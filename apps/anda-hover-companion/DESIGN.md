@@ -12,10 +12,16 @@ status, clock, the one thing that needs you, and a grounded AI brief of risks an
 ## 1. Design north star
 
 **The RPM's question is never "show me everything about this ANDA." It is:
-"what is this, where does it stand, what needs me, and when is the clock?"**
+"what is this, where does it stand, what needs me — and when will it *really* finish?"**
 
-Everything below optimizes for answering those four questions in **under 5 seconds,
-with zero clicks**, and making everything else *available* but never *present* by default.
+The official goal date is a commitment; the product's primary deliverable is the
+**true forecast** — an evidence-based projected action date shown *against* the goal
+date, with its delta, its confidence, and its drivers. Everything else on the card
+exists to explain or protect that forecast. The app is a **companion**: it watches the
+RPM's back — flagging assumptions, patterns, gaps, risks, blind spots, brewing
+conflicts, and communication friction — and tries to surface what the RPM will need
+*before* they ask. Answered in **under 5 seconds, with zero clicks**; everything else
+*available* but never *present* by default.
 
 Three principles drive every decision:
 
@@ -24,10 +30,11 @@ Three principles drive every decision:
 2. **One primary signal.** The card surfaces exactly **one** "needs attention" line —
    the most urgent item — not a list of twelve statuses. If nothing needs attention,
    that slot simply doesn't exist (absence is information).
-3. **Deterministic facts and AI synthesis never mix.** Dates, statuses, and submission
-   history render directly from source data. Claude writes only the clearly-labeled
-   "AI brief" slot, streamed in after the facts are already on screen, with citations
-   back to the notes/submissions it drew from.
+3. **Deterministic facts and AI synthesis never mix.** Dates, statuses, submission
+   history — and the forecast *number* itself — render from data and models, not from
+   the LLM. Claude writes only the clearly-labeled "companion brief," streamed in after
+   the facts are already on screen, with citations back to the notes/submissions it
+   drew from.
 
 ---
 
@@ -39,14 +46,22 @@ interrupts work the RPM didn't ask to interrupt, fires false positives on phone 
 and tracking IDs, and trains the user to fear their own cursor. An app that appears
 unbidden is a distraction machine, not a lifesaver.
 
-Recommended activation ladder (ship in this order):
+**The two-stage consent contract.** In every mode, recognition and opening are separate
+acts. Stage 1 is always passive or transient (a mark, an invite, a compact peek) and costs
+nothing to ignore; stage 2 is always a deliberate act by the user. A full card never
+appears without stage 2. The user picks their model in settings — all ship, one default.
 
-| Mode | Gesture | Default | Notes |
-|---|---|---|---|
-| **Point & Peek** | Hover the cursor over an ANDA number, tap a hotkey (e.g. double-`Ctrl` or `Ctrl+Alt+A`) | ✅ on | Zero false positives; the user's intent is explicit. Reads the text under the cursor via UI Automation, falls back to selected text, then to a small OCR crop. |
-| **Select & Peek** | Select any text containing an ANDA number, same hotkey | ✅ on | Works in apps UI Automation can't read (Citrix, PDFs, images via OCR). |
-| **Dwell hover (trusted apps only)** | 600 ms dwell over a recognized ANDA pattern in apps the user has allow-listed (e.g. Outlook, Excel) | ⬜ off | Even then: dwell first shows only a 16 px underline glyph; the card opens on a further 400 ms dwell or a click of the glyph. Two-stage consent, no surprise cards. |
-| **Tray search** | Click tray icon or `Ctrl+Alt+Space`, type/paste a number | ✅ on | The fallback that always works; also the demo path. |
+| # | Consent model | Stage 1 (free to ignore) | Stage 2 (opens the card) | Best for |
+|---|---|---|---|---|
+| ① | **Mark → Tap** *(default)* | Recognized numbers get only a quiet dotted underline + 5 px dot. Nothing moves, nothing pops. | Click / tap the marked number. | Minimum motion; users who want total stillness. |
+| ② | **Whisper invite** | Rest the cursor on a number 350 ms (or long-press on touch) → a small pill appears: `● ANDA 216482 · Peek ›`. It self-fades in 3 s if ignored. | Tap the pill. | Users who want an affordance offered, never imposed. |
+| ③ | **Peek → Full** | First tap opens only a compact peek: identity + goal clock, ~120 px, no AI call yet. | Second tap or **Full brief ↓** expands to the complete card (and only then is the AI brief generated). | Cautious rollout; also minimizes API spend. |
+| ④ | **Long-press (touch, always on)** | On any touch device, in any model, long-press ≈ 450 ms summons the whisper invite. | Tap the invite. | Tablets / phones, where hover doesn't exist. |
+
+Alongside the consent model, the activation *inputs* ship in this order: hotkey
+Point & Peek (hover + double-`Ctrl`), Select & Peek (selection + hotkey, covers
+Citrix/PDF/OCR), allow-listed dwell recognition per app (off by default), and tray
+search (`Ctrl+Alt+Space`) as the path that always works.
 
 **Validation before anything renders:** captured text is matched against
 `^(?:ANDA[-\s#]?)?(\d{6})$`, then checked against a locally cached index of real ANDA
@@ -72,16 +87,18 @@ becomes recognition, not scanning:
 │ Metformin HCl ER Tablets, 500 mg             │
 │ Meridian Pharmaceuticals · Cycle 2           │
 ├──────────────────────────────────────────────┤
-│ GOAL  Oct 3, 2026 · 80 days      ▓▓▓▓▓░░ 62% │  ← the clock: one date, one thin bar
+│ GOAL      Oct 3, 2026 · 80 days  ▓▓▓▓▓░░ 62% │  ← the commitment: one date, one thin bar
+│ FORECAST  Oct 17 · ▲ +14 d vs goal · moderate│  ← THE headline: the true forecast + delta
 ├──────────────────────────────────────────────┤
 │ ⚠ Needs you · IR response due in 6 days      │  ← ONE line, only if something needs attention
 ├──────────────────────────────────────────────┤
 │ Latest: Amendment (minor) received Jun 30    │  ← most recent event, one line
 ├──────────────────────────────────────────────┤
-│ AI BRIEF · generated — verify    [sources]   │  ← streams in ~1–2 s, never blocks the card
-│ Two disciplines complete; biopharm IR is the │
-│ critical path. Sister ANDA 214990 received a │
-│ facility-related IR last cycle — same site.  │
+│ COMPANION · generated — verify   [sources]   │  ← streams in ~1–2 s, never blocks the card
+│ Forecast runs 14 days past goal: applicant's │
+│ last two IR responses averaged 31 days vs a  │
+│ 21-day ask. Untested assumption: "no new     │
+│ facility inspection."                        │
 ├──────────────────────────────────────────────┤
 │ [Sister ANDA ·1] [Notes ·3] [Open in system↗]│  ← chips: doors, not content
 └──────────────────────────────────────────────┘
@@ -151,12 +168,48 @@ card is a single labeled dialog; slots are a list; AI brief announced as "AI-gen
 
 ---
 
-## 6. Where Claude fits (and where it deliberately doesn't)
+## 6. The true forecast — the product's core deliverable
 
-**Claude never renders facts.** Dates, statuses, submission events, and note text come
-straight from the data layer. Claude does exactly one job per card: the **AI brief** —
-2–4 sentences synthesizing risk, blind spots, cross-ANDA signals, and unstated
-assumptions from the structured record + recent notes.
+The forecast is **computed, not vibed**. The projected action date comes from a
+deterministic model — historical cycle times for comparable reviews (stage, discipline
+mix, applicant response history, facility status) — adjusted by explicitly flagged
+risks. It always renders with three companions: the **delta vs. goal** (▲ +14 d /
+▼ 9 d ahead, icon + words, never color alone), a **confidence level**, and a **why ›**
+door to the drivers and assumptions behind it.
+
+A forecast is only "true" if it's accountable: the app tracks its own calibration
+(median |forecast − actual| over trailing months) and shows it in the drivers panel —
+"forecasts within ±8 days over the last 6 months." When the RPM can audit the tool's
+track record, the forecast earns the right to be the headline.
+
+## 7. The companion doctrine (where Claude fits — and deliberately doesn't)
+
+The companion's job is to watch the RPM's back and connect dots ahead of need. Per
+card, Claude scans the structured record, recent notes, correspondence metadata, and
+sister-ANDA history for exactly these classes of signal:
+
+- **Assumptions** — unstated or untested premises in the current plan ("assumes no new
+  facility inspection"), surfaced verbatim so they can be challenged.
+- **Patterns & trends** — applicant response-time history, repeat deficiencies,
+  discipline bottlenecks, drift across cycles.
+- **Cross-ANDA signals** — sister/related applications sharing an applicant, drug
+  substance, or facility, and what happened there.
+- **Conflicts & misunderstandings** — commitments in notes that contradict the tracker,
+  scope confusion or friction evident in correspondence, misaligned expectations.
+- **Gaps, risks, blind spots, pitfalls** — what the record is *missing* relative to
+  this stage, and what typically goes wrong at it.
+- **Interruptions ahead** — items that will land on the RPM (or need chasing) in the
+  next 1–2 weeks, so nothing arrives as a surprise.
+
+**Grounded tone, enforced by prompt and schema.** The brief cuts the fluff: no
+preamble, no hedging filler, no restating what the card already shows. Every claim is
+quantified where possible and cites a note/submission ID (`source_refs` in the output
+schema — the UI's `sources ›` door). If the record is insufficient, the brief says
+what's missing instead of inferring. 2–4 sentences, hard cap.
+
+**Claude never renders facts.** Dates, statuses, submission events, note text, and the
+forecast number itself come from the data layer and forecast model. Claude explains,
+flags, and connects — in one clearly labeled slot.
 
 Recommended API shape (Anthropic SDK):
 
@@ -193,7 +246,7 @@ exports/APIs the systems of record allow.
 
 ---
 
-## 7. What's intentionally *not* in v1
+## 8. What's intentionally *not* in v1
 
 Cutting these is a feature — each one erodes the "calm" contract:
 
@@ -207,8 +260,10 @@ Cutting these is a feature — each one erodes the "calm" contract:
 
 ---
 
-## 8. Success measures
+## 9. Success measures
 
+- **Forecast accuracy & calibration:** median |forecast − actual action date| and the
+  share of actuals landing inside the stated confidence band — published inside the app.
 - **Time-to-answer:** median < 5 s from gesture to the RPM knowing status + next action
   (baseline: minutes of system-of-record navigation).
 - **Zero-regret rate:** % of card opens the user doesn't immediately dismiss (>80 %).
@@ -218,10 +273,21 @@ Cutting these is a feature — each one erodes the "calm" contract:
 
 ---
 
-## 9. Mockup
+## 10. Mockup — the design studio
 
-Open **`mockup/anda-card.html`** in any browser. It demonstrates, with fictional data:
+Open **`mockup/anda-card.html`** in any browser, desktop or phone. It demonstrates,
+with fictional data:
 
-- The trigger experience (recognized ANDA numbers inside a fake email/tracker page)
-- The peek card: healthy and at-risk scenarios, streaming AI brief, pin, expand
-- The invalid-number whisper, light/dark themes, keyboard shortcuts (`Esc`, `E`, `Space`)
+- **Three visual directions**, switchable live:
+  **A · Quiet Fluent** (native Windows calm — white surface, steel-blue accent, system
+  type, thin bar), **B · Docket Ledger** (typeset federal docket — warm paper, archival
+  green, serif title, stamp seal, milestone ticks), **C · Signal** (mission-control
+  glass — deep navy blur, cyan accent, mono numerals, glowing progress ring; commits to
+  a single dark world).
+- **Three consent models** (§2), switchable live, plus long-press on touch.
+- The forecast-first clock (goal vs. forecast with delta + confidence), the single
+  needs-attention signal, the streamed companion brief, pin / expand / keyboard.
+- **Touch-first presentation:** on phones and tablets the card presents as a bottom
+  sheet with a drag handle, scrim, safe-area padding, and 44 px targets — tested
+  against iOS-style touch emulation.
+- The invalid-number whisper, light/dark themes (A and B; C is deliberately dark-only).
