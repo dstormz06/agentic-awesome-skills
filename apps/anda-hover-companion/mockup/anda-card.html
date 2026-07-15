@@ -285,6 +285,11 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--st-line);
 .latest{font-size:12.5px;color:var(--c-ink2)}
 .latest b{color:var(--c-ink);font-weight:550}
 
+/* AHEAD — anticipation: what lands on the RPM next (only when ≤ 14 d out) */
+.ahead{display:flex;gap:8px;align-items:baseline;font-size:12.5px;color:var(--c-ink2)}
+.ahead .albl{font-size:9.5px;font-weight:800;letter-spacing:.13em;color:var(--c-accent);white-space:nowrap}
+.ahead b{color:var(--c-ink);font-weight:550}
+
 /* --- AI brief slot --- */
 .ai .tag{display:flex;align-items:center;gap:6px;margin-bottom:6px}
 .ai .t{font-size:9.5px;font-weight:800;letter-spacing:.13em;color:var(--c-accent)}
@@ -341,8 +346,8 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--st-line);
   font-family:inherit;letter-spacing:.02em;
 }
 #card.mini #moreBtn{display:block}
-#card.mini .attn-slot,#card.mini .latest,#card.mini .ai,#card.mini #ext,
-#card.mini .chips-slot,#card.mini .kbdbar{display:none}
+#card.mini .attn-slot,#card.mini .latest,#card.mini .ahead,#card.mini .ai,
+#card.mini #ext,#card.mini .chips-slot,#card.mini .kbdbar{display:none}
 
 .kbdbar{padding:8px 16px calc(8px + env(safe-area-inset-bottom,0px)/2);
   border-top:1px solid var(--c-hair);display:flex;gap:14px;
@@ -510,6 +515,11 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--st-line);
     Latest: <b>Amendment (minor)</b> received Jun 30 — under review
   </div>
 
+  <div class="slot ahead" id="aheadSlot">
+    <span class="albl">AHEAD</span>
+    <span id="c-ahead"><b>Thu huddle</b> — status requested on this ANDA + sister 214990</span>
+  </div>
+
   <div class="slot ai">
     <div class="tag">
       <span class="t">COMPANION</span>
@@ -563,6 +573,7 @@ const DATA = {
     attn: { level:"warn", text:"<b>IR response due in 6 days</b> — Biopharmaceutics" },
     latest: "Latest: <b>Amendment (minor)</b> received Jun 30 — under review",
     ai: "Forecast runs 14 days past goal: this applicant's last two IR responses averaged 31 days against 21-day asks, and the shared-facility finding on 214990 wasn't closed until late cycle. Untested assumption in the plan: “no new facility inspection needed” — worth raising at Thursday's huddle.",
+    ahead: "<b>Thu huddle</b> — status requested on this ANDA + sister 214990 (memo, Jul 14)",
     pending: [["IR response — Biopharmaceutics","due Jul 21",true],["Labeling carve-out review","in queue",false]],
     notes: [["You · Jul 8","Applicant confirmed receipt of IR; response expected on time."],
             ["You · Jun 30","Minor amendment logged; routed to OPQ same day."],
@@ -579,6 +590,7 @@ const DATA = {
     attn: null,
     latest: "Latest: <b>Facility IR resolved</b> — closed Jul 2",
     ai: "Tracking 9 days ahead of goal; all disciplines on schedule and no open items need action. The Jul 2 facility-closure memo is the precedent 216482's pending biopharm response will need — flag it to that review team now rather than after their IR lands.",
+    ahead: "<b>Aug 1</b> — labeling final-format confirmation due from applicant",
     pending: [],
     notes: [["You · Jul 2","Facility IR closed; memo filed."],["You · Jun 20","Labeling agreed; final format pending."]],
     forecast: "Baseline from comparable cycle-3 reviews: Aug 8. Adjusted −2 days: all disciplines complete or scheduled; band ±3 days. <b>Assumption:</b> no late labeling revisions. Tool calibration, trailing 6 months: median error ±8 days.",
@@ -673,6 +685,9 @@ function fill(id, d){
     document.getElementById("c-attn-t").innerHTML = d.attn.text;
   } else slot.style.display = "none";
   document.getElementById("c-latest").innerHTML = d.latest;
+  const ah = document.getElementById("aheadSlot");
+  if(d.ahead){ ah.style.display = ""; document.getElementById("c-ahead").innerHTML = d.ahead; }
+  else ah.style.display = "none";
   document.getElementById("x-pending-n").textContent = d.pending.length ? "· " + d.pending.length : "· none";
   document.getElementById("x-pending").innerHTML = d.pending.length
     ? d.pending.map(([t,due,w]) => `<div class="rowi"><span>${t}</span><span class="due ${w?"warn":""}">${due}</span></div>`).join("")

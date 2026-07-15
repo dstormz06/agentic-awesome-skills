@@ -94,6 +94,9 @@ becomes recognition, not scanning:
 ├──────────────────────────────────────────────┤
 │ Latest: Amendment (minor) received Jun 30    │  ← most recent event, one line
 ├──────────────────────────────────────────────┤
+│ AHEAD  Thu huddle — status requested on this │  ← anticipation: what lands on the RPM
+│        ANDA + sister (memo, Jul 14)          │    next (only when ≤ 14 days out)
+├──────────────────────────────────────────────┤
 │ COMPANION · generated — verify   [sources]   │  ← streams in ~1–2 s, never blocks the card
 │ Forecast runs 14 days past goal: applicant's │
 │ last two IR responses averaged 31 days vs a  │
@@ -199,7 +202,10 @@ sister-ANDA history for exactly these classes of signal:
 - **Gaps, risks, blind spots, pitfalls** — what the record is *missing* relative to
   this stage, and what typically goes wrong at it.
 - **Interruptions ahead** — items that will land on the RPM (or need chasing) in the
-  next 1–2 weeks, so nothing arrives as a surprise.
+  next 1–2 weeks, so nothing arrives as a surprise. This one is visible on the card
+  itself: the **AHEAD** line renders the single nearest upcoming demand (meeting where
+  this ANDA is on the agenda, response due in, deliverable owed), with its source —
+  and collapses entirely when nothing is within 14 days.
 
 **Grounded tone, enforced by prompt and schema.** The brief cuts the fluff: no
 preamble, no hedging filler, no restating what the card already shows. Every claim is
