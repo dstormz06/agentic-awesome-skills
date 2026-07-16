@@ -23,6 +23,21 @@ conflicts, and communication friction — and tries to surface what the RPM will
 *before* they ask. Answered in **under 5 seconds, with zero clicks**; everything else
 *available* but never *present* by default.
 
+### The four things that make it a daily lifesaver
+
+1. **A forecast you can say out loud.** Before any meeting, the RPM knows the honest
+   projected date, its delta vs. goal, and the drivers — with the tool's published
+   calibration to back it up. No more hedge-guessing timelines from memory.
+2. **Zero-navigation answers.** Point at a number in Outlook, Excel, or a PDF and know
+   status + next action in five seconds. That kills the dozens of daily
+   system-of-record round-trips that are the real time sink of the job.
+3. **Never blindsided.** The AHEAD line reads the meeting/memo horizon and says what
+   will be asked of you before it lands — walking into a huddle already holding the
+   answer is the moment this tool wins converts.
+4. **Cross-ANDA memory.** Sister-application dot-connecting (same applicant, facility,
+   or drug substance) stops depending on the one person who "remembers what happened on
+   the sister" — the precedent surfaces itself, cited.
+
 Three principles drive every decision:
 
 1. **Progressive disclosure, three levels.** A glyph → a peek card → an expanded drawer.
@@ -165,9 +180,16 @@ or removes information:
 |---|---|---|---|
 | **A** | **Quiet Fluent** *(default)* | Native Windows calm — white surface, steel-blue accent, system type | Thin 4 px bar |
 | B | Docket Ledger | Typeset federal docket — warm paper, archival green, serif title, stamp seal | Milestone ticks |
-| C | Signal | Mission-control glass — deep navy blur, cyan accent, mono numerals; commits to dark | Glowing ring |
-| D | Draft | Engineer's drawing — inky blueprint-blue on white, graph grid, drafting mono, hatched fill; dark mode is a true blueprint | Hatched rule |
-| E | Instrument | Medical-device porcelain — cool clinical white, teal accent, capsule geometry, soft large radii | Capsule |
+| C | Signal | Mission-control dark — deep navy, steel-blue accent, mono numerals; commits to dark | Ring |
+| D | Draft | Engineer's drawing — federal navy ink on white, graph grid, drafting mono; dark mode is a true blueprint | Hatched rule |
+| E | Instrument | Medical-device porcelain — slate steel on clinical white, capsule geometry, soft large radii | Capsule |
+
+**Palette policy.** Accent hues are anchored to the **U.S. Web Design System** federal
+palette (e.g. D's navy = USWDS `primary-dark #1a4480`, blueprint ground = `primary-darker
+#162e51`) so every appearance reads government-professional, and the status colors
+(good / warn / bad) keep one consistent semantic family across all five. Within that
+conservative range, the appearances differentiate through *material, typography, and
+geometry* — paper and serif, grid and mono, glass, porcelain — rather than louder hues.
 
 - **Native-feeling Windows 11:** Mica/acrylic card, 10 px radius, Segoe UI Variable,
   system light/dark followed automatically, `prefers-reduced-motion` respected
@@ -308,3 +330,13 @@ with fictional data:
   against iOS-style touch emulation.
 - The invalid-number whisper, light/dark themes (all appearances except C, which is
   deliberately dark-only).
+
+## 11. Implementation status — the Windows app
+
+**`app/`** contains the working v0: a .NET 8 / Avalonia tray application with all five
+appearances (A default) selectable from the tray menu, all three consent models,
+global hotkeys (`Ctrl+Alt+A` Select & Peek, `Ctrl+Alt+Space` lookup), the
+forecast-first card with AHEAD line and expandable drawer, persisted settings, and a
+companion brief via the official Anthropic SDK (`claude-opus-4-8`) with a deterministic
+offline fallback. A headless preview harness renders the real card to PNGs for review
+without a Windows box. See `app/README.md`.
