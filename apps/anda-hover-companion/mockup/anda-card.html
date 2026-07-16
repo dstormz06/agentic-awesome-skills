@@ -70,6 +70,48 @@
   --c-mark:rgba(130,194,161,.14);
   --c-shadow:0 20px 40px -14px rgba(0,0,0,.6), 0 2px 6px rgba(0,0,0,.4);
 }
+/* D · Draft — engineer's drawing: ink on white; dark = true blueprint */
+:root[data-dir="d"]{
+  --c-bg:#ffffff; --c-ink:#14181d; --c-ink2:#4e5560; --c-ink3:#848b96;
+  --c-hair:#e3e7ec; --c-line:#c9cfd8; --c-accent:#1f4e9e; --c-accent2:#16407f;
+  --c-good:#106b3c; --c-good-bg:#e5f2ea; --c-warn:#8a5800; --c-warn-bg:#faf1dc;
+  --c-bad:#a03030; --c-bad-bg:#f8e9e9; --c-track:#e6e9ee; --c-fill:#1f4e9e;
+  --c-mark:rgba(31,78,158,.10); --c-radius:4px;
+  --c-shadow:0 16px 32px -12px rgba(18,30,52,.20), 0 2px 4px rgba(18,30,52,.08);
+  --c-grid:rgba(31,78,158,.055);
+  --c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;
+  --c-drug-font:var(--c-font);
+  --c-num-font:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace;
+}
+:root[data-dir="d"][data-theme="dark"]{
+  --c-bg:#152a52; --c-ink:#dde8f8; --c-ink2:#a4b8d6; --c-ink3:#7a90b4;
+  --c-hair:rgba(221,232,248,.14); --c-line:rgba(221,232,248,.26);
+  --c-accent:#8db4ec; --c-accent2:#aecbf3;
+  --c-good:#7fd3a6; --c-good-bg:rgba(127,211,166,.14); --c-warn:#ecc36e; --c-warn-bg:rgba(236,195,110,.13);
+  --c-bad:#eb9c9c; --c-bad-bg:rgba(235,156,156,.13); --c-track:rgba(221,232,248,.18); --c-fill:#8db4ec;
+  --c-mark:rgba(141,180,236,.16);
+  --c-shadow:0 24px 48px -12px rgba(2,8,20,.65), 0 2px 6px rgba(2,8,20,.4);
+  --c-grid:rgba(221,232,248,.07);
+}
+/* E · Instrument — medical-device porcelain */
+:root[data-dir="e"]{
+  --c-bg:#fcfdfd; --c-ink:#17282c; --c-ink2:#57696e; --c-ink3:#8aa0a5;
+  --c-hair:#e6eef0; --c-line:#d3e2e4; --c-accent:#0e7c86; --c-accent2:#0a6570;
+  --c-good:#17805c; --c-good-bg:#e2f3ec; --c-warn:#92610a; --c-warn-bg:#fcf1d9;
+  --c-bad:#ad3d3d; --c-bad-bg:#f9e8e8; --c-track:#e2edee; --c-fill:#14929e;
+  --c-mark:rgba(14,124,134,.10); --c-radius:20px;
+  --c-shadow:0 28px 56px -16px rgba(23,40,44,.22), 0 4px 10px rgba(23,40,44,.07);
+  --c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;
+  --c-drug-font:var(--c-font); --c-num-font:var(--c-font);
+}
+:root[data-dir="e"][data-theme="dark"]{
+  --c-bg:#152528; --c-ink:#e2eef0; --c-ink2:#a3bbc0; --c-ink3:#71898e;
+  --c-hair:#22363a; --c-line:#2d4448; --c-accent:#5fc4cf; --c-accent2:#83d4dd;
+  --c-good:#5fce9f; --c-good-bg:#1a352a; --c-warn:#e4bb64; --c-warn-bg:#352c17;
+  --c-bad:#e39292; --c-bad-bg:#3a2324; --c-track:#263d41; --c-fill:#3ba8b4;
+  --c-mark:rgba(95,196,207,.14);
+  --c-shadow:0 28px 56px -16px rgba(0,0,0,.6), 0 4px 10px rgba(0,0,0,.35);
+}
 /* C · Signal — committed dark; mission-control glass */
 :root[data-dir="c"], :root[data-dir="c"][data-theme="light"]{
   --c-bg:rgba(18,25,36,.94); --c-ink:#e6edf5; --c-ink2:#94a4b8; --c-ink3:#66788e;
@@ -264,6 +306,27 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--st-line);
 :root[data-dir="b"] .p-bar{display:none} :root[data-dir="b"] .p-ticks{display:flex}
 :root[data-dir="c"] .p-bar{display:none} :root[data-dir="c"] .p-ringwrap{display:block}
 :root[data-dir="c"] .cpct{display:none}
+/* D · Draft — graph-grid surface, drafting mono labels, hatched fill */
+:root[data-dir="d"] #card{
+  background-color:var(--c-bg);
+  background-image:linear-gradient(var(--c-grid) 1px,transparent 1px),
+                   linear-gradient(90deg,var(--c-grid) 1px,transparent 1px);
+  background-size:14px 14px;
+}
+:root[data-dir="d"] .lblx,:root[data-dir="d"] .albl,:root[data-dir="d"] .ai .t,
+:root[data-dir="d"] .attn .k,:root[data-dir="d"] .cpct{font-family:var(--c-num-font)}
+:root[data-dir="d"] .p-bar{height:6px;border-radius:0;outline:1px solid var(--c-line)}
+:root[data-dir="d"] .p-bar i{
+  border-radius:0;
+  background:repeating-linear-gradient(45deg,var(--c-fill) 0 3px,transparent 3px 6px);
+  box-shadow:inset 0 0 0 1px var(--c-fill);
+}
+:root[data-dir="d"] .seal{border:1px solid var(--c-good);background:transparent;border-radius:3px}
+/* E · Instrument — capsule geometry */
+:root[data-dir="e"] .p-bar{height:8px;border-radius:99px}
+:root[data-dir="e"] .p-bar i{border-radius:99px;background:linear-gradient(90deg,var(--c-accent2),var(--c-fill))}
+:root[data-dir="e"] .attn{border-radius:14px;padding:9px 12px}
+:root[data-dir="e"] .chip{border-width:1.5px}
 /* forecast row — the true forecast is the headline */
 .frow{margin:9px 0 0;padding-top:9px;border-top:1px dashed var(--c-hair);
       flex-wrap:wrap;row-gap:2px;min-width:0}
@@ -386,7 +449,8 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--st-line);
 <div class="studio">
   <p class="eyebrow">DESIGN STUDIO · ALL DATA FICTIONAL</p>
   <h1>ANDA Hover Companion — card concepts</h1>
-  <p class="lede">Three visual directions × three consent models. Pick a direction, pick a consent
+  <p class="lede">Five selectable appearances (A is the app default; in the Windows app this
+     picker lives in Settings → Appearance) × three consent models. Pick a direction, pick a consent
      model, then tap an <span style="border-bottom:1.5px dotted var(--st-accent)">underlined</span> ANDA
      number in the memo below. On a phone the card presents as a bottom sheet; on desktop,
      <kbd>Esc</kbd> close · <kbd>E</kbd> expand · <kbd>Space</kbd> pin.</p>
@@ -409,6 +473,16 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--st-line);
           <span class="sw"><i style="background:#121924"></i><i style="background:#58b7ff"></i><i style="background:#4ade94"></i></span>
           <span class="nm">C · Signal</span>
           <span class="tg">Mission-control glass — deep navy blur, cyan accent, mono numerals, glowing progress ring.</span>
+        </button>
+        <button class="dir" data-dir="d" aria-pressed="false">
+          <span class="sw"><i style="background:#ffffff"></i><i style="background:#1f4e9e"></i><i style="background:#152a52"></i></span>
+          <span class="nm">D · Draft</span>
+          <span class="tg">Engineer's drawing — inky lines on white, graph grid, drafting mono, hatched progress. Dark mode is a true blueprint.</span>
+        </button>
+        <button class="dir" data-dir="e" aria-pressed="false">
+          <span class="sw"><i style="background:#fcfdfd"></i><i style="background:#0e7c86"></i><i style="background:#17805c"></i></span>
+          <span class="nm">E · Instrument</span>
+          <span class="tg">Medical-device porcelain — cool clinical white, teal accent, capsule geometry, soft large radii.</span>
         </button>
       </div>
     </div>
@@ -624,15 +698,15 @@ document.querySelectorAll(".dir").forEach(b => b.addEventListener("click", () =>
   root.dataset.dir = b.dataset.dir;
   if(current) applyProgress(DATA[current].pct);
 }));
-document.querySelectorAll("[data-mode]").forEach(b => b.addEventListener("click", () => {
-  document.querySelectorAll("[data-mode]").forEach(x => x.setAttribute("aria-pressed", x === b));
+document.querySelectorAll("button[data-mode]").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll("button[data-mode]").forEach(x => x.setAttribute("aria-pressed", x === b));
   mode = b.dataset.mode;
   document.getElementById("modeHint").textContent = HINTS[mode];
   hideChip(); closeCard();
 }));
 document.getElementById("modeHint").textContent = HINTS[mode];
-document.querySelectorAll("[data-theme]").forEach(b => b.addEventListener("click", () => {
-  document.querySelectorAll("[data-theme]").forEach(x => x.setAttribute("aria-pressed", x === b));
+document.querySelectorAll("button[data-theme]").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll("button[data-theme]").forEach(x => x.setAttribute("aria-pressed", x === b));
   root.dataset.theme = b.dataset.theme;
 }));
 /* follow system on load */
@@ -641,7 +715,7 @@ document.querySelectorAll("[data-theme]").forEach(b => b.addEventListener("click
   if(root.dataset.theme !== "light" && root.dataset.theme !== "dark"){
     root.dataset.theme = dark ? "dark" : "light";
   }
-  document.querySelectorAll("[data-theme]").forEach(x =>
+  document.querySelectorAll("button[data-theme]").forEach(x =>
     x.setAttribute("aria-pressed", x.dataset.theme === root.dataset.theme));
 })();
 

@@ -155,6 +155,20 @@ a deep link to the record in the system of record.
 
 ## 5. Visual language
 
+**Appearance is a preference, never information.** The card ships with **five
+selectable appearances** (Windows app: Settings → Appearance). **A · Quiet Fluent is
+the default**; the rest are user options. All five share identical anatomy, slot
+order, status semantics, and interactions — switching appearance never moves, adds,
+or removes information:
+
+| | Appearance | Character | Progress form |
+|---|---|---|---|
+| **A** | **Quiet Fluent** *(default)* | Native Windows calm — white surface, steel-blue accent, system type | Thin 4 px bar |
+| B | Docket Ledger | Typeset federal docket — warm paper, archival green, serif title, stamp seal | Milestone ticks |
+| C | Signal | Mission-control glass — deep navy blur, cyan accent, mono numerals; commits to dark | Glowing ring |
+| D | Draft | Engineer's drawing — inky blueprint-blue on white, graph grid, drafting mono, hatched fill; dark mode is a true blueprint | Hatched rule |
+| E | Instrument | Medical-device porcelain — cool clinical white, teal accent, capsule geometry, soft large radii | Capsule |
+
 - **Native-feeling Windows 11:** Mica/acrylic card, 10 px radius, Segoe UI Variable,
   system light/dark followed automatically, `prefers-reduced-motion` respected
   (fade 120 ms → no animation).
@@ -284,16 +298,13 @@ Cutting these is a feature — each one erodes the "calm" contract:
 Open **`mockup/anda-card.html`** in any browser, desktop or phone. It demonstrates,
 with fictional data:
 
-- **Three visual directions**, switchable live:
-  **A · Quiet Fluent** (native Windows calm — white surface, steel-blue accent, system
-  type, thin bar), **B · Docket Ledger** (typeset federal docket — warm paper, archival
-  green, serif title, stamp seal, milestone ticks), **C · Signal** (mission-control
-  glass — deep navy blur, cyan accent, mono numerals, glowing progress ring; commits to
-  a single dark world).
+- **Five appearances** (the §5 table), switchable live — the studio picker is the
+  prototype of the app's Settings → Appearance page. A is the default.
 - **Three consent models** (§2), switchable live, plus long-press on touch.
 - The forecast-first clock (goal vs. forecast with delta + confidence), the single
   needs-attention signal, the streamed companion brief, pin / expand / keyboard.
 - **Touch-first presentation:** on phones and tablets the card presents as a bottom
   sheet with a drag handle, scrim, safe-area padding, and 44 px targets — tested
   against iOS-style touch emulation.
-- The invalid-number whisper, light/dark themes (A and B; C is deliberately dark-only).
+- The invalid-number whisper, light/dark themes (all appearances except C, which is
+  deliberately dark-only).
