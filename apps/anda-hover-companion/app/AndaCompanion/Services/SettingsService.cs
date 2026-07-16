@@ -14,7 +14,9 @@ public sealed class Settings
 {
     public AppearanceId Appearance { get; set; } = AppearanceId.A;   // A is the product default
     public ThemeMode Theme { get; set; } = ThemeMode.System;
-    public ConsentModel Consent { get; set; } = ConsentModel.PeekFirst;
+
+    // Full = DESIGN.md consent model ① (the deliberate hotkey press IS the second stage).
+    public ConsentModel Consent { get; set; } = ConsentModel.Full;
 }
 
 public static class SettingsService

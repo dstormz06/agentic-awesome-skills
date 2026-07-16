@@ -78,7 +78,7 @@ public sealed class MockAndaRepository : IAndaRepository
 public static class AndaValidator
 {
     private static readonly System.Text.RegularExpressions.Regex Pattern =
-        new(@"(?:ANDA[-\s#]?)?(\d{6})", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        new(@"(?:ANDA[-\s#]?)?(?<!\d)(\d{6})(?!\d)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
     /// <summary>Extracts the first 6-digit ANDA-shaped number from arbitrary captured text.</summary>
     public static string? Extract(string? text)

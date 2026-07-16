@@ -1,0 +1,75 @@
+# Verification report — Windows app delivery (v0)
+
+Scope: rigorous verification of the previous delivery — the Windows app
+(`app/`), the federal palette retune, and the claims made about them.
+Method: re-verify claims → re-derive/re-run → line audit → stress-test →
+fidelity check → fix and repeat. Traceability: each fix is in commit history
+on `claude/anda-hover-tooltip-app-lmlkb6`; this report is versioned with it.
+
+## 1. Claim-by-claim verification of the previous response
+
+| Claim | Verdict | Evidence |
+|---|---|---|
+| "Compiles clean" | ✅ Confirmed (re-run) | `dotnet build` → 0 warnings, 0 errors, after every fix below |
+| "Screenshots are the actual app" | ✅ Confirmed | Produced by `AndaCompanion.Preview` headless harness from the built assembly |
+| "All five appearances, A default" | ✅ Confirmed | Stress check: `Appearances.All.Count == 5`; `new Settings().Appearance == A`; 7 rendered frames |
+| "Settings persist to AppData" | ✅ Confirmed (executed) | Round-trip test: save D/Dark/Whisper → reload → equal |
+| "Companion brief via official Anthropic SDK, offline fallback" | ✅ / ⚠️ | Offline path executed (tests below). Anthropic path compiles against SDK 12.35.1 but is **not runtime-tested** (no key in this environment) |
+| "Hotkeys, clipboard capture work" | ⚠️ Unverifiable here | Windows-only P/Invoke; compiles, logic reviewed; **needs a Windows smoke test** — flagged, not asserted |
+| "Runs with `dotnet run` on Windows / publishes single exe" | ⚠️ Expected, unverified | Standard Avalonia deployment; cannot be executed in this Linux container |
+
+## 2. Re-derivation / re-execution
+
+- Full rebuild of both projects from clean state: **0 errors**.
+- Headless re-render of all 7 card states (A light/dark, B expanded, C, D
+  light/dark, E healthy): all frames produced and visually inspected,
+  including the previously unchecked healthy-card state (attention slot
+  correctly absent, green "▼ 9 d ahead of goal").
+- 100+ executable checks run against the real assembly (validator,
+  repository, settings, appearance invariants, every palette color parse,
+  offline brief): **all pass** (`scratchpad` stress runner; assertions listed in §4).
+
+## 3. Line audit — findings and dispositions
+
+| # | Finding | Severity | Disposition |
+|---|---|---|---|
+| F1 | `AndaValidator` regex matched the first 6 digits of longer numbers (a 7-digit or 10-digit string produced a false ANDA) | **Bug** | Fixed: `(?<!\d)(\d{6})(?!\d)` boundaries; regression checks added |
+| F2 | DESIGN.md §7 still recommended "WinUI 3 (or WPF)" while the shipped app is Avalonia — doc/code contradiction | **Doc bug** | Fixed: §7 now documents the Avalonia decision and its rationale |
+| F3 | App's default consent was `PeekFirst`; DESIGN.md names model ① as the default | Inconsistency | Fixed: default is now `Full` (the deliberate hotkey press is model ①'s stage two); README annotated |
+| F4 | Dead code: no-op `Closed` handler in `App.OpenCard`; stale `_card` reference after close | Code quality | Fixed: handler now nulls the reference correctly |
+| F5 | `ChipWindow` fade timer kept ticking after close | Minor leak | Fixed: timer stopped on `Closed` |
+| F6 | Floating package versions (`11.3.*`, `Anthropic *`) — not reproducible | Traceability | Fixed: pinned to Avalonia 11.3.18 / Anthropic 12.35.1 (the resolved versions) |
+| F7 | Sister-hop repositioned the card by +10/+14 px on every click (drift); sister chip shown even when count = 0 | Polish bug | Fixed: card positions once per open; chip hidden at zero |
+| F8 | Mockup CSS header comment still said "3 visual directions" | Stale comment | Fixed |
+| F9 | C's progress ring renders left-aligned in the app vs. right-aligned in the web mockup | Divergence | **Accepted, logged** — no information difference; will align in the polish pass |
+
+## 4. Stress-test results (all executed, all passing)
+
+Validator: plain/prefixed/dashed/hash/embedded forms extract; 5-digit,
+7-digit, 10-digit-phone, null, and whitespace inputs all reject; first of two
+numbers wins. Repository: known found, unknown null, healthy record has no
+attention, at-risk record forecast is late. Settings: full round-trip through
+disk, defaults A + Full. Appearances: exactly five, exactly one single-theme
+(C), five distinct progress forms, **every color token in every palette
+parses** (guards typos in the 10 palettes). Offline brief: non-empty, marked
+not-generated, handles the no-attention record.
+
+## 5. Fidelity to intent
+
+- "Build the actual Windows app with all appearances as options" → built; five
+  appearances selectable in the tray menu, persisted, **A default** per your
+  decision. ✅
+- "Top 4 daily lifesavers" → delivered and recorded in DESIGN.md §1. ✅
+- "Colors not FDA friendly — you suggest" → retuned to USWDS-anchored palette
+  with documented policy. ✅
+- Honest divergences, stated at delivery and re-confirmed here: text capture is
+  Select & Peek (UIA under-cursor is the next milestone); Windows-runtime
+  behaviors need one smoke test on a real Windows box; the Anthropic call path
+  is compile-verified only.
+
+## 6. Iteration log
+
+Pass 1 surfaced F1–F9 → fixes applied → pass 2: rebuild clean, stress suite
+green, all 7 frames re-rendered and inspected. No open discrepancies besides
+the two ⚠️ environment-limited items in §1, which are constraints of this
+container, not defects in the deliverable.

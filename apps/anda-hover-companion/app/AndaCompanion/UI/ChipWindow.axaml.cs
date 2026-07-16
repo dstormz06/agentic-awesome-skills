@@ -18,6 +18,7 @@ public partial class ChipWindow : Window
     {
         InitializeComponent();
         _fade.Tick += (_, _) => Close();
+        Closed += (_, _) => _fade.Stop();
     }
 
     public void ShowInvite(string label, PixelPoint near, Action onAccept)

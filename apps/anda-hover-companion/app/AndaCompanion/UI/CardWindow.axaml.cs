@@ -165,11 +165,15 @@ public partial class CardWindow : Window
             });
 
         SisterChip.Content = $"Sister ANDA · {record.Sisters.Count}";
+        SisterChip.IsVisible = record.Sisters.Count > 0;
         NotesChip.Content = $"Notes · {record.Notes.Count}";
 
         SetMiniVisibility();
-        PositionNear(near);
-        if (!IsVisible) Show();
+        if (!IsVisible)
+        {
+            PositionNear(near);   // position once; sister-hops keep the card where it is
+            Show();
+        }
         Activate();
         Focus();
         if (!_mini) _ = LoadBriefAsync(record);

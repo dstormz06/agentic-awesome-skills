@@ -8,7 +8,8 @@ A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
 - **Tray app** — quiet icon, no notifications. Menu: lookup, demo cards, and Settings:
   **Appearance** (all five: A Quiet Fluent *(default)*, B Docket Ledger, C Signal,
   D Draft, E Instrument), **Theme** (System / Light / Dark), **Consent model**
-  (Full · Peek-first · Whisper invite). Settings persist to
+  (Full *(default — the deliberate hotkey press is DESIGN.md's model ①)* ·
+  Peek-first · Whisper invite). Settings persist to
   `%AppData%\AndaCompanion\settings.json`.
 - **Global hotkeys** — `Ctrl+Alt+A`: peek at the current text selection (Select & Peek);
   `Ctrl+Alt+Space`: lookup window. The hotkey is always the consent act — nothing ever

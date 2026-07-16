@@ -280,11 +280,14 @@ approval, not the public consumer app, and with a minimal-necessary-fields promp
 (no unnecessary applicant PII, nothing retained client-side beyond the local cache).
 Leading with this in the OGD/ORO conversation builds credibility.
 
-**App shell:** .NET 8 + WinUI 3 (or WPF) tray app is the pragmatic choice for an FDA
-Windows estate — first-class UI Automation for text-under-cursor, MSIX/Intune
-deployment, and native acrylic. (Tauri/Rust is a fine alternative if the team prefers
-web UI inside the card.) Local cache in SQLite, populated from whatever sanctioned
-exports/APIs the systems of record allow.
+**App shell (as built):** .NET 8 + **Avalonia** tray app (`app/`). Chosen over
+WPF/WinUI for one decisive reason: the UI cross-compiles and headless-renders on any
+CI box, so every card state is pixel-verified without a Windows machine, while still
+publishing a plain single-file Windows `.exe` (MSIX/Intune-friendly). Windows-native
+integration (global hotkeys, clipboard capture, and the planned UI Automation
+text-under-cursor) is P/Invoke behind service interfaces, so nothing in the UI layer
+is framework-hostage. Local cache in SQLite (planned), populated from whatever
+sanctioned exports/APIs the systems of record allow.
 
 ---
 

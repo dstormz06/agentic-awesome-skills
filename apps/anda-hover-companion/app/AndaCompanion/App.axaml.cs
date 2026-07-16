@@ -91,9 +91,10 @@ public partial class App : Application
     public void OpenCard(AndaRecord record, PixelPoint near, bool mini)
     {
         _card?.Close();
-        _card = new CardWindow(_briefs, _repository.Find);
-        _card.Closed += (_, _) => { if (ReferenceEquals(_card, null)) return; };
-        _card.Show(record, near, mini);
+        var card = new CardWindow(_briefs, _repository.Find);
+        card.Closed += (_, _) => { if (ReferenceEquals(_card, card)) _card = null; };
+        _card = card;
+        card.Show(record, near, mini);
     }
 
     // ---------- tray ----------
