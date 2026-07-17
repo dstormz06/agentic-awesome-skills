@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="color-scheme" content="light dark">
+<meta name="color-scheme" content="light">
 <title>ANDA Hover Companion — Design Studio</title>
 <style>
 /* ============================================================
@@ -16,18 +16,6 @@
   --st-bg:#f2f1ee; --st-ink:#1b1d20; --st-ink2:#61666d; --st-ink3:#93989f;
   --st-panel:#ffffff; --st-line:#e5e3df; --st-accent:#3d6fa5;
   --st-doc:#ffffff;
-}
-:root[data-theme="dark"]{
-  --st-bg:#131518; --st-ink:#e9ebee; --st-ink2:#a3a9b1; --st-ink3:#767d86;
-  --st-panel:#1d2024; --st-line:#2e3237; --st-accent:#8fb5dd;
-  --st-doc:#1d2024;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme]){
-    --st-bg:#131518; --st-ink:#e9ebee; --st-ink2:#a3a9b1; --st-ink3:#767d86;
-    --st-panel:#1d2024; --st-line:#2e3237; --st-accent:#8fb5dd;
-    --st-doc:#1d2024;
-  }
 }
 
 /* ---------- card tokens per direction × theme ---------- */
@@ -42,14 +30,6 @@
   --c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;
   --c-drug-font:var(--c-font); --c-num-font:var(--c-font);
 }
-:root[data-dir="a"][data-theme="dark"], :root[data-dir="a"].sysdark:not([data-theme="light"]){
-  --c-bg:#212429; --c-ink:#eaecef; --c-ink2:#a7adb5; --c-ink3:#7b828b;
-  --c-hair:#2e3238; --c-line:#383d44; --c-accent:#8fb5dd; --c-accent2:#a9c7e6;
-  --c-good:#63cb90; --c-good-bg:#1e3128; --c-warn:#e2b45e; --c-warn-bg:#352b18;
-  --c-bad:#e28f8f; --c-bad-bg:#392224; --c-track:#383d44; --c-fill:#7fa5cc;
-  --c-mark:rgba(143,181,221,.14);
-  --c-shadow:0 24px 48px -12px rgba(0,0,0,.55), 0 4px 12px rgba(0,0,0,.35);
-}
 /* B · Docket Ledger — typeset federal docket */
 :root[data-dir="b"]{
   --c-bg:#fbf8f2; --c-ink:#211d15; --c-ink2:#6e6552; --c-ink3:#9a9078;
@@ -62,15 +42,7 @@
   --c-drug-font:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,serif;
   --c-num-font:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace;
 }
-:root[data-dir="b"][data-theme="dark"], :root[data-dir="b"].sysdark:not([data-theme="light"]){
-  --c-bg:#201d16; --c-ink:#ebe5d6; --c-ink2:#b0a68e; --c-ink3:#847b65;
-  --c-hair:#332f24; --c-line:#403a2c; --c-accent:#82c2a1; --c-accent2:#9ad0b3;
-  --c-good:#82c2a1; --c-good-bg:transparent; --c-warn:#e0b463; --c-warn-bg:#372d18;
-  --c-bad:#dd9280; --c-bad-bg:#3a2620; --c-track:#3b3527; --c-fill:#82c2a1;
-  --c-mark:rgba(130,194,161,.14);
-  --c-shadow:0 20px 40px -14px rgba(0,0,0,.6), 0 2px 6px rgba(0,0,0,.4);
-}
-/* D · Draft — engineer's drawing: ink on white; dark = true blueprint */
+/* D · Draft — engineer's drawing: federal navy ink on white */
 :root[data-dir="d"]{
   --c-bg:#ffffff; --c-ink:#14181d; --c-ink2:#4e5560; --c-ink3:#848b96;
   --c-hair:#e3e7ec; --c-line:#c9cfd8; --c-accent:#1a4480; --c-accent2:#162e51;
@@ -83,16 +55,6 @@
   --c-drug-font:var(--c-font);
   --c-num-font:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace;
 }
-:root[data-dir="d"][data-theme="dark"]{
-  --c-bg:#162e51; --c-ink:#dce4f5; --c-ink2:#a3b4d4; --c-ink3:#7a8cb0;
-  --c-hair:rgba(221,232,248,.14); --c-line:rgba(221,232,248,.26);
-  --c-accent:#9db9e8; --c-accent2:#bccff0;
-  --c-good:#7fd3a6; --c-good-bg:rgba(127,211,166,.14); --c-warn:#ecc36e; --c-warn-bg:rgba(236,195,110,.13);
-  --c-bad:#eb9c9c; --c-bad-bg:rgba(235,156,156,.13); --c-track:rgba(221,232,248,.18); --c-fill:#9db9e8;
-  --c-mark:rgba(157,185,232,.16);
-  --c-shadow:0 24px 48px -12px rgba(2,8,20,.65), 0 2px 6px rgba(2,8,20,.4);
-  --c-grid:rgba(221,232,248,.07);
-}
 /* E · Instrument — medical-device porcelain */
 :root[data-dir="e"]{
   --c-bg:#fcfdfe; --c-ink:#1f2c33; --c-ink2:#5a6c76; --c-ink3:#8b9ba4;
@@ -104,25 +66,17 @@
   --c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;
   --c-drug-font:var(--c-font); --c-num-font:var(--c-font);
 }
-:root[data-dir="e"][data-theme="dark"]{
-  --c-bg:#182226; --c-ink:#e3ebee; --c-ink2:#a5b7bf; --c-ink3:#74868f;
-  --c-hair:#263238; --c-line:#32444c; --c-accent:#9fb9c6; --c-accent2:#bdd2dc;
-  --c-good:#63c495; --c-good-bg:#1c332a; --c-warn:#e4bb64; --c-warn-bg:#352c17;
-  --c-bad:#e39292; --c-bad-bg:#3a2324; --c-track:#2a3a41; --c-fill:#7f9dab;
-  --c-mark:rgba(159,185,198,.14);
-  --c-shadow:0 28px 56px -16px rgba(0,0,0,.6), 0 4px 10px rgba(0,0,0,.35);
-}
-/* C · Signal — committed dark; mission-control glass */
-:root[data-dir="c"], :root[data-dir="c"][data-theme="light"]{
-  --c-bg:rgba(18,25,36,.94); --c-ink:#e6edf5; --c-ink2:#94a4b8; --c-ink3:#66788e;
-  --c-hair:rgba(126,168,214,.14); --c-line:rgba(126,168,214,.22);
-  --c-accent:#7cb0e3; --c-accent2:#a4cbf0;
-  --c-good:#5cc28e; --c-good-bg:rgba(92,194,142,.12);
-  --c-warn:#e8c46a; --c-warn-bg:rgba(232,196,106,.10);
-  --c-bad:#e89090; --c-bad-bg:rgba(232,144,144,.10);
-  --c-track:rgba(126,168,214,.18); --c-fill:#7cb0e3;
-  --c-mark:rgba(124,176,227,.14); --c-radius:14px;
-  --c-shadow:0 32px 64px -16px rgba(0,0,0,.7), 0 0 0 1px rgba(126,168,214,.10);
+/* C · Signal — light steel command panel */
+:root[data-dir="c"]{
+  --c-bg:#f7fafd; --c-ink:#16232e; --c-ink2:#51667a; --c-ink3:#7e93a6;
+  --c-hair:#e2eaf2; --c-line:#c9d8e5;
+  --c-accent:#005ea2; --c-accent2:#0b4778;
+  --c-good:#177245; --c-good-bg:#e3f1ea;
+  --c-warn:#8a5800; --c-warn-bg:#fbf2dd;
+  --c-bad:#a33636; --c-bad-bg:#f9e9e9;
+  --c-track:#dde7f1; --c-fill:#2e7bbf;
+  --c-mark:rgba(0,94,162,.10); --c-radius:14px;
+  --c-shadow:0 24px 48px -12px rgba(22,35,46,.20), 0 4px 12px rgba(22,35,46,.08);
   --c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;
   --c-drug-font:var(--c-font);
   --c-num-font:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace;
@@ -173,8 +127,6 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--st-line);
 .seg button[aria-pressed="true"]{background:var(--st-accent);color:#fff;font-weight:600}
 .hint{font-size:12px;color:var(--st-ink2);margin-top:8px;min-height:1.4em}
 .themegrp .note{font-size:11.5px;color:var(--st-ink3);margin-top:6px;display:none}
-:root[data-dir="c"] .themegrp .note{display:block}
-:root[data-dir="c"] .themegrp .seg{opacity:.45;pointer-events:none}
 
 /* ---------- fake document ---------- */
 .doc{background:var(--st-doc);border:1px solid var(--st-line);border-radius:14px;
@@ -236,7 +188,6 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--st-line);
   font-family:var(--c-font);font-size:14px;line-height:1.5;
   animation:cardin .18s cubic-bezier(.2,.9,.3,1);
 }
-:root[data-dir="c"] #card{-webkit-backdrop-filter:blur(24px) saturate(1.3);backdrop-filter:blur(24px) saturate(1.3)}
 #card.pinned{outline:2px solid var(--c-accent);outline-offset:-1px}
 @keyframes cardin{from{opacity:0;transform:translateY(6px) scale(.985)}to{opacity:1;transform:none}}
 
@@ -263,7 +214,6 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--st-line);
 }
 :root[data-dir="b"] .seal{border:1.5px solid var(--c-good);border-radius:4px;
   transform:rotate(-2.5deg);padding:2px 7px;background:transparent}
-:root[data-dir="c"] .seal{box-shadow:0 0 12px var(--c-good-bg)}
 .tools{margin-left:auto;display:flex;gap:2px;opacity:0;transition:opacity .15s}
 #card:hover .tools,#card:focus-within .tools{opacity:1}
 @media (hover:none){.tools{opacity:1}}
@@ -299,7 +249,6 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--st-line);
 .p-ringwrap svg{width:52px;height:52px;transform:rotate(-90deg)}
 .p-ringwrap .tr{fill:none;stroke:var(--c-track);stroke-width:4}
 .p-ringwrap .fg{fill:none;stroke:var(--c-accent);stroke-width:4;stroke-linecap:round;
-  filter:drop-shadow(0 0 4px rgba(124,176,227,.5));
   transition:stroke-dashoffset .7s cubic-bezier(.2,.9,.3,1)}
 .p-ringwrap .rv{position:absolute;inset:0;display:grid;place-items:center;
   font-size:11.5px;font-weight:700;font-family:var(--c-num-font)}
@@ -449,8 +398,8 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--st-line);
 <div class="studio">
   <p class="eyebrow">DESIGN STUDIO · ALL DATA FICTIONAL</p>
   <h1>ANDA Hover Companion — card concepts</h1>
-  <p class="lede">Five selectable appearances (A is the app default; in the Windows app this
-     picker lives in Settings → Appearance) × three consent models. Pick a direction, pick a consent
+  <p class="lede">Five selectable appearances — all light, per product decision (A is the app default; in the
+     Windows app this picker lives in Settings → Appearance) × three consent models. Pick a direction, pick a consent
      model, then tap an <span style="border-bottom:1.5px dotted var(--st-accent)">underlined</span> ANDA
      number in the memo below. On a phone the card presents as a bottom sheet; on desktop,
      <kbd>Esc</kbd> close · <kbd>E</kbd> expand · <kbd>Space</kbd> pin.</p>
@@ -470,14 +419,14 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--st-line);
           <span class="tg">Typeset federal docket — warm paper, archival green, serif title, stamp seal, milestone ticks.</span>
         </button>
         <button class="dir" data-dir="c" aria-pressed="false">
-          <span class="sw"><i style="background:#121924"></i><i style="background:#7cb0e3"></i><i style="background:#5cc28e"></i></span>
+          <span class="sw"><i style="background:#f7fafd"></i><i style="background:#005ea2"></i><i style="background:#177245"></i></span>
           <span class="nm">C · Signal</span>
-          <span class="tg">Mission-control glass — deep navy blur, cyan accent, mono numerals, glowing progress ring.</span>
+          <span class="tg">Light steel command panel — cool sky surface, federal blue, mono numerals, progress ring.</span>
         </button>
         <button class="dir" data-dir="d" aria-pressed="false">
           <span class="sw"><i style="background:#ffffff"></i><i style="background:#1a4480"></i><i style="background:#162e51"></i></span>
           <span class="nm">D · Draft</span>
-          <span class="tg">Engineer's drawing — federal navy ink (USWDS) on white, graph grid, drafting mono, hatched progress. Dark mode is a true blueprint.</span>
+          <span class="tg">Engineer's drawing — federal navy ink (USWDS) on white, graph grid, drafting mono, hatched progress.</span>
         </button>
         <button class="dir" data-dir="e" aria-pressed="false">
           <span class="sw"><i style="background:#fcfdfe"></i><i style="background:#3e5d6d"></i><i style="background:#1c7a4d"></i></span>
@@ -495,14 +444,7 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--st-line);
       </div>
       <div class="hint" id="modeHint"></div>
     </div>
-    <div class="grp themegrp">
-      <div class="lbl">THEME</div>
-      <div class="seg" role="group" aria-label="Theme">
-        <button data-theme="light" aria-pressed="true">Light</button>
-        <button data-theme="dark" aria-pressed="false">Dark</button>
-      </div>
-      <div class="note">Signal commits to a single dark world — the theme toggle doesn’t apply.</div>
-    </div>
+  </div>
   </div>
 
   <div class="doc" id="doc">
@@ -705,19 +647,8 @@ document.querySelectorAll("button[data-mode]").forEach(b => b.addEventListener("
   hideChip(); closeCard();
 }));
 document.getElementById("modeHint").textContent = HINTS[mode];
-document.querySelectorAll("button[data-theme]").forEach(b => b.addEventListener("click", () => {
-  document.querySelectorAll("button[data-theme]").forEach(x => x.setAttribute("aria-pressed", x === b));
-  root.dataset.theme = b.dataset.theme;
-}));
-/* follow system on load */
-(function(){
-  const dark = matchMedia("(prefers-color-scheme: dark)").matches;
-  if(root.dataset.theme !== "light" && root.dataset.theme !== "dark"){
-    root.dataset.theme = dark ? "dark" : "light";
-  }
-  document.querySelectorAll("button[data-theme]").forEach(x =>
-    x.setAttribute("aria-pressed", x.dataset.theme === root.dataset.theme));
-})();
+/* light-only by product decision — dark variants retired */
+root.dataset.theme = "light";
 
 /* ---------------- open / fill / close ---------------- */
 function openFor(el, opts = {}){

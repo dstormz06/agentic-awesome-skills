@@ -3,14 +3,27 @@
 A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
 **All bundled data is fictional.** Not an FDA product; a concept prototype.
 
+## Quick setup (under 5 minutes)
+
+1. `dotnet run --project AndaCompanion` (or double-click the published `AndaCompanion.exe`).
+2. First run opens **Settings** automatically: pick an appearance, a consent model,
+   and your transparency — a demo card appears alongside so every choice previews live.
+3. Optional, the day API access is approved: set `ANTHROPIC_API_KEY` (agency-approved
+   channel), press **Test** in Settings. Done — no reinstall, no code change.
+
 ## What works today
 
-- **Tray app** — quiet icon, no notifications. Menu: lookup, demo cards, and Settings:
-  **Appearance** (all five: A Quiet Fluent *(default)*, B Docket Ledger, C Signal,
-  D Draft, E Instrument), **Theme** (System / Light / Dark), **Consent model**
-  (Full *(default — the deliberate hotkey press is DESIGN.md's model ①)* ·
-  Peek-first · Whisper invite). Settings persist to
+- **Tray app** — quiet icon, no notifications. Menu: lookup, demo cards, quick
+  Appearance switch, **Settings…**, **Prompt library…**. All persisted to
   `%AppData%\AndaCompanion\settings.json`.
+- **Settings window** — Appearance (all five, **light-only by product decision**, A
+  default), Consent model (Full default = DESIGN.md model ①), **card transparency
+  slider** (85–100%; text always stays opaque), companion lens picker, and the
+  **Claude connection panel** with one-click Test.
+- **Prompt Library** — users store and run their own named lenses that steer the
+  brief's emphasis ("Facility focus", "Director summary", "First-cycle watch" ship as
+  starters). Lenses are guidance, never authority — grounding rules always outrank
+  them (see ../SECURITY.md).
 - **Global hotkeys** — `Ctrl+Alt+A`: peek at the current text selection (Select & Peek);
   `Ctrl+Alt+Space`: lookup window. The hotkey is always the consent act — nothing ever
   opens on its own.

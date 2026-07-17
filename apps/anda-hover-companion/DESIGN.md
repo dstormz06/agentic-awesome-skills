@@ -180,9 +180,14 @@ or removes information:
 |---|---|---|---|
 | **A** | **Quiet Fluent** *(default)* | Native Windows calm — white surface, steel-blue accent, system type | Thin 4 px bar |
 | B | Docket Ledger | Typeset federal docket — warm paper, archival green, serif title, stamp seal | Milestone ticks |
-| C | Signal | Mission-control dark — deep navy, steel-blue accent, mono numerals; commits to dark | Ring |
-| D | Draft | Engineer's drawing — federal navy ink on white, graph grid, drafting mono; dark mode is a true blueprint | Hatched rule |
+| C | Signal | Light steel command panel — cool sky surface, federal blue, mono numerals | Ring |
+| D | Draft | Engineer's drawing — federal navy ink on white, graph grid, drafting mono | Hatched rule |
 | E | Instrument | Medical-device porcelain — slate steel on clinical white, capsule geometry, soft large radii | Capsule |
+
+**Light-only, by product decision.** All dark variants are retired (C was redesigned
+from dark glass into a light steel panel). A per-user **transparency slider** (85–100%,
+card surface only — text and status inks always stay opaque) provides the "sits
+lightly on my screen" quality dark themes used to serve.
 
 **Palette policy.** Accent hues are anchored to the **U.S. Web Design System** federal
 palette (e.g. D's navy = USWDS `primary-dark #1a4480`, blueprint ground = `primary-darker
@@ -341,5 +346,36 @@ appearances (A default) selectable from the tray menu, all three consent models,
 global hotkeys (`Ctrl+Alt+A` Select & Peek, `Ctrl+Alt+Space` lookup), the
 forecast-first card with AHEAD line and expandable drawer, persisted settings, and a
 companion brief via the official Anthropic SDK (`claude-opus-4-8`) with a deterministic
-offline fallback. A headless preview harness renders the real card to PNGs for review
-without a Windows box. See `app/README.md`.
+offline fallback. Also shipped: the Settings window (transparency slider, Claude
+connection panel with one-click Test), the Prompt Library (user-stored lenses that
+steer the brief without overriding grounding), and a first-run setup that lands a new
+user in under five minutes. A headless preview harness renders the real windows to
+PNGs for review without a Windows box. See `app/README.md`, `SECURITY.md`, and
+`PROPOSAL.md` (the director one-pager for API access).
+
+## 12. Engagement roadmap — six features that make it the daily habit
+
+Engagement here means *the tool pays the user every time they touch it* — never
+streaks, badges, or noise. Ranked by payoff-per-build-effort:
+
+1. **Copy-ready status lines** *(next to build)* — every card gets a one-tap "Copy as
+   status line": a perfectly formatted sentence for emails and trackers ("ANDA 216482
+   (metformin ER 500 mg): cycle 2, 62%, goal Oct 3, forecast Oct 17 (+14 d, moderate);
+   IR response due Jul 21."). RPMs write that sentence dozens of times a week; the tool
+   that writes it for them gets opened reflexively.
+2. **Morning Runway** — hover the tray icon for a slim, pull-only strip: today across
+   *your whole portfolio* — top three clocks, items due this week, meetings where your
+   ANDAs are on an agenda. The first thing checked with coffee; still zero notifications.
+3. **Huddle Mode** — one hotkey before a meeting pins mini-cards for every ANDA on the
+   agenda in a neat row; `Esc` sweeps them away. Walking into the huddle pre-armed is
+   the moment that converts the skeptics.
+4. **"What changed since Friday"** — per-ANDA diff view: which facts moved since you
+   last looked (new submission, slipped forecast, closed item). Answers the Monday
+   question directly instead of forcing a re-read.
+5. **Time-saved meter** — a quiet counter in Settings ("~47 lookups this week ≈ 3.1 h
+   of navigation avoided") — engagement for the user, adoption evidence for the
+   director, and the pilot metric for the proposal, all in one number.
+6. **Division calibration board** — the competition showpiece: a shared, read-only page
+   of the tool's forecast accuracy by division ("median error ±8 days, trailing 6
+   months"). An AI tool that publishes its own report card is what "first place in AI
+   automation" looks like to a review committee.

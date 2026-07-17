@@ -33,8 +33,8 @@ public sealed class OfflineBriefService : ICompanionBriefService
 public static class BriefServiceFactory
 {
     /// <summary>Claude-backed brief when ANTHROPIC_API_KEY is configured; offline otherwise.</summary>
-    public static ICompanionBriefService Create() =>
-        string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY"))
-            ? new OfflineBriefService()
-            : new AnthropicBriefService(new OfflineBriefService());
+    public static ICompanionBriefService Create(Func<string?>? lensProvider = null) =>
+        ConnectionService.HasKey
+            ? new AnthropicBriefService(new OfflineBriefService(), lensProvider)
+            : new OfflineBriefService();
 }

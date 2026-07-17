@@ -4,7 +4,6 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
-using Avalonia.Platform;
 using Avalonia.Threading;
 using AndaCompanion.Data;
 using AndaCompanion.Models;
@@ -17,6 +16,7 @@ namespace AndaCompanion;
 public partial class App : Application
 {
     private readonly IAndaRepository _repository = new MockAndaRepository();
+    private readonly PromptLibraryService _prompts = new();
     private ICompanionBriefService _briefs = new OfflineBriefService();
     private Settings _settings = new();
     private HotkeyService? _hotkeys;
@@ -28,8 +28,8 @@ public partial class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         _settings = SettingsService.Load();
-        ThemeManager.Apply(_settings.Appearance, _settings.Theme);
-        _briefs = BriefServiceFactory.Create();
+        ThemeManager.Apply(_settings.Appearance, _settings.CardOpacity);
+        _briefs = BriefServiceFactory.Create(() => _prompts.GetText(_settings.ActiveLens));
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
@@ -38,6 +38,14 @@ public partial class App : Application
             _hotkeys = new HotkeyService(id => Dispatcher.UIThread.Post(() => OnHotkey(id)));
             _hotkeys.Start();
             desktop.Exit += (_, _) => { _hotkeys.Dispose(); _tray?.Dispose(); };
+
+            if (!_settings.FirstRunDone)
+            {
+                _settings.FirstRunDone = true;
+                SettingsService.Save(_settings);
+                OpenSettings();          // 5-minute setup: pick appearance + consent, test connection
+                DemoCard("216482");      // and see the product immediately
+            }
         }
 
         base.OnFrameworkInitializationCompleted();
@@ -97,6 +105,9 @@ public partial class App : Application
         card.Show(record, near, mini);
     }
 
+    private void OpenSettings() =>
+        new SettingsWindow(_settings, _prompts, ApplySettings).Show();
+
     // ---------- tray ----------
 
     private TrayIcon BuildTrayIcon(IClassicDesktopStyleApplicationLifetime desktop)
@@ -119,21 +130,14 @@ public partial class App : Application
             () => (object)_settings.Appearance,
             value => { _settings.Appearance = (AppearanceId)value; ApplySettings(); }));
 
-        menu.Add(BuildRadioSubmenu("Theme", new[]
-            {
-                ("System", (object)ThemeMode.System), ("Light", (object)ThemeMode.Light), ("Dark", (object)ThemeMode.Dark),
-            },
-            () => (object)_settings.Theme,
-            value => { _settings.Theme = (ThemeMode)value; ApplySettings(); }));
+        var settings = new NativeMenuItem("Settings…");
+        settings.Click += (_, _) => OpenSettings();
+        menu.Add(settings);
 
-        menu.Add(BuildRadioSubmenu("Consent model", new[]
-            {
-                ("① Full card on hotkey", (object)ConsentModel.Full),
-                ("② Peek first, expand to full", (object)ConsentModel.PeekFirst),
-                ("③ Whisper invite, open on click", (object)ConsentModel.Whisper),
-            },
-            () => (object)_settings.Consent,
-            value => { _settings.Consent = (ConsentModel)value; SettingsService.Save(_settings); }));
+        var prompts = new NativeMenuItem("Prompt library…");
+        prompts.Click += (_, _) =>
+            new PromptLibraryWindow(_prompts, _settings, ApplySettings).Show();
+        menu.Add(prompts);
 
         menu.Add(new NativeMenuItemSeparator());
         var exit = new NativeMenuItem("Exit");
@@ -177,8 +181,8 @@ public partial class App : Application
     private void ApplySettings()
     {
         SettingsService.Save(_settings);
-        ThemeManager.Apply(_settings.Appearance, _settings.Theme);
-        _card?.Close(); // appearance changes take effect on the next card
+        ThemeManager.Apply(_settings.Appearance, _settings.CardOpacity);
+        _card?.Close(); // appearance/opacity changes take effect on the next card
     }
 
     private void DemoCard(string number)

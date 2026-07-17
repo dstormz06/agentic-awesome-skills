@@ -10,8 +10,8 @@ using AndaCompanion.UI;
 namespace AndaCompanion.Preview;
 
 /// <summary>
-/// Headless render harness: opens the real CardWindow in every appearance and
-/// writes PNG frames, so the card can be pixel-reviewed without a Windows box.
+/// Headless render harness: opens the real windows in every appearance and
+/// writes PNG frames, so the app can be pixel-reviewed without a Windows box.
 /// Usage: dotnet run [outputDir]
 /// </summary>
 public class PreviewApp : Application
@@ -35,43 +35,66 @@ public static class Program
         var repo = new MockAndaRepository();
         var briefs = new OfflineBriefService();
 
-        var shots = new (AppearanceId Id, ThemeMode Mode, string Name, string Anda, bool Expanded)[]
+        var cardShots = new (AppearanceId Id, string Name, string Anda, bool Expanded, double Opacity)[]
         {
-            (AppearanceId.A, ThemeMode.Light, "app-a-light", "216482", false),
-            (AppearanceId.A, ThemeMode.Dark, "app-a-dark", "216482", false),
-            (AppearanceId.B, ThemeMode.Light, "app-b-light", "216482", true),
-            (AppearanceId.C, ThemeMode.Dark, "app-c", "216482", false),
-            (AppearanceId.D, ThemeMode.Light, "app-d-light", "216482", false),
-            (AppearanceId.D, ThemeMode.Dark, "app-d-dark", "216482", false),
-            (AppearanceId.E, ThemeMode.Light, "app-e-light", "214990", false),
+            (AppearanceId.A, "app-a", "216482", false, 1.0),
+            (AppearanceId.B, "app-b-expanded", "216482", true, 1.0),
+            (AppearanceId.C, "app-c", "216482", false, 1.0),
+            (AppearanceId.D, "app-d", "216482", false, 1.0),
+            (AppearanceId.E, "app-e-healthy", "214990", false, 1.0),
+            (AppearanceId.A, "app-a-transparent-88", "216482", false, 0.88),
         };
 
-        foreach (var shot in shots)
+        foreach (var shot in cardShots)
         {
             await session.Dispatch(() =>
             {
-                ThemeManager.Apply(shot.Id, shot.Mode);
+                ThemeManager.Apply(shot.Id, shot.Opacity);
                 var window = new CardWindow(briefs, repo.Find);
-                var record = repo.Find(shot.Anda)!;
-                window.Show(record, new PixelPoint(40, 40), mini: false);
+                window.Show(repo.Find(shot.Anda)!, new PixelPoint(40, 40), mini: false);
                 if (shot.Expanded)
                 {
-                    // drive the expand button the way a user would
                     window.FindControl<Button>("ExpBtn")!
                         .RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
                 }
-                // let the offline brief + layout settle, then force a frame
-                Avalonia.Threading.Dispatcher.UIThread.RunJobs();
-                AvaloniaHeadlessPlatform.ForceRenderTimerTick();
-                var frame = window.CaptureRenderedFrame();
-                if (frame is null) { Console.WriteLine($"{shot.Name}: no frame"); return 1; }
-                string path = Path.Combine(outDir, shot.Name + ".png");
-                frame.Save(path);
-                Console.WriteLine($"{shot.Name}: {frame.PixelSize.Width}x{frame.PixelSize.Height} -> {path}");
-                window.Close();
-                return 0;
+                return Capture(window, shot.Name, outDir);
             }, CancellationToken.None);
         }
+
+        // settings + prompt library, in the default appearance
+        await session.Dispatch(() =>
+        {
+            ThemeManager.Apply(AppearanceId.A);
+            var settings = new Settings();
+            var prompts = new PromptLibraryService();
+            var win = new SettingsWindow(settings, prompts, () => { });
+            win.Show();
+            return Capture(win, "app-settings", outDir);
+        }, CancellationToken.None);
+
+        await session.Dispatch(() =>
+        {
+            ThemeManager.Apply(AppearanceId.A);
+            var settings = new Settings { ActiveLens = "Facility focus" };
+            var prompts = new PromptLibraryService();
+            var win = new PromptLibraryWindow(prompts, settings, () => { });
+            win.Show();
+            return Capture(win, "app-prompt-library", outDir);
+        }, CancellationToken.None);
+
         Console.WriteLine("done");
+    }
+
+    private static int Capture(Window window, string name, string outDir)
+    {
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+        var frame = window.CaptureRenderedFrame();
+        if (frame is null) { Console.WriteLine($"{name}: no frame"); return 1; }
+        string path = Path.Combine(outDir, name + ".png");
+        frame.Save(path);
+        Console.WriteLine($"{name}: {frame.PixelSize.Width}x{frame.PixelSize.Height} -> {path}");
+        window.Close();
+        return 0;
     }
 }
