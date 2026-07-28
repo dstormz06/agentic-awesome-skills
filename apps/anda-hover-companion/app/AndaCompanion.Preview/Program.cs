@@ -87,6 +87,10 @@ public static class Program
 
     private static int Capture(Window window, string name, string outDir)
     {
+        // Composite over a light desktop tone (headless default is black, which
+        // misrepresents a light-only product — especially the transparency demo).
+        window.Background = new Avalonia.Media.SolidColorBrush(
+            Avalonia.Media.Color.Parse("#E9E7E3"));
         Avalonia.Threading.Dispatcher.UIThread.RunJobs();
         AvaloniaHeadlessPlatform.ForceRenderTimerTick();
         var frame = window.CaptureRenderedFrame();

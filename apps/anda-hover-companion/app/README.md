@@ -73,7 +73,7 @@ shipped build is offline-first by design.
 ```
 AndaCompanion/
   App.axaml(.cs)        tray icon, menus, hotkey→consent→card flow
-  Theming/              5 appearances × light/dark as token palettes (USWDS-anchored)
+  Theming/              5 light-only appearance palettes (USWDS-anchored)
   UI/CardWindow.*       the peek card (all slots, mini/full, pin/expand)
   UI/ChipWindow.*       whisper invite + invalid-number notice
   UI/LookupWindow.*     Ctrl+Alt+Space lookup

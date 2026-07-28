@@ -110,7 +110,11 @@ public partial class CardWindow : Window
         MetaText.Text = record.Meta;
         GoalText.Text = record.GoalDate;
         GoalDaysText.Text = record.GoalDays;
-        PctText.Text = ThemeManager.Current.Progress == ProgressVariant.Ring ? "" : record.ProgressPct + "%";
+        bool ring = ThemeManager.Current.Progress == ProgressVariant.Ring;
+        PctText.Text = ring ? "" : record.ProgressPct + "%";
+        Progress.HorizontalAlignment = ring
+            ? Avalonia.Layout.HorizontalAlignment.Right
+            : Avalonia.Layout.HorizontalAlignment.Stretch;
         Progress.Value = record.ProgressPct;
         ForecastText.Text = record.ForecastDate;
         ForecastDeltaText.Text = record.ForecastDelta;

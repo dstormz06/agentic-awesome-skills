@@ -22,6 +22,8 @@ public partial class App : Application
     private HotkeyService? _hotkeys;
     private TrayIcon? _tray;
     private CardWindow? _card;
+    private SettingsWindow? _settingsWindow;
+    private (AndaRecord Record, PixelPoint Near, bool Mini)? _lastCard;
 
     public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
@@ -102,11 +104,17 @@ public partial class App : Application
         var card = new CardWindow(_briefs, _repository.Find);
         card.Closed += (_, _) => { if (ReferenceEquals(_card, card)) _card = null; };
         _card = card;
+        _lastCard = (record, near, mini);
         card.Show(record, near, mini);
     }
 
-    private void OpenSettings() =>
-        new SettingsWindow(_settings, _prompts, ApplySettings).Show();
+    private void OpenSettings()
+    {
+        if (_settingsWindow is not null) { _settingsWindow.Activate(); return; }
+        _settingsWindow = new SettingsWindow(_settings, _prompts, ApplySettings);
+        _settingsWindow.Closed += (_, _) => _settingsWindow = null;
+        _settingsWindow.Show();
+    }
 
     // ---------- tray ----------
 
@@ -182,7 +190,9 @@ public partial class App : Application
     {
         SettingsService.Save(_settings);
         ThemeManager.Apply(_settings.Appearance, _settings.CardOpacity);
-        _card?.Close(); // appearance/opacity changes take effect on the next card
+        // Live preview: if a card is open, rebuild it in place with the new look.
+        if (_card is not null && _lastCard is { } last)
+            OpenCard(last.Record, last.Near, last.Mini);
     }
 
     private void DemoCard(string number)

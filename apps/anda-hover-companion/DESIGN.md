@@ -190,14 +190,14 @@ card surface only — text and status inks always stay opaque) provides the "sit
 lightly on my screen" quality dark themes used to serve.
 
 **Palette policy.** Accent hues are anchored to the **U.S. Web Design System** federal
-palette (e.g. D's navy = USWDS `primary-dark #1a4480`, blueprint ground = `primary-darker
-#162e51`) so every appearance reads government-professional, and the status colors
+palette (e.g. D's navy = USWDS `primary-dark #1a4480`, C's federal blue = USWDS
+`primary #005ea2`) so every appearance reads government-professional, and the status colors
 (good / warn / bad) keep one consistent semantic family across all five. Within that
 conservative range, the appearances differentiate through *material, typography, and
 geometry* — paper and serif, grid and mono, glass, porcelain — rather than louder hues.
 
 - **Native-feeling Windows 11:** Mica/acrylic card, 10 px radius, Segoe UI Variable,
-  system light/dark followed automatically, `prefers-reduced-motion` respected
+  light-only (§5), `prefers-reduced-motion` respected
   (fade 120 ms → no animation).
 - **Density:** 13 px base text, 11 px metadata, 4/8 px spacing grid. One weight change
   (semibold) for the identity line and the goal date — nothing else competes.
@@ -336,8 +336,7 @@ with fictional data:
 - **Touch-first presentation:** on phones and tablets the card presents as a bottom
   sheet with a drag handle, scrim, safe-area padding, and 44 px targets — tested
   against iOS-style touch emulation.
-- The invalid-number whisper, light/dark themes (all appearances except C, which is
-  deliberately dark-only).
+- The invalid-number whisper. All appearances are light-only (§5).
 
 ## 11. Implementation status — the Windows app
 

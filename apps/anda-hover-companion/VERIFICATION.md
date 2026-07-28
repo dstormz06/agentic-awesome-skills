@@ -73,3 +73,26 @@ Pass 1 surfaced F1–F9 → fixes applied → pass 2: rebuild clean, stress suit
 green, all 7 frames re-rendered and inspected. No open discrepancies besides
 the two ⚠️ environment-limited items in §1, which are constraints of this
 container, not defects in the deliverable.
+
+---
+
+# Round 2 — verification of the light-only / Prompt Library / security delivery
+
+Same protocol, applied to the next delivery (commit `2851c3a`). Findings:
+
+| # | Finding | Class | Disposition |
+|---|---|---|---|
+| G1 | README and the chat summary claimed settings changes "preview live," but `ApplySettings` closed the open card — a claim/behavior mismatch found by re-deriving the code path | **Claim bug** | Fixed: the open card now rebuilds in place with the new appearance/transparency, making the claim true |
+| G2 | The 88%-transparency screenshot was shipped **unviewed**, and the headless capture composites over black — making the translucent card look *darker*, the opposite of the light-only direction | **Process + evidence bug** | Fixed: harness now composites all frames over a light desktop tone (`#E9E7E3`); shot re-rendered and visually inspected this time |
+| G3 | Three stale light/dark references survived the light-only conversion (app README layout note; DESIGN §5 visual-language bullet; DESIGN §10 mockup bullet) plus a stale "blueprint ground" palette mention | Doc drift | All four corrected |
+| G4 | Settings window could be opened multiple times from the tray | Polish bug | Fixed: single instance, re-activated if already open |
+| G5 | F9 from round 1 (ring left-aligned in the app vs right in the mockup) | Carryover | **Closed**: ring right-aligns when the appearance uses the ring form |
+| G6 | Dev screenshot scripts for the web studio (`shot2.js`/`shot3.js`) still reference the removed theme buttons | Dev-tooling only | Logged, not fixed — they are scratchpad tools outside the repo; the committed preview harness is current |
+
+Re-execution after fixes: both projects build with 0 errors; the stress suite
+(78 checks: validator boundaries, repository, settings round-trip incl.
+opacity + lens, appearance invariants, every palette color parse, prompt
+library CRUD, offline brief) passes in full; all 8 frames re-rendered over the
+light backdrop and inspected. Environment-limited items unchanged from round
+1: Windows-runtime smoke test and a live Anthropic call still require a
+Windows box / API key respectively.
