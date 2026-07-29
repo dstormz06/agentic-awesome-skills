@@ -38,4 +38,8 @@ Exit criteria and rollback: remove the key — the tool keeps working offline.
 **Why this wins for the division.** It's AI where AI is accountable: deterministic
 facts, computed forecasts with published accuracy, and a clearly-fenced synthesis layer
 — a template for how OGD project management can adopt AI without ceding a single fact
-to a model.
+to a model. The architecture is also **provider-pluggable and Elsa-ready**: the model
+backend sits behind one interface, so if the agency later standardizes on Elsa or
+another approved service, the tool swaps backends with zero change to its grounding,
+security, or UI. Goal-date logic is likewise versioned per GDUFA cycle — GDUFA III
+encoded today, GDUFA IV a drop-in when its commitment letter finalizes.

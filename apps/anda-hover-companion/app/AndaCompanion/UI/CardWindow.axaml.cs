@@ -194,6 +194,9 @@ public partial class CardWindow : Window
         await Dispatcher.UIThread.InvokeAsync(() =>
         {
             BriefTag.Text = brief.Generated ? "COMPANION" : "OFFLINE BRIEF";
+            BriefVerify.Text = brief.Generated
+                ? "generated — verify before acting"
+                : "assembled from the record";     // offline text is deterministic, not generated
             BriefText.Foreground = Ink2();
             BriefText.Text = brief.Text;
         });

@@ -17,12 +17,14 @@ public sealed class OfflineBriefService : ICompanionBriefService
 {
     public Task<CompanionBrief> GetBriefAsync(AndaRecord r, CancellationToken ct = default)
     {
+        // S4: never restate what the card already shows (goal/forecast dates are two
+        // slots above) — lead with what the card does NOT show.
         var sb = new StringBuilder();
-        sb.Append(r.ForecastLate
-            ? $"Forecast {r.ForecastDate} runs past the {r.GoalDate} goal ({r.ForecastConfidence}). "
-            : $"Forecast {r.ForecastDate} is ahead of the {r.GoalDate} goal ({r.ForecastConfidence}). ");
         if (r.Attention is not null) sb.Append($"Open now: {r.Attention.Text}. ");
-        if (r.Sisters.Count > 0) sb.Append($"Related: ANDA {r.Sisters[0].Number} — {r.Sisters[0].Description}.");
+        if (r.Sisters.Count > 0)
+            sb.Append($"Related precedent: ANDA {r.Sisters[0].Number} — {r.Sisters[0].Description}. ");
+        if (sb.Length == 0) sb.Append("No open items need action. ");
+        sb.Append("Forecast drivers and assumptions: expand → Forecast & assumptions.");
         return Task.FromResult(new CompanionBrief(
             sb.ToString().TrimEnd(),
             r.Notes.Select(n => n.Who).ToArray(),
@@ -32,9 +34,15 @@ public sealed class OfflineBriefService : ICompanionBriefService
 
 public static class BriefServiceFactory
 {
-    /// <summary>Claude-backed brief when ANTHROPIC_API_KEY is configured; offline otherwise.</summary>
-    public static ICompanionBriefService Create(Func<string?>? lensProvider = null) =>
-        ConnectionService.HasKey
-            ? new AnthropicBriefService(new OfflineBriefService(), lensProvider)
-            : new OfflineBriefService();
+    /// <summary>
+    /// Provider-backed brief when a chat completer is available (Anthropic today;
+    /// Elsa or another approved wrapper later via ChatCompleterFactory); offline otherwise.
+    /// </summary>
+    public static ICompanionBriefService Create(Func<string?>? lensProvider = null)
+    {
+        var offline = new OfflineBriefService();
+        return ChatCompleterFactory.Create() is { } completer
+            ? new GeneratedBriefService(completer, offline, lensProvider)
+            : offline;
+    }
 }

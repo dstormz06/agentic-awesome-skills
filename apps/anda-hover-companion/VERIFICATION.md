@@ -96,3 +96,28 @@ library CRUD, offline brief) passes in full; all 8 frames re-rendered over the
 light backdrop and inspected. Environment-limited items unchanged from round
 1: Windows-runtime smoke test and a live Anthropic call still require a
 Windows box / API key respectively.
+
+---
+
+# Round 3 — surgical-edit application (user-confirmed set S1–S6 + provider seam)
+
+Applied exactly as proposed and confirmed; verified by rebuild (0 errors), an
+extended 88-check stress suite, and visual inspection of re-rendered frames.
+
+| Edit | Applied at | Verified by |
+|---|---|---|
+| S1 offline label honesty | `CardWindow.axaml` (`BriefVerify`) + `LoadBriefAsync` | Rendered frame shows "OFFLINE BRIEF · assembled from the record" |
+| S2 null-free record JSON | `GeneratedBriefService.RecordJson` | Options set `WhenWritingNull`; logic untouched |
+| S3 brief MaxTokens 1024→400 | `GeneratedBriefService.BriefMaxTokens` | Ceiling only; no path change |
+| S4 offline brief de-duplication | `OfflineBriefService` | Stress checks: no goal/forecast date restated; leads with open item / precedent |
+| S5 compressed system prompt | `GeneratedBriefService.SystemPrompt` | Rule-for-rule mapping documented in the source comment |
+| S6 GDUFA-versioned goal rules | new `Services/GoalDateRules.cs` | Encoded tiers match cited sources; unencoded tiers return null (fail-loud); GDUFA IV placeholder inert |
+| Provider seam (Elsa-ready) | new `Services/BriefProvider.cs`; factory rewired | Stress: no key → offline; reserved provider "elsa" → offline; Anthropic path compiles against SDK 12.35.1 |
+
+Accuracy policy note for S6: only tiers confirmed against the Sept 2024
+amendments guidance / GDUFA III commitment letter are encoded (standard
+original ANDA 10 months; major amendment without preapproval inspection
+8 months). All other tiers deliberately return "not encoded" until transcribed
+from the commitment letter tables — the forecast layer must never guess a
+regulatory number. GDUFA IV rules are a placeholder pending the FY2028–2032
+commitment letter (negotiations ongoing as of mid-2026).

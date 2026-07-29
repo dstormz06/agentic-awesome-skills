@@ -31,9 +31,19 @@ A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
   needs-attention line, latest event, AHEAD anticipation line, companion brief, expandable
   drawer (pending items, notes, forecast drivers, sister ANDAs), pin (`Space`),
   expand (`E`), copy brief (`C`), `Esc` to close.
-- **Companion brief** — via the official Anthropic SDK (`claude-opus-4-8`) when
-  `ANTHROPIC_API_KEY` is set; otherwise a deterministic offline brief assembled from the
-  record. Facts and the forecast number never come from the model.
+- **Companion brief** — provider-pluggable via the `IChatCompleter` seam
+  (`Services/BriefProvider.cs`). Today: the official Anthropic SDK (`claude-opus-4-8`)
+  when `ANTHROPIC_API_KEY` is set; otherwise a deterministic offline brief. The seam is
+  deliberately **Elsa-ready**: when FDA's Elsa (or another approved multi-model chat
+  wrapper) publishes an API, implement `IChatCompleter` against it and register it in
+  `ChatCompleterFactory` (`ANDA_COMPANION_PROVIDER` selects the provider) — grounding
+  rules, fencing, fallback, and UI are untouched by a backend swap. Facts and the
+  forecast number never come from any model.
+- **GDUFA-versioned goal-date rules** — `Services/GoalDateRules.cs` encodes the
+  amendment→goal-date logic behind an `IGoalDateRules` interface: `Gdufa3Rules` (from
+  the Sept 2024 amendments guidance + GDUFA III commitment letter; only source-confirmed
+  tiers are filled, unencoded tiers fail loudly) and a `Gdufa4Rules` placeholder that
+  activates when the FY2028–2032 commitment letter is published.
 - **Consent stage-one surfaces** — whisper invite chip (self-fades in 3 s) and the
   compact peek card (no AI call until expanded).
 
