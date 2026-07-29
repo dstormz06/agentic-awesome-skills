@@ -1,0 +1,84 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="AndaCompanion.App"
+             RequestedThemeVariant="Light">
+  <Application.Styles>
+    <FluentTheme/>
+
+    <!-- ============================================================
+         App-level polish, inherited by every window.
+         Apple-inspired: quiet materials, generous radii, one accent,
+         motion that clarifies and never misrepresents a value.
+         ============================================================ -->
+
+    <!-- Hover boxes: a miniature of the card itself, not an OS tooltip -->
+    <Style Selector="ToolTip">
+      <Setter Property="Background" Value="{DynamicResource C.Bg}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource C.Line}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="Padding" Value="10,7"/>
+      <Setter Property="MaxWidth" Value="280"/>
+      <Setter Property="FontFamily" Value="{DynamicResource C.Font}"/>
+      <Setter Property="FontSize" Value="11.5"/>
+      <Setter Property="Foreground" Value="{DynamicResource C.Ink2}"/>
+    </Style>
+    <Style Selector="ToolTip">
+      <Style.Animations>
+        <Animation Duration="0:0:0.14" Easing="CubicEaseOut" FillMode="Forward">
+          <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0"/></KeyFrame>
+          <KeyFrame Cue="100%"><Setter Property="Opacity" Value="1"/></KeyFrame>
+        </Animation>
+      </Style.Animations>
+    </Style>
+
+    <!-- Focus: a visible accent ring on every focusable control (Section 508) -->
+    <Style Selector="Button:focus-visible /template/ ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource C.Accent}"/>
+      <Setter Property="BorderThickness" Value="2"/>
+    </Style>
+    <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+      <Setter Property="BorderBrush" Value="{DynamicResource C.Accent}"/>
+      <Setter Property="BorderThickness" Value="2"/>
+    </Style>
+    <Style Selector="ComboBox:focus-visible /template/ Border#Background">
+      <Setter Property="BorderBrush" Value="{DynamicResource C.Accent}"/>
+      <Setter Property="BorderThickness" Value="2"/>
+    </Style>
+    <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource C.Mark}"/>
+      <Setter Property="CornerRadius" Value="6"/>
+    </Style>
+
+    <!-- Controls inherit the appearance's type and ink -->
+    <Style Selector="TextBox">
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="FontFamily" Value="{DynamicResource C.Font}"/>
+    </Style>
+    <Style Selector="ComboBox"><Setter Property="CornerRadius" Value="8"/></Style>
+    <Style Selector="RadioButton"><Setter Property="FontFamily" Value="{DynamicResource C.Font}"/></Style>
+
+    <!-- Primary action: filled accent pill (Settings "Done", Prompt "Save") -->
+    <Style Selector="Button.primary /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource C.Accent}"/>
+      <Setter Property="CornerRadius" Value="99"/>
+    </Style>
+    <Style Selector="Button.primary">
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Padding" Value="16,7"/>
+      <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
+    </Style>
+    <Style Selector="Button.primary:pressed"><Setter Property="RenderTransform" Value="scale(0.97)"/></Style>
+
+    <!-- Slider: thin track, accent fill, generous thumb (Apple-style) -->
+    <Style Selector="Slider:horizontal /template/ Border#TrackBackground">
+      <Setter Property="Height" Value="4"/>
+      <Setter Property="CornerRadius" Value="2"/>
+      <Setter Property="Background" Value="{DynamicResource C.Track}"/>
+    </Style>
+    <Style Selector="Slider /template/ Thumb">
+      <Setter Property="Width" Value="18"/><Setter Property="Height" Value="18"/>
+    </Style>
+  </Application.Styles>
+</Application>

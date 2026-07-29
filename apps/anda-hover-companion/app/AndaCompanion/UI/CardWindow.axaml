@@ -1,0 +1,221 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="clr-namespace:AndaCompanion.UI"
+        x:Class="AndaCompanion.UI.CardWindow"
+        SystemDecorations="None" TransparencyLevelHint="Transparent" Background="Transparent"
+        SizeToContent="WidthAndHeight" CanResize="False" Topmost="True"
+        ShowInTaskbar="False" ShowActivated="True" Title="ANDA quick brief">
+
+  <Window.Styles>
+    <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource C.Font}"/></Style>
+    <Style Selector="TextBlock.lbl">
+      <Setter Property="FontSize" Value="9.5"/><Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="LetterSpacing" Value="1.4"/><Setter Property="Foreground" Value="{DynamicResource C.Ink3}"/>
+      <Setter Property="FontFamily" Value="{DynamicResource C.LabelFont}"/>
+    </Style>
+    <Style Selector="TextBlock.body2"><Setter Property="FontSize" Value="12.5"/><Setter Property="Foreground" Value="{DynamicResource C.Ink2}"/><Setter Property="TextWrapping" Value="Wrap"/></Style>
+    <Style Selector="Button.tool">
+      <Setter Property="Background" Value="Transparent"/><Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Width" Value="30"/><Setter Property="Height" Value="30"/>
+      <Setter Property="Padding" Value="0"/><Setter Property="CornerRadius" Value="6"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/><Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="Button.tool:pointerover /template/ ContentPresenter"><Setter Property="Background" Value="{DynamicResource C.Mark}"/></Style>
+    <Style Selector="Button.tool Path"><Setter Property="Stroke" Value="{DynamicResource C.Ink3}"/><Setter Property="StrokeThickness" Value="1.5"/></Style>
+    <Style Selector="Button.chip">
+      <Setter Property="Background" Value="Transparent"/><Setter Property="BorderBrush" Value="{DynamicResource C.Line}"/>
+      <Setter Property="BorderThickness" Value="1"/><Setter Property="CornerRadius" Value="99"/>
+      <Setter Property="Padding" Value="12,6"/><Setter Property="FontSize" Value="12"/>
+      <Setter Property="Foreground" Value="{DynamicResource C.Ink2}"/>
+      <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
+    </Style>
+    <Style Selector="Button.chip:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource C.Mark}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource C.Ink3}"/>
+    </Style>
+    <Style Selector="Button.chip:pressed"><Setter Property="RenderTransform" Value="scale(0.96)"/></Style>
+    <Style Selector="Button.tool:pressed"><Setter Property="RenderTransform" Value="scale(0.88)"/></Style>
+    <Style Selector="Expander">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="MinHeight" Value="0"/>
+    </Style>
+  </Window.Styles>
+
+  <Panel Margin="26">
+    <Border Name="Root" Width="372"
+            Background="{DynamicResource C.Bg}" CornerRadius="{DynamicResource C.Radius}"
+            BorderBrush="{DynamicResource C.Line}" BorderThickness="1"
+            BoxShadow="0 18 42 -10 #59000000" ClipToBounds="True">
+      <Panel>
+        <ui:GridSurface/>
+        <StackPanel Name="Slots" Grid.IsSharedSizeScope="True">
+
+          <!-- identity -->
+          <StackPanel Margin="16,14,16,12">
+            <Grid ColumnDefinitions="Auto,8,Auto,*,Auto">
+              <TextBlock Name="NumText" FontSize="15" FontWeight="Bold"
+                         FontFamily="{DynamicResource C.NumFont}" Foreground="{DynamicResource C.Ink}"
+                         VerticalAlignment="Center" Text="ANDA 216482"/>
+              <Border Name="Seal" Grid.Column="2" Background="{DynamicResource C.GoodBg}"
+                      CornerRadius="99" Padding="8,3" VerticalAlignment="Center">
+                <TextBlock FontSize="10" FontWeight="Bold" LetterSpacing="0.8"
+                           Foreground="{DynamicResource C.Good}" Text="✓ VERIFIED"/>
+              </Border>
+              <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="2">
+                <Button Name="PinBtn" Classes="tool" ToolTip.Tip="Pin (Space)" AutomationProperties.Name="Pin card">
+                  <Path Data="M9.5 2.5l4 4-2.2.55a2 2 0 0 0-1.25 1.25L9.5 10.5 5.5 6.5l2.2-.55A2 2 0 0 0 8.95 4.7z M5.5 10.5L2.5 13.5" Width="16" Height="16" Fill="{x:Null}"/>
+                </Button>
+                <Button Name="ExpBtn" Classes="tool" ToolTip.Tip="Expand (E)" AutomationProperties.Name="Expand card">
+                  <Path Data="M9.5 6.5L13 3M13 3h-3.5M13 3v3.5M6.5 9.5L3 13M3 13h3.5M3 13V9.5" Width="16" Height="16" Fill="{x:Null}"/>
+                </Button>
+                <Button Name="CloseBtn" Classes="tool" ToolTip.Tip="Close (Esc)" AutomationProperties.Name="Close card">
+                  <Path Data="M4 4l8 8M12 4l-8 8" Width="16" Height="16" Fill="{x:Null}"/>
+                </Button>
+              </StackPanel>
+            </Grid>
+            <TextBlock Name="DrugText" FontSize="14" FontWeight="Medium" Margin="0,6,0,0"
+                       FontFamily="{DynamicResource C.DrugFont}" FontStyle="{DynamicResource C.DrugStyle}"
+                       Foreground="{DynamicResource C.Ink}" TextWrapping="Wrap"/>
+            <TextBlock Name="MetaText" FontSize="12" Foreground="{DynamicResource C.Ink2}" Margin="0,2,0,0"/>
+            <TextBlock Name="FreshnessText" FontSize="10.5" Foreground="{DynamicResource C.Ink3}" Margin="0,3,0,0"/>
+          </StackPanel>
+          <Border Height="1" Background="{DynamicResource C.Hair}"/>
+
+          <!-- clock: goal + progress + forecast (the headline) -->
+          <StackPanel Margin="16,11,16,12">
+            <Grid Margin="0,0,0,7">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelRail"/>
+                <ColumnDefinition Width="9"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="6"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+              </Grid.ColumnDefinitions>
+              <TextBlock Classes="lbl" Text="GOAL" VerticalAlignment="Center"/>
+              <TextBlock Grid.Column="2" Name="GoalText" FontSize="13.5" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink}"/>
+              <TextBlock Grid.Column="4" Name="GoalDaysText" FontSize="12" Foreground="{DynamicResource C.Ink2}"/>
+              <TextBlock Grid.Column="6" Name="PctText" FontSize="11.5" Foreground="{DynamicResource C.Ink2}"
+                         FontFamily="{DynamicResource C.NumFont}"/>
+            </Grid>
+            <ui:ProgressControl Name="Progress" HorizontalAlignment="Stretch"/>
+            <Border Name="ForecastSep" Height="1" Background="{DynamicResource C.Hair}" Margin="0,9,0,0"/>
+            <Grid Margin="0,8,0,0">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelRail"/>
+                <ColumnDefinition Width="9"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="*"/>
+              </Grid.ColumnDefinitions>
+              <TextBlock Classes="lbl" Text="FORECAST" VerticalAlignment="Center"/>
+              <TextBlock Grid.Column="2" Name="ForecastText" FontSize="13.5" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink}"/>
+              <TextBlock Grid.Column="4" Name="ForecastDeltaText" FontSize="11.5" FontWeight="Bold" VerticalAlignment="Center"/>
+            </Grid>
+            <TextBlock Name="ForecastConfText" FontSize="10.5" Foreground="{DynamicResource C.Ink3}"
+                       HorizontalAlignment="Right" Margin="0,3,0,0"/>
+          </StackPanel>
+
+          <!-- attention (single most urgent item, or collapsed) -->
+          <StackPanel Name="AttentionSlot">
+            <Border Height="1" Background="{DynamicResource C.Hair}"/>
+            <Border Name="AttentionBox" Margin="16,10,16,10" CornerRadius="8" Padding="10,8">
+              <Grid ColumnDefinitions="Auto,9,*">
+                <TextBlock Name="AttentionKind" Classes="lbl" Text="⚠ NEEDS YOU" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="2" Name="AttentionText" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
+              </Grid>
+            </Border>
+          </StackPanel>
+
+          <!-- latest — same labeled rail as every other slot -->
+          <StackPanel Name="LatestSlot">
+            <Border Height="1" Background="{DynamicResource C.Hair}"/>
+            <Grid Margin="16,10,16,10">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelRail"/>
+                <ColumnDefinition Width="9"/>
+                <ColumnDefinition Width="*"/>
+              </Grid.ColumnDefinitions>
+              <TextBlock Classes="lbl" Text="LATEST" VerticalAlignment="Top" Margin="0,2,0,0"/>
+              <TextBlock Grid.Column="2" Name="LatestText" Classes="body2"/>
+            </Grid>
+          </StackPanel>
+
+          <!-- AHEAD: anticipation -->
+          <StackPanel Name="AheadSlot">
+            <Border Height="1" Background="{DynamicResource C.Hair}"/>
+            <Grid Margin="16,10,16,10">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelRail"/>
+                <ColumnDefinition Width="9"/>
+                <ColumnDefinition Width="*"/>
+              </Grid.ColumnDefinitions>
+              <TextBlock Classes="lbl" Text="AHEAD" Foreground="{DynamicResource C.Accent}" VerticalAlignment="Top" Margin="0,2,0,0"/>
+              <TextBlock Grid.Column="2" Name="AheadText" Classes="body2"/>
+            </Grid>
+          </StackPanel>
+
+          <!-- companion brief -->
+          <StackPanel Name="BriefSlot">
+            <Border Height="1" Background="{DynamicResource C.Hair}"/>
+            <StackPanel Margin="16,10,16,12">
+              <Grid Margin="0,0,0,5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="Auto" SharedSizeGroup="LabelRail"/>
+                  <ColumnDefinition Width="9"/>
+                  <ColumnDefinition Width="*"/>
+                  <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Classes="lbl" Name="BriefTag" Text="COMPANION" Foreground="{DynamicResource C.Accent}"/>
+                <TextBlock Grid.Column="2" Name="BriefVerify" FontSize="10.5" Foreground="{DynamicResource C.Ink3}"
+                           Text="generated — verify before acting" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="3" Name="SourcesLink" FontSize="11.5" Foreground="{DynamicResource C.Accent}" Text="sources ›"/>
+              </Grid>
+              <TextBlock Name="BriefText" Classes="body2" MinHeight="34"/>
+            </StackPanel>
+          </StackPanel>
+
+          <!-- expanded drawer -->
+          <StackPanel Name="Drawer" IsVisible="False">
+            <Border Height="1" Background="{DynamicResource C.Hair}"/>
+            <Expander Margin="8,2,8,0"><Expander.Header><TextBlock Name="PendingHeader" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink2}" Text="Pending &amp; urgent items"/></Expander.Header>
+              <StackPanel Name="PendingPanel" Margin="12,0,12,8"/>
+            </Expander>
+            <Expander Margin="8,0,8,0"><Expander.Header><TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink2}" Text="Recent project notes"/></Expander.Header>
+              <StackPanel Name="NotesPanel" Margin="12,0,12,8"/>
+            </Expander>
+            <Expander Margin="8,0,8,0"><Expander.Header><TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink2}" Text="Forecast &amp; assumptions"/></Expander.Header>
+              <TextBlock Name="ForecastDetailText" Classes="body2" Margin="12,0,12,8"/>
+            </Expander>
+            <Expander Margin="8,0,8,4"><Expander.Header><TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink2}" Text="Sister / related ANDAs"/></Expander.Header>
+              <StackPanel Name="SistersPanel" Margin="12,0,12,8"/>
+            </Expander>
+          </StackPanel>
+
+          <!-- chips -->
+          <StackPanel Name="ChipsSlot">
+            <Border Height="1" Background="{DynamicResource C.Hair}"/>
+            <WrapPanel Margin="16,10,16,12">
+              <Button Name="CopyChip" Classes="chip" Margin="0,0,7,7" Content="Copy status"
+                      ToolTip.Tip="Copy a formatted status sentence for emails and trackers (S)"
+                      AutomationProperties.Name="Copy formatted status line"/>
+              <Button Name="SisterChip" Classes="chip" Margin="0,0,7,7"/>
+              <Button Name="NotesChip" Classes="chip" Margin="0,0,7,7"/>
+              <Button Name="OpenChip" Classes="chip" Foreground="{DynamicResource C.Accent}" Content="Open in system of record ↗"
+                      AutomationProperties.Name="Open this ANDA in the system of record"/>
+            </WrapPanel>
+          </StackPanel>
+
+          <!-- mini-mode CTA (consent model ③: Peek → Full) -->
+          <Button Name="MoreBtn" IsVisible="False" AutomationProperties.Name="Show the full brief" Height="42" HorizontalAlignment="Stretch"
+                  HorizontalContentAlignment="Center" Background="{DynamicResource C.Mark}"
+                  BorderThickness="0" CornerRadius="0"
+                  Foreground="{DynamicResource C.Accent}" FontWeight="SemiBold" FontSize="12.5"
+                  Content="Full brief ↓"/>
+        </StackPanel>
+      </Panel>
+    </Border>
+  </Panel>
+</Window>
