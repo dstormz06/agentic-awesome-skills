@@ -42,7 +42,7 @@
             BoxShadow="0 18 42 -10 #59000000" ClipToBounds="True">
       <Panel>
         <ui:GridSurface/>
-        <StackPanel Name="Slots">
+        <StackPanel Name="Slots" Grid.IsSharedSizeScope="True">
 
           <!-- identity -->
           <StackPanel Margin="16,14,16,12">
@@ -76,7 +76,16 @@
 
           <!-- clock: goal + progress + forecast (the headline) -->
           <StackPanel Margin="16,11,16,12">
-            <Grid ColumnDefinitions="Auto,8,Auto,6,Auto,*,Auto" Margin="0,0,0,7">
+            <Grid Margin="0,0,0,7">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelRail"/>
+                <ColumnDefinition Width="9"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="6"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+              </Grid.ColumnDefinitions>
               <TextBlock Classes="lbl" Text="GOAL" VerticalAlignment="Center"/>
               <TextBlock Grid.Column="2" Name="GoalText" FontSize="13.5" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink}"/>
               <TextBlock Grid.Column="4" Name="GoalDaysText" FontSize="12" Foreground="{DynamicResource C.Ink2}"/>
@@ -85,7 +94,14 @@
             </Grid>
             <ui:ProgressControl Name="Progress" HorizontalAlignment="Stretch"/>
             <Border Name="ForecastSep" Height="1" Background="{DynamicResource C.Hair}" Margin="0,9,0,0"/>
-            <Grid ColumnDefinitions="Auto,8,Auto,8,*" Margin="0,8,0,0">
+            <Grid Margin="0,8,0,0">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelRail"/>
+                <ColumnDefinition Width="9"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="*"/>
+              </Grid.ColumnDefinitions>
               <TextBlock Classes="lbl" Text="FORECAST" VerticalAlignment="Center"/>
               <TextBlock Grid.Column="2" Name="ForecastText" FontSize="13.5" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink}"/>
               <TextBlock Grid.Column="4" Name="ForecastDeltaText" FontSize="11.5" FontWeight="Bold" VerticalAlignment="Center"/>
@@ -105,16 +121,29 @@
             </Border>
           </StackPanel>
 
-          <!-- latest -->
+          <!-- latest — same labeled rail as every other slot -->
           <StackPanel Name="LatestSlot">
             <Border Height="1" Background="{DynamicResource C.Hair}"/>
-            <TextBlock Name="LatestText" Classes="body2" Margin="16,10,16,10"/>
+            <Grid Margin="16,10,16,10">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelRail"/>
+                <ColumnDefinition Width="9"/>
+                <ColumnDefinition Width="*"/>
+              </Grid.ColumnDefinitions>
+              <TextBlock Classes="lbl" Text="LATEST" VerticalAlignment="Top" Margin="0,2,0,0"/>
+              <TextBlock Grid.Column="2" Name="LatestText" Classes="body2"/>
+            </Grid>
           </StackPanel>
 
           <!-- AHEAD: anticipation -->
           <StackPanel Name="AheadSlot">
             <Border Height="1" Background="{DynamicResource C.Hair}"/>
-            <Grid ColumnDefinitions="Auto,9,*" Margin="16,10,16,10">
+            <Grid Margin="16,10,16,10">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelRail"/>
+                <ColumnDefinition Width="9"/>
+                <ColumnDefinition Width="*"/>
+              </Grid.ColumnDefinitions>
               <TextBlock Classes="lbl" Text="AHEAD" Foreground="{DynamicResource C.Accent}" VerticalAlignment="Top" Margin="0,2,0,0"/>
               <TextBlock Grid.Column="2" Name="AheadText" Classes="body2"/>
             </Grid>
@@ -124,7 +153,13 @@
           <StackPanel Name="BriefSlot">
             <Border Height="1" Background="{DynamicResource C.Hair}"/>
             <StackPanel Margin="16,10,16,12">
-              <Grid ColumnDefinitions="Auto,6,*,Auto" Margin="0,0,0,5">
+              <Grid Margin="0,0,0,5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="Auto" SharedSizeGroup="LabelRail"/>
+                  <ColumnDefinition Width="9"/>
+                  <ColumnDefinition Width="*"/>
+                  <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
                 <TextBlock Classes="lbl" Name="BriefTag" Text="COMPANION" Foreground="{DynamicResource C.Accent}"/>
                 <TextBlock Grid.Column="2" Name="BriefVerify" FontSize="10.5" Foreground="{DynamicResource C.Ink3}"
                            Text="generated — verify before acting" VerticalAlignment="Center"/>

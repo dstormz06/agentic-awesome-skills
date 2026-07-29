@@ -27,7 +27,7 @@ public sealed class MockAndaRepository : IAndaRepository
             ForecastDate = "Oct 17, 2026", ForecastDelta = "▲ +14 d vs goal",
             ForecastLate = true, ForecastConfidence = "moderate confidence",
             Attention = new AttentionItem(AttentionLevel.Warn, "IR response due in 6 days — Biopharmaceutics"),
-            Latest = "Latest: Amendment (minor) received Jun 30 — under review",
+            Latest = "Amendment (minor) received Jun 30 — under review",
             Ahead = "Thu huddle — status requested on this ANDA + sister 214990 (memo, Jul 14)",
             Pending = new[]
             {
@@ -55,7 +55,7 @@ public sealed class MockAndaRepository : IAndaRepository
             ForecastDate = "Aug 6, 2026", ForecastDelta = "▼ 9 d ahead of goal",
             ForecastLate = false, ForecastConfidence = "high confidence",
             Attention = null,
-            Latest = "Latest: Facility IR resolved — closed Jul 2",
+            Latest = "Facility IR resolved — closed Jul 2",
             Ahead = "Aug 1 — labeling final-format confirmation due from applicant",
             Pending = Array.Empty<PendingItem>(),
             Notes = new[]

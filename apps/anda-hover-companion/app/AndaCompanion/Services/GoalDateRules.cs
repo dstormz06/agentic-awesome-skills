@@ -60,13 +60,16 @@ public sealed class Gdufa3Rules : IGoalDateRules
 
 /// <summary>
 /// GDUFA IV (FY2028–2032) — placeholder. The commitment letter is still in
-/// FDA–industry negotiation (sessions held Jan 28 and Mar 27, 2026); every lookup
-/// intentionally reports "not yet published" until it finalizes.
+/// FDA–industry negotiation (documented sessions incl. Jan 28, Feb 4, Feb 19,
+/// Mar 4/6, and Mar 27, 2026; draft language agreed so far on ANDA prioritization,
+/// maximum-daily-dose enhancement, and IID updates — goal-date-extension guardrails
+/// remain under discussion). Every lookup intentionally reports "not yet published"
+/// until the letter finalizes.
 /// </summary>
 public sealed class Gdufa4Rules : IGoalDateRules
 {
     public string Version => "GDUFA IV (pending)";
-    public string Citation => "GDUFA IV commitment letter — not yet published (negotiations ongoing, 2026).";
+    public string Citation => "GDUFA IV commitment letter — not yet published; FDA-industry negotiations ongoing through 2026 (GDUFA III expires Sept 30, 2027).";
     public int StandardOriginalAndaMonths => throw new InvalidOperationException(Citation);
     public int? AmendmentAssessmentMonths(AmendmentClass a, bool i) => null;
 }
