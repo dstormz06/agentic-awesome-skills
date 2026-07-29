@@ -17,6 +17,10 @@ public sealed record SisterRef(string Number, string Description);
 public sealed record AndaRecord
 {
     public required string Number { get; init; }
+
+    /// <summary>Identifier type label, e.g. "ANDA". Lets one card serve any tracked
+    /// submission type without touching the UI (see Data/EntityKinds.cs).</summary>
+    public string Kind { get; init; } = "ANDA";
     public required string Drug { get; init; }
     public required string Meta { get; init; }
     public required string GoalDate { get; init; }
@@ -28,6 +32,10 @@ public sealed record AndaRecord
     public required string ForecastConfidence { get; init; }
     public AttentionItem? Attention { get; init; }
     public required string Latest { get; init; }
+
+    /// <summary>T4 — freshness: when the underlying extract was taken. The most
+    /// dangerous state is not a wrong fact but a stale fact confidently shown.</summary>
+    public string? DataAsOf { get; init; }
     public string? Ahead { get; init; }
     public required IReadOnlyList<PendingItem> Pending { get; init; }
     public required IReadOnlyList<NoteItem> Notes { get; init; }

@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless;
-using Avalonia.Themes.Fluent;
 using AndaCompanion.Data;
 using AndaCompanion.Services;
 using AndaCompanion.Theming;
@@ -14,9 +13,15 @@ namespace AndaCompanion.Preview;
 /// writes PNG frames, so the app can be pixel-reviewed without a Windows box.
 /// Usage: dotnet run [outputDir]
 /// </summary>
-public class PreviewApp : Application
+/// <summary>
+/// Subclasses the REAL application so every frame carries the real app-level
+/// styles (tooltips, focus rings, primary buttons, slider). Only the desktop
+/// lifecycle (tray icon, hotkeys) is skipped — screenshots must never diverge
+/// from what a user sees.
+/// </summary>
+public class PreviewApp : AndaCompanion.App
 {
-    public override void Initialize() => Styles.Add(new FluentTheme());
+    public override void OnFrameworkInitializationCompleted() { /* no tray/hotkeys in headless */ }
 
     public static AppBuilder BuildAvaloniaApp() =>
         AppBuilder.Configure<PreviewApp>()

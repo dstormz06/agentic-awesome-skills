@@ -121,3 +121,28 @@ original ANDA 10 months; major amendment without preapproval inspection
 from the commitment letter tables — the forecast layer must never guess a
 regulatory number. GDUFA IV rules are a placeholder pending the FY2028–2032
 commitment letter (negotiations ongoing as of mid-2026).
+
+---
+
+# Round 4 — T1–T4, Apple-inspired polish, universality seam
+
+| # | Item | Verified by |
+|---|---|---|
+| T1 | Copy-ready status line (`Services/StatusLine.cs`, "Copy status" chip, `S` key, "Copied ✓" confirm) | Pure function; rendered chip; stress checks |
+| T2 | Section 508 groundwork: `AutomationProperties.Name` on card, tool buttons, chips; visible accent focus rings app-wide | Rendered; names set per record |
+| T3 | GDUFA III tier table completion | **NOT done — deliberately.** fda.gov blocks automated fetch; the dual-source rule means unverified tiers stay "not encoded" rather than guessed. Requires manual transcription from the commitment-letter PDF. |
+| T4 | "Data as of" freshness stamp under the identity block | Rendered on both records |
+| — | Apple-inspired polish: 160/180 ms fade+scale card entrance, pressed-state scaling, hover fills, card-material tooltips, filled accent primary pills, thin slider | Rendered across card / Settings / Prompt Library |
+| — | Universality seam (`Data/EntityKinds.cs`): identifier recognition is a registry; `AndaRecord.Kind` drives all labels | Validator delegates to registry; stress suite unchanged and green |
+
+## Defects caught and fixed in this round
+
+| # | Finding | Class | Disposition |
+|---|---|---|---|
+| H1 | Progress **value** was animated 0 → target; the card displayed a wrong percentage for ~half a second, and screenshots captured it mid-sweep | **Data-integrity bug** | Value animation removed; entrance motion kept. Rule recorded in code: motion may never misrepresent a fact. |
+| H2 | Preview harness loaded only FluentTheme, so app-level styles (tooltips, focus rings, primary pills) were absent from every screenshot — evidence diverging from the product | **Evidence bug** | Harness now subclasses the real `App`, skipping only tray/hotkeys |
+| H3 | `ToolTip` has no `BoxShadow` property (build error) | Build | Removed; border + material carry the effect |
+| H4 | Consent label ① ran into the panel edge; Prompt Library subtitle clipped behind the Done pill | Layout | Both shortened/wrapped |
+
+Environment-limited items unchanged: Windows-runtime smoke test (hotkeys, clipboard,
+tray) and a live Anthropic call still require a Windows box / API key.

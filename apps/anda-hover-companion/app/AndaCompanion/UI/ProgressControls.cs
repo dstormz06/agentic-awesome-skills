@@ -23,6 +23,10 @@ public sealed class ProgressControl : Control
 
     static ProgressControl() => AffectsRender<ProgressControl>(ValueProperty);
 
+    // Deliberately NOT animated: sweeping the value from 0 would display a wrong
+    // percentage for ~half a second. Motion may never misrepresent a fact — the card's
+    // entrance animation carries the polish instead.
+
     private static Color Res(string key) =>
         ((ISolidColorBrush)Application.Current!.Resources[key]!).Color;
 

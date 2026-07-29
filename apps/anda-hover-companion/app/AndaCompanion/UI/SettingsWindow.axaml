@@ -24,8 +24,7 @@
       <StackPanel Spacing="14">
         <Grid ColumnDefinitions="*,Auto">
           <TextBlock FontSize="15" FontWeight="Bold" Foreground="{DynamicResource C.Ink}" Text="Settings"/>
-          <Button Grid.Column="1" Name="CloseBtn" Content="Done" FontWeight="SemiBold"
-                  Foreground="{DynamicResource C.Accent}"/>
+          <Button Grid.Column="1" Name="CloseBtn" Classes="primary" Content="Done"/>
         </Grid>
 
         <StackPanel Spacing="6">
@@ -63,8 +62,8 @@
           <Grid ColumnDefinitions="*,8,Auto">
             <TextBlock Name="ConnStatus" FontSize="12" Foreground="{DynamicResource C.Ink2}"
                        TextWrapping="Wrap" VerticalAlignment="Center"/>
-            <Button Grid.Column="2" Name="TestBtn" Content="Test" FontWeight="SemiBold"
-                    VerticalAlignment="Top" Foreground="{DynamicResource C.Accent}"/>
+            <Button Grid.Column="2" Name="TestBtn" Classes="primary" Content="Test" VerticalAlignment="Top"
+                    ToolTip.Tip="Send one tiny request to prove the channel end to end"/>
           </Grid>
           <TextBlock Classes="hint" Text="The app is fully functional offline. When API access is approved, set ANTHROPIC_API_KEY through the agency-approved channel and press Test — no reinstall, no code change."/>
         </StackPanel>

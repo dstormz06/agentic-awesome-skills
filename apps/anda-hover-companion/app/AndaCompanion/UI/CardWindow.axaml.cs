@@ -1,4 +1,7 @@
 using Avalonia;
+using Avalonia.Animation;
+using Avalonia.Animation.Easings;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -26,6 +29,7 @@ public partial class CardWindow : Window
         InitializeComponent();
 
         CloseBtn.Click += (_, _) => Close();
+        CopyChip.Click += (_, _) => CopyStatusLine();
         PinBtn.Click += (_, _) => TogglePin();
         ExpBtn.Click += (_, _) => ToggleExpand();
         MoreBtn.Click += (_, _) => ExpandFromMini();
@@ -33,6 +37,24 @@ public partial class CardWindow : Window
         Deactivated += (_, _) => { if (!_pinned) Close(); };
         KeyDown += OnKey;
         ApplyAppearanceStructure();
+
+        // Apple-style entrance: quick fade + settle from 97% scale (no bounce, no delay).
+        var scale = new ScaleTransform(0.97, 0.97)
+        {
+            Transitions = new Transitions
+            {
+                new DoubleTransition { Property = ScaleTransform.ScaleXProperty, Duration = TimeSpan.FromMilliseconds(180), Easing = new CubicEaseOut() },
+                new DoubleTransition { Property = ScaleTransform.ScaleYProperty, Duration = TimeSpan.FromMilliseconds(180), Easing = new CubicEaseOut() },
+            },
+        };
+        Root.RenderTransform = scale;
+        Root.RenderTransformOrigin = new RelativePoint(0.5, 0.3, RelativeUnit.Relative);
+        Root.Transitions = new Transitions
+        {
+            new DoubleTransition { Property = OpacityProperty, Duration = TimeSpan.FromMilliseconds(160), Easing = new CubicEaseOut() },
+        };
+        Root.Opacity = 0;
+        Opened += (_, _) => { Root.Opacity = 1; scale.ScaleX = 1; scale.ScaleY = 1; };
     }
 
     private void OnKey(object? sender, KeyEventArgs e)
@@ -44,6 +66,7 @@ public partial class CardWindow : Window
             case Key.Space: TogglePin(); e.Handled = true; break;
             case Key.C when _record is not null && BriefText.Text is { Length: > 0 } text:
                 Clipboard?.SetTextAsync(text); break;
+            case Key.S: CopyStatusLine(); break;
         }
     }
 
@@ -67,6 +90,15 @@ public partial class CardWindow : Window
         _mini = false;
         SetMiniVisibility();
         if (_record is not null) _ = LoadBriefAsync(_record);
+    }
+
+    private void CopyStatusLine()
+    {
+        if (_record is null) return;
+        Clipboard?.SetTextAsync(Services.StatusLine.Build(_record));
+        CopyChip.Content = "Copied ✓";
+        Avalonia.Threading.DispatcherTimer.RunOnce(
+            () => CopyChip.Content = "Copy status", TimeSpan.FromSeconds(1.2));
     }
 
     private void OpenFirstSister()
@@ -105,7 +137,7 @@ public partial class CardWindow : Window
         _record = record;
         _mini = mini;
 
-        NumText.Text = "ANDA " + record.Number;
+        NumText.Text = $"{record.Kind} {record.Number}";
         DrugText.Text = record.Drug;
         MetaText.Text = record.Meta;
         GoalText.Text = record.GoalDate;
@@ -131,6 +163,9 @@ public partial class CardWindow : Window
         }
         LatestText.Text = record.Latest;
         AheadText.Text = record.Ahead ?? "";
+        FreshnessText.Text = record.DataAsOf ?? "";
+        FreshnessText.IsVisible = record.DataAsOf is not null;
+        AutomationProperties.SetName(this, $"{record.Kind} {record.Number} quick brief");
 
         // expanded drawer content
         PendingHeader.Text = $"Pending & urgent items · {(record.Pending.Count == 0 ? "none" : record.Pending.Count.ToString())}";
@@ -164,13 +199,15 @@ public partial class CardWindow : Window
         foreach (var s in record.Sisters)
             SistersPanel.Children.Add(new TextBlock
             {
-                Text = $"ANDA {s.Number} — {s.Description}", FontSize = 12.5,
+                Text = $"{record.Kind} {s.Number} — {s.Description}", FontSize = 12.5,
                 Foreground = (IBrush)Application.Current.Resources["C.Accent"]!, TextWrapping = TextWrapping.Wrap,
             });
 
         SisterChip.Content = $"Sister ANDA · {record.Sisters.Count}";
         SisterChip.IsVisible = record.Sisters.Count > 0;
+        AutomationProperties.SetName(SisterChip, $"Open sister application, {record.Sisters.Count} related");
         NotesChip.Content = $"Notes · {record.Notes.Count}";
+        AutomationProperties.SetName(NotesChip, $"Recent project notes, {record.Notes.Count} entries");
 
         SetMiniVisibility();
         if (!IsVisible)

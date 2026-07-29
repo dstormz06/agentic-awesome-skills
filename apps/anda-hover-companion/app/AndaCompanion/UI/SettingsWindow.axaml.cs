@@ -36,9 +36,9 @@ public partial class SettingsWindow : Window
 
         var consents = new (ConsentModel Model, string Label)[]
         {
-            (ConsentModel.Full, "① Full card on hotkey — the deliberate press is the consent"),
-            (ConsentModel.PeekFirst, "② Peek first — compact card, expand for the full brief"),
-            (ConsentModel.Whisper, "③ Whisper invite — small pill, card opens only if clicked"),
+            (ConsentModel.Full, "① Full card — the hotkey press is the consent"),
+            (ConsentModel.PeekFirst, "② Peek first — expand for the full brief"),
+            (ConsentModel.Whisper, "③ Whisper invite — opens only if clicked"),
         };
         foreach (var (model, label) in consents)
         {

@@ -28,6 +28,7 @@ public sealed class MockAndaRepository : IAndaRepository
             ForecastLate = true, ForecastConfidence = "moderate confidence",
             Attention = new AttentionItem(AttentionLevel.Warn, "IR response due in 6 days — Biopharmaceutics"),
             Latest = "Amendment (minor) received Jun 30 — under review",
+            DataAsOf = "data as of Jul 16, 07:12 · extract #412 (fictional)",
             Ahead = "Thu huddle — status requested on this ANDA + sister 214990 (memo, Jul 14)",
             Pending = new[]
             {
@@ -56,6 +57,7 @@ public sealed class MockAndaRepository : IAndaRepository
             ForecastLate = false, ForecastConfidence = "high confidence",
             Attention = null,
             Latest = "Facility IR resolved — closed Jul 2",
+            DataAsOf = "data as of Jul 16, 07:12 · extract #412 (fictional)",
             Ahead = "Aug 1 — labeling final-format confirmation due from applicant",
             Pending = Array.Empty<PendingItem>(),
             Notes = new[]
@@ -77,14 +79,10 @@ public sealed class MockAndaRepository : IAndaRepository
 
 public static class AndaValidator
 {
-    private static readonly System.Text.RegularExpressions.Regex Pattern =
-        new(@"(?:ANDA[-\s#]?)?(?<!\d)(\d{6})(?!\d)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-
-    /// <summary>Extracts the first 6-digit ANDA-shaped number from arbitrary captured text.</summary>
-    public static string? Extract(string? text)
-    {
-        if (string.IsNullOrWhiteSpace(text)) return null;
-        var m = Pattern.Match(text);
-        return m.Success ? m.Groups[1].Value : null;
-    }
+    /// <summary>
+    /// Extracts the first recognized identifier from arbitrary captured text.
+    /// Delegates to <see cref="EntityKinds.Recognize"/> so broadening the app to
+    /// other submission types is a registry entry, not a code change here.
+    /// </summary>
+    public static string? Extract(string? text) => EntityKinds.Recognize(text)?.Id;
 }
