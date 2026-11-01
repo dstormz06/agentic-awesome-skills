@@ -105,8 +105,9 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
   -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
   font-size:12px; color:var(--ink2);
 }
-.banner b{color:var(--ink);font-weight:650}
+.banner b{color:var(--ink);font-weight:650;white-space:nowrap}
 .banner .sp{flex:1}
+.banner span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .banner button{border:1px solid var(--win-line);background:#fff;border-radius:99px;padding:4px 11px;font-size:12px;min-height:26px}
 
 /* desktop icon (re-launch after Exit) */
@@ -130,36 +131,36 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 .win .menu{display:flex;gap:14px;padding:4px 12px;font-size:12px;color:var(--ink2);border-bottom:1px solid var(--win-line);user-select:none;-webkit-user-select:none}
 .win .body{padding:16px 20px;overflow:auto;flex:1}
 
-#memo{left:132px;top:62px;width:min(600px,calc(100% - 520px));min-width:460px;bottom:calc(var(--tb-h) + 26px)}
-#memo .body{font:14px/1.62 ui-monospace,"Cascadia Mono",Consolas,"SF Mono",monospace;white-space:pre-wrap;
+#memo{left:120px;top:56px;width:min(660px,calc(100% - 520px));min-width:460px;bottom:calc(var(--tb-h) + 26px)}
+#memo .body{font:13px/1.6 ui-monospace,"Cascadia Mono",Consolas,"SF Mono",monospace;white-space:pre-wrap;
             user-select:text;-webkit-user-select:text;cursor:text;color:#1f2328}
 #memo .body ::selection,#term .body ::selection{background:#b9d4f2;color:#0d1b2a}
 #memo .body span.pick{cursor:text}
-#term{right:24px;bottom:calc(var(--tb-h) + 26px);width:400px;height:200px}
+#term{right:24px;bottom:calc(var(--tb-h) + 26px);width:372px;height:132px}
 #term .bar{background:#eef0f3}
-#term .body{background:#f7f8fa;color:#1f2328;font:13px/1.55 ui-monospace,"Cascadia Mono",Consolas,monospace;
+#term .body{padding:10px 16px;background:#f7f8fa;color:#1f2328;font:13px/1.55 ui-monospace,"Cascadia Mono",Consolas,monospace;
             white-space:pre-wrap;user-select:text;-webkit-user-select:text;cursor:text}
 
 /* guide panel */
-#guide{right:24px;top:52px;width:372px;max-height:calc(100% - var(--tb-h) - 52px - 250px);min-height:300px}
+#guide{right:24px;top:48px;width:372px;max-height:calc(100% - var(--tb-h) - 48px - 132px - 26px - 12px);min-height:300px}
 #guide .body{padding:12px 16px 14px}
 #guide h2{font-size:14px;margin:0 0 2px}
 #guide .sub{font-size:12px;color:var(--ink2);margin:0 0 10px}
-#guide ol{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:6px}
-#guide li{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start;font-size:12.5px;color:var(--ink2)}
-#guide li i{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--win-line);display:grid;place-items:center;
+#guide ol{list-style:none;margin:0 0 6px;padding:0;display:grid;gap:5px}
+#guide li{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:center;font-size:12.5px;line-height:1.35;color:var(--ink2)}
+#guide li i{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--win-line);display:grid;place-items:center;
             font-style:normal;font-size:11px;color:transparent;background:#fff;margin-top:1px}
 #guide li.done i{background:var(--ok);border-color:var(--ok);color:#fff}
 #guide li.done span{color:var(--ink3);text-decoration:line-through;text-decoration-color:rgba(0,0,0,.25)}
-#guide .row{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
-#guide .lbl{font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--ink3);margin:8px 0 5px}
-.btn{border:1px solid var(--win-line);background:#fff;border-radius:8px;padding:6px 11px;font-size:12.5px;min-height:34px}
+#guide .row{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 4px}
+#guide .lbl{font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--ink3);margin:7px 0 4px}
+.btn{border:1px solid var(--win-line);background:#fff;border-radius:8px;padding:4px 10px;font-size:12.5px;min-height:30px}
 .btn:hover{border-color:#b9c1ca}
 .btn.primary{background:var(--sim);border-color:var(--sim);color:#fff;font-weight:600}
 .btn.key{font-family:ui-monospace,Consolas,monospace;font-size:12px}
-.sw{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink2);margin:4px 0;min-height:30px}
+.sw{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink2);margin:2px 0;min-height:26px}
 .sw input{width:18px;height:18px;accent-color:var(--sim);margin:0}
-.fine{font-size:11.5px;color:var(--ink3);margin:8px 0 0}
+.fine{font-size:11px;line-height:1.35;color:var(--ink3);margin:6px 0 0}
 
 /* ===================== taskbar ===================== */
 #taskbar{
@@ -177,8 +178,8 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 #taskbar .tray button{border:none;background:none;min-width:34px;height:36px;border-radius:7px;display:grid;place-items:center;padding:0 6px}
 #taskbar .tray button:hover{background:rgba(255,255,255,.7)}
 #taskbar .clock{font-size:11.5px;line-height:1.2;text-align:right;padding:0 8px;color:var(--ink);font-variant-numeric:tabular-nums}
-#appIcon{display:none}
-#appIcon.pinned{display:grid}
+#taskbar .tray #appIcon{display:none}
+#taskbar .tray #appIcon.pinned{display:grid}
 .glyph{width:18px;height:18px;border-radius:5px;background:#3d6fa5;display:grid;place-items:center}
 .glyph::after{content:"";width:6px;height:6px;border-radius:50%;background:#fff}
 .glyph.big{width:28px;height:28px;border-radius:8px}.glyph.big::after{width:9px;height:9px}
@@ -201,7 +202,7 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 #menu .sub button[aria-checked="true"]::before{content:"●";position:absolute;margin-left:-16px;font-size:9px;color:var(--sim)}
 
 /* keystroke overlay */
-#keys{position:fixed;z-index:60;left:50%;bottom:calc(var(--tb-h) + 18px);transform:translateX(-50%);display:none;
+#keys{position:fixed;z-index:35;left:50%;bottom:calc(var(--tb-h) + 18px);transform:translateX(-50%);display:none;
       align-items:center;gap:10px;background:rgba(255,255,255,.96);border:1px solid var(--win-line);border-radius:12px;
       padding:9px 14px;box-shadow:var(--shadow-win);font-size:12.5px;color:var(--ink2);max-width:calc(100% - 24px)}
 #keys kbd{font-size:13px;padding:4px 8px}
@@ -224,8 +225,8 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 .app-win select,.app-win input[type=text],.app-win textarea{font:inherit;color:var(--c-ink);background:#fff;border:1px solid var(--c-line);border-radius:8px;padding:7px 9px;width:100%}
 .app-win input[type=range]{width:100%;accent-color:var(--c-accent)}
 .app-win :focus-visible{outline:2px solid var(--c-accent);outline-offset:2px}
-#settings{width:440px;padding:18px 20px;max-height:calc(100% - var(--tb-h) - 24px);overflow:auto;left:calc(50% - 220px);top:46px}
-#plib{width:520px;padding:18px 20px;left:calc(50% - 150px);top:80px;max-height:calc(100% - var(--tb-h) - 100px);overflow:auto}
+#settings{width:440px;padding:18px 20px;max-height:calc(100% - var(--tb-h) - 58px);overflow:auto;left:calc(50% - 220px);top:46px}
+#plib{width:520px;padding:18px 20px;left:calc(50% - 150px);top:80px;max-height:calc(100% - var(--tb-h) - 92px);overflow:auto}
 #plib .cols{display:grid;grid-template-columns:150px 1fr;gap:12px}
 #plib .list{display:grid;gap:2px;align-content:start}
 #plib .list button{border:none;background:none;text-align:left;padding:7px 9px;border-radius:7px;color:var(--c-ink2);font-size:12.5px}
@@ -248,10 +249,10 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 
 /* ===================== THE CARD (matches the Windows app's slots) ===================== */
 #card{
-  --rail:62px;
+  --rail:92px;
   position:fixed;z-index:50;width:372px;max-width:calc(100vw - 24px);display:none;
   background:var(--c-bg);background-color:color-mix(in srgb,var(--c-bg) var(--op),transparent);
-  color:var(--c-ink);border:1px solid var(--c-line);border-radius:var(--c-radius);box-shadow:var(--c-shadow);overflow:hidden;
+  color:var(--c-ink);border:1px solid var(--c-line);border-radius:var(--c-radius);box-shadow:var(--c-shadow);overflow-x:hidden;overflow-y:auto;
   font-family:var(--c-font);font-size:14px;line-height:1.5;animation:cardin .18s cubic-bezier(.2,.9,.3,1);
 }
 #card.pinned{outline:2px solid var(--c-accent);outline-offset:-1px}
@@ -276,10 +277,10 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 :root[data-dir="b"] .drug{font-size:16px;font-style:italic}
 .meta{font-size:12px;color:var(--c-ink2);margin-top:2px}
 .fresh{font-size:10.5px;color:var(--c-ink3);margin-top:3px}
-.lblx{font-size:9.5px;font-weight:800;letter-spacing:.13em;color:var(--c-ink3);width:var(--rail);flex:none}
+.lblx{font-size:9.5px;font-weight:800;letter-spacing:.13em;color:var(--c-ink3);width:var(--rail);flex:none;white-space:nowrap}
 .lblx.acc{color:var(--c-accent)}
 :root[data-dir="d"] .lblx,:root[data-dir="d"] .attn .k,:root[data-dir="d"] .cpct{font-family:var(--c-num-font)}
-.clock{display:flex;align-items:center;gap:12px}
+.clock{display:block}
 .clockmain{flex:1;min-width:0}
 .crow{display:flex;align-items:baseline;gap:9px;margin-bottom:7px}
 .crow:last-of-type{margin-bottom:0}
@@ -291,7 +292,7 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 .p-ticks{display:none;gap:4px;margin:0 0 9px}
 .p-ticks i{flex:1;height:5px;border-radius:2px;background:var(--c-track)}
 .p-ticks i.on{background:var(--c-fill)}
-.p-ringwrap{display:none;position:relative;width:52px;height:52px;flex:none}
+.p-ringwrap{display:none;position:relative;width:52px;height:52px;flex:none;margin:0 0 6px auto}
 .p-ringwrap svg{width:52px;height:52px;transform:rotate(-90deg)}
 .p-ringwrap .tr{fill:none;stroke:var(--c-track);stroke-width:4}
 .p-ringwrap .fg{fill:none;stroke:var(--c-accent);stroke-width:4;stroke-linecap:round}
@@ -362,7 +363,8 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
   .desk{height:auto;min-height:100%;padding:calc(var(--banner-h) + 12px) max(16px,env(safe-area-inset-right,0px)) calc(var(--tb-h) + 28px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
         display:flex;flex-direction:column;gap:14px;overflow:visible}
   .win,.icon{position:static;width:auto;min-width:0;max-height:none;height:auto}
-  #guide{order:1}#memo{order:2;min-width:0;width:auto}#term{order:3;width:auto;height:auto}
+  #guide{order:1;width:auto;max-height:none;min-height:0}#memo{order:2;min-width:0;width:auto}#term{order:3;width:auto;height:auto}
+  .banner .long{display:none}
   #memo .body{min-height:300px}
   .icon{order:4;align-self:flex-start}
   #term .body{min-height:110px}
@@ -382,7 +384,7 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 <body>
 <div class="desk" id="desk">
   <div class="banner" role="note">
-    <b>Browser simulation</b><span>of the ANDA Hover Companion Windows app · fictional data · not an FDA product</span>
+    <b>Browser simulation</b><span class="long">of the ANDA Hover Companion Windows app ·</span><span class="short">fictional data · not an FDA product</span>
     <span class="sp"></span>
     <button id="resetBtn" type="button" aria-label="Reset the simulation">Reset</button>
   </div>
@@ -406,23 +408,18 @@ Team,
 
 Two items for Thursday. Please have status ready on both.
 
-1. ANDA <span class="pick" data-pick="216482">216482</span> - Metformin HCl ER Tablets, 500 mg. The Biopharmaceutics
-   information request response is due next week. Leadership asked where
-   this one stands against its goal date.
+1. ANDA <span class="pick" data-pick="216482">216482</span> - Metformin HCl ER Tablets, 500 mg. The Biopharmaceutics information request response is due next week. Leadership asked where this one stands against its goal date.
 
-2. ANDA <span class="pick" data-pick="214990">214990</span> - the 750 mg strength from the same applicant. It shares a
-   manufacturing site with the 500 mg application, so any facility finding
-   on one matters to both.
+2. ANDA <span class="pick" data-pick="214990">214990</span> - the 750 mg strength from the same applicant. It shares a manufacturing site with the 500 mg application, so any facility finding on one matters to both.
 
 Reference numbers that should NOT open a card (try selecting each one):
 
-   - <span class="pick" data-pick="NDA 021234">NDA 021234</span>        another application type, even though it has six digits
-   - <span class="pick" data-pick="12345">12345</span>             only five digits
-   - <span class="pick" data-pick="9999999">9999999</span>           seven digits
-   - <span class="pick" data-pick="999999">999999</span>            six digits, but not a number the demo data knows
+   - <span class="pick" data-pick="NDA 021234">NDA 021234</span>    another application type, though it has six digits
+   - <span class="pick" data-pick="12345">12345</span>         only five digits
+   - <span class="pick" data-pick="9999999">9999999</span>       seven digits
+   - <span class="pick" data-pick="999999">999999</span>        six digits, but a number the demo data does not know
 
-How to try it: select a number above (double-click selects a whole number),
-then press Ctrl+Alt+A. Or press Ctrl+Alt+Space and type one.
+How to try it: select a number above (double-click selects a whole number), then press Ctrl+Alt+A. Or press Ctrl+Alt+Space and type one.
 
 Thanks,
 Demo author</div>
@@ -439,13 +436,13 @@ C:\work&gt; </div>
   <section class="win" id="guide" aria-label="Demo guide">
     <div class="bar"><span class="ttl">Try it in five steps</span></div>
     <div class="body">
-      <p class="sub">A tray app. Select a number in any window, press a hotkey, get a card. Nothing opens on its own.</p>
+      <p class="sub">Select a number in any window, press a hotkey, get a card. Nothing opens on its own.</p>
       <ol id="steps">
-        <li data-step="pin"><i>✓</i><span>Open the <b>^</b> tray overflow and <b>Pin</b> the app icon.</span></li>
-        <li data-step="peek"><i>✓</i><span>Select <b>216482</b> in the memo, then press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>A</kbd>.</span></li>
-        <li data-step="look"><i>✓</i><span>Press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Space</kbd>, type <b>214990</b>.</span></li>
-        <li data-step="look2"><i>✓</i><span>Select <b>NDA 021234</b>, press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>A</kbd>. It will not guess.</span></li>
-        <li data-step="look3"><i>✓</i><span>Select the number in the <b>Terminal</b>. Terminals are paused.</span></li>
+        <li data-step="pin"><i>✓</i><span>Click <b>^</b> in the tray, then <b>Pin</b> the icon.</span></li>
+        <li data-step="peek"><i>✓</i><span>Select <b>216482</b>, press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>A</kbd>.</span></li>
+        <li data-step="look"><i>✓</i><span><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Space</kbd>, type <b>214990</b>.</span></li>
+        <li data-step="look2"><i>✓</i><span>Select <b>NDA 021234</b>, press the hotkey. No guess.</span></li>
+        <li data-step="look3"><i>✓</i><span>Select the number in the <b>Terminal</b>: paused.</span></li>
       </ol>
       <div class="lbl">SELECT FOR ME</div>
       <div class="row" id="pickRow">
@@ -464,7 +461,7 @@ C:\work&gt; </div>
       <div class="lbl">WHAT IF…</div>
       <label class="sw"><input type="checkbox" id="swConflict"> Another program already owns Ctrl+Alt+A</label>
       <label class="sw"><input type="checkbox" id="swAi"> Claude access is approved (sample brief)</label>
-      <p class="fine">Simulated: window chrome, hotkeys, clipboard hand-off and the brief text. Real in the Windows build: everything the self-test report lists as PASS. No data leaves this page.</p>
+      <p class="fine">Simulated here: the desktop, the hotkey and clipboard hand-off, the sample brief. No data leaves this page.</p>
     </div>
   </section>
 
@@ -562,10 +559,10 @@ C:\work&gt; </div>
       <div class="crow"><span class="lblx">GOAL</span><span class="cdate" id="c-goal"></span><span class="cdays" id="c-days"></span><span class="cpct" id="c-pct"></span></div>
       <div class="p-bar"><i id="c-fill"></i></div>
       <div class="p-ticks" id="c-ticks"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="p-ringwrap" aria-hidden="true"><svg viewBox="0 0 52 52"><circle class="tr" cx="26" cy="26" r="21"></circle><circle class="fg" id="c-ring" cx="26" cy="26" r="21"></circle></svg><span class="rv" id="c-ringv"></span></div>
       <div class="crow"><span class="lblx">FORECAST</span><span class="cdate" id="c-fc"></span><span class="fdelta" id="c-fdelta"></span></div>
       <div class="fconf" id="c-fconf"></div>
     </div>
-    <div class="p-ringwrap" aria-hidden="true"><svg viewBox="0 0 52 52"><circle class="tr" cx="26" cy="26" r="21"></circle><circle class="fg" id="c-ring" cx="26" cy="26" r="21"></circle></svg><span class="rv" id="c-ringv"></span></div>
   </div>
   <div class="slot attn-slot" id="attnSlot"><div class="attn warn" id="c-attn"><span class="k">⚠ NEEDS YOU</span><span id="c-attn-t"></span></div></div>
   <div class="slot rail latest"><span class="lblx">LATEST</span><span id="c-latest"></span></div>
@@ -753,6 +750,7 @@ function renderBrief(id){
     streamTimer = setInterval(() => {
       i += 3;
       body.innerHTML = d.ai.slice(0, i) + (i < d.ai.length ? '<span class="cur"></span>' : note);
+      clampCard();   /* the brief grows as it types; keep the card on screen */
       if(i >= d.ai.length) clearInterval(streamTimer);
     }, 20);
   }, 420);
@@ -764,6 +762,7 @@ function placeCard(anchor){
 }
 function clampCard(){
   if(isSheet() || card.style.display !== "block") return;
+  limitHeight();
   const [x, y] = clampPos(card.offsetLeft, card.offsetTop, card.offsetWidth, card.offsetHeight, workArea());
   card.style.left = x + "px"; card.style.top = y + "px";
 }
@@ -775,11 +774,14 @@ function openCard(id, opts = {}){
   card.classList.toggle("mini", !!opts.mini);
   card.classList.toggle("sheet", isSheet());
   card.style.display = "block";
-  if(isSheet()){ scrim.style.display = "block"; card.style.left = card.style.top = ""; }
-  else { scrim.style.display = "none"; placeCard(opts.anchor || pointer); }
-  card.focus({ preventScroll:true });
+  /* Final content first, then place: the brief changes the height, and a card placed before it arrives can overflow. */
   if(opts.mini) $("c-ai").textContent = ""; else renderBrief(id);
+  if(isSheet()){ scrim.style.display = "block"; card.style.left = card.style.top = ""; card.style.maxHeight = ""; }
+  else { scrim.style.display = "none"; limitHeight(); placeCard(opts.anchor || pointer); }
+  card.focus({ preventScroll:true });
 }
+/* A card taller than the work area scrolls instead of running off the screen (same rule as the Windows app). */
+function limitHeight(){ const a = workArea(); card.style.maxHeight = Math.max(240, a.b - a.y - 12) + "px"; }
 function closeCard(){
   clearInterval(streamTimer); clearTimeout(streamTimer);
   card.style.display = "none"; scrim.style.display = "none";
@@ -934,7 +936,6 @@ $("plClose").addEventListener("click", () => closeApp("plib"));
 /* settings */
 function applyLook(dir){
   state.dir = dir; root.dataset.dir = dir;
-  if(dir !== "a") markStep("look4");
 }
 (function buildSettings(){
   LOOKS.forEach(([id, name]) => {
@@ -1086,7 +1087,7 @@ card.addEventListener("click", e => {
   if(s && DATA[s.dataset.anda]){ current = s.dataset.anda; fill(current); renderBrief(current); setTimeout(clampCard, 0); }
 });
 card.addEventListener("keydown", e => { if((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("sister")){ e.preventDefault(); e.target.click(); } });
-$("resetBtn").addEventListener("click", () => location.reload());
+$("resetBtn").addEventListener("click", () => { try{ location.reload(); }catch(e){} });
 addEventListener("resize", () => {
   if(card.style.display !== "block") return;
   const sheet = isSheet(); card.classList.toggle("sheet", sheet); scrim.style.display = sheet ? "block" : "none";

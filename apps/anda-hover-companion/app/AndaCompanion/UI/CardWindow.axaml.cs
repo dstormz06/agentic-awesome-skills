@@ -21,6 +21,10 @@ public partial class CardWindow : Window
     private bool _pinned;
     private bool _mini;
     private CancellationTokenSource? _briefCts;
+    private Task _briefReady = Task.CompletedTask;
+
+    /// <summary>What the last placement decided and from which numbers. The self-test reports it.</summary>
+    internal string PlacementTrace { get; private set; } = "not placed yet";
     private PixelPoint _anchor;
 
     /// <summary>Normal use: the card closes when the user clicks elsewhere. The self-test and
@@ -59,7 +63,14 @@ public partial class CardWindow : Window
             new DoubleTransition { Property = OpacityProperty, Duration = TimeSpan.FromMilliseconds(160), Easing = new CubicEaseOut() },
         };
         Root.Opacity = 0;
-        Opened += (_, _) => { PlaceNear(_anchor); Root.Opacity = 1; scale.ScaleX = 1; scale.ScaleY = 1; };
+        Opened += async (_, _) =>
+        {
+            // The card is invisible (opacity 0) until now. Give an instant brief (offline mode, a cached one)
+            // a moment to land so the card is placed from its final height rather than the placeholder's.
+            await Task.WhenAny(_briefReady, Task.Delay(150));
+            PlaceNear(_anchor);
+            Root.Opacity = 1; scale.ScaleX = 1; scale.ScaleY = 1;
+        };
     }
 
     private void OnKey(object? sender, KeyEventArgs e)
@@ -222,12 +233,17 @@ public partial class CardWindow : Window
             _anchor = near;
             Position = near;      // provisional; Opened re-places it using the real, laid-out size
             LimitHeightTo(near);
+            _briefReady = _mini ? Task.CompletedTask : LoadBriefAsync(record);
             Show();
         }
-        else Dispatcher.UIThread.Post(ClampToScreen, DispatcherPriority.Loaded);   // sister-hop can change height
+        else
+        {
+            // Sister-hop on an open card: new record, new brief, possibly a different height.
+            _briefReady = _mini ? Task.CompletedTask : LoadBriefAsync(record);
+            Dispatcher.UIThread.Post(ClampToScreen, DispatcherPriority.Loaded);
+        }
         Activate();
         Focus();
-        if (!_mini) _ = LoadBriefAsync(record);
     }
 
     private async Task LoadBriefAsync(AndaRecord record)
@@ -246,6 +262,8 @@ public partial class CardWindow : Window
                 : "assembled from the record";     // offline text is deterministic, not generated
             BriefText.Foreground = Ink2();
             BriefText.Text = brief.Text;
+            // The brief is taller than the "Reading the record…" placeholder the card was placed with.
+            Dispatcher.UIThread.Post(ClampToScreen, DispatcherPriority.Loaded);
         });
     }
 
@@ -273,6 +291,7 @@ public partial class CardWindow : Window
         LimitHeightTo(near);
         if (Geometry(near) is not { } g) { Position = near; return; }
         Position = Placement.Near(near, g.Width, g.Height, g.Area);
+        PlacementTrace = $"anchor {near.X},{near.Y}; bounds {Bounds.Width:0.#}x{Bounds.Height:0.#} dip; size {g.Width}x{g.Height}px; area {g.Area} → {Position.X},{Position.Y}";
     }
 
     private void ClampToScreen()

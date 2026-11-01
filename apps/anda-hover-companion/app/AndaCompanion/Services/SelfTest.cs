@@ -250,25 +250,33 @@ internal static class SelfTest
             var trace = new List<string>();
             foreach (var (label, at) in anchors)
             {
+                // Phase 1: the card as it opens. Its position must be exactly what the placement rule says
+                // for its final, laid-out size (below-right of the cursor, flipped at an edge, then clamped).
                 var card = new CardWindow(briefs, repo.Find) { CloseWhenDeactivated = false };
                 card.Show(repo.Find("216482")!, at, false);
-                card.FindControl<Button>("ExpBtn")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));   // worst case: biggest size
-                await Task.Delay(500);
+                await Task.Delay(700);
                 double s = card.RenderScaling;
                 var size = new PixelSize((int)Math.Ceiling(card.Bounds.Width * s), (int)Math.Ceiling(card.Bounds.Height * s));
                 var rect = new PixelRect(card.Position, size);
                 var expected = Placement.Near(at, size.Width, size.Height, wa);
-                trace.Add($"{label}: anchor {at.X},{at.Y} → at {rect.X},{rect.Y} size {size.Width}x{size.Height} (expected x,y {expected.X},{expected.Y})");
+                trace.Add($"{label}: {card.PlacementTrace}; expected {expected.X},{expected.Y}");
+                if (Math.Abs(rect.X - expected.X) > 2 || Math.Abs(rect.Y - expected.Y) > 2)
+                    problems.Add($"{label}: opened at {rect.X},{rect.Y} but the placement rule gives {expected.X},{expected.Y} for {size.Width}x{size.Height}");
 
+                // Phase 2: expand to the biggest size; the grown card must still be fully on screen.
+                card.FindControl<Button>("ExpBtn")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                await Task.Delay(400);
+                size = new PixelSize((int)Math.Ceiling(card.Bounds.Width * s), (int)Math.Ceiling(card.Bounds.Height * s));
+                rect = new PixelRect(card.Position, size);
                 bool fits = size.Width <= wa.Width && size.Height <= wa.Height;
                 bool inside = rect.X >= wa.X && rect.Y >= wa.Y && rect.Right <= wa.Right && rect.Bottom <= wa.Bottom;
-                if (!fits) problems.Add($"{label}: card {size.Width}x{size.Height} is larger than the {wa.Width}x{wa.Height} work area and did not scroll");
-                else if (!inside) problems.Add($"{label}: card {rect} outside working area {wa}");
+                if (!fits) problems.Add($"{label}: expanded card {size.Width}x{size.Height} is larger than the {wa.Width}x{wa.Height} work area and did not scroll");
+                else if (!inside) problems.Add($"{label}: expanded card {rect} outside working area {wa}");
                 card.Close();
             }
             return problems.Count == 0
                 ? new(name, CheckStatus.Pass,
-                    $"expanded card stayed inside the {wa.Width}x{wa.Height} working area at all 5 anchors · scaling {screen.Scaling:0.##}x · " + string.Join(" | ", trace))
+                    $"opened exactly where the placement rule says, and stayed inside the {wa.Width}x{wa.Height} work area when expanded, at all 5 anchors · scaling {screen.Scaling:0.##}x · " + string.Join(" | ", trace))
                 : new(name, CheckStatus.Fail, string.Join("; ", problems) + " · trace: " + string.Join(" | ", trace));
         }
         catch (Exception ex) { return new(name, CheckStatus.Fail, ex.Message); }
