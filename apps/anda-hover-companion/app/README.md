@@ -38,8 +38,9 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   clipboard sequence number, so a selection equal to your clipboard still works; your clipboard is
   snapshotted in every plain-memory format and put back (oversized clipboards are refused, not
   half-saved); it runs off the UI thread. Settings can turn it off entirely, leaving the lookup box.
-  Known limits: elevated (run-as-administrator) windows ignore injected keys, and on keyboard layouts
-  where Ctrl+Alt is AltGr the hotkey may type a character. UI Automation capture (no keystroke) is the
+  Known limits: elevated (run-as-administrator) windows ignore injected keys; on keyboard layouts
+  where Ctrl+Alt is AltGr the hotkey may type a character; and for a moment the copied selection is on the
+  clipboard, so Windows clipboard history and clipboard-monitoring tools can see it. UI Automation capture (no keystroke) is the
   planned replacement.
 - **The card** — forecast-first clock (goal vs. forecast + delta + confidence), single
   needs-attention line, latest event, AHEAD anticipation line, companion brief, expandable
@@ -105,7 +106,8 @@ AndaCompanion.exe --selftest report
 ```
 
 Renders every window to PNG, then exercises the Windows integration for real and writes
-`reporteport.md` and `report.json`: hotkeys registered and delivered (it presses them), tray icon,
+`report
+eport.md` and `report.json`: hotkeys registered and delivered (it presses them), tray icon,
 Segoe UI present, clipboard snapshot/restore, card placement at five screen anchors, and an end-to-end
 Select & Peek from a real selection. Each check is PASS, WARN (this machine needs attention), SKIP
 (could not be tested, with the reason) or FAIL. It is hermetic (own data folder) and makes no network
