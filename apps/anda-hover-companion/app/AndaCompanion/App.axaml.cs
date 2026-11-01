@@ -15,8 +15,16 @@ namespace AndaCompanion;
 
 public partial class App : Application
 {
+    /// <summary>Set by Program.Main when launched with --selftest (a headless-friendly diagnostic run).</summary>
+    public static SelfTestOptions? SelfTestRun { get; set; }
+
+    /// <summary>Raised on the hotkey thread for every hotkey press while a self-test is running.</summary>
+    internal static event Action<int>? HotkeyObserved;
+
     private readonly IAndaRepository _repository = new MockAndaRepository();
     private readonly PromptLibraryService _prompts = new();
+    private int _captureBusy;
+    private string? _trayError;
     private ICompanionBriefService _briefs = new OfflineBriefService();
     private Settings _settings = new();
     private HotkeyService? _hotkeys;
@@ -36,12 +44,31 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.ShutdownMode = Avalonia.Controls.ShutdownMode.OnExplicitShutdown;
-            _tray = BuildTrayIcon(desktop);
-            _hotkeys = new HotkeyService(id => Dispatcher.UIThread.Post(() => OnHotkey(id)));
+
+            // Hotkeys first, so the tray menu can state truthfully which ones are live.
+            _hotkeys = new HotkeyService(
+                onHotkey: id => _ = OnHotkeyAsync(id),
+                onProblem: message => Dispatcher.UIThread.Post(() => ShowNotice(message)));
             _hotkeys.Start();
+            _hotkeys.WaitReady(TimeSpan.FromMilliseconds(1500));
+
+            // A tray failure must be reported, not fatal: the hotkeys still work without it.
+            try { _tray = BuildTrayIcon(desktop); }
+            catch (Exception ex) { _trayError = ex.Message; }
             desktop.Exit += (_, _) => { _hotkeys.Dispose(); _tray?.Dispose(); };
 
-            if (!_settings.FirstRunDone)
+            if (SelfTestRun is { } selfTest)
+            {
+                // Diagnostic run: render everything, report, exit. Never opens first-run windows.
+                new Thread(() => { Thread.Sleep(TimeSpan.FromSeconds(150)); Environment.Exit(2); })
+                    { IsBackground = true, Name = "AndaCompanion.SelfTestWatchdog" }.Start();
+                Dispatcher.UIThread.Post(async () =>
+                {
+                    int code = await SelfTest.RunAsync(selfTest, _hotkeys.Status, _tray is not null, _trayError, _repository);
+                    desktop.Shutdown(code);
+                }, DispatcherPriority.Background);
+            }
+            else if (!_settings.FirstRunDone)
             {
                 _settings.FirstRunDone = true;
                 SettingsService.Save(_settings);
@@ -55,19 +82,45 @@ public partial class App : Application
 
     // ---------- hotkey / consent flow ----------
 
-    private void OnHotkey(int id)
+    /// <summary>
+    /// Runs on the hotkey thread. Capture touches the clipboard and keyboard state and polls, so it
+    /// is pushed to the thread pool; only the resulting UI work is marshalled to the UI thread.
+    /// A second press while a capture is in flight is ignored.
+    /// </summary>
+    private async Task OnHotkeyAsync(int id)
     {
-        if (id == HotkeyService.IdLookup) { OpenLookup(); return; }
+        // Self-test: only report that the key arrived. No capture, no windows, no side effects.
+        if (SelfTestRun is not null) { HotkeyObserved?.Invoke(id); return; }
 
-        var cursor = TextCaptureService.GetCursorPosition();
-        var near = new PixelPoint(cursor.X, cursor.Y);
-        string? number = AndaValidator.Extract(TextCaptureService.TryCaptureSelectedText());
+        if (id == HotkeyService.IdLookup) { Dispatcher.UIThread.Post(OpenLookup); return; }
+
+        if (Interlocked.Exchange(ref _captureBusy, 1) == 1) return;
+        try
+        {
+            var cursor = TextCaptureService.GetCursorPosition();
+            var near = new PixelPoint(cursor.X, cursor.Y);
+
+            if (!_settings.CaptureViaCopy) { Dispatcher.UIThread.Post(OpenLookup); return; }
+
+            var result = await Task.Run(TextCaptureService.CaptureSelection);
+            Dispatcher.UIThread.Post(() => HandleCapture(result, near));
+        }
+        finally { Interlocked.Exchange(ref _captureBusy, 0); }
+    }
+
+    private void HandleCapture(CaptureResult result, PixelPoint near)
+    {
+        // Something the user should hear about (terminal in front, modifiers held, clipboard busy):
+        // say so, then still offer the lookup box so the press is never a dead end.
+        if (result.Notice is { } notice) { ShowNotice(notice, near); OpenLookup(); return; }
+
+        string? number = result.Outcome == CaptureOutcome.Captured ? AndaValidator.Extract(result.Text) : null;
         if (number is null) { OpenLookup(); return; }
 
         var record = _repository.Find(number);
         if (record is null)
         {
-            new ChipWindow().ShowNotice($"{number} is not a recognized ANDA", near);
+            ShowNotice($"{number} is not a recognized ANDA", near);
             return;
         }
 
@@ -84,6 +137,12 @@ public partial class App : Application
                 OpenCard(record, near, mini: false);
                 break;
         }
+    }
+
+    private static void ShowNotice(string message, PixelPoint? near = null)
+    {
+        var at = near ?? new PixelPoint(TextCaptureService.GetCursorPosition().X, TextCaptureService.GetCursorPosition().Y);
+        new ChipWindow().ShowNotice(message, at);
     }
 
     private void OpenLookup()
@@ -148,6 +207,7 @@ public partial class App : Application
         menu.Add(prompts);
 
         menu.Add(new NativeMenuItemSeparator());
+        menu.Add(new NativeMenuItem(HotkeyStatusLine()) { IsEnabled = false });
         var exit = new NativeMenuItem("Exit");
         exit.Click += (_, _) => desktop.Shutdown();
         menu.Add(exit);
@@ -161,6 +221,14 @@ public partial class App : Application
         tray.Clicked += (_, _) => OpenLookup();
         tray.IsVisible = true;
         return tray;
+    }
+
+    /// <summary>One honest line in the tray menu: which hotkeys are live, and which are taken.</summary>
+    private string HotkeyStatusLine()
+    {
+        var status = _hotkeys?.Status;
+        if (status is null || status.Count == 0) return "Hotkeys: starting…";
+        return "Hotkeys: " + string.Join("   ", status.Select(h => $"{h.Binding.Combo} {(h.Registered ? "✓" : "✗ in use")}"));
     }
 
     private NativeMenuItem BuildRadioSubmenu(

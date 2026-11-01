@@ -23,32 +23,36 @@ public sealed class Settings
     /// <summary>Name of the active Prompt Library lens (null = no lens).</summary>
     public string? ActiveLens { get; set; }
 
+    /// <summary>
+    /// Select &amp; Peek reads the selection by sending Ctrl+C to the app in front.
+    /// Off: Ctrl+Alt+A opens the lookup box instead and no keystroke is ever sent.
+    /// </summary>
+    public bool CaptureViaCopy { get; set; } = true;
+
     public bool FirstRunDone { get; set; }
 }
 
 public static class SettingsService
 {
-    private static readonly string Path = System.IO.Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "AndaCompanion", "settings.json");
-
-    public static Settings Load()
+    public static Settings Load(string? path = null)
     {
+        path ??= AppPaths.SettingsFile;
         try
         {
-            if (File.Exists(Path))
-                return JsonSerializer.Deserialize<Settings>(File.ReadAllText(Path)) ?? new Settings();
+            if (File.Exists(path))
+                return JsonSerializer.Deserialize<Settings>(File.ReadAllText(path)) ?? new Settings();
         }
         catch { /* corrupted settings → defaults */ }
         return new Settings();
     }
 
-    public static void Save(Settings s)
+    public static void Save(Settings s, string? path = null)
     {
+        path ??= AppPaths.SettingsFile;
         try
         {
-            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(Path)!);
-            File.WriteAllText(Path, JsonSerializer.Serialize(s, new JsonSerializerOptions { WriteIndented = true }));
+            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(path)!);
+            File.WriteAllText(path, JsonSerializer.Serialize(s, new JsonSerializerOptions { WriteIndented = true }));
         }
         catch { /* best effort */ }
     }

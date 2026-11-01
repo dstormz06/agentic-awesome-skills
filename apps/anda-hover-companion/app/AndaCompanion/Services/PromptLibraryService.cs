@@ -13,20 +13,18 @@ public sealed record LensPrompt(string Name, string Text);
 /// </summary>
 public sealed class PromptLibraryService
 {
-    private static readonly string Path = System.IO.Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "AndaCompanion", "prompts.json");
-
+    private readonly string _path;
     private List<LensPrompt> _prompts = new();
 
     public IReadOnlyList<LensPrompt> Prompts => _prompts;
 
-    public PromptLibraryService()
+    public PromptLibraryService(string? path = null)
     {
+        _path = path ?? AppPaths.PromptsFile;
         try
         {
-            if (File.Exists(Path))
-                _prompts = JsonSerializer.Deserialize<List<LensPrompt>>(File.ReadAllText(Path)) ?? new();
+            if (File.Exists(_path))
+                _prompts = JsonSerializer.Deserialize<List<LensPrompt>>(File.ReadAllText(_path)) ?? new();
         }
         catch { _prompts = new(); }
 
@@ -69,8 +67,8 @@ public sealed class PromptLibraryService
     {
         try
         {
-            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(Path)!);
-            File.WriteAllText(Path, JsonSerializer.Serialize(_prompts, new JsonSerializerOptions { WriteIndented = true }));
+            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(_path)!);
+            File.WriteAllText(_path, JsonSerializer.Serialize(_prompts, new JsonSerializerOptions { WriteIndented = true }));
         }
         catch { /* best effort */ }
     }

@@ -39,6 +39,17 @@ public static class ThemeManager
         Brush("C.Mark", palette.Mark);
         Brush("C.Grid", palette.Grid ?? "#00FFFFFF");
 
+        // Fluent's own controls (checkbox, radio, slider fill) read SystemAccentColor*; point them at the
+        // appearance's accent so nothing in the app shows a stray default Windows blue.
+        var accent = Color.Parse(palette.Accent);
+        r["SystemAccentColor"] = accent;
+        r["SystemAccentColorDark1"] = Mix(accent, Colors.Black, 0.12);
+        r["SystemAccentColorDark2"] = Mix(accent, Colors.Black, 0.24);
+        r["SystemAccentColorDark3"] = Mix(accent, Colors.Black, 0.36);
+        r["SystemAccentColorLight1"] = Mix(accent, Colors.White, 0.18);
+        r["SystemAccentColorLight2"] = Mix(accent, Colors.White, 0.36);
+        r["SystemAccentColorLight3"] = Mix(accent, Colors.White, 0.54);
+
         r["C.Radius"] = new CornerRadius(appearance.Radius);
         r["C.Font"] = new FontFamily(appearance.BodyFont);
         r["C.NumFont"] = new FontFamily(appearance.NumFont);
@@ -48,4 +59,10 @@ public static class ThemeManager
 
         Changed?.Invoke();
     }
+
+    private static Color Mix(Color from, Color to, double amount) => new(
+        255,
+        (byte)Math.Round(from.R + (to.R - from.R) * amount),
+        (byte)Math.Round(from.G + (to.G - from.G) * amount),
+        (byte)Math.Round(from.B + (to.B - from.B) * amount));
 }

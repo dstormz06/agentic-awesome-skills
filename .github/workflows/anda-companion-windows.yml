@@ -1,0 +1,144 @@
+name: ANDA Companion (Windows)
+
+# Builds, tests and packages the ANDA Hover Companion on a real Windows machine, then runs the app's
+# own --selftest there. This workflow is the "Windows box": it is how hotkeys, the clipboard, the tray
+# icon, Segoe UI rendering and on-screen placement get verified without a local Windows computer.
+# All bundled data is fictional; this is a concept prototype, not an FDA product.
+
+on:
+  push:
+    branches: ["main", "claude/anda-hover-tooltip-app-lmlkb6"]
+    paths:
+      - "apps/anda-hover-companion/app/**"
+      - "apps/anda-hover-companion/demo/**"
+      - ".github/workflows/anda-companion-windows.yml"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "apps/anda-hover-companion/app/**"
+      - "apps/anda-hover-companion/demo/**"
+      - ".github/workflows/anda-companion-windows.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: anda-companion-windows-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    name: Build, test, self-test, package (win-x64)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: apps/anda-hover-companion
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          persist-credentials: false
+
+      - name: Show the toolchain
+        run: |
+          dotnet --list-sdks
+          if (-not (dotnet --list-sdks | Select-String '^8\.')) {
+            Write-Warning 'No .NET 8 SDK preinstalled; the build will use the newest SDK to target net8.0.'
+          }
+          [System.Environment]::OSVersion | Format-List
+          (Get-CimInstance Win32_VideoController | Select-Object -First 1 Name, CurrentHorizontalResolution, CurrentVerticalResolution) | Format-List
+
+      - name: Build
+        run: dotnet build app/AndaCompanion.Tests -c Release -nologo
+
+      - name: Test (all tests, including the Windows-only ones)
+        run: >
+          dotnet test app/AndaCompanion.Tests -c Release --no-build -nologo
+          --logger "trx;LogFileName=test-results.trx"
+          --results-directory "$env:RUNNER_TEMP/test-results"
+
+      - name: Publish single-file win-x64 executable
+        run: >
+          dotnet publish app/AndaCompanion -c Release -r win-x64 --self-contained true -nologo
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:EnableCompressionInSingleFile=true
+          -p:PublishReadyToRun=true
+          -o "$env:RUNNER_TEMP/publish"
+
+      - name: Run the app's own self-test on this Windows machine
+        run: |
+          $out = Join-Path $env:RUNNER_TEMP 'selftest'
+          New-Item -ItemType Directory -Force -Path $out | Out-Null
+          $exe = Join-Path $env:RUNNER_TEMP 'publish/AndaCompanion.exe'
+          $p = Start-Process -FilePath $exe -ArgumentList '--selftest', "`"$out`"" -PassThru
+          if (-not $p.WaitForExit(170000)) { $p.Kill(); throw 'Self-test did not finish within 170 s.' }
+          if (Test-Path (Join-Path $out 'report.md')) { Get-Content (Join-Path $out 'report.md') | Write-Host }
+          else { throw "Self-test produced no report (exit code $($p.ExitCode)); the app may have failed to start." }
+          if ($p.ExitCode -ne 0) { throw "Self-test reported failures (exit code $($p.ExitCode))." }
+
+      - name: Assemble the demo bundle
+        if: always()
+        run: |
+          $pub = Join-Path $env:RUNNER_TEMP 'publish/AndaCompanion.exe'
+          if (-not (Test-Path $pub)) { Write-Warning 'No published executable; skipping the bundle.'; exit 0 }
+          $bundle = Join-Path $env:RUNNER_TEMP 'bundle/AndaCompanion-demo'
+          New-Item -ItemType Directory -Force -Path $bundle | Out-Null
+          Copy-Item $pub $bundle
+          Copy-Item demo/* $bundle -Recurse
+          Copy-Item DESIGN.md, SECURITY.md $bundle
+          $hash = (Get-FileHash -Algorithm SHA256 (Join-Path $bundle 'AndaCompanion.exe')).Hash.ToLower()
+          "$hash  AndaCompanion.exe" | Set-Content -Encoding ascii (Join-Path $bundle 'SHA256SUMS.txt')
+          $zip = Join-Path $env:RUNNER_TEMP 'bundle/AndaCompanion-demo-win-x64.zip'
+          Compress-Archive -Path $bundle -DestinationPath $zip -Force
+          $zipHash = (Get-FileHash -Algorithm SHA256 $zip).Hash.ToLower()
+          "$zipHash  AndaCompanion-demo-win-x64.zip" | Set-Content -Encoding ascii (Join-Path $env:RUNNER_TEMP 'bundle/ZIP-SHA256.txt')
+          Get-ChildItem (Join-Path $env:RUNNER_TEMP 'bundle') | Format-Table Name, Length
+
+      - name: Upload the demo bundle
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: anda-companion-demo-win-x64
+          path: |
+            ${{ runner.temp }}/bundle/AndaCompanion-demo-win-x64.zip
+            ${{ runner.temp }}/bundle/ZIP-SHA256.txt
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Upload the self-test report and screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: anda-companion-selftest
+          path: ${{ runner.temp }}/selftest
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: anda-companion-test-results
+          path: ${{ runner.temp }}/test-results
+          if-no-files-found: warn
+          retention-days: 14
+
+  linux-tests:
+    name: Cross-platform tests (Linux)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/anda-hover-companion/app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          persist-credentials: false
+
+      - name: Test (Windows-only tests are skipped here)
+        run: dotnet test AndaCompanion.Tests -c Release -nologo --filter "Category!=Windows"

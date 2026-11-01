@@ -21,6 +21,11 @@ public partial class CardWindow : Window
     private bool _pinned;
     private bool _mini;
     private CancellationTokenSource? _briefCts;
+    private PixelPoint _anchor;
+
+    /// <summary>Normal use: the card closes when the user clicks elsewhere. The self-test and
+    /// screenshot paths turn this off so a stolen focus cannot close a card mid-render.</summary>
+    public bool CloseWhenDeactivated { get; set; } = true;
 
     public CardWindow(ICompanionBriefService briefs, Func<string, AndaRecord?> lookup)
     {
@@ -34,7 +39,7 @@ public partial class CardWindow : Window
         ExpBtn.Click += (_, _) => ToggleExpand();
         MoreBtn.Click += (_, _) => ExpandFromMini();
         SisterChip.Click += (_, _) => OpenFirstSister();
-        Deactivated += (_, _) => { if (!_pinned) Close(); };
+        Deactivated += (_, _) => { if (!_pinned && CloseWhenDeactivated) Close(); };
         KeyDown += OnKey;
         ApplyAppearanceStructure();
 
@@ -54,7 +59,7 @@ public partial class CardWindow : Window
             new DoubleTransition { Property = OpacityProperty, Duration = TimeSpan.FromMilliseconds(160), Easing = new CubicEaseOut() },
         };
         Root.Opacity = 0;
-        Opened += (_, _) => { Root.Opacity = 1; scale.ScaleX = 1; scale.ScaleY = 1; };
+        Opened += (_, _) => { PlaceNear(_anchor); Root.Opacity = 1; scale.ScaleX = 1; scale.ScaleY = 1; };
     }
 
     private void OnKey(object? sender, KeyEventArgs e)
@@ -83,6 +88,7 @@ public partial class CardWindow : Window
     {
         Drawer.IsVisible = !Drawer.IsVisible;
         Root.Width = Drawer.IsVisible ? 492 : 372;
+        Dispatcher.UIThread.Post(ClampToScreen, DispatcherPriority.Loaded);   // it just grew: keep it on-screen
     }
 
     private void ExpandFromMini()
@@ -90,6 +96,7 @@ public partial class CardWindow : Window
         _mini = false;
         SetMiniVisibility();
         if (_record is not null) _ = LoadBriefAsync(_record);
+        Dispatcher.UIThread.Post(ClampToScreen, DispatcherPriority.Loaded);
     }
 
     private void CopyStatusLine()
@@ -212,9 +219,11 @@ public partial class CardWindow : Window
         SetMiniVisibility();
         if (!IsVisible)
         {
-            PositionNear(near);   // position once; sister-hops keep the card where it is
+            _anchor = near;
+            Position = near;      // provisional; Opened re-places it using the real, laid-out size
             Show();
         }
+        else Dispatcher.UIThread.Post(ClampToScreen, DispatcherPriority.Loaded);   // sister-hop can change height
         Activate();
         Focus();
         if (!_mini) _ = LoadBriefAsync(record);
@@ -239,19 +248,24 @@ public partial class CardWindow : Window
         });
     }
 
-    private void PositionNear(PixelPoint p)
+    private (PixelRect Area, int Width, int Height)? Geometry(PixelPoint at)
     {
-        var screen = Screens.ScreenFromPoint(p) ?? Screens.Primary;
-        int x = p.X + 10, y = p.Y + 14;
-        if (screen is not null)
-        {
-            var area = screen.WorkingArea;
-            x = Math.Min(x, area.Right - 430);
-            y = Math.Min(y, area.Bottom - 420);
-            x = Math.Max(x, area.X);
-            y = Math.Max(y, area.Y);
-        }
-        Position = new PixelPoint(x, y);
+        var screen = Screens.ScreenFromPoint(at) ?? Screens.Primary;
+        if (screen is null) return null;
+        double scale = screen.Scaling;
+        return (screen.WorkingArea, (int)Math.Ceiling(Bounds.Width * scale), (int)Math.Ceiling(Bounds.Height * scale));
+    }
+
+    private void PlaceNear(PixelPoint near)
+    {
+        if (Geometry(near) is not { } g) { Position = near; return; }
+        Position = Placement.Near(near, g.Width, g.Height, g.Area);
+    }
+
+    private void ClampToScreen()
+    {
+        if (Geometry(Position) is not { } g) return;
+        Position = Placement.Clamp(Position, g.Width, g.Height, g.Area);
     }
 
     private IBrush Ink2() => (IBrush)Application.Current!.Resources["C.Ink2"]!;

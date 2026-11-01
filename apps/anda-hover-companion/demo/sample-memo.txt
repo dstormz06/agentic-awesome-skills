@@ -1,0 +1,30 @@
+INTERNAL DRAFT  -  FICTIONAL DEMO DATA ONLY  -  NOT AN FDA DOCUMENT
+
+To:       Review team (demo)
+From:     Demo author
+Subject:  Thursday huddle prep - Meridian Pharmaceuticals (fictional)
+
+Team,
+
+Two items for Thursday. Please have status ready on both.
+
+1. ANDA 216482 - Metformin HCl ER Tablets, 500 mg. The Biopharmaceutics
+   information request response is due next week. Leadership asked where
+   this one stands against its goal date.
+
+2. ANDA 214990 - the 750 mg strength from the same applicant. It shares a
+   manufacturing site with the 500 mg application, so any facility finding
+   on one matters to both.
+
+Reference numbers that should NOT open a card (try selecting each one):
+
+   - NDA 021234        another application type, even though it has six digits
+   - 12345             only five digits
+   - 9999999           seven digits
+   - 999999            six digits, but not a number the demo data knows
+
+How to try it: select a number above (double-click selects a whole number),
+then press Ctrl+Alt+A. Or press Ctrl+Alt+Space and type one.
+
+Thanks,
+Demo author

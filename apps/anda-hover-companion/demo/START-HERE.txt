@@ -1,0 +1,42 @@
+ANDA HOVER COMPANION - LIVE DEMO (Windows 10/11, 64-bit)
+=========================================================
+Fictional demo data only. A concept prototype, not an FDA product.
+
+SET UP - about 2 minutes
+  1. Right-click the downloaded .zip > Extract All. (Do not run it from inside the zip.)
+  2. Double-click Start-Demo.bat.
+  3. Windows may warn "Windows protected your PC" because the demo is not
+     code-signed. That is expected for an unsigned prototype. If your
+     organization allows it: More info > Run anyway.
+  4. A Settings window and a sample card open. A sample memo opens in Notepad.
+  5. Find the tray icon near the clock. Windows 11 hides new icons under the
+     ^ arrow: drag the icon onto the taskbar to keep it visible.
+
+TRY IT
+  - In Notepad, double-click a number such as 216482, then press Ctrl+Alt+A.
+  - Press Ctrl+Alt+Space from anywhere and type a number.
+  - Tray icon > Settings: switch appearance, consent model, transparency.
+  - Tray icon > Prompt library: add your own lens.
+
+IF SOMETHING DOES NOT WORK
+  - Nothing appears when you press Ctrl+Alt+A: another program may own that
+    combination. The tray menu shows which hotkeys are live ("Hotkeys: ...").
+    Ctrl+Alt+Space and the tray icon always work.
+  - Blocked by your computer's security software: that is the organization's
+    policy working. Use the browser demo instead, which installs nothing.
+  - Check the app yourself: open a Command Prompt in this folder and run
+        AndaCompanion.exe --selftest report
+    It takes about a minute and then writes report\report.md with what works
+    on your machine, plus pictures. Do not type or click while it runs: it
+    presses the hotkeys itself. Your clipboard is put back afterwards.
+
+CHECK THE DOWNLOAD
+  SHA256SUMS.txt lists the expected hash of AndaCompanion.exe. In PowerShell:
+        Get-FileHash .\AndaCompanion.exe -Algorithm SHA256
+
+REMOVE IT
+  Close the app from the tray icon (Exit), then delete this folder. Nothing was
+  installed and nothing was written outside the "data" folder.
+
+NO CLAUDE ACCESS IS NEEDED. The app works offline. Generated briefs only
+appear after API access is approved and a key is configured.

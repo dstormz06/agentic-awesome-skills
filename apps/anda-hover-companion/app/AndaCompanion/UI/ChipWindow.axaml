@@ -6,11 +6,11 @@
         ShowInTaskbar="False" ShowActivated="False" Title="ANDA whisper">
   <Panel Margin="16">
     <Border Name="Pill" Background="{DynamicResource C.Bg}" BorderBrush="{DynamicResource C.Line}"
-            BorderThickness="1" CornerRadius="99" Padding="14,9"
+            BorderThickness="1" CornerRadius="18" Padding="14,9"
             BoxShadow="0 8 24 -6 #4D000000" Cursor="Hand">
       <StackPanel Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
         <Ellipse Name="Dot" Width="7" Height="7" Fill="{DynamicResource C.Accent}"/>
-        <TextBlock Name="ChipText" FontSize="12.5" FontWeight="SemiBold"
+        <TextBlock Name="ChipText" FontSize="12.5" FontWeight="SemiBold" MaxWidth="300" TextWrapping="Wrap"
                    FontFamily="{DynamicResource C.Font}" Foreground="{DynamicResource C.Ink}"/>
         <TextBlock Name="GoText" FontSize="12.5" FontWeight="Bold"
                    Foreground="{DynamicResource C.Accent}" Text="Peek ›"/>

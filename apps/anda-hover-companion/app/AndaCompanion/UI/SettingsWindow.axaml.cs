@@ -54,6 +54,14 @@ public partial class SettingsWindow : Window
             ConsentPanel.Children.Add(rb);
         }
 
+        CaptureCheck.IsChecked = _settings.CaptureViaCopy;
+        CaptureCheck.IsCheckedChanged += (_, _) =>
+        {
+            if (_loading) return;
+            _settings.CaptureViaCopy = CaptureCheck.IsChecked == true;
+            Apply();
+        };
+
         OpacitySlider.Value = Math.Round(_settings.CardOpacity * 100);
         OpacityLabel.Text = $"{OpacitySlider.Value:0}%";
         OpacitySlider.PropertyChanged += (_, e) =>
@@ -93,8 +101,19 @@ public partial class SettingsWindow : Window
         };
 
         CloseBtn.Click += (_, _) => Close();
+        Opened += (_, _) => FitToScreen();
         KeyDown += (_, e) => { if (e.Key == Key.Escape) Close(); };
         _loading = false;
+    }
+
+    /// <summary>On a short screen the sections scroll instead of the window running off the bottom.</summary>
+    private void FitToScreen()
+    {
+        var screen = Screens.ScreenFromWindow(this) ?? Screens.Primary;
+        if (screen is null) return;
+        // window chrome around the scroller: outer margins 52, card padding 40, header row ~34 + spacing, safety.
+        double available = screen.WorkingArea.Height / screen.Scaling - 52 - 40 - 34 - 14 - 20;
+        Body.MaxHeight = Math.Max(240, available);
     }
 
     private void ReloadLenses()

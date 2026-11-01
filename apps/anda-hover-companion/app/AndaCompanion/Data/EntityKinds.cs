@@ -19,9 +19,17 @@ public sealed record EntityKind(string Label, string Pattern, string Description
 
 public static class EntityKinds
 {
-    /// <summary>Six digits, optionally prefixed "ANDA" — the default domain.</summary>
+    /// <summary>
+    /// Six digits, optionally prefixed "ANDA" — the default domain. A bare six-digit number is
+    /// accepted (people select just the number), BUT a number that is explicitly labelled as
+    /// another kind of application or file — NDA, BLA, IND, DMF, MF, NDC — is rejected: NDA and
+    /// DMF numbers are also six digits and can coincide with a real ANDA number, and showing the
+    /// wrong application's card is worse than showing none.
+    /// </summary>
     public static readonly EntityKind Anda =
-        new("ANDA", @"(?:ANDA[-\s#]?)?(?<!\d)(\d{6})(?!\d)", "Abbreviated New Drug Application");
+        new("ANDA",
+            @"(?:ANDA[-\s#]?)?(?<!\d)(?<!\b(?:NDA|BLA|IND|DMF|NDC|MF)(?:[-\s#:.]|No\b|Number\b)*)(\d{6})(?!\d)",
+            "Abbreviated New Drug Application");
 
     /// <summary>
     /// Additional kinds are registered here as the tool expands. Each is opt-in:
