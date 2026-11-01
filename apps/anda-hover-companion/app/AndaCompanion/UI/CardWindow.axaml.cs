@@ -221,6 +221,7 @@ public partial class CardWindow : Window
         {
             _anchor = near;
             Position = near;      // provisional; Opened re-places it using the real, laid-out size
+            LimitHeightTo(near);
             Show();
         }
         else Dispatcher.UIThread.Post(ClampToScreen, DispatcherPriority.Loaded);   // sister-hop can change height
@@ -248,6 +249,17 @@ public partial class CardWindow : Window
         });
     }
 
+    /// <summary>
+    /// A card taller than the work area (expanded, on a 768 px laptop) must scroll rather than run off the
+    /// screen. The body's max height is the work area minus the shadow margin (2 x 26) and the border.
+    /// </summary>
+    private void LimitHeightTo(PixelPoint at)
+    {
+        var screen = Screens.ScreenFromPoint(at) ?? Screens.Primary;
+        if (screen is null) return;
+        Body.MaxHeight = Math.Max(240, screen.WorkingArea.Height / screen.Scaling - 52 - 2);
+    }
+
     private (PixelRect Area, int Width, int Height)? Geometry(PixelPoint at)
     {
         var screen = Screens.ScreenFromPoint(at) ?? Screens.Primary;
@@ -258,6 +270,7 @@ public partial class CardWindow : Window
 
     private void PlaceNear(PixelPoint near)
     {
+        LimitHeightTo(near);
         if (Geometry(near) is not { } g) { Position = near; return; }
         Position = Placement.Near(near, g.Width, g.Height, g.Area);
     }

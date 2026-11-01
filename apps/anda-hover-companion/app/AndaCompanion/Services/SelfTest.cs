@@ -214,7 +214,8 @@ internal static class SelfTest
         rtb.Save(path);
 
         long bytes = new FileInfo(path).Length;
-        bool plausible = bytes > 6000;   // a flat rectangle compresses far below this; real content does not
+        // A flat rectangle compresses to roughly 0.01 bytes per pixel; text and shapes land above 0.1.
+        bool plausible = bytes > Math.Max(1500, 0.05 * size.Width * size.Height);
         return new("render-" + name, plausible ? CheckStatus.Pass : CheckStatus.Fail,
             $"{size.Width}x{size.Height}px @ {scale:0.##}x · {bytes / 1024} KB{note}" + (plausible ? "" : " — image looks blank"));
     }
@@ -246,6 +247,7 @@ internal static class SelfTest
                 ("center", new(wa.X + wa.Width / 2, wa.Y + wa.Height / 2)),
             };
             var problems = new List<string>();
+            var trace = new List<string>();
             foreach (var (label, at) in anchors)
             {
                 var card = new CardWindow(briefs, repo.Find) { CloseWhenDeactivated = false };
@@ -253,16 +255,21 @@ internal static class SelfTest
                 card.FindControl<Button>("ExpBtn")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));   // worst case: biggest size
                 await Task.Delay(500);
                 double s = card.RenderScaling;
-                var rect = new PixelRect(card.Position, new PixelSize(
-                    (int)Math.Ceiling(card.Bounds.Width * s), (int)Math.Ceiling(card.Bounds.Height * s)));
+                var size = new PixelSize((int)Math.Ceiling(card.Bounds.Width * s), (int)Math.Ceiling(card.Bounds.Height * s));
+                var rect = new PixelRect(card.Position, size);
+                var expected = Placement.Near(at, size.Width, size.Height, wa);
+                trace.Add($"{label}: anchor {at.X},{at.Y} → at {rect.X},{rect.Y} size {size.Width}x{size.Height} (expected x,y {expected.X},{expected.Y})");
+
+                bool fits = size.Width <= wa.Width && size.Height <= wa.Height;
                 bool inside = rect.X >= wa.X && rect.Y >= wa.Y && rect.Right <= wa.Right && rect.Bottom <= wa.Bottom;
-                if (!inside) problems.Add($"{label}: card {rect} outside working area {wa}");
+                if (!fits) problems.Add($"{label}: card {size.Width}x{size.Height} is larger than the {wa.Width}x{wa.Height} work area and did not scroll");
+                else if (!inside) problems.Add($"{label}: card {rect} outside working area {wa}");
                 card.Close();
             }
             return problems.Count == 0
                 ? new(name, CheckStatus.Pass,
-                    $"expanded card stayed inside the {wa.Width}x{wa.Height} working area at all 5 anchors · scaling {screen.Scaling:0.##}x")
-                : new(name, CheckStatus.Fail, string.Join("; ", problems));
+                    $"expanded card stayed inside the {wa.Width}x{wa.Height} working area at all 5 anchors · scaling {screen.Scaling:0.##}x · " + string.Join(" | ", trace))
+                : new(name, CheckStatus.Fail, string.Join("; ", problems) + " · trace: " + string.Join(" | ", trace));
         }
         catch (Exception ex) { return new(name, CheckStatus.Fail, ex.Message); }
     }

@@ -1,0 +1,1097 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>ANDA Companion Desktop Simulation</title>
+<style>
+/* Layout: a light desktop stage. Floating windows on wide screens; the same windows stack in one column on phones.
+   One look only: the product is light-only by decision, so every color below is set explicitly (no dark variants). */
+:root{
+  /* desktop chrome */
+  --wall-a:#d8e5f1; --wall-b:#eef2f6; --wall-c:#f3ede2;
+  --ink:#1b1e22; --ink2:#454b53; --ink3:#5f666e;           /* all >= 4.5:1 on white */
+  --win:#ffffff; --win-line:#d9dde2; --win-bar:#f4f6f8; --win-bar-on:#eaf0f7;
+  --tb:rgba(244,246,248,.88); --tb-line:rgba(20,30,40,.10);
+  --sim:#3d6fa5; --sim-ink:#ffffff; --sim-soft:rgba(61,111,165,.12);
+  --ok:#177245; --bad:#a33636;
+  --shadow-win:0 18px 40px -14px rgba(20,30,45,.30),0 2px 8px rgba(20,30,45,.10);
+  --tb-h:48px; --banner-h:34px;
+  --op:100%;
+}
+
+/* ---- card tokens: five light appearances (A is the product default) ---- */
+:root[data-dir="a"]{
+  --c-bg:#ffffff; --c-ink:#1a1d21; --c-ink2:#5c6370; --c-ink3:#70757c;
+  --c-hair:#eceae6; --c-line:#e2e0db; --c-accent:#3d6fa5; --c-accent2:#2d5a8c;
+  --c-good:#177245; --c-good-bg:#e7f3ec; --c-warn:#8a5800; --c-warn-bg:#fbf2dd;
+  --c-bad:#a33636; --c-bad-bg:#f9e9e9; --c-track:#e9e7e2; --c-fill:#5d84ad;
+  --c-mark:rgba(61,111,165,.10); --c-radius:12px;
+  --c-shadow:0 24px 48px -12px rgba(23,26,31,.22),0 4px 12px rgba(23,26,31,.08);
+  --c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;
+  --c-drug-font:var(--c-font); --c-num-font:var(--c-font);
+}
+:root[data-dir="b"]{
+  --c-bg:#fbf8f2; --c-ink:#211d15; --c-ink2:#6e6552; --c-ink3:#78705c;
+  --c-hair:#e9e2d3; --c-line:#ddd3bf; --c-accent:#23573f; --c-accent2:#1c4834;
+  --c-good:#23573f; --c-good-bg:transparent; --c-warn:#8a5200; --c-warn-bg:#f6ecd8;
+  --c-bad:#93321f; --c-bad-bg:#f5e5e0; --c-track:#e6ddc9; --c-fill:#23573f;
+  --c-mark:rgba(35,87,63,.10); --c-radius:8px;
+  --c-shadow:0 20px 40px -14px rgba(43,36,22,.28),0 2px 6px rgba(43,36,22,.10);
+  --c-font:"Segoe UI",-apple-system,system-ui,sans-serif;
+  --c-drug-font:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,serif;
+  --c-num-font:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace;
+}
+:root[data-dir="c"]{
+  --c-bg:#f7fafd; --c-ink:#16232e; --c-ink2:#51667a; --c-ink3:#617484;
+  --c-hair:#e2eaf2; --c-line:#c9d8e5; --c-accent:#005ea2; --c-accent2:#0b4778;
+  --c-good:#177245; --c-good-bg:#e3f1ea; --c-warn:#8a5800; --c-warn-bg:#fbf2dd;
+  --c-bad:#a33636; --c-bad-bg:#f9e9e9; --c-track:#dde7f1; --c-fill:#2e7bbf;
+  --c-mark:rgba(0,94,162,.10); --c-radius:14px;
+  --c-shadow:0 24px 48px -12px rgba(22,35,46,.20),0 4px 12px rgba(22,35,46,.08);
+  --c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;
+  --c-drug-font:var(--c-font);
+  --c-num-font:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace;
+}
+:root[data-dir="d"]{
+  --c-bg:#ffffff; --c-ink:#14181d; --c-ink2:#4e5560; --c-ink3:#6f757f;
+  --c-hair:#e3e7ec; --c-line:#c9cfd8; --c-accent:#1a4480; --c-accent2:#162e51;
+  --c-good:#106b3c; --c-good-bg:#e5f2ea; --c-warn:#8a5800; --c-warn-bg:#faf1dc;
+  --c-bad:#a03030; --c-bad-bg:#f8e9e9; --c-track:#e6e9ee; --c-fill:#1a4480;
+  --c-mark:rgba(26,68,128,.10); --c-radius:4px;
+  --c-shadow:0 16px 32px -12px rgba(18,30,52,.20),0 2px 4px rgba(18,30,52,.08);
+  --c-grid:rgba(26,68,128,.05);
+  --c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;
+  --c-drug-font:var(--c-font);
+  --c-num-font:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace;
+}
+:root[data-dir="e"]{
+  --c-bg:#fcfdfe; --c-ink:#1f2c33; --c-ink2:#5a6c76; --c-ink3:#67767f;
+  --c-hair:#e7edf0; --c-line:#d6dfe4; --c-accent:#3e5d6d; --c-accent2:#2f4855;
+  --c-good:#1c7a4d; --c-good-bg:#e5f2eb; --c-warn:#92610a; --c-warn-bg:#fcf1d9;
+  --c-bad:#ad3d3d; --c-bad-bg:#f9e8e8; --c-track:#e3eaed; --c-fill:#567383;
+  --c-mark:rgba(62,93,109,.10); --c-radius:20px;
+  --c-shadow:0 28px 56px -16px rgba(23,40,44,.22),0 4px 10px rgba(23,40,44,.07);
+  --c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;
+  --c-drug-font:var(--c-font); --c-num-font:var(--c-font);
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; color:var(--ink); background:var(--wall-b);
+  font:14px/1.45 "Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;
+  overflow:hidden; -webkit-tap-highlight-color:transparent; -webkit-text-size-adjust:100%;
+}
+button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent;cursor:pointer}
+:focus-visible{outline:2px solid var(--sim);outline-offset:2px;border-radius:4px}
+kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line);border-bottom-width:2px;
+    border-radius:4px;padding:2px 5px;background:#fff;color:var(--ink2);white-space:nowrap}
+
+/* ===================== desktop stage ===================== */
+.desk{
+  position:relative; height:100%; overflow:hidden;
+  background:
+    radial-gradient(900px 520px at 18% 12%,rgba(255,255,255,.75),transparent 60%),
+    radial-gradient(700px 480px at 88% 78%,rgba(245,236,222,.85),transparent 62%),
+    linear-gradient(135deg,var(--wall-a),var(--wall-b) 48%,var(--wall-c));
+}
+.banner{
+  position:absolute; z-index:5; inset:0 0 auto 0; height:var(--banner-h);
+  display:flex; align-items:center; gap:10px; padding:0 max(14px,env(safe-area-inset-left,0px));
+  background:rgba(255,255,255,.82); border-bottom:1px solid var(--tb-line);
+  -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+  font-size:12px; color:var(--ink2);
+}
+.banner b{color:var(--ink);font-weight:650}
+.banner .sp{flex:1}
+.banner button{border:1px solid var(--win-line);background:#fff;border-radius:99px;padding:4px 11px;font-size:12px;min-height:26px}
+
+/* desktop icon (re-launch after Exit) */
+.icon{position:absolute;left:18px;top:56px;width:84px;text-align:center;border:none;background:none;
+      padding:6px 4px;border-radius:8px;color:var(--ink);font-size:12px;line-height:1.25}
+.icon:hover{background:rgba(255,255,255,.55)}
+.icon svg{display:block;margin:0 auto 4px}
+.icon.attn{outline:2px dashed var(--sim);outline-offset:2px}
+
+/* ===================== windows ===================== */
+.win{
+  position:absolute; background:var(--win); border:1px solid var(--win-line); border-radius:10px;
+  box-shadow:var(--shadow-win); overflow:hidden; display:flex; flex-direction:column;
+}
+.win .bar{display:flex;align-items:center;gap:8px;height:34px;padding:0 6px 0 12px;background:var(--win-bar);
+          border-bottom:1px solid var(--win-line);font-size:12px;color:var(--ink2);user-select:none;-webkit-user-select:none}
+.win.active .bar{background:var(--win-bar-on);color:var(--ink)}
+.win .bar .ttl{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.win .bar .ctl{display:flex;gap:2px}
+.win .bar .ctl i{width:26px;height:22px;border-radius:5px;display:grid;place-items:center;font-style:normal;color:var(--ink3);font-size:11px}
+.win .menu{display:flex;gap:14px;padding:4px 12px;font-size:12px;color:var(--ink2);border-bottom:1px solid var(--win-line);user-select:none;-webkit-user-select:none}
+.win .body{padding:16px 20px;overflow:auto;flex:1}
+
+#memo{left:132px;top:62px;width:min(600px,calc(100% - 520px));min-width:460px;bottom:calc(var(--tb-h) + 26px)}
+#memo .body{font:14px/1.62 ui-monospace,"Cascadia Mono",Consolas,"SF Mono",monospace;white-space:pre-wrap;
+            user-select:text;-webkit-user-select:text;cursor:text;color:#1f2328}
+#memo .body ::selection,#term .body ::selection{background:#b9d4f2;color:#0d1b2a}
+#memo .body span.pick{cursor:text}
+#term{right:24px;bottom:calc(var(--tb-h) + 26px);width:400px;height:200px}
+#term .bar{background:#eef0f3}
+#term .body{background:#f7f8fa;color:#1f2328;font:13px/1.55 ui-monospace,"Cascadia Mono",Consolas,monospace;
+            white-space:pre-wrap;user-select:text;-webkit-user-select:text;cursor:text}
+
+/* guide panel */
+#guide{right:24px;top:52px;width:372px;max-height:calc(100% - var(--tb-h) - 52px - 250px);min-height:300px}
+#guide .body{padding:12px 16px 14px}
+#guide h2{font-size:14px;margin:0 0 2px}
+#guide .sub{font-size:12px;color:var(--ink2);margin:0 0 10px}
+#guide ol{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:6px}
+#guide li{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start;font-size:12.5px;color:var(--ink2)}
+#guide li i{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--win-line);display:grid;place-items:center;
+            font-style:normal;font-size:11px;color:transparent;background:#fff;margin-top:1px}
+#guide li.done i{background:var(--ok);border-color:var(--ok);color:#fff}
+#guide li.done span{color:var(--ink3);text-decoration:line-through;text-decoration-color:rgba(0,0,0,.25)}
+#guide .row{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+#guide .lbl{font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--ink3);margin:8px 0 5px}
+.btn{border:1px solid var(--win-line);background:#fff;border-radius:8px;padding:6px 11px;font-size:12.5px;min-height:34px}
+.btn:hover{border-color:#b9c1ca}
+.btn.primary{background:var(--sim);border-color:var(--sim);color:#fff;font-weight:600}
+.btn.key{font-family:ui-monospace,Consolas,monospace;font-size:12px}
+.sw{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink2);margin:4px 0;min-height:30px}
+.sw input{width:18px;height:18px;accent-color:var(--sim);margin:0}
+.fine{font-size:11.5px;color:var(--ink3);margin:8px 0 0}
+
+/* ===================== taskbar ===================== */
+#taskbar{
+  position:absolute;z-index:30;left:0;right:0;bottom:0;height:calc(var(--tb-h) + env(safe-area-inset-bottom,0px));
+  padding:0 max(10px,env(safe-area-inset-right,0px)) env(safe-area-inset-bottom,0px) max(10px,env(safe-area-inset-left,0px));
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  background:var(--tb);border-top:1px solid var(--tb-line);
+  -webkit-backdrop-filter:blur(18px) saturate(1.2);backdrop-filter:blur(18px) saturate(1.2);
+}
+#taskbar .mid{display:flex;gap:6px;position:absolute;left:50%;transform:translateX(-50%)}
+#taskbar .app{width:40px;height:40px;border:none;background:none;border-radius:8px;display:grid;place-items:center}
+#taskbar .app:hover{background:rgba(255,255,255,.7)}
+#taskbar .app.on{background:rgba(255,255,255,.8);box-shadow:inset 0 -3px 0 var(--sim)}
+#taskbar .tray{display:flex;align-items:center;gap:2px;margin-left:auto}
+#taskbar .tray button{border:none;background:none;min-width:34px;height:36px;border-radius:7px;display:grid;place-items:center;padding:0 6px}
+#taskbar .tray button:hover{background:rgba(255,255,255,.7)}
+#taskbar .clock{font-size:11.5px;line-height:1.2;text-align:right;padding:0 8px;color:var(--ink);font-variant-numeric:tabular-nums}
+#appIcon{display:none}
+#appIcon.pinned{display:grid}
+.glyph{width:18px;height:18px;border-radius:5px;background:#3d6fa5;display:grid;place-items:center}
+.glyph::after{content:"";width:6px;height:6px;border-radius:50%;background:#fff}
+.glyph.big{width:28px;height:28px;border-radius:8px}.glyph.big::after{width:9px;height:9px}
+
+/* tray overflow flyout + context menu */
+.pop{position:fixed;z-index:45;background:rgba(250,251,252,.97);border:1px solid var(--win-line);border-radius:10px;
+     box-shadow:var(--shadow-win);display:none;font-size:13px;color:var(--ink)}
+#flyout{right:max(10px,env(safe-area-inset-right,0px));bottom:calc(var(--tb-h) + 8px + env(safe-area-inset-bottom,0px));width:236px;padding:10px}
+#flyout .it{display:flex;align-items:center;gap:10px;width:100%;border:none;background:none;border-radius:8px;padding:8px;text-align:left}
+#flyout .it:hover{background:#eef2f6}
+#flyout small{display:block;color:var(--ink3);font-size:11.5px;line-height:1.35;margin:6px 4px 0}
+#flyout .pin{margin:6px 0 0;width:100%}
+#menu{width:288px;padding:6px;right:max(10px,env(safe-area-inset-right,0px));bottom:calc(var(--tb-h) + 8px + env(safe-area-inset-bottom,0px))}
+#menu button{display:flex;width:100%;align-items:center;gap:8px;border:none;background:none;text-align:left;padding:8px 10px;border-radius:6px;font-size:13px;min-height:34px}
+#menu button:hover:not(:disabled){background:#eaf0f7}
+#menu button:disabled{color:var(--ink3);cursor:default}
+#menu .k{margin-left:auto;color:var(--ink3);font-size:11.5px}
+#menu hr{border:none;border-top:1px solid var(--win-line);margin:5px 4px}
+#menu .sub button{padding-left:26px}
+#menu .sub button[aria-checked="true"]::before{content:"●";position:absolute;margin-left:-16px;font-size:9px;color:var(--sim)}
+
+/* keystroke overlay */
+#keys{position:fixed;z-index:60;left:50%;bottom:calc(var(--tb-h) + 18px);transform:translateX(-50%);display:none;
+      align-items:center;gap:10px;background:rgba(255,255,255,.96);border:1px solid var(--win-line);border-radius:12px;
+      padding:9px 14px;box-shadow:var(--shadow-win);font-size:12.5px;color:var(--ink2);max-width:calc(100% - 24px)}
+#keys kbd{font-size:13px;padding:4px 8px}
+#keys.show{display:flex;animation:fadein .14s ease-out}
+@keyframes fadein{from{opacity:0;transform:translateX(-50%) translateY(4px)}to{opacity:1;transform:translateX(-50%)}}
+
+/* ===================== in-app windows (use the appearance tokens) ===================== */
+.app-win{position:absolute;z-index:42;display:none;background:var(--c-bg);color:var(--c-ink);border:1px solid var(--c-line);
+         border-radius:var(--c-radius);box-shadow:var(--c-shadow);font-family:var(--c-font);font-size:13px}
+.app-win h3{margin:0;font-size:15px}
+.app-win .hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.app-win .lbl{font-size:9.5px;font-weight:800;letter-spacing:.13em;color:var(--c-ink3);margin:14px 0 6px}
+.app-win .lbl:first-of-type{margin-top:0}
+.app-win .hint{font-size:11px;color:var(--c-ink3);margin:4px 0 0}
+.app-win label.opt{display:flex;align-items:center;gap:8px;min-height:30px;color:var(--c-ink2);font-size:12.5px}
+.app-win input[type=radio],.app-win input[type=checkbox]{accent-color:var(--c-accent);width:16px;height:16px;margin:0}
+.app-win .wrap{display:flex;flex-wrap:wrap;gap:2px 14px}
+.pill{border:none;background:var(--c-accent);color:#fff;border-radius:99px;padding:7px 16px;font-weight:650;font-size:12.5px;min-height:34px}
+.pill.quiet{background:var(--c-mark);color:var(--c-accent)}
+.app-win select,.app-win input[type=text],.app-win textarea{font:inherit;color:var(--c-ink);background:#fff;border:1px solid var(--c-line);border-radius:8px;padding:7px 9px;width:100%}
+.app-win input[type=range]{width:100%;accent-color:var(--c-accent)}
+.app-win :focus-visible{outline:2px solid var(--c-accent);outline-offset:2px}
+#settings{width:440px;padding:18px 20px;max-height:calc(100% - var(--tb-h) - 24px);overflow:auto;left:calc(50% - 220px);top:46px}
+#plib{width:520px;padding:18px 20px;left:calc(50% - 150px);top:80px;max-height:calc(100% - var(--tb-h) - 100px);overflow:auto}
+#plib .cols{display:grid;grid-template-columns:150px 1fr;gap:12px}
+#plib .list{display:grid;gap:2px;align-content:start}
+#plib .list button{border:none;background:none;text-align:left;padding:7px 9px;border-radius:7px;color:var(--c-ink2);font-size:12.5px}
+#plib .list button[aria-current="true"]{background:var(--c-mark);color:var(--c-accent);font-weight:650}
+#plib textarea{min-height:120px;resize:vertical}
+#lookup{width:330px;padding:14px 16px;left:calc(50% - 165px);top:30%}
+#lookup .r{display:flex;gap:8px}
+#lookup .err{color:var(--c-bad);font-size:11.5px;margin-top:6px;display:none}
+
+/* ===================== whisper chip / notice ===================== */
+#chip{position:fixed;z-index:70;display:none;align-items:center;gap:7px;background:var(--c-bg);color:var(--c-ink);
+      border:1px solid var(--c-line);border-radius:18px;padding:8px 14px;font-size:12.5px;font-weight:600;max-width:320px;
+      box-shadow:var(--c-shadow);cursor:pointer;font-family:var(--c-font);min-height:36px;text-align:left;
+      animation:chipin .16s cubic-bezier(.2,.9,.3,1)}
+#chip .dot{width:7px;height:7px;flex:none;border-radius:50%;background:var(--c-accent);box-shadow:0 0 0 3px var(--c-mark)}
+#chip .go{color:var(--c-accent);font-weight:700;white-space:nowrap}
+#chip.fading{opacity:0;transition:opacity .5s}
+@keyframes chipin{from{opacity:0;transform:translateY(3px) scale(.97)}to{opacity:1;transform:none}}
+#scrim{position:fixed;inset:0;z-index:40;background:rgba(10,12,16,.38);display:none;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+
+/* ===================== THE CARD (matches the Windows app's slots) ===================== */
+#card{
+  --rail:62px;
+  position:fixed;z-index:50;width:372px;max-width:calc(100vw - 24px);display:none;
+  background:var(--c-bg);background-color:color-mix(in srgb,var(--c-bg) var(--op),transparent);
+  color:var(--c-ink);border:1px solid var(--c-line);border-radius:var(--c-radius);box-shadow:var(--c-shadow);overflow:hidden;
+  font-family:var(--c-font);font-size:14px;line-height:1.5;animation:cardin .18s cubic-bezier(.2,.9,.3,1);
+}
+#card.pinned{outline:2px solid var(--c-accent);outline-offset:-1px}
+@keyframes cardin{from{opacity:0;transform:translateY(6px) scale(.985)}to{opacity:1;transform:none}}
+.slot{padding:11px 16px;border-top:1px solid var(--c-hair)}
+.slot:first-of-type{border-top:none}
+.grab{display:none;width:40px;height:4px;border-radius:2px;background:var(--c-ink3);opacity:.4;margin:8px auto 0}
+.hd{padding-top:14px}
+.idrow{display:flex;align-items:center;gap:8px}
+.num{font-weight:700;font-size:15px;font-family:var(--c-num-font);font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.seal{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--c-good);background:var(--c-good-bg);
+      border-radius:99px;padding:3px 8px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+:root[data-dir="b"] .seal{border:1.5px solid var(--c-good);border-radius:4px;transform:rotate(-2.5deg);padding:2px 7px;background:transparent}
+:root[data-dir="d"] .seal{border:1px solid var(--c-good);background:transparent;border-radius:3px}
+.tools{margin-left:auto;display:flex;gap:2px;opacity:0;transition:opacity .15s}
+#card:hover .tools,#card:focus-within .tools{opacity:1}
+@media (hover:none){.tools{opacity:1}}
+.tools button{border:none;background:none;color:var(--c-ink3);border-radius:6px;width:32px;height:32px;display:grid;place-items:center}
+.tools button:hover{background:var(--c-mark);color:var(--c-ink)}
+.tools button.on{color:var(--c-accent);background:var(--c-mark)}
+.drug{font-size:14px;font-weight:500;margin:6px 0 0;font-family:var(--c-drug-font)}
+:root[data-dir="b"] .drug{font-size:16px;font-style:italic}
+.meta{font-size:12px;color:var(--c-ink2);margin-top:2px}
+.fresh{font-size:10.5px;color:var(--c-ink3);margin-top:3px}
+.lblx{font-size:9.5px;font-weight:800;letter-spacing:.13em;color:var(--c-ink3);width:var(--rail);flex:none}
+.lblx.acc{color:var(--c-accent)}
+:root[data-dir="d"] .lblx,:root[data-dir="d"] .attn .k,:root[data-dir="d"] .cpct{font-family:var(--c-num-font)}
+.clock{display:flex;align-items:center;gap:12px}
+.clockmain{flex:1;min-width:0}
+.crow{display:flex;align-items:baseline;gap:9px;margin-bottom:7px}
+.crow:last-of-type{margin-bottom:0}
+.cdate{font-weight:650;font-size:13.5px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.cdays{color:var(--c-ink2);font-size:12px;white-space:nowrap}
+.cpct{margin-left:auto;font-size:11.5px;color:var(--c-ink2);font-variant-numeric:tabular-nums;font-family:var(--c-num-font)}
+.p-bar{height:4px;border-radius:2px;background:var(--c-track);margin:0 0 9px}
+.p-bar i{display:block;height:100%;border-radius:2px;background:var(--c-fill)}
+.p-ticks{display:none;gap:4px;margin:0 0 9px}
+.p-ticks i{flex:1;height:5px;border-radius:2px;background:var(--c-track)}
+.p-ticks i.on{background:var(--c-fill)}
+.p-ringwrap{display:none;position:relative;width:52px;height:52px;flex:none}
+.p-ringwrap svg{width:52px;height:52px;transform:rotate(-90deg)}
+.p-ringwrap .tr{fill:none;stroke:var(--c-track);stroke-width:4}
+.p-ringwrap .fg{fill:none;stroke:var(--c-accent);stroke-width:4;stroke-linecap:round}
+.p-ringwrap .rv{position:absolute;inset:0;display:grid;place-items:center;font-size:11.5px;font-weight:700;font-family:var(--c-num-font)}
+:root[data-dir="b"] .p-bar{display:none}:root[data-dir="b"] .p-ticks{display:flex}
+:root[data-dir="c"] .p-bar{display:none}:root[data-dir="c"] .p-ringwrap{display:block}:root[data-dir="c"] .cpct{display:none}
+:root[data-dir="d"] #card{background-color:color-mix(in srgb,var(--c-bg) var(--op),transparent);
+  background-image:linear-gradient(var(--c-grid) 1px,transparent 1px),linear-gradient(90deg,var(--c-grid) 1px,transparent 1px);background-size:14px 14px}
+:root[data-dir="d"] .p-bar{height:6px;border-radius:0;outline:1px solid var(--c-line)}
+:root[data-dir="d"] .p-bar i{border-radius:0;background:repeating-linear-gradient(45deg,var(--c-fill) 0 3px,transparent 3px 6px);box-shadow:inset 0 0 0 1px var(--c-fill)}
+:root[data-dir="e"] .p-bar{height:8px;border-radius:99px}
+:root[data-dir="e"] .p-bar i{border-radius:99px;background:linear-gradient(90deg,var(--c-accent),var(--c-fill))}
+:root[data-dir="e"] .attn{border-radius:14px}
+.fdelta{font-size:11.5px;font-weight:700;white-space:nowrap}
+.fdelta.warn{color:var(--c-warn)}.fdelta.good{color:var(--c-good)}
+.fconf{font-size:10.5px;color:var(--c-ink3);text-align:right;margin:3px 0 0}
+.attn{display:flex;gap:9px;align-items:baseline;font-size:13px;border-radius:8px;padding:8px 10px;margin:-2px 0}
+.attn .k{font-size:9.5px;font-weight:800;letter-spacing:.1em;align-self:center;white-space:nowrap}
+.attn.warn{color:var(--c-warn);background:var(--c-warn-bg)}.attn.bad{color:var(--c-bad);background:var(--c-bad-bg)}
+:root[data-dir="c"] .attn.warn{box-shadow:inset 3px 0 0 var(--c-warn)}
+.rail{display:flex;gap:9px;align-items:baseline;font-size:12.5px;color:var(--c-ink2)}
+.rail .lblx{align-self:baseline}
+.ai .tag{display:flex;align-items:center;gap:9px;margin-bottom:5px}
+.ai .verify{font-size:10.5px;color:var(--c-ink3);flex:1}
+.ai .src{font-size:11.5px;color:var(--c-accent)}
+.ai .body{font-size:12.5px;color:var(--c-ink2);min-height:2.6em}
+.ai .cur{display:inline-block;width:6px;height:12px;background:var(--c-ink3);vertical-align:-1px;animation:blink 1s steps(1) infinite}
+.ai .skel{display:block;height:9px;border-radius:4px;margin:6px 0;
+  background:linear-gradient(90deg,var(--c-track) 25%,var(--c-mark) 50%,var(--c-track) 75%);background-size:200% 100%;animation:shim 1.1s linear infinite}
+.ai .skel:last-child{width:70%}
+@keyframes blink{50%{opacity:0}}@keyframes shim{from{background-position:200% 0}to{background-position:-200% 0}}
+#ext{display:none}
+#card.expanded{width:492px}
+#card.expanded #ext{display:block}
+#ext details{border-top:1px solid var(--c-hair)}
+#ext summary{list-style:none;cursor:pointer;padding:11px 16px;font-size:12px;font-weight:650;color:var(--c-ink2);display:flex;align-items:center;gap:7px;min-height:44px}
+#ext summary::-webkit-details-marker{display:none}
+#ext summary::before{content:"›";color:var(--c-ink3);transition:transform .12s;font-size:14px}
+#ext details[open] summary::before{transform:rotate(90deg)}
+#ext .cnt{padding:0 16px 12px;font-size:12.5px;color:var(--c-ink2)}
+.rowi{display:flex;gap:8px;padding:6px 0;border-top:1px dashed var(--c-hair);align-items:baseline}
+.rowi:first-child{border-top:none}
+.rowi .due{margin-left:auto;white-space:nowrap;font-size:11.5px;color:var(--c-ink3)}
+.rowi .due.warn{color:var(--c-warn);font-weight:650}
+.notei{padding:7px 0;border-top:1px dashed var(--c-hair)}.notei:first-child{border-top:none}
+.notei .who{font-size:11px;color:var(--c-ink3);margin-bottom:1px}
+.sister{color:var(--c-accent);cursor:pointer;border-bottom:1.5px dotted var(--c-accent)}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{font-size:12px;padding:8px 13px;border-radius:99px;min-height:36px;border:1px solid var(--c-line);background:none;color:var(--c-ink2);font-family:inherit}
+.chip:hover{color:var(--c-ink);border-color:var(--c-ink3)}
+.chip.link{color:var(--c-accent)}
+:root[data-dir="e"] .chip{border-width:1.5px}
+#moreBtn{display:none;width:100%;border:none;min-height:44px;background:var(--c-mark);color:var(--c-accent);font-weight:650;font-size:12.5px;font-family:inherit}
+#card.mini #moreBtn{display:block}
+#card.mini .attn-slot,#card.mini .latest,#card.mini .ahead,#card.mini .ai,#card.mini #ext,#card.mini .chips-slot,#card.mini .kbdbar{display:none}
+.kbdbar{padding:8px 16px;border-top:1px solid var(--c-hair);display:flex;gap:14px;font-size:10px;color:var(--c-ink3);letter-spacing:.02em}
+@media (hover:none){.kbdbar{display:none}}
+#card.sheet{left:0 !important;right:0;top:auto !important;bottom:0;width:100% !important;max-width:none;
+  border-radius:calc(var(--c-radius) + 8px) calc(var(--c-radius) + 8px) 0 0;border-left:none;border-right:none;border-bottom:none;
+  max-height:86dvh;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+  padding-bottom:env(safe-area-inset-bottom,0px);animation:sheetin .26s cubic-bezier(.2,.9,.27,1);z-index:55}
+#card.sheet .grab{display:block}
+@keyframes sheetin{from{transform:translateY(24%)}to{transform:none}}
+
+/* ===================== phones and narrow windows: the desktop becomes one scrolling column ===================== */
+@media (max-width:1040px){
+  body{overflow:auto}
+  .desk{height:auto;min-height:100%;padding:calc(var(--banner-h) + 12px) max(16px,env(safe-area-inset-right,0px)) calc(var(--tb-h) + 28px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+        display:flex;flex-direction:column;gap:14px;overflow:visible}
+  .win,.icon{position:static;width:auto;min-width:0;max-height:none;height:auto}
+  #guide{order:1}#memo{order:2;min-width:0;width:auto}#term{order:3;width:auto;height:auto}
+  #memo .body{min-height:300px}
+  .icon{order:4;align-self:flex-start}
+  #term .body{min-height:110px}
+  .banner,#taskbar{position:fixed}
+  .banner{padding-left:max(14px,env(safe-area-inset-left,0px))}
+  .app-win{position:fixed;left:12px !important;right:12px;width:auto !important;top:calc(var(--banner-h) + 12px) !important;max-height:calc(100dvh - var(--banner-h) - var(--tb-h) - 28px)}
+  #lookup{top:22% !important}
+  #plib .cols{grid-template-columns:1fr}
+  #plib .list{display:flex;flex-wrap:wrap}
+  #taskbar .mid{display:none}
+  #keys{bottom:calc(var(--tb-h) + 14px + env(safe-area-inset-bottom,0px))}
+  .hide-narrow{display:none}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+</style>
+</head>
+<body>
+<div class="desk" id="desk">
+  <div class="banner" role="note">
+    <b>Browser simulation</b><span>of the ANDA Hover Companion Windows app · fictional data · not an FDA product</span>
+    <span class="sp"></span>
+    <button id="resetBtn" type="button" aria-label="Reset the simulation">Reset</button>
+  </div>
+
+  <button class="icon" id="deskIcon" type="button" aria-label="Start-Demo.bat. Launches the app.">
+    <svg width="38" height="38" viewBox="0 0 38 38" fill="none"><rect x="6" y="3" width="26" height="32" rx="3" fill="#fff" stroke="#8a929b" stroke-width="1.5"/><path d="M11 12h16M11 17h16M11 22h10" stroke="#8a929b" stroke-width="1.5" stroke-linecap="round"/><circle cx="27" cy="27" r="6" fill="#3d6fa5"/><path d="M25 27l2 2 3-4" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Start-Demo.bat
+  </button>
+
+  <!-- ===== sample memo (the same text as demo/sample-memo.txt) ===== -->
+  <section class="win active" id="memo" aria-label="sample-memo.txt text editor">
+    <div class="bar"><span class="ttl">sample-memo.txt — Text Editor</span><span class="ctl" aria-hidden="true"><i>–</i><i>▢</i><i>✕</i></span></div>
+    <div class="menu" aria-hidden="true"><span>File</span><span>Edit</span><span>View</span></div>
+    <div class="body" id="memoBody" tabindex="0">INTERNAL DRAFT  -  FICTIONAL DEMO DATA ONLY  -  NOT AN FDA DOCUMENT
+
+To:       Review team (demo)
+From:     Demo author
+Subject:  Thursday huddle prep - Meridian Pharmaceuticals (fictional)
+
+Team,
+
+Two items for Thursday. Please have status ready on both.
+
+1. ANDA <span class="pick" data-pick="216482">216482</span> - Metformin HCl ER Tablets, 500 mg. The Biopharmaceutics
+   information request response is due next week. Leadership asked where
+   this one stands against its goal date.
+
+2. ANDA <span class="pick" data-pick="214990">214990</span> - the 750 mg strength from the same applicant. It shares a
+   manufacturing site with the 500 mg application, so any facility finding
+   on one matters to both.
+
+Reference numbers that should NOT open a card (try selecting each one):
+
+   - <span class="pick" data-pick="NDA 021234">NDA 021234</span>        another application type, even though it has six digits
+   - <span class="pick" data-pick="12345">12345</span>             only five digits
+   - <span class="pick" data-pick="9999999">9999999</span>           seven digits
+   - <span class="pick" data-pick="999999">999999</span>            six digits, but not a number the demo data knows
+
+How to try it: select a number above (double-click selects a whole number),
+then press Ctrl+Alt+A. Or press Ctrl+Alt+Space and type one.
+
+Thanks,
+Demo author</div>
+  </section>
+
+  <section class="win" id="term" aria-label="Terminal window">
+    <div class="bar"><span class="ttl">Terminal</span><span class="ctl" aria-hidden="true"><i>–</i><i>▢</i><i>✕</i></span></div>
+    <div class="body" id="termBody" tabindex="0">C:\work&gt; echo ANDA 216482
+<span class="pick" data-pick="TERM">ANDA 216482</span>
+C:\work&gt; </div>
+  </section>
+
+  <!-- ===== guide ===== -->
+  <section class="win" id="guide" aria-label="Demo guide">
+    <div class="bar"><span class="ttl">Try it in five steps</span></div>
+    <div class="body">
+      <p class="sub">A tray app. Select a number in any window, press a hotkey, get a card. Nothing opens on its own.</p>
+      <ol id="steps">
+        <li data-step="pin"><i>✓</i><span>Open the <b>^</b> tray overflow and <b>Pin</b> the app icon.</span></li>
+        <li data-step="peek"><i>✓</i><span>Select <b>216482</b> in the memo, then press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>A</kbd>.</span></li>
+        <li data-step="look"><i>✓</i><span>Press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Space</kbd>, type <b>214990</b>.</span></li>
+        <li data-step="look2"><i>✓</i><span>Select <b>NDA 021234</b>, press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>A</kbd>. It will not guess.</span></li>
+        <li data-step="look3"><i>✓</i><span>Select the number in the <b>Terminal</b>. Terminals are paused.</span></li>
+      </ol>
+      <div class="lbl">SELECT FOR ME</div>
+      <div class="row" id="pickRow">
+        <button class="btn" type="button" data-pickbtn="216482">216482</button>
+        <button class="btn" type="button" data-pickbtn="214990">214990</button>
+        <button class="btn" type="button" data-pickbtn="NDA 021234">NDA 021234</button>
+        <button class="btn" type="button" data-pickbtn="12345">12345</button>
+        <button class="btn" type="button" data-pickbtn="TERM">in Terminal</button>
+      </div>
+      <div class="lbl">PRESS A HOTKEY</div>
+      <div class="row">
+        <button class="btn key" type="button" id="keyPeek" aria-label="Press Control Alt A">Ctrl+Alt+A</button>
+        <button class="btn key" type="button" id="keyLook" aria-label="Press Control Alt Space">Ctrl+Alt+Space</button>
+        <button class="btn" type="button" id="trayMenuBtn">Tray menu</button>
+      </div>
+      <div class="lbl">WHAT IF…</div>
+      <label class="sw"><input type="checkbox" id="swConflict"> Another program already owns Ctrl+Alt+A</label>
+      <label class="sw"><input type="checkbox" id="swAi"> Claude access is approved (sample brief)</label>
+      <p class="fine">Simulated: window chrome, hotkeys, clipboard hand-off and the brief text. Real in the Windows build: everything the self-test report lists as PASS. No data leaves this page.</p>
+    </div>
+  </section>
+
+  <!-- ===== taskbar + tray ===== -->
+  <div id="taskbar">
+    <div class="mid" aria-hidden="true">
+      <button class="app" tabindex="-1"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" fill="#6f8fb5"/><rect x="12" y="3" width="7" height="7" rx="1.5" fill="#8fb39a"/><rect x="3" y="12" width="7" height="7" rx="1.5" fill="#d1a86a"/><rect x="12" y="12" width="7" height="7" rx="1.5" fill="#b78a8a"/></svg></button>
+      <button class="app on" tabindex="-1"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="4" y="3" width="14" height="16" rx="2" fill="#fff" stroke="#7c858f" stroke-width="1.4"/><path d="M7 8h8M7 11h8M7 14h5" stroke="#7c858f" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+      <button class="app" tabindex="-1"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="4" width="16" height="14" rx="2" fill="#3b4048"/><path d="M6 9l3 2-3 2M11 14h5" stroke="#e8eaed" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+    <div class="tray">
+      <button id="chev" type="button" aria-label="Show hidden icons" aria-expanded="false"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 9l4-4 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button id="appIcon" type="button" aria-label="ANDA Hover Companion tray icon. Click for lookup, right-click or long-press for the menu."><span class="glyph"></span></button>
+      <button type="button" tabindex="-1" aria-hidden="true" class="hide-narrow"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 6.5a9 9 0 0112 0M4 9a6 6 0 018 0M6.2 11.4a3 3 0 013.6 0" stroke="#454b53" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="13" r=".9" fill="#454b53"/></svg></button>
+      <button type="button" tabindex="-1" aria-hidden="true" class="hide-narrow"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2.5 6h2.5L8.5 3v10L5 10H2.5z" fill="#454b53"/><path d="M11 5.5a3.5 3.5 0 010 5" stroke="#454b53" stroke-width="1.4" stroke-linecap="round"/></svg></button>
+      <div class="clock" aria-label="Clock, simulated"><div>10:42 AM</div><div>7/16/2026</div></div>
+    </div>
+  </div>
+
+  <div class="pop" id="flyout" role="dialog" aria-label="Hidden icons">
+    <button class="it" id="flyIcon" type="button"><span class="glyph big"></span><span><b>ANDA Hover Companion</b><br><small style="margin:0">Click: lookup · Right-click or long-press: menu</small></span></button>
+    <button class="btn pin" id="pinBtn2" type="button">Pin to taskbar (like dragging it out)</button>
+    <small>Windows 11 hides new tray icons here. Pinning keeps this one visible.</small>
+  </div>
+
+  <div class="pop" id="menu" role="menu" aria-label="ANDA Hover Companion menu"></div>
+
+  <div id="keys" role="status" aria-live="polite"></div>
+
+  <!-- ===== lookup ===== -->
+  <div class="app-win" id="lookup" role="dialog" aria-label="Lookup ANDA">
+    <div class="lbl" style="margin-top:0">LOOKUP · CTRL+ALT+SPACE</div>
+    <div class="r"><input type="text" id="lookupIn" placeholder="ANDA number, e.g. 216482" inputmode="numeric" autocomplete="off" aria-label="ANDA number"><button class="pill" id="lookupGo" type="button">Go</button></div>
+    <div class="err" id="lookupErr" role="alert">Not a recognized ANDA number.</div>
+  </div>
+
+  <!-- ===== settings ===== -->
+  <div class="app-win" id="settings" role="dialog" aria-label="Settings">
+    <div class="hdr"><h3>Settings</h3><button class="pill" id="setDone" type="button">Done</button></div>
+    <div class="lbl">APPEARANCE</div>
+    <div class="wrap" id="setLook"></div>
+    <p class="hint">All appearances share identical anatomy and meaning. This is preference, never information.</p>
+    <div class="lbl">CONSENT MODEL</div>
+    <div id="setConsent"></div>
+    <div class="lbl">SELECT &amp; PEEK · CTRL+ALT+A</div>
+    <label class="opt"><input type="checkbox" id="setCapture" checked> Read my selection by copying it, then put my clipboard back</label>
+    <p class="hint">Off: Ctrl+Alt+A opens the lookup box instead and no keystroke is ever sent. Terminals are always skipped, because Ctrl+C there interrupts a running command.</p>
+    <div class="lbl">CARD TRANSPARENCY</div>
+    <div style="display:flex;align-items:center;gap:10px"><input type="range" id="setOp" min="85" max="100" step="1" value="100" aria-label="Card transparency"><span id="setOpV" style="width:42px;text-align:right">100%</span></div>
+    <p class="hint">Only the card surface becomes translucent. Text and status colors stay fully readable.</p>
+    <div class="lbl">COMPANION LENS · PROMPT LIBRARY</div>
+    <div style="display:flex;gap:8px"><select id="setLens" aria-label="Companion lens"></select><button class="pill quiet" id="setManage" type="button">Manage…</button></div>
+    <p class="hint">Your own stored prompt steers the brief's emphasis. A lens can never override grounding.</p>
+    <div class="lbl">CLAUDE CONNECTION</div>
+    <div style="display:flex;gap:10px;align-items:flex-start"><div id="setConn" style="flex:1;color:var(--c-ink2);font-size:12px">Offline mode. Briefs are assembled from the record. Ready for API access when approved.</div><button class="pill" id="setTest" type="button">Test</button></div>
+    <p class="hint">Works fully offline. When API access is approved, set the key through the agency-approved channel and press Test. In this simulation nothing is sent anywhere.</p>
+  </div>
+
+  <!-- ===== prompt library ===== -->
+  <div class="app-win" id="plib" role="dialog" aria-label="Prompt library">
+    <div class="hdr"><h3>Prompt library</h3><button class="pill" id="plClose" type="button">Done</button></div>
+    <div class="cols">
+      <div class="list" id="plList"></div>
+      <div>
+        <input type="text" id="plName" aria-label="Lens name" placeholder="Lens name">
+        <textarea id="plText" aria-label="Lens text" style="margin-top:8px" placeholder="What should the companion emphasize?"></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px"><button class="pill" id="plSave" type="button">Save</button><button class="pill quiet" id="plNew" type="button">New</button><button class="pill quiet" id="plDel" type="button">Delete</button></div>
+        <p class="hint">Lenses are guidance, never authority. Grounding rules always outrank them.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="scrim"></div>
+<button id="chip" type="button"><span class="dot" id="chipDot"></span><span id="chipTxt"></span><span class="go" id="chipGo">Peek&nbsp;›</span></button>
+
+<div id="card" role="dialog" aria-label="ANDA quick brief" tabindex="-1">
+  <div class="grab" aria-hidden="true"></div>
+  <div class="slot hd">
+    <div class="idrow">
+      <span class="num" id="c-id"></span>
+      <span class="seal">✓ Verified</span>
+      <span class="tools">
+        <button id="pinBtn" type="button" title="Pin (Space)" aria-label="Pin card"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2.5l4 4-2.2.55a2 2 0 0 0-1.25 1.25L9.5 10.5 5.5 6.5l2.2-.55A2 2 0 0 0 8.95 4.7z"/><path d="M5.5 10.5L2.5 13.5"/></svg></button>
+        <button id="expBtn" type="button" title="Expand (E)" aria-label="Expand card"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 6.5L13 3M13 3h-3.5M13 3v3.5M6.5 9.5L3 13M3 13h3.5M3 13V9.5"/></svg></button>
+        <button id="closeBtn" type="button" title="Close (Esc)" aria-label="Close card"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+      </span>
+    </div>
+    <h2 class="drug" id="c-drug"></h2>
+    <div class="meta" id="c-meta"></div>
+    <div class="fresh" id="c-fresh"></div>
+  </div>
+  <div class="slot clock">
+    <div class="clockmain">
+      <div class="crow"><span class="lblx">GOAL</span><span class="cdate" id="c-goal"></span><span class="cdays" id="c-days"></span><span class="cpct" id="c-pct"></span></div>
+      <div class="p-bar"><i id="c-fill"></i></div>
+      <div class="p-ticks" id="c-ticks"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="crow"><span class="lblx">FORECAST</span><span class="cdate" id="c-fc"></span><span class="fdelta" id="c-fdelta"></span></div>
+      <div class="fconf" id="c-fconf"></div>
+    </div>
+    <div class="p-ringwrap" aria-hidden="true"><svg viewBox="0 0 52 52"><circle class="tr" cx="26" cy="26" r="21"></circle><circle class="fg" id="c-ring" cx="26" cy="26" r="21"></circle></svg><span class="rv" id="c-ringv"></span></div>
+  </div>
+  <div class="slot attn-slot" id="attnSlot"><div class="attn warn" id="c-attn"><span class="k">⚠ NEEDS YOU</span><span id="c-attn-t"></span></div></div>
+  <div class="slot rail latest"><span class="lblx">LATEST</span><span id="c-latest"></span></div>
+  <div class="slot rail ahead" id="aheadSlot"><span class="lblx acc">AHEAD</span><span id="c-ahead"></span></div>
+  <div class="slot ai">
+    <div class="tag"><span class="lblx acc" id="c-tag">COMPANION</span><span class="verify" id="c-verify"></span><span class="src">sources ›</span></div>
+    <div class="body" id="c-ai"></div>
+  </div>
+  <div id="ext">
+    <details><summary>Pending &amp; urgent items <span id="x-pending-n" style="font-weight:400;color:var(--c-ink3)"></span></summary><div class="cnt" id="x-pending"></div></details>
+    <details><summary>Recent project notes</summary><div class="cnt" id="x-notes"></div></details>
+    <details><summary>Forecast &amp; assumptions</summary><div class="cnt" id="x-forecast"></div></details>
+    <details><summary>Sister / related ANDAs</summary><div class="cnt" id="x-sisters"></div></details>
+  </div>
+  <div class="slot chips-slot"><div class="chips">
+    <button class="chip" id="chipCopy" type="button">Copy status</button>
+    <button class="chip" id="chipSister" type="button"></button>
+    <button class="chip" id="chipNotes" type="button"></button>
+    <button class="chip link" id="chipOpen" type="button">Open in system of record ↗</button>
+  </div></div>
+  <button id="moreBtn" type="button">Full brief ↓</button>
+  <div class="kbdbar"><span>Esc close</span><span>E expand</span><span>Space pin</span><span>S copy status</span></div>
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+   ANDA Hover Companion: browser simulation.
+   Faithful ports of the Windows app's logic (recognizer, placement, consent flow, offline brief, status line);
+   simulated parts: window chrome, the hotkey and clipboard hand-off, and the sample "generated" brief.
+   All records are fictional. Nothing leaves this page.
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const root = document.documentElement;
+root.dataset.dir = "a";
+
+/* ---------------- fictional data (same records as the Windows app's mock repository) ---------------- */
+const DATA = {
+  "216482": {
+    drug:"Metformin HCl ER Tablets, 500 mg", meta:"Meridian Pharmaceuticals (fictional) · Cycle 2",
+    goal:"Oct 3, 2026", days:"· 80 days", pct:62,
+    fc:"Oct 17, 2026", fdelta:"▲ +14 d vs goal", late:true, fconf:"moderate confidence",
+    attn:"IR response due in 6 days — Biopharmaceutics",
+    latest:"Amendment (minor) received Jun 30 — under review",
+    asOf:"data as of Jul 16, 07:12 · extract #412 (fictional)",
+    ahead:"Thu huddle — status requested on this ANDA + sister 214990 (memo, Jul 14)",
+    pending:[["IR response — Biopharmaceutics","due Jul 21",true],["Labeling carve-out review","in queue",false]],
+    notes:[["You · Jul 8","Applicant confirmed receipt of IR; response expected on time."],["You · Jun 30","Minor amendment logged; routed to OPQ same day."],["Team lead · Jun 12","Watch facility linkage with 214990 — same site."]],
+    forecast:"Baseline from comparable cycle-2 reviews: Oct 10. Adjusted +7 days for this applicant's IR-response history; band ±5 days. Assumptions: first-pass IR response; no new facility inspection. Tool calibration, trailing 6 months: median error ±8 days.",
+    sisters:[["214990","Metformin HCl ER Tablets, 750 mg — same applicant, same facility"]],
+    ai:"Forecast runs 14 days past goal: this applicant's last two IR responses averaged 31 days against 21-day asks, and the shared-facility finding on 214990 wasn't closed until late cycle. Untested assumption in the plan: “no new facility inspection needed”. Worth raising at Thursday's huddle."
+  },
+  "214990": {
+    drug:"Metformin HCl ER Tablets, 750 mg", meta:"Meridian Pharmaceuticals (fictional) · Cycle 3",
+    goal:"Aug 15, 2026", days:"· 31 days", pct:88,
+    fc:"Aug 6, 2026", fdelta:"▼ 9 d ahead of goal", late:false, fconf:"high confidence",
+    attn:null,
+    latest:"Facility IR resolved — closed Jul 2",
+    asOf:"data as of Jul 16, 07:12 · extract #412 (fictional)",
+    ahead:"Aug 1 — labeling final-format confirmation due from applicant",
+    pending:[],
+    notes:[["You · Jul 2","Facility IR closed; memo filed."],["You · Jun 20","Labeling agreed; final format pending."]],
+    forecast:"Baseline from comparable cycle-3 reviews: Aug 8. Adjusted −2 days: all disciplines complete or scheduled; band ±3 days. Assumption: no late labeling revisions. Tool calibration, trailing 6 months: median error ±8 days.",
+    sisters:[["216482","Metformin HCl ER Tablets, 500 mg — same applicant, same facility"]],
+    ai:"Tracking 9 days ahead of goal; all disciplines on schedule and no open items need action. The Jul 2 facility-closure memo is the precedent 216482's pending biopharm response will need. Flag it to that review team now rather than after their IR lands."
+  }
+};
+
+/* ---------------- ports of the Windows app's pure logic ---------------- */
+
+/* Recognizer: six-digit number, but never one labelled as another application type (NDA, BLA, IND, DMF, MF, NDC).
+   Same behavior as Data/EntityKinds.cs; scanned without regex lookbehind so older Safari parses this file. */
+const OTHER_LABEL = /(?:^|[^A-Za-z0-9_])(?:NDA|BLA|IND|DMF|NDC|MF)(?:[-\s#:.]|No\b|Number\b)*$/i;
+function extractNumber(text){
+  if(!text) return null;
+  const re = /\d+/g; let m;
+  while((m = re.exec(text))){
+    if(m[0].length !== 6) continue;
+    if(OTHER_LABEL.test(text.slice(0, m.index))) continue;
+    return m[0];
+  }
+  return null;
+}
+
+/* UI/Placement.cs: prefer below-right of the cursor, flip when it would leave the work area, then clamp. */
+function clampPos(x, y, w, h, a){
+  return [Math.min(Math.max(x, a.x), Math.max(a.x, a.r - w)), Math.min(Math.max(y, a.y), Math.max(a.y, a.b - h))];
+}
+function placeNear(cx, cy, w, h, a, dx = 10, dy = 14){
+  let x = cx + dx, y = cy + dy;
+  if(x + w > a.r) x = cx - w - dx;
+  if(y + h > a.b) y = cy - h - dy;
+  return clampPos(x, y, w, h, a);
+}
+function workArea(){
+  const tb = $("taskbar").offsetHeight, bn = document.querySelector(".banner").offsetHeight;
+  return { x:0, y:bn, r:innerWidth, b:innerHeight - tb };
+}
+
+/* Services/StatusLine.cs */
+function statusLine(id){
+  const d = DATA[id], cycle = d.meta.slice(d.meta.lastIndexOf("·") + 1).trim();
+  const delta = d.fdelta.replace("▲","").replace("▼","").trim();
+  return `ANDA ${id} (${d.drug}): ${cycle}, ${d.pct}% through review; goal ${d.goal}; forecast ${d.fc} (${delta}, ${d.fconf})` +
+         (d.attn ? `; needs action: ${d.attn}` : "") + ".";
+}
+/* Services/CompanionBriefService.cs, OfflineBriefService: deterministic, assembled from the record. */
+function offlineBrief(id){
+  const d = DATA[id]; let t = "";
+  if(d.attn) t += `Open now: ${d.attn}. `;
+  if(d.sisters.length) t += `Related precedent: ANDA ${d.sisters[0][0]} — ${d.sisters[0][1]}. `;
+  if(!t) t = "No open items need action. ";
+  return (t + "Forecast drivers and assumptions: expand → Forecast & assumptions.").trim();
+}
+const noticeLifetime = text => Math.min(8, Math.max(2.5, 1.2 + text.length / 14)) * 1000;
+
+/* ---------------- state ---------------- */
+const state = { dir:"a", mode:"full", capture:true, op:100, lens:null, pinned:false, running:true, conflict:false, ai:false };
+const steps = {};
+let current = null, pinnedCard = false, focusedWin = "memo", lastSel = null, deselecting = false;
+let pointer = { x: Math.round(innerWidth * 0.4), y: Math.round(innerHeight * 0.4) };
+let chipTimer = null, streamTimer = null, keysTimer = null, chipAccept = null;
+const coarse = matchMedia("(pointer:coarse)"), narrow = matchMedia("(max-width:1040px)");
+const isSheet = () => coarse.matches || narrow.matches;
+const card = $("card"), scrim = $("scrim"), chip = $("chip");
+const RING_C = 2 * Math.PI * 21;
+
+const LOOKS = [["a","A · Quiet Fluent"],["b","B · Docket Ledger"],["c","C · Signal"],["d","D · Draft"],["e","E · Instrument"]];
+const CONSENTS = [["full","① Full card: the hotkey press is the consent"],["peek","② Peek first: expand for the full brief"],["whisper","③ Whisper invite: opens only if clicked"]];
+let prompts = [
+  ["Facility focus","Weight facility and inspection signals heaviest: shared sites, unresolved findings, inspection assumptions. Name the facility linkage explicitly when one exists."],
+  ["Director summary","Write for a division director skimming between meetings: lead with the forecast delta and the single decision or risk that needs their awareness. No review-discipline jargon."],
+  ["First-cycle watch","Emphasize anything that threatens first-cycle approval: response quality history, unresolved deficiencies, and assumptions that have not been pressure-tested."]
+];
+
+function markStep(name){
+  if(steps[name]) return;
+  steps[name] = true;
+  const li = document.querySelector(`#steps [data-step="${name}"]`);
+  if(li) li.classList.add("done");
+}
+
+/* ---------------- card ---------------- */
+function fill(id){
+  const d = DATA[id];
+  $("c-id").textContent = "ANDA " + id;
+  $("c-drug").textContent = d.drug; $("c-meta").textContent = d.meta; $("c-fresh").textContent = d.asOf;
+  $("c-goal").textContent = d.goal; $("c-days").textContent = d.days;
+  $("c-fc").textContent = d.fc;
+  const fd = $("c-fdelta"); fd.textContent = d.fdelta; fd.className = "fdelta " + (d.late ? "warn" : "good");
+  $("c-fconf").textContent = d.fconf;
+  $("c-pct").textContent = d.pct + "%"; $("c-fill").style.width = d.pct + "%";
+  document.querySelectorAll("#c-ticks i").forEach((t, i) => t.classList.toggle("on", i < Math.round(d.pct / 20)));
+  const ring = $("c-ring"); ring.style.strokeDasharray = RING_C; ring.style.strokeDashoffset = RING_C * (1 - d.pct / 100);
+  $("c-ringv").textContent = d.pct + "%";
+  $("attnSlot").style.display = d.attn ? "" : "none";
+  if(d.attn) $("c-attn-t").innerHTML = "<b>" + d.attn.replace(" — ", "</b> — ");
+  $("c-latest").textContent = d.latest;
+  $("aheadSlot").style.display = d.ahead ? "" : "none";
+  if(d.ahead) $("c-ahead").textContent = d.ahead;
+  $("x-pending-n").textContent = d.pending.length ? "· " + d.pending.length : "· none";
+  $("x-pending").innerHTML = d.pending.length
+    ? d.pending.map(([t, due, w]) => `<div class="rowi"><span>${t}</span><span class="due ${w ? "warn" : ""}">${due}</span></div>`).join("")
+    : `<div class="rowi"><span>No open items.</span></div>`;
+  $("x-notes").innerHTML = d.notes.map(([who, t]) => `<div class="notei"><div class="who">${who}</div>${t}</div>`).join("");
+  $("x-forecast").textContent = d.forecast;
+  $("x-sisters").innerHTML = d.sisters.map(([n, desc]) =>
+    `<div class="rowi"><span><span class="sister" data-anda="${n}" role="button" tabindex="0">ANDA ${n}</span> — ${desc}</span></div>`).join("");
+  $("chipSister").textContent = "Sister ANDA · " + d.sisters.length; $("chipSister").hidden = d.sisters.length === 0;
+  $("chipNotes").textContent = "Notes · " + d.notes.length;
+}
+function renderBrief(id){
+  clearInterval(streamTimer);
+  const body = $("c-ai"), d = DATA[id];
+  if(!state.ai){
+    $("c-tag").textContent = "OFFLINE BRIEF"; $("c-verify").textContent = "assembled from the record";
+    body.textContent = offlineBrief(id); return;
+  }
+  $("c-tag").textContent = "COMPANION"; $("c-verify").textContent = "sample text · no model is called";
+  body.innerHTML = '<span class="skel"></span><span class="skel"></span>';
+  streamTimer = setTimeout(() => {
+    let i = 0;
+    const note = state.lens ? `<div style="margin-top:6px;font-size:11px;color:var(--c-ink3)">Sample text. With a live connection, your lens “${state.lens}” would steer this brief.</div>` : "";
+    body.innerHTML = '<span class="cur"></span>';
+    streamTimer = setInterval(() => {
+      i += 3;
+      body.innerHTML = d.ai.slice(0, i) + (i < d.ai.length ? '<span class="cur"></span>' : note);
+      if(i >= d.ai.length) clearInterval(streamTimer);
+    }, 20);
+  }, 420);
+}
+function placeCard(anchor){
+  const a = workArea();
+  const [x, y] = placeNear(anchor.x, anchor.y, card.offsetWidth, card.offsetHeight, a);
+  card.style.left = x + "px"; card.style.top = y + "px";
+}
+function clampCard(){
+  if(isSheet() || card.style.display !== "block") return;
+  const [x, y] = clampPos(card.offsetLeft, card.offsetTop, card.offsetWidth, card.offsetHeight, workArea());
+  card.style.left = x + "px"; card.style.top = y + "px";
+}
+function openCard(id, opts = {}){
+  if(!DATA[id]) return;
+  hideChip(); closeMenus();
+  current = id; fill(id); setPin(false);
+  card.classList.remove("expanded");
+  card.classList.toggle("mini", !!opts.mini);
+  card.classList.toggle("sheet", isSheet());
+  card.style.display = "block";
+  if(isSheet()){ scrim.style.display = "block"; card.style.left = card.style.top = ""; }
+  else { scrim.style.display = "none"; placeCard(opts.anchor || pointer); }
+  card.focus({ preventScroll:true });
+  if(opts.mini) $("c-ai").textContent = ""; else renderBrief(id);
+}
+function closeCard(){
+  clearInterval(streamTimer); clearTimeout(streamTimer);
+  card.style.display = "none"; scrim.style.display = "none";
+  setPin(false); card.classList.remove("expanded", "mini"); current = null;
+}
+function setPin(v){
+  pinnedCard = v; card.classList.toggle("pinned", v); $("pinBtn").classList.toggle("on", v);
+}
+function toggleExpand(){ card.classList.toggle("expanded"); setTimeout(clampCard, 0); }
+function copyStatus(){
+  if(!current) return;
+  const text = statusLine(current), btn = $("chipCopy");
+  const done = () => { btn.textContent = "Copied ✓"; setTimeout(() => btn.textContent = "Copy status", 1200); };
+  (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text) : Promise.reject())
+    .then(done, () => showNotice("The browser blocked copying. Status line: " + text, anchorForCard()));
+}
+const anchorForCard = () => ({ x: card.offsetLeft + 12, y: card.offsetTop + card.offsetHeight - 40 });
+
+/* ---------------- chip: whisper invite and notices ---------------- */
+function showChipAt(anchor){
+  chip.classList.remove("fading"); chip.style.display = "flex";
+  const [x, y] = placeNear(anchor.x, anchor.y, chip.offsetWidth, chip.offsetHeight, workArea(), 8, 12);
+  chip.style.left = x + "px"; chip.style.top = y + "px";
+}
+function showNotice(text, anchor){
+  hideChip();
+  $("chipTxt").textContent = text; $("chipDot").hidden = true; $("chipGo").hidden = true; chipAccept = null;
+  showChipAt(anchor || pointer);
+  fadeChipAfter(noticeLifetime(text));
+}
+function showInvite(label, anchor, accept){
+  hideChip();
+  $("chipTxt").textContent = label; $("chipDot").hidden = false; $("chipGo").hidden = false; chipAccept = accept;
+  showChipAt(anchor || pointer);
+  fadeChipAfter(3000);
+}
+function fadeChipAfter(ms){
+  clearTimeout(chipTimer);
+  chipTimer = setTimeout(() => { chip.classList.add("fading"); chipTimer = setTimeout(hideChip, 520); }, ms);
+}
+function hideChip(){ clearTimeout(chipTimer); chip.style.display = "none"; chip.classList.remove("fading"); chipAccept = null; }
+chip.addEventListener("click", () => { const go = chipAccept; hideChip(); if(go) go(); });
+
+/* ---------------- keystroke overlay ---------------- */
+function showKeys(kind, extra){
+  const k = $("keys");
+  k.innerHTML = `<span><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>${kind === "peek" ? "A" : "Space"}</kbd></span>` + (extra ? `<span>${extra}</span>` : "");
+  k.classList.add("show"); clearTimeout(keysTimer);
+  keysTimer = setTimeout(() => k.classList.remove("show"), 2000);
+}
+
+/* ---------------- selection tracking (the "text in the window in front") ---------------- */
+const winOf = node => { const el = node && (node.nodeType === 1 ? node : node.parentElement); return el && el.closest ? (el.closest("#memo") ? "memo" : el.closest("#term") ? "term" : null) : null; };
+document.addEventListener("selectionchange", () => {
+  const s = getSelection(), t = s.toString();
+  if(t.trim() && winOf(s.anchorNode)){
+    const r = s.rangeCount ? s.getRangeAt(0).getBoundingClientRect() : null;
+    lastSel = { text:t, win:winOf(s.anchorNode), x:r ? r.right : pointer.x, y:r ? r.bottom : pointer.y };
+  } else if(!t.trim() && deselecting) lastSel = null;
+});
+["memoBody", "termBody"].forEach(id => {
+  const el = $(id);
+  el.addEventListener("pointerdown", () => { deselecting = true; setFocusWin(id === "memoBody" ? "memo" : "term"); });
+  ["pointerup", "pointercancel"].forEach(ev => el.addEventListener(ev, () => setTimeout(() => deselecting = false, 0)));
+});
+function setFocusWin(w){
+  focusedWin = w;
+  $("memo").classList.toggle("active", w === "memo"); $("term").classList.toggle("active", w === "term");
+}
+function pick(text){
+  const el = document.querySelector(`[data-pick="${text}"]`);
+  if(!el) return;
+  const r = document.createRange(); r.selectNodeContents(el);
+  const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+  setFocusWin(winOf(el));
+  lastSel = { text:el.textContent, win:winOf(el), x:el.getBoundingClientRect().right, y:el.getBoundingClientRect().bottom };
+}
+document.addEventListener("pointermove", e => { pointer = { x:e.clientX, y:e.clientY }; }, { passive:true });
+document.addEventListener("pointerdown", e => { pointer = { x:e.clientX, y:e.clientY }; }, { passive:true });
+
+/* ---------------- hotkey flow: a port of App.axaml.cs OnHotkeyAsync / HandleCapture ---------------- */
+function hotkey(kind, source){
+  if(!state.running){ showKeys(kind, "The app is not running"); return; }
+  const anchor = source === "button" ? (lastSel ? { x:lastSel.x, y:lastSel.y } : { ...pointer }) : { ...pointer };
+  if(kind === "look"){ showKeys(kind); openLookup(anchor); return; }
+  if(state.conflict){ showKeys(kind, "Another program handled this key. The app never saw it."); return; }
+  if(!state.capture){ showKeys(kind); openLookup(anchor); return; }
+  if(focusedWin === "term"){
+    showKeys(kind);
+    showNotice("Paused in terminals. Type the number instead", anchor); markStep("look3"); openLookup(anchor); return;
+  }
+  const sel = getSelection().toString().trim() ? { text:getSelection().toString() } : lastSel;
+  showKeys(kind, sel ? "Copied your selection, read it, put your clipboard back ✓" : "");
+  const number = sel ? extractNumber(sel.text) : null;
+  if(!number){ if(sel) markStep("look2"); openLookup(anchor); return; }
+  if(!DATA[number]){ showNotice(`${number} is not a recognized ANDA`, anchor); return; }
+  markStep("peek");
+  if(state.mode === "whisper") showInvite(`ANDA ${number}`, anchor, () => openCard(number, { anchor }));
+  else openCard(number, { mini: state.mode === "peek", anchor });
+}
+document.addEventListener("keydown", e => {
+  if(e.ctrlKey && e.altKey && !e.metaKey){
+    if(e.code === "KeyA"){ e.preventDefault(); hotkey("peek", "keyboard"); return; }
+    if(e.code === "Space"){ e.preventDefault(); hotkey("look", "keyboard"); return; }
+  }
+  if(e.key === "Escape"){
+    if(menuOpen() || $("flyout").style.display === "block"){ closeMenus(); return; }
+    for(const id of ["lookup", "plib", "settings"]) if($(id).style.display === "block"){ closeApp(id); return; }
+    hideChip(); if(card.style.display === "block") closeCard(); return;
+  }
+  if(card.style.display !== "block" || /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
+  const k = e.key.toLowerCase();
+  if(k === "e" && !e.ctrlKey) toggleExpand();
+  else if(k === "s" && !e.ctrlKey) copyStatus();
+  else if(e.key === " " && document.activeElement === card){ e.preventDefault(); setPin(!pinnedCard); }
+  else if(k === "c" && !e.ctrlKey && current && navigator.clipboard) navigator.clipboard.writeText($("c-ai").textContent).catch(() => {});
+});
+$("keyPeek").addEventListener("click", () => hotkey("peek", "button"));
+$("keyLook").addEventListener("click", () => hotkey("look", "button"));
+document.querySelectorAll("[data-pickbtn]").forEach(b => b.addEventListener("click", () => pick(b.dataset.pickbtn)));
+document.querySelectorAll("#memo .pick, #term .pick").forEach(el => el.addEventListener("dblclick", () => { lastSel = { text:el.textContent, win:winOf(el), x:el.getBoundingClientRect().right, y:el.getBoundingClientRect().bottom }; }));
+
+/* ---------------- lookup ---------------- */
+let lookupAnchor = null;
+function openLookup(anchor){
+  closeMenus(); lookupAnchor = anchor || pointer;
+  const box = $("lookup"); box.style.display = "block"; $("lookupErr").style.display = "none"; $("lookupIn").value = "";
+  setTimeout(() => $("lookupIn").focus(), 30);
+}
+function submitLookup(){
+  const n = extractNumber($("lookupIn").value);
+  if(!n){ $("lookupErr").style.display = "block"; return; }
+  closeApp("lookup");
+  if(!DATA[n]){ showNotice(`${n} is not a recognized ANDA`, lookupAnchor); return; }
+  markStep("look");
+  openCard(n, { mini: state.mode === "peek", anchor: lookupAnchor });
+}
+$("lookupGo").addEventListener("click", submitLookup);
+$("lookupIn").addEventListener("keydown", e => { if(e.key === "Enter") submitLookup(); });
+
+/* ---------------- app windows ---------------- */
+function showApp(id){ closeMenus(); $(id).style.display = "block"; if(isSheet()){ scrim.style.display = "block"; } }
+function closeApp(id){ $(id).style.display = "none"; if(card.style.display !== "block") scrim.style.display = "none"; }
+scrim.addEventListener("click", () => {
+  if(card.style.display === "block" && !pinnedCard) closeCard();
+  ["lookup", "plib", "settings"].forEach(id => { if($(id).style.display === "block" && id !== "settings") closeApp(id); });
+  scrim.style.display = "none";
+});
+$("setDone").addEventListener("click", () => closeApp("settings"));
+$("plClose").addEventListener("click", () => closeApp("plib"));
+
+/* settings */
+function applyLook(dir){
+  state.dir = dir; root.dataset.dir = dir;
+  if(dir !== "a") markStep("look4");
+}
+(function buildSettings(){
+  LOOKS.forEach(([id, name]) => {
+    const l = document.createElement("label"); l.className = "opt";
+    l.innerHTML = `<input type="radio" name="look" value="${id}" ${id === "a" ? "checked" : ""}> ${name}`;
+    l.firstChild.addEventListener("change", () => applyLook(id));
+    $("setLook").appendChild(l);
+  });
+  CONSENTS.forEach(([id, name]) => {
+    const l = document.createElement("label"); l.className = "opt";
+    l.innerHTML = `<input type="radio" name="consent" value="${id}" ${id === "full" ? "checked" : ""}> ${name}`;
+    l.firstChild.addEventListener("change", () => { state.mode = id; });
+    $("setConsent").appendChild(l);
+  });
+  $("setCapture").addEventListener("change", e => { state.capture = e.target.checked; });
+  $("setOp").addEventListener("input", e => {
+    state.op = +e.target.value; $("setOpV").textContent = state.op + "%"; root.style.setProperty("--op", state.op + "%");
+  });
+  $("setLens").addEventListener("change", e => { state.lens = e.target.selectedIndex <= 0 ? null : e.target.value; });
+  $("setManage").addEventListener("click", () => { showApp("plib"); renderPrompts(0); });
+  $("setTest").addEventListener("click", () => {
+    $("setConn").textContent = "Testing…";
+    setTimeout(() => { $("setConn").textContent = "Offline mode: no API key detected. Briefs are assembled from the record. When access is granted, set the key through the agency-approved channel and press Test again. (Simulation: nothing was sent.)"; }, 500);
+  });
+  reloadLenses();
+})();
+function reloadLenses(){
+  const sel = $("setLens"); sel.innerHTML = "";
+  [["No lens (default brief)"], ...prompts].forEach(([n]) => { const o = document.createElement("option"); o.textContent = n; sel.appendChild(o); });
+  const idx = state.lens ? prompts.findIndex(p => p[0] === state.lens) + 1 : 0;
+  sel.selectedIndex = Math.max(0, idx); if(idx <= 0) state.lens = null;
+}
+
+/* prompt library */
+let plIndex = 0;
+function renderPrompts(i){
+  plIndex = i; const list = $("plList"); list.innerHTML = "";
+  prompts.forEach(([n], k) => {
+    const b = document.createElement("button"); b.type = "button"; b.textContent = n;
+    if(k === i) b.setAttribute("aria-current", "true");
+    b.addEventListener("click", () => renderPrompts(k)); list.appendChild(b);
+  });
+  $("plName").value = prompts[i] ? prompts[i][0] : ""; $("plText").value = prompts[i] ? prompts[i][1] : "";
+}
+$("plSave").addEventListener("click", () => {
+  const n = $("plName").value.trim(), t = $("plText").value.trim(); if(!n) return;
+  const k = prompts.findIndex(p => p[0].toLowerCase() === n.toLowerCase());
+  if(k >= 0) prompts[k] = [n, t]; else prompts.push([n, t]);
+  reloadLenses(); renderPrompts(k >= 0 ? k : prompts.length - 1);
+});
+$("plNew").addEventListener("click", () => { $("plName").value = ""; $("plText").value = ""; $("plName").focus(); });
+$("plDel").addEventListener("click", () => { if(prompts[plIndex]){ prompts.splice(plIndex, 1); reloadLenses(); renderPrompts(0); } });
+
+/* ---------------- tray ---------------- */
+const menu = $("menu"), flyout = $("flyout");
+const menuOpen = () => menu.style.display === "block";
+function closeMenus(){ menu.style.display = "none"; flyout.style.display = "none"; $("chev").setAttribute("aria-expanded", "false"); }
+function hotkeyLine(){ return `Hotkeys: Ctrl+Alt+A ${state.conflict ? "✗ in use" : "✓"}   Ctrl+Alt+Space ✓`; }
+function openMenu(){
+  if(!state.running) return;
+  flyout.style.display = "none";
+  menu.innerHTML = ""; let sub = false;
+  const item = (label, key, fn, o = {}) => {
+    const b = document.createElement("button"); b.type = "button"; b.setAttribute("role", "menuitem");
+    b.innerHTML = `<span>${label}</span>` + (key ? `<span class="k">${key}</span>` : "");
+    if(o.disabled) b.disabled = true;
+    if(o.checked !== undefined) b.setAttribute("aria-checked", o.checked);
+    b.addEventListener("click", () => { if(fn) fn(); if(!o.keep) closeMenus(); });
+    return b;
+  };
+  menu.append(
+    item("Lookup ANDA…", "Ctrl+Alt+Space", () => openLookup(pointer)),
+    item("Demo: at-risk card", "", () => openCard("216482", { anchor:trayAnchor() })),
+    item("Demo: healthy card", "", () => openCard("214990", { anchor:trayAnchor() })),
+    document.createElement("hr"));
+  const ap = item("Appearance", "▸", null, { keep:true });
+  const subBox = document.createElement("div"); subBox.className = "sub"; subBox.hidden = true;
+  LOOKS.forEach(([id, name]) => subBox.append(item(name, "", () => { applyLook(id); const r = document.querySelector(`input[name=look][value=${id}]`); if(r) r.checked = true; }, { checked:state.dir === id })));
+  ap.addEventListener("click", () => { subBox.hidden = !subBox.hidden; });
+  menu.append(ap, subBox,
+    item("Settings…", "", () => showApp("settings")),
+    item("Prompt library…", "", () => { showApp("plib"); renderPrompts(0); }),
+    document.createElement("hr"),
+    item(hotkeyLine(), "", null, { disabled:true }),
+    item("Exit", "", exitApp));
+  menu.style.display = "block";
+}
+const trayAnchor = () => { const r = ($("appIcon").classList.contains("pinned") ? $("appIcon") : $("chev")).getBoundingClientRect(); return { x:r.left, y:r.top - 8 }; };
+$("chev").addEventListener("click", e => {
+  e.stopPropagation();
+  const open = flyout.style.display === "block";
+  closeMenus(); if(open) return;
+  $("flyIcon").hidden = state.pinned || !state.running; $("pinBtn2").hidden = state.pinned || !state.running;
+  flyout.querySelector("small").textContent = state.running ? (state.pinned ? "The app icon is pinned to the taskbar." : "Windows 11 hides new tray icons here. Pinning keeps this one visible.") : "No hidden icons.";
+  flyout.style.display = "block"; $("chev").setAttribute("aria-expanded", "true");
+});
+function pinIcon(){ state.pinned = true; $("appIcon").classList.add("pinned"); markStep("pin"); closeMenus(); }
+$("pinBtn2").addEventListener("click", pinIcon);
+$("flyIcon").addEventListener("click", () => { closeMenus(); openLookup(pointer); });
+$("flyIcon").addEventListener("contextmenu", e => { e.preventDefault(); openMenu(); });
+$("appIcon").addEventListener("click", () => { closeMenus(); openLookup(pointer); });
+$("appIcon").addEventListener("contextmenu", e => { e.preventDefault(); openMenu(); });
+let lp = null;
+[$("appIcon"), $("flyIcon")].forEach(el => {
+  el.addEventListener("touchstart", () => { lp = setTimeout(() => { lp = null; openMenu(); }, 500); }, { passive:true });
+  ["touchend", "touchmove", "touchcancel"].forEach(ev => el.addEventListener(ev, () => { if(lp){ clearTimeout(lp); lp = null; } }, { passive:true }));
+});
+$("trayMenuBtn").addEventListener("click", openMenu);
+document.addEventListener("pointerdown", e => {
+  const t = e.target;
+  if(!t.closest("#menu, #flyout, #chev, #appIcon, #trayMenuBtn")) closeMenus();
+  if(!t.closest("#lookup, #keyLook, #keyPeek, #trayMenuBtn, #appIcon, #flyIcon") && $("lookup").style.display === "block") closeApp("lookup");
+  if(card.style.display === "block" && !pinnedCard && !isSheet() && !t.closest("#card, #chip, #menu, #flyout"))
+    closeCard();
+}, true);
+
+function exitApp(){
+  state.running = false; closeCard(); hideChip(); ["lookup", "plib", "settings"].forEach(closeApp);
+  $("appIcon").style.display = "none"; $("deskIcon").classList.add("attn");
+  showKeys("look", "The app has exited. Double-click Start-Demo.bat on the desktop to start it again.");
+}
+$("deskIcon").addEventListener("dblclick", launch);
+$("deskIcon").addEventListener("click", e => { if(e.detail === 0 || coarse.matches) launch(); });
+function launch(){
+  if(state.running) return;
+  state.running = true; $("appIcon").style.display = ""; $("deskIcon").classList.remove("attn");
+  showNotice("ANDA Hover Companion started. Look for its icon near the clock.", { x:innerWidth - 300, y:innerHeight - 140 });
+}
+
+/* ---------------- what-if switches ---------------- */
+$("swConflict").addEventListener("change", e => {
+  state.conflict = e.target.checked;
+  if(state.conflict && state.running)
+    showNotice("Ctrl+Alt+A is already used by another program. Use Ctrl+Alt+Space or the tray icon.", { x:innerWidth - 360, y:innerHeight - 150 });
+});
+$("swAi").addEventListener("change", e => { state.ai = e.target.checked; if(current && !card.classList.contains("mini")) renderBrief(current); });
+
+/* ---------------- card controls ---------------- */
+$("closeBtn").addEventListener("click", closeCard);
+$("pinBtn").addEventListener("click", () => setPin(!pinnedCard));
+$("expBtn").addEventListener("click", toggleExpand);
+$("chipCopy").addEventListener("click", copyStatus);
+$("moreBtn").addEventListener("click", () => { card.classList.remove("mini"); if(current) renderBrief(current); setTimeout(clampCard, 0); });
+$("chipSister").addEventListener("click", () => { const s = current && DATA[current].sisters[0]; if(s){ current = s[0]; fill(current); renderBrief(current); setTimeout(clampCard, 0); } });
+$("chipNotes").addEventListener("click", () => showNotice("Not wired in this prototype. In the full build this opens the project notes.", anchorForCard()));
+$("chipOpen").addEventListener("click", () => showNotice("Not wired in this prototype. The full build links to your system of record.", anchorForCard()));
+card.addEventListener("click", e => {
+  const s = e.target.closest(".sister");
+  if(s && DATA[s.dataset.anda]){ current = s.dataset.anda; fill(current); renderBrief(current); setTimeout(clampCard, 0); }
+});
+card.addEventListener("keydown", e => { if((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("sister")){ e.preventDefault(); e.target.click(); } });
+$("resetBtn").addEventListener("click", () => location.reload());
+addEventListener("resize", () => {
+  if(card.style.display !== "block") return;
+  const sheet = isSheet(); card.classList.toggle("sheet", sheet); scrim.style.display = sheet ? "block" : "none";
+  if(!sheet) clampCard();
+});
+</script>
+</body>
+</html>

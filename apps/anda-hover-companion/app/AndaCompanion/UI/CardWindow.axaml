@@ -6,6 +6,18 @@
         SizeToContent="WidthAndHeight" CanResize="False" Topmost="True"
         ShowInTaskbar="False" ShowActivated="True" Title="ANDA quick brief">
 
+  <Window.Resources>
+    <!-- Drawer sections read as flat, full-width rows with hairlines, not as boxed buttons. -->
+    <SolidColorBrush x:Key="ExpanderHeaderBackground" Color="Transparent"/>
+    <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="Transparent"/>
+    <SolidColorBrush x:Key="ExpanderHeaderBackgroundPressed" Color="Transparent"/>
+    <SolidColorBrush x:Key="ExpanderHeaderBorderBrush" Color="Transparent"/>
+    <SolidColorBrush x:Key="ExpanderHeaderBorderBrushPointerOver" Color="Transparent"/>
+    <SolidColorBrush x:Key="ExpanderHeaderBorderBrushPressed" Color="Transparent"/>
+    <SolidColorBrush x:Key="ExpanderContentBackground" Color="Transparent"/>
+    <SolidColorBrush x:Key="ExpanderContentBorderBrush" Color="Transparent"/>
+  </Window.Resources>
+
   <Window.Styles>
     <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource C.Font}"/></Style>
     <Style Selector="TextBlock.lbl">
@@ -35,7 +47,12 @@
     </Style>
     <Style Selector="Button.chip:pressed"><Setter Property="RenderTransform" Value="scale(0.96)"/></Style>
     <Style Selector="Button.tool:pressed"><Setter Property="RenderTransform" Value="scale(0.88)"/></Style>
+    <Style Selector="Expander /template/ ToggleButton#ExpanderHeader">
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+    </Style>
     <Style Selector="Expander">
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
       <Setter Property="Background" Value="Transparent"/>
       <Setter Property="Padding" Value="0"/>
       <Setter Property="MinHeight" Value="0"/>
@@ -49,6 +66,8 @@
             BoxShadow="0 18 42 -10 #59000000" ClipToBounds="True">
       <Panel>
         <ui:GridSurface/>
+        <!-- Scrolls only when the card is taller than the screen's work area (e.g. expanded on a 768 px laptop). -->
+        <ScrollViewer Name="Body" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Name="Slots" Grid.IsSharedSizeScope="True">
 
           <!-- identity -->
@@ -215,6 +234,7 @@
                   Foreground="{DynamicResource C.Accent}" FontWeight="SemiBold" FontSize="12.5"
                   Content="Full brief ↓"/>
         </StackPanel>
+        </ScrollViewer>
       </Panel>
     </Border>
   </Panel>
