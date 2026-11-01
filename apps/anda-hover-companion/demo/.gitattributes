@@ -1,0 +1,3 @@
+# The launcher and the plain-text guide are read by Windows tools: keep CRLF line endings.
+*.bat text eol=crlf
+*.txt text eol=crlf
