@@ -5,6 +5,10 @@ A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
 
 ## Quick setup (under 5 minutes)
 
+**No .NET needed:** every green run of the *ANDA Companion (Windows)* workflow publishes
+`anda-companion-demo-win-x64`: a single self-contained `AndaCompanion.exe` plus a launcher, a sample
+memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat`, pin the tray icon.
+
 1. `dotnet run --project AndaCompanion` (or double-click the published `AndaCompanion.exe`).
 2. First run opens **Settings** automatically: pick an appearance, a consent model,
    and your transparency — a demo card appears alongside so every choice previews live.
@@ -26,7 +30,17 @@ A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
   them (see ../SECURITY.md).
 - **Global hotkeys** — `Ctrl+Alt+A`: peek at the current text selection (Select & Peek);
   `Ctrl+Alt+Space`: lookup window. The hotkey is always the consent act — nothing ever
-  opens on its own.
+  opens on its own. Registration is **checked**: if another program owns a combination you get a
+  plain-language notice with the fallback, and the tray menu shows which hotkeys are live.
+- **Select & Peek, safely** — it reads the selection by sending Ctrl+C, and every step exists
+  because the naive version hurts someone: terminals are skipped (Ctrl+C there is an interrupt);
+  it waits for you to release Ctrl+Alt so the target sees Ctrl+C; success is detected by the
+  clipboard sequence number, so a selection equal to your clipboard still works; your clipboard is
+  snapshotted in every plain-memory format and put back (oversized clipboards are refused, not
+  half-saved); it runs off the UI thread. Settings can turn it off entirely, leaving the lookup box.
+  Known limits: elevated (run-as-administrator) windows ignore injected keys, and on keyboard layouts
+  where Ctrl+Alt is AltGr the hotkey may type a character. UI Automation capture (no keystroke) is the
+  planned replacement.
 - **The card** — forecast-first clock (goal vs. forecast + delta + confidence), single
   needs-attention line, latest event, AHEAD anticipation line, companion brief, expandable
   drawer (pending items, notes, forecast drivers, sister ANDAs), pin (`Space`),
@@ -47,8 +61,14 @@ A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
 - **Consent stage-one surfaces** — whisper invite chip (self-fades in 3 s) and the
   compact peek card (no AI call until expanded).
 
+- **Placement** — cards, notices and invites are placed from their measured size: below-right of
+  the cursor, flipped at an edge, clamped to the work area. A card taller than the screen scrolls.
+- **Recognizer** — six digits, optionally prefixed `ANDA`. A number labelled NDA, BLA, IND, DMF, MF
+  or NDC is refused, because those are also six digits and showing the wrong card is worse than none.
+- **Accessibility** — every text ink meets WCAG AA (4.5:1) on every appearance, enforced by tests.
+
 Planned next: UI Automation text-under-cursor capture (slots in behind
-`TextCaptureService` without touching callers), real data adapters, MSIX packaging.
+`TextCaptureService` without touching callers), real data adapters, MSIX packaging, code signing.
 
 ## Build & run
 
@@ -56,12 +76,46 @@ Planned next: UI Automation text-under-cursor capture (slots in behind
 # on Windows (run)
 dotnet run --project AndaCompanion
 
-# publish a single-file exe
-dotnet publish AndaCompanion -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
+# publish a single-file exe (what CI does)
+dotnet publish AndaCompanion -c Release -r win-x64 --self-contained true `
+  -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true
 ```
 
-The project also cross-compiles from Linux/macOS (`dotnet build`), which is how CI and
-the preview harness work.
+The project also cross-compiles from Linux/macOS (`dotnet build`).
+
+**Portable mode.** `ANDA_COMPANION_HOME=<folder>` moves every file the app writes (settings, prompts,
+crash log) into that folder. `Start-Demo.bat` uses it, so the demo never touches your profile.
+
+## Tests
+
+```bash
+dotnet test AndaCompanion.Tests                              # everything (Windows-only tests skip elsewhere)
+dotnet test AndaCompanion.Tests --filter "Category!=Windows" # what runs on Linux/macOS
+```
+
+136 cross-platform tests (recognizer, status line, GDUFA rules, brief fencing and fallback, provider
+selection, settings, contrast, placement, hotkey registration with a fake API, headless renders of the real
+windows) plus Windows-only tests that use real Win32 (clipboard snapshot/restore, hotkey registration and
+conflict, owner window). Tests never touch the real `%AppData%`.
+
+## Self-test — evidence from the machine it runs on
+
+```powershell
+AndaCompanion.exe --selftest report
+```
+
+Renders every window to PNG, then exercises the Windows integration for real and writes
+`reporteport.md` and `report.json`: hotkeys registered and delivered (it presses them), tray icon,
+Segoe UI present, clipboard snapshot/restore, card placement at five screen anchors, and an end-to-end
+Select & Peek from a real selection. Each check is PASS, WARN (this machine needs attention), SKIP
+(could not be tested, with the reason) or FAIL. It is hermetic (own data folder) and makes no network
+calls. Your clipboard is restored afterwards. Do not type or click while it runs.
+
+## Continuous verification on a real Windows machine
+
+`.github/workflows/anda-companion-windows.yml` builds, runs all tests, publishes the single-file exe,
+runs `--selftest` on the Windows runner and uploads the demo bundle, the self-test report with its
+screenshots, and the test results. Outcomes and their limits are recorded in `../VERIFICATION.md`.
 
 ## Preview harness (no Windows box needed)
 
@@ -71,9 +125,16 @@ Renders the real card in every appearance to PNGs via Avalonia's headless platfo
 dotnet run --project AndaCompanion.Preview -- ./shots
 ```
 
+Linux renders use fallback fonts, not Segoe UI. Treat them as layout evidence; the Windows self-test
+screenshots are the typography evidence.
+
 ## Claude configuration
 
-Set `ANTHROPIC_API_KEY` to enable generated briefs. For any real FDA deployment this
+Set `ANTHROPIC_API_KEY` to enable generated briefs. The request uses the official SDK and the
+`claude-opus-4-8` model ID, which matches Anthropic's current model list; **it has not been run against the
+live API** (no key in the build environment). Moving to a newer model needs a larger token budget and an
+effort setting, because newer models always think and thinking tokens count toward the limit; the
+deterministic offline brief covers any failure. For any real FDA deployment this
 must instead point at an agency-approved channel (e.g. Claude on Amazon Bedrock in
 GovCloud) — see DESIGN.md §7 — and the data layer must be a sanctioned extract. The
 shipped build is offline-first by design.
@@ -88,7 +149,11 @@ AndaCompanion/
   UI/ChipWindow.*       whisper invite + invalid-number notice
   UI/LookupWindow.*     Ctrl+Alt+Space lookup
   UI/ProgressControls   bar / ticks / ring / hatch / capsule + D's grid surface
-  Services/             hotkeys, text capture, settings, brief services (offline + Anthropic)
-  Data/                 IAndaRepository + fictional mock data
+  Services/             hotkeys (checked), text capture + clipboard snapshot, settings, brief services,
+                        self-test, app paths (portable mode)
+  Data/                 IAndaRepository + fictional mock data + identifier registry
+AndaCompanion.Tests/    xUnit suite (cross-platform + Windows-only)
 AndaCompanion.Preview/  headless screenshot harness
+../demo/                sample memo, launcher, START-HERE and the demo guide (bundled by CI)
+../mockup/              design studio (anda-card.html) and the desktop simulation (windows-simulation.html)
 ```

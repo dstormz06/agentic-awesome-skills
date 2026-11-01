@@ -352,6 +352,12 @@ user in under five minutes. A headless preview harness renders the real windows 
 PNGs for review without a Windows box. See `app/README.md`, `SECURITY.md`, and
 `PROPOSAL.md` (the director one-pager for API access).
 
+**Live demo and verification.** A GitHub Actions workflow builds the app, runs the full test suite on
+Windows and Linux, publishes a single-file Windows executable with a launcher, sample memo and demo
+guide (`demo/`), and runs the app's own `--selftest` on a real Windows machine. `mockup/windows-simulation.html`
+is a browser simulation of the whole tray flow for anyone who cannot run an unsigned program. What was and
+was not verified, with the defects each step found, is recorded in `VERIFICATION.md` round 5.
+
 ## 12. Engagement roadmap — six features that make it the daily habit
 
 Engagement here means *the tool pays the user every time they touch it* — never

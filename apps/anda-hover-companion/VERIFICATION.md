@@ -146,3 +146,59 @@ commitment letter (negotiations ongoing as of mid-2026).
 
 Environment-limited items unchanged: Windows-runtime smoke test (hotkeys, clipboard,
 tray) and a live Anthropic call still require a Windows box / API key.
+
+---
+
+# Round 5 — live-demo delivery: a real Windows machine, a test suite, a browser simulation
+
+**What changed in method.** Until now every screenshot came from a Linux headless renderer with fallback fonts,
+and nothing Windows-specific (hotkeys, clipboard, tray, Segoe UI, placement) had ever run. This round adds
+GitHub Actions on `windows-latest` as the Windows box: it builds, runs every test, publishes the single-file
+`.exe`, and runs the app's own `--selftest` on the machine. The self-test report is read back from the job log.
+
+## Evidence, with its limits
+
+| Claim | Evidence | Limit |
+|---|---|---|
+| The code builds and 143 tests pass on Windows; 136 pass on Linux (7 Windows-only tests skip there) | Workflow run 1 (143/143 on Windows) and later runs | Test counts are for the commit named in each run |
+| Both hotkeys register, and pressing them as real keystrokes reaches the app | Self-test `hotkeys-registered`, `hotkeys-delivered` | The runner is a clean machine: no competing program owns the keys |
+| Select & Peek works end to end: a real selection is captured, also when equal to the clipboard, "nothing selected" is clean, and the clipboard is restored byte-for-byte every time | Self-test `select-and-peek-end-to-end`, `clipboard-snapshot-restore` | Tested against the app's own text box. Not against Word, Outlook, a browser or a PDF reader |
+| Segoe UI Variable Text, Cascadia Mono and a serif fall-back resolve | Self-test `fonts` | Windows build 26100 (Windows 11 24H2 / Server 2025 generation). Windows 10 falls back to Segoe UI |
+| Every window renders on a real desktop, with real fonts | Self-test `render-*` (PNG per window, plus desktop captures) | The PNGs live in the run's artifact; the artifact host is not reachable from the authoring environment, so they were not viewed here |
+| Cards stay on screen at five screen anchors, collapsed and expanded | Self-test `card-placement-on-screen` | One resolution (1024×768, 1× scaling). High-DPI and multi-monitor are untested |
+| The single-file `.exe` starts and runs | The self-test ran from the published exe | Unsigned; SmartScreen behavior on a user's machine is documented, not tested |
+| The browser simulation matches the app's logic | 30 recognizer cases, the status line, the offline brief and the placement rule were compared in a browser against the C# tests' expectations: no differences | The simulation is a port, not the app. The window chrome, hotkey and clipboard hand-off are simulated and labelled as such |
+
+**Not verified, stated plainly:** a live Anthropic call (no key in any environment used); behavior on a managed
+agency workstation (allow-listing, endpoint protection, clipboard monitoring); non-US keyboard layouts where
+Ctrl+Alt is AltGr; elevated target windows (documented as a limit); Windows 10; a real mouse and display
+(the runner is virtual). Windows 11 Pro/Enterprise features such as Windows Sandbox were not used.
+
+## Defects caught this round
+
+| # | Finding | Found by | Disposition |
+|---|---|---|---|
+| R1 | Hotkey registration was unchecked; a taken combination failed silently | Audit | Checked; plain-language notice and tray status line; second instance refused |
+| R2 | Ctrl+C was synthesized into terminals, where it is an interrupt | Audit | Terminals skipped by window class |
+| R3 | Ctrl+C was sent while Ctrl+Alt was still held, so the target saw Ctrl+Alt+C | Audit | Waits for release; masking key; bounded wait |
+| R4 | Clipboard restore used a null owner window, so `SetClipboardData` fails and the user's clipboard could be emptied | Audit | Real owner window on its own message pump; Windows self-test proves restore |
+| R5 | A selection equal to the clipboard was treated as "nothing selected"; restore was text-only; capture blocked the UI thread | Audit | Sequence-number detection; every plain format snapshotted; runs off-thread |
+| R6 | Cards used fixed-size guesses and could hang off-screen from the tray | Audit | Placement from measured size; pure, tested rule |
+| R7 | **"NDA 021234" was recognized as an ANDA number**, so a real ANDA with that number would show the wrong card | Test authoring | Recognizer refuses labelled non-ANDA numbers; 14 tests; ported to the simulation |
+| R8 | **Tertiary text color failed WCAG AA on all five appearances** (2.8–3.4:1; 4.5:1 required) | Measured | Darkened to ≥4.6:1; contrast tests enforce all inks and status colors |
+| R9 | **The expanded card was ~750 px tall and ran off a 720 px work area** (a 768 px laptop) | First Windows run | Card body scrolls when it would not fit |
+| R10 | Drawer sections rendered as shrink-wrapped boxed buttons of unequal width | Rendered review | Flat full-width rows |
+| R11 | The card was placed from a window size that had not settled; at the right edge it opened ~200 px left of where the placement rule puts it | Windows self-test trace | Placed after the brief lands (≤150 ms); self-test asserts the exact position |
+| R12 | The card could overflow the bottom edge when its brief loaded after placement | Browser simulation test | Clamped after the brief lands, in the app and the simulation |
+| R13 | Settings was ~770 px tall with no scroll | Rendered review | Scrolls on short screens |
+| R14 | The self-test's "blank image" heuristic mis-flagged small valid images | First Windows run | Threshold scales with image area |
+
+R7, R8, R9 and R11 are defects a user would have met. R9 and R11 were invisible in every earlier round
+because no earlier round ran on Windows.
+
+## Still open
+
+GDUFA III tier table (needs the commitment-letter text and the dual-source rule); a rebindable hotkey for
+non-US layouts; UI Automation capture; code signing; the live Claude call; a 508 pass with a screen reader.
+`npm run test` for the whole repository stops in this authoring environment at an unrelated test that needs a
+newer `git` (`--ref-format=reftable`); `npm run validate` and `npm run security:docs` pass.
