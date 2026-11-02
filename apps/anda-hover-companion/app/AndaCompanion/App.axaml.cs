@@ -274,7 +274,7 @@ public partial class App : Application
             {
                 var result = await Task.Run(TextCaptureService.CaptureSelection);
                 if (result.Notice is { } notice) Dispatcher.UIThread.Post(() => ShowNotice(notice, near));
-                else if (result.Outcome == CaptureOutcome.Captured) text = result.Text;
+                else if (result.Outcome == CaptureOutcome.Captured) text = result.Text ?? "";
             }
             Dispatcher.UIThread.Post(() => OpenDraft(text));
         }

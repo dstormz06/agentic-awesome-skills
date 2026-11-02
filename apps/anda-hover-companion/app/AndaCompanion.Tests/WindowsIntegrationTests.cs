@@ -54,8 +54,10 @@ public class WindowsIntegrationTests
         });
 
         // the problem callback fires after WaitReady; give the hotkey thread a moment
-        SpinWait.SpinUntil(() => problems.Count >= 2, TimeSpan.FromSeconds(2));
-        Assert.Equal(2, problems.Count);
+        int expected = second.Status.Count;   // one message per shortcut (three now: peek, lookup, check a draft)
+        Assert.Equal(3, expected);
+        SpinWait.SpinUntil(() => problems.Count >= expected, TimeSpan.FromSeconds(2));
+        Assert.Equal(expected, problems.Count);
         Assert.All(problems, m => Assert.Contains("already used by another program", m));
     }
 
