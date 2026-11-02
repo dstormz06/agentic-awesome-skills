@@ -233,6 +233,17 @@ locally on the final code (269 plus the two new contrast tests). Run 10's own co
 | R20 | The compact box's "needs you" label wrapped in the lab and the simulation | Browser render | Stub widened and set to no-wrap in all three renderers |
 | R21 | **Progress fills in F, H and J were below 3:1 against their tracks** (2.99, 2.96, 2.61; G borderline at 3.12), so the bar was hard to tell from its track for some viewers | A new non-text-contrast test written while lightening K | Fills nudged slightly deeper (still mid-tone, not dark); the test now guards all eleven looks. The value is also shown as text, so this was a margin issue, not a lost fact |
 
+### Pitch refresh (2026-11-02, documents and simulation only; no app code changed)
+
+After an IT notice about AI sites and feedback from two AI workgroup leads: the browser simulation now shows look-alike mail,
+chat and browser windows (labelled "Outlook-style", "Teams-style", "Edge-style", with no logos or real products) plus an optional
+terminal, and lets the tester choose which to show. Verified in a browser: 26 new checks (layout, no overlaps, picker, hotkey from each
+app, phone width), the earlier 38 + 68 + recognizer and placement checks still pass. The deck, one-pager, `PROPOSAL.md` and
+`demo/` guides were rewritten around workflow use cases and measures, the Product Catalog path, and the stated volume (about 8
+status requests per tester per week); `ROADMAP.md` records the tester feedback and decisions. **Everything in the roadmap is not built.**
+Corrections: the demo guides now say not to run the unsigned Windows build on a managed computer before IT approves it (an earlier
+version suggested running the self-test there).
+
 ### Housekeeping in round 6
 
 The original design studio `mockup/anda-card.html` (five looks, A default) was **retired**, because it had fallen behind the app and

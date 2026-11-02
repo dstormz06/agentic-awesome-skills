@@ -2,6 +2,10 @@ ANDA HOVER COMPANION - LIVE DEMO (Windows 10/11, 64-bit)
 =========================================================
 Fictional demo data only. A concept prototype, not an FDA product.
 
+IF THIS COMPUTER IS MANAGED BY YOUR ORGANIZATION: do not run this until your IT or
+security team has approved it. It is an unsigned program that sends keystrokes and
+reads the clipboard. Use the browser demo or the slides instead.
+
 SET UP - about 2 minutes
   1. Right-click the downloaded .zip > Extract All. (Do not run it from inside the zip.)
   2. Double-click Start-Demo.bat.

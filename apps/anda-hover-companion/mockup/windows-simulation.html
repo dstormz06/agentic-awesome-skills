@@ -138,18 +138,45 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 .win .menu{display:flex;gap:14px;padding:4px 12px;font-size:12px;color:var(--ink2);border-bottom:1px solid var(--win-line);user-select:none;-webkit-user-select:none}
 .win .body{padding:16px 20px;overflow:auto;flex:1}
 
-#memo{left:120px;top:56px;width:min(660px,calc(100% - 520px));min-width:460px;bottom:calc(var(--tb-h) + 26px)}
-#memo .body{font:13px/1.6 ui-monospace,"Cascadia Mono",Consolas,"SF Mono",monospace;white-space:pre-wrap;
-            user-select:text;-webkit-user-select:text;cursor:text;color:#1f2328}
-#memo .body ::selection,#term .body ::selection{background:#b9d4f2;color:#0d1b2a}
-#memo .body span.pick{cursor:text}
-#term{right:24px;bottom:calc(var(--tb-h) + 26px);width:372px;height:132px}
+/* simulated apps: look-alike layouts (no logos, no real products). Which ones show is the tester's choice. */
+.apps{position:absolute;left:116px;right:416px;top:46px;bottom:calc(var(--tb-h) + 26px);z-index:1;display:grid;gap:12px;
+      grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(0,1fr)}
+.apps[data-count="1"]{grid-template-columns:minmax(0,1fr)}
+.apps[data-count="3"] .win.first{grid-row:span 2}
+.apps .win{position:relative;min-width:0;min-height:0}
+.apps .win .body{user-select:text;-webkit-user-select:text;cursor:text}
+.apps .win .body ::selection{background:#b9d4f2;color:#0d1b2a}
+.apps .win .body span.pick{cursor:text}
+.apps .win[hidden]{display:none}
+#mail .rib{display:flex;gap:6px;padding:6px 10px;border-bottom:1px solid var(--win-line);background:#f6f8fb;font-size:12px;color:var(--ink2);user-select:none;-webkit-user-select:none}
+#mail .rib span{padding:3px 9px;border-radius:6px;background:#fff;border:1px solid var(--win-line)}
+#mail .hdr{padding:10px 18px 8px;border-bottom:1px solid var(--win-line);font-size:12.5px;line-height:1.5;color:var(--ink2)}
+#mail .hdr .subj{font-size:15px;font-weight:650;color:var(--ink);margin-bottom:3px}
+#mail .body{font:13px/1.6 "Segoe UI",-apple-system,system-ui,sans-serif;color:#1f2328;white-space:pre-wrap}
+#mail .tag,#chat .tag,#web .tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--ink2);background:#eef0f3;border-radius:99px;padding:2px 9px;margin:0 0 10px}
+#chat .body{font:13px/1.5 "Segoe UI",-apple-system,system-ui,sans-serif;color:#1f2328;background:#fbfbfd}
+#chat .msg{display:flex;gap:8px;margin:0 0 12px}
+#chat .av{width:28px;height:28px;border-radius:50%;background:#dfe6f0;display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--ink2);flex:none}
+#chat .bub{background:#eef2f7;border-radius:10px;padding:8px 11px;font-size:12.5px;max-width:92%}
+#chat .msg.me{flex-direction:row-reverse}#chat .msg.me .bub{background:#e3ecf8}
+#chat .who{font-size:11px;color:var(--ink3);margin-bottom:2px}
+#web .tabs{display:flex;gap:4px;padding:6px 8px 0;background:var(--win-bar);user-select:none;-webkit-user-select:none}
+#web .tabs span{background:var(--win);border:1px solid var(--win-line);border-bottom:none;border-radius:8px 8px 0 0;padding:5px 12px;font-size:12px;color:var(--ink)}
+#web .addr{display:flex;gap:8px;padding:6px 10px;border-bottom:1px solid var(--win-line);user-select:none;-webkit-user-select:none}
+#web .addr .url{flex:1;background:#f1f3f5;border-radius:99px;padding:4px 12px;font-size:12px;color:var(--ink2)}
+#web .body{font:13px/1.5 "Segoe UI",-apple-system,system-ui,sans-serif;color:#1f2328}
+#web h3{margin:0 0 6px;font-size:14px}
+#web table{border-collapse:collapse;width:100%;font-size:12px;margin:0 0 14px}
+#web th,#web td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--win-line);vertical-align:top}
+#web th{font-size:10px;letter-spacing:.08em;color:var(--ink3);font-weight:800}
 #term .bar{background:#eef0f3}
-#term .body{padding:10px 16px;background:#f7f8fa;color:#1f2328;font:13px/1.55 ui-monospace,"Cascadia Mono",Consolas,monospace;
-            white-space:pre-wrap;user-select:text;-webkit-user-select:text;cursor:text}
+#term .body{padding:10px 16px;background:#f7f8fa;color:#1f2328;font:13px/1.55 ui-monospace,"Cascadia Mono",Consolas,monospace;white-space:pre-wrap}
+#appPick{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 4px}
+#appPick button{border:1.5px solid var(--win-line);background:#fff;border-radius:99px;padding:5px 11px;font-size:12px;min-height:30px;color:var(--ink2)}
+#appPick button[aria-pressed="true"]{background:var(--sim);border-color:var(--sim);color:#fff;font-weight:600}
 
 /* guide panel */
-#guide{right:24px;top:48px;width:372px;max-height:calc(100% - var(--tb-h) - 48px - 132px - 26px - 12px);min-height:300px}
+#guide{right:24px;top:48px;width:372px;max-height:calc(100% - var(--tb-h) - 48px - 26px);min-height:300px}
 #guide .body{padding:12px 16px 14px}
 #guide h2{font-size:14px;margin:0 0 2px}
 #guide .sub{font-size:12px;color:var(--ink2);margin:0 0 10px}
@@ -465,11 +492,13 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
   .desk{height:auto;min-height:100%;padding:calc(var(--banner-h) + 12px) max(16px,env(safe-area-inset-right,0px)) calc(var(--tb-h) + 28px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
         display:flex;flex-direction:column;gap:14px;overflow:visible}
   .win,.icon{position:static;width:auto;min-width:0;max-height:none;height:auto}
-  #guide{order:1;width:auto;max-height:none;min-height:0}#memo{order:2;min-width:0;width:auto}#term{order:3;width:auto;height:auto}
+  #guide{order:1;width:auto;max-height:none;min-height:0}
+  .apps{position:static;order:2;display:flex;flex-direction:column;gap:14px;z-index:auto}.apps .win{min-width:0;width:auto}
   .banner .long{display:none}
-  #memo .body{min-height:300px}
+  #mail .body{min-height:240px}#chat .body,#web .body{min-height:160px}
   .icon{order:4;align-self:flex-start}
   #term .body{min-height:110px}
+  #appPick button{min-height:44px}
   .banner,#taskbar{position:fixed}
   .banner{padding-left:max(14px,env(safe-area-inset-left,0px))}
   .app-win{position:fixed;left:12px !important;right:12px;width:auto !important;top:calc(var(--banner-h) + 12px) !important;max-height:calc(100dvh - var(--banner-h) - var(--tb-h) - 28px)}
@@ -496,16 +525,14 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
     Start-Demo.bat
   </button>
 
-  <!-- ===== sample memo (the same text as demo/sample-memo.txt) ===== -->
-  <section class="win active" id="memo" aria-label="sample-memo.txt text editor">
-    <div class="bar"><span class="ttl">sample-memo.txt — Text Editor</span><span class="ctl" aria-hidden="true"><i>–</i><i>▢</i><i>✕</i></span></div>
-    <div class="menu" aria-hidden="true"><span>File</span><span>Edit</span><span>View</span></div>
-    <div class="body" id="memoBody" tabindex="0">INTERNAL DRAFT  -  FICTIONAL DEMO DATA ONLY  -  NOT AN FDA DOCUMENT
-
-To:       Review team (demo)
-From:     Demo author
-Subject:  Thursday huddle prep - Meridian Pharmaceuticals (fictional)
-
+  <!-- ===== simulated apps: look-alike layouts with fictional content (no logos, no real products) ===== -->
+  <div class="apps" id="apps" data-count="3">
+    <section class="win active first" id="mail" data-app="mail" aria-label="Mail window, Outlook-style">
+      <div class="bar"><span class="ttl">Inbox · Mail (Outlook-style)</span><span class="ctl" aria-hidden="true"><i>–</i><i>▢</i><i>✕</i></span></div>
+      <div class="rib" aria-hidden="true"><span>New mail</span><span>Reply</span><span>Reply all</span><span>Forward</span></div>
+      <div class="hdr"><div class="subj">Thursday huddle prep - Meridian Pharmaceuticals (fictional)</div>
+        <div>From: Demo author (demo) &nbsp;·&nbsp; To: Review team (demo)</div><div>Wed 7/15/2026 4:12 PM</div></div>
+      <div class="body" id="mailBody" tabindex="0"><span class="tag">FICTIONAL DEMO DATA · NOT AN FDA DOCUMENT</span>
 Team,
 
 Two items for Thursday. Please have status ready on both.
@@ -514,25 +541,48 @@ Two items for Thursday. Please have status ready on both.
 
 2. ANDA <span class="pick" data-pick="214990">214990</span> - the 750 mg strength from the same applicant. It shares a manufacturing site with the 500 mg application, so any facility finding on one matters to both.
 
-Reference numbers that should NOT open a card (try selecting each one):
-
-   - <span class="pick" data-pick="NDA 021234">NDA 021234</span>    another application type, though it has six digits
-   - <span class="pick" data-pick="12345">12345</span>         only five digits
-   - <span class="pick" data-pick="9999999">9999999</span>       seven digits
-   - <span class="pick" data-pick="999999">999999</span>        six digits, but a number the demo data does not know
-
-How to try it: select a number above (double-click selects a whole number), then press Ctrl+Alt+A. Or press Ctrl+Alt+Space and type one.
+How to try it: select a number (double-click selects a whole number), then press Ctrl+Alt+A. Or press Ctrl+Alt+Space and type one.
 
 Thanks,
 Demo author</div>
-  </section>
+    </section>
 
-  <section class="win" id="term" aria-label="Terminal window">
-    <div class="bar"><span class="ttl">Terminal</span><span class="ctl" aria-hidden="true"><i>–</i><i>▢</i><i>✕</i></span></div>
-    <div class="body" id="termBody" tabindex="0">C:\work&gt; echo ANDA 216482
+    <section class="win" id="chat" data-app="chat" aria-label="Chat window, Teams-style">
+      <div class="bar"><span class="ttl">Huddle chat · Chat (Teams-style)</span><span class="ctl" aria-hidden="true"><i>–</i><i>▢</i><i>✕</i></span></div>
+      <div class="body" id="chatBody" tabindex="0"><span class="tag">FICTIONAL PEOPLE AND DATA</span>
+        <div class="msg"><span class="av" aria-hidden="true">A</span><div><div class="who">Colleague A (demo)</div><div class="bub">Can someone confirm where <span class="pick" data-pick="216482">216482</span> stands against its goal date? Leadership asked.</div></div></div>
+        <div class="msg"><span class="av" aria-hidden="true">B</span><div><div class="who">Colleague B (demo)</div><div class="bub">Last I looked it was around 62%. The sister application is <span class="pick" data-pick="214990">214990</span>.</div></div></div>
+        <div class="msg me"><span class="av" aria-hidden="true">Me</span><div><div class="who">You</div><div class="bub">Checking now.</div></div></div>
+      </div>
+    </section>
+
+    <section class="win" id="web" data-app="web" aria-label="Browser window, Edge-style">
+      <div class="bar"><span class="ttl">Browser (Edge-style)</span><span class="ctl" aria-hidden="true"><i>–</i><i>▢</i><i>✕</i></span></div>
+      <div class="tabs" aria-hidden="true"><span>My portfolio (demo)</span></div>
+      <div class="addr" aria-hidden="true"><span>‹ ›</span><span class="url">tracker.example/portfolio</span></div>
+      <div class="body" id="webBody" tabindex="0"><span class="tag">FICTIONAL PAGE · NOT A REAL SITE</span>
+        <h3>My portfolio</h3>
+        <table><thead><tr><th>ANDA</th><th>DRUG</th><th>GOAL</th><th>MY NOTE</th></tr></thead><tbody>
+          <tr><td><span class="pick" data-pick="216482">216482</span></td><td>Metformin HCl ER 500 mg</td><td>Oct 3</td><td>IR response due next week</td></tr>
+          <tr><td><span class="pick" data-pick="214990">214990</span></td><td>Metformin HCl ER 750 mg</td><td>Aug 15</td><td>Labeling final format pending</td></tr>
+        </tbody></table>
+        <h3>Numbers that should NOT open a card</h3>
+        <table><tbody>
+          <tr><td><span class="pick" data-pick="NDA 021234">NDA 021234</span></td><td>another application type, though it has six digits</td></tr>
+          <tr><td><span class="pick" data-pick="12345">12345</span></td><td>only five digits</td></tr>
+          <tr><td><span class="pick" data-pick="9999999">9999999</span></td><td>seven digits</td></tr>
+          <tr><td><span class="pick" data-pick="999999">999999</span></td><td>six digits, but a number the demo data does not know</td></tr>
+        </tbody></table>
+      </div>
+    </section>
+
+    <section class="win" id="term" data-app="term" aria-label="Terminal window" hidden>
+      <div class="bar"><span class="ttl">Terminal</span><span class="ctl" aria-hidden="true"><i>–</i><i>▢</i><i>✕</i></span></div>
+      <div class="body" id="termBody" tabindex="0">C:\work&gt; echo ANDA 216482
 <span class="pick" data-pick="TERM">ANDA 216482</span>
 C:\work&gt; </div>
-  </section>
+    </section>
+  </div>
 
   <!-- ===== guide ===== -->
   <section class="win" id="guide" aria-label="Demo guide">
@@ -544,15 +594,17 @@ C:\work&gt; </div>
         <li data-step="peek"><i>✓</i><span>Select <b>216482</b>, press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>A</kbd>.</span></li>
         <li data-step="look"><i>✓</i><span><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Space</kbd>, type <b>214990</b>.</span></li>
         <li data-step="look2"><i>✓</i><span>Select <b>NDA 021234</b>, press the hotkey. No guess.</span></li>
-        <li data-step="look3"><i>✓</i><span>Select the number in the <b>Terminal</b>: paused.</span></li>
+        <li data-step="look3"><i>✓</i><span>Turn on <b>Terminal</b> below, select its number: paused.</span></li>
       </ol>
+      <div class="lbl">APPS TO TEST</div>
+      <div id="appPick" role="group" aria-label="Which simulated apps to show"></div>
       <div class="lbl">SELECT FOR ME</div>
       <div class="row" id="pickRow">
         <button class="btn" type="button" data-pickbtn="216482">216482</button>
         <button class="btn" type="button" data-pickbtn="214990">214990</button>
         <button class="btn" type="button" data-pickbtn="NDA 021234">NDA 021234</button>
         <button class="btn" type="button" data-pickbtn="12345">12345</button>
-        <button class="btn" type="button" data-pickbtn="TERM">in Terminal</button>
+        <button class="btn" type="button" data-pickbtn="TERM" id="pickTerm" hidden>in Terminal</button>
       </div>
       <div class="lbl">PRESS A HOTKEY</div>
       <div class="row">
@@ -563,7 +615,7 @@ C:\work&gt; </div>
       <div class="lbl">WHAT IF…</div>
       <label class="sw"><input type="checkbox" id="swConflict"> Another program already owns Ctrl+Alt+A</label>
       <label class="sw"><input type="checkbox" id="swAi"> Claude access is approved (sample brief)</label>
-      <p class="fine">Simulated here: the desktop, the hotkey and clipboard hand-off, the sample brief. No data leaves this page.</p>
+      <p class="fine">Simulated here: the desktop, look-alike app windows (no logos, no real products), the hotkey and clipboard hand-off, the sample brief. No data leaves this page.</p>
     </div>
   </section>
 
@@ -571,8 +623,10 @@ C:\work&gt; </div>
   <div id="taskbar">
     <div class="mid" aria-hidden="true">
       <button class="app" tabindex="-1"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" fill="#6f8fb5"/><rect x="12" y="3" width="7" height="7" rx="1.5" fill="#8fb39a"/><rect x="3" y="12" width="7" height="7" rx="1.5" fill="#d1a86a"/><rect x="12" y="12" width="7" height="7" rx="1.5" fill="#b78a8a"/></svg></button>
-      <button class="app on" tabindex="-1"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="4" y="3" width="14" height="16" rx="2" fill="#fff" stroke="#7c858f" stroke-width="1.4"/><path d="M7 8h8M7 11h8M7 14h5" stroke="#7c858f" stroke-width="1.3" stroke-linecap="round"/></svg></button>
-      <button class="app" tabindex="-1"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="4" width="16" height="14" rx="2" fill="#3b4048"/><path d="M6 9l3 2-3 2M11 14h5" stroke="#e8eaed" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button class="app on" data-app-icon="mail" tabindex="-1"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="5" width="16" height="12" rx="2" fill="#fff" stroke="#7c858f" stroke-width="1.4"/><path d="M4 7l7 5 7-5" stroke="#7c858f" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button class="app" data-app-icon="chat" tabindex="-1"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 5h14a1.5 1.5 0 011.5 1.5v7A1.5 1.5 0 0118 15h-7l-4 3.5V15H4a1.5 1.5 0 01-1.5-1.5v-7A1.5 1.5 0 014 5z" fill="#fff" stroke="#7c858f" stroke-width="1.4" stroke-linejoin="round"/></svg></button>
+      <button class="app" data-app-icon="web" tabindex="-1"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="7.5" fill="#fff" stroke="#7c858f" stroke-width="1.4"/><path d="M3.5 11h15M11 3.5c2.2 2.2 3 4.6 3 7.5s-.8 5.3-3 7.5c-2.2-2.2-3-4.6-3-7.5s.8-5.3 3-7.5z" stroke="#7c858f" stroke-width="1.2" fill="none"/></svg></button>
+      <button class="app" data-app-icon="term" tabindex="-1"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="4" width="16" height="14" rx="2" fill="#3b4048"/><path d="M6 9l3 2-3 2M11 14h5" stroke="#e8eaed" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
     <div class="tray">
       <button id="chev" type="button" aria-label="Show hidden icons" aria-expanded="false"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 9l4-4 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -794,7 +848,7 @@ const noticeLifetime = text => Math.min(8, Math.max(2.5, 1.2 + text.length / 14)
 /* ---------------- state ---------------- */
 const state = { dir:"k", look:"k", form:"full", autoHide:20, mode:"full", capture:true, op:100, lens:null, pinned:false, running:true, conflict:false, ai:false };
 const steps = {};
-let current = null, pinnedCard = false, focusedWin = "memo", lastSel = null, deselecting = false;
+let current = null, pinnedCard = false, focusedWin = "mail", lastSel = null, deselecting = false;
 let pointer = { x: Math.round(innerWidth * 0.4), y: Math.round(innerHeight * 0.4) };
 let chipTimer = null, streamTimer = null, keysTimer = null, chipAccept = null;
 const coarse = matchMedia("(pointer:coarse)"), narrow = matchMedia("(max-width:1040px)");
@@ -1022,7 +1076,7 @@ function showKeys(kind, extra){
 }
 
 /* ---------------- selection tracking (the "text in the window in front") ---------------- */
-const winOf = node => { const el = node && (node.nodeType === 1 ? node : node.parentElement); return el && el.closest ? (el.closest("#memo") ? "memo" : el.closest("#term") ? "term" : null) : null; };
+const winOf = node => { const el = node && (node.nodeType === 1 ? node : node.parentElement); const w = el && el.closest ? el.closest(".win[data-app]") : null; return w ? w.dataset.app : null; };
 document.addEventListener("selectionchange", () => {
   const s = getSelection(), t = s.toString();
   if(t.trim() && winOf(s.anchorNode)){
@@ -1030,17 +1084,42 @@ document.addEventListener("selectionchange", () => {
     lastSel = { text:t, win:winOf(s.anchorNode), x:r ? r.right : pointer.x, y:r ? r.bottom : pointer.y };
   } else if(!t.trim() && deselecting) lastSel = null;
 });
-["memoBody", "termBody"].forEach(id => {
+["mailBody", "chatBody", "webBody", "termBody"].forEach(id => {
   const el = $(id);
-  el.addEventListener("pointerdown", () => { deselecting = true; setFocusWin(id === "memoBody" ? "memo" : "term"); });
+  el.addEventListener("pointerdown", () => { deselecting = true; setFocusWin(winOf(el)); });
   ["pointerup", "pointercancel"].forEach(ev => el.addEventListener(ev, () => setTimeout(() => deselecting = false, 0)));
 });
 function setFocusWin(w){
   focusedWin = w;
-  $("memo").classList.toggle("active", w === "memo"); $("term").classList.toggle("active", w === "term");
+  document.querySelectorAll(".apps .win").forEach(x => x.classList.toggle("active", x.dataset.app === w));
 }
+/* which simulated apps are showing (the tester's choice); at least one stays on */
+const APPS = [["mail","Mail"],["chat","Chat"],["web","Browser"],["term","Terminal"]];
+state.apps = { mail:true, chat:true, web:true, term:false };
+function applyApps(){
+  const shown = APPS.filter(([id]) => state.apps[id]).map(([id]) => id);
+  document.querySelectorAll(".apps .win").forEach(w => { w.hidden = !state.apps[w.dataset.app]; w.classList.remove("first"); });
+  const firstWin = document.querySelector(".apps .win:not([hidden])"); if(firstWin) firstWin.classList.add("first");
+  $("apps").dataset.count = String(Math.min(shown.length, 4));
+  document.querySelectorAll("[data-app-icon]").forEach(i => { i.style.display = state.apps[i.dataset.appIcon] ? "" : "none"; });
+  $("pickTerm").hidden = !state.apps.term;
+  $("appPick").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(!!state.apps[b.dataset.app])));
+  if(!state.apps[focusedWin]) setFocusWin(shown[0]);
+}
+(function buildAppPicker(){
+  APPS.forEach(([id, name]) => {
+    const b = document.createElement("button"); b.type = "button"; b.dataset.app = id; b.textContent = name;
+    b.addEventListener("click", () => {
+      const on = Object.values(state.apps).filter(Boolean).length;
+      if(state.apps[id] && on === 1) return;            /* keep at least one app on screen */
+      state.apps[id] = !state.apps[id]; applyApps();
+    });
+    $("appPick").appendChild(b);
+  });
+  applyApps();
+})();
 function pick(text){
-  const el = document.querySelector(`[data-pick="${text}"]`);
+  const el = [...document.querySelectorAll(`[data-pick="${text}"]`)].find(e => !e.closest(".win").hidden);
   if(!el) return;
   const r = document.createRange(); r.selectNodeContents(el);
   const s = getSelection(); s.removeAllRanges(); s.addRange(r);
@@ -1091,7 +1170,7 @@ document.addEventListener("keydown", e => {
 $("keyPeek").addEventListener("click", () => hotkey("peek", "button"));
 $("keyLook").addEventListener("click", () => hotkey("look", "button"));
 document.querySelectorAll("[data-pickbtn]").forEach(b => b.addEventListener("click", () => pick(b.dataset.pickbtn)));
-document.querySelectorAll("#memo .pick, #term .pick").forEach(el => el.addEventListener("dblclick", () => { lastSel = { text:el.textContent, win:winOf(el), x:el.getBoundingClientRect().right, y:el.getBoundingClientRect().bottom }; }));
+document.querySelectorAll(".apps .pick").forEach(el => el.addEventListener("dblclick", () => { lastSel = { text:el.textContent, win:winOf(el), x:el.getBoundingClientRect().right, y:el.getBoundingClientRect().bottom }; }));
 
 /* ---------------- lookup ---------------- */
 let lookupAnchor = null;
