@@ -4,8 +4,9 @@ using Xunit;
 namespace AndaCompanion.Tests;
 
 /// <summary>
-/// The product rules about appearance, enforced as numbers: light-only, A is the default,
-/// and every text ink meets WCAG 2.x AA (the Section 508 baseline) on every appearance.
+/// The product rules about appearance, enforced as numbers: light-only, K is the default,
+/// and every text ink meets WCAG 2.x AA (the Section 508 baseline) on every appearance —
+/// including on the tinted header bands, seals and chips some looks add.
 /// </summary>
 public class AppearanceTests
 {
@@ -33,12 +34,47 @@ public class AppearanceTests
     }
 
     [Fact]
-    public void There_are_five_appearances_and_A_is_first()
+    public void There_are_fifteen_looks_and_K_is_the_default()
     {
-        Assert.Equal(new[] { AppearanceId.A, AppearanceId.B, AppearanceId.C, AppearanceId.D, AppearanceId.E },
+        Assert.Equal(new[]
+            {
+                AppearanceId.A, AppearanceId.B, AppearanceId.C, AppearanceId.D, AppearanceId.E, AppearanceId.F, AppearanceId.G,
+                AppearanceId.H, AppearanceId.I, AppearanceId.J, AppearanceId.K, AppearanceId.L, AppearanceId.M, AppearanceId.N, AppearanceId.O,
+            },
             Appearances.All.Select(a => a.Id));
-        Assert.Equal(AppearanceId.A, new AndaCompanion.Services.Settings().Appearance);
-        Assert.Equal(AppearanceId.A, ThemeManager.Current.Id);
+        Assert.Equal(11, Appearances.All.Count(a => !a.IsCompact));
+        Assert.Equal(4, Appearances.All.Count(a => a.IsCompact));
+        Assert.Equal(AppearanceId.K, Appearances.Default);
+        Assert.Equal(AppearanceId.K, new AndaCompanion.Services.Settings().Appearance);
+        Assert.Equal(AppearanceId.K, Appearances.Get(Appearances.Default).Id);
+    }
+
+    [Fact]
+    public void Saved_settings_keep_their_numeric_meaning_so_old_choices_still_load()
+    {
+        // The settings file stores the enum as a number. A–E must keep 0–4 or an existing tester's choice would change.
+        Assert.Equal(new[] { 0, 1, 2, 3, 4 }, new[] { AppearanceId.A, AppearanceId.B, AppearanceId.C, AppearanceId.D, AppearanceId.E }.Select(i => (int)i));
+        Assert.Equal(AppearanceId.K, (AppearanceId)10);
+    }
+
+    [Fact]
+    public void Compact_looks_borrow_a_sibling_and_expand_into_its_full_card()
+    {
+        var map = Appearances.All.Where(a => a.IsCompact).ToDictionary(a => a.Id, a => a.ExpandsAs);
+        Assert.Equal(AppearanceId.K, map[AppearanceId.L]);
+        Assert.Equal(AppearanceId.A, map[AppearanceId.M]);
+        Assert.Equal(AppearanceId.F, map[AppearanceId.N]);
+        Assert.Equal(AppearanceId.G, map[AppearanceId.O]);
+        Assert.Equal(new[] { CardForm.Strip, CardForm.Tile, CardForm.Ticket, CardForm.Badge },
+            Appearances.All.Where(a => a.IsCompact).Select(a => a.Form));
+        foreach (var c in Appearances.All.Where(a => a.IsCompact))
+        {
+            var sibling = Appearances.Get(c.ExpandsAs!.Value);
+            Assert.False(sibling.IsCompact, $"{c.Id} must expand into a FULL look");
+            Assert.Equal(sibling.Palette, c.Palette);
+            Assert.Equal(sibling.Id, c.Basis);
+            Assert.Equal(sibling.Look, c.Look);
+        }
     }
 
     [Theory, MemberData(nameof(AllAppearances))]
@@ -85,9 +121,53 @@ public class AppearanceTests
     }
 
     [Fact]
-    public void Each_appearance_has_its_own_progress_shape()
+    public void Each_full_look_family_has_its_own_progress_shape()
     {
-        Assert.Equal(5, Appearances.All.Select(a => a.Progress).Distinct().Count());
+        // Nine distinct forms across the eleven full looks (A, F and G share the thin bar).
+        Assert.Equal(9, Appearances.All.Where(a => !a.IsCompact).Select(a => a.Progress).Distinct().Count());
+        Assert.Equal(ProgressVariant.Line, Appearances.K.Progress);
+        Assert.Equal(ProgressVariant.Timeline, Appearances.J.Progress);
+    }
+
+    [Fact]
+    public void Added_surfaces_keep_their_text_readable()
+    {
+        foreach (var a in Appearances.All.Where(x => !x.IsCompact))
+        {
+            var p = a.Palette;
+            var look = a.Look;
+            if (look.HeaderTint is { } tint)
+            {
+                Assert.True(Contrast(p.Ink, tint) >= 7, $"{a.Id} Ink on header band");
+                Assert.True(Contrast(p.Ink2, tint) >= 4.5, $"{a.Id} Ink2 on header band");
+                Assert.True(Contrast(p.Ink3, tint) >= 4.5, $"{a.Id} Ink3 on header band = {Contrast(p.Ink3, tint):0.00}");
+            }
+            if (look.Seal == SealStyle.Tinted)
+                Assert.True(Contrast(look.SealInk!, look.SealFill!) >= 4.5, $"{a.Id} seal text");
+            if (look.Seal == SealStyle.Quiet)
+                Assert.True(Contrast(p.Ink2, p.Bg) >= 4.5, $"{a.Id} quiet seal text");
+            if (look.Chips == ChipStyle.Tint)
+                Assert.True(Contrast(look.ChipInk!, look.ChipFill!) >= 4.5, $"{a.Id} chip text");
+            if (look.LinkFill is { } fill)
+            {
+                Assert.True(Contrast("#FFFFFF", fill) >= 4.5, $"{a.Id} white text on the filled chip");
+                Assert.True(Contrast("#FFFFFF", p.Accent2) >= 4.5, $"{a.Id} white text on the chip's hover fill");
+            }
+            // attention text sits on the tint (or the surface, for the outlined shape)
+            Assert.True(Contrast(p.Warn, look.Attention == AttentionShape.Outline ? p.Bg : p.WarnBg) >= 4.5, $"{a.Id} attention text");
+        }
+    }
+
+    [Fact]
+    public void Structure_values_are_usable()
+    {
+        foreach (var a in Appearances.All)
+        {
+            Assert.InRange(a.Look.SlotPadV, 6, 16);
+            Assert.InRange(a.Look.SlotPadH, 12, 22);
+            Assert.InRange(a.Look.DateSize, 12, 18);
+            if (a.Look.TopRule is not null) Assert.True(a.Look.TopRuleHeight > 0, $"{a.Id} has a top rule with no height");
+        }
     }
 
     [Fact]
@@ -96,7 +176,7 @@ public class AppearanceTests
         foreach (var a in Appearances.All)
         {
             var p = a.Palette;
-            foreach (var surface in new[] { p.Bg, p.WarnBg, p.BadBg, p.Track, p.Hair, p.Line })
+            foreach (var surface in new[] { p.Bg, p.WarnBg, p.BadBg, p.Track, p.Hair, p.Line, a.Look.HeaderTint ?? p.Bg, a.Look.ChipFill ?? p.Bg, a.Look.SealFill ?? p.Bg })
                 Assert.True(Luminance(surface) > 0.6, $"{a.Id}: {surface} is too dark for a light-only product");
         }
     }

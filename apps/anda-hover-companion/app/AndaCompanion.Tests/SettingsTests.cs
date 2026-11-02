@@ -10,7 +10,8 @@ public class SettingsTests
     public void Defaults_match_the_product_decisions()
     {
         var s = new Settings();
-        Assert.Equal(AppearanceId.A, s.Appearance);      // A is the default
+        Assert.Equal(AppearanceId.K, s.Appearance);      // K · Graphite Quiet is the default
+        Assert.Equal(20, s.AutoHideSeconds);
         Assert.Equal(ConsentModel.Full, s.Consent);
         Assert.Equal(1.0, s.CardOpacity);
         Assert.True(s.CaptureViaCopy);
@@ -29,7 +30,34 @@ public class SettingsTests
     public void A_missing_file_gives_defaults()
     {
         var s = SettingsService.Load(Path.Combine(Temp.NewDir(), "nope.json"));
-        Assert.Equal(AppearanceId.A, s.Appearance);
+        Assert.Equal(AppearanceId.K, s.Appearance);
+    }
+
+    [Fact]
+    public void An_existing_testers_choice_is_kept_when_the_default_changes()
+    {
+        string path = Path.Combine(Temp.NewDir(), "settings.json");
+        File.WriteAllText(path, "{ \"Appearance\": 0 }");          // saved by an earlier build: A
+        Assert.Equal(AppearanceId.A, SettingsService.Load(path).Appearance);
+    }
+
+    [Fact]
+    public void Unknown_appearance_numbers_and_auto_hide_values_fall_back_safely()
+    {
+        string path = Path.Combine(Temp.NewDir(), "settings.json");
+        File.WriteAllText(path, "{ \"Appearance\": 99, \"AutoHideSeconds\": -5 }");
+        var s = SettingsService.Load(path);
+        Assert.Equal(AppearanceId.K, s.Appearance);
+        Assert.Equal(20, s.AutoHideSeconds);
+    }
+
+    [Theory]
+    [InlineData(0)] [InlineData(10)] [InlineData(20)] [InlineData(40)]
+    public void Each_offered_auto_hide_value_round_trips(int seconds)
+    {
+        string path = Path.Combine(Temp.NewDir(), "settings.json");
+        SettingsService.Save(new Settings { AutoHideSeconds = seconds }, path);
+        Assert.Equal(seconds, SettingsService.Load(path).AutoHideSeconds);
     }
 
     [Fact]

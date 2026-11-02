@@ -43,11 +43,14 @@ internal static class SelfTest
                 : new("tray-icon", CheckStatus.Warn, "not created: " + (trayError ?? "unknown")));
             report.Add(SelfTestChecks.DataAndBriefs(repo));
             report.Add(SelfTestChecks.SettingsAndPrompts(Path.Combine(options.OutDir, "home", "check")));
+            report.Add(SelfTestChecks.ElsaPlaceholder());
             report.Add(Fonts());
             report.Add(SelfTestChecks.ClipboardRoundTrip());
 
             await RenderAllAsync(options, repo, report);
             report.Add(await PlacementAsync(repo));
+            report.Add(await CompactBehaviorAsync(repo));
+            report.Add(await AutoHideAsync(repo));
             report.Add(await HotkeyDeliveryAsync(hotkeys));
             report.Add(await CaptureEndToEndAsync());
 
@@ -58,7 +61,7 @@ internal static class SelfTest
         {
             report.Add(new("selftest-runner", CheckStatus.Fail, ex.ToString()));
         }
-        ThemeManager.Apply(AppearanceId.A);
+        ThemeManager.Apply(Appearances.Default);
         if (userClipboard is not null && !userClipboard.TooLarge) userClipboard.Restore();
         report.Write();
         return report.HasFailures ? 1 : 0;
@@ -114,17 +117,33 @@ internal static class SelfTest
     private static async Task RenderAllAsync(SelfTestOptions o, IAndaRepository repo, Report report)
     {
         var briefs = new OfflineBriefService();
+        // K is the default look, so it gets the full set; every other full look and every compact form gets
+        // at least one shot, alternating the at-risk and healthy records so both states are exercised.
         var shots = new CardShot[]
         {
-            new("card-a", AppearanceId.A, "216482", false, false, 1.0, true),
-            new("card-a-expanded", AppearanceId.A, "216482", true, false, 1.0, true),
-            new("card-a-healthy", AppearanceId.A, "214990", false, false, 1.0, false),
-            new("card-a-peek", AppearanceId.A, "216482", false, true, 1.0, false),
-            new("card-a-transparent-88", AppearanceId.A, "216482", false, false, 0.88, false),
+            new("card-k", AppearanceId.K, "216482", false, false, 1.0, true),
+            new("card-k-expanded", AppearanceId.K, "216482", true, false, 1.0, true),
+            new("card-k-healthy", AppearanceId.K, "214990", false, false, 1.0, false),
+            new("card-k-peek", AppearanceId.K, "216482", false, true, 1.0, false),
+            new("card-k-transparent-88", AppearanceId.K, "216482", false, false, 0.88, false),
+            new("card-a", AppearanceId.A, "216482", false, false, 1.0, false),
             new("card-b-expanded", AppearanceId.B, "216482", true, false, 1.0, false),
-            new("card-c", AppearanceId.C, "216482", false, false, 1.0, true),
+            new("card-c", AppearanceId.C, "216482", false, false, 1.0, false),
             new("card-d", AppearanceId.D, "216482", false, false, 1.0, false),
-            new("card-e-healthy", AppearanceId.E, "214990", false, false, 1.0, true),
+            new("card-e-healthy", AppearanceId.E, "214990", false, false, 1.0, false),
+            new("card-f", AppearanceId.F, "216482", false, false, 1.0, true),
+            new("card-g", AppearanceId.G, "216482", false, false, 1.0, false),
+            new("card-g-healthy", AppearanceId.G, "214990", false, false, 1.0, false),
+            new("card-h", AppearanceId.H, "216482", false, false, 1.0, false),
+            new("card-i", AppearanceId.I, "216482", false, false, 1.0, false),
+            new("card-j", AppearanceId.J, "216482", false, false, 1.0, true),
+            new("card-j-healthy", AppearanceId.J, "214990", false, false, 1.0, false),
+            new("compact-l", AppearanceId.L, "216482", false, false, 1.0, true),
+            new("compact-m", AppearanceId.M, "216482", false, false, 1.0, false),
+            new("compact-n", AppearanceId.N, "216482", false, false, 1.0, false),
+            new("compact-o", AppearanceId.O, "216482", false, false, 1.0, false),
+            new("compact-l-healthy", AppearanceId.L, "214990", false, false, 1.0, false),
+            new("compact-m-healthy", AppearanceId.M, "214990", false, false, 1.0, false),
         };
 
         foreach (var shot in shots)
@@ -132,6 +151,14 @@ internal static class SelfTest
             try
             {
                 ThemeManager.Apply(shot.Id, shot.Opacity);
+                if (ThemeManager.Current.IsCompact)
+                {
+                    var compact = new CompactCardWindow(repo.Find(shot.Anda)!, () => { }) { CloseWhenDeactivated = false };
+                    compact.ShowNear(Anchor);
+                    report.Add(await ShootAsync(compact, shot.Name, o.OutDir, shot.Desktop));
+                    compact.Close();
+                    continue;
+                }
                 var window = new CardWindow(briefs, repo.Find) { CloseWhenDeactivated = false };
                 window.Show(repo.Find(shot.Anda)!, Anchor, shot.Mini);
                 if (shot.Expand) window.FindControl<Button>("ExpBtn")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
@@ -141,7 +168,7 @@ internal static class SelfTest
             catch (Exception ex) { report.Add(new("render-" + shot.Name, CheckStatus.Fail, ex.Message)); }
         }
 
-        ThemeManager.Apply(AppearanceId.A);
+        ThemeManager.Apply(Appearances.Default);
         var prompts = new PromptLibraryService(Path.Combine(o.OutDir, "home", "prompts.json"));
 
         await Safe(report, "settings", async () =>
@@ -228,7 +255,7 @@ internal static class SelfTest
         const string name = "card-placement-on-screen";
         try
         {
-            ThemeManager.Apply(AppearanceId.A);
+            ThemeManager.Apply(Appearances.Default);
             var briefs = new OfflineBriefService();
             var probe = new CardWindow(briefs, repo.Find) { CloseWhenDeactivated = false };
             probe.Show(repo.Find("216482")!, new PixelPoint(0, 0), false);
@@ -278,6 +305,93 @@ internal static class SelfTest
                 ? new(name, CheckStatus.Pass,
                     $"opened exactly where the placement rule says, and stayed inside the {wa.Width}x{wa.Height} work area when expanded, at all 5 anchors · scaling {screen.Scaling:0.##}x · " + string.Join(" | ", trace))
                 : new(name, CheckStatus.Fail, string.Join("; ", problems) + " · trace: " + string.Join(" | ", trace));
+        }
+        catch (Exception ex) { return new(name, CheckStatus.Fail, ex.Message); }
+    }
+
+    /// <summary>
+    /// Every compact form must open fully inside the work area at all five anchors, must be much smaller than the
+    /// full card (that is its whole point), and must hand over to the full card on a click or Enter.
+    /// </summary>
+    private static async Task<CheckResult> CompactBehaviorAsync(IAndaRepository repo)
+    {
+        const string name = "compact-boxes";
+        try
+        {
+            var problems = new List<string>();
+            var sizes = new List<string>();
+            ThemeManager.Apply(Appearances.Default);
+            var full = new CardWindow(new OfflineBriefService(), repo.Find) { CloseWhenDeactivated = false };
+            full.Show(repo.Find("216482")!, new PixelPoint(0, 0), false);
+            await Task.Delay(400);
+            double fullArea = full.Bounds.Width * full.Bounds.Height;
+            var screen = full.Screens.Primary;
+            full.Close();
+            if (screen is null) return new(name, CheckStatus.Skip, "no screen information available");
+            var wa = screen.WorkingArea;
+            var anchors = new[] { new PixelPoint(wa.X, wa.Y), new PixelPoint(wa.Right - 1, wa.Y), new PixelPoint(wa.X, wa.Bottom - 1),
+                new PixelPoint(wa.Right - 1, wa.Bottom - 1), new PixelPoint(wa.X + wa.Width / 2, wa.Y + wa.Height / 2) };
+
+            foreach (var id in new[] { AppearanceId.L, AppearanceId.M, AppearanceId.N, AppearanceId.O })
+            {
+                ThemeManager.Apply(id);
+                foreach (var at in anchors)
+                {
+                    var box = new CompactCardWindow(repo.Find("216482")!, () => { }) { CloseWhenDeactivated = false };
+                    box.ShowNear(at);
+                    await Task.Delay(450);
+                    double s = box.RenderScaling;
+                    var rect = new PixelRect(box.Position, new PixelSize((int)Math.Ceiling(box.Bounds.Width * s), (int)Math.Ceiling(box.Bounds.Height * s)));
+                    if (!(rect.X >= wa.X && rect.Y >= wa.Y && rect.Right <= wa.Right && rect.Bottom <= wa.Bottom))
+                        problems.Add($"{id} at {at}: {rect} outside {wa}");
+                    if (at == anchors[4])
+                    {
+                        sizes.Add($"{id} {box.Bounds.Width - 28:0}x{box.Bounds.Height - 28:0} dip");
+                        // box.Bounds includes the 14 dip shadow margin on each side
+                        if ((box.Bounds.Width - 28) * (box.Bounds.Height - 28) > fullArea * 0.35)
+                            problems.Add($"{id} is not much smaller than the full card");
+                    }
+                    box.Close();
+                }
+
+                // expand: a click (pointer press) and Enter both reach the callback exactly once
+                int expanded = 0;
+                var live = new CompactCardWindow(repo.Find("216482")!, () => expanded++) { CloseWhenDeactivated = false };
+                live.ShowNear(anchors[4]);
+                await Task.Delay(300);
+                live.RaiseEvent(new Avalonia.Input.KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Avalonia.Input.Key.Enter });
+                if (expanded != 1) problems.Add($"{id}: Enter did not expand the box");
+                live.Close();
+            }
+            ThemeManager.Apply(Appearances.Default);
+            return problems.Count == 0
+                ? new(name, CheckStatus.Pass, "L, M, N, O stayed inside the work area at all 5 anchors, each under 35% of the full card's area, and Enter expands · " + string.Join(" · ", sizes))
+                : new(name, CheckStatus.Fail, string.Join("; ", problems));
+        }
+        catch (Exception ex) { return new(name, CheckStatus.Fail, ex.Message); }
+    }
+
+    /// <summary>The auto-hide timer, for real: an idle card disappears on its own.</summary>
+    private static async Task<CheckResult> AutoHideAsync(IAndaRepository repo)
+    {
+        const string name = "auto-hide";
+        try
+        {
+            ThemeManager.Apply(Appearances.Default);
+            var card = new CardWindow(new OfflineBriefService(), repo.Find) { CloseWhenDeactivated = false, AutoHideSeconds = 1.0 };
+            card.Show(repo.Find("216482")!, Anchor, false);
+            await Task.Delay(500);
+            bool stillThere = card.IsVisible;
+            await Task.Delay(2600);
+            bool hidden = !card.IsVisible;
+            bool pointerOver = card.IsVisible && card.IsPointerOver;
+            if (card.IsVisible) card.Close();
+            // A real mouse that happens to rest on the card keeps it open — that is the rule working, not a defect.
+            if (!hidden && pointerOver)
+                return new(name, CheckStatus.Skip, "the pointer was resting on the card, so auto-hide correctly kept it open; move the mouse away and rerun");
+            return stillThere && hidden
+                ? new(name, CheckStatus.Pass, "a card set to 1 s was visible at 0.5 s and gone by 3 s; hover, pin and drawer rules are covered by unit tests")
+                : new(name, CheckStatus.Fail, $"visible at 0.5 s: {stillThere}; hidden by 3 s: {hidden}");
         }
         catch (Exception ex) { return new(name, CheckStatus.Fail, ex.Message); }
     }

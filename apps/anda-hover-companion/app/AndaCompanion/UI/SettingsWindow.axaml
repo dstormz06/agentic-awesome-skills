@@ -34,9 +34,17 @@
         <StackPanel Spacing="14" Margin="0,0,2,0">
 
         <StackPanel Spacing="6">
-          <TextBlock Classes="lbl" Text="APPEARANCE"/>
-          <WrapPanel Name="AppearancePanel"/>
-          <TextBlock Classes="hint" Text="All appearances share identical anatomy and meaning — this is preference, never information."/>
+          <TextBlock Classes="lbl" Text="APPEARANCE · FULL CARD"/>
+          <UniformGrid Name="AppearancePanel" Columns="2"/>
+          <TextBlock Classes="lbl" Margin="0,6,0,0" Text="APPEARANCE · COMPACT BOX"/>
+          <UniformGrid Name="CompactPanel" Columns="2"/>
+          <TextBlock Classes="hint" Text="Compact boxes are small enough to leave an open email readable. They make no AI call; click one (or press Enter) to open its full card. All looks share identical anatomy and meaning — this is preference, never information."/>
+        </StackPanel>
+
+        <StackPanel Spacing="6">
+          <TextBlock Classes="lbl" Text="AUTO-HIDE"/>
+          <WrapPanel Name="AutoHidePanel"/>
+          <TextBlock Classes="hint" Text="Hides a card or box after this long with no mouse or key activity. It never hides while your pointer is over it, while it is pinned, or while the drawer is open."/>
         </StackPanel>
 
         <StackPanel Spacing="6">
@@ -72,14 +80,14 @@
         </StackPanel>
 
         <StackPanel Spacing="6">
-          <TextBlock Classes="lbl" Text="CLAUDE CONNECTION"/>
+          <TextBlock Classes="lbl" Text="AI CONNECTION · CLAUDE OR ELSA"/>
           <Grid ColumnDefinitions="*,8,Auto">
             <TextBlock Name="ConnStatus" FontSize="12" Foreground="{DynamicResource C.Ink2}"
                        TextWrapping="Wrap" VerticalAlignment="Center"/>
             <Button Grid.Column="2" Name="TestBtn" Classes="primary" Content="Test" VerticalAlignment="Top"
                     ToolTip.Tip="Send one tiny request to prove the channel end to end"/>
           </Grid>
-          <TextBlock Classes="hint" Text="The app is fully functional offline. When API access is approved, set ANTHROPIC_API_KEY through the agency-approved channel and press Test — no reinstall, no code change."/>
+          <TextBlock Classes="hint" Text="The app is fully functional offline. When API access is approved, set ANTHROPIC_API_KEY (Claude) or follow ELSA-INTEGRATION.md (Elsa) through the agency-approved channel and press Test."/>
         </StackPanel>
         </StackPanel>
         </ScrollViewer>

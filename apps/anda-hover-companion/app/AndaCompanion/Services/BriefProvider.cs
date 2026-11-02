@@ -7,9 +7,10 @@ namespace AndaCompanion.Services;
 /// grounding rules, fencing, fallback, and UI never depend on which model
 /// service answers — they depend only on this interface.
 ///
-/// Implementations: <see cref="AnthropicChatCompleter"/> (today, official SDK).
-/// When FDA's Elsa (or any approved multi-model chat wrapper) publishes an API,
-/// implement this interface against its chat endpoint and register it in
+/// Implementations: <see cref="AnthropicChatCompleter"/> (official SDK) and
+/// <see cref="ElsaChatCompleter"/> (placeholder: everything is wired, the two request/response
+/// translations in ElsaMapping.cs are the only part still to write — see ELSA-INTEGRATION.md).
+/// Any other approved chat wrapper plugs in the same way: implement this interface and add a case to
 /// <see cref="ChatCompleterFactory"/> — nothing else in the app changes.
 /// </summary>
 public interface IChatCompleter
@@ -44,19 +45,24 @@ public sealed class AnthropicChatCompleter : IChatCompleter
 public static class ChatCompleterFactory
 {
     /// <summary>
-    /// Provider selection via ANDA_COMPANION_PROVIDER (default "anthropic").
-    /// "elsa" is a reserved name: FDA's Elsa has no published API yet, so it —
-    /// like any unknown provider — resolves to null and the app runs offline,
-    /// loudly rather than wrongly. To integrate Elsa later: implement
-    /// IChatCompleter against its endpoint and add a case here.
+    /// Provider selection via ANDA_COMPANION_PROVIDER (default "anthropic"). "elsa" returns a completer only when
+    /// the endpoint is configured safely AND the mapping has been written; otherwise — like any unknown provider —
+    /// it resolves to null and the app runs offline, loudly (Settings says exactly why) rather than wrongly.
     /// </summary>
-    public static IChatCompleter? Create()
+    public static IChatCompleter? Create(Func<string, string?>? env = null, IElsaMapping? mapping = null)
     {
-        string provider = Environment.GetEnvironmentVariable("ANDA_COMPANION_PROVIDER")?.ToLowerInvariant() ?? "anthropic";
+        env ??= Environment.GetEnvironmentVariable;
+        string provider = env("ANDA_COMPANION_PROVIDER")?.Trim().ToLowerInvariant() ?? "anthropic";
         return provider switch
         {
             "anthropic" when ConnectionService.HasKey => new AnthropicChatCompleter(),
-            _ => null, // no key, or a provider (e.g. "elsa") not yet available → offline mode
+            "elsa" => ElsaChatCompleterOrNull(env, mapping ?? ElsaMapping.Current),
+            _ => null, // no key, or an unknown provider → offline mode
         };
     }
+
+    private static IChatCompleter? ElsaChatCompleterOrNull(Func<string, string?> env, IElsaMapping mapping) =>
+        ElsaConfig.Inspect(env, mapping) is { Status: ElsaStatus.Ready, Settings: { } settings }
+            ? new ElsaChatCompleter(settings, mapping)
+            : null;
 }

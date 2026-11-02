@@ -22,6 +22,11 @@ public partial class CardWindow : Window
     private bool _mini;
     private CancellationTokenSource? _briefCts;
     private Task _briefReady = Task.CompletedTask;
+    private readonly AutoHideController _autoHide;
+
+    /// <summary>Hide after this many idle seconds (0 = never). The app sets it from Settings; tests and the
+    /// self-test leave it off so a render is never raced by a timer.</summary>
+    public double AutoHideSeconds { get; set; }
 
     /// <summary>What the last placement decided and from which numbers. The self-test reports it.</summary>
     internal string PlacementTrace { get; private set; } = "not placed yet";
@@ -47,6 +52,13 @@ public partial class CardWindow : Window
         KeyDown += OnKey;
         ApplyAppearanceStructure();
 
+        _autoHide = new AutoHideController(() => _pinned, () => Drawer.IsVisible, () => Close());
+        Root.PointerEntered += (_, _) => _autoHide.PointerInside = true;
+        Root.PointerExited += (_, _) => _autoHide.PointerInside = false;
+        Root.PointerMoved += (_, _) => _autoHide.Touch();
+        Root.PointerPressed += (_, _) => _autoHide.Touch();
+        Closed += (_, _) => _autoHide.Stop();
+
         // Apple-style entrance: quick fade + settle from 97% scale (no bounce, no delay).
         var scale = new ScaleTransform(0.97, 0.97)
         {
@@ -70,11 +82,13 @@ public partial class CardWindow : Window
             await Task.WhenAny(_briefReady, Task.Delay(150));
             PlaceNear(_anchor);
             Root.Opacity = 1; scale.ScaleX = 1; scale.ScaleY = 1;
+            _autoHide.Start(AutoHideSeconds);
         };
     }
 
     private void OnKey(object? sender, KeyEventArgs e)
     {
+        _autoHide.Touch();
         switch (e.Key)
         {
             case Key.Escape: Close(); break;
@@ -98,6 +112,7 @@ public partial class CardWindow : Window
     private void ToggleExpand()
     {
         Drawer.IsVisible = !Drawer.IsVisible;
+        _autoHide.Touch();
         Root.Width = Drawer.IsVisible ? 492 : 372;
         Dispatcher.UIThread.Post(ClampToScreen, DispatcherPriority.Loaded);   // it just grew: keep it on-screen
     }
@@ -125,17 +140,96 @@ public partial class CardWindow : Window
             Show(rec, Position, _mini);
     }
 
-    /// <summary>Structural signature bits that palettes alone can't express (stamp seal).</summary>
+    private static IBrush Br(string hex) => new SolidColorBrush(Color.Parse(hex));
+
+    /// <summary>
+    /// Structural signature bits that palettes alone can't express: seal style, tinted header, status spine,
+    /// top rule, chip form, spacing. Everything comes from <see cref="Appearance.Look"/>; the anatomy and slot
+    /// order are identical in every look.
+    /// </summary>
     private void ApplyAppearanceStructure()
     {
         var a = ThemeManager.Current;
-        if (a.StampSeal)
+        var look = a.Look;
+        var res = Application.Current!.Resources;
+
+        // Verified seal
+        switch (look.Seal)
         {
-            Seal.Background = Brushes.Transparent;
-            Seal.BorderBrush = (IBrush)Application.Current!.Resources["C.Good"]!;
-            Seal.BorderThickness = new Thickness(1.5);
-            Seal.CornerRadius = new CornerRadius(4);
-            Seal.RenderTransform = a.Id == AppearanceId.B ? new RotateTransform(-2.5) : null;
+            case SealStyle.Quiet:
+                Seal.Background = Brushes.Transparent;
+                Seal.BorderBrush = (IBrush)res["C.Line"]!;
+                Seal.BorderThickness = new Thickness(1);
+                SealText.Foreground = (IBrush)res["C.Ink2"]!;
+                break;
+            case SealStyle.Tinted:
+                Seal.Background = Br(look.SealFill!);
+                SealText.Foreground = Br(look.SealInk!);
+                break;
+            default:
+                if (a.StampSeal)
+                {
+                    Seal.Background = Brushes.Transparent;
+                    Seal.BorderBrush = (IBrush)res["C.Good"]!;
+                    Seal.BorderThickness = new Thickness(1.5);
+                    Seal.CornerRadius = new CornerRadius(4);
+                    Seal.RenderTransform = a.Basis == AppearanceId.B ? new RotateTransform(-2.5) : null;
+                }
+                break;
+        }
+
+        // Header band, spacing
+        HeaderBand.Background = look.HeaderTint is null ? null : Br(look.HeaderTint);
+        double v = look.SlotPadV, h = look.SlotPadH;
+        HeaderBand.Padding = new Thickness(h, v + 4, h, v + 2);
+        ClockPanel.Margin = new Thickness(h, v + 1, h, v + 2);
+        AttentionBox.Margin = new Thickness(h, v, h, v);
+        LatestGrid.Margin = new Thickness(h, v, h, v);
+        AheadGrid.Margin = new Thickness(h, v, h, v);
+        BriefPanel.Margin = new Thickness(h, v, h, v + 2);
+        ChipsWrap.Margin = new Thickness(h, v, h, v + 2);
+
+        // Spine (left, coloured per record in Show) and top rule
+        Spine.IsVisible = look.StatusSpine;
+        double top = 0;
+        if (look.TopRule is { } rule)
+        {
+            TopRule.IsVisible = true;
+            TopRule.Height = look.TopRuleHeight;
+            if (look.TopRuleDouble)
+            {
+                TopRule.BorderBrush = Br(rule);
+                TopRule.BorderThickness = new Thickness(0, 1.5, 0, 1.5);
+            }
+            else TopRule.Background = Br(rule);
+            top = look.TopRuleHeight;
+        }
+        Body.Margin = new Thickness(look.StatusSpine ? 5 : 0, top, 0, 0);
+
+        // Chips
+        foreach (var chip in new[] { CopyChip, SisterChip, NotesChip, OpenChip })
+        {
+            switch (look.Chips)
+            {
+                case ChipStyle.Tint:
+                    chip.Background = Br(look.ChipFill!);
+                    chip.BorderBrush = Br(look.ChipLine!);
+                    chip.Foreground = Br(look.ChipInk!);
+                    break;
+                case ChipStyle.Underline:
+                    chip.BorderThickness = new Thickness(0, 0, 0, 1);
+                    chip.CornerRadius = new CornerRadius(0);
+                    chip.Padding = new Thickness(2, 6);
+                    chip.MinHeight = 30;
+                    break;
+            }
+        }
+        if (look.LinkFill is { } fill)
+        {
+            OpenChip.Classes.Add("filled");
+            OpenChip.Background = Br(fill);
+            OpenChip.BorderBrush = Br(fill);
+            OpenChip.Foreground = Brushes.White;
         }
     }
 
@@ -166,6 +260,8 @@ public partial class CardWindow : Window
             ? Avalonia.Layout.HorizontalAlignment.Right
             : Avalonia.Layout.HorizontalAlignment.Stretch;
         Progress.Value = record.ProgressPct;
+        Progress.DaysToGoal = record.DaysToGoal;
+        Progress.DeltaDays = record.ForecastDeltaDays;
         ForecastText.Text = record.ForecastDate;
         ForecastDeltaText.Text = record.ForecastDelta;
         ForecastDeltaText.Foreground = (IBrush)Application.Current!.Resources[record.ForecastLate ? "C.Warn" : "C.Good"]!;
@@ -174,11 +270,29 @@ public partial class CardWindow : Window
         if (record.Attention is { } attn)
         {
             string tone = attn.Level == AttentionLevel.Bad ? "Bad" : "Warn";
-            AttentionBox.Background = (IBrush)Application.Current.Resources[$"C.{tone}Bg"]!;
             AttentionKind.Foreground = (IBrush)Application.Current.Resources[$"C.{tone}"]!;
+            switch (ThemeManager.Current.Look.Attention)
+            {
+                case AttentionShape.Outline:
+                    AttentionBox.Background = Brushes.Transparent;
+                    AttentionBox.BorderBrush = AttentionKind.Foreground;
+                    AttentionBox.CornerRadius = new CornerRadius(6);
+                    break;
+                case AttentionShape.Pill:
+                    AttentionBox.Background = (IBrush)Application.Current.Resources[$"C.{tone}Bg"]!;
+                    AttentionBox.CornerRadius = new CornerRadius(18);
+                    AttentionBox.Padding = new Thickness(14, 8);
+                    break;
+                default:
+                    AttentionBox.Background = (IBrush)Application.Current.Resources[$"C.{tone}Bg"]!;
+                    break;
+            }
             AttentionText.Foreground = AttentionKind.Foreground;
             AttentionText.Text = attn.Text;
         }
+        // Status spine (G): bad attention reads red, a late forecast amber, otherwise green.
+        Spine.Background = (IBrush)Application.Current.Resources[
+            record.Attention?.Level == AttentionLevel.Bad ? "C.Bad" : record.ForecastLate ? "C.Warn" : "C.Good"]!;
         LatestText.Text = record.Latest;
         AheadText.Text = record.Ahead ?? "";
         FreshnessText.Text = record.DataAsOf ?? "";
@@ -275,7 +389,7 @@ public partial class CardWindow : Window
     {
         var screen = Screens.ScreenFromPoint(at) ?? Screens.Primary;
         if (screen is null) return;
-        Body.MaxHeight = Math.Max(240, screen.WorkingArea.Height / screen.Scaling - 52 - 2);
+        Body.MaxHeight = Math.Max(240, screen.WorkingArea.Height / screen.Scaling - 52 - 2 - Body.Margin.Top);
     }
 
     private (PixelRect Area, int Width, int Height)? Geometry(PixelPoint at)

@@ -25,6 +25,11 @@ public sealed record AndaRecord
     public required string Meta { get; init; }
     public required string GoalDate { get; init; }
     public required string GoalDays { get; init; }
+
+    /// <summary>Days from the data extract to the goal date, and the forecast's days late (+) or early (−).
+    /// Optional: when absent, the timeline look falls back to a plain bar. Never parsed from display text.</summary>
+    public int? DaysToGoal { get; init; }
+    public int? ForecastDeltaDays { get; init; }
     public required int ProgressPct { get; init; }
     public required string ForecastDate { get; init; }
     public required string ForecastDelta { get; init; }   // e.g. "▲ +14 d vs goal"

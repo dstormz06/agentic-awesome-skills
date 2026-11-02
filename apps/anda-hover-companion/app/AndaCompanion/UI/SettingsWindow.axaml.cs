@@ -27,11 +27,27 @@ public partial class SettingsWindow : Window
                 IsChecked = a.Id == _settings.Appearance,
                 Margin = new Avalonia.Thickness(0, 0, 12, 2),
             };
+            ToolTip.SetTip(rb, a.Tagline);
             rb.IsCheckedChanged += (_, _) =>
             {
                 if (!_loading && rb.IsChecked == true) { _settings.Appearance = a.Id; Apply(); }
             };
-            AppearancePanel.Children.Add(rb);
+            (a.IsCompact ? CompactPanel : AppearancePanel).Children.Add(rb);
+        }
+
+        foreach (int seconds in AutoHidePolicy.Choices)
+        {
+            var rb = new RadioButton
+            {
+                Content = AutoHidePolicy.Label(seconds), GroupName = "autohide",
+                IsChecked = seconds == _settings.AutoHideSeconds,
+                Margin = new Avalonia.Thickness(0, 0, 14, 2),
+            };
+            rb.IsCheckedChanged += (_, _) =>
+            {
+                if (!_loading && rb.IsChecked == true) { _settings.AutoHideSeconds = seconds; Apply(); }
+            };
+            AutoHidePanel.Children.Add(rb);
         }
 
         var consents = new (ConsentModel Model, string Label)[]
@@ -89,9 +105,7 @@ public partial class SettingsWindow : Window
             win.Show(this);
         };
 
-        ConnStatus.Text = ConnectionService.HasKey
-            ? "Key detected — press Test to verify the channel."
-            : "Offline mode — deterministic briefs. Ready for API access when approved.";
+        ConnStatus.Text = ConnectionService.Describe();
         TestBtn.Click += async (_, _) =>
         {
             TestBtn.IsEnabled = false;

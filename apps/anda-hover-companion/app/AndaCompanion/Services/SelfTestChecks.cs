@@ -163,17 +163,23 @@ internal static class SelfTestChecks
             var s = new Settings
             {
                 Appearance = Theming.AppearanceId.E, Consent = ConsentModel.Whisper, CardOpacity = 0.9,
-                ActiveLens = "Facility focus", CaptureViaCopy = false, FirstRunDone = true,
+                ActiveLens = "Facility focus", CaptureViaCopy = false, FirstRunDone = true, AutoHideSeconds = 40,
             };
             SettingsService.Save(s, settingsPath);
             var l = SettingsService.Load(settingsPath);
             if (l.Appearance != s.Appearance || l.Consent != s.Consent || Math.Abs(l.CardOpacity - 0.9) > 1e-9 ||
-                l.ActiveLens != s.ActiveLens || l.CaptureViaCopy || !l.FirstRunDone)
+                l.ActiveLens != s.ActiveLens || l.CaptureViaCopy || !l.FirstRunDone || l.AutoHideSeconds != 40)
                 problems.Add("settings did not round-trip");
+
+            // A hand-edited auto-hide value that is not one of the offered choices falls back to the default.
+            File.WriteAllText(settingsPath, "{ \"AutoHideSeconds\": 7 }");
+            if (SettingsService.Load(settingsPath).AutoHideSeconds != UI.AutoHidePolicy.Default)
+                problems.Add("an unsupported auto-hide value was not normalised");
 
             File.WriteAllText(settingsPath, "{ this is not json");
             var d = SettingsService.Load(settingsPath);
-            if (d.Appearance != Theming.AppearanceId.A || !d.CaptureViaCopy || d.Consent != ConsentModel.Full)
+            if (d.Appearance != Theming.Appearances.Default || d.Appearance != Theming.AppearanceId.K ||
+                !d.CaptureViaCopy || d.Consent != ConsentModel.Full || d.AutoHideSeconds != UI.AutoHidePolicy.Default)
                 problems.Add("corrupt settings did not fall back to defaults");
 
             var lib = new PromptLibraryService(promptsPath);
@@ -186,6 +192,37 @@ internal static class SelfTestChecks
 
             return problems.Count == 0
                 ? new(name, CheckStatus.Pass, "round-trip OK; corrupt file → defaults; starter lenses present; files written only under the test home")
+                : new(name, CheckStatus.Fail, string.Join("; ", problems));
+        }
+        catch (Exception ex) { return new(name, CheckStatus.Fail, ex.GetType().Name + ": " + ex.Message); }
+    }
+
+    /// <summary>
+    /// The Elsa placeholder resolves every configuration state to a clear message, never reaches the network
+    /// without a safe endpoint and a written mapping, and falls back to offline instead of failing.
+    /// </summary>
+    public static CheckResult ElsaPlaceholder()
+    {
+        const string name = "elsa-placeholder";
+        var problems = new List<string>();
+        try
+        {
+            static Func<string, string?> Env(params (string K, string V)[] kv) => k => kv.FirstOrDefault(p => p.K == k).V;
+            var provider = ("ANDA_COMPANION_PROVIDER", "elsa");
+            var unfilled = new UnfilledElsaMapping();
+
+            if (ElsaConfig.Inspect(Env(), unfilled).Status != ElsaStatus.NotSelected) problems.Add("not-selected state wrong");
+            if (ElsaConfig.Inspect(Env(provider), unfilled).Status != ElsaStatus.MissingEndpoint) problems.Add("missing-endpoint state wrong");
+            if (ElsaConfig.Inspect(Env(provider, (ElsaConfig.EndpointVar, "http://elsa.example.gov/api")), unfilled).Status != ElsaStatus.InsecureEndpoint)
+                problems.Add("plain-http endpoint was not refused");
+            var placeholder = ElsaConfig.Inspect(Env(provider, (ElsaConfig.EndpointVar, "https://elsa.example.gov/api")), unfilled);
+            if (placeholder.Status != ElsaStatus.MappingNotFilled) problems.Add("unfilled-mapping state wrong");
+            if (ChatCompleterFactory.Create(Env(provider, (ElsaConfig.EndpointVar, "https://elsa.example.gov/api")), unfilled) is not null)
+                problems.Add("the factory returned an Elsa completer while the mapping is a placeholder");
+            if (placeholder.Message.Contains("secret", StringComparison.OrdinalIgnoreCase)) problems.Add("message mentions a secret");
+
+            return problems.Count == 0
+                ? new(name, CheckStatus.Pass, "all five configuration states resolve to a plain message; plain-http refused; placeholder mapping keeps briefs offline; no network call made")
                 : new(name, CheckStatus.Fail, string.Join("; ", problems));
         }
         catch (Exception ex) { return new(name, CheckStatus.Fail, ex.GetType().Name + ": " + ex.Message); }

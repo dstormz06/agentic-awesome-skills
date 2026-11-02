@@ -10,20 +10,31 @@ A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
 memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat`, pin the tray icon.
 
 1. `dotnet run --project AndaCompanion` (or double-click the published `AndaCompanion.exe`).
-2. First run opens **Settings** automatically: pick an appearance, a consent model,
-   and your transparency — a demo card appears alongside so every choice previews live.
+2. First run opens **Settings** automatically: pick an appearance (the default is **K · Graphite
+   Quiet**), a consent model, auto-hide and your transparency — a demo card appears alongside so
+   every choice previews live.
 3. Optional, the day API access is approved: set `ANTHROPIC_API_KEY` (agency-approved
-   channel), press **Test** in Settings. Done — no reinstall, no code change.
+   channel), press **Test** in Settings. Done — no reinstall, no code change. For **Elsa**, follow
+   `../ELSA-INTEGRATION.md`: the app is already wired for it; two small methods remain to be written
+   when Elsa's API is available.
 
 ## What works today
 
 - **Tray app** — quiet icon, no notifications. Menu: lookup, demo cards, quick
   Appearance switch, **Settings…**, **Prompt library…**. All persisted to
   `%AppData%\AndaCompanion\settings.json`.
-- **Settings window** — Appearance (all five, **light-only by product decision**, A
-  default), Consent model (Full default = DESIGN.md model ①), **card transparency
-  slider** (85–100%; text always stays opaque), companion lens picker, and the
-  **Claude connection panel** with one-click Test.
+- **Settings window** — Appearance (fifteen looks, **light-only by product decision**; **K ·
+  Graphite Quiet is the default**): eleven full cards (A–K) and four **compact boxes** (L–O),
+  Auto-hide (Off / 10 / 20 / 40 s, default 20), Consent model (Full default = DESIGN.md model ①),
+  **card transparency slider** (85–100%; text always stays opaque), companion lens picker, and the
+  **AI connection panel** (Claude or Elsa) with one-click Test.
+- **Compact boxes (L–O)** — a Strip, a Tile, a Ticket and a Badge, roughly 340 × 70, 196 × 130,
+  300 × 64 and 170 × 38 px, so a card never blankets the email being read. They make **no AI call**,
+  **never take keyboard focus** (typing in the email continues undisturbed), and open their sibling
+  look's full card on a click or when the same hotkey is pressed again on the same number.
+- **Auto-hide** — a card or box hides itself after the chosen idle time. It never hides while the
+  pointer is over it, while it is pinned, or while the drawer is open (`UI/AutoHide.cs`, unit-tested
+  with a fake clock).
 - **Prompt Library** — users store and run their own named lenses that steer the
   brief's emphasis ("Facility focus", "Director summary", "First-cycle watch" ship as
   starters). Lenses are guidance, never authority — grounding rules always outrank
@@ -48,12 +59,14 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   expand (`E`), copy brief (`C`), `Esc` to close.
 - **Companion brief** — provider-pluggable via the `IChatCompleter` seam
   (`Services/BriefProvider.cs`). Today: the official Anthropic SDK (`claude-opus-4-8`)
-  when `ANTHROPIC_API_KEY` is set; otherwise a deterministic offline brief. The seam is
-  deliberately **Elsa-ready**: when FDA's Elsa (or another approved multi-model chat
-  wrapper) publishes an API, implement `IChatCompleter` against it and register it in
-  `ChatCompleterFactory` (`ANDA_COMPANION_PROVIDER` selects the provider) — grounding
-  rules, fencing, fallback, and UI are untouched by a backend swap. Facts and the
-  forecast number never come from any model.
+  when `ANTHROPIC_API_KEY` is set; otherwise a deterministic offline brief. **Elsa is a wired
+  placeholder** (`Services/Elsa.cs`, `Services/ElsaMapping.cs`): provider selection
+  (`ANDA_COMPANION_PROVIDER=elsa`), configuration from `ANDA_ELSA_*` environment variables, an
+  https-only guard, timeout, error handling, offline fallback and the Settings status line are
+  done and tested; the only code left is the two translations in `ElsaMapping.cs` (request and
+  reply), because Elsa's API shape is not known and is not guessed. Checklist:
+  `../ELSA-INTEGRATION.md`. Grounding rules, fencing, fallback and UI are untouched by a backend
+  swap. Facts and the forecast number never come from any model.
 - **GDUFA-versioned goal-date rules** — `Services/GoalDateRules.cs` encodes the
   amendment→goal-date logic behind an `IGoalDateRules` interface: `Gdufa3Rules` (from
   the Sept 2024 amendments guidance + GDUFA III commitment letter; only source-confirmed
@@ -66,7 +79,7 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   the cursor, flipped at an edge, clamped to the work area. A card taller than the screen scrolls.
 - **Recognizer** — six digits, optionally prefixed `ANDA`. A number labelled NDA, BLA, IND, DMF, MF
   or NDC is refused, because those are also six digits and showing the wrong card is worse than none.
-- **Accessibility** — every text ink meets WCAG AA (4.5:1) on every appearance, enforced by tests.
+- **Accessibility** — every text ink meets WCAG AA (4.5:1) on every appearance, including the tinted header bands, seals and chips some looks add, enforced by tests. Compact boxes are mouse-and-hotkey only by design (they never take focus); the full card they open is keyboard-complete.
 
 Planned next: UI Automation text-under-cursor capture (slots in behind
 `TextCaptureService` without touching callers), real data adapters, MSIX packaging, code signing.
@@ -121,7 +134,7 @@ screenshots, and the test results. Outcomes and their limits are recorded in `..
 
 ## Preview harness (no Windows box needed)
 
-Renders the real card in every appearance to PNGs via Avalonia's headless platform:
+Renders the real card in all eleven full looks, and the four compact boxes, to PNGs via Avalonia's headless platform:
 
 ```bash
 dotnet run --project AndaCompanion.Preview -- ./shots
@@ -146,13 +159,15 @@ shipped build is offline-first by design.
 ```
 AndaCompanion/
   App.axaml(.cs)        tray icon, menus, hotkey→consent→card flow
-  Theming/              5 light-only appearance palettes (USWDS-anchored)
+  Theming/              15 light-only looks: palettes + structural signatures (USWDS-anchored)
   UI/CardWindow.*       the peek card (all slots, mini/full, pin/expand)
+  UI/CompactCardWindow  the compact boxes L–O (no AI call, never focused)
+  UI/AutoHide.cs        the auto-hide rule (pure) and its timer
   UI/ChipWindow.*       whisper invite + invalid-number notice
   UI/LookupWindow.*     Ctrl+Alt+Space lookup
-  UI/ProgressControls   bar / ticks / ring / hatch / capsule + D's grid surface
+  UI/ProgressControls   bar / ticks / ring / hatch / capsule / line / dots / step / timeline + D's grid surface
   Services/             hotkeys (checked), text capture + clipboard snapshot, settings, brief services,
-                        self-test, app paths (portable mode)
+                        Elsa placeholder (Elsa.cs + ElsaMapping.cs), self-test, app paths (portable mode)
   Data/                 IAndaRepository + fictional mock data + identifier registry
 AndaCompanion.Tests/    xUnit suite (cross-platform + Windows-only)
 AndaCompanion.Preview/  headless screenshot harness

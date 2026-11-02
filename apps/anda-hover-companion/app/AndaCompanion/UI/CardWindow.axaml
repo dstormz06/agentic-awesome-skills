@@ -45,6 +45,10 @@
       <Setter Property="Background" Value="{DynamicResource C.Mark}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource C.Ink3}"/>
     </Style>
+    <Style Selector="Button.chip.filled:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource C.Accent2}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource C.Accent2}"/>
+    </Style>
     <Style Selector="Button.chip:pressed"><Setter Property="RenderTransform" Value="scale(0.96)"/></Style>
     <Style Selector="Button.tool:pressed"><Setter Property="RenderTransform" Value="scale(0.88)"/></Style>
     <Style Selector="Expander /template/ ToggleButton#ExpanderHeader">
@@ -66,19 +70,23 @@
             BoxShadow="0 18 42 -10 #59000000" ClipToBounds="True">
       <Panel>
         <ui:GridSurface/>
+        <!-- Structural signatures (set from the appearance in code): status spine (G), top rule (I, J). -->
+        <Border Name="Spine" Width="5" HorizontalAlignment="Left" IsVisible="False" ZIndex="2"/>
+        <Border Name="TopRule" VerticalAlignment="Top" IsVisible="False" ZIndex="2"/>
         <!-- Scrolls only when the card is taller than the screen's work area (e.g. expanded on a 768 px laptop). -->
         <ScrollViewer Name="Body" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Name="Slots" Grid.IsSharedSizeScope="True">
 
           <!-- identity -->
-          <StackPanel Margin="16,14,16,12">
+          <Border Name="HeaderBand" Padding="16,14,16,12">
+          <StackPanel Name="HeaderPanel">
             <Grid ColumnDefinitions="Auto,8,Auto,*,Auto">
               <TextBlock Name="NumText" FontSize="15" FontWeight="Bold"
                          FontFamily="{DynamicResource C.NumFont}" Foreground="{DynamicResource C.Ink}"
                          VerticalAlignment="Center" Text="ANDA 216482"/>
               <Border Name="Seal" Grid.Column="2" Background="{DynamicResource C.GoodBg}"
                       CornerRadius="99" Padding="8,3" VerticalAlignment="Center">
-                <TextBlock FontSize="10" FontWeight="Bold" LetterSpacing="0.8"
+                <TextBlock Name="SealText" FontSize="10" FontWeight="Bold" LetterSpacing="0.8"
                            Foreground="{DynamicResource C.Good}" Text="✓ VERIFIED"/>
               </Border>
               <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="2">
@@ -99,10 +107,11 @@
             <TextBlock Name="MetaText" FontSize="12" Foreground="{DynamicResource C.Ink2}" Margin="0,2,0,0"/>
             <TextBlock Name="FreshnessText" FontSize="10.5" Foreground="{DynamicResource C.Ink3}" Margin="0,3,0,0"/>
           </StackPanel>
+          </Border>
           <Border Height="1" Background="{DynamicResource C.Hair}"/>
 
           <!-- clock: goal + progress + forecast (the headline) -->
-          <StackPanel Margin="16,11,16,12">
+          <StackPanel Name="ClockPanel" Margin="16,11,16,12">
             <Grid Margin="0,0,0,7">
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" SharedSizeGroup="LabelRail"/>
@@ -114,7 +123,7 @@
                 <ColumnDefinition Width="Auto"/>
               </Grid.ColumnDefinitions>
               <TextBlock Classes="lbl" Text="GOAL" VerticalAlignment="Center"/>
-              <TextBlock Grid.Column="2" Name="GoalText" FontSize="13.5" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink}"/>
+              <TextBlock Grid.Column="2" Name="GoalText" FontSize="{DynamicResource C.DateSize}" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink}"/>
               <TextBlock Grid.Column="4" Name="GoalDaysText" FontSize="12" Foreground="{DynamicResource C.Ink2}"/>
               <TextBlock Grid.Column="6" Name="PctText" FontSize="11.5" Foreground="{DynamicResource C.Ink2}"
                          FontFamily="{DynamicResource C.NumFont}"/>
@@ -130,7 +139,7 @@
                 <ColumnDefinition Width="*"/>
               </Grid.ColumnDefinitions>
               <TextBlock Classes="lbl" Text="FORECAST" VerticalAlignment="Center"/>
-              <TextBlock Grid.Column="2" Name="ForecastText" FontSize="13.5" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink}"/>
+              <TextBlock Grid.Column="2" Name="ForecastText" FontSize="{DynamicResource C.DateSize}" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink}"/>
               <TextBlock Grid.Column="4" Name="ForecastDeltaText" FontSize="11.5" FontWeight="Bold" VerticalAlignment="Center"/>
             </Grid>
             <TextBlock Name="ForecastConfText" FontSize="10.5" Foreground="{DynamicResource C.Ink3}"
@@ -140,7 +149,7 @@
           <!-- attention (single most urgent item, or collapsed) -->
           <StackPanel Name="AttentionSlot">
             <Border Height="1" Background="{DynamicResource C.Hair}"/>
-            <Border Name="AttentionBox" Margin="16,10,16,10" CornerRadius="8" Padding="10,8">
+            <Border Name="AttentionBox" Margin="16,10,16,10" CornerRadius="8" Padding="10,8" BorderThickness="1" BorderBrush="Transparent">
               <Grid ColumnDefinitions="Auto,9,*">
                 <TextBlock Name="AttentionKind" Classes="lbl" Text="⚠ NEEDS YOU" VerticalAlignment="Center"/>
                 <TextBlock Grid.Column="2" Name="AttentionText" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
@@ -151,7 +160,7 @@
           <!-- latest — same labeled rail as every other slot -->
           <StackPanel Name="LatestSlot">
             <Border Height="1" Background="{DynamicResource C.Hair}"/>
-            <Grid Margin="16,10,16,10">
+            <Grid Name="LatestGrid" Margin="16,10,16,10">
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" SharedSizeGroup="LabelRail"/>
                 <ColumnDefinition Width="9"/>
@@ -165,7 +174,7 @@
           <!-- AHEAD: anticipation -->
           <StackPanel Name="AheadSlot">
             <Border Height="1" Background="{DynamicResource C.Hair}"/>
-            <Grid Margin="16,10,16,10">
+            <Grid Name="AheadGrid" Margin="16,10,16,10">
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" SharedSizeGroup="LabelRail"/>
                 <ColumnDefinition Width="9"/>
@@ -179,7 +188,7 @@
           <!-- companion brief -->
           <StackPanel Name="BriefSlot">
             <Border Height="1" Background="{DynamicResource C.Hair}"/>
-            <StackPanel Margin="16,10,16,12">
+            <StackPanel Name="BriefPanel" Margin="16,10,16,12">
               <Grid Margin="0,0,0,5">
                 <Grid.ColumnDefinitions>
                   <ColumnDefinition Width="Auto" SharedSizeGroup="LabelRail"/>
@@ -216,7 +225,7 @@
           <!-- chips -->
           <StackPanel Name="ChipsSlot">
             <Border Height="1" Background="{DynamicResource C.Hair}"/>
-            <WrapPanel Margin="16,10,16,12">
+            <WrapPanel Name="ChipsWrap" Margin="16,10,16,12">
               <Button Name="CopyChip" Classes="chip" Margin="0,0,7,7" Content="Copy status"
                       ToolTip.Tip="Copy a formatted status sentence for emails and trackers (S)"
                       AutomationProperties.Name="Copy formatted status line"/>

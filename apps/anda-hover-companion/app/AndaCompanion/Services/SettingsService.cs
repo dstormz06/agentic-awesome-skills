@@ -12,7 +12,13 @@ public enum ConsentModel
 
 public sealed class Settings
 {
-    public AppearanceId Appearance { get; set; } = AppearanceId.A;   // A is the product default
+    public AppearanceId Appearance { get; set; } = Appearances.Default;   // K · Graphite Quiet is the product default
+
+    /// <summary>
+    /// Hide a card or compact box after this many idle seconds (0 = never). Pointer over it, a pinned card and an
+    /// expanded drawer all count as "in use" and are never hidden. See <see cref="UI.AutoHidePolicy"/>.
+    /// </summary>
+    public int AutoHideSeconds { get; set; } = UI.AutoHidePolicy.Default;
 
     // Full = DESIGN.md consent model ① (the deliberate hotkey press IS the second stage).
     public ConsentModel Consent { get; set; } = ConsentModel.Full;
@@ -40,7 +46,12 @@ public static class SettingsService
         try
         {
             if (File.Exists(path))
-                return JsonSerializer.Deserialize<Settings>(File.ReadAllText(path)) ?? new Settings();
+            {
+                var loaded = JsonSerializer.Deserialize<Settings>(File.ReadAllText(path)) ?? new Settings();
+                loaded.AutoHideSeconds = UI.AutoHidePolicy.Normalize(loaded.AutoHideSeconds);
+                if (!Enum.IsDefined(loaded.Appearance)) loaded.Appearance = Appearances.Default;
+                return loaded;
+            }
         }
         catch { /* corrupted settings → defaults */ }
         return new Settings();

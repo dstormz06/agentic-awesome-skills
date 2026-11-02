@@ -83,8 +83,19 @@ public static class ConnectionService
     public static bool HasKey =>
         !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY"));
 
+    /// <summary>One honest sentence for the Settings panel before any request is made.</summary>
+    public static string Describe(Func<string, string?>? env = null, IElsaMapping? mapping = null)
+    {
+        env ??= Environment.GetEnvironmentVariable;
+        if (ElsaConfig.IsSelected(env)) return ElsaConfig.Inspect(env, mapping).Message;
+        return !string.IsNullOrEmpty(env("ANTHROPIC_API_KEY"))
+            ? "Key detected — press Test to verify the channel."
+            : "Offline mode — deterministic briefs. Ready for API access when approved.";
+    }
+
     public static async Task<string> TestAsync()
     {
+        if (ElsaConfig.IsSelected()) return await TestElsaAsync();
         if (!HasKey)
             return "Offline mode — no API key detected. Briefs are assembled deterministically from the " +
                    "record. When access is granted, set ANTHROPIC_API_KEY (agency-approved channel only) " +
@@ -103,6 +114,27 @@ public static class ConnectionService
             var text = string.Concat(response.Content
                 .Select(b => b.TryPickText(out var tb) ? tb.Text : string.Empty)).Trim();
             return $"Connected · claude-opus-4-8 · {sw.ElapsedMilliseconds} ms · response: \"{text}\"";
+        }
+        catch (Exception ex)
+        {
+            return $"Connection failed: {ex.GetType().Name} — {ex.Message}";
+        }
+    }
+
+    /// <summary>The same one-request check for Elsa: explains what is missing, or proves the channel end to end.</summary>
+    public static async Task<string> TestElsaAsync(Func<string, string?>? env = null, IElsaMapping? mapping = null,
+        HttpMessageHandler? handler = null)
+    {
+        mapping ??= ElsaMapping.Current;
+        var inspection = ElsaConfig.Inspect(env, mapping);
+        if (inspection.Status != ElsaStatus.Ready || inspection.Settings is not { } settings) return inspection.Message;
+        try
+        {
+            using var completer = new ElsaChatCompleter(settings, mapping, handler);
+            var sw = Stopwatch.StartNew();
+            var text = await completer.CompleteAsync("Reply with exactly: OK", "Reply with exactly: OK", 16, CancellationToken.None);
+            sw.Stop();
+            return $"Connected · {completer.ProviderName} · {sw.ElapsedMilliseconds} ms · response: \"{text.Trim()}\"";
         }
         catch (Exception ex)
         {

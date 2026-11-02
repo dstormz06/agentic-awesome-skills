@@ -10,7 +10,7 @@ namespace AndaCompanion.Theming;
 /// </summary>
 public static class ThemeManager
 {
-    public static Appearance Current { get; private set; } = Appearances.A;
+    public static Appearance Current { get; private set; } = Appearances.Get(Appearances.Default);
 
     public static event Action? Changed;
 
@@ -55,7 +55,9 @@ public static class ThemeManager
         r["C.NumFont"] = new FontFamily(appearance.NumFont);
         r["C.DrugFont"] = new FontFamily(appearance.DrugFont);
         r["C.DrugStyle"] = appearance.DrugItalic ? FontStyle.Italic : FontStyle.Normal;
-        r["C.LabelFont"] = new FontFamily(appearance.MonoLabels ? appearance.NumFont : appearance.BodyFont);
+        r["C.LabelFont"] = new FontFamily(appearance.Look.SerifLabels ? appearance.DrugFont
+            : appearance.MonoLabels ? appearance.NumFont : appearance.BodyFont);
+        r["C.DateSize"] = appearance.Look.DateSize;
 
         Changed?.Invoke();
     }

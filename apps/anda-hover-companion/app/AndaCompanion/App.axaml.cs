@@ -30,6 +30,7 @@ public partial class App : Application
     private HotkeyService? _hotkeys;
     private TrayIcon? _tray;
     private CardWindow? _card;
+    private CompactCardWindow? _compact;
     private SettingsWindow? _settingsWindow;
     private (AndaRecord Record, PixelPoint Near, bool Mini)? _lastCard;
 
@@ -124,6 +125,14 @@ public partial class App : Application
             return;
         }
 
+        // A compact box never takes focus, so the keyboard way to open it is to press the hotkey again on the
+        // same number: that is the explicit second act, whatever the consent model says.
+        if (_compact is { IsVisible: true } open && open.Number == record.Number)
+        {
+            OpenFullCard(record, near, mini: false);
+            return;
+        }
+
         // Two-stage consent: the hotkey is stage one; what happens next depends on the model.
         switch (_settings.Consent)
         {
@@ -157,14 +166,39 @@ public partial class App : Application
         }).Show();
     }
 
+    /// <summary>
+    /// Opens the quick-look for a record in the chosen appearance. A compact appearance (L–O) opens its small box first —
+    /// no AI call — and a click expands it into the sibling look's full card; every other appearance opens the card.
+    /// </summary>
     public void OpenCard(AndaRecord record, PixelPoint near, bool mini)
     {
-        _card?.Close();
-        var card = new CardWindow(_briefs, _repository.Find);
+        _lastCard = (record, near, mini);
+        if (ThemeManager.Current.IsCompact)
+        {
+            CloseOpenCards();
+            var compact = new CompactCardWindow(record, () => OpenFullCard(record, near, mini: false))
+                { AutoHideSeconds = _settings.AutoHideSeconds };
+            compact.Closed += (_, _) => { if (ReferenceEquals(_compact, compact)) _compact = null; };
+            _compact = compact;
+            compact.ShowNear(near);
+            return;
+        }
+        OpenFullCard(record, near, mini);
+    }
+
+    private void OpenFullCard(AndaRecord record, PixelPoint near, bool mini)
+    {
+        CloseOpenCards();
+        var card = new CardWindow(_briefs, _repository.Find) { AutoHideSeconds = _settings.AutoHideSeconds };
         card.Closed += (_, _) => { if (ReferenceEquals(_card, card)) _card = null; };
         _card = card;
-        _lastCard = (record, near, mini);
         card.Show(record, near, mini);
+    }
+
+    private void CloseOpenCards()
+    {
+        _card?.Close();
+        _compact?.Close();
     }
 
     private void OpenSettings()
@@ -195,7 +229,11 @@ public partial class App : Application
 
         menu.Add(BuildRadioSubmenu("Appearance", Appearances.All.Select(a => (a.Name, (object)a.Id)),
             () => (object)_settings.Appearance,
-            value => { _settings.Appearance = (AppearanceId)value; ApplySettings(); }));
+            value => { _settings.Appearance = (AppearanceId)value; ApplySettings(); },
+            separatorBefore: Appearances.L.Name));
+        menu.Add(BuildRadioSubmenu("Auto-hide", AutoHidePolicy.Choices.Select(c => (AutoHidePolicy.Label(c), (object)c)),
+            () => (object)_settings.AutoHideSeconds,
+            value => { _settings.AutoHideSeconds = (int)value; ApplySettings(); }));
 
         var settings = new NativeMenuItem("Settings…");
         settings.Click += (_, _) => OpenSettings();
@@ -233,11 +271,12 @@ public partial class App : Application
 
     private NativeMenuItem BuildRadioSubmenu(
         string title, IEnumerable<(string Label, object Value)> options,
-        Func<object> current, Action<object> select)
+        Func<object> current, Action<object> select, string? separatorBefore = null)
     {
         var parent = new NativeMenuItem(title) { Menu = new NativeMenu() };
         foreach (var (label, value) in options)
         {
+            if (label == separatorBefore) parent.Menu.Add(new NativeMenuItemSeparator());
             var item = new NativeMenuItem(label)
             {
                 ToggleType = NativeMenuItemToggleType.Radio,
@@ -259,7 +298,7 @@ public partial class App : Application
         SettingsService.Save(_settings);
         ThemeManager.Apply(_settings.Appearance, _settings.CardOpacity);
         // Live preview: if a card is open, rebuild it in place with the new look.
-        if (_card is not null && _lastCard is { } last)
+        if ((_card is not null || _compact is not null) && _lastCard is { } last)
             OpenCard(last.Record, last.Near, last.Mini);
     }
 
@@ -278,8 +317,9 @@ public partial class App : Application
         var rtb = new RenderTargetBitmap(new PixelSize(32, 32), new Vector(96, 96));
         using (var ctx = rtb.CreateDrawingContext())
         {
-            var accent = ((ISolidColorBrush)Current!.Resources["C.Accent"]!).Color;
-            ctx.DrawRectangle(new SolidColorBrush(accent), null, new RoundedRect(new Rect(2, 2, 28, 28), 8));
+            // A fixed federal blue (USWDS primary), not the look's accent: with K the accent is graphite, which
+            // would make a dark tile on a dark Windows taskbar. The glyph must read in both taskbar modes.
+            ctx.DrawRectangle(new SolidColorBrush(Color.Parse("#005EA2")), null, new RoundedRect(new Rect(2, 2, 28, 28), 8));
             ctx.DrawEllipse(Brushes.White, null, new Point(16, 16), 5, 5);
         }
         return rtb;

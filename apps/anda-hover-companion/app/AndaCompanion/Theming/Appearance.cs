@@ -2,14 +2,54 @@ using Avalonia.Media;
 
 namespace AndaCompanion.Theming;
 
-public enum AppearanceId { A, B, C, D, E }
+/// <summary>
+/// Fifteen looks. A–K are the full card (K is the product default); L–O are the compact forms, which
+/// borrow a sibling's palette and expand into that sibling's full card. Saved settings store the numeric
+/// value, so new members are only ever appended.
+/// </summary>
+public enum AppearanceId { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O }
 
-public enum ProgressVariant { Bar, Ticks, Ring, Hatch, Capsule }
+public enum ProgressVariant { Bar, Ticks, Ring, Hatch, Capsule, Line, Dots, Step, Timeline }
+
+/// <summary>Full = the regular quick-look card. The rest are the compact boxes (see CompactCardWindow).</summary>
+public enum CardForm { Full, Strip, Tile, Ticket, Badge }
+
+public enum AttentionShape { Tint, Pill, Outline }
+
+public enum ChipStyle { Outline, Tint, Underline }
+
+public enum SealStyle { Default, Quiet, Tinted }
+
+/// <summary>
+/// Structural signature bits that a palette alone cannot express. Everything defaults to the plain card,
+/// so a look only states what makes it different. Appearance is preference, never information.
+/// </summary>
+public sealed record Structure
+{
+    public string? HeaderTint { get; init; }            // tinted identity band (F, H)
+    public bool StatusSpine { get; init; }              // 5 px left edge coloured by status (G)
+    public string? TopRule { get; init; }               // coloured rule across the top (I, J)
+    public double TopRuleHeight { get; init; }
+    public bool TopRuleDouble { get; init; }            // two hairlines instead of one band (I)
+    public AttentionShape Attention { get; init; } = AttentionShape.Tint;
+    public ChipStyle Chips { get; init; } = ChipStyle.Outline;
+    public string? ChipFill { get; init; }              // Tint chips
+    public string? ChipLine { get; init; }
+    public string? ChipInk { get; init; }
+    public string? LinkFill { get; init; }              // the "Open in system of record" chip is filled (F)
+    public SealStyle Seal { get; init; } = SealStyle.Default;
+    public string? SealFill { get; init; }
+    public string? SealInk { get; init; }
+    public bool SerifLabels { get; init; }
+    public double SlotPadV { get; init; } = 10;
+    public double SlotPadH { get; init; } = 16;
+    public double DateSize { get; init; } = 13.5;
+}
 
 /// <summary>
 /// One palette. The product is light-only by direction of the product owner.
 /// Every text ink (Ink, Ink2, Ink3) and every status ink on its tint meets WCAG 2.x AA (4.5:1);
-/// the contrast tests in AndaCompanion.Tests enforce this for all five appearances.
+/// the contrast tests in AndaCompanion.Tests enforce this for every appearance.
 /// </summary>
 public sealed record Palette(
     string Bg, string Ink, string Ink2, string Ink3, string Hair, string Line,
@@ -18,7 +58,7 @@ public sealed record Palette(
 
 /// <summary>
 /// An appearance = palette + structural signature. Appearance is preference,
-/// never information: anatomy, slot order, and status semantics are identical across all five.
+/// never information: anatomy, slot order, and status semantics are identical across every look.
 /// Accents are anchored to the U.S. Web Design System federal palette. All light.
 /// </summary>
 public sealed record Appearance(
@@ -26,7 +66,18 @@ public sealed record Appearance(
     Palette Palette,
     double Radius, ProgressVariant Progress,
     string BodyFont, string NumFont, string DrugFont,
-    bool DrugItalic, bool StampSeal, bool MonoLabels);
+    bool DrugItalic, bool StampSeal, bool MonoLabels)
+{
+    public Structure Look { get; init; } = new();
+    public CardForm Form { get; init; } = CardForm.Full;
+
+    /// <summary>For a compact look: the full look it expands into. Null for full looks.</summary>
+    public AppearanceId? ExpandsAs { get; init; }
+
+    /// <summary>The full look whose structure and palette this appearance uses (itself, if it is full).</summary>
+    public AppearanceId Basis => ExpandsAs ?? Id;
+    public bool IsCompact => Form != CardForm.Full;
+}
 
 public static class Appearances
 {
@@ -84,7 +135,132 @@ public static class Appearances
         BodyFont: Sans, NumFont: Sans, DrugFont: Sans,
         DrugItalic: false, StampSeal: false, MonoLabels: false);
 
-    public static readonly IReadOnlyList<Appearance> All = new[] { A, B, C, D, E };
+    public static readonly Appearance F = new(
+        AppearanceId.F, "F · Agency Bronze",
+        "Warm greige and bronze, a tinted header and filled tag chips — the familiar agency-tool feel.",
+        new("#FFFFFF", "#25201A", "#584F43", "#6B6153", "#EEE9DF", "#E0D8C9",
+            "#7A5A2E", "#5D4620", "#1F6B43", "#E6F2EA", "#8F4A00", "#FDEEDB",
+            "#A33636", "#F9E9E9", "#E9E2D3", "#A27B3F", "#1A7A5A2E"),
+        Radius: 12, Progress: ProgressVariant.Bar,
+        BodyFont: Sans, NumFont: Sans, DrugFont: Sans,
+        DrugItalic: false, StampSeal: false, MonoLabels: false)
+    {
+        Look = new()
+        {
+            HeaderTint = "#F8F2E6",
+            Seal = SealStyle.Tinted, SealFill = "#F1E7D6", SealInk = "#5D4620",
+            Attention = AttentionShape.Pill,
+            Chips = ChipStyle.Tint, ChipFill = "#F6F0E4", ChipLine = "#E6DCC7", ChipInk = "#5D4620",
+            LinkFill = "#7A5A2E",
+        },
+    };
+
+    public static readonly Appearance G = new(
+        AppearanceId.G, "G · Harbor Teal",
+        "Cool teal with a status spine down the left edge — late or on track at a glance. Compact spacing.",
+        new("#FCFEFE", "#12262B", "#42606A", "#557078", "#E3EEEE", "#CFE0E1",
+            "#0B6E73", "#08565A", "#1B7A4B", "#E2F2EA", "#8A5800", "#FBF1DB",
+            "#A33636", "#F9E9E9", "#DCEAEB", "#2A8F94", "#1A0B6E73"),
+        Radius: 10, Progress: ProgressVariant.Bar,
+        BodyFont: Sans, NumFont: Mono, DrugFont: Sans,
+        DrugItalic: false, StampSeal: true, MonoLabels: false)
+    {
+        Look = new() { StatusSpine = true, SlotPadV = 8, SlotPadH = 14 },
+    };
+
+    public static readonly Appearance H = new(
+        AppearanceId.H, "H · Sage Clinical",
+        "Soft sage band, generous radii and spacing, ten-dot progress. The calmest of the set.",
+        new("#FBFCFA", "#1F2A24", "#4A5A50", "#5B6B61", "#E6EDE7", "#D3DED6",
+            "#3A6653", "#2D5142", "#246A45", "#E1F0E6", "#8A5800", "#FAF0D9",
+            "#A33636", "#F9E9E9", "#E1E9E3", "#5E9078", "#1A3A6653"),
+        Radius: 20, Progress: ProgressVariant.Dots,
+        BodyFont: Sans, NumFont: Sans, DrugFont: Sans,
+        DrugItalic: false, StampSeal: false, MonoLabels: false)
+    {
+        Look = new() { HeaderTint = "#EEF4F0", Attention = AttentionShape.Pill, SlotPadV = 12, SlotPadH = 18 },
+    };
+
+    public static readonly Appearance I = new(
+        AppearanceId.I, "I · Indigo Dossier",
+        "A formal case file — double rule, serif name and labels, a five-step stepper.",
+        new("#FDFCFB", "#1D1C26", "#4D4B5E", "#5F5D72", "#E9E7EF", "#D8D5E3",
+            "#3B3F8C", "#2D3070", "#23694A", "#E4F1EA", "#8A5200", "#F8EED9",
+            "#A33636", "#F9E9E9", "#E4E2EE", "#5A5FB0", "#1A3B3F8C"),
+        Radius: 3, Progress: ProgressVariant.Step,
+        BodyFont: Sans, NumFont: Mono, DrugFont: Serif,
+        DrugItalic: false, StampSeal: true, MonoLabels: false)
+    {
+        Look = new() { TopRule = "#3B3F8C", TopRuleHeight = 5, TopRuleDouble = true, SerifLabels = true },
+    };
+
+    public static readonly Appearance J = new(
+        AppearanceId.J, "J · Cobalt Timeline",
+        "Draws goal against forecast on one timeline, so the gap is the picture. Gold rule on top.",
+        new("#FFFFFF", "#18212E", "#46556A", "#5B697D", "#E8EDF3", "#D4DCE7",
+            "#1F4FB4", "#173D8C", "#157047", "#E2F1EA", "#8A5800", "#FBF1DB",
+            "#A33636", "#F9E9E9", "#E1E8F1", "#6A8FD6", "#1A1F4FB4"),
+        Radius: 6, Progress: ProgressVariant.Timeline,
+        BodyFont: Sans, NumFont: Sans, DrugFont: Sans,
+        DrugItalic: false, StampSeal: true, MonoLabels: false)
+    {
+        Look = new() { TopRule = "#C99A1D", TopRuleHeight = 3 },
+    };
+
+    public static readonly Appearance K = new(
+        AppearanceId.K, "K · Graphite Quiet",
+        "Monochrome. Colour appears only where status needs it. Quiet in a meeting, sharp on a projector. The default.",
+        new("#FDFDFD", "#1B1D1F", "#4A4E53", "#5C6167", "#ECECEC", "#DEDEDE",
+            "#33373C", "#1F2226", "#1A6B43", "#E6F1EA", "#8A5800", "#FAF1DC",
+            "#A33636", "#F9E9E9", "#E6E6E6", "#33373C", "#1A33373C"),
+        Radius: 8, Progress: ProgressVariant.Line,
+        BodyFont: Sans, NumFont: Sans, DrugFont: Sans,
+        DrugItalic: false, StampSeal: false, MonoLabels: false)
+    {
+        Look = new()
+        {
+            Seal = SealStyle.Quiet,
+            Attention = AttentionShape.Outline,
+            Chips = ChipStyle.Underline,
+            DateSize = 15,
+        },
+    };
+
+    // ---- Compact forms: small boxes that stay out of the way of an open email. They borrow a sibling's
+    // palette, make no AI call, and expand into that sibling's full card on click (or the E key). ----
+
+    public static readonly Appearance L = K with
+    {
+        Id = AppearanceId.L, Name = "L · Graphite Strip",
+        Tagline = "A one-glance strip: number, goal, forecast, status edge. About 340 × 62–78 px. Graphite palette.",
+        Form = CardForm.Strip, ExpandsAs = AppearanceId.K,
+    };
+
+    public static readonly Appearance M = A with
+    {
+        Id = AppearanceId.M, Name = "M · Fluent Tile",
+        Tagline = "A small tile: the forecast gap in large type, one attention line. About 196 × 120–139 px. Quiet Fluent palette.",
+        Form = CardForm.Tile, ExpandsAs = AppearanceId.A,
+    };
+
+    public static readonly Appearance N = F with
+    {
+        Id = AppearanceId.N, Name = "N · Bronze Ticket",
+        Tagline = "A slim ticket with a perforated stub: number left, forecast right. About 300 × 64 px. Agency Bronze palette.",
+        Form = CardForm.Ticket, ExpandsAs = AppearanceId.F,
+    };
+
+    public static readonly Appearance O = G with
+    {
+        Id = AppearanceId.O, Name = "O · Teal Badge",
+        Tagline = "The smallest: a status pill with the number and the gap. About 150–190 × 38 px. Harbor Teal palette.",
+        Form = CardForm.Badge, ExpandsAs = AppearanceId.G,
+    };
+
+    public static readonly IReadOnlyList<Appearance> All = new[] { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O };
+
+    /// <summary>The product default, by direction of the product owner (replaced A on 2026-11-02).</summary>
+    public static readonly AppearanceId Default = AppearanceId.K;
 
     public static Appearance Get(AppearanceId id) => All.First(a => a.Id == id);
 }
