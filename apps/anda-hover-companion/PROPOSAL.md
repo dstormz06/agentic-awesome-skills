@@ -50,5 +50,7 @@ facts, computed forecasts with published accuracy, and a clearly-fenced synthesi
 to a model. The architecture is also **provider-pluggable and Elsa-ready**: the model
 backend sits behind one interface, so if the agency later standardizes on Elsa or
 another approved service, the tool swaps backends with zero change to its grounding,
-security, or UI. Goal-date logic is likewise versioned per GDUFA cycle — GDUFA III
+security, or UI. Elsa is already wired as a placeholder with its tests and a five-step
+checklist (`ELSA-INTEGRATION.md`); the one piece that cannot be written yet is the pair of
+translations specific to its API. Goal-date logic is likewise versioned per GDUFA cycle — GDUFA III
 encoded today, GDUFA IV a drop-in when its commitment letter finalizes.

@@ -170,19 +170,44 @@ a deep link to the record in the system of record.
 
 ## 5. Visual language
 
-**Appearance is a preference, never information.** The card ships with **five
-selectable appearances** (Windows app: Settings → Appearance). **A · Quiet Fluent is
-the default**; the rest are user options. All five share identical anatomy, slot
+**Appearance is a preference, never information.** The card ships with **fifteen
+selectable looks** (Windows app: Settings → Appearance): eleven full cards (A–K) and four
+compact boxes (L–O). **K · Graphite Quiet is the default** (changed from A on 2026-11-02 by the
+product owner); the rest are user options. All full looks share identical anatomy, slot
 order, status semantics, and interactions — switching appearance never moves, adds,
 or removes information:
 
 | | Appearance | Character | Progress form |
 |---|---|---|---|
-| **A** | **Quiet Fluent** *(default)* | Native Windows calm — white surface, steel-blue accent, system type | Thin 4 px bar |
+| A | Quiet Fluent | Native Windows calm — white surface, steel-blue accent, system type | Thin 4 px bar |
 | B | Docket Ledger | Typeset federal docket — warm paper, archival green, serif title, stamp seal | Milestone ticks |
 | C | Signal | Light steel command panel — cool sky surface, federal blue, mono numerals | Ring |
 | D | Draft | Engineer's drawing — federal navy ink on white, graph grid, drafting mono | Hatched rule |
 | E | Instrument | Medical-device porcelain — slate steel on clinical white, capsule geometry, soft large radii | Capsule |
+| F | Agency Bronze | Warm greige and bronze, tinted header, filled tag chips (an agency-tool feel; no logo, name or pattern borrowed) | Thin bar |
+| G | Harbor Teal | Cool teal with a **status spine** down the left edge (amber = late, green = on track); compact spacing | Thin bar |
+| H | Sage Clinical | Soft sage band, generous radii and spacing; the calmest | Ten dots |
+| I | Indigo Dossier | A formal case file — double rule, serif name and labels | Five-step stepper |
+| J | Cobalt Timeline | Gold top rule; goal against forecast drawn on one runway, so the gap is the picture | Timeline |
+| **K** | **Graphite Quiet** *(default)* | Monochrome — colour appears only where status needs it; outlined attention, text-only chips; quiet in a meeting, sharp on a projector | Line with a dot |
+| L | Graphite Strip | Compact (about 340 × 62–78 px): number, goal, forecast, status edge | — |
+| M | Fluent Tile | Compact (about 196 × 120–139 px): the forecast gap in large type, one attention line | — |
+| N | Bronze Ticket | Compact (about 300 × 64 px): a slim ticket with a perforated stub | — |
+| O | Teal Badge | Compact (about 150–190 × 38 px): a status pill with the number and the gap | — |
+
+**Compact boxes (L–O).** They exist so the tool never blankets the email being read or
+written. A compact box borrows a full look's palette (K, A, F, G respectively), shows only
+facts already on the record, **makes no AI call**, and **never takes keyboard focus**, so typing in the
+email continues undisturbed and a stray Enter cannot expand it. The deliberate second act is a
+click, or pressing the same hotkey again on the same number; either opens the sibling look's
+full card. Trade-off, stated plainly: because a compact box is not focused it is a pointer-and-hotkey surface;
+the full card it opens is the keyboard-complete one.
+
+**Auto-hide.** A card or compact box hides itself after Off / 10 / 20 / 40 s with no pointer or key
+activity (default 20 s). It **never** hides while the pointer is over it, while the card is pinned, or
+while the drawer is expanded: each is an "I am using this" signal, and taking a card away mid-sentence
+is worse than leaving it. The rule is a pure function (`AutoHidePolicy.ShouldHide`) with a fake-clock
+test.
 
 **Light-only, by product decision.** All dark variants are retired (C was redesigned
 from dark glass into a light steel panel). A per-user **transparency slider** (85–100%,
@@ -192,7 +217,7 @@ lightly on my screen" quality dark themes used to serve.
 **Palette policy.** Accent hues are anchored to the **U.S. Web Design System** federal
 palette (e.g. D's navy = USWDS `primary-dark #1a4480`, C's federal blue = USWDS
 `primary #005ea2`) so every appearance reads government-professional, and the status colors
-(good / warn / bad) keep one consistent semantic family across all five. Within that
+(good / warn / bad) keep one consistent semantic family across every look. Within that
 conservative range, the appearances differentiate through *material, typography, and
 geometry* — paper and serif, grid and mono, glass, porcelain — rather than louder hues.
 
@@ -328,8 +353,10 @@ Cutting these is a feature — each one erodes the "calm" contract:
 Open **`mockup/anda-card.html`** in any browser, desktop or phone. It demonstrates,
 with fictional data:
 
-- **Five appearances** (the §5 table), switchable live — the studio picker is the
-  prototype of the app's Settings → Appearance page. A is the default.
+- **Five appearances** (A–E of the §5 table), switchable live — the studio picker is the
+  prototype of the app's Settings → Appearance page. The full fifteen are in
+  `mockup/appearance-lab.html` (a comparison wall, with the compact boxes shown over an open email)
+  and in the desktop simulation `mockup/windows-simulation.html` (default K).
 - **Three consent models** (§2), switchable live, plus long-press on touch.
 - The forecast-first clock (goal vs. forecast with delta + confidence), the single
   needs-attention signal, the streamed companion brief, pin / expand / keyboard.
@@ -340,8 +367,8 @@ with fictional data:
 
 ## 11. Implementation status — the Windows app
 
-**`app/`** contains the working v0: a .NET 8 / Avalonia tray application with all five
-appearances (A default) selectable from the tray menu, all three consent models,
+**`app/`** contains the working v0: a .NET 8 / Avalonia tray application with all fifteen
+looks (K default; four of them compact boxes) selectable from the tray menu, auto-hide, all three consent models,
 global hotkeys (`Ctrl+Alt+A` Select & Peek, `Ctrl+Alt+Space` lookup), the
 forecast-first card with AHEAD line and expandable drawer, persisted settings, and a
 companion brief via the official Anthropic SDK (`claude-opus-4-8`) with a deterministic

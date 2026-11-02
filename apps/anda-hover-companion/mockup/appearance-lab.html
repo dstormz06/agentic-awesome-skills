@@ -7,7 +7,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <title>ANDA Companion Appearance Lab</title>
 <style>
-/* Layout: a comparison wall. Eleven live cards on a quiet desk, one card per look, all showing the same record.
+/* Layout: a comparison wall. Eleven full cards and four compact boxes on a quiet desk, all showing the same record.
    Light only by product decision. Every color is an explicit token; no dark variants. */
 :root{
   --desk:#F3F1ED; --panel:#FFFFFF; --ink:#1D2024; --ink2:#454B53; --ink3:#5F666E; --line:#DDDAD3;
@@ -51,9 +51,58 @@ h2.sec{font-size:13px;letter-spacing:.12em;font-weight:700;color:var(--ink3);mar
 .pick{align-self:flex-start;border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:8px 16px;font-weight:650;font-size:12.5px;min-height:40px;color:var(--ink2)}
 .pick[aria-pressed="true"]{background:var(--sel);border-color:var(--sel);color:#fff}
 .note{font-size:12px;color:var(--ink3);margin:0}
+.mailstage{background:#EDEAE4;border-radius:12px;padding:14px;display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-width:0}
+.mailmock{width:100%;max-width:420px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:11.5px;color:var(--ink3);line-height:1.7}
+.mailmock b{color:var(--ink2)}.mailmock .ln{height:7px;border-radius:4px;background:#E7E5E0;margin:7px 0}
 .foot{margin-top:28px;color:var(--ink2);font-size:12.5px;max-width:80ch}
 
+/* ============ compact boxes ============ */
+/* ---- compact boxes (L Strip, M Tile, N Ticket, O Badge): small, no AI call, never take focus ---- */
+.cbx{position:relative;display:block;background:var(--c-bg);color:var(--c-ink);border:1px solid var(--c-line);border-radius:min(var(--c-radius),12px);
+  box-shadow:0 10px 26px -10px rgba(20,30,45,.38),0 2px 6px rgba(20,30,45,.08);font-family:var(--c-font);cursor:pointer;overflow:hidden;
+  max-width:100%;--tone:var(--c-good)}
+.cbx.late{--tone:var(--c-warn)}
+.cbx .x{border:none;background:none;color:var(--c-ink3);width:28px;height:28px;border-radius:6px;display:grid;place-items:center;flex:none;cursor:pointer;padding:0}
+.cbx .x:hover{background:var(--c-mark);color:var(--c-ink)}
+.cbx .l{font-size:9px;font-weight:800;letter-spacing:.11em;color:var(--c-ink3)}
+.cbx .n{font-weight:700;font-family:var(--c-num-font);font-variant-numeric:tabular-nums}
+.cbx .dl{font-weight:700}.cbx .late-t{color:var(--c-warn)}.cbx .ok-t{color:var(--c-good)}
+.cbx .tr{display:block;height:4px;background:var(--c-track)}.cbx .tr i{display:block;height:100%;background:var(--c-fill)}
+.cbx .ell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cbx .warnline{color:var(--c-warn);font-weight:650}
+.cbx.strip{width:340px}
+.cbx.strip .row{display:flex}
+.cbx.strip .edge{width:4px;background:var(--tone);flex:none}
+.cbx.strip .body{flex:1;min-width:0;padding:8px 4px 8px 12px}
+.cbx.strip .r1{display:flex;align-items:center;gap:8px;font-size:13px}
+.cbx.strip .r1 .dg{flex:1;min-width:0;color:var(--c-ink2);font-size:12px}
+.cbx.strip .r2{display:flex;align-items:baseline;gap:5px;font-size:12.5px;margin-top:1px;white-space:nowrap}
+.cbx.strip .r3{font-size:11.5px;margin-top:2px}
+.cbx.tile{width:196px;padding:8px 6px 10px 12px}
+.cbx.tile .r1{display:flex;align-items:center;gap:5px}.cbx.tile .n{font-size:15px}
+.cbx.tile .dg{font-size:11.5px;color:var(--c-ink2)}
+.cbx.tile .big{font-size:24px;font-weight:700;margin-top:4px;line-height:1.2}
+.cbx.tile .sub{font-size:10.5px;color:var(--c-ink3)}
+.cbx.tile .tr{margin:7px 6px 0 0;height:4px}
+.cbx.tile .warnline{font-size:11px;margin:6px 6px 0 0}
+.cbx.ticket{width:300px}
+.cbx.ticket .row{display:flex}
+.cbx.ticket .stub{width:80px;white-space:nowrap;padding:8px 6px 8px 10px;display:flex;flex-direction:column;justify-content:center;gap:1px}
+.cbx.ticket .stub .n{font-size:14px}.cbx.ticket .stub .nd{font-size:10.5px;font-weight:650;color:var(--c-warn)}
+.cbx.ticket .perf{width:0;border-left:1px dotted var(--c-ink3);margin:6px 0}
+.cbx.ticket .main{flex:1;min-width:0;padding:9px 4px 8px 10px}
+.cbx.ticket .main .dg{font-size:12px;font-weight:650}
+.cbx.ticket .main .fc{display:flex;gap:5px;align-items:baseline;font-size:12.5px;margin-top:2px;white-space:nowrap}
+.cbx.ticket .tr{height:3px}
+.cbx.badge{border-radius:99px;width:max-content}
+.cbx.badge .row{display:flex;align-items:center;gap:7px;padding:5px 4px 5px 12px;font-size:12.5px;white-space:nowrap}
+.cbx.badge .dot{width:9px;height:9px;border-radius:50%;background:var(--tone);flex:none}
+.cbx.badge .n{font-size:12.5px}
+.cbx.badge .nd{color:var(--c-warn);font-weight:700}
+
+
 /* ============ THE CARD (same anatomy in every look) ============ */
+.cbx{--c-mark:rgba(0,0,0,.06)}
 .card{
   --rail:84px;
   width:100%;max-width:372px;background:var(--c-bg);color:var(--c-ink);border:1px solid var(--c-line);
@@ -121,18 +170,18 @@ h2.sec{font-size:13px;letter-spacing:.12em;font-weight:700;color:var(--ink3);mar
 .p-time .lb.up{top:1px}.p-time .lb.dn{top:37px}
 .p-time .lb.l{transform:none}
 /* ---- the eleven looks: tokens ---- */
-.card[data-look="a"]{--c-bg:#fff;--c-ink:#1a1d21;--c-ink2:#5c6370;--c-ink3:#70757c;--c-hair:#eceae6;--c-line:#e2e0db;--c-accent:#3d6fa5;--c-good:#177245;--c-good-bg:#e7f3ec;--c-warn:#8a5800;--c-warn-bg:#fbf2dd;--c-track:#e9e7e2;--c-fill:#5d84ad;--c-radius:12px;--c-shadow:0 18px 36px -14px rgba(23,26,31,.22),0 3px 10px rgba(23,26,31,.07);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
-.card[data-look="b"]{--c-bg:#fbf8f2;--c-ink:#211d15;--c-ink2:#6e6552;--c-ink3:#78705c;--c-hair:#e9e2d3;--c-line:#ddd3bf;--c-accent:#23573f;--c-good:#23573f;--c-good-bg:transparent;--c-warn:#8a5200;--c-warn-bg:#f6ecd8;--c-track:#e6ddc9;--c-fill:#23573f;--c-radius:8px;--c-shadow:0 16px 32px -14px rgba(43,36,22,.28),0 2px 6px rgba(43,36,22,.10);--c-font:"Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,serif;--c-num-font:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace}
-.card[data-look="c"]{--c-bg:#f7fafd;--c-ink:#16232e;--c-ink2:#51667a;--c-ink3:#617484;--c-hair:#e2eaf2;--c-line:#c9d8e5;--c-accent:#005ea2;--c-good:#177245;--c-good-bg:#e3f1ea;--c-warn:#8a5800;--c-warn-bg:#fbf2dd;--c-track:#dde7f1;--c-fill:#2e7bbf;--c-radius:14px;--c-shadow:0 18px 36px -14px rgba(22,35,46,.20),0 3px 10px rgba(22,35,46,.07);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace}
-.card[data-look="d"]{--c-bg:#fff;--c-ink:#14181d;--c-ink2:#4e5560;--c-ink3:#6f757f;--c-hair:#e3e7ec;--c-line:#c9cfd8;--c-accent:#1a4480;--c-good:#106b3c;--c-good-bg:#e5f2ea;--c-warn:#8a5800;--c-warn-bg:#faf1dc;--c-track:#e6e9ee;--c-fill:#1a4480;--c-radius:4px;--c-grid:rgba(26,68,128,.05);--c-shadow:0 14px 28px -12px rgba(18,30,52,.20),0 2px 4px rgba(18,30,52,.08);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace}
-.card[data-look="e"]{--c-bg:#fcfdfe;--c-ink:#1f2c33;--c-ink2:#5a6c76;--c-ink3:#67767f;--c-hair:#e7edf0;--c-line:#d6dfe4;--c-accent:#3e5d6d;--c-good:#1c7a4d;--c-good-bg:#e5f2eb;--c-warn:#92610a;--c-warn-bg:#fcf1d9;--c-track:#e3eaed;--c-fill:#567383;--c-radius:20px;--c-shadow:0 22px 44px -16px rgba(23,40,44,.22),0 3px 8px rgba(23,40,44,.07);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
+.card[data-look="a"],.cbx[data-look="a"]{--c-bg:#fff;--c-ink:#1a1d21;--c-ink2:#5c6370;--c-ink3:#70757c;--c-hair:#eceae6;--c-line:#e2e0db;--c-accent:#3d6fa5;--c-good:#177245;--c-good-bg:#e7f3ec;--c-warn:#8a5800;--c-warn-bg:#fbf2dd;--c-track:#e9e7e2;--c-fill:#5d84ad;--c-radius:12px;--c-shadow:0 18px 36px -14px rgba(23,26,31,.22),0 3px 10px rgba(23,26,31,.07);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
+.card[data-look="b"],.cbx[data-look="b"]{--c-bg:#fbf8f2;--c-ink:#211d15;--c-ink2:#6e6552;--c-ink3:#78705c;--c-hair:#e9e2d3;--c-line:#ddd3bf;--c-accent:#23573f;--c-good:#23573f;--c-good-bg:transparent;--c-warn:#8a5200;--c-warn-bg:#f6ecd8;--c-track:#e6ddc9;--c-fill:#23573f;--c-radius:8px;--c-shadow:0 16px 32px -14px rgba(43,36,22,.28),0 2px 6px rgba(43,36,22,.10);--c-font:"Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,serif;--c-num-font:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace}
+.card[data-look="c"],.cbx[data-look="c"]{--c-bg:#f7fafd;--c-ink:#16232e;--c-ink2:#51667a;--c-ink3:#617484;--c-hair:#e2eaf2;--c-line:#c9d8e5;--c-accent:#005ea2;--c-good:#177245;--c-good-bg:#e3f1ea;--c-warn:#8a5800;--c-warn-bg:#fbf2dd;--c-track:#dde7f1;--c-fill:#2e7bbf;--c-radius:14px;--c-shadow:0 18px 36px -14px rgba(22,35,46,.20),0 3px 10px rgba(22,35,46,.07);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace}
+.card[data-look="d"],.cbx[data-look="d"]{--c-bg:#fff;--c-ink:#14181d;--c-ink2:#4e5560;--c-ink3:#6f757f;--c-hair:#e3e7ec;--c-line:#c9cfd8;--c-accent:#1a4480;--c-good:#106b3c;--c-good-bg:#e5f2ea;--c-warn:#8a5800;--c-warn-bg:#faf1dc;--c-track:#e6e9ee;--c-fill:#1a4480;--c-radius:4px;--c-grid:rgba(26,68,128,.05);--c-shadow:0 14px 28px -12px rgba(18,30,52,.20),0 2px 4px rgba(18,30,52,.08);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace}
+.card[data-look="e"],.cbx[data-look="e"]{--c-bg:#fcfdfe;--c-ink:#1f2c33;--c-ink2:#5a6c76;--c-ink3:#67767f;--c-hair:#e7edf0;--c-line:#d6dfe4;--c-accent:#3e5d6d;--c-good:#1c7a4d;--c-good-bg:#e5f2eb;--c-warn:#92610a;--c-warn-bg:#fcf1d9;--c-track:#e3eaed;--c-fill:#567383;--c-radius:20px;--c-shadow:0 22px 44px -16px rgba(23,40,44,.22),0 3px 8px rgba(23,40,44,.07);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
 /* NEW */
-.card[data-look="f"]{--c-bg:#fff;--c-ink:#25201a;--c-ink2:#584f43;--c-ink3:#6b6153;--c-hair:#eee9df;--c-line:#e0d8c9;--c-accent:#7a5a2e;--c-good:#1f6b43;--c-good-bg:#e6f2ea;--c-warn:#8f4a00;--c-warn-bg:#fdeedb;--c-track:#e9e2d3;--c-fill:#a27b3f;--c-radius:12px;--c-shadow:0 18px 36px -14px rgba(58,44,24,.24),0 3px 10px rgba(58,44,24,.07);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
-.card[data-look="g"]{--c-bg:#fcfefe;--c-ink:#12262b;--c-ink2:#42606a;--c-ink3:#557078;--c-hair:#e3eeee;--c-line:#cfe0e1;--c-accent:#0b6e73;--c-good:#1b7a4b;--c-good-bg:#e2f2ea;--c-warn:#8a5800;--c-warn-bg:#fbf1db;--c-track:#dceaeb;--c-fill:#2a8f94;--c-radius:10px;--c-shadow:0 16px 32px -14px rgba(10,50,56,.22),0 2px 8px rgba(10,50,56,.07);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace}
-.card[data-look="h"]{--c-bg:#fbfcfa;--c-ink:#1f2a24;--c-ink2:#4a5a50;--c-ink3:#5b6b61;--c-hair:#e6ede7;--c-line:#d3ded6;--c-accent:#3a6653;--c-good:#246a45;--c-good-bg:#e1f0e6;--c-warn:#8a5800;--c-warn-bg:#faf0d9;--c-track:#e1e9e3;--c-fill:#5e9078;--c-radius:20px;--c-shadow:0 20px 40px -16px rgba(30,60,44,.20),0 3px 8px rgba(30,60,44,.06);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
-.card[data-look="i"]{--c-bg:#fdfcfb;--c-ink:#1d1c26;--c-ink2:#4d4b5e;--c-ink3:#5f5d72;--c-hair:#e9e7ef;--c-line:#d8d5e3;--c-accent:#3b3f8c;--c-good:#23694a;--c-good-bg:#e4f1ea;--c-warn:#8a5200;--c-warn-bg:#f8eed9;--c-track:#e4e2ee;--c-fill:#5a5fb0;--c-radius:3px;--c-shadow:0 14px 28px -12px rgba(30,28,70,.22),0 2px 5px rgba(30,28,70,.07);--c-font:"Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:Georgia,Cambria,"Times New Roman",serif;--c-num-font:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace}
-.card[data-look="j"]{--c-bg:#fff;--c-ink:#18212e;--c-ink2:#46556a;--c-ink3:#5b697d;--c-hair:#e8edf3;--c-line:#d4dce7;--c-accent:#1f4fb4;--c-good:#157047;--c-good-bg:#e2f1ea;--c-warn:#8a5800;--c-warn-bg:#fbf1db;--c-track:#e1e8f1;--c-fill:#6a8fd6;--c-radius:6px;--c-shadow:0 16px 30px -14px rgba(20,40,80,.22),0 2px 6px rgba(20,40,80,.07);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
-.card[data-look="k"]{--c-bg:#fdfdfd;--c-ink:#1b1d1f;--c-ink2:#4a4e53;--c-ink3:#5c6167;--c-hair:#ececec;--c-line:#dedede;--c-accent:#33373c;--c-good:#1a6b43;--c-good-bg:#e6f1ea;--c-warn:#8a5800;--c-warn-bg:#faf1dc;--c-track:#e6e6e6;--c-fill:#33373c;--c-radius:8px;--c-shadow:0 14px 28px -14px rgba(20,22,24,.20),0 2px 6px rgba(20,22,24,.06);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
+.card[data-look="f"],.cbx[data-look="f"]{--c-bg:#fff;--c-ink:#25201a;--c-ink2:#584f43;--c-ink3:#6b6153;--c-hair:#eee9df;--c-line:#e0d8c9;--c-accent:#7a5a2e;--c-good:#1f6b43;--c-good-bg:#e6f2ea;--c-warn:#8f4a00;--c-warn-bg:#fdeedb;--c-track:#e9e2d3;--c-fill:#a27b3f;--c-radius:12px;--c-shadow:0 18px 36px -14px rgba(58,44,24,.24),0 3px 10px rgba(58,44,24,.07);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
+.card[data-look="g"],.cbx[data-look="g"]{--c-bg:#fcfefe;--c-ink:#12262b;--c-ink2:#42606a;--c-ink3:#557078;--c-hair:#e3eeee;--c-line:#cfe0e1;--c-accent:#0b6e73;--c-good:#1b7a4b;--c-good-bg:#e2f2ea;--c-warn:#8a5800;--c-warn-bg:#fbf1db;--c-track:#dceaeb;--c-fill:#2a8f94;--c-radius:10px;--c-shadow:0 16px 32px -14px rgba(10,50,56,.22),0 2px 8px rgba(10,50,56,.07);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace}
+.card[data-look="h"],.cbx[data-look="h"]{--c-bg:#fbfcfa;--c-ink:#1f2a24;--c-ink2:#4a5a50;--c-ink3:#5b6b61;--c-hair:#e6ede7;--c-line:#d3ded6;--c-accent:#3a6653;--c-good:#246a45;--c-good-bg:#e1f0e6;--c-warn:#8a5800;--c-warn-bg:#faf0d9;--c-track:#e1e9e3;--c-fill:#5e9078;--c-radius:20px;--c-shadow:0 20px 40px -16px rgba(30,60,44,.20),0 3px 8px rgba(30,60,44,.06);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
+.card[data-look="i"],.cbx[data-look="i"]{--c-bg:#fdfcfb;--c-ink:#1d1c26;--c-ink2:#4d4b5e;--c-ink3:#5f5d72;--c-hair:#e9e7ef;--c-line:#d8d5e3;--c-accent:#3b3f8c;--c-good:#23694a;--c-good-bg:#e4f1ea;--c-warn:#8a5200;--c-warn-bg:#f8eed9;--c-track:#e4e2ee;--c-fill:#5a5fb0;--c-radius:3px;--c-shadow:0 14px 28px -12px rgba(30,28,70,.22),0 2px 5px rgba(30,28,70,.07);--c-font:"Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:Georgia,Cambria,"Times New Roman",serif;--c-num-font:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace}
+.card[data-look="j"],.cbx[data-look="j"]{--c-bg:#fff;--c-ink:#18212e;--c-ink2:#46556a;--c-ink3:#5b697d;--c-hair:#e8edf3;--c-line:#d4dce7;--c-accent:#1f4fb4;--c-good:#157047;--c-good-bg:#e2f1ea;--c-warn:#8a5800;--c-warn-bg:#fbf1db;--c-track:#e1e8f1;--c-fill:#6a8fd6;--c-radius:6px;--c-shadow:0 16px 30px -14px rgba(20,40,80,.22),0 2px 6px rgba(20,40,80,.07);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
+.card[data-look="k"],.cbx[data-look="k"]{--c-bg:#fdfdfd;--c-ink:#1b1d1f;--c-ink2:#4a4e53;--c-ink3:#5c6167;--c-hair:#ececec;--c-line:#dedede;--c-accent:#33373c;--c-good:#1a6b43;--c-good-bg:#e6f1ea;--c-warn:#8a5800;--c-warn-bg:#faf1dc;--c-track:#e6e6e6;--c-fill:#33373c;--c-radius:8px;--c-shadow:0 14px 28px -14px rgba(20,22,24,.20),0 2px 6px rgba(20,22,24,.06);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
 
 /* ---- the structural signature of each look ---- */
 .card[data-look="b"] .seal{border:1.5px solid var(--c-good);border-radius:4px;transform:rotate(-2.5deg);padding:2px 7px;background:transparent}
@@ -190,25 +239,23 @@ h2.sec{font-size:13px;letter-spacing:.12em;font-weight:700;color:var(--ink3);mar
 <div class="wrap">
   <p class="eyebrow">ALL DATA FICTIONAL · LIGHT ONLY</p>
   <h1>Appearance Lab</h1>
-  <p class="lede">Eleven looks for the same card. The five current looks are first; six new ones follow. Anatomy and meaning never change between looks: only the surface, type, and the shape of the progress marker do. Pick your top four.</p>
+  <p class="lede">All fifteen looks are now options in the app, and K is the default. Eleven full cards, then four compact boxes that stay out of the way of an open email. Anatomy and meaning never change between looks: only the surface, type, and the shape of the progress marker do.</p>
 
   <div class="bar" role="toolbar" aria-label="Controls">
     <div class="seg" role="group" aria-label="Record shown">
       <button type="button" data-rec="216482" aria-pressed="true">Forecast late</button>
       <button type="button" data-rec="214990" aria-pressed="false">On track</button>
     </div>
-    <span id="picks" aria-live="polite">Picked 0 of 4</span>
-    <button type="button" class="pill" id="copy">Copy my top 4</button>
-    <button type="button" class="pill quiet" id="clear">Clear</button>
   </div>
-  <div id="out" role="status"></div>
-
-  <h2 class="sec">CURRENT · A TO E</h2>
+  
+  <h2 class="sec">FULL CARD · A TO E</h2>
   <section class="grid" id="gridCur"></section>
-  <h2 class="sec">NEW · F TO K</h2>
+  <h2 class="sec">FULL CARD · F TO K</h2>
   <section class="grid" id="gridNew"></section>
+  <h2 class="sec">COMPACT BOX · L TO O · SHOWN OVER AN OPEN EMAIL</h2>
+  <section class="grid" id="gridCompact"></section>
 
-  <p class="foot">The runway in J is drawn from the days to goal and the forecast delta, both on the card. F is inspired by the warm-neutral, bronze-accent feel of agency tools; it borrows no logo, name or pattern from any of them.</p>
+  <p class="foot">Compact boxes never take keyboard focus, make no AI call, and open their sibling look's full card on a click or when the hotkey is pressed again. The runway in J is drawn from the days to goal and the forecast delta, both on the card. F is inspired by the warm-neutral, bronze-accent feel of agency tools; it borrows no logo, name or pattern from any of them.</p>
 </div>
 
 <script>
@@ -225,7 +272,7 @@ const DATA = {
     brief:"Related precedent: ANDA 216482 — same applicant, same facility. Forecast drivers and assumptions: expand → Forecast & assumptions.", sisters:1, notes:2 }
 };
 const LOOKS = [
-  { id:"a", cur:true, name:"A · Quiet Fluent", tag:"Native Windows calm. White surface, steel-blue accent, a thin bar. The current default.", prog:"bar", sw:["#fff","#3d6fa5","#177245"] },
+  { id:"a", cur:true, name:"A · Quiet Fluent", tag:"Native Windows calm. White surface, steel-blue accent, a thin bar.", prog:"bar", sw:["#fff","#3d6fa5","#177245"] },
   { id:"b", cur:true, name:"B · Docket Ledger", tag:"Typeset federal docket. Warm paper, archival green, serif title, stamp seal, milestone ticks.", prog:"ticks", sw:["#fbf8f2","#23573f","#211d15"] },
   { id:"c", cur:true, name:"C · Signal", tag:"Light steel panel. Federal blue, mono numerals, a progress ring.", prog:"ring", sw:["#f7fafd","#005ea2","#177245"] },
   { id:"d", cur:true, name:"D · Draft", tag:"Engineer's drawing. Navy ink on a graph grid, hatched progress.", prog:"bar", sw:["#fff","#1a4480","#162e51"] },
@@ -235,7 +282,13 @@ const LOOKS = [
   { id:"h", cur:false, name:"H · Sage Clinical", tag:"Soft sage band, large radii, ten-dot progress. The calmest of the set.", prog:"dots", sw:["#eef4f0","#3a6653","#2d7a4f"] },
   { id:"i", cur:false, name:"I · Indigo Dossier", tag:"A formal case file. Double rule, serif name and labels, a five-step stepper.", prog:"step", sw:["#fdfcfb","#3b3f8c","#23694a"] },
   { id:"j", cur:false, name:"J · Cobalt Timeline", tag:"Draws goal against forecast on one timeline, so the gap is the picture. Gold rule on top.", prog:"time", sw:["#fff","#1f4fb4","#c99a1d"] },
-  { id:"k", cur:false, name:"K · Graphite Quiet", tag:"Monochrome. Colour appears only where status needs it. Best on a projector.", prog:"line", sw:["#fdfdfd","#33373c","#8a5800"] }
+  { id:"k", cur:false, def:true, name:"K · Graphite Quiet", tag:"Monochrome. Colour appears only where status needs it. Best on a projector. The default.", prog:"line", sw:["#fdfdfd","#33373c","#8a5800"] }
+];
+const COMPACT = [
+  { id:"l", form:"strip", tokens:"k", name:"L · Graphite Strip", tag:"One glance: number, goal, forecast, a status edge. About 340 × 62–78 px.", sw:["#fdfdfd","#33373c","#8a5800"] },
+  { id:"m", form:"tile", tokens:"a", name:"M · Fluent Tile", tag:"The forecast gap in large type and one attention line. About 196 × 120–139 px.", sw:["#fff","#3d6fa5","#177245"] },
+  { id:"n", form:"ticket", tokens:"f", name:"N · Bronze Ticket", tag:"A slim ticket with a perforated stub. About 300 × 64 px.", sw:["#f6f0e4","#7a5a2e","#1f6b43"] },
+  { id:"o", form:"badge", tokens:"g", name:"O · Teal Badge", tag:"The smallest: a status pill with the number and the gap. About 150–190 × 38 px.", sw:["#eef7f7","#0b6e73","#1b7a4b"] }
 ];
 const ICON = {
   pin:'<svg viewBox="0 0 16 16"><path d="M9.5 2.5l4 4-2.2.55a2 2 0 0 0-1.25 1.25L9.5 10.5 5.5 6.5l2.2-.55A2 2 0 0 0 8.95 4.7z"/><path d="M5.5 10.5L2.5 13.5"/></svg>',
@@ -285,41 +338,40 @@ function card(look, id){
     <div class="slot"><div class="chips"><button class="chip" type="button" tabindex="-1">Copy status</button><button class="chip" type="button" tabindex="-1">Sister ANDA · ${d.sisters}</button><button class="chip" type="button" tabindex="-1">Notes · ${d.notes}</button><button class="chip link" type="button" tabindex="-1">Open in system of record ↗</button></div></div>
   </article>`;
 }
-let rec = "216482"; const picked = [];
+let rec = "216482";
+const shortDelta = t => { for (const sep of [" vs ", " ahead"]){ const i = t.indexOf(sep); if (i > 0) return t.slice(0, i); } return t; };
+const pairDates = (g, f) => { const y = d => { const i = d.lastIndexOf(", "); return i > 0 ? d.slice(i + 2) : null; }, day = d => { const i = d.lastIndexOf(", "); return i > 0 ? d.slice(0, i) : d; }; return y(g) && y(g) === y(f) ? [day(g), day(f)] : [g, f]; };
+const XB = '<span class="x" aria-hidden="true"><svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3.5 3.5l7 7M10.5 3.5l-7 7"/></svg></span>';
+function compactBox(c, id){
+  const d = DATA[id], [g, f] = pairDates(d.goal, d.fc), dl = shortDelta(d.fdelta), tone = d.late ? "late-t" : "ok-t";
+  const bar = `<span class="tr"><i style="width:${d.pct}%"></i></span>`;
+  const warn = d.attn ? `<span class="warnline ell">⚠ ${d.attn}</span>` : "";
+  let inner;
+  if (c.form === "strip") inner = `<div class="row"><span class="edge"></span><div style="flex:1;min-width:0"><div class="body"><div class="r1"><span class="n">ANDA ${id}</span><span class="dg ell">${d.drug}</span>${XB}</div><div class="r2"><span class="l">GOAL</span><b>${g}</b><span style="color:var(--c-ink3)">→</span><span class="l">FORECAST</span><b>${f}</b><b class="dl ${tone}">${dl}</b></div>${d.attn ? `<div class="r3 ell">${warn}</div>` : ""}</div>${bar}</div></div>`;
+  else if (c.form === "tile") inner = `<div class="r1"><span class="n">${id}</span><span class="l">ANDA</span><span style="flex:1"></span>${XB}</div><div class="dg ell">${d.drug}</div><div class="big ${tone}">${dl}</div><div class="sub ell">forecast ${f} · goal ${g}</div>${bar}${d.attn ? `<div class="warnline ell">⚠ ${d.attn}</div>` : ""}`;
+  else if (c.form === "ticket") inner = `<div class="row"><div class="stub"><span class="l">ANDA</span><span class="n">${id}</span>${d.attn ? '<span class="nd">⚠ needs you</span>' : ""}</div><span class="perf"></span><div class="main"><div style="display:flex;align-items:center"><span class="dg ell" style="flex:1">${d.drug}</span>${XB}</div><div class="fc"><span class="l">FORECAST</span><b>${f}</b><b class="dl ${tone}">${dl}</b></div></div></div>${bar}`;
+  else inner = `<div class="row"><span class="dot"></span><span class="n">${id}</span><b class="dl ${tone}">${dl}</b>${d.attn ? '<span class="nd">⚠</span>' : ""}${XB}</div>`;
+  return `<div class="cbx ${c.form}${d.late ? " late" : ""}" data-look="${c.tokens}" aria-label="Compact box ${c.name} for ANDA ${id}">${inner}</div>`;
+}
 function render(){
   for (const [gridId, cur] of [["gridCur", true], ["gridNew", false]]){
     document.getElementById(gridId).innerHTML = LOOKS.filter(l => l.cur === cur).map(l => `
-      <div class="tile${picked.includes(l.id) ? " picked" : ""}" data-id="${l.id}">
-        <div class="thead"><div><div class="nm">${l.name}<span class="badge ${l.cur ? "cur" : "new"}">${l.cur ? "CURRENT" : "NEW"}</span></div><div class="tg">${l.tag}</div></div>
+      <div class="tile" data-id="${l.id}">
+        <div class="thead"><div><div class="nm">${l.name}${l.def ? '<span class="badge new">DEFAULT</span>' : ""}</div><div class="tg">${l.tag}</div></div>
           <span class="sw" aria-hidden="true">${l.sw.map(c => `<i style="background:${c}"></i>`).join("")}</span></div>
         <div class="stage">${card(l, rec)}</div>
-        <button class="pick" type="button" data-pick="${l.id}" aria-pressed="${picked.includes(l.id)}">${picked.includes(l.id) ? "✓ In my top 4" : "Add to my top 4"}</button>
       </div>`).join("");
   }
-  document.getElementById("picks").textContent = `Picked ${picked.length} of 4`;
-}
-function summary(){
-  const names = picked.map(id => LOOKS.find(l => l.id === id).name);
-  return names.length ? "My top " + names.length + ": " + names.join(", ") : "Nothing picked yet.";
+  document.getElementById("gridCompact").innerHTML = COMPACT.map(c => `
+    <div class="tile" data-id="${c.id}">
+      <div class="thead"><div><div class="nm">${c.name}</div><div class="tg">${c.tag}</div></div>
+        <span class="sw" aria-hidden="true">${c.sw.map(x => `<i style="background:${x}"></i>`).join("")}</span></div>
+      <div class="mailstage"><div class="mailmock" aria-hidden="true"><b>To:</b> Review team · <b>Subject:</b> Thursday huddle prep<div class="ln" style="width:92%"></div><div class="ln" style="width:78%"></div><div class="ln" style="width:85%"></div></div>${compactBox(c, rec)}</div>
+    </div>`).join("");
 }
 document.addEventListener("click", e => {
-  const p = e.target.closest("[data-pick]");
-  if (p){
-    const id = p.dataset.pick, i = picked.indexOf(id);
-    if (i >= 0) picked.splice(i, 1);
-    else if (picked.length < 4) picked.push(id);
-    else { const o = document.getElementById("out"); o.textContent = "You already have four. Remove one first."; o.classList.add("show"); return; }
-    document.getElementById("out").classList.remove("show"); render(); return;
-  }
   const r = e.target.closest("[data-rec]");
   if (r){ rec = r.dataset.rec; document.querySelectorAll("[data-rec]").forEach(b => b.setAttribute("aria-pressed", b === r)); render(); }
-});
-document.getElementById("clear").addEventListener("click", () => { picked.length = 0; document.getElementById("out").classList.remove("show"); render(); });
-document.getElementById("copy").addEventListener("click", () => {
-  const text = summary(), o = document.getElementById("out");
-  const show = msg => { o.textContent = msg + "\n" + text; o.classList.add("show"); };
-  (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text) : Promise.reject())
-    .then(() => show("Copied. Paste it into the chat:"), () => show("Select and copy this:"));
 });
 render();
 </script>

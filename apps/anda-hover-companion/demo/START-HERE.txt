@@ -15,7 +15,11 @@ SET UP - about 2 minutes
 TRY IT
   - In Notepad, double-click a number such as 216482, then press Ctrl+Alt+A.
   - Press Ctrl+Alt+Space from anywhere and type a number.
-  - Tray icon > Settings: switch appearance, consent model, transparency.
+  - Tray icon > Settings: switch appearance (15 looks; K is the default; L to O
+    are small boxes that stay out of the way of an email), auto-hide, consent
+    model, transparency.
+  - With a small box (L to O) showing, press Ctrl+Alt+A again on the same number,
+    or click the box, to open the full card.
   - Tray icon > Prompt library: add your own lens.
 
 IF SOMETHING DOES NOT WORK

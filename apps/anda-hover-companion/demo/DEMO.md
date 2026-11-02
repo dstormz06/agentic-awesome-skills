@@ -35,8 +35,8 @@ clipboard hand-off are simulated there; in the Windows build they are real.
 | 1:45 | Click **Copy status**, paste into the memo. | "The sentence I retype a dozen times a week, in one click." |
 | 2:15 | Select **NDA 021234**, press Ctrl+Alt+A. | "Same six digits, different application type. It declines to guess and opens the lookup box. Showing the wrong card is worse than showing none." |
 | 2:45 | Copy any text, trigger a card, then paste. | "It read my selection by copying it, then put my clipboard back exactly as it was." |
-| 3:15 | Tray → Settings. Switch appearance and consent model. Drag the transparency slider. | "Five looks, one anatomy. Three consent models, so my team chooses how much happens without a second act." |
-| 4:00 | Tray → Prompt library. Pick a lens. Press **Test** in Settings. | "Our own prompts steer emphasis but can never override grounding. Test shows offline today. The day access is approved: set the key, press Test, done." |
+| 3:15 | Tray → Settings. Pick **L · Graphite Strip**, select a number again and press Ctrl+Alt+A: a small strip appears and does not take focus. Click it, or press Ctrl+Alt+A again, to open the full card. Then switch back to the default **K**. Show Auto-hide and the transparency slider. | "Fifteen looks, one anatomy; K is the default. The compact boxes stay out of the way of an open email, make no AI call, and never steal the keyboard. A card hides itself when idle but never while I am reading it. Three consent models, so my team chooses how much happens without a second act." |
+| 4:00 | Tray → Prompt library. Pick a lens. Press **Test** in Settings. | "Our own prompts steer emphasis but can never override grounding. Test shows offline today. The day access is approved: set the key (Claude) or follow the Elsa checklist, press Test, done. The Elsa wiring is already in; only its two request-and-reply translations wait for the API." |
 | 4:45 | Stop. | The ask: API access through an agency-approved channel. See `PROPOSAL.md`. |
 
 ## If someone asks
@@ -44,6 +44,7 @@ clipboard hand-off are simulated there; in the Windows build they are real.
 | Question | Honest answer |
 |---|---|
 | Is this connected to real ANDA data? | No. Every record is fictional. A real data layer reads only a sanctioned extract (see `DESIGN.md` §6). |
+| Is Elsa integrated? | It is wired as a placeholder, not integrated. Selection, configuration, the https-only guard, timeout, fallback and the Settings status line are built and tested; the two translations that depend on Elsa's API are not written because that API is not known and is not guessed. See `ELSA-INTEGRATION.md`. |
 | Does it call Claude today? | No. It is offline by default. The Claude path uses the official SDK and the `claude-opus-4-8` model ID, which matches Anthropic's current model list, but it has **not** been exercised against the live API. |
 | Has it run on Windows? | Yes, in an automated run on a Windows build-26100 machine (the Windows 11 24H2 / Server 2025 generation) at 1024×768: hotkeys registered and delivered, Select & Peek captured a real selection and restored the clipboard, Segoe UI rendered, cards stayed on screen. See `VERIFICATION.md` round 5 for the run and its limits. |
 | Will it work on my managed workstation? | Unknown. Application allow-listing, endpoint protection and clipboard-monitoring tools can block an unsigned program or its keystroke injection. Run the self-test there first. |
