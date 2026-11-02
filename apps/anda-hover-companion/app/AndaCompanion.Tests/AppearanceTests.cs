@@ -171,6 +171,29 @@ public class AppearanceTests
     }
 
     [Fact]
+    public void Accents_and_fills_are_never_near_black()
+    {
+        // "Don't make anything too dark" (product owner, 2026-11-02). Text must stay dark enough to read, so this
+        // applies to the colours used for buttons, checkboxes, progress marks and fills, not to the text inks.
+        foreach (var a in Appearances.All)
+        {
+            Assert.True(Luminance(a.Palette.Accent) >= 0.05, $"{a.Id} accent {a.Palette.Accent} is too dark ({Luminance(a.Palette.Accent):0.000})");
+            Assert.True(Luminance(a.Palette.Fill) >= 0.05, $"{a.Id} fill {a.Palette.Fill} is too dark ({Luminance(a.Palette.Fill):0.000})");
+        }
+        // K is the default: its accent is a soft slate, not graphite
+        Assert.True(Luminance(Appearances.K.Palette.Accent) >= 0.10);
+        Assert.True(Luminance(Appearances.K.Palette.Ink) >= 0.02, "K text ink is softened from near-black");
+    }
+
+    [Fact]
+    public void Graphs_stay_visible_against_their_track()
+    {
+        // non-text contrast: a progress fill must be distinguishable from its track (WCAG 1.4.11, 3:1)
+        foreach (var a in Appearances.All)
+            Assert.True(Contrast(a.Palette.Fill, a.Palette.Track) >= 3.0, $"{a.Id} fill vs track = {Contrast(a.Palette.Fill, a.Palette.Track):0.00}");
+    }
+
+    [Fact]
     public void The_shipped_palettes_contain_no_dark_surfaces_even_in_the_card_tints()
     {
         foreach (var a in Appearances.All)

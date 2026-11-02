@@ -140,7 +140,7 @@ public static class Appearances
         "Warm greige and bronze, a tinted header and filled tag chips — the familiar agency-tool feel.",
         new("#FFFFFF", "#25201A", "#584F43", "#6B6153", "#EEE9DF", "#E0D8C9",
             "#7A5A2E", "#5D4620", "#1F6B43", "#E6F2EA", "#8F4A00", "#FDEEDB",
-            "#A33636", "#F9E9E9", "#E9E2D3", "#A27B3F", "#1A7A5A2E"),
+            "#A33636", "#F9E9E9", "#E9E2D3", "#9C7539", "#1A7A5A2E"),
         Radius: 12, Progress: ProgressVariant.Bar,
         BodyFont: Sans, NumFont: Sans, DrugFont: Sans,
         DrugItalic: false, StampSeal: false, MonoLabels: false)
@@ -160,7 +160,7 @@ public static class Appearances
         "Cool teal with a status spine down the left edge — late or on track at a glance. Compact spacing.",
         new("#FCFEFE", "#12262B", "#42606A", "#557078", "#E3EEEE", "#CFE0E1",
             "#0B6E73", "#08565A", "#1B7A4B", "#E2F2EA", "#8A5800", "#FBF1DB",
-            "#A33636", "#F9E9E9", "#DCEAEB", "#2A8F94", "#1A0B6E73"),
+            "#A33636", "#F9E9E9", "#DCEAEB", "#288A8F", "#1A0B6E73"),
         Radius: 10, Progress: ProgressVariant.Bar,
         BodyFont: Sans, NumFont: Mono, DrugFont: Sans,
         DrugItalic: false, StampSeal: true, MonoLabels: false)
@@ -173,7 +173,7 @@ public static class Appearances
         "Soft sage band, generous radii and spacing, ten-dot progress. The calmest of the set.",
         new("#FBFCFA", "#1F2A24", "#4A5A50", "#5B6B61", "#E6EDE7", "#D3DED6",
             "#3A6653", "#2D5142", "#246A45", "#E1F0E6", "#8A5800", "#FAF0D9",
-            "#A33636", "#F9E9E9", "#E1E9E3", "#5E9078", "#1A3A6653"),
+            "#A33636", "#F9E9E9", "#E1E9E3", "#578A71", "#1A3A6653"),
         Radius: 20, Progress: ProgressVariant.Dots,
         BodyFont: Sans, NumFont: Sans, DrugFont: Sans,
         DrugItalic: false, StampSeal: false, MonoLabels: false)
@@ -199,7 +199,7 @@ public static class Appearances
         "Draws goal against forecast on one timeline, so the gap is the picture. Gold rule on top.",
         new("#FFFFFF", "#18212E", "#46556A", "#5B697D", "#E8EDF3", "#D4DCE7",
             "#1F4FB4", "#173D8C", "#157047", "#E2F1EA", "#8A5800", "#FBF1DB",
-            "#A33636", "#F9E9E9", "#E1E8F1", "#6A8FD6", "#1A1F4FB4"),
+            "#A33636", "#F9E9E9", "#E1E8F1", "#587FC5", "#1A1F4FB4"),
         Radius: 6, Progress: ProgressVariant.Timeline,
         BodyFont: Sans, NumFont: Sans, DrugFont: Sans,
         DrugItalic: false, StampSeal: true, MonoLabels: false)
@@ -209,10 +209,10 @@ public static class Appearances
 
     public static readonly Appearance K = new(
         AppearanceId.K, "K · Graphite Quiet",
-        "Monochrome. Colour appears only where status needs it. Quiet in a meeting, sharp on a projector. The default.",
-        new("#FDFDFD", "#1B1D1F", "#4A4E53", "#5C6167", "#ECECEC", "#DEDEDE",
-            "#33373C", "#1F2226", "#1A6B43", "#E6F1EA", "#8A5800", "#FAF1DC",
-            "#A33636", "#F9E9E9", "#E6E6E6", "#33373C", "#1A33373C"),
+        "Monochrome in soft slate. Colour appears only where status needs it. Quiet in a meeting, sharp on a projector. The default.",
+        new("#FDFDFD", "#2A2E33", "#4A4E53", "#5C6167", "#ECECEC", "#DEDEDE",
+            "#56626E", "#48535E", "#1A6B43", "#E6F1EA", "#8A5800", "#FAF1DC",
+            "#A33636", "#F9E9E9", "#E6E6E6", "#6E7A86", "#1A56626E"),
         Radius: 8, Progress: ProgressVariant.Line,
         BodyFont: Sans, NumFont: Sans, DrugFont: Sans,
         DrugItalic: false, StampSeal: false, MonoLabels: false)

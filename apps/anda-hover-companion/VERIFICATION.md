@@ -230,6 +230,7 @@ not re-read from run 8's.
 | R18 | Sizes were quoted from Linux renders (fallback font); Segoe UI measured wider (strip 81 not 78, tile 145 not 139) | Windows self-test | Taglines, DESIGN and the lab quote the Windows ranges |
 | R19 | The tray icon was drawn in the look's accent; with K that is graphite, a dark tile on a dark Windows taskbar | Review of the K default | Tray icon is a fixed federal blue in every look |
 | R20 | The compact box's "needs you" label wrapped in the lab and the simulation | Browser render | Stub widened and set to no-wrap in all three renderers |
+| R21 | **Progress fills in F, H and J were below 3:1 against their tracks** (2.99, 2.96, 2.61; G borderline at 3.12), so the bar was hard to tell from its track for some viewers | A new non-text-contrast test written while lightening K | Fills nudged slightly deeper (still mid-tone, not dark); the test now guards all eleven looks. The value is also shown as text, so this was a margin issue, not a lost fact |
 
 ### Housekeeping in round 6
 
@@ -239,9 +240,9 @@ report that mention the studio describe a file that is no longer in the tree (it
 
 ### Things the owner should decide, not assume
 
-- **K's accent is graphite (`#33373C`).** The surface is light and the look is the one picked from the lab, but the primary
-  buttons, checkboxes and the progress line are a dark ink, not a colour. If "no dark colours" is meant to include that,
-  say so and the accent can move to a mid slate; nothing else changes.
+- ~~K's accent is graphite (`#33373C`)~~ **Decided: "don't make anything too dark."** K's accent is now soft slate `#56626E`
+  (white text on it 6.1:1), its fill `#6E7A86`, its text ink softened to `#2A2E33` (still 13:1 on the surface). Every
+  look's accent and fill is held above a minimum luminance by a test.
 - **Auto-hide defaults to 20 s.** A card opens next to the pointer, not under it, so a reader who keeps the mouse still
   and does not touch the keyboard will see it hide. Off is one click in Settings; 40 s is the gentler choice.
 - **Existing installs keep their saved look.** Only new installs get K.

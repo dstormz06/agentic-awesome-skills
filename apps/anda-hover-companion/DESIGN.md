@@ -189,7 +189,7 @@ or removes information:
 | H | Sage Clinical | Soft sage band, generous radii and spacing; the calmest | Ten dots |
 | I | Indigo Dossier | A formal case file — double rule, serif name and labels | Five-step stepper |
 | J | Cobalt Timeline | Gold top rule; goal against forecast drawn on one runway, so the gap is the picture | Timeline |
-| **K** | **Graphite Quiet** *(default)* | Monochrome — colour appears only where status needs it; outlined attention, text-only chips; quiet in a meeting, sharp on a projector | Line with a dot |
+| **K** | **Graphite Quiet** *(default)* | Monochrome in soft slate (accent `#56626E`, not near-black) — colour appears only where status needs it; outlined attention, text-only chips; quiet in a meeting, sharp on a projector | Line with a dot |
 | L | Graphite Strip | Compact (about 340 × 63–81 px): number, goal, forecast, status edge | — |
 | M | Fluent Tile | Compact (about 196 × 123–145 px): the forecast gap in large type, one attention line | — |
 | N | Bronze Ticket | Compact (about 300 × 64–68 px): a slim ticket with a perforated stub | — |
@@ -208,6 +208,8 @@ activity (default 20 s). It **never** hides while the pointer is over it, while 
 while the drawer is expanded: each is an "I am using this" signal, and taking a card away mid-sentence
 is worse than leaving it. The rule is a pure function (`AutoHidePolicy.ShouldHide`) with a fake-clock
 test.
+
+**Nothing too dark (product owner, 2026-11-02).** Beyond the light-only rule, no accent or progress fill may be near-black (a test enforces a minimum luminance on every look's accent and fill), and every progress fill must stay at least 3:1 against its track. Text inks stay dark enough for AA contrast; that is legibility, not decoration.
 
 **Light-only, by product decision.** All dark variants are retired (C was redesigned
 from dark glass into a light steel panel). A per-user **transparency slider** (85–100%,
