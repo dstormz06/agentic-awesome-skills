@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ANDA Hover Companion</title>
+<link rel="stylesheet" href="pages.css">
+<style>body{width:420px;min-height:260px}#out .k{display:block}#cardHost .card{width:100%;max-height:480px;box-shadow:none;border:none}#cardHost .card.wide{width:100%}</style>
+</head>
+<body>
+<div class="tabs" role="tablist" aria-label="ANDA Hover Companion">
+  <button role="tab" id="t-look" aria-selected="true" aria-controls="p-look">Look up</button>
+  <button role="tab" id="t-draft" aria-selected="false" aria-controls="p-draft">Draft</button>
+  <button role="tab" id="t-watch" aria-selected="false" aria-controls="p-watch">Watch list</button>
+  <button role="tab" id="t-page" aria-selected="false" aria-controls="p-page">This page</button>
+</div>
+
+<section class="pane" id="p-look" role="tabpanel" aria-labelledby="t-look">
+  <form class="row" id="lookForm"><input type="text" id="num" placeholder="ANDA number, e.g. 216482" inputmode="numeric" autocomplete="off" aria-label="ANDA number"><button class="btn primary" type="submit">Go</button></form>
+  <div id="lookMsg" class="status" hidden role="alert"></div>
+  <div id="cardHost" class="k"></div>
+</section>
+
+<section class="pane" id="p-draft" role="tabpanel" aria-labelledby="t-draft" hidden>
+  <textarea id="draftText" aria-label="Draft text" placeholder="Paste or type an email or chat draft"></textarea>
+  <div class="row" style="margin-top:8px"><button class="btn primary" id="draftGo" type="button">Check against the record</button><button class="btn" id="draftPage" type="button">Use the page selection</button></div>
+  <p class="hint">No AI and no network. It compares the ANDA numbers, goal and forecast dates and on-track or late wording with your data, and says what it did not check.</p>
+  <div id="draftOut" class="k"></div>
+</section>
+
+<section class="pane" id="p-watch" role="tabpanel" aria-labelledby="t-watch" hidden>
+  <div class="row"><button class="btn" id="watchGo" type="button">Refresh</button><label class="opt" style="margin-left:auto"><input type="checkbox" id="watchNotes"> include notes</label></div>
+  <p class="hint" id="watchNote"></p>
+  <div id="watchOut" class="k"></div>
+</section>
+
+<section class="pane" id="p-page" role="tabpanel" aria-labelledby="t-page" hidden>
+  <button class="btn primary" id="scanGo" type="button">Scan this page for ANDA numbers</button>
+  <p class="hint">Reads the visible text of the tab you are on, on your click only, and keeps nothing. Nothing is sent anywhere.</p>
+  <div id="scanMsg" class="status" hidden></div>
+  <div id="scanOut" class="k"></div>
+</section>
+
+<div class="foot"><span id="source">…</span><a id="openOptions" role="link" tabindex="0">Settings</a></div>
+<script src="ui/card-ui.js"></script>
+<script type="module" src="popup.js"></script>
+</body>
+</html>

@@ -16,6 +16,9 @@ public static class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        // The browser starts this same exe as its native-messaging host: answer on stdin/stdout, no window, no tray, no single-instance check.
+        if (NativeHost.IsHostLaunch(args)) return NativeHost.Run(args);
+
         var selfTest = SelfTestOptions.Parse(args);
         if (selfTest is not null)
         {

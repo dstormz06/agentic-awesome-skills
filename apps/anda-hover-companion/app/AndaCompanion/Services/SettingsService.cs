@@ -56,6 +56,9 @@ public sealed class Settings
     /// <summary>A local usage log: date, event and seconds, never an ANDA number or any text. Off by default.</summary>
     public bool UsageLog { get; set; }
 
+    /// <summary>The Edge extension allowed to talk to this app (its 32-letter ID). Defaults to the extension in this repository.</summary>
+    public string ExtensionId { get; set; } = NativeHostRegistration.DefaultExtensionId;
+
     /// <summary>Card surface transparency, 0.85–1.0. Text always stays opaque.</summary>
     public double CardOpacity { get; set; } = 1.0;
 
@@ -84,6 +87,7 @@ public static class SettingsService
                 loaded.AutoHideSeconds = UI.AutoHidePolicy.Normalize(loaded.AutoHideSeconds);
                 loaded.UrgentLateDays = UrgencyPolicy.Normalize(loaded.UrgentLateDays);
                 if (!Settings.HolidayLeadChoices.Contains(loaded.HolidayLeadDays)) loaded.HolidayLeadDays = 3;
+                if (!NativeHostRegistration.IsValidExtensionId(loaded.ExtensionId)) loaded.ExtensionId = NativeHostRegistration.DefaultExtensionId;
                 loaded.PortfolioColumns ??= new();
                 loaded.StandingInstructions ??= "";
                 if (HotkeyParser.ValidateSet(("Select & Peek", loaded.PeekHotkey), ("Lookup", loaded.LookupHotkey), ("Check a draft", loaded.DraftHotkey)) is not null)

@@ -189,6 +189,23 @@ public partial class SettingsWindow : Window
             Apply();
         };
 
+        ExtIdBox.Text = _settings.ExtensionId;
+        void PaintExt(string? extra = null)
+        {
+            var st = NativeHostRegistration.Status();
+            ExtStatus.Text = (extra is null ? "" : extra + " ") + st.Message;
+        }
+        PaintExt();
+        ExtConnect.Click += (_, _) =>
+        {
+            string id = (ExtIdBox.Text ?? "").Trim();
+            if (!NativeHostRegistration.IsValidExtensionId(id)) { PaintExt("That is not an extension ID (32 letters from a to p; copy it from the extension's Settings page)."); return; }
+            _settings.ExtensionId = id; Apply();
+            var (_, message) = NativeHostRegistration.Install(Environment.ProcessPath ?? "", id);
+            PaintExt(message);
+        };
+        ExtDisconnect.Click += (_, _) => { var (_, message) = NativeHostRegistration.Uninstall(); PaintExt(message); };
+
         UsageCheck.IsChecked = _settings.UsageLog;
         UsageCheck.IsCheckedChanged += (_, _) => { if (_loading) return; _settings.UsageLog = UsageCheck.IsChecked == true; Apply(); };
         UsageHint.Text += $" File: {AppPaths.UsageFile}";

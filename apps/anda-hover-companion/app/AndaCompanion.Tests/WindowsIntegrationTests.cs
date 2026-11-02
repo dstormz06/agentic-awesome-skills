@@ -62,6 +62,33 @@ public class WindowsIntegrationTests
     }
 
     [WindowsFact]
+    public void The_edge_connection_round_trips_in_the_current_user_registry_hive()
+    {
+        const string testBase = @"Software\AndaHoverCompanionTests\NativeMessagingHosts";
+        string dir = Temp.NewDir();
+        Environment.SetEnvironmentVariable(NativeHostRegistration.DirEnvVar, dir);
+        try
+        {
+            Assert.False(NativeHostRegistration.Status(testBase).Registered);
+            var (ok, message) = NativeHostRegistration.Install(@"C:\Apps\AndaCompanion.exe", NativeHostRegistration.DefaultExtensionId, testBase);
+            Assert.True(ok, message);
+            var status = NativeHostRegistration.Status(testBase);
+            Assert.True(status.Registered, status.Message);
+            Assert.Contains(NativeHostRegistration.DefaultExtensionId, status.Message);
+            Assert.True(File.Exists(NativeHostRegistration.ManifestPath));
+            Assert.True(NativeHostRegistration.Uninstall(testBase).Ok);
+            Assert.False(NativeHostRegistration.Status(testBase).Registered);
+            Assert.False(File.Exists(NativeHostRegistration.ManifestPath));
+            Assert.False(NativeHostRegistration.Install(@"C:\x", "bad id", testBase).Ok);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(NativeHostRegistration.DirEnvVar, null);
+            Microsoft.Win32.Registry.CurrentUser.DeleteSubKeyTree(@"Software\AndaHoverCompanionTests", throwOnMissingSubKey: false);
+        }
+    }
+
+    [WindowsFact]
     public void Disposing_the_service_releases_the_hotkeys()
     {
         var first = new HotkeyService(_ => { });

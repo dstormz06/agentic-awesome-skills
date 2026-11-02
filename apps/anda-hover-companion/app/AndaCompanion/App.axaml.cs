@@ -251,14 +251,8 @@ public partial class App : Application
         else if (string.IsNullOrWhiteSpace(_settings.ReferenceDataPath)) { _drugs = null; _drugsMessage = ""; _drugsLoadedFrom = null; }
     }
 
-    private ReferenceInfo? ReferenceFor(AndaRecord record)
-    {
-        if (_drugs is not null) return _drugs.Describe(record);
-        string? psg = DrugsAtFdaFile.PsgOf(record);
-        string? rld = string.IsNullOrWhiteSpace(_settings.ReferenceDataPath) ? null
-            : _drugsLoading ? "reading the Drugs@FDA file…" : $"not checked: {(_drugsMessage.Length > 0 ? _drugsMessage : "the Drugs@FDA file could not be used")}";
-        return psg is null && rld is null ? null : new ReferenceInfo(psg, rld);
-    }
+    private ReferenceInfo? ReferenceFor(AndaRecord record) =>
+        ReferenceResolver.For(record, _drugs, _drugsMessage, _settings.ReferenceDataPath, _drugsLoading);
 
     // ---------- check a draft ----------
 
@@ -290,6 +284,22 @@ public partial class App : Application
         win.Show();
     }
 
+    private WatchListWindow? _watchWindow;
+
+    private CardContext CardCtx() => new(Today(), _calendar, _settings.HolidayLeadDays, _settings.UrgentLateDays, ReferenceFor);
+
+    private void OpenWatchList()
+    {
+        if (_watchWindow is not null) { _watchWindow.Reload(); _watchWindow.Activate(); return; }
+        var win = new WatchListWindow(() => WatchList.Build(_repository, CardCtx()), (number, near) =>
+        {
+            if (_repository.Find(number) is { } record) OpenCard(record, near, mini: false);
+        });
+        win.Closed += (_, _) => _watchWindow = null;
+        _watchWindow = win;
+        win.Show();
+    }
+
     private void OpenSettings()
     {
         if (_settingsWindow is not null) { _settingsWindow.Activate(); return; }
@@ -311,6 +321,9 @@ public partial class App : Application
         var draft = new NativeMenuItem($"Check a draft…\t{_settings.DraftHotkey}");
         draft.Click += (_, _) => OpenDraft("");
         menu.Add(draft);
+        var watch = new NativeMenuItem("Watch list…");
+        watch.Click += (_, _) => OpenWatchList();
+        menu.Add(watch);
 
         var demoRisk = new NativeMenuItem("Demo: at-risk card");
         demoRisk.Click += (_, _) => DemoCard("216482");

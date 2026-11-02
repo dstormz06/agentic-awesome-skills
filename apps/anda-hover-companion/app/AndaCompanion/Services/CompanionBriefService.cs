@@ -15,7 +15,11 @@ public interface ICompanionBriefService
 /// </summary>
 public sealed class OfflineBriefService : ICompanionBriefService
 {
-    public Task<CompanionBrief> GetBriefAsync(AndaRecord r, CancellationToken ct = default)
+    public Task<CompanionBrief> GetBriefAsync(AndaRecord r, CancellationToken ct = default) =>
+        Task.FromResult(new CompanionBrief(Compose(r), r.Notes.Select(n => n.Who).ToArray(), Generated: false));
+
+    /// <summary>The offline brief text on its own, so other surfaces (the browser extension's host) say exactly the same thing.</summary>
+    public static string Compose(AndaRecord r)
     {
         // S4: never restate what the card already shows (goal/forecast dates are two
         // slots above) — lead with what the card does NOT show.
@@ -25,10 +29,7 @@ public sealed class OfflineBriefService : ICompanionBriefService
             sb.Append($"Related precedent: ANDA {r.Sisters[0].Number} — {r.Sisters[0].Description}. ");
         if (sb.Length == 0) sb.Append("No open items need action. ");
         sb.Append("Forecast drivers and assumptions: expand → Forecast & assumptions.");
-        return Task.FromResult(new CompanionBrief(
-            sb.ToString().TrimEnd(),
-            r.Notes.Select(n => n.Who).ToArray(),
-            Generated: false));
+        return sb.ToString().TrimEnd();
     }
 }
 

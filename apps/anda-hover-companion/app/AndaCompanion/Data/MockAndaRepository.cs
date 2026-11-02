@@ -6,6 +6,9 @@ public interface IAndaRepository
 {
     /// <summary>Null when the number is not a recognized ANDA.</summary>
     AndaRecord? Find(string number);
+
+    /// <summary>Every number the repository knows, for the portfolio-wide watch list. Empty when it cannot enumerate.</summary>
+    IReadOnlyCollection<string> Numbers => Array.Empty<string>();
 }
 
 /// <summary>
@@ -81,6 +84,7 @@ public sealed class MockAndaRepository : IAndaRepository
     }
 
     public AndaRecord? Find(string number) => _records.GetValueOrDefault(number);
+    public IReadOnlyCollection<string> Numbers => _records.Keys;
 }
 
 public static class AndaValidator
@@ -98,4 +102,5 @@ public sealed class SwitchableRepository(IAndaRepository initial) : IAndaReposit
 {
     public IAndaRepository Current { get; set; } = initial;
     public AndaRecord? Find(string number) => Current.Find(number);
+    public IReadOnlyCollection<string> Numbers => Current.Numbers;
 }

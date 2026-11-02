@@ -156,6 +156,17 @@
         </StackPanel>
 
         <StackPanel Spacing="6">
+          <TextBlock Classes="lbl" Text="EDGE EXTENSION · OPTIONAL"/>
+          <TextBlock Name="ExtStatus" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+          <TextBox Name="ExtIdBox" FontSize="12" FontFamily="{DynamicResource C.NumFont}" AutomationProperties.Name="Extension ID"/>
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Name="ExtConnect" Classes="primary" Content="Connect"/>
+            <Button Name="ExtDisconnect" Content="Disconnect"/>
+          </StackPanel>
+          <TextBlock Classes="hint" Text="Lets the ANDA Hover Companion extension in Edge read your data through this app, so both show the same facts. Current user only, no admin rights, and only the extension ID above can use it. The extension also works without this app."/>
+        </StackPanel>
+
+        <StackPanel Spacing="6">
           <TextBlock Classes="lbl" Text="USAGE LOG · FOR THE PILOT SCORECARD"/>
           <CheckBox Name="UsageCheck">
             <TextBlock Text="Keep a local log of what I use (date, event, seconds)" TextWrapping="Wrap"/>

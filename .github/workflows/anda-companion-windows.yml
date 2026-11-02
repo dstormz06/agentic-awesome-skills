@@ -11,12 +11,14 @@ on:
     paths:
       - "apps/anda-hover-companion/app/**"
       - "apps/anda-hover-companion/demo/**"
+      - "apps/anda-hover-companion/extension/**"
       - ".github/workflows/anda-companion-windows.yml"
   pull_request:
     branches: ["main"]
     paths:
       - "apps/anda-hover-companion/app/**"
       - "apps/anda-hover-companion/demo/**"
+      - "apps/anda-hover-companion/extension/**"
       - ".github/workflows/anda-companion-windows.yml"
   workflow_dispatch:
 
@@ -59,6 +61,9 @@ jobs:
           dotnet test app/AndaCompanion.Tests -c Release --no-build -nologo
           --logger "trx;LogFileName=test-results.trx"
           --results-directory "$env:RUNNER_TEMP/test-results"
+
+      - name: Test the Edge extension's rules against the app's own output (no browser needed)
+        run: node --test extension/tests/unit/parity.test.mjs extension/tests/unit/safety.test.mjs
 
       - name: Publish single-file win-x64 executable
         run: >
@@ -142,3 +147,7 @@ jobs:
 
       - name: Test (Windows-only tests are skipped here)
         run: dotnet test AndaCompanion.Tests -c Release -nologo --filter "Category!=Windows"
+
+      - name: Test the Edge extension's rules against the app's own output (no browser needed)
+        working-directory: apps/anda-hover-companion
+        run: node --test extension/tests/unit/parity.test.mjs extension/tests/unit/safety.test.mjs

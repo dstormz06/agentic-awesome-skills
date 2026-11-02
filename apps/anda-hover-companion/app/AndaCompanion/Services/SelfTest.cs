@@ -45,6 +45,7 @@ internal static class SelfTest
             report.Add(SelfTestChecks.SettingsAndPrompts(Path.Combine(options.OutDir, "home", "check")));
             report.Add(SelfTestChecks.ElsaPlaceholder());
             report.Add(SelfTestChecks.Phase1Rules(repo, Path.Combine(options.OutDir, "home", "phase1")));
+            report.Add(SelfTestChecks.NativeHostProcess());
             report.Add(Fonts());
             report.Add(SelfTestChecks.ClipboardRoundTrip());
 
@@ -206,6 +207,34 @@ internal static class SelfTest
             chip.ShowNotice("Paused in terminals. Type the number instead", Anchor);
             report.Add(await ShootAsync(chip, "chip-notice", o.OutDir, false));
             chip.Close();
+        });
+        await Safe(report, "draft", async () =>
+        {
+            var win = new DraftWindow("Hi all, quick status. ANDA 216482 is on track, with a goal date of Oct 10, 2026. ANDA 123456 needs a call.", repo.Find,
+                new WritingService(null), new Settings(), prompts);
+            win.Show();
+            report.Add(await ShootAsync(win, "draft", o.OutDir, false));
+            win.Close();
+        });
+        await Safe(report, "watch-list", async () =>
+        {
+            var win = new WatchListWindow(() => WatchList.Build(repo, new CardContext(new DateOnly(2026, 11, 2), new BusinessCalendar())), (_, _) => { });
+            win.Show();
+            report.Add(await ShootAsync(win, "watch-list", o.OutDir, false));
+            win.Close();
+        });
+        await Safe(report, "watch-line", async () =>
+        {
+            // The fictional goal date is a Saturday: the card must say so, in the slot the owner asked for, on a real Windows renderer.
+            var win = new CardWindow(briefs, repo.Find) { CloseWhenDeactivated = false, Today = () => new DateOnly(2026, 11, 2) };
+            win.Show(repo.Find("216482")!, Anchor, false);
+            bool slot = win.FindControl<Control>("WatchSlot")!.IsVisible;
+            string text = win.FindControl<TextBlock>("WatchText")!.Text ?? "";
+            win.Close();
+            report.Add(slot && text.Contains("falls on a weekend: Sat Oct 3") && text.Contains("more in the drawer")
+                ? new("watch-line-on-card", CheckStatus.Pass, "the card shows the weekend goal-date flag and points to the rest of the watch list")
+                : new("watch-line-on-card", CheckStatus.Fail, $"WATCH slot visible={slot}, text='{text}'"));
+            await Task.CompletedTask;
         });
     }
 
@@ -421,7 +450,7 @@ internal static class SelfTest
                 await Task.Delay(150);
             }
             return problems.Count == 0
-                ? new(name, CheckStatus.Pass, "Ctrl+Alt+A and Ctrl+Alt+Space, pressed as real keystrokes, both reached the hotkey thread")
+                ? new(name, CheckStatus.Pass, $"{string.Join(", ", hotkeys.Select(h => h.Binding.Combo))}, pressed as real keystrokes, {(hotkeys.Count == 2 ? "both" : "all")} reached the hotkey thread")
                 : new(name, CheckStatus.Fail, string.Join("; ", problems));
         }
         finally { App.HotkeyObserved -= OnSeen; }

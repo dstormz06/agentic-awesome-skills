@@ -1,0 +1,63 @@
+{
+  "manifest_version": 3,
+  "name": "ANDA Hover Companion (prototype)",
+  "short_name": "ANDA Companion",
+  "version": "0.1.0",
+  "description": "Select an ANDA number, get its forecast, watch flags and a draft check. Offline; fictional demo data until you add your own. Prototype, not an FDA product.",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0ExgiuijsADRSzBxjZOG6nF+3KTDezWOya02YcyHs4udXsn0lTplITNLTflySawiPcJmjoSP2n4wxKSyj/8L1u8TztHxPCyQ+e2ByDV6yTJOcWLomHMNMG74/GXPlSpwUOH0+HqOADGcS0gyX6D8ESWgoz1L6gfJ3r39Hq7BSaAOQfoRqVqDqw3bi1OE0R/8vCIV2YMnlGiTd84ih4g2DbAfWn2gUnSq3bFSykvoWmqL5uBGM+AyZFvA2pVpX5UsBYCOoe9w44SXI1hY6j995ThFmrYfj6If9hfp1RhQdseQnJHCo48lfqIbx9MP1UqL24kMiGxJq1WoHEo0AlBOMwIDAQAB",
+  "minimum_chrome_version": "110",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "ANDA Hover Companion",
+    "default_popup": "src/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png"
+    }
+  },
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
+  "options_ui": {
+    "page": "src/options.html",
+    "open_in_tab": true
+  },
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "contextMenus",
+    "storage"
+  ],
+  "optional_permissions": [
+    "nativeMessaging"
+  ],
+  "commands": {
+    "peek-selection": {
+      "suggested_key": {
+        "default": "Alt+Shift+A"
+      },
+      "description": "Peek at the selected ANDA number"
+    },
+    "check-draft": {
+      "suggested_key": {
+        "default": "Alt+Shift+D"
+      },
+      "description": "Check the selected text (or the field you are typing in) as a draft"
+    },
+    "scan-page": {
+      "suggested_key": {
+        "default": "Alt+Shift+S"
+      },
+      "description": "Scan this page for ANDA numbers"
+    }
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'; base-uri 'none'"
+  }
+}

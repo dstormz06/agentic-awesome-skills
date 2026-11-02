@@ -266,6 +266,51 @@ internal static class SelfTestChecks
     }
 
     /// <summary>
+    /// Starts the published executable the way the browser starts a native-messaging host (the extension's origin as the first argument,
+    /// pipes for stdin and stdout), asks it three things, and checks the answers and a clean exit. Hermetic: the child inherits the
+    /// self-test's own data folder, reads nothing of the person's, and makes no network call.
+    /// </summary>
+    public static CheckResult NativeHostProcess()
+    {
+        const string name = "native-host-process";
+        string? exe = Environment.ProcessPath;
+        if (exe is null || !Path.GetFileNameWithoutExtension(exe).Equals("AndaCompanion", StringComparison.OrdinalIgnoreCase))
+            return new(name, CheckStatus.Skip, "not running as the published executable, so it cannot start itself as a host");
+        try
+        {
+            var psi = new System.Diagnostics.ProcessStartInfo(exe)
+            { RedirectStandardInput = true, RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false, CreateNoWindow = true };
+            psi.ArgumentList.Add($"chrome-extension://{NativeHostRegistration.DefaultExtensionId}/");
+            var clock = System.Diagnostics.Stopwatch.StartNew();
+            using var p = System.Diagnostics.Process.Start(psi) ?? throw new InvalidOperationException("the host did not start");
+            var stdin = p.StandardInput.BaseStream; var stdout = p.StandardOutput.BaseStream;
+            System.Text.Json.Nodes.JsonNode? Ask(string json)
+            {
+                NativeHost.WriteFrame(stdin, json);
+                var read = Task.Run(() => NativeHost.ReadFrame(stdout));
+                if (!read.Wait(TimeSpan.FromSeconds(20))) throw new TimeoutException("no answer within 20 s");
+                return read.Result is { } b ? System.Text.Json.Nodes.JsonNode.Parse(b) : null;
+            }
+            var problems = new List<string>();
+            var hello = Ask("{\"id\":1,\"type\":\"hello\"}");
+            long firstMs = clock.ElapsedMilliseconds;
+            if (hello?["ok"]?.GetValue<bool>() != true || hello["protocol"]?.GetValue<int>() != NativeHostSession.Protocol) problems.Add("hello was not answered");
+            var lookup = Ask("{\"id\":2,\"type\":\"lookup\",\"number\":\"216482\"}");
+            if (lookup?["card"]?["brief"]?["tag"]?.GetValue<string>() != "OFFLINE BRIEF") problems.Add("lookup did not return a card");
+            else if (!lookup["card"]!["watch"]![0]!["text"]!.GetValue<string>().Contains("falls on a weekend: Sat Oct 3")) problems.Add("the card lacked the weekend flag");
+            var draft = Ask("{\"id\":3,\"type\":\"draft\",\"text\":\"ANDA 216482 is on track. Goal date Oct 10, 2026.\"}");
+            if (draft?["findings"]?.AsArray().Any(f => f?["kind"]?.GetValue<string>() == "diff") != true) problems.Add("the draft check found nothing");
+            stdin.Close();
+            if (!p.WaitForExit(10000)) { p.Kill(); problems.Add("the host did not exit when the pipe closed"); }
+            else if (p.ExitCode != 0) problems.Add($"the host exited with code {p.ExitCode}");
+            return problems.Count == 0
+                ? new(name, CheckStatus.Pass, $"the exe answered hello, a card lookup and a draft check over stdin/stdout and exited cleanly when the pipe closed; first answer after {firstMs} ms")
+                : new(name, CheckStatus.Fail, string.Join("; ", problems));
+        }
+        catch (Exception ex) { return new(name, CheckStatus.Fail, ex.GetType().Name + ": " + ex.Message); }
+    }
+
+    /// <summary>
     /// The Phase 1 rules, with no UI and no network: federal-calendar dates, the weekend/holiday watch flag, the
     /// deterministic draft check, shortcut parsing, and reading a portfolio file. Uses a throwaway CSV in the
     /// self-test folder; nothing outside it is read or written.

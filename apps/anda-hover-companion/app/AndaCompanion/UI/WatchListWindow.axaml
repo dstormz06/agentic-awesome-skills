@@ -1,0 +1,35 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="AndaCompanion.UI.WatchListWindow"
+        SystemDecorations="None" TransparencyLevelHint="Transparent" Background="Transparent"
+        SizeToContent="WidthAndHeight" CanResize="False" Topmost="True"
+        ShowInTaskbar="False" WindowStartupLocation="CenterScreen" Title="ANDA Companion — Watch list">
+
+  <Window.Styles>
+    <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource C.Font}"/></Style>
+    <Style Selector="TextBlock.lbl">
+      <Setter Property="FontSize" Value="9.5"/><Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="LetterSpacing" Value="1.4"/><Setter Property="Foreground" Value="{DynamicResource C.Ink3}"/>
+    </Style>
+    <Style Selector="TextBlock.hint"><Setter Property="FontSize" Value="11.5"/><Setter Property="Foreground" Value="{DynamicResource C.Ink2}"/><Setter Property="TextWrapping" Value="Wrap"/></Style>
+  </Window.Styles>
+
+  <Panel Margin="26">
+    <Border Background="{DynamicResource C.Bg}" BorderBrush="{DynamicResource C.Line}"
+            BorderThickness="1" CornerRadius="{DynamicResource C.Radius}"
+            BoxShadow="0 18 42 -10 #59000000" Padding="20" Width="600">
+      <StackPanel Spacing="10">
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock FontSize="15" FontWeight="Bold" Foreground="{DynamicResource C.Ink}" Text="Watch list"/>
+          <Button Grid.Column="1" Name="CloseBtn" Content="Done"/>
+        </Grid>
+        <TextBlock Name="Summary" Classes="hint"/>
+        <CheckBox Name="NotesCheck"><TextBlock Text="Include notes (dates near a holiday, no goal date)"/></CheckBox>
+        <ScrollViewer MaxHeight="420" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+          <StackPanel Name="Rows" Spacing="2"/>
+        </ScrollViewer>
+        <TextBlock Classes="hint" Text="The same rules the card uses, applied to every ANDA in your data when you open this list. Nothing runs in the background and nothing is sent anywhere. Click a row to open its card."/>
+      </StackPanel>
+    </Border>
+  </Panel>
+</Window>

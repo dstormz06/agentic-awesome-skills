@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ANDA Hover Companion settings</title>
+<link rel="stylesheet" href="pages.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>ANDA Hover Companion for Edge</h1>
+  <p class="hint">Prototype, not an FDA product. It makes no network requests of its own. Everything stays in this browser profile unless you connect the desktop app on this computer.</p>
+
+  <h2>Where the data comes from</h2>
+  <label class="opt"><input type="radio" name="source" value="demo"> Fictional demo records (two ANDAs, for trying it out)</label>
+  <label class="opt"><input type="radio" name="source" value="imported"> A spreadsheet I choose below (kept in this browser only)</label>
+  <label class="opt"><input type="radio" name="source" value="app"> The desktop app on this computer</label>
+  <div id="sourceStatus" class="status" role="status">…</div>
+  <button class="btn" id="testSource" type="button">Test the data source</button>
+
+  <h2>My spreadsheet</h2>
+  <input type="file" id="file" accept=".xlsx,.xlsm,.csv,.tsv,.txt" aria-label="Choose your portfolio spreadsheet">
+  <p class="hint">Excel (.xlsx) or CSV. Read here in the browser, never uploaded; the rows are kept in this profile so the extension works offline. It shows only what your sheet says: a forecast or progress that is not in it shows as "—", never an estimate. A notes folder needs the desktop app.</p>
+  <div id="importStatus" class="status" hidden></div>
+  <table class="map" id="map" hidden></table>
+  <button class="btn" id="clearImport" type="button" hidden>Remove the imported spreadsheet</button>
+
+  <h2>The desktop app</h2>
+  <label class="opt"><input type="checkbox" id="follow"> When connected, follow the app's settings (consent, urgent rule, holiday window)</label>
+  <button class="btn" id="connect" type="button">Allow the connection to the desktop app…</button>
+  <p class="hint">This extension's ID: <code id="extId"></code><br>In the app, open Settings, Edge extension, and choose Connect. The app lists only this ID, so no other extension can use the connection. Your browser asks you to allow "communicate with cooperating native applications".</p>
+
+  <h2>When you select an ANDA number</h2>
+  <label class="opt"><input type="radio" name="consent" value="whisper"> Whisper invite: a small chip you click (default)</label>
+  <label class="opt"><input type="radio" name="consent" value="peek"> Peek first: a small card, expand for the rest</label>
+  <label class="opt"><input type="radio" name="consent" value="full"> Full card</label>
+  <label class="opt"><input type="checkbox" id="escalate"> In whisper mode, open a peek by itself for an at-risk or late ANDA</label>
+  <div class="row"><span>Late means a forecast at least</span><select id="late" style="width:auto"><option>3</option><option>7</option><option>14</option></select><span>days past the goal</span></div>
+  <div class="row" style="margin-top:6px"><span>Flag dates within</span><select id="lead" style="width:auto"><option>0</option><option>2</option><option>3</option><option>5</option></select><span>business days of a federal holiday</span></div>
+  <div class="row" style="margin-top:6px"><span>Hide the card after</span><select id="hide" style="width:auto"><option value="0">never</option><option value="10">10 s</option><option value="20">20 s</option><option value="40">40 s</option></select><span>idle (never while your pointer is on it)</span></div>
+
+  <h2>Extra closures</h2>
+  <textarea id="closures" aria-label="Extra closures" placeholder="2026-12-24 Executive order closing"></textarea>
+  <p class="hint">One per line: a date, then a name. Weekends and federal holidays are always included (U.S. federal calendar, OPM). Closures announced at short notice are not predicted, so add them here. This only flags the date; it never says how a goal-date rule applies.</p>
+
+  <h2>Shortcuts</h2>
+  <p class="hint">Suggested: Alt+Shift+A peek, Alt+Shift+D check a draft, Alt+Shift+S scan the page. Edge leaves out a suggestion that another extension or Edge itself already uses. <a id="shortcuts" tabindex="0" role="link" style="color:var(--accent);cursor:pointer;text-decoration:underline">Change them in Edge</a>.</p>
+
+  <h2>What this extension can and cannot do</h2>
+  <p class="hint">It runs on a page only when you press a shortcut, use the right-click menu or click its button, and only on that tab (the "active tab" permission). It has no permission to read pages you have not asked about, to use your history, or to call any website. It does not use AI.</p>
+</main>
+<script type="module" src="options.js"></script>
+</body>
+</html>
