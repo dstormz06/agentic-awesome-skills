@@ -8,6 +8,7 @@ using Avalonia.Threading;
 using AndaCompanion.Data;
 using AndaCompanion.Models;
 using AndaCompanion.Services;
+using AndaCompanion.Services.Portfolio;
 using AndaCompanion.Theming;
 using AndaCompanion.UI;
 
@@ -21,7 +22,15 @@ public partial class App : Application
     /// <summary>Raised on the hotkey thread for every hotkey press while a self-test is running.</summary>
     internal static event Action<int>? HotkeyObserved;
 
-    private readonly IAndaRepository _repository = new MockAndaRepository();
+    private readonly MockAndaRepository _demo = new();
+    private readonly SwitchableRepository _repository;
+    private PortfolioRepository? _portfolio;
+    private DrugsAtFdaFile? _drugs;
+    private string _drugsMessage = "";
+    private bool _drugsLoading;
+    private string? _drugsLoadedFrom;
+    private BusinessCalendar _calendar = new();
+    private DraftWindow? _draftWindow;
     private readonly PromptLibraryService _prompts = new();
     private int _captureBusy;
     private string? _trayError;
@@ -34,12 +43,17 @@ public partial class App : Application
     private SettingsWindow? _settingsWindow;
     private (AndaRecord Record, PixelPoint Near, bool Mini)? _lastCard;
 
+    public App() { _repository = new SwitchableRepository(_demo); }
+
     public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
     public override void OnFrameworkInitializationCompleted()
     {
         _settings = SettingsService.Load();
         ThemeManager.Apply(_settings.Appearance, _settings.CardOpacity);
+        _calendar = BusinessCalendar.FromFile(AppPaths.ClosuresFile);
+        UsageLog.Configure(_settings.UsageLog && SelfTestRun is null);
+        ApplyData();
         _briefs = BriefServiceFactory.Create(() => _prompts.GetText(_settings.ActiveLens));
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
@@ -49,7 +63,8 @@ public partial class App : Application
             // Hotkeys first, so the tray menu can state truthfully which ones are live.
             _hotkeys = new HotkeyService(
                 onHotkey: id => _ = OnHotkeyAsync(id),
-                onProblem: message => Dispatcher.UIThread.Post(() => ShowNotice(message)));
+                onProblem: message => Dispatcher.UIThread.Post(() => ShowNotice(message)),
+                bindings: HotkeyService.FromCombos(_settings.PeekHotkey, _settings.LookupHotkey, _settings.DraftHotkey));
             _hotkeys.Start();
             _hotkeys.WaitReady(TimeSpan.FromMilliseconds(1500));
 
@@ -94,6 +109,7 @@ public partial class App : Application
         if (SelfTestRun is not null) { HotkeyObserved?.Invoke(id); return; }
 
         if (id == HotkeyService.IdLookup) { Dispatcher.UIThread.Post(OpenLookup); return; }
+        if (id == HotkeyService.IdDraft) { await OnDraftHotkeyAsync(); return; }
 
         if (Interlocked.Exchange(ref _captureBusy, 1) == 1) return;
         try
@@ -121,7 +137,7 @@ public partial class App : Application
         var record = _repository.Find(number);
         if (record is null)
         {
-            ShowNotice($"{number} is not a recognized ANDA", near);
+            ShowNotice(NotFoundMessage(number), near);
             return;
         }
 
@@ -133,13 +149,16 @@ public partial class App : Application
             return;
         }
 
-        // Two-stage consent: the hotkey is stage one; what happens next depends on the model.
-        switch (_settings.Consent)
+        // Two-stage consent: the hotkey is stage one; what happens next depends on the model. In whisper mode an urgent or at-risk
+        // ANDA skips the invite and opens a peek (no AI call). The person's own selection and shortcut still started it.
+        bool urgent = _settings.EscalateUrgent && UrgencyPolicy.IsUrgent(record, Today(), _calendar, _settings.UrgentLateDays);
+        switch (UrgencyPolicy.Decide(_settings.Consent, _settings.EscalateUrgent, urgent))
         {
-            case ConsentModel.Whisper:
+            case FirstStep.Invite:
                 new ChipWindow().ShowInvite($"ANDA {record.Number}", near, () => OpenCard(record, near, mini: false));
                 break;
-            case ConsentModel.PeekFirst:
+            case FirstStep.Peek:
+                if (_settings.Consent == ConsentModel.Whisper) UsageLog.Record("peek_auto_open");
                 OpenCard(record, near, mini: true);
                 break;
             default:
@@ -161,7 +180,7 @@ public partial class App : Application
         {
             var record = _repository.Find(number);
             var near = new PixelPoint(cursor.X, cursor.Y);
-            if (record is null) new ChipWindow().ShowNotice($"{number} is not a recognized ANDA", near);
+            if (record is null) new ChipWindow().ShowNotice(NotFoundMessage(number), near);
             else OpenCard(record, near, _settings.Consent == ConsentModel.PeekFirst);
         }).Show();
     }
@@ -189,7 +208,12 @@ public partial class App : Application
     private void OpenFullCard(AndaRecord record, PixelPoint near, bool mini)
     {
         CloseOpenCards();
-        var card = new CardWindow(_briefs, _repository.Find) { AutoHideSeconds = _settings.AutoHideSeconds };
+        var card = new CardWindow(_briefs, _repository.Find)
+        {
+            AutoHideSeconds = _settings.AutoHideSeconds,
+            Calendar = _calendar, Watch = new WatchSettings(HolidayLeadBusinessDays: _settings.HolidayLeadDays),
+            Today = Today, Reference = ReferenceFor,
+        };
         card.Closed += (_, _) => { if (ReferenceEquals(_card, card)) _card = null; };
         _card = card;
         card.Show(record, near, mini);
@@ -201,10 +225,76 @@ public partial class App : Application
         _compact?.Close();
     }
 
+    private static DateOnly Today() => DateOnly.FromDateTime(DateTime.Now);
+
+    private string NotFoundMessage(string number) =>
+        _portfolio is { Status.Ok: true } p ? $"{number} is not in your portfolio ({p.FileName})" : $"{number} is not a recognized ANDA";
+
+    // ---------- my data: the fictional demo records, or the person's own portfolio ----------
+
+    private void ApplyData()
+    {
+        if (!string.IsNullOrWhiteSpace(_settings.PortfolioPath) && SelfTestRun is null)
+        {
+            var repo = new PortfolioRepository(_settings.PortfolioPath!, _settings.PortfolioColumns, _settings.NotesFolder);
+            _portfolio = repo;
+            _repository.Current = repo.Status.Ok ? repo : _demo;          // an unreadable file falls back to the demo records, and Settings says why
+        }
+        else { _portfolio = null; _repository.Current = _demo; }
+
+        if (_settings.ReferenceDataPath is { Length: > 0 } path && path != _drugsLoadedFrom && !_drugsLoading && SelfTestRun is null)
+        {
+            _drugsLoading = true; _drugsMessage = "Reading the Drugs@FDA file…"; _drugsLoadedFrom = path;
+            Task.Run(() => DrugsAtFdaFile.TryLoad(path, out var msg) is { } f ? (f, msg) : (null, msg)).ContinueWith(t =>
+                Dispatcher.UIThread.Post(() => { _drugs = t.Result.Item1; _drugsMessage = t.Result.msg; _drugsLoading = false; }));
+        }
+        else if (string.IsNullOrWhiteSpace(_settings.ReferenceDataPath)) { _drugs = null; _drugsMessage = ""; _drugsLoadedFrom = null; }
+    }
+
+    private ReferenceInfo? ReferenceFor(AndaRecord record)
+    {
+        if (_drugs is not null) return _drugs.Describe(record);
+        string? psg = DrugsAtFdaFile.PsgOf(record);
+        string? rld = string.IsNullOrWhiteSpace(_settings.ReferenceDataPath) ? null
+            : _drugsLoading ? "reading the Drugs@FDA file…" : $"not checked: {(_drugsMessage.Length > 0 ? _drugsMessage : "the Drugs@FDA file could not be used")}";
+        return psg is null && rld is null ? null : new ReferenceInfo(psg, rld);
+    }
+
+    // ---------- check a draft ----------
+
+    private async Task OnDraftHotkeyAsync()
+    {
+        if (Interlocked.Exchange(ref _captureBusy, 1) == 1) return;
+        try
+        {
+            var cursor = TextCaptureService.GetCursorPosition();
+            var near = new PixelPoint(cursor.X, cursor.Y);
+            string text = "";
+            if (_settings.CaptureViaCopy)
+            {
+                var result = await Task.Run(TextCaptureService.CaptureSelection);
+                if (result.Notice is { } notice) Dispatcher.UIThread.Post(() => ShowNotice(notice, near));
+                else if (result.Outcome == CaptureOutcome.Captured) text = result.Text;
+            }
+            Dispatcher.UIThread.Post(() => OpenDraft(text));
+        }
+        finally { Interlocked.Exchange(ref _captureBusy, 0); }
+    }
+
+    private void OpenDraft(string text)
+    {
+        if (_draftWindow is not null) { _draftWindow.Close(); _draftWindow = null; }
+        var win = new DraftWindow(text, _repository.Find, new WritingService(ChatCompleterFactory.Create()), _settings, _prompts);
+        win.Closed += (_, _) => { if (ReferenceEquals(_draftWindow, win)) _draftWindow = null; };
+        _draftWindow = win;
+        win.Show();
+    }
+
     private void OpenSettings()
     {
         if (_settingsWindow is not null) { _settingsWindow.Activate(); return; }
-        _settingsWindow = new SettingsWindow(_settings, _prompts, ApplySettings);
+        _settingsWindow = new SettingsWindow(_settings, _prompts, ApplySettings,
+            new SettingsHooks(HotkeyStatusLine, () => _portfolio, () => _drugsMessage));
         _settingsWindow.Closed += (_, _) => _settingsWindow = null;
         _settingsWindow.Show();
     }
@@ -215,9 +305,12 @@ public partial class App : Application
     {
         var menu = new NativeMenu();
 
-        var lookup = new NativeMenuItem("Lookup ANDA…\tCtrl+Alt+Space");
+        var lookup = new NativeMenuItem($"Lookup ANDA…\t{_settings.LookupHotkey}");
         lookup.Click += (_, _) => OpenLookup();
         menu.Add(lookup);
+        var draft = new NativeMenuItem($"Check a draft…\t{_settings.DraftHotkey}");
+        draft.Click += (_, _) => OpenDraft("");
+        menu.Add(draft);
 
         var demoRisk = new NativeMenuItem("Demo: at-risk card");
         demoRisk.Click += (_, _) => DemoCard("216482");
@@ -297,6 +390,9 @@ public partial class App : Application
     {
         SettingsService.Save(_settings);
         ThemeManager.Apply(_settings.Appearance, _settings.CardOpacity);
+        UsageLog.Configure(_settings.UsageLog && SelfTestRun is null);
+        _hotkeys?.Reconfigure(HotkeyService.FromCombos(_settings.PeekHotkey, _settings.LookupHotkey, _settings.DraftHotkey));
+        ApplyData();
         // Live preview: if a card is open, rebuild it in place with the new look.
         if ((_card is not null || _compact is not null) && _lastCard is { } last)
             OpenCard(last.Record, last.Near, last.Mini);
@@ -304,7 +400,7 @@ public partial class App : Application
 
     private void DemoCard(string number)
     {
-        if (_repository.Find(number) is { } record)
+        if (_demo.Find(number) is { } record)
         {
             var cursor = TextCaptureService.GetCursorPosition();
             OpenCard(record, new PixelPoint(cursor.X, cursor.Y), mini: false);

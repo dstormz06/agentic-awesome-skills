@@ -23,10 +23,21 @@ public partial class CardWindow : Window
     private CancellationTokenSource? _briefCts;
     private Task _briefReady = Task.CompletedTask;
     private readonly AutoHideController _autoHide;
+    private DateTime _shownAt = DateTime.Now;
 
     /// <summary>Hide after this many idle seconds (0 = never). The app sets it from Settings; tests and the
     /// self-test leave it off so a render is never raced by a timer.</summary>
     public double AutoHideSeconds { get; set; }
+
+    /// <summary>The federal calendar and thresholds behind the watch flags; the app sets them from Settings.</summary>
+    public BusinessCalendar Calendar { get; set; } = new();
+    public WatchSettings Watch { get; set; } = new();
+
+    /// <summary>Today's date for the watch rules. Overridable so a test is never at the mercy of the real clock.</summary>
+    public Func<DateOnly> Today { get; set; } = () => DateOnly.FromDateTime(DateTime.Now);
+
+    /// <summary>The PSG and RLD-labeling lines, if the person has set up the sources. Null or empty parts are hidden.</summary>
+    public Func<AndaRecord, ReferenceInfo?>? Reference { get; set; }
 
     /// <summary>What the last placement decided and from which numbers. The self-test reports it.</summary>
     internal string PlacementTrace { get; private set; } = "not placed yet";
@@ -129,6 +140,7 @@ public partial class CardWindow : Window
     {
         if (_record is null) return;
         Clipboard?.SetTextAsync(Services.StatusLine.Build(_record));
+        UsageLog.Record("copy_status", (DateTime.Now - _shownAt).TotalSeconds);
         CopyChip.Content = "Copied ✓";
         Avalonia.Threading.DispatcherTimer.RunOnce(
             () => CopyChip.Content = "Copy status", TimeSpan.FromSeconds(1.2));
@@ -236,6 +248,8 @@ public partial class CardWindow : Window
     private void SetMiniVisibility()
     {
         AttentionSlot.IsVisible = !_mini && _record?.Attention is not null;
+        WatchSlot.IsVisible = !_mini && _watchFlags.Count > 0;
+        RefSlot.IsVisible = !_mini && _refShown;
         LatestSlot.IsVisible = !_mini;
         AheadSlot.IsVisible = !_mini && _record?.Ahead is not null;
         BriefSlot.IsVisible = !_mini;
@@ -255,17 +269,22 @@ public partial class CardWindow : Window
         GoalText.Text = record.GoalDate;
         GoalDaysText.Text = record.GoalDays;
         bool ring = ThemeManager.Current.Progress == ProgressVariant.Ring;
-        PctText.Text = ring ? "" : record.ProgressPct + "%";
+        bool timeline = ThemeManager.Current.Progress == ProgressVariant.Timeline && record.DaysToGoal is not null && record.ForecastDeltaDays is not null;
+        // A sheet that has no progress or forecast shows nothing there, never an estimate.
+        Progress.IsVisible = record.HasProgress || timeline;
+        PctText.Text = ring || !record.HasProgress ? "" : record.ProgressPct + "%";
         Progress.HorizontalAlignment = ring
             ? Avalonia.Layout.HorizontalAlignment.Right
             : Avalonia.Layout.HorizontalAlignment.Stretch;
-        Progress.Value = record.ProgressPct;
+        Progress.Value = Math.Max(0, record.ProgressPct);
         Progress.DaysToGoal = record.DaysToGoal;
         Progress.DeltaDays = record.ForecastDeltaDays;
         ForecastText.Text = record.ForecastDate;
         ForecastDeltaText.Text = record.ForecastDelta;
-        ForecastDeltaText.Foreground = (IBrush)Application.Current!.Resources[record.ForecastLate ? "C.Warn" : "C.Good"]!;
+        ForecastDeltaText.Foreground = (IBrush)Application.Current!.Resources[
+            !record.HasForecast ? "C.Ink3" : record.ForecastLate ? "C.Warn" : "C.Good"]!;
         ForecastConfText.Text = record.ForecastConfidence;
+        ForecastConfText.IsVisible = record.ForecastConfidence.Length > 0;
 
         if (record.Attention is { } attn)
         {
@@ -295,6 +314,8 @@ public partial class CardWindow : Window
             record.Attention?.Level == AttentionLevel.Bad ? "C.Bad" : record.ForecastLate ? "C.Warn" : "C.Good"]!;
         LatestText.Text = record.Latest;
         AheadText.Text = record.Ahead ?? "";
+        ShowWatch(record);
+        ShowReference(record);
         FreshnessText.Text = record.DataAsOf ?? "";
         FreshnessText.IsVisible = record.DataAsOf is not null;
         AutomationProperties.SetName(this, $"{record.Kind} {record.Number} quick brief");
@@ -356,6 +377,8 @@ public partial class CardWindow : Window
             _briefReady = _mini ? Task.CompletedTask : LoadBriefAsync(record);
             Dispatcher.UIThread.Post(ClampToScreen, DispatcherPriority.Loaded);
         }
+        _shownAt = DateTime.Now;
+        UsageLog.Record("card_open");
         Activate();
         Focus();
     }
@@ -390,6 +413,45 @@ public partial class CardWindow : Window
         var screen = Screens.ScreenFromPoint(at) ?? Screens.Primary;
         if (screen is null) return;
         Body.MaxHeight = Math.Max(240, screen.WorkingArea.Height / screen.Scaling - 52 - 2 - Body.Margin.Top);
+    }
+
+    private IReadOnlyList<WatchFlag> _watchFlags = Array.Empty<WatchFlag>();
+    private bool _refShown;
+
+    /// <summary>The watch layer: the most important flag on the card, the full list with evidence in the drawer.</summary>
+    private void ShowWatch(AndaRecord record)
+    {
+        _watchFlags = WatchRules.Evaluate(record, Today(), Calendar, Watch);
+        WatchPanel.Children.Clear();
+        WatchExpander.IsVisible = _watchFlags.Count > 0;
+        WatchHeader.Text = $"Watch list · {_watchFlags.Count}";
+        if (_watchFlags.Count == 0) { WatchSlot.IsVisible = false; return; }
+
+        var top = _watchFlags[0];
+        string tone = top.Severity switch { WatchSeverity.Bad => "C.Bad", WatchSeverity.Warn => "C.Warn", _ => "C.Ink2" };
+        WatchText.Text = top.Text + (_watchFlags.Count > 1 ? $"  (+{_watchFlags.Count - 1} more in the drawer)" : "");
+        WatchText.Foreground = (IBrush)Application.Current!.Resources[tone]!;
+        ToolTip.SetTip(WatchText, top.Why);
+        UsageLog.Record("watch_flag_shown");
+
+        foreach (var f in _watchFlags)
+        {
+            var color = (IBrush)Application.Current!.Resources[f.Severity switch { WatchSeverity.Bad => "C.Bad", WatchSeverity.Warn => "C.Warn", _ => "C.Ink2" }]!;
+            WatchPanel.Children.Add(new TextBlock { Text = f.Text, FontSize = 12.5, FontWeight = FontWeight.SemiBold, Foreground = color, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 6, 0, 1) });
+            WatchPanel.Children.Add(new TextBlock { Text = f.Why, FontSize = 11.5, Foreground = Ink2(), TextWrapping = TextWrapping.Wrap });
+            WatchPanel.Children.Add(new TextBlock { Text = "Source: " + f.Source, FontSize = 10.5, Foreground = Ink3() });
+        }
+    }
+
+    private void ShowReference(AndaRecord record)
+    {
+        var info = Reference?.Invoke(record);
+        _refShown = info is not null && (info.PsgText is not null || info.RldText is not null);
+        PsgLabel.IsVisible = PsgText.IsVisible = info?.PsgText is not null;
+        RldLabel.IsVisible = RldText.IsVisible = info?.RldText is not null;
+        PsgText.Text = info?.PsgText ?? "";
+        RldText.Text = info?.RldText ?? "";
+        RefSlot.IsVisible = !_mini && _refShown;
     }
 
     private (PixelRect Area, int Width, int Height)? Geometry(PixelPoint at)

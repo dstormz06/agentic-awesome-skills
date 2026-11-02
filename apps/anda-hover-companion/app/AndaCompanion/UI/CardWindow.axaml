@@ -157,6 +157,20 @@
             </Border>
           </StackPanel>
 
+          <!-- watch: the single most important flag from the deterministic checks (weekend/holiday, goal passed, stale data...) -->
+          <StackPanel Name="WatchSlot" IsVisible="False">
+            <Border Height="1" Background="{DynamicResource C.Hair}"/>
+            <Grid Name="WatchGrid" Margin="16,10,16,10">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelRail"/>
+                <ColumnDefinition Width="9"/>
+                <ColumnDefinition Width="*"/>
+              </Grid.ColumnDefinitions>
+              <TextBlock Name="WatchLabel" Classes="lbl" Text="WATCH" VerticalAlignment="Top" Margin="0,2,0,0"/>
+              <TextBlock Grid.Column="2" Name="WatchText" Classes="body2"/>
+            </Grid>
+          </StackPanel>
+
           <!-- latest — same labeled rail as every other slot -->
           <StackPanel Name="LatestSlot">
             <Border Height="1" Background="{DynamicResource C.Hair}"/>
@@ -185,6 +199,22 @@
             </Grid>
           </StackPanel>
 
+          <!-- reference dates: PSG (from your sheet) and the RLD's latest labeling date (from a Drugs@FDA file you downloaded) -->
+          <StackPanel Name="RefSlot" IsVisible="False">
+            <Border Height="1" Background="{DynamicResource C.Hair}"/>
+            <Grid Name="RefGrid" Margin="16,10,16,10" RowDefinitions="Auto,Auto">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelRail"/>
+                <ColumnDefinition Width="9"/>
+                <ColumnDefinition Width="*"/>
+              </Grid.ColumnDefinitions>
+              <TextBlock Name="PsgLabel" Classes="lbl" Text="PSG" VerticalAlignment="Top" Margin="0,2,0,0"/>
+              <TextBlock Grid.Column="2" Name="PsgText" Classes="body2"/>
+              <TextBlock Grid.Row="1" Name="RldLabel" Classes="lbl" Text="RLD LABEL" VerticalAlignment="Top" Margin="0,6,0,0"/>
+              <TextBlock Grid.Row="1" Grid.Column="2" Name="RldText" Classes="body2" Margin="0,4,0,0"/>
+            </Grid>
+          </StackPanel>
+
           <!-- companion brief -->
           <StackPanel Name="BriefSlot">
             <Border Height="1" Background="{DynamicResource C.Hair}"/>
@@ -208,7 +238,10 @@
           <!-- expanded drawer -->
           <StackPanel Name="Drawer" IsVisible="False">
             <Border Height="1" Background="{DynamicResource C.Hair}"/>
-            <Expander Margin="8,2,8,0"><Expander.Header><TextBlock Name="PendingHeader" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink2}" Text="Pending &amp; urgent items"/></Expander.Header>
+            <Expander Name="WatchExpander" Margin="8,2,8,0" IsVisible="False"><Expander.Header><TextBlock Name="WatchHeader" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink2}" Text="Watch list"/></Expander.Header>
+              <StackPanel Name="WatchPanel" Margin="12,0,12,8"/>
+            </Expander>
+            <Expander Margin="8,0,8,0"><Expander.Header><TextBlock Name="PendingHeader" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink2}" Text="Pending &amp; urgent items"/></Expander.Header>
               <StackPanel Name="PendingPanel" Margin="12,0,12,8"/>
             </Expander>
             <Expander Margin="8,0,8,0"><Expander.Header><TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink2}" Text="Recent project notes"/></Expander.Header>

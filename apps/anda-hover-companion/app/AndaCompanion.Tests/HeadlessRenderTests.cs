@@ -141,15 +141,17 @@ public class HeadlessRenderTests : IClassFixture<HeadlessFixture>
             var win = new SettingsWindow(new Settings(), new PromptLibraryService(Path.Combine(Temp.NewDir(), "p.json")), () => { });
             win.Show();
             Dispatcher.UIThread.RunJobs();
-            var found = new[] { "AppearancePanel", "CompactPanel", "AutoHidePanel", "ConsentPanel", "CaptureCheck", "OpacitySlider", "LensCombo", "TestBtn", "CloseBtn" }
+            var found = new[] { "AppearancePanel", "CompactPanel", "AutoHidePanel", "ConsentPanel", "CaptureCheck", "OpacitySlider", "LensCombo", "TestBtn", "CloseBtn",
+                    "EscalateCheck", "LatePanel", "HolidayPanel", "PeekKeyBox", "LookupKeyBox", "DraftKeyBox", "PortfolioBox", "NotesBox", "ReferenceBox", "InstructionsBox", "UsageCheck" }
                 .Where(n => win.FindControl<Control>(n) is not null).ToList();
             int radios = win.GetVisualDescendants().OfType<RadioButton>().Count();
             win.Close();
             return (found, radios);
         }, CancellationToken.None);
 
-        Assert.Equal(9, names.found.Count);
-        Assert.Equal(15 + 4 + 3, names.radios);      // fifteen appearances + four auto-hide choices + three consent models
+        Assert.Equal(20, names.found.Count);
+        // fifteen appearances + four auto-hide choices + three consent models + three "late" choices + four holiday-lead choices
+        Assert.Equal(15 + 4 + 3 + 3 + 4, names.radios);
     }
 
     [Fact]

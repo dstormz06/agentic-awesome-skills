@@ -53,11 +53,76 @@
         </StackPanel>
 
         <StackPanel Spacing="6">
-          <TextBlock Classes="lbl" Text="SELECT &amp; PEEK · CTRL+ALT+A"/>
+          <TextBlock Classes="lbl" Text="URGENT ANDAs"/>
+          <CheckBox Name="EscalateCheck">
+            <TextBlock Text="In whisper mode, open a peek by itself for an urgent or at-risk ANDA" TextWrapping="Wrap"/>
+          </CheckBox>
+          <WrapPanel Name="LatePanel"/>
+          <TextBlock Classes="hint" Text="At risk = forecast this many days after the goal, a serious attention item, or a passed goal date. It still starts only when you select a number and press the shortcut; nothing ever opens on its own. A peek makes no AI call."/>
+        </StackPanel>
+
+        <StackPanel Spacing="6">
+          <TextBlock Classes="lbl" Text="SELECT &amp; PEEK"/>
           <CheckBox Name="CaptureCheck">
             <TextBlock Text="Read my selection by copying it, then put my clipboard back" TextWrapping="Wrap"/>
           </CheckBox>
           <TextBlock Classes="hint" Text="Off: Ctrl+Alt+A opens the lookup box instead and no keystroke is ever sent. Terminals are always skipped, because Ctrl+C there interrupts a running command."/>
+        </StackPanel>
+
+        <StackPanel Spacing="6">
+          <TextBlock Classes="lbl" Text="SHORTCUTS · CLICK A BOX, THEN PRESS THE KEYS"/>
+          <Grid ColumnDefinitions="140,*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="6" ColumnSpacing="8">
+            <TextBlock Text="Select &amp; Peek" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}"/>
+            <TextBox Grid.Column="1" Name="PeekKeyBox" IsReadOnly="True" AutomationProperties.Name="Select and Peek shortcut"/>
+            <Button Grid.Column="2" Name="PeekKeyReset" Content="Reset"/>
+            <TextBlock Grid.Row="1" Text="Lookup box" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}"/>
+            <TextBox Grid.Row="1" Grid.Column="1" Name="LookupKeyBox" IsReadOnly="True" AutomationProperties.Name="Lookup shortcut"/>
+            <Button Grid.Row="1" Grid.Column="2" Name="LookupKeyReset" Content="Reset"/>
+            <TextBlock Grid.Row="2" Text="Check a draft" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}"/>
+            <TextBox Grid.Row="2" Grid.Column="1" Name="DraftKeyBox" IsReadOnly="True" AutomationProperties.Name="Check a draft shortcut"/>
+            <Button Grid.Row="2" Grid.Column="2" Name="DraftKeyReset" Content="Reset"/>
+          </Grid>
+          <TextBlock Name="KeyStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+          <TextBlock Classes="hint" Text="Use at least two modifiers, one of them Ctrl or Alt, so everyday shortcuts like Ctrl+C keep working. On keyboards where Ctrl+Alt is AltGr, choose Ctrl+Shift instead. Windows reports at once if another program already owns a shortcut."/>
+        </StackPanel>
+
+        <StackPanel Spacing="6">
+          <TextBlock Classes="lbl" Text="WEEKEND AND HOLIDAY WARNING"/>
+          <WrapPanel Name="HolidayPanel"/>
+          <TextBlock Classes="hint" Text="Flags a goal or forecast date on a weekend or federal holiday, or this many business days before or after a federal holiday. It shows the nearest business days; it does not decide how a date is handled."/>
+        </StackPanel>
+
+        <StackPanel Spacing="6">
+          <TextBlock Classes="lbl" Text="MY DATA · YOUR OWN FILES, READ-ONLY, ON THIS PC"/>
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <TextBox Name="PortfolioBox" IsReadOnly="True" Watermark="Your ANDA portfolio (.xlsx or .csv). Empty = fictional demo data." AutomationProperties.Name="Portfolio file"/>
+            <Button Grid.Column="1" Name="PortfolioChoose" Content="Choose…"/>
+            <Button Grid.Column="2" Name="PortfolioClear" Content="Clear"/>
+          </Grid>
+          <TextBlock Name="PortfolioStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+          <Expander Name="ColumnsExpander" IsVisible="False" Header="Match my columns">
+            <StackPanel Name="ColumnsPanel" Spacing="4" Margin="0,4,0,0"/>
+          </Expander>
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <TextBox Name="NotesBox" IsReadOnly="True" Watermark="Folder with your notes (.txt, .md, .docx)" AutomationProperties.Name="Notes folder"/>
+            <Button Grid.Column="1" Name="NotesChoose" Content="Choose…"/>
+            <Button Grid.Column="2" Name="NotesClear" Content="Clear"/>
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <TextBox Name="ReferenceBox" IsReadOnly="True" Watermark="Drugs@FDA data file you downloaded (.zip), for the RLD labeling date" AutomationProperties.Name="Drugs@FDA file"/>
+            <Button Grid.Column="1" Name="ReferenceChoose" Content="Choose…"/>
+            <Button Grid.Column="2" Name="ReferenceClear" Content="Clear"/>
+          </Grid>
+          <TextBlock Name="ReferenceStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+          <TextBlock Classes="hint" Text="This tool only reads these files and never changes them. Nothing is sent anywhere. It shows only what your sheet contains: a forecast or progress that is not in it stays blank. The PSG date shown is the one in your own sheet; no official PSG source is connected yet."/>
+        </StackPanel>
+
+        <StackPanel Spacing="6">
+          <TextBlock Classes="lbl" Text="MY WRITING INSTRUCTIONS"/>
+          <TextBox Name="InstructionsBox" AcceptsReturn="True" TextWrapping="Wrap" Height="76"
+                   Watermark="Always applied to Proofread, Rewrite and Fact-check, in your own words. For example: plain words, no jargon, keep it under 120 words."
+                   AutomationProperties.Name="My standing writing instructions"/>
+          <TextBlock Classes="hint" Text="Your named lenses (below) are added on top. Instructions can never override the fixed rules: no changed numbers or dates, no invented facts."/>
         </StackPanel>
 
         <StackPanel Spacing="6">
@@ -88,6 +153,14 @@
                     ToolTip.Tip="Send one tiny request to prove the channel end to end"/>
           </Grid>
           <TextBlock Classes="hint" Text="The app is fully functional offline. When API access is approved, set ANTHROPIC_API_KEY (Claude) or follow ELSA-INTEGRATION.md (Elsa) through the agency-approved channel and press Test."/>
+        </StackPanel>
+
+        <StackPanel Spacing="6">
+          <TextBlock Classes="lbl" Text="USAGE LOG · FOR THE PILOT SCORECARD"/>
+          <CheckBox Name="UsageCheck">
+            <TextBlock Text="Keep a local log of what I use (date, event, seconds)" TextWrapping="Wrap"/>
+          </CheckBox>
+          <TextBlock Name="UsageHint" Classes="hint" Text="Never records ANDA numbers, drafts or any text. Off by default. It is a plain file you can read, and you share it only if you choose to."/>
         </StackPanel>
         </StackPanel>
         </ScrollViewer>

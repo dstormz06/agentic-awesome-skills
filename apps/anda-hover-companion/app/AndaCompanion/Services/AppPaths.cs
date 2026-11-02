@@ -17,5 +17,7 @@ public static class AppPaths
             : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "AndaCompanion");
 
     public static string SettingsFile => Path.Combine(Root, "settings.json");
+    public static string UsageFile => Path.Combine(Root, "usage.csv");
+    public static string ClosuresFile => Path.Combine(Root, "closures.txt");
     public static string PromptsFile => Path.Combine(Root, "prompts.json");
 }

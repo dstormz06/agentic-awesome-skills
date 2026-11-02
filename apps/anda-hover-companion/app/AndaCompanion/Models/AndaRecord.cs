@@ -46,6 +46,36 @@ public sealed record AndaRecord
     public required IReadOnlyList<NoteItem> Notes { get; init; }
     public required string ForecastDetail { get; init; }
     public required IReadOnlyList<SisterRef> Sisters { get; init; }
+
+    // ---- machine-readable dates and provenance (optional) ----
+
+    /// <summary>The text a display field carries when the source has no value. Never a guess.</summary>
+    public const string Unknown = "—";
+
+    public DateOnly? GoalDateValue { get; init; }
+    public DateOnly? ForecastDateValue { get; init; }
+    public DateOnly? SubmittedDate { get; init; }
+
+    /// <summary>When the underlying data was taken (a file's modified date, or an extract date).</summary>
+    public DateOnly? AsOfDate { get; init; }
+
+    /// <summary>True for the bundled fictional records. Watch rules then treat <see cref="AsOfDate"/> as "today",
+    /// so the demo never shows "stale" or "overdue" just because the calendar moved on.</summary>
+    public bool Demo { get; init; }
+
+    /// <summary>Where the record came from, e.g. "Your portfolio: Portfolio.xlsx".</summary>
+    public string? SourceLabel { get; init; }
+
+    /// <summary>Used only to match a public reference listing; never sent anywhere.</summary>
+    public string? ActiveIngredient { get; init; }
+    public string? DosageForm { get; init; }
+    public string? Strength { get; init; }
+
+    /// <summary>A PSG date the RPM keeps in their own sheet, shown as theirs. Not from an official source.</summary>
+    public DateOnly? PsgDateFromSheet { get; init; }
+
+    [System.Text.Json.Serialization.JsonIgnore] public bool HasProgress => ProgressPct >= 0;
+    [System.Text.Json.Serialization.JsonIgnore] public bool HasForecast => ForecastDate != Unknown;
 }
 
 public sealed record CompanionBrief(string Text, IReadOnlyList<string> SourceRefs, bool Generated);

@@ -20,11 +20,11 @@ public class HotkeyTests
     }
 
     [Fact]
-    public void Bindings_are_the_documented_two_and_do_not_collide()
+    public void Default_bindings_are_the_documented_three_and_do_not_collide()
     {
-        Assert.Equal(new[] { "Ctrl+Alt+A", "Ctrl+Alt+Space" }, HotkeyService.Bindings.Select(b => b.Combo));
-        Assert.Equal(2, HotkeyService.Bindings.Select(b => b.Id).Distinct().Count());
-        Assert.Equal(2, HotkeyService.Bindings.Select(b => (b.Modifiers, b.VirtualKey)).Distinct().Count());
+        Assert.Equal(new[] { "Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+D" }, HotkeyService.Bindings.Select(b => b.Combo));
+        Assert.Equal(3, HotkeyService.Bindings.Select(b => b.Id).Distinct().Count());
+        Assert.Equal(3, HotkeyService.Bindings.Select(b => (b.Modifiers, b.VirtualKey)).Distinct().Count());
     }
 
     [Fact]
@@ -38,6 +38,20 @@ public class HotkeyTests
         }
         Assert.Equal(0x41u, HotkeyService.Bindings.Single(b => b.Id == HotkeyService.IdPeek).VirtualKey);
         Assert.Equal(0x20u, HotkeyService.Bindings.Single(b => b.Id == HotkeyService.IdLookup).VirtualKey);
+        Assert.Equal(0x44u, HotkeyService.Bindings.Single(b => b.Id == HotkeyService.IdDraft).VirtualKey);
+    }
+
+    [Fact]
+    public void Custom_bindings_register_with_their_own_keys_and_failures_name_the_custom_combination()
+    {
+        var custom = HotkeyService.FromCombos("Ctrl+Shift+P", "Ctrl+Alt+L", "Ctrl+Alt+Shift+9");
+        var api = new FakeApi();
+        api.FailWith[HotkeyService.IdDraft] = 1409;
+        var status = HotkeyService.RegisterAll(api, custom);
+        Assert.Equal((0x2u | 0x4u | 0x4000u, 0x50u), api.Registered[HotkeyService.IdPeek]);
+        Assert.Equal(0x4Cu, api.Registered[HotkeyService.IdLookup].Vk);
+        var failed = status.Single(s => !s.Registered);
+        Assert.Contains("Ctrl+Alt+Shift+9 is already used by another program", HotkeyService.Describe(failed));
     }
 
     [Fact]
@@ -47,7 +61,7 @@ public class HotkeyTests
         var status = HotkeyService.RegisterAll(api);
         Assert.All(status, s => Assert.True(s.Registered));
         Assert.All(status, s => Assert.Null(HotkeyService.Describe(s)));
-        Assert.Equal(2, api.Registered.Count);
+        Assert.Equal(3, api.Registered.Count);
     }
 
     [Fact]
@@ -61,7 +75,7 @@ public class HotkeyTests
         Assert.False(peek.Registered);
         string message = HotkeyService.Describe(peek)!;
         Assert.Contains("Ctrl+Alt+A is already used by another program", message);
-        Assert.Contains("Ctrl+Alt+Space or the tray icon", message);
+        Assert.Contains("Choose another shortcut in Settings, or use the tray icon", message);
 
         Assert.True(status.Single(s => s.Binding.Id == HotkeyService.IdLookup).Registered);   // one failure must not block the other
     }

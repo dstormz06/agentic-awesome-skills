@@ -14,9 +14,11 @@ public static class StatusLine
     public static string Build(AndaRecord r)
     {
         var sb = new StringBuilder();
-        sb.Append($"{r.Kind} {r.Number} ({r.Drug}): {r.Meta[(r.Meta.LastIndexOf('·') + 1)..].Trim()}, ");
-        sb.Append($"{r.ProgressPct}% through review; goal {r.GoalDate}; ");
-        sb.Append($"forecast {r.ForecastDate} ({Clean(r.ForecastDelta)}, {r.ForecastConfidence})");
+        string cycle = r.Meta.Contains('·') ? r.Meta[(r.Meta.LastIndexOf('·') + 1)..].Trim() : r.Meta.Trim();
+        sb.Append($"{r.Kind} {r.Number} ({r.Drug}): {cycle}");
+        if (r.HasProgress) sb.Append($", {r.ProgressPct}% through review");
+        sb.Append($"; goal {r.GoalDate}");
+        if (r.HasForecast) sb.Append($"; forecast {r.ForecastDate} ({Clean(r.ForecastDelta)}, {r.ForecastConfidence})");
         if (r.Attention is not null) sb.Append($"; needs action: {r.Attention.Text}");
         sb.Append('.');
         return sb.ToString();

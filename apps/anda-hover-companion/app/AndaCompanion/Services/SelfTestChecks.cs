@@ -1,6 +1,7 @@
 using System.Text;
 using AndaCompanion.Data;
 using AndaCompanion.Models;
+using AndaCompanion.Services.Portfolio;
 
 namespace AndaCompanion.Services;
 
@@ -162,7 +163,7 @@ internal static class SelfTestChecks
 
             var s = new Settings
             {
-                Appearance = Theming.AppearanceId.E, Consent = ConsentModel.Whisper, CardOpacity = 0.9,
+                Appearance = Theming.AppearanceId.E, Consent = ConsentModel.PeekFirst, CardOpacity = 0.9,
                 ActiveLens = "Facility focus", CaptureViaCopy = false, FirstRunDone = true, AutoHideSeconds = 40,
             };
             SettingsService.Save(s, settingsPath);
@@ -179,7 +180,7 @@ internal static class SelfTestChecks
             File.WriteAllText(settingsPath, "{ this is not json");
             var d = SettingsService.Load(settingsPath);
             if (d.Appearance != Theming.Appearances.Default || d.Appearance != Theming.AppearanceId.K ||
-                !d.CaptureViaCopy || d.Consent != ConsentModel.Full || d.AutoHideSeconds != UI.AutoHidePolicy.Default)
+                !d.CaptureViaCopy || d.Consent != ConsentModel.Whisper || d.AutoHideSeconds != UI.AutoHidePolicy.Default)
                 problems.Add("corrupt settings did not fall back to defaults");
 
             var lib = new PromptLibraryService(promptsPath);
@@ -259,6 +260,59 @@ internal static class SelfTestChecks
 
             return problems.Count == 0
                 ? new(name, CheckStatus.Pass, "recognizer, 2 records, status line and offline brief behave")
+                : new(name, CheckStatus.Fail, string.Join("; ", problems));
+        }
+        catch (Exception ex) { return new(name, CheckStatus.Fail, ex.GetType().Name + ": " + ex.Message); }
+    }
+
+    /// <summary>
+    /// The Phase 1 rules, with no UI and no network: federal-calendar dates, the weekend/holiday watch flag, the
+    /// deterministic draft check, shortcut parsing, and reading a portfolio file. Uses a throwaway CSV in the
+    /// self-test folder; nothing outside it is read or written.
+    /// </summary>
+    public static CheckResult Phase1Rules(IAndaRepository repo, string scratchFolder)
+    {
+        const string name = "calendar-watch-draft-portfolio";
+        var problems = new List<string>();
+        try
+        {
+            var cal = new BusinessCalendar();
+            (DateOnly Date, string Name)[] mustBeClosed =
+            {
+                (new(2026, 1, 1), "New Year"), (new(2026, 7, 3), "Independence Day (observed)"),
+                (new(2026, 11, 11), "Veterans Day"), (new(2026, 12, 25), "Christmas"),
+                (new(2027, 6, 18), "Juneteenth (observed)"), (new(2027, 7, 5), "Independence Day (observed)"),
+            };
+            foreach (var (d, n) in mustBeClosed)
+                if (cal.IsBusinessDay(d)) problems.Add($"{d:yyyy-MM-dd} ({n}) was treated as a business day");
+            if (cal.KindOf(new DateOnly(2026, 10, 3)) != DayKind.Weekend) problems.Add("Sat 2026-10-03 not seen as a weekend");
+            if (cal.NextBusinessDay(new DateOnly(2026, 10, 3)) != new DateOnly(2026, 10, 5)) problems.Add("next business day after Sat 2026-10-03 is wrong");
+
+            var record = repo.Find("216482");
+            if (record is null) problems.Add("demo record 216482 missing");
+            else
+            {
+                var flags = WatchRules.Evaluate(record with { GoalDateValue = new DateOnly(2026, 10, 3) }, new DateOnly(2026, 9, 1), cal);
+                if (!flags.Any(f => f.Code == "goal-date-calendar")) problems.Add("a goal date on a Saturday raised no flag");
+            }
+
+            var draft = DraftCheck.Check("ANDA 216482 is on track.", repo.Find);
+            if (draft.NumbersChecked < 1) problems.Add("draft check did not read the ANDA number");
+            if (DraftCheck.Check("ANDA 999999 is done.", repo.Find).Findings.All(f => f.Kind != DraftFindingKind.UnknownAnda)) problems.Add("draft check did not flag an unknown ANDA");
+
+            if (!HotkeyParser.TryParse("Ctrl+Alt+Shift+Q", out _, out _, out _, out _)) problems.Add("a valid shortcut was refused");
+            if (HotkeyParser.TryParse("Q", out _, out _, out _, out _)) problems.Add("a bare letter was accepted as a shortcut");
+
+            Directory.CreateDirectory(scratchFolder);
+            string csv = Path.Combine(scratchFolder, "portfolio-check.csv");
+            File.WriteAllText(csv, "ANDA,Product,Goal date\n123456,Check drug,2026-12-01\n");
+            var portfolio = new PortfolioRepository(csv, today: () => new DateOnly(2026, 11, 2));
+            if (!portfolio.Status.Ok || portfolio.Find("123456") is not { } row) problems.Add("a sample portfolio file was not read");
+            else if (row.HasForecast || row.HasProgress) problems.Add("a sheet without forecast/progress showed an estimate");
+            File.Delete(csv);
+
+            return problems.Count == 0
+                ? new(name, CheckStatus.Pass, "federal-calendar dates, weekend flag, draft check, shortcut parsing and a sample portfolio file all behave; no network, nothing outside the self-test folder")
                 : new(name, CheckStatus.Fail, string.Join("; ", problems));
         }
         catch (Exception ex) { return new(name, CheckStatus.Fail, ex.GetType().Name + ": " + ex.Message); }

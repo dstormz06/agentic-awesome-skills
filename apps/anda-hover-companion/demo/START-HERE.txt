@@ -18,6 +18,13 @@ SET UP - about 2 minutes
 
 TRY IT
   - In Notepad, double-click a number such as 216482, then press Ctrl+Alt+A.
+    A new install starts in the Whisper setting: a small invite you click.
+    An at-risk ANDA such as 216482 opens a small peek by itself (Settings can
+    turn that off). Click "Full brief" to see the whole card, including the
+    WATCH line about weekend and holiday dates.
+  - Select any text and press Ctrl+Alt+D to check a draft against the record
+    (no AI, nothing leaves the computer). The three shortcuts can be changed in
+    Settings.
   - Press Ctrl+Alt+Space from anywhere and type a number.
   - Tray icon > Settings: switch appearance (15 looks; K is the default; L to O
     are small boxes that stay out of the way of an email), auto-hide, consent

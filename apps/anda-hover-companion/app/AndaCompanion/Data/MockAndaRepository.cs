@@ -45,6 +45,9 @@ public sealed class MockAndaRepository : IAndaRepository
                              "applicant's IR-response history; band ±5 days. Assumptions: first-pass IR response; " +
                              "no new facility inspection. Tool calibration, trailing 6 months: median error ±8 days.",
             Sisters = new[] { new SisterRef("214990", "Metformin HCl ER Tablets, 750 mg — same applicant, same facility") },
+            GoalDateValue = new DateOnly(2026, 10, 3), ForecastDateValue = new DateOnly(2026, 10, 17),
+            AsOfDate = new DateOnly(2026, 7, 16), Demo = true, SourceLabel = "Fictional demo data",
+            ActiveIngredient = "METFORMIN HYDROCHLORIDE", DosageForm = "TABLET, EXTENDED RELEASE", Strength = "500 MG",
         };
 
         var a214990 = new AndaRecord
@@ -69,6 +72,9 @@ public sealed class MockAndaRepository : IAndaRepository
                              "complete or scheduled; band ±3 days. Assumption: no late labeling revisions. " +
                              "Tool calibration, trailing 6 months: median error ±8 days.",
             Sisters = new[] { new SisterRef("216482", "Metformin HCl ER Tablets, 500 mg — same applicant, same facility") },
+            GoalDateValue = new DateOnly(2026, 8, 15), ForecastDateValue = new DateOnly(2026, 8, 6),
+            AsOfDate = new DateOnly(2026, 7, 16), Demo = true, SourceLabel = "Fictional demo data",
+            ActiveIngredient = "METFORMIN HYDROCHLORIDE", DosageForm = "TABLET, EXTENDED RELEASE", Strength = "750 MG",
         };
 
         _records = new() { [a216482.Number] = a216482, [a214990.Number] = a214990 };
@@ -85,4 +91,11 @@ public static class AndaValidator
     /// other submission types is a registry entry, not a code change here.
     /// </summary>
     public static string? Extract(string? text) => EntityKinds.Recognize(text)?.Id;
+}
+
+/// <summary>Lets the app swap its data source (the fictional demo records, or the person's own portfolio) without anything else changing.</summary>
+public sealed class SwitchableRepository(IAndaRepository initial) : IAndaRepository
+{
+    public IAndaRepository Current { get; set; } = initial;
+    public AndaRecord? Find(string number) => Current.Find(number);
 }

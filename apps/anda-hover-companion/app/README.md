@@ -25,9 +25,12 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   `%AppData%\AndaCompanion\settings.json`.
 - **Settings window** — Appearance (fifteen looks, **light-only by product decision**; **K ·
   Graphite Quiet is the default**): eleven full cards (A–K) and four **compact boxes** (L–O),
-  Auto-hide (Off / 10 / 20 / 40 s, default 20), Consent model (Full default = DESIGN.md model ①),
-  **card transparency slider** (85–100%; text always stays opaque), companion lens picker, and the
-  **AI connection panel** (Claude or Elsa) with one-click Test.
+  Auto-hide (Off / 10 / 20 / 40 s, default 20), Consent model (**Whisper invite is the default** for
+  new installs; an install that already saved a choice keeps it), **urgent items** (in whisper mode an
+  at-risk or late ANDA opens a peek by itself), the weekend/holiday window, **My data**,
+  **standing instructions** for the writing actions, **three rebindable shortcuts**, an optional
+  **usage log** (off by default), **card transparency slider** (85–100%; text always stays opaque),
+  companion lens picker, and the **AI connection panel** (Claude or Elsa) with one-click Test.
 - **Compact boxes (L–O)** — a Strip, a Tile, a Ticket and a Badge, about 340 × 63–81, 196 × 123–145,
   300 × 64–68 and 150–185 × 38 px (measured on Windows), so a card never blankets the email being read. They make **no AI call**,
   **never take keyboard focus** (typing in the email continues undisturbed), and open their sibling
@@ -40,9 +43,50 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   starters). Lenses are guidance, never authority — grounding rules always outrank
   them (see ../SECURITY.md).
 - **Global hotkeys** — `Ctrl+Alt+A`: peek at the current text selection (Select & Peek);
-  `Ctrl+Alt+Space`: lookup window. The hotkey is always the consent act — nothing ever
-  opens on its own. Registration is **checked**: if another program owns a combination you get a
-  plain-language notice with the fallback, and the tray menu shows which hotkeys are live.
+  `Ctrl+Alt+Space`: lookup window; `Ctrl+Alt+D`: check the selected draft. All three are
+  **rebindable in Settings** (at least two modifiers including Ctrl or Alt; letters, digits, F1–F12 or
+  Space; never the Windows key; no two the same). The hotkey is always the consent act: a card opens
+  only after your own selection and shortcut. Registration is **checked**: if another program owns a
+  combination you get a plain-language notice with the fallback, and the tray menu shows which
+  hotkeys are live.
+- **Consent, with the urgent rule** — default **Whisper**: a small invite you click. If the ANDA is
+  urgent (a "Bad" attention item, a forecast 7 or more days past goal (3/7/14 selectable), or a
+  goal date that already passed) and the rule is on, the invite is skipped and a **peek** opens
+  (no AI call). `Services/UrgencyPolicy.cs`, unit-tested.
+- **Weekend and federal-holiday watch** — `Services/BusinessCalendar.cs` computes the U.S. federal
+  holidays from the statutory rules (Saturday observed Friday, Sunday observed Monday; Inauguration
+  Day is regional) and is checked against OPM's published 2026–2027 dates in the tests.
+  `Services/WatchRules.cs` turns that into flags: a goal or forecast date on a weekend or holiday (with
+  the nearest business days before and after), within 3 business days of a holiday (0/2/3/5
+  selectable), a goal that already passed or is within 5 days, and stale or missing data. One
+  **WATCH** line on the card, the full list with each flag's evidence and source in the drawer.
+  It states what the data shows and says "this tool does not decide": it never claims how GDUFA treats
+  such a date. Closures declared by executive order or a funding lapse are not predictable: add them
+  to `closures.txt` in the data folder (`2025-12-24 Executive order closing`).
+- **Check a draft** — `Ctrl+Alt+D` or tray → *Check a draft…* opens a window with the selected text
+  and checks it **at once, with no AI and no network**: the ANDA numbers it names, any goal or forecast
+  date it gives, and on-track or late wording, against the record. It lists differences and says
+  exactly what it checked and did not. `Services/DraftCheck.cs`.
+- **Writing actions (Proofread, Rewrite, Fact-check)** — buttons in the draft window, **off until an
+  approved model is connected**. Each shows a **preview of the exact text that will be sent** (your draft,
+  the matching records for Fact-check, your standing instructions and chosen lens) and sends nothing
+  until you press Send. The result is **Copy only**: the app never pastes, replaces or sends for you.
+  The draft is fenced as data and the instructions cannot change facts. `Services/WritingActions.cs`;
+  tested with a fake provider only: **it has never been run against a live model**.
+- **My data** — Settings → *My data*: point to your own **Excel (.xlsx) or CSV** portfolio, map columns
+  (the app suggests them from the header names; you can override), and a **notes folder**
+  (.txt, .md, .docx). Read-only and local; Excel can stay open. Unknown values show as "—", never an
+  estimate. Hard limits on file size, rows and columns; no macros, formulas or external links are
+  read. `Services/Portfolio/`. Tested on generated sample files, **not on a real RPM workbook**.
+- **Reference dates (RLD labeling, PSG)** — the card can show one date each. **RLD labeling** is the most recent labeling
+  approval date in a Drugs@FDA data file *you* download and point to; the app downloads nothing.
+  **PSG** is shown only if your own sheet has a PSG date column, labelled "from your sheet, not an
+  official source". No official PSG source is connected. If a lookup fails it says "not checked" and
+  never guesses. **The Drugs@FDA file layout the parser expects has not been checked against a real
+  download** (FDA's sites were not reachable from the build environment), so treat RLD as unverified
+  until someone opens a real file. `Services/ReferenceData.cs`.
+- **Usage log (optional, off by default)** — a local CSV of `date,event,seconds`, from a fixed list of
+  event names. It never contains an ANDA number, text, a name or a path. `Services/UsageLog.cs`.
 - **Select & Peek, safely** — it reads the selection by sending Ctrl+C, and every step exists
   because the naive version hurts someone: terminals are skipped (Ctrl+C there is an interrupt);
   it waits for you to release Ctrl+Alt so the target sees Ctrl+C; success is detected by the
@@ -54,8 +98,9 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   clipboard, so Windows clipboard history and clipboard-monitoring tools can see it. UI Automation capture (no keystroke) is the
   planned replacement.
 - **The card** — forecast-first clock (goal vs. forecast + delta + confidence), single
-  needs-attention line, latest event, AHEAD anticipation line, companion brief, expandable
-  drawer (pending items, notes, forecast drivers, sister ANDAs), pin (`Space`),
+  needs-attention line, latest event, AHEAD anticipation line, the WATCH line, the RLD/PSG lines when
+  there is something to show, companion brief, expandable
+  drawer (watch list, pending items, notes, forecast drivers, sister ANDAs), pin (`Space`),
   expand (`E`), copy brief (`C`), `Esc` to close.
 - **Companion brief** — provider-pluggable via the `IChatCompleter` seam
   (`Services/BriefProvider.cs`). Today: the official Anthropic SDK (`claude-opus-4-8`)
@@ -81,8 +126,11 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   or NDC is refused, because those are also six digits and showing the wrong card is worse than none.
 - **Accessibility** — every text ink meets WCAG AA (4.5:1) on every appearance, including the tinted header bands, seals and chips some looks add, enforced by tests. Compact boxes are mouse-and-hotkey only by design (they never take focus); the full card they open is keyboard-complete.
 
-Planned next: UI Automation text-under-cursor capture (slots in behind
-`TextCaptureService` without touching callers), real data adapters, MSIX packaging, code signing.
+Not built: Outlook context, a right-click menu item (Windows does not let one app extend other apps'
+menus; the real routes are an Edge extension or an Outlook add-in, each a separate approved package),
+an official PSG source, and a live Elsa or Claude call. Planned next: UI Automation text-under-cursor
+capture (slots in behind `TextCaptureService` without touching callers), real data adapters, MSIX
+packaging, code signing. See `../ROADMAP.md` for what is built and what is not.
 
 ## Build & run
 
@@ -107,9 +155,10 @@ dotnet test AndaCompanion.Tests                              # everything (Windo
 dotnet test AndaCompanion.Tests --filter "Category!=Windows" # what runs on Linux/macOS
 ```
 
-136 cross-platform tests (recognizer, status line, GDUFA rules, brief fencing and fallback, provider
-selection, settings, contrast, placement, hotkey registration with a fake API, headless renders of the real
-windows) plus Windows-only tests that use real Win32 (clipboard snapshot/restore, hotkey registration and
+421 cross-platform tests at the time of writing (recognizer, status line, GDUFA rules, the federal-holiday
+calendar against OPM's dates, watch rules, urgency, draft check, portfolio and notes readers, writing prompts,
+hotkey parsing and registration with a fake API, brief fencing and fallback, provider selection, settings,
+contrast, placement, headless renders of the real windows) plus Windows-only tests that use real Win32 (clipboard snapshot/restore, hotkey registration and
 conflict, owner window). Tests never touch the real `%AppData%`.
 
 ## Self-test — evidence from the machine it runs on
@@ -119,8 +168,7 @@ AndaCompanion.exe --selftest report
 ```
 
 Renders every window to PNG, then exercises the Windows integration for real and writes
-`report
-eport.md` and `report.json`: hotkeys registered and delivered (it presses them), tray icon,
+`report\report.md` and `report.json`: hotkeys registered and delivered (it presses them), tray icon,
 Segoe UI present, clipboard snapshot/restore, card placement at five screen anchors, and an end-to-end
 Select & Peek from a real selection. Each check is PASS, WARN (this machine needs attention), SKIP
 (could not be tested, with the reason) or FAIL. It is hermetic (own data folder) and makes no network
@@ -165,9 +213,14 @@ AndaCompanion/
   UI/AutoHide.cs        the auto-hide rule (pure) and its timer
   UI/ChipWindow.*       whisper invite + invalid-number notice
   UI/LookupWindow.*     Ctrl+Alt+Space lookup
+  UI/DraftWindow.*      Ctrl+Alt+D draft check and the writing actions (preview before send, Copy only)
+  UI/SettingsWindow.*   appearance, consent, urgent rule, My data, instructions, shortcuts, usage log
+  UI/HotkeyCapture.cs   press-a-shortcut box used by the shortcut settings
   UI/ProgressControls   bar / ticks / ring / hatch / capsule / line / dots / step / timeline + D's grid surface
-  Services/             hotkeys (checked), text capture + clipboard snapshot, settings, brief services,
-                        Elsa placeholder (Elsa.cs + ElsaMapping.cs), self-test, app paths (portable mode)
+  Services/             hotkeys (checked, rebindable), text capture + clipboard snapshot, settings, brief services,
+                        Elsa placeholder (Elsa.cs + ElsaMapping.cs), BusinessCalendar + WatchRules,
+                        UrgencyPolicy, DraftCheck, WritingActions, ReferenceData, UsageLog,
+                        Portfolio/ (xlsx/csv reader, column detection, notes index), self-test, app paths
   Data/                 IAndaRepository + fictional mock data + identifier registry
 AndaCompanion.Tests/    xUnit suite (cross-platform + Windows-only)
 AndaCompanion.Preview/  headless screenshot harness

@@ -29,6 +29,7 @@ public sealed class HotkeyService : IDisposable
 {
     public const int IdPeek = 1;    // Ctrl+Alt+A     → peek at the current selection
     public const int IdLookup = 2;  // Ctrl+Alt+Space → lookup box
+    public const int IdDraft = 3;   // Ctrl+Alt+D     → check the selected draft
 
     private const int WmHotkey = 0x0312;
     private const int WmQuit = 0x0012;
@@ -38,16 +39,35 @@ public sealed class HotkeyService : IDisposable
     public static readonly IReadOnlyList<HotkeyBinding> Bindings = new[]
     {
         new HotkeyBinding(IdPeek, "Select & Peek", "Ctrl+Alt+A",
-            ModControl | ModAlt | ModNoRepeat, 0x41, "Use Ctrl+Alt+Space or the tray icon."),
+            ModControl | ModAlt | ModNoRepeat, 0x41, "Choose another shortcut in Settings, or use the tray icon."),
         new HotkeyBinding(IdLookup, "Lookup", "Ctrl+Alt+Space",
-            ModControl | ModAlt | ModNoRepeat, 0x20, "Use the tray icon."),
+            ModControl | ModAlt | ModNoRepeat, 0x20, "Choose another shortcut in Settings, or use the tray icon."),
+        new HotkeyBinding(IdDraft, "Check a draft", "Ctrl+Alt+D",
+            ModControl | ModAlt | ModNoRepeat, 0x44, "Choose another shortcut in Settings, or use the tray icon."),
     };
 
-    /// <summary>Registers every binding and reports each outcome. Pure apart from the api calls.</summary>
-    public static IReadOnlyList<HotkeyStatus> RegisterAll(IHotkeyApi api)
+    /// <summary>The three bindings with the shortcuts a person chose. An invalid or duplicate choice falls back to its default.</summary>
+    public static IReadOnlyList<HotkeyBinding> FromCombos(string? peek, string? lookup, string? draft)
     {
-        var result = new List<HotkeyStatus>(Bindings.Count);
-        foreach (var b in Bindings)
+        var chosen = new[] { (IdPeek, peek), (IdLookup, lookup), (IdDraft, draft) };
+        var result = new List<HotkeyBinding>();
+        var taken = new HashSet<string>();
+        foreach (var (id, combo) in chosen)
+        {
+            var def = Bindings.Single(b => b.Id == id);
+            if (HotkeyParser.TryParse(combo, out uint mods, out uint vk, out string norm, out _) && taken.Add(norm))
+                result.Add(def with { Combo = norm, Modifiers = mods | ModNoRepeat, VirtualKey = vk });
+            else { taken.Add(def.Combo); result.Add(def); }
+        }
+        return result;
+    }
+
+    /// <summary>Registers every binding and reports each outcome. Pure apart from the api calls.</summary>
+    public static IReadOnlyList<HotkeyStatus> RegisterAll(IHotkeyApi api, IReadOnlyList<HotkeyBinding>? bindings = null)
+    {
+        bindings ??= Bindings;
+        var result = new List<HotkeyStatus>(bindings.Count);
+        foreach (var b in bindings)
         {
             bool ok = api.Register(b.Id, b.Modifiers, b.VirtualKey, out int error);
             result.Add(new HotkeyStatus(b, ok, ok ? 0 : error));
@@ -68,15 +88,31 @@ public sealed class HotkeyService : IDisposable
     private readonly ManualResetEventSlim _ready = new();
     private Thread? _thread;
     private volatile uint _threadId;
+    private volatile IReadOnlyList<HotkeyBinding> _bindings;
+    private volatile IReadOnlyList<HotkeyBinding>? _pending;
+    private const int WmApp = 0x8000;
 
     /// <summary>Per-binding outcome; empty until <see cref="WaitReady"/> returns true.</summary>
     public IReadOnlyList<HotkeyStatus> Status { get; private set; } = Array.Empty<HotkeyStatus>();
 
-    public HotkeyService(Action<int> onHotkey, Action<string>? onProblem = null, IHotkeyApi? api = null)
+    public HotkeyService(Action<int> onHotkey, Action<string>? onProblem = null, IHotkeyApi? api = null,
+        IReadOnlyList<HotkeyBinding>? bindings = null)
     {
         _onHotkey = onHotkey;
         _onProblem = onProblem;
         _api = api ?? new Win32HotkeyApi();
+        _bindings = bindings ?? Bindings;
+    }
+
+    /// <summary>
+    /// Swaps the registered shortcuts while the app runs (a change in Settings). The message loop unregisters the old ones and
+    /// registers the new ones on its own thread, because RegisterHotKey belongs to the thread that called it.
+    /// </summary>
+    public void Reconfigure(IReadOnlyList<HotkeyBinding> bindings)
+    {
+        _pending = bindings;
+        if (_threadId != 0) PostThreadMessage(_threadId, WmApp, IntPtr.Zero, IntPtr.Zero);
+        else _bindings = bindings;   // not started (or not Windows): the next Start uses them
     }
 
     public void Start()
@@ -95,7 +131,7 @@ public sealed class HotkeyService : IDisposable
         // Force this thread's message queue into existence before anything can post to it.
         PeekMessage(out _, IntPtr.Zero, 0, 0, 0 /* PM_NOREMOVE */);
 
-        var status = RegisterAll(_api);
+        var status = RegisterAll(_api, _bindings);
         Status = status;
         _ready.Set();
         foreach (var s in status)
@@ -103,6 +139,17 @@ public sealed class HotkeyService : IDisposable
 
         while (GetMessage(out var msg, IntPtr.Zero, 0, 0) > 0)
         {
+            if (msg.message == WmApp && _pending is { } next)
+            {
+                _pending = null;
+                foreach (var old in status) if (old.Registered) _api.Unregister(old.Binding.Id);
+                _bindings = next;
+                status = RegisterAll(_api, next);
+                Status = status;
+                foreach (var s in status)
+                    if (Describe(s) is { } problem) SafeProblem(problem);
+                continue;
+            }
             if (msg.message != WmHotkey) continue;
             try { _onHotkey((int)msg.wParam); }
             catch { /* a handler failure must never kill the message loop */ }

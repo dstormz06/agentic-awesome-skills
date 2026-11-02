@@ -44,6 +44,7 @@ internal static class SelfTest
             report.Add(SelfTestChecks.DataAndBriefs(repo));
             report.Add(SelfTestChecks.SettingsAndPrompts(Path.Combine(options.OutDir, "home", "check")));
             report.Add(SelfTestChecks.ElsaPlaceholder());
+            report.Add(SelfTestChecks.Phase1Rules(repo, Path.Combine(options.OutDir, "home", "phase1")));
             report.Add(Fonts());
             report.Add(SelfTestChecks.ClipboardRoundTrip());
 

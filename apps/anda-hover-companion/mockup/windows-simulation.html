@@ -269,6 +269,18 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 #lookup{width:330px;padding:14px 16px;left:calc(50% - 165px);top:30%}
 #lookup .r{display:flex;gap:8px}
 #lookup .err{color:var(--c-bad);font-size:11.5px;margin-top:6px;display:none}
+#draft{width:480px;padding:16px 18px;left:calc(50% - 240px);top:52px;max-height:calc(100% - var(--tb-h) - 76px);overflow:auto}
+#draft textarea{min-height:128px;resize:vertical}
+#draft .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+#draft .find{margin:6px 0 0;padding:8px 10px;border-radius:8px;font-size:12px;line-height:1.4}
+#draft .find.diff{background:var(--c-warn-bg);color:var(--c-warn)}
+#draft .find.ok{background:var(--c-good-bg);color:var(--c-good)}
+#draft .find.note{background:var(--c-mark);color:var(--c-ink2)}
+#draft .pill:disabled{opacity:.55}
+.watch .wtxt.warn{color:var(--c-warn)}.watch .wtxt.bad{color:var(--c-bad)}
+.watch .more{color:var(--c-ink3)}
+#ext .wf{padding:6px 0;border-top:1px solid var(--c-hair)}#ext .wf:first-child{border-top:none}
+#ext .wf .why,#ext .wf .src{font-size:11.5px;color:var(--c-ink3)}
 
 /* ===================== whisper chip / notice ===================== */
 #chip{position:fixed;z-index:70;display:none;align-items:center;gap:7px;background:var(--c-bg);color:var(--c-ink);
@@ -381,7 +393,7 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 :root[data-dir="e"] .chip{border-width:1.5px}
 #moreBtn{display:none;width:100%;border:none;min-height:44px;background:var(--c-mark);color:var(--c-accent);font-weight:650;font-size:12.5px;font-family:inherit}
 #card.mini #moreBtn{display:block}
-#card.mini .attn-slot,#card.mini .latest,#card.mini .ahead,#card.mini .ai,#card.mini #ext,#card.mini .chips-slot,#card.mini .kbdbar{display:none}
+#card.mini .attn-slot,#card.mini .latest,#card.mini .ahead,#card.mini .watch,#card.mini .ai,#card.mini #ext,#card.mini .chips-slot,#card.mini .kbdbar{display:none}
 .kbdbar{padding:8px 16px;border-top:1px solid var(--c-hair);display:flex;gap:14px;font-size:10px;color:var(--c-ink3);letter-spacing:.02em}
 @media (hover:none){.kbdbar{display:none}}
 #card.sheet{left:0 !important;right:0;top:auto !important;bottom:0;width:100% !important;max-width:none;
@@ -544,7 +556,10 @@ Two items for Thursday. Please have status ready on both.
 How to try it: select a number (double-click selects a whole number), then press Ctrl+Alt+A. Or press Ctrl+Alt+Space and type one.
 
 Thanks,
-Demo author</div>
+Demo author
+
+--- Draft reply (not sent) ---
+<span class="pick" data-pick="DRAFT">Hi all, quick status. ANDA 216482 is on track, with a goal date of Oct 10, 2026 and a forecast of Oct 17, 2026. ANDA 214990 is running late. ANDA 123456 needs a call.</span></div>
     </section>
 
     <section class="win" id="chat" data-app="chat" aria-label="Chat window, Teams-style">
@@ -586,15 +601,18 @@ C:\work&gt; </div>
 
   <!-- ===== guide ===== -->
   <section class="win" id="guide" aria-label="Demo guide">
-    <div class="bar"><span class="ttl">Try it in five steps</span></div>
+    <div class="bar"><span class="ttl">Try it in seven steps</span></div>
     <div class="body">
-      <p class="sub">Select a number in any window, press a hotkey, get a card. Nothing opens on its own.</p>
+      <p class="sub">Select a number in any window and press a hotkey. By default you get a small invite; an at-risk ANDA opens a peek by itself. Weekend and holiday goal dates are flagged.</p>
       <ol id="steps">
         <li data-step="pin"><i>✓</i><span>Click <b>^</b> in the tray, then <b>Pin</b> the icon.</span></li>
-        <li data-step="peek"><i>✓</i><span>Select <b>216482</b>, press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>A</kbd>.</span></li>
+        <li data-step="peek"><i>✓</i><span>Select <b>216482</b> (at risk), press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>A</kbd>: a peek opens by itself.</span></li>
+        <li data-step="invite"><i>✓</i><span>Select <b>214990</b>, press the hotkey: a small invite. Click it.</span></li>
+        <li data-step="watch"><i>✓</i><span>On the card, read <b>WATCH</b>: the goal date is on a weekend.</span></li>
         <li data-step="look"><i>✓</i><span><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Space</kbd>, type <b>214990</b>.</span></li>
         <li data-step="look2"><i>✓</i><span>Select <b>NDA 021234</b>, press the hotkey. No guess.</span></li>
         <li data-step="look3"><i>✓</i><span>Turn on <b>Terminal</b> below, select its number: paused.</span></li>
+        <li data-step="draft"><i>✓</i><span>Select the <b>draft reply</b> in Mail, press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>D</kbd>.</span></li>
       </ol>
       <div class="lbl">APPS TO TEST</div>
       <div id="appPick" role="group" aria-label="Which simulated apps to show"></div>
@@ -604,16 +622,19 @@ C:\work&gt; </div>
         <button class="btn" type="button" data-pickbtn="214990">214990</button>
         <button class="btn" type="button" data-pickbtn="NDA 021234">NDA 021234</button>
         <button class="btn" type="button" data-pickbtn="12345">12345</button>
+        <button class="btn" type="button" data-pickbtn="DRAFT">draft reply</button>
         <button class="btn" type="button" data-pickbtn="TERM" id="pickTerm" hidden>in Terminal</button>
       </div>
       <div class="lbl">PRESS A HOTKEY</div>
       <div class="row">
         <button class="btn key" type="button" id="keyPeek" aria-label="Press Control Alt A">Ctrl+Alt+A</button>
         <button class="btn key" type="button" id="keyLook" aria-label="Press Control Alt Space">Ctrl+Alt+Space</button>
+        <button class="btn key" type="button" id="keyDraft" aria-label="Press Control Alt D">Ctrl+Alt+D</button>
         <button class="btn" type="button" id="trayMenuBtn">Tray menu</button>
       </div>
       <div class="lbl">WHAT IF…</div>
       <label class="sw"><input type="checkbox" id="swConflict"> Another program already owns Ctrl+Alt+A</label>
+      <label class="sw"><input type="checkbox" id="swToday"> Pretend today is Oct 1, 2026 (goal dates get close)</label>
       <label class="sw"><input type="checkbox" id="swAi"> Claude access is approved (sample brief)</label>
       <p class="fine">Simulated here: the desktop, look-alike app windows (no logos, no real products), the hotkey and clipboard hand-off, the sample brief. No data leaves this page.</p>
     </div>
@@ -667,6 +688,13 @@ C:\work&gt; </div>
     <p class="hint">Hides a card or box after this long with no mouse or key activity. Never while your pointer is over it, while it is pinned, or while the drawer is open.</p>
     <div class="lbl">CONSENT MODEL</div>
     <div id="setConsent"></div>
+    <label class="opt"><input type="checkbox" id="setUrgent" checked> Open a peek by itself for an at-risk or late ANDA (whisper mode only)</label>
+    <p class="hint">Still starts only from your own selection and shortcut. A peek makes no AI call. Off: the invite always waits for your click.</p>
+    <div class="lbl">WEEKEND &amp; HOLIDAY WATCH</div>
+    <div style="display:flex;align-items:center;gap:10px"><span style="color:var(--c-ink2);font-size:12.5px">Flag dates within</span><select id="setLead" aria-label="Business days around a federal holiday" style="width:auto"></select><span style="color:var(--c-ink2);font-size:12.5px">business days of a federal holiday</span></div>
+    <p class="hint">Weekends and federal holidays are always flagged (U.S. federal calendar, OPM). This only shows you the date; it never says how a goal date rule applies.</p>
+    <div class="lbl">MY DATA · ACTIONS · SHORTCUTS</div>
+    <p class="hint" style="margin-top:0">The Windows app lets you point to your own Excel portfolio, notes folder and Drugs@FDA file (read-only, kept on your computer), set your own standing instructions for Proofread / Rewrite / Fact-check, and rebind the three shortcuts. Those need real files and a model connection, so they are not simulated here.</p>
     <div class="lbl">SELECT &amp; PEEK · CTRL+ALT+A</div>
     <label class="opt"><input type="checkbox" id="setCapture" checked> Read my selection by copying it, then put my clipboard back</label>
     <p class="hint">Off: Ctrl+Alt+A opens the lookup box instead and no keystroke is ever sent. Terminals are always skipped, because Ctrl+C there interrupts a running command.</p>
@@ -679,6 +707,25 @@ C:\work&gt; </div>
     <div class="lbl">AI CONNECTION · CLAUDE OR ELSA</div>
     <div style="display:flex;gap:10px;align-items:flex-start"><div id="setConn" style="flex:1;color:var(--c-ink2);font-size:12px">Offline mode. Briefs are assembled from the record. Ready for API access when approved.</div><button class="pill" id="setTest" type="button">Test</button></div>
     <p class="hint">Works fully offline. When API access is approved, set the key through the agency-approved channel and press Test. In this simulation nothing is sent anywhere.</p>
+  </div>
+
+  <!-- ===== draft check ===== -->
+  <div class="app-win" id="draft" role="dialog" aria-label="Check a draft">
+    <div class="hdr"><h3>Check a draft</h3><button class="pill" id="drDone" type="button">Done</button></div>
+    <textarea id="drText" aria-label="Draft text" placeholder="Paste or type an email or chat draft"></textarea>
+    <div class="acts">
+      <button class="pill" id="drCheck" type="button">Check against the record</button>
+      <button class="pill quiet" id="drSample" type="button">Use the sample draft</button>
+    </div>
+    <div class="lbl">AI ACTIONS · NEED AN APPROVED MODEL</div>
+    <div class="acts" style="margin-top:0">
+      <button class="pill quiet" type="button" data-ai="Proofread" disabled>Proofread</button>
+      <button class="pill quiet" type="button" data-ai="Rewrite" disabled>Rewrite</button>
+      <button class="pill quiet" type="button" data-ai="Fact-check" disabled>Fact-check</button>
+    </div>
+    <p class="hint" id="drAiHint">Off until a model is approved and connected. When on, a preview shows the exact text first, nothing is sent until you press Send, and the result is Copy only: the app never pastes or sends for you.</p>
+    <div class="lbl">RESULT</div>
+    <div id="drOut" aria-live="polite"></div>
   </div>
 
   <!-- ===== prompt library ===== -->
@@ -733,11 +780,13 @@ C:\work&gt; </div>
   <div class="slot attn-slot" id="attnSlot"><div class="attn warn" id="c-attn"><span class="k">⚠ NEEDS YOU</span><span id="c-attn-t"></span></div></div>
   <div class="slot rail latest"><span class="lblx">LATEST</span><span id="c-latest"></span></div>
   <div class="slot rail ahead" id="aheadSlot"><span class="lblx acc">AHEAD</span><span id="c-ahead"></span></div>
+  <div class="slot rail watch" id="watchSlot"><span class="lblx">WATCH</span><span><span class="wtxt" id="c-watch"></span> <span class="more" id="c-watch-more"></span></span></div>
   <div class="slot ai">
     <div class="tag"><span class="lblx acc" id="c-tag">COMPANION</span><span class="verify" id="c-verify"></span><span class="src">sources ›</span></div>
     <div class="body" id="c-ai"></div>
   </div>
   <div id="ext">
+    <details id="x-watch-d"><summary>Watch list <span id="x-watch-n" style="font-weight:400;color:var(--c-ink3)"></span></summary><div class="cnt" id="x-watch"></div></details>
     <details><summary>Pending &amp; urgent items <span id="x-pending-n" style="font-weight:400;color:var(--c-ink3)"></span></summary><div class="cnt" id="x-pending"></div></details>
     <details><summary>Recent project notes</summary><div class="cnt" id="x-notes"></div></details>
     <details><summary>Forecast &amp; assumptions</summary><div class="cnt" id="x-forecast"></div></details>
@@ -769,7 +818,7 @@ root.dataset.dir = "k";
 const DATA = {
   "216482": {
     drug:"Metformin HCl ER Tablets, 500 mg", meta:"Meridian Pharmaceuticals (fictional) · Cycle 2",
-    goal:"Oct 3, 2026", days:"· 80 days", daysTo:80, delta:14, pct:62,
+    goal:"Oct 3, 2026", goalD:[2026,10,3], fcD:[2026,10,17], days:"· 80 days", daysTo:80, delta:14, pct:62,
     fc:"Oct 17, 2026", fdelta:"▲ +14 d vs goal", late:true, fconf:"moderate confidence",
     attn:"IR response due in 6 days — Biopharmaceutics",
     latest:"Amendment (minor) received Jun 30 — under review",
@@ -783,7 +832,7 @@ const DATA = {
   },
   "214990": {
     drug:"Metformin HCl ER Tablets, 750 mg", meta:"Meridian Pharmaceuticals (fictional) · Cycle 3",
-    goal:"Aug 15, 2026", days:"· 31 days", daysTo:31, delta:-9, pct:88,
+    goal:"Aug 15, 2026", goalD:[2026,8,15], fcD:[2026,8,6], days:"· 31 days", daysTo:31, delta:-9, pct:88,
     fc:"Aug 6, 2026", fdelta:"▼ 9 d ahead of goal", late:false, fconf:"high confidence",
     attn:null,
     latest:"Facility IR resolved — closed Jul 2",
@@ -843,10 +892,147 @@ function offlineBrief(id){
   if(!t) t = "No open items need action. ";
   return (t + "Forecast drivers and assumptions: expand → Forecast & assumptions.").trim();
 }
+
+/* ---- Services/BusinessCalendar.cs: U.S. federal holidays from the statutory rules; Sat -> Fri, Sun -> Mon (OPM) ---- */
+const DAY = 864e5, ymd = (y, m, d) => Date.UTC(y, m - 1, d), dowOf = t => new Date(t).getUTCDay();   /* 0 = Sunday */
+const shortDate = t => new Date(t).toLocaleDateString("en-US", { weekday:"short", month:"short", day:"numeric", timeZone:"UTC" }).replace(",", "");
+const longDate = t => new Date(t).toLocaleDateString("en-US", { month:"short", day:"numeric", year:"numeric", timeZone:"UTC" });
+function holidaysOf(year){
+  const list = [];
+  const fixed = (m, d, name) => { const a = ymd(year, m, d), w = dowOf(a); list.push({ obs: w === 6 ? a - DAY : w === 0 ? a + DAY : a, name }); };
+  const nth = (m, wd, n, name) => { let t = ymd(year, m, 1); while(dowOf(t) !== wd) t += DAY; list.push({ obs: t + 7 * (n - 1) * DAY, name }); };
+  const last = (m, wd, name) => { let t = Date.UTC(year, m, 0); while(dowOf(t) !== wd) t -= DAY; list.push({ obs: t, name }); };
+  fixed(1, 1, "New Year's Day"); nth(1, 1, 3, "Birthday of Martin Luther King, Jr."); nth(2, 1, 3, "Washington's Birthday");
+  last(5, 1, "Memorial Day"); fixed(6, 19, "Juneteenth National Independence Day"); fixed(7, 4, "Independence Day");
+  nth(9, 1, 1, "Labor Day"); nth(10, 1, 2, "Columbus Day"); fixed(11, 11, "Veterans Day"); nth(11, 4, 4, "Thanksgiving Day"); fixed(12, 25, "Christmas Day");
+  if((year - 1) % 4 === 0){ let d = ymd(year, 1, 20); if(dowOf(d) === 0) d += DAY; list.push({ obs: d, name:"Inauguration Day (Washington, DC area)" }); }
+  return list;
+}
+function holidayOn(t){
+  const y = new Date(t).getUTCFullYear(), all = holidaysOf(y).concat(new Date(t).getUTCMonth() === 11 ? holidaysOf(y + 1) : []);
+  return all.find(h => h.obs === t) || null;
+}
+const kindOf = t => (dowOf(t) === 0 || dowOf(t) === 6) ? "weekend" : holidayOn(t) ? "holiday" : "business";
+const isBiz = t => kindOf(t) === "business";
+function nextBiz(t){ do t += DAY; while(!isBiz(t)); return t; }
+function prevBiz(t){ do t -= DAY; while(!isBiz(t)); return t; }
+function bizBetween(a, b){ if(a > b) [a, b] = [b, a]; let n = 0; for(let d = a + DAY; d < b; d += DAY) if(isBiz(d)) n++; return n; }
+function evaluateDate(t, lead){
+  const kind = kindOf(t); let name = kind === "holiday" ? holidayOn(t).name : null, near = null, before = false;
+  if(kind === "business" && lead > 0){
+    const win = lead * 2 + 4;
+    for(let k = 1; k <= win && near === null; k++){
+      const ahead = t + k * DAY, behind = t - k * DAY;
+      if(kindOf(ahead) === "holiday"){ const n = bizBetween(t, ahead) + 1; if(n <= lead){ near = n; before = true; name = holidayOn(ahead).name; } }
+      if(near === null && kindOf(behind) === "holiday"){ const n = bizBetween(behind, t) + 1; if(n <= lead){ near = n; before = false; name = holidayOn(behind).name; } }
+    }
+  }
+  return { kind, name, near, before, prev: prevBiz(t), next: nextBiz(t) };
+}
+
+/* ---- Services/WatchRules.cs: deterministic flags with their evidence; states what the data shows, never what a rule means ---- */
+const SEV = { info:0, warn:1, bad:2 };
+const RANK = { "goal-passed":0, "goal-soon":1, "goal-date-calendar":2, "forecast-date-calendar":3, "no-goal-date":6 };
+const demoToday = () => state.pretend ? ymd(2026, 10, 1) : ymd(2026, 7, 16);   /* demo records are frozen at their extract date unless the tester moves the clock */
+function watchFlags(id){
+  const d = DATA[id], today = demoToday(), flags = [], src = "Fictional demo data";
+  const rule = (code, what, t) => {
+    const f = evaluateDate(t, state.lead);
+    if(f.kind === "weekend") flags.push({ code, sev:"warn", text:`${what} date falls on a weekend: ${shortDate(t)}. Nearest business days: ${shortDate(f.prev)} and ${shortDate(f.next)}.`, why:"A date on a weekend may be handled differently from a weekday. Check how it applies to this action; this tool does not decide.", src:"U.S. federal calendar (OPM)" });
+    else if(f.kind === "holiday") flags.push({ code, sev:"warn", text:`${what} date falls on a federal holiday: ${shortDate(t)} (${f.name}). Nearest business days: ${shortDate(f.prev)} and ${shortDate(f.next)}.`, why:"A date on a holiday may be handled differently from a workday. Check how it applies to this action; this tool does not decide.", src:"U.S. federal calendar (OPM)" });
+    else if(f.near !== null) flags.push({ code, sev:"info", text:`${what} date ${shortDate(t)} is ${f.near} business day${f.near === 1 ? "" : "s"} ${f.before ? "before" : "after"} ${f.name}.`, why:"Staffing and turnaround around a federal holiday can differ. Worth a look if the date is tight.", src:"U.S. federal calendar (OPM)" });
+  };
+  const goal = ymd(...d.goalD), fc = ymd(...d.fcD);
+  rule("goal-date-calendar", "Goal", goal); rule("forecast-date-calendar", "Forecast", fc);
+  const days = Math.round((goal - today) / DAY);
+  if(days < 0) flags.push({ code:"goal-passed", sev:"bad", text:`The goal date (${shortDate(goal)}) passed ${-days} day${days === -1 ? "" : "s"} ago.`, why:"The record still lists this goal date. Confirm whether it moved or the data is out of date.", src });
+  else if(days <= 5) flags.push({ code:"goal-soon", sev:"warn", text: days === 0 ? `The goal date is today (${shortDate(goal)}).` : `The goal date (${shortDate(goal)}) is in ${days} day${days === 1 ? "" : "s"}.`, why:"A near goal date is easy to miss in a long list.", src });
+  return flags.sort((a, b) => SEV[b.sev] - SEV[a.sev] || (RANK[a.code] ?? 9) - (RANK[b.code] ?? 9));
+}
+
+/* ---- Services/UrgencyPolicy.cs: in whisper mode an urgent ANDA skips the invite and opens a peek, if left on ---- */
+const LATE_DAYS = 7;
+function isUrgent(id){ const d = DATA[id]; return d.delta >= LATE_DAYS || watchFlags(id).some(f => f.sev === "bad"); }
+function firstStep(id){
+  if(state.mode === "whisper") return state.escalate && isUrgent(id) ? "peek" : "invite";
+  return state.mode === "peek" ? "peek" : "full";
+}
+
+/* ---- Services/DraftCheck.cs: compares numbers, goal/forecast dates and on-track/late wording with the record. No model, no network. ---- */
+const MONTHS = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
+const ON_TRACK = /\b(on track|on schedule|ahead of (?:the )?(?:goal|schedule)|ahead of goal)\b/i;
+const LATE_RE = /\b(running late|behind schedule|behind|delayed|at risk|slipping|slipped|past (?:the )?goal|will miss|going to miss)\b/i;
+const DATE_RE = /(?:(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s+(\d{1,2})(?:st|nd|rd|th)?(?:,?\s+(\d{4}))?(?!\d)|(\d{1,2})\/(\d{1,2})(?:\/(\d{4}|\d{2}))?(?![\d\/])|(\d{4})-(\d{2})-(\d{2}))/gi;
+function andaNumbers(sentence){
+  const out = [], re = /\d+/g; let m;
+  while((m = re.exec(sentence))){ if(m[0].length === 6 && !OTHER_LABEL.test(sentence.slice(0, m.index)) && !out.includes(m[0])) out.push(m[0]); }
+  return out;
+}
+function dateMention(m){
+  let mon, day, year = null;
+  if(m[1]){ mon = MONTHS.indexOf(m[1].slice(0, 3).toLowerCase()) + 1; day = +m[2]; year = m[3] ? +m[3] : null; if(mon < 1 || day < 1 || day > 31) return null; }
+  else if(m[4]){ mon = +m[4]; day = +m[5]; if(m[6]){ year = +m[6]; if(year < 100) year += 2000; } if(mon < 1 || mon > 12 || day < 1 || day > 31) return null; }
+  else if(m[7]){ year = +m[7]; mon = +m[8]; day = +m[9]; }
+  else return null;
+  return { mon, day, year, index:m.index, len:m[0].length };
+}
+function keywordFor(sentence, mt){
+  const before = sentence.slice(Math.max(0, mt.index - 50), mt.index).toLowerCase();
+  const g = before.lastIndexOf("goal"), f = Math.max(before.lastIndexOf("forecast"), before.lastIndexOf("projected"));
+  if(g >= 0 || f >= 0) return g > f ? "goal" : "forecast";
+  const after = sentence.slice(mt.index + mt.len, Math.min(sentence.length, mt.index + mt.len + 30)).toLowerCase();
+  const ag = after.indexOf("goal"), af = after.indexOf("forecast");
+  if(ag >= 0 && (af < 0 || ag < af)) return "goal";
+  if(af >= 0) return "forecast";
+  return null;
+}
+const showMention = mt => new Date(Date.UTC(2000, mt.mon - 1, 1)).toLocaleDateString("en-US", { month:"short", timeZone:"UTC" }) + " " + mt.day + (mt.year ? ", " + mt.year : "");
+function draftCheck(draft){
+  const findings = [], seenF = new Set(), seenN = new Set(), unknownSeen = new Set();
+  const add = (kind, text) => { if(!seenF.has(kind + text)){ seenF.add(kind + text); findings.push({ kind, text }); } };
+  if(!draft || !draft.trim()) return { findings:[{ kind:"note", text:"Nothing to check yet. Paste or type a draft." }] };
+  let numbers = 0, dates = 0, status = 0, multi = 0;
+  for(const paragraph of draft.split(/\r?\n\s*\r?\n/)){
+    let context = null;
+    for(const sentence of paragraph.replace(/([.!?])\s+/g, "$1\u0000").split(/\u0000|\r?\n/).filter(x => x.trim())){
+      const nums = andaNumbers(sentence);
+      for(const n of nums){
+        if(!seenN.has(n)){ seenN.add(n); numbers++; }
+        if(!DATA[n] && !unknownSeen.has(n)){ unknownSeen.add(n); add("unknown", `ANDA ${n} is not in your data, so nothing about it could be checked. Check the number.`); }
+      }
+      let subject;
+      if(nums.length === 1){ subject = nums[0]; context = subject; }
+      else if(nums.length > 1){ subject = null; context = null; if(++multi <= 3) add("note", `One sentence names several ANDAs, so its dates and wording were not checked: "${sentence.trim().length <= 90 ? sentence.trim() : sentence.trim().slice(0, 87) + "..."}"`); }
+      else subject = context;
+      if(!subject || !DATA[subject]) continue;
+      const rec = DATA[subject];
+      DATE_RE.lastIndex = 0; let m;
+      while((m = DATE_RE.exec(sentence))){
+        if(m.index > 0 && /[\d\/]/.test(sentence[m.index - 1])) continue;   /* the C# pattern's lookbehind, done by hand */
+        const mt = dateMention(m); if(!mt) continue;
+        const which = keywordFor(sentence, mt); if(!which) continue;
+        const actual = which === "goal" ? rec.goalD : rec.fcD;
+        dates++;
+        const same = mt.mon === actual[1] && mt.day === actual[2] && (mt.year === null || mt.year === actual[0]);
+        if(!same) add("diff", `ANDA ${subject}: the draft gives the ${which} date as ${showMention(mt)}, but the record says ${longDate(ymd(...actual))}.`);
+      }
+      const claimsOn = ON_TRACK.test(sentence), claimsLate = LATE_RE.test(sentence), delta = rec.fdelta.replace("▲", "").replace("▼", "").trim();
+      if(claimsOn) status++; if(claimsLate) status++;
+      if(claimsOn && rec.late) add("diff", `ANDA ${subject}: the draft sounds on track, but the record's forecast is ${delta}.`);
+      if(claimsLate && !rec.late) add("diff", `ANDA ${subject}: the draft sounds late or at risk, but the record's forecast is ${delta}.`);
+    }
+  }
+  const ordered = findings.slice().sort((a, b) => (a.kind === "note" ? 1 : 0) - (b.kind === "note" ? 1 : 0));
+  if(numbers === 0) ordered.unshift({ kind:"note", text:"No ANDA numbers found in the draft, so nothing was checked against a record." });
+  else if(!ordered.some(f => f.kind === "diff" || f.kind === "unknown"))
+    ordered.unshift({ kind:"ok", text:`Checked ${numbers} ANDA number${numbers === 1 ? "" : "s"}, ${dates} goal or forecast date${dates === 1 ? "" : "s"} and ${status} on-track or late statement${status === 1 ? "" : "s"}: no differences from the record.` });
+  ordered.push({ kind:"note", text:"This compares the draft only with the data this tool has, and only numbers, goal and forecast dates, and on-track or late wording. It does not check other wording and is not the system of record." });
+  return { findings:ordered };
+}
 const noticeLifetime = text => Math.min(8, Math.max(2.5, 1.2 + text.length / 14)) * 1000;
 
 /* ---------------- state ---------------- */
-const state = { dir:"k", look:"k", form:"full", autoHide:20, mode:"full", capture:true, op:100, lens:null, pinned:false, running:true, conflict:false, ai:false };
+const state = { dir:"k", look:"k", form:"full", autoHide:20, mode:"whisper", escalate:true, lead:3, pretend:false, capture:true, op:100, lens:null, pinned:false, running:true, conflict:false, ai:false };
 const steps = {};
 let current = null, pinnedCard = false, focusedWin = "mail", lastSel = null, deselecting = false;
 let pointer = { x: Math.round(innerWidth * 0.4), y: Math.round(innerHeight * 0.4) };
@@ -861,7 +1047,7 @@ const LOOKS = [["a","A · Quiet Fluent","a","full"],["b","B · Docket Ledger","b
   ["f","F · Agency Bronze","f","full"],["g","G · Harbor Teal","g","full"],["h","H · Sage Clinical","h","full"],["i","I · Indigo Dossier","i","full"],["j","J · Cobalt Timeline","j","full"],["k","K · Graphite Quiet","k","full"],
   ["l","L · Graphite Strip","k","strip"],["m","M · Fluent Tile","a","tile"],["n","N · Bronze Ticket","f","ticket"],["o","O · Teal Badge","g","badge"]];
 const AUTO_CHOICES = [0, 10, 20, 40];
-const CONSENTS = [["full","① Full card: the hotkey press is the consent"],["peek","② Peek first: expand for the full brief"],["whisper","③ Whisper invite: opens only if clicked"]];
+const CONSENTS = [["full","① Full card: the hotkey press is the consent"],["peek","② Peek first: expand for the full brief"],["whisper","③ Whisper invite: opens only if clicked (default)"]];
 let prompts = [
   ["Facility focus","Weight facility and inspection signals heaviest: shared sites, unresolved findings, inspection assumptions. Name the facility linkage explicitly when one exists."],
   ["Director summary","Write for a division director skimming between meetings: lead with the forecast delta and the single decision or risk that needs their awareness. No review-discipline jargon."],
@@ -969,6 +1155,17 @@ function fill(id){
   $("x-forecast").textContent = d.forecast;
   $("x-sisters").innerHTML = d.sisters.map(([n, desc]) =>
     `<div class="rowi"><span><span class="sister" data-anda="${n}" role="button" tabindex="0">ANDA ${n}</span> — ${desc}</span></div>`).join("");
+  { /* WATCH: the top flag on the card, the full list with evidence in the drawer */
+    const fl = watchFlags(id);
+    $("watchSlot").style.display = fl.length ? "" : "none";
+    if(fl.length){
+      const w = $("c-watch"); w.textContent = fl[0].text; w.className = "wtxt " + (fl[0].sev === "bad" ? "bad" : fl[0].sev === "warn" ? "warn" : "");
+      $("c-watch-more").textContent = fl.length > 1 ? `(+${fl.length - 1} more in the drawer)` : "";
+    }
+    $("x-watch-d").style.display = fl.length ? "" : "none";
+    $("x-watch-n").textContent = "· " + fl.length;
+    $("x-watch").innerHTML = fl.map(f => `<div class="wf"><div>${f.text}</div><div class="why">${f.why}</div><div class="src">Source: ${f.src}</div></div>`).join("");
+  }
   $("chipSister").textContent = "Sister ANDA · " + d.sisters.length; $("chipSister").hidden = d.sisters.length === 0;
   $("chipNotes").textContent = "Notes · " + d.notes.length;
 }
@@ -1018,6 +1215,7 @@ function openCard(id, opts = {}){
   if(opts.mini) $("c-ai").textContent = ""; else renderBrief(id);
   if(isSheet()){ scrim.style.display = "block"; card.style.left = card.style.top = ""; card.style.maxHeight = ""; }
   else { scrim.style.display = "none"; limitHeight(); placeCard(opts.anchor || pointer); }
+  if(!opts.mini && $("watchSlot").style.display !== "none") markStep("watch");
   card.focus({ preventScroll:true });
   armAutoHide(card, () => pinnedCard || card.classList.contains("expanded"), closeCard);
 }
@@ -1070,7 +1268,7 @@ chip.addEventListener("click", () => { const go = chipAccept; hideChip(); if(go)
 /* ---------------- keystroke overlay ---------------- */
 function showKeys(kind, extra){
   const k = $("keys");
-  k.innerHTML = `<span><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>${kind === "peek" ? "A" : "Space"}</kbd></span>` + (extra ? `<span>${extra}</span>` : "");
+  k.innerHTML = `<span><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>${kind === "peek" ? "A" : kind === "draft" ? "D" : "Space"}</kbd></span>` + (extra ? `<span>${extra}</span>` : "");
   k.classList.add("show"); clearTimeout(keysTimer);
   keysTimer = setTimeout(() => k.classList.remove("show"), 2000);
 }
@@ -1134,6 +1332,11 @@ function hotkey(kind, source){
   if(!state.running){ showKeys(kind, "The app is not running"); return; }
   const anchor = source === "button" ? (lastSel ? { x:lastSel.x, y:lastSel.y } : { ...pointer }) : { ...pointer };
   if(kind === "look"){ showKeys(kind); openLookup(anchor); return; }
+  if(kind === "draft"){
+    const t = getSelection().toString().trim() ? getSelection().toString() : (lastSel && lastSel.win !== "term" ? lastSel.text : "");
+    showKeys(kind, t ? "Copied your selection, put your clipboard back ✓" : "");
+    openDraft(t); return;
+  }
   if(state.conflict){ showKeys(kind, "Another program handled this key. The app never saw it."); return; }
   if(!state.capture){ showKeys(kind); openLookup(anchor); return; }
   if(focusedWin === "term"){
@@ -1147,17 +1350,20 @@ function hotkey(kind, source){
   if(!DATA[number]){ showNotice(`${number} is not a recognized ANDA`, anchor); return; }
   markStep("peek");
   if(compactId === number && compact.style.display === "block"){ expandCompact(); return; }   /* compact boxes never take focus: the hotkey again is the keyboard way in */
-  if(state.mode === "whisper") showInvite(`ANDA ${number}`, anchor, () => openCard(number, { anchor }));
-  else openCard(number, { mini: state.mode === "peek", anchor });
+  /* Two-stage consent: the hotkey is stage one. In whisper mode an urgent ANDA skips the invite and opens a peek (no AI call). */
+  const step = firstStep(number);
+  if(step === "invite"){ markStep("invite"); showInvite(`ANDA ${number}`, anchor, () => openCard(number, { anchor })); }
+  else openCard(number, { mini: step === "peek", anchor });
 }
 document.addEventListener("keydown", e => {
   if(e.ctrlKey && e.altKey && !e.metaKey){
     if(e.code === "KeyA"){ e.preventDefault(); hotkey("peek", "keyboard"); return; }
     if(e.code === "Space"){ e.preventDefault(); hotkey("look", "keyboard"); return; }
+    if(e.code === "KeyD"){ e.preventDefault(); hotkey("draft", "keyboard"); return; }
   }
   if(e.key === "Escape"){
     if(menuOpen() || $("flyout").style.display === "block"){ closeMenus(); return; }
-    for(const id of ["lookup", "plib", "settings"]) if($(id).style.display === "block"){ closeApp(id); return; }
+    for(const id of ["lookup", "plib", "settings", "draft"]) if($(id).style.display === "block"){ closeApp(id); return; }
     hideChip(); if(compact.style.display === "block") closeCompact(); if(card.style.display === "block") closeCard(); return;
   }
   if(card.style.display !== "block" || /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
@@ -1169,6 +1375,7 @@ document.addEventListener("keydown", e => {
 });
 $("keyPeek").addEventListener("click", () => hotkey("peek", "button"));
 $("keyLook").addEventListener("click", () => hotkey("look", "button"));
+$("keyDraft").addEventListener("click", () => hotkey("draft", "button"));
 document.querySelectorAll("[data-pickbtn]").forEach(b => b.addEventListener("click", () => pick(b.dataset.pickbtn)));
 document.querySelectorAll(".apps .pick").forEach(el => el.addEventListener("dblclick", () => { lastSel = { text:el.textContent, win:winOf(el), x:el.getBoundingClientRect().right, y:el.getBoundingClientRect().bottom }; }));
 
@@ -1190,12 +1397,33 @@ function submitLookup(){
 $("lookupGo").addEventListener("click", submitLookup);
 $("lookupIn").addEventListener("keydown", e => { if(e.key === "Enter") submitLookup(); });
 
+/* ---------------- draft check window (port of UI/DraftWindow: checks as soon as it opens; AI actions stay off until a model is approved) ---------------- */
+const SAMPLE_DRAFT = "Hi all, quick status. ANDA 216482 is on track, with a goal date of Oct 10, 2026 and a forecast of Oct 17, 2026. ANDA 214990 is running late. ANDA 123456 needs a call.";
+function runDraftCheck(){
+  const r = draftCheck($("drText").value);
+  $("drOut").innerHTML = r.findings.map(f => `<div class="find ${f.kind === "diff" || f.kind === "unknown" ? "diff" : f.kind}">${f.text.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</div>`).join("");
+}
+function openDraft(text){
+  closeMenus(); markStep("draft");
+  const box = $("draft"); box.style.display = "block"; if(isSheet()) $("scrim").style.display = "block";
+  $("drText").value = text || ""; runDraftCheck();
+  document.querySelectorAll("#draft [data-ai]").forEach(b => { b.disabled = !state.ai; });
+  setTimeout(() => $("drText").focus(), 30);
+}
+$("drCheck").addEventListener("click", runDraftCheck);
+$("drSample").addEventListener("click", () => { $("drText").value = SAMPLE_DRAFT; runDraftCheck(); });
+$("drDone").addEventListener("click", () => closeApp("draft"));
+$("drText").addEventListener("input", () => { clearTimeout(runDraftCheck.t); runDraftCheck.t = setTimeout(runDraftCheck, 250); });
+document.querySelectorAll("#draft [data-ai]").forEach(b => b.addEventListener("click", () => {
+  $("drOut").innerHTML = `<div class="find note">${b.dataset.ai}: in the Windows app a preview shows exactly what would be sent (your draft, the matching records, your standing instructions) and nothing leaves until you press Send; the result is Copy only. This simulation never calls a model.</div>`;
+}));
+
 /* ---------------- app windows ---------------- */
 function showApp(id){ closeMenus(); $(id).style.display = "block"; if(isSheet()){ scrim.style.display = "block"; } }
 function closeApp(id){ $(id).style.display = "none"; if(card.style.display !== "block") scrim.style.display = "none"; }
 scrim.addEventListener("click", () => {
   if(card.style.display === "block" && !pinnedCard) closeCard();
-  ["lookup", "plib", "settings"].forEach(id => { if($(id).style.display === "block" && id !== "settings") closeApp(id); });
+  ["lookup", "plib", "settings", "draft"].forEach(id => { if($(id).style.display === "block" && id !== "settings") closeApp(id); });
   scrim.style.display = "none";
 });
 $("setDone").addEventListener("click", () => closeApp("settings"));
@@ -1224,11 +1452,14 @@ function applyLook(id){
   });
   CONSENTS.forEach(([id, name]) => {
     const l = document.createElement("label"); l.className = "opt";
-    l.innerHTML = `<input type="radio" name="consent" value="${id}" ${id === "full" ? "checked" : ""}> ${name}`;
+    l.innerHTML = `<input type="radio" name="consent" value="${id}" ${id === state.mode ? "checked" : ""}> ${name}`;
     l.firstChild.addEventListener("change", () => { state.mode = id; });
     $("setConsent").appendChild(l);
   });
   $("setCapture").addEventListener("change", e => { state.capture = e.target.checked; });
+  $("setUrgent").addEventListener("change", e => { state.escalate = e.target.checked; });
+  [0, 2, 3, 5].forEach(n => { const o = document.createElement("option"); o.value = n; o.textContent = n === 0 ? "0 (only weekends and holidays)" : String(n); if(n === state.lead) o.selected = true; $("setLead").appendChild(o); });
+  $("setLead").addEventListener("change", e => { state.lead = +e.target.value; if(current && card.style.display === "block") fill(current); });
   $("setOp").addEventListener("input", e => {
     state.op = +e.target.value; $("setOpV").textContent = state.op + "%"; root.style.setProperty("--op", state.op + "%");
   });
@@ -1271,7 +1502,7 @@ $("plDel").addEventListener("click", () => { if(prompts[plIndex]){ prompts.splic
 const menu = $("menu"), flyout = $("flyout");
 const menuOpen = () => menu.style.display === "block";
 function closeMenus(){ menu.style.display = "none"; flyout.style.display = "none"; $("chev").setAttribute("aria-expanded", "false"); }
-function hotkeyLine(){ return `Hotkeys: Ctrl+Alt+A ${state.conflict ? "✗ in use" : "✓"}   Ctrl+Alt+Space ✓`; }
+function hotkeyLine(){ return `Hotkeys: Ctrl+Alt+A ${state.conflict ? "✗ in use" : "✓"}   Ctrl+Alt+Space ✓   Ctrl+Alt+D ✓`; }
 function openMenu(){
   if(!state.running) return;
   flyout.style.display = "none";
@@ -1286,6 +1517,7 @@ function openMenu(){
   };
   menu.append(
     item("Lookup ANDA…", "Ctrl+Alt+Space", () => openLookup(pointer)),
+    item("Check a draft…", "Ctrl+Alt+D", () => openDraft("")),
     item("Demo: at-risk card", "", () => openCard("216482", { anchor:trayAnchor() })),
     item("Demo: healthy card", "", () => openCard("214990", { anchor:trayAnchor() })),
     document.createElement("hr"));
@@ -1335,7 +1567,7 @@ document.addEventListener("pointerdown", e => {
 }, true);
 
 function exitApp(){
-  state.running = false; closeCard(); hideChip(); ["lookup", "plib", "settings"].forEach(closeApp);
+  state.running = false; closeCard(); hideChip(); ["lookup", "plib", "settings", "draft"].forEach(closeApp);
   $("appIcon").style.display = "none"; $("deskIcon").classList.add("attn");
   showKeys("look", "The app has exited. Double-click Start-Demo.bat on the desktop to start it again.");
 }
@@ -1353,14 +1585,18 @@ $("swConflict").addEventListener("change", e => {
   if(state.conflict && state.running)
     showNotice("Ctrl+Alt+A is already used by another program. Use Ctrl+Alt+Space or the tray icon.", { x:innerWidth - 360, y:innerHeight - 150 });
 });
-$("swAi").addEventListener("change", e => { state.ai = e.target.checked; if(current && !card.classList.contains("mini")) renderBrief(current); });
+$("swAi").addEventListener("change", e => {
+  state.ai = e.target.checked; if(current && !card.classList.contains("mini")) renderBrief(current);
+  document.querySelectorAll("#draft [data-ai]").forEach(b => { b.disabled = !state.ai; });
+});
+$("swToday").addEventListener("change", e => { state.pretend = e.target.checked; if(current && card.style.display === "block") fill(current); });
 
 /* ---------------- card controls ---------------- */
 $("closeBtn").addEventListener("click", closeCard);
 $("pinBtn").addEventListener("click", () => setPin(!pinnedCard));
 $("expBtn").addEventListener("click", toggleExpand);
 $("chipCopy").addEventListener("click", copyStatus);
-$("moreBtn").addEventListener("click", () => { card.classList.remove("mini"); if(current) renderBrief(current); setTimeout(clampCard, 0); });
+$("moreBtn").addEventListener("click", () => { card.classList.remove("mini"); if(current) renderBrief(current); if($("watchSlot").style.display !== "none") markStep("watch"); setTimeout(clampCard, 0); });
 $("chipSister").addEventListener("click", () => { const s = current && DATA[current].sisters[0]; if(s){ current = s[0]; fill(current); renderBrief(current); setTimeout(clampCard, 0); } });
 $("chipNotes").addEventListener("click", () => showNotice("Not wired in this prototype. In the full build this opens the project notes.", anchorForCard()));
 $("chipOpen").addEventListener("click", () => showNotice("Not wired in this prototype. The full build links to your system of record.", anchorForCard()));

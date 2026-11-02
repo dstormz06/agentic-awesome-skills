@@ -26,7 +26,7 @@ clipboard hand-off are simulated there; in the Windows build they are real.
 3. Double-click **Start-Demo.bat**. The build is not code-signed, so Windows may say "Windows protected your PC".
    That is expected for a prototype. **More info → Run anyway**, if your organization allows it.
 4. Find the tray icon near the clock. Windows 11 hides new icons under **^**. Drag it onto the taskbar.
-5. Right-click the icon. The menu's last grey line says which hotkeys are live. Both should show a tick.
+5. Right-click the icon. The menu's last grey line says which hotkeys are live. All three should show a tick.
 6. Optional, 1 minute: `AndaCompanion.exe --selftest report` from a Command Prompt in the folder, then open
    `report\report.md`. Do not touch the keyboard or mouse while it runs.
 
@@ -34,14 +34,15 @@ clipboard hand-off are simulated there; in the Windows build they are real.
 
 | Time | Do | Say |
 |---|---|---|
-| 0:00 | In the memo, double-click **216482**. Press **Ctrl+Alt+A**. | "I select a number in any window and press a hotkey. Nothing ever opens by itself." |
+| 0:00 | In the memo, double-click **216482**. Press **Ctrl+Alt+A**. | "I select a number in any window and press a hotkey. The default is a small invite, but this ANDA is at risk, so a small peek opens by itself. It still started from my own selection and key." Click **Full brief ↓**. |
 | 0:30 | Point at the clock block. | "The forecast is the headline: goal Oct 3, forecast Oct 17, 14 days late, moderate confidence. These numbers come from the data layer. The AI never writes a date." |
-| 1:00 | Point at NEEDS YOU, LATEST, AHEAD. | "One thing that needs me, what just happened, and what lands on me next." |
+| 1:00 | Point at NEEDS YOU, LATEST, AHEAD, then WATCH. | "One thing that needs me, what just happened, and what lands on me next. WATCH: the goal date is a Saturday, and it shows the Friday and Monday either side. It never says how a goal-date rule applies; that is still my call." |
 | 1:30 | Point at the brief label. | "No Claude access yet, so this is labelled OFFLINE BRIEF: assembled from the record, no model. When access is approved it says generated, verify before acting." |
 | 1:45 | Click **Copy status**, paste into the memo. | "The sentence I retype a dozen times a week, in one click." |
 | 2:15 | Select **NDA 021234**, press Ctrl+Alt+A. | "Same six digits, different application type. It declines to guess and opens the lookup box. Showing the wrong card is worse than showing none." |
 | 2:45 | Copy any text, trigger a card, then paste. | "It read my selection by copying it, then put my clipboard back exactly as it was." |
 | 3:15 | Tray → Settings. Pick **L · Graphite Strip**, select a number again and press Ctrl+Alt+A: a small strip appears and does not take focus. Click it, or press Ctrl+Alt+A again, to open the full card. Then switch back to the default **K**. Show Auto-hide and the transparency slider. | "Fifteen looks, one anatomy; K is the default. The compact boxes stay out of the way of an open email, make no AI call, and never steal the keyboard. A card hides itself when idle but never while I am reading it. Three consent models, so my team chooses how much happens without a second act." |
+| 3:45 | Select the draft reply in the memo and press **Ctrl+Alt+D**. | "It checks my draft against the record, with no AI: a wrong goal date, 'on track' against a late forecast, a number it does not know. It says what it checked and what it did not." (The memo has a sample draft paragraph with three deliberate mistakes.) |
 | 4:00 | Tray → Prompt library. Pick a lens. Press **Test** in Settings. | "Our own prompts steer emphasis but can never override grounding. Test shows offline today. The day access is approved: set the key (Claude) or follow the Elsa checklist, press Test, done. The Elsa wiring is already in; only its two request-and-reply translations wait for the API." |
 | 4:45 | Stop. | The ask: API access through an agency-approved channel. See `PROPOSAL.md`. |
 
@@ -55,7 +56,7 @@ clipboard hand-off are simulated there; in the Windows build they are real.
 | Has it run on Windows? | Yes, in an automated run on a Windows build-26100 machine (the Windows 11 24H2 / Server 2025 generation) at 1024×768: hotkeys registered and delivered, Select & Peek captured a real selection and restored the clipboard, Segoe UI rendered, cards stayed on screen. See `VERIFICATION.md` round 5 for the run and its limits. |
 | Will it work on my managed workstation? | Unknown, and do not try it there before IT approves it. Application allow-listing, endpoint protection and clipboard-monitoring tools can block an unsigned program or its keystroke injection. Run the self-test there first. |
 | Does copying touch my clipboard history or DLP? | Yes, briefly. The selection is on the clipboard for a moment, so Win+V clipboard history and any clipboard-monitoring tool can see it. Your own clipboard is restored afterwards. Turn **Select & Peek** off in Settings to avoid this; the lookup box needs no clipboard. |
-| What about non-US keyboards? | Ctrl+Alt is also AltGr on several layouts (for example German and French), so Ctrl+Alt+A may type a character. The tray icon and Ctrl+Alt+Space path avoid selection capture. A rebindable hotkey is on the list. |
+| What about non-US keyboards? | Ctrl+Alt is also AltGr on several layouts (for example German and French), so Ctrl+Alt+A may type a character. The tray icon and Ctrl+Alt+Space path avoid selection capture. The three shortcuts are rebindable in Settings. |
 | Why does nothing happen in my admin window? | Windows blocks injected keystrokes into elevated windows. The app then reports nothing selected and opens the lookup box. |
 
 ## Troubleshooting

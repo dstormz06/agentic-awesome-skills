@@ -1,0 +1,72 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="AndaCompanion.UI.DraftWindow"
+        SystemDecorations="None" TransparencyLevelHint="Transparent" Background="Transparent"
+        SizeToContent="WidthAndHeight" CanResize="False" Topmost="True"
+        ShowInTaskbar="False" WindowStartupLocation="CenterScreen" Title="ANDA Companion — Check a draft">
+
+  <Window.Styles>
+    <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource C.Font}"/></Style>
+    <Style Selector="TextBlock.lbl">
+      <Setter Property="FontSize" Value="9.5"/><Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="LetterSpacing" Value="1.4"/><Setter Property="Foreground" Value="{DynamicResource C.Ink3}"/>
+    </Style>
+    <Style Selector="TextBlock.hint"><Setter Property="FontSize" Value="11"/><Setter Property="Foreground" Value="{DynamicResource C.Ink3}"/><Setter Property="TextWrapping" Value="Wrap"/></Style>
+    <Style Selector="TextBox"><Setter Property="FontSize" Value="12.5"/></Style>
+  </Window.Styles>
+
+  <Panel Margin="26">
+    <Border Background="{DynamicResource C.Bg}" BorderBrush="{DynamicResource C.Line}"
+            BorderThickness="1" CornerRadius="{DynamicResource C.Radius}"
+            BoxShadow="0 18 42 -10 #59000000" Padding="20" Width="580">
+      <StackPanel Spacing="10">
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock FontSize="15" FontWeight="Bold" Foreground="{DynamicResource C.Ink}" Text="Check a draft"/>
+          <Button Grid.Column="1" Name="CloseBtn" Classes="primary" Content="Done"/>
+        </Grid>
+        <ScrollViewer Name="Body" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Spacing="10" Margin="0,0,2,0">
+
+          <TextBlock Classes="lbl" Text="YOUR DRAFT"/>
+          <TextBox Name="DraftBox" AcceptsReturn="True" TextWrapping="Wrap" Height="140"
+                   Watermark="Paste or type an email draft. Select it in your mail and press the Check-a-draft shortcut to bring it here."
+                   AutomationProperties.Name="Your draft"/>
+
+          <TextBlock Classes="lbl" Text="CHECKED AGAINST THE RECORD · NO AI"/>
+          <StackPanel Name="FindingsPanel" Spacing="5"/>
+
+          <TextBlock Classes="lbl" Margin="0,6,0,0" Text="WRITING HELP · USES YOUR OWN INSTRUCTIONS"/>
+          <TextBlock Name="AiNote" Classes="hint"/>
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Name="ProofBtn" Content="Proofread"/>
+            <Button Name="RewriteBtn" Content="Rewrite"/>
+            <Button Name="FactBtn" Content="Fact-check"/>
+          </StackPanel>
+
+          <StackPanel Name="PreviewPanel" IsVisible="False" Spacing="6">
+            <TextBlock Classes="lbl" Text="WHAT WILL BE SENT · NOTHING IS SENT UNTIL YOU SAY SO"/>
+            <TextBox Name="PreviewBox" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="150"
+                     FontFamily="Cascadia Mono, Consolas, DejaVu Sans Mono, monospace" FontSize="11"
+                     AutomationProperties.Name="Exactly what will be sent"/>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Button Name="SendBtn" Classes="primary" Content="Send"/>
+              <Button Name="CancelBtn" Content="Cancel"/>
+            </StackPanel>
+          </StackPanel>
+
+          <StackPanel Name="ResultPanel" IsVisible="False" Spacing="6">
+            <TextBlock Name="ResultLabel" Classes="lbl" Text="RESULT"/>
+            <TextBox Name="ResultBox" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="150"
+                     AutomationProperties.Name="Result"/>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Button Name="CopyBtn" Content="Copy result"/>
+              <TextBlock Name="ResultNote" Classes="hint" VerticalAlignment="Center"/>
+            </StackPanel>
+          </StackPanel>
+
+        </StackPanel>
+        </ScrollViewer>
+      </StackPanel>
+    </Border>
+  </Panel>
+</Window>

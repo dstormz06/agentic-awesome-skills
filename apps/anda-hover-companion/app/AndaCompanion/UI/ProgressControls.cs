@@ -77,6 +77,7 @@ public sealed class ProgressControl : Control
     {
         double pct = Math.Clamp(Value, 0, 100) / 100.0;
         double w = Bounds.Width, h = Bounds.Height;
+        if (w <= 0 || h <= 0) return;   // not laid out (or hidden): nothing to draw — and no clamp may invert on a zero width
         var track = new SolidColorBrush(Res("C.Track"));
         var fill = new SolidColorBrush(Res("C.Fill"));
 
@@ -127,7 +128,7 @@ public sealed class ProgressControl : Control
                     ctx.DrawRectangle(track, null, new RoundedRect(new Rect(0, y - 1, w, 2), 1));
                     double x = Math.Clamp(w * pct, 0, w);
                     if (pct > 0) ctx.DrawRectangle(fill, null, new RoundedRect(new Rect(0, y - 1, x, 2), 1));
-                    ctx.DrawEllipse(fill, null, new Point(Math.Clamp(x, 4.5, w - 4.5), y), 4.5, 4.5);
+                    ctx.DrawEllipse(fill, null, new Point(Math.Clamp(x, 4.5, Math.Max(4.5, w - 4.5)), y), 4.5, 4.5);
                     break;
                 }
 

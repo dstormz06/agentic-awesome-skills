@@ -66,6 +66,13 @@ acts. Stage 1 is always passive or transient (a mark, an invite, a compact peek)
 nothing to ignore; stage 2 is always a deliberate act by the user. A full card never
 appears without stage 2. The user picks their model in settings — all ship, one default.
 
+**What the Windows app ships (2026-11-02):** three models — Full card, Peek first and **Whisper invite, the default
+for new installs** (an install that already saved a choice keeps it). In Whisper mode there is one controlled
+exception, switchable in Settings: an **urgent** ANDA (a bad attention item, a forecast late by 7 days or more (3, 7 or 14, as
+chosen), or a goal date that has passed) skips the invite and opens a **peek**. It still starts only from the
+person's own selection and shortcut, the peek makes no AI call, and typing a number in the lookup box (itself the
+consent) opens the full card.
+
 | # | Consent model | Stage 1 (free to ignore) | Stage 2 (opens the card) | Best for |
 |---|---|---|---|---|
 | ① | **Mark → Tap** *(default)* | Recognized numbers get only a quiet dotted underline + 5 px dot. Nothing moves, nothing pops. | Click / tap the marked number. | Minimum motion; users who want total stillness. |
@@ -360,8 +367,11 @@ history. Open these in any browser, desktop or phone, with fictional data:
   record side by side, with the at-risk and on-track records switchable, and the four compact boxes shown over an open
   email. It is the quickest way to compare looks and the source of each look's palette and structure.
 - **`mockup/windows-simulation.html`** — a Windows 11 desktop in the browser (default **K**) that ports the app's
-  logic: the recognizer, the placement rule, the three consent models (§2), the offline brief, auto-hide, and the
-  compact boxes (a click or the hotkey again expands them). It shows the forecast-first clock, the single
+  logic: the recognizer, the placement rule, the three consent models (§2, **whisper default with the urgent-peek
+  rule**), the offline brief, auto-hide, the compact boxes (a click or the hotkey again expands them), the **WATCH
+  line with the federal-holiday calendar** (OPM dates, 3-business-day window) and the **draft check** (`Ctrl+Alt+D`).
+  My data, the writing actions and rebinding shortcuts need real files and a model connection, so the simulation only
+  describes them. It shows the forecast-first clock, the single
   needs-attention signal, a sample streamed companion brief (no model is called), pin / expand / keyboard, and the
   invalid-number whisper. **On phones and tablets the card presents as a bottom sheet** with a drag handle, scrim and
   safe-area padding, with no horizontal scroll at 390 px. It is a port, not the app: the window chrome, the hotkey and
@@ -372,8 +382,12 @@ All looks are light-only (§5).
 ## 11. Implementation status — the Windows app
 
 **`app/`** contains the working v0: a .NET 8 / Avalonia tray application with all fifteen
-looks (K default; four of them compact boxes) selectable from the tray menu, auto-hide, all three consent models,
-global hotkeys (`Ctrl+Alt+A` Select & Peek, `Ctrl+Alt+Space` lookup), the
+looks (K default; four of them compact boxes) selectable from the tray menu, auto-hide, all three consent models
+(Whisper default, with the urgent-peek rule), three rebindable global hotkeys (`Ctrl+Alt+A` Select & Peek,
+`Ctrl+Alt+Space` lookup, `Ctrl+Alt+D` check a draft), the weekend and federal-holiday WATCH line, the draft
+check and the writing actions (Proofread / Rewrite / Fact-check, preview before send, Copy only), reading
+the person's own Excel or CSV portfolio and notes folder, one RLD-labeling date from a downloaded Drugs@FDA
+file, an optional usage log, the
 forecast-first card with AHEAD line and expandable drawer, persisted settings, and a
 companion brief via the official Anthropic SDK (`claude-opus-4-8`) with a deterministic
 offline fallback. Also shipped: the Settings window (transparency slider, Claude
