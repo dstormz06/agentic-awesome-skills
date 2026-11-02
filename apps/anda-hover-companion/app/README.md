@@ -28,8 +28,8 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   Auto-hide (Off / 10 / 20 / 40 s, default 20), Consent model (Full default = DESIGN.md model ①),
   **card transparency slider** (85–100%; text always stays opaque), companion lens picker, and the
   **AI connection panel** (Claude or Elsa) with one-click Test.
-- **Compact boxes (L–O)** — a Strip, a Tile, a Ticket and a Badge, roughly 340 × 70, 196 × 130,
-  300 × 64 and 170 × 38 px, so a card never blankets the email being read. They make **no AI call**,
+- **Compact boxes (L–O)** — a Strip, a Tile, a Ticket and a Badge, about 340 × 63–81, 196 × 123–145,
+  300 × 64–68 and 150–185 × 38 px (measured on Windows), so a card never blankets the email being read. They make **no AI call**,
   **never take keyboard focus** (typing in the email continues undisturbed), and open their sibling
   look's full card on a click or when the same hotkey is pressed again on the same number.
 - **Auto-hide** — a card or box hides itself after the chosen idle time. It never hides while the

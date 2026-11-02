@@ -232,28 +232,28 @@ public static class Appearances
     public static readonly Appearance L = K with
     {
         Id = AppearanceId.L, Name = "L · Graphite Strip",
-        Tagline = "A one-glance strip: number, goal, forecast, status edge. About 340 × 62–78 px. Graphite palette.",
+        Tagline = "A one-glance strip: number, goal, forecast, status edge. About 340 × 63–81 px. Graphite palette.",
         Form = CardForm.Strip, ExpandsAs = AppearanceId.K,
     };
 
     public static readonly Appearance M = A with
     {
         Id = AppearanceId.M, Name = "M · Fluent Tile",
-        Tagline = "A small tile: the forecast gap in large type, one attention line. About 196 × 120–139 px. Quiet Fluent palette.",
+        Tagline = "A small tile: the forecast gap in large type, one attention line. About 196 × 123–145 px. Quiet Fluent palette.",
         Form = CardForm.Tile, ExpandsAs = AppearanceId.A,
     };
 
     public static readonly Appearance N = F with
     {
         Id = AppearanceId.N, Name = "N · Bronze Ticket",
-        Tagline = "A slim ticket with a perforated stub: number left, forecast right. About 300 × 64 px. Agency Bronze palette.",
+        Tagline = "A slim ticket with a perforated stub: number left, forecast right. About 300 × 64–68 px. Agency Bronze palette.",
         Form = CardForm.Ticket, ExpandsAs = AppearanceId.F,
     };
 
     public static readonly Appearance O = G with
     {
         Id = AppearanceId.O, Name = "O · Teal Badge",
-        Tagline = "The smallest: a status pill with the number and the gap. About 150–190 × 38 px. Harbor Teal palette.",
+        Tagline = "The smallest: a status pill with the number and the gap. About 150–185 × 38 px. Harbor Teal palette.",
         Form = CardForm.Badge, ExpandsAs = AppearanceId.G,
     };
 

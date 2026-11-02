@@ -190,10 +190,10 @@ or removes information:
 | I | Indigo Dossier | A formal case file — double rule, serif name and labels | Five-step stepper |
 | J | Cobalt Timeline | Gold top rule; goal against forecast drawn on one runway, so the gap is the picture | Timeline |
 | **K** | **Graphite Quiet** *(default)* | Monochrome — colour appears only where status needs it; outlined attention, text-only chips; quiet in a meeting, sharp on a projector | Line with a dot |
-| L | Graphite Strip | Compact (about 340 × 62–78 px): number, goal, forecast, status edge | — |
-| M | Fluent Tile | Compact (about 196 × 120–139 px): the forecast gap in large type, one attention line | — |
-| N | Bronze Ticket | Compact (about 300 × 64 px): a slim ticket with a perforated stub | — |
-| O | Teal Badge | Compact (about 150–190 × 38 px): a status pill with the number and the gap | — |
+| L | Graphite Strip | Compact (about 340 × 63–81 px): number, goal, forecast, status edge | — |
+| M | Fluent Tile | Compact (about 196 × 123–145 px): the forecast gap in large type, one attention line | — |
+| N | Bronze Ticket | Compact (about 300 × 64–68 px): a slim ticket with a perforated stub | — |
+| O | Teal Badge | Compact (about 150–185 × 38 px): a status pill with the number and the gap | — |
 
 **Compact boxes (L–O).** They exist so the tool never blankets the email being read or
 written. A compact box borrows a full look's palette (K, A, F, G respectively), shows only
