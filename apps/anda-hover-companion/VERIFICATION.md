@@ -259,10 +259,48 @@ report that mention the studio describe a file that is no longer in the tree (it
   and does not touch the keyboard will see it hide. Off is one click in Settings; 40 s is the gentler choice.
 - **Existing installs keep their saved look.** Only new installs get K.
 
+## Round 7 — Phase 1: whisper default, urgent peek, watch, draft check, my data
+
+Scope: the product owner asked for Phase 1 of the tester feedback in `ROADMAP.md`. Same method as rounds 5 and 6: build it,
+run it on the Windows runner, read the counts from the job log. The Windows run on the first push (`dc030fc`, run 12) **failed**
+(427 of 428 passed), which is why there is a second push; the final run is the one recorded here.
+
+Final code commit **`9762220`** (run 13): Linux job green; Windows job **428 tests, 0 failed**; self-test **42 PASS, 0 WARN, 0 FAIL,
+1 SKIP** (the live Claude connection, by design). Counts read from the job log. 421 of the 428 tests run on Linux (the rest are Windows-only).
+
+| Claim | Evidence | Limit |
+|---|---|---|
+| The U.S. federal-holiday calendar is right for 2026 and 2027, including observed Friday and Monday dates | `CalendarAndWatchTests` against OPM's published list (2026: Jan 1, Jul 3, Nov 11, Dec 25; 2027: Jan 1, Jun 18, Jul 5, Nov 11, Dec 24); the same dates re-checked in the browser port; self-test `calendar-watch-draft-portfolio` on Windows | Rules, not a feed. Closures declared by executive order or a funding lapse are not predicted; they go in `closures.txt`. **No claim is made about how GDUFA treats a weekend or holiday goal date** |
+| A goal or forecast date on a weekend or federal holiday, or within N business days of one, gets one WATCH line with its evidence and source | Unit tests (ordering, wording, 0/2/3/5 window), headless card tests, 41 browser checks | The demo records are fictional, and the demo clock is frozen at the extract date |
+| Whisper is the default for new installs; an install that saved a choice keeps it; an urgent ANDA opens a peek | `FirstStepTests`, `SettingsTests` (round trip and normalisation), browser flow | Never used by a person. Urgent means a bad attention item, a forecast 7+ days late (3/7/14 selectable) or a passed goal date; these thresholds are a proposal |
+| Three shortcuts are rebindable and validated; all three register on Windows | `HotkeyTests` (parser, validation, fake API), Windows test `Real_hotkey_registration…` (3 registered, 3 problems reported to a second copy), self-test `hotkeys-registered`: all three registered | Only the first two are *pressed* as real keystrokes by the self-test (`hotkeys-delivered`). Rebinding through the Settings window was tested headless, not by a person on Windows |
+| The draft check finds a wrong goal or forecast date, "on track" against a late forecast, "late" against an early forecast, and an unknown ANDA, and says what it did not check | `DraftCheckTests`, headless window tests, browser port (same sample draft) | Deterministic text rules, not language understanding; it only knows numbers, goal/forecast dates and a short list of on-track/late phrases |
+| Proofread, Rewrite and Fact-check show the exact text first and send nothing until Send; the draft is fenced as data | `WritingAndReferenceTests`, `Phase1UiTests` with a fake completer | **Never run against a live model.** Provider prompts are untested for quality |
+| The Excel/CSV portfolio and notes readers parse a workbook, detect and override columns, tolerate Excel having the file open, and refuse oversized or malformed files; unknown values stay "—" | `PortfolioTests` (generated .xlsx and .csv, caps, delimiter detection, notes index), self-test (sample CSV on Windows) | **Tested on generated files only, not on a real RPM workbook.** Real files only after approval |
+| The RLD labeling date and PSG date lines show only what is known | Parser tests on a fixture that follows the layout the code expects; PSG only from the RPM's own sheet | **Unverified against real FDA files.** FDA hosts were unreachable from the build environment, so the Drugs@FDA layout and any PSG source were not checked. No official PSG source is connected |
+| The browser simulation matches the app's new logic | 42 (adapted original flow) + 41 (new: calendar vs OPM, WATCH, urgency, draft check, tray, phone width) + 13 + 69 + 27 Playwright checks pass | A port, not the app. My data, the writing actions and rebinding are described there, not simulated |
+
+### Defects caught in round 7
+
+| # | Finding | Found by | Disposition |
+|---|---|---|---|
+| R22 | **The K progress line threw (`Math.Clamp` min > max) when drawn at zero width**, hit when a record has no progress value (the control is hidden and has no size). The exception was masked in the tests by a font-manager error raised during teardown, which hid the cause for a long time. Whether it could occur in the shipped app on Windows was not established; the guard is cheap and tested | New headless test of a record with no progress | Draw nothing when the control has no size; clamp made safe; a regression test fails without the fix |
+| R23 | A Windows-only test still expected two shortcuts after the third was added | The Windows run on the first push | Test updated; the run that was red is recorded above, not hidden |
+| R24 | The xlsx reader skipped every other cell (an inner read loop over-consumed the stream) | `PortfolioTests` | Cells and strings now read through sub-readers |
+| R25 | Within one severity, a forecast-date flag could outrank the goal-date flag | `CalendarAndWatchTests` | Explicit ordering: goal passed, goal soon, goal date, forecast date, then data flags |
+| R26 | A "date is on a weekend" sentence said it twice ("falls on a weekend … is a Saturday") | Review of the wording | One plain sentence plus the nearest business days |
+
+### What round 7 does not prove
+
+No real FDA data, no real RPM workbook, no live Elsa or Claude call, no Outlook, no right-click menu, no check against FDA's current
+files, no managed-workstation or signed-build run, no real-mouse hover test, no real email client. The Windows self-test does not render
+the draft window or the WATCH line, and does not press the third shortcut; those are covered by headless tests only. Whisper-by-default and
+the urgent-peek thresholds are decisions to test with the testers, not facts.
+
 ## Still open
 
-GDUFA III tier table (needs the commitment-letter text and the dual-source rule); a rebindable hotkey for
-non-US layouts; UI Automation capture; code signing; the live Claude call; **the live Elsa call (the two
+GDUFA III tier table (needs the commitment-letter text and the dual-source rule); a real-keyboard check of rebound shortcuts on
+non-US layouts (rebinding is built); UI Automation capture; code signing; the live Claude call; **the live Elsa call (the two
 translations in `ElsaMapping.cs`, once the API is available)**; a 508 pass with a screen reader; a real-email-client
 check that compact boxes do not disturb typing; a real-mouse hover check for auto-hide on Windows.
 `npm run test` for the whole repository stops in this authoring environment at an unrelated test that needs a
