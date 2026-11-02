@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>ANDA Companion Appearance Lab</title>
+<style>
+/* Layout: a comparison wall. Eleven live cards on a quiet desk, one card per look, all showing the same record.
+   Light only by product decision. Every color is an explicit token; no dark variants. */
+:root{
+  --desk:#F3F1ED; --panel:#FFFFFF; --ink:#1D2024; --ink2:#454B53; --ink3:#5F666E; --line:#DDDAD3;
+  --sel:#3D6FA5; --selbg:rgba(61,111,165,.10);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--desk);color:var(--ink);font:14px/1.5 "Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;
+     padding-block:24px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+     -webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--sel);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1240px;margin:0 auto}
+.eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.14em;color:var(--ink3);margin:0 0 6px}
+h1{font-size:24px;margin:0 0 6px;text-wrap:balance}
+.lede{margin:0 0 16px;color:var(--ink2);max-width:70ch}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;
+     background:rgba(243,241,237,.94);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+     padding:10px 0;margin:0 0 18px;border-bottom:1px solid var(--line)}
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:9px;overflow:hidden;background:#fff}
+.seg button{border:none;background:none;padding:8px 14px;font-size:12.5px;color:var(--ink2);min-height:40px;border-left:1px solid var(--line)}
+.seg button:first-child{border-left:none}
+.seg button[aria-pressed="true"]{background:var(--sel);color:#fff;font-weight:600}
+#picks{font-weight:650;font-size:13px}
+.pill{border:1.5px solid var(--sel);background:var(--sel);color:#fff;border-radius:99px;padding:8px 16px;font-weight:650;font-size:12.5px;min-height:40px}
+.pill.quiet{background:#fff;color:var(--sel)}
+#out{display:none;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:0 0 20px;white-space:pre-wrap;user-select:all;-webkit-user-select:all}
+#out.show{display:block}
+h2.sec{font-size:13px;letter-spacing:.12em;font-weight:700;color:var(--ink3);margin:26px 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,404px),1fr));gap:18px}
+.tile{background:var(--panel);border:1.5px solid var(--line);border-radius:16px;padding:14px 14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.tile.picked{border-color:var(--sel);box-shadow:0 0 0 3px var(--selbg)}
+.thead{display:flex;align-items:flex-start;gap:10px}
+.thead .nm{font-weight:700;font-size:14.5px}
+.thead .tg{font-size:12px;color:var(--ink2);line-height:1.35;margin-top:2px}
+.badge{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.1em;border-radius:99px;padding:2px 8px;margin-left:6px;vertical-align:1px}
+.badge.cur{background:#E9EDF2;color:#38424F}.badge.new{background:#E3F1EA;color:#14573A}
+.sw{display:flex;gap:4px;margin-left:auto;flex:none;padding-top:3px}
+.sw i{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.14)}
+.stage{background:#EDEAE4;border-radius:12px;padding:14px;display:flex;justify-content:center;min-width:0}
+.pick{align-self:flex-start;border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:8px 16px;font-weight:650;font-size:12.5px;min-height:40px;color:var(--ink2)}
+.pick[aria-pressed="true"]{background:var(--sel);border-color:var(--sel);color:#fff}
+.note{font-size:12px;color:var(--ink3);margin:0}
+.foot{margin-top:28px;color:var(--ink2);font-size:12.5px;max-width:80ch}
+
+/* ============ THE CARD (same anatomy in every look) ============ */
+.card{
+  --rail:84px;
+  width:100%;max-width:372px;background:var(--c-bg);color:var(--c-ink);border:1px solid var(--c-line);
+  border-radius:var(--c-radius);box-shadow:var(--c-shadow);overflow:hidden;font-family:var(--c-font);font-size:14px;line-height:1.5;
+}
+.slot{padding:11px 16px;border-top:1px solid var(--c-hair)}
+.slot:first-child{border-top:none}
+.hd{padding-top:14px}
+.idrow{display:flex;align-items:center;gap:8px}
+.num{font-weight:700;font-size:15px;font-family:var(--c-num-font);font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.seal{display:inline-flex;align-items:center;font-size:10px;font-weight:700;color:var(--c-good);background:var(--c-good-bg);border-radius:99px;padding:3px 8px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.tools{margin-left:auto;display:flex;gap:2px;color:var(--c-ink3)}
+.tools svg{width:14px;height:14px;margin:9px 8px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.drug{font-size:14px;font-weight:500;margin:4px 0 0;font-family:var(--c-drug-font)}
+.meta{font-size:12px;color:var(--c-ink2);margin-top:2px}
+.fresh{font-size:10.5px;color:var(--c-ink3);margin-top:3px}
+.lblx{font-size:9.5px;font-weight:800;letter-spacing:.13em;color:var(--c-ink3);width:var(--rail);flex:none;white-space:nowrap}
+.lblx.acc{color:var(--c-accent)}
+.crow{display:flex;align-items:baseline;gap:9px;margin-bottom:7px}
+.cdate{font-weight:650;font-size:13.5px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.cdays{color:var(--c-ink2);font-size:12px;white-space:nowrap}
+.cpct{margin-left:auto;font-size:11.5px;color:var(--c-ink2);font-variant-numeric:tabular-nums;font-family:var(--c-num-font)}
+.fdelta{font-size:11.5px;font-weight:700;white-space:nowrap}
+.fdelta.warn{color:var(--c-warn)}.fdelta.good{color:var(--c-good)}
+.fconf{font-size:10.5px;color:var(--c-ink3);text-align:right;margin:3px 0 0}
+.attn{display:flex;gap:9px;align-items:baseline;font-size:13px;border-radius:8px;padding:8px 10px;margin:-2px 0}
+.attn .k{font-size:9.5px;font-weight:800;letter-spacing:.1em;align-self:center;white-space:nowrap}
+.attn.warn{color:var(--c-warn);background:var(--c-warn-bg)}
+.rail{display:flex;gap:9px;align-items:baseline;font-size:12.5px;color:var(--c-ink2)}
+.ai .tag{display:flex;align-items:center;gap:9px;margin-bottom:5px}
+.ai .verify{font-size:10.5px;color:var(--c-ink3);flex:1}
+.ai .src{font-size:11.5px;color:var(--c-accent)}
+.ai .body{font-size:12.5px;color:var(--c-ink2)}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{font-size:12px;padding:7px 13px;border-radius:99px;min-height:34px;border:1px solid var(--c-line);background:none;color:var(--c-ink2);font-family:inherit}
+.chip.link{color:var(--c-accent)}
+
+/* ---- progress shapes ---- */
+.p-bar{height:4px;border-radius:2px;background:var(--c-track);margin:0 0 9px}
+.p-bar i{display:block;height:100%;border-radius:2px;background:var(--c-fill)}
+.p-ticks,.p-dots,.p-step{display:flex;gap:4px;margin:0 0 9px;align-items:center}
+.p-ticks i{flex:1;height:5px;border-radius:2px;background:var(--c-track)}.p-ticks i.on{background:var(--c-fill)}
+.p-dots{gap:7px}.p-dots i{flex:none;width:9px;height:9px;border-radius:50%;background:var(--c-track)}.p-dots i.on{background:var(--c-fill)}
+.p-step i{width:12px;height:12px;border-radius:50%;border:2px solid var(--c-track);background:var(--c-bg);flex:none}
+.p-step i.on{background:var(--c-fill);border-color:var(--c-fill)}
+.p-step b{flex:1;height:2px;background:var(--c-track)}.p-step b.on{background:var(--c-fill)}
+.p-ring{display:block;position:relative;width:52px;height:52px;margin:0 0 6px auto}
+.p-ring svg{width:52px;height:52px;transform:rotate(-90deg)}
+.p-ring .tr{fill:none;stroke:var(--c-track);stroke-width:4}.p-ring .fg{fill:none;stroke:var(--c-accent);stroke-width:4;stroke-linecap:round}
+.p-ring span{position:absolute;inset:0;display:grid;place-items:center;font-size:11.5px;font-weight:700;font-family:var(--c-num-font)}
+.p-line{position:relative;height:14px;margin:0 0 9px}
+.p-line::before{content:"";position:absolute;left:0;right:0;top:6px;height:2px;background:var(--c-track)}
+.p-line i{position:absolute;left:0;top:6px;height:2px;background:var(--c-ink)}
+.p-line b{position:absolute;top:2px;width:10px;height:10px;border-radius:50%;background:var(--c-ink);margin-left:-5px}
+/* runway: from today to the goal (solid) and the forecast (diamond), with the gap between them drawn */
+.p-time{position:relative;height:52px;margin:0 0 4px}
+.p-time .trk{position:absolute;left:0;right:0;top:21px;height:6px;border-radius:3px;background:var(--c-track)}
+.p-time .el{position:absolute;left:0;top:21px;height:6px;border-radius:3px 0 0 3px;background:var(--c-fill)}
+.p-time .gap{position:absolute;top:21px;height:6px;background:var(--c-warn)}
+.p-time .gap.good{background:var(--c-good)}
+.p-time .tk{position:absolute;top:15px;width:2px;height:18px;background:var(--c-ink);margin-left:-1px}
+.p-time .fm{position:absolute;top:18px;width:12px;height:12px;border-radius:2px;background:var(--c-bg);border:2.5px solid var(--c-warn);transform:rotate(45deg);margin-left:-6px}
+.p-time .fm.good{border-color:var(--c-good)}
+.p-time .lb{position:absolute;font-size:9.5px;font-weight:800;letter-spacing:.1em;color:var(--c-ink3);transform:translateX(-50%);white-space:nowrap}
+.p-time .lb.up{top:1px}.p-time .lb.dn{top:37px}
+.p-time .lb.l{transform:none}
+/* ---- the eleven looks: tokens ---- */
+.card[data-look="a"]{--c-bg:#fff;--c-ink:#1a1d21;--c-ink2:#5c6370;--c-ink3:#70757c;--c-hair:#eceae6;--c-line:#e2e0db;--c-accent:#3d6fa5;--c-good:#177245;--c-good-bg:#e7f3ec;--c-warn:#8a5800;--c-warn-bg:#fbf2dd;--c-track:#e9e7e2;--c-fill:#5d84ad;--c-radius:12px;--c-shadow:0 18px 36px -14px rgba(23,26,31,.22),0 3px 10px rgba(23,26,31,.07);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
+.card[data-look="b"]{--c-bg:#fbf8f2;--c-ink:#211d15;--c-ink2:#6e6552;--c-ink3:#78705c;--c-hair:#e9e2d3;--c-line:#ddd3bf;--c-accent:#23573f;--c-good:#23573f;--c-good-bg:transparent;--c-warn:#8a5200;--c-warn-bg:#f6ecd8;--c-track:#e6ddc9;--c-fill:#23573f;--c-radius:8px;--c-shadow:0 16px 32px -14px rgba(43,36,22,.28),0 2px 6px rgba(43,36,22,.10);--c-font:"Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,serif;--c-num-font:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace}
+.card[data-look="c"]{--c-bg:#f7fafd;--c-ink:#16232e;--c-ink2:#51667a;--c-ink3:#617484;--c-hair:#e2eaf2;--c-line:#c9d8e5;--c-accent:#005ea2;--c-good:#177245;--c-good-bg:#e3f1ea;--c-warn:#8a5800;--c-warn-bg:#fbf2dd;--c-track:#dde7f1;--c-fill:#2e7bbf;--c-radius:14px;--c-shadow:0 18px 36px -14px rgba(22,35,46,.20),0 3px 10px rgba(22,35,46,.07);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace}
+.card[data-look="d"]{--c-bg:#fff;--c-ink:#14181d;--c-ink2:#4e5560;--c-ink3:#6f757f;--c-hair:#e3e7ec;--c-line:#c9cfd8;--c-accent:#1a4480;--c-good:#106b3c;--c-good-bg:#e5f2ea;--c-warn:#8a5800;--c-warn-bg:#faf1dc;--c-track:#e6e9ee;--c-fill:#1a4480;--c-radius:4px;--c-grid:rgba(26,68,128,.05);--c-shadow:0 14px 28px -12px rgba(18,30,52,.20),0 2px 4px rgba(18,30,52,.08);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace}
+.card[data-look="e"]{--c-bg:#fcfdfe;--c-ink:#1f2c33;--c-ink2:#5a6c76;--c-ink3:#67767f;--c-hair:#e7edf0;--c-line:#d6dfe4;--c-accent:#3e5d6d;--c-good:#1c7a4d;--c-good-bg:#e5f2eb;--c-warn:#92610a;--c-warn-bg:#fcf1d9;--c-track:#e3eaed;--c-fill:#567383;--c-radius:20px;--c-shadow:0 22px 44px -16px rgba(23,40,44,.22),0 3px 8px rgba(23,40,44,.07);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
+/* NEW */
+.card[data-look="f"]{--c-bg:#fff;--c-ink:#25201a;--c-ink2:#584f43;--c-ink3:#6b6153;--c-hair:#eee9df;--c-line:#e0d8c9;--c-accent:#7a5a2e;--c-good:#1f6b43;--c-good-bg:#e6f2ea;--c-warn:#8f4a00;--c-warn-bg:#fdeedb;--c-track:#e9e2d3;--c-fill:#a27b3f;--c-radius:12px;--c-shadow:0 18px 36px -14px rgba(58,44,24,.24),0 3px 10px rgba(58,44,24,.07);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
+.card[data-look="g"]{--c-bg:#fcfefe;--c-ink:#12262b;--c-ink2:#42606a;--c-ink3:#557078;--c-hair:#e3eeee;--c-line:#cfe0e1;--c-accent:#0b6e73;--c-good:#1b7a4b;--c-good-bg:#e2f2ea;--c-warn:#8a5800;--c-warn-bg:#fbf1db;--c-track:#dceaeb;--c-fill:#2a8f94;--c-radius:10px;--c-shadow:0 16px 32px -14px rgba(10,50,56,.22),0 2px 8px rgba(10,50,56,.07);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace}
+.card[data-look="h"]{--c-bg:#fbfcfa;--c-ink:#1f2a24;--c-ink2:#4a5a50;--c-ink3:#5b6b61;--c-hair:#e6ede7;--c-line:#d3ded6;--c-accent:#3a6653;--c-good:#246a45;--c-good-bg:#e1f0e6;--c-warn:#8a5800;--c-warn-bg:#faf0d9;--c-track:#e1e9e3;--c-fill:#5e9078;--c-radius:20px;--c-shadow:0 20px 40px -16px rgba(30,60,44,.20),0 3px 8px rgba(30,60,44,.06);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
+.card[data-look="i"]{--c-bg:#fdfcfb;--c-ink:#1d1c26;--c-ink2:#4d4b5e;--c-ink3:#5f5d72;--c-hair:#e9e7ef;--c-line:#d8d5e3;--c-accent:#3b3f8c;--c-good:#23694a;--c-good-bg:#e4f1ea;--c-warn:#8a5200;--c-warn-bg:#f8eed9;--c-track:#e4e2ee;--c-fill:#5a5fb0;--c-radius:3px;--c-shadow:0 14px 28px -12px rgba(30,28,70,.22),0 2px 5px rgba(30,28,70,.07);--c-font:"Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:Georgia,Cambria,"Times New Roman",serif;--c-num-font:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace}
+.card[data-look="j"]{--c-bg:#fff;--c-ink:#18212e;--c-ink2:#46556a;--c-ink3:#5b697d;--c-hair:#e8edf3;--c-line:#d4dce7;--c-accent:#1f4fb4;--c-good:#157047;--c-good-bg:#e2f1ea;--c-warn:#8a5800;--c-warn-bg:#fbf1db;--c-track:#e1e8f1;--c-fill:#6a8fd6;--c-radius:6px;--c-shadow:0 16px 30px -14px rgba(20,40,80,.22),0 2px 6px rgba(20,40,80,.07);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
+.card[data-look="k"]{--c-bg:#fdfdfd;--c-ink:#1b1d1f;--c-ink2:#4a4e53;--c-ink3:#5c6167;--c-hair:#ececec;--c-line:#dedede;--c-accent:#33373c;--c-good:#1a6b43;--c-good-bg:#e6f1ea;--c-warn:#8a5800;--c-warn-bg:#faf1dc;--c-track:#e6e6e6;--c-fill:#33373c;--c-radius:8px;--c-shadow:0 14px 28px -14px rgba(20,22,24,.20),0 2px 6px rgba(20,22,24,.06);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
+
+/* ---- the structural signature of each look ---- */
+.card[data-look="b"] .seal{border:1.5px solid var(--c-good);border-radius:4px;transform:rotate(-2.5deg);padding:2px 7px;background:transparent}
+.card[data-look="b"] .drug{font-size:16px;font-style:italic}
+.card[data-look="d"]{background-image:linear-gradient(var(--c-grid) 1px,transparent 1px),linear-gradient(90deg,var(--c-grid) 1px,transparent 1px);background-size:14px 14px}
+.card[data-look="d"] .seal{border:1px solid var(--c-good);background:transparent;border-radius:3px}
+.card[data-look="d"] .p-bar{height:6px;border-radius:0;outline:1px solid var(--c-line)}
+.card[data-look="d"] .p-bar i{border-radius:0;background:repeating-linear-gradient(45deg,var(--c-fill) 0 3px,transparent 3px 6px);box-shadow:inset 0 0 0 1px var(--c-fill)}
+.card[data-look="d"] .lblx,.card[data-look="d"] .attn .k{font-family:var(--c-num-font)}
+.card[data-look="e"] .p-bar{height:8px;border-radius:99px}.card[data-look="e"] .p-bar i{border-radius:99px;background:linear-gradient(90deg,var(--c-accent),var(--c-fill))}
+.card[data-look="e"] .attn{border-radius:14px}
+/* F: warm greige hand, filled tag pills, a faint geometric field in the header */
+.card[data-look="f"] .hd{background-image:linear-gradient(115deg,rgba(255,255,255,0) 40%,#fff 92%),linear-gradient(60deg,rgba(162,123,63,.10) 25%,transparent 25.5%),linear-gradient(120deg,rgba(162,123,63,.07) 25%,transparent 25.5%),linear-gradient(0deg,rgba(162,123,63,.05) 50%,transparent 50%);background-size:100% 100%,34px 59px,34px 59px,34px 30px}
+.card[data-look="f"] .seal{background:#f1e7d6;color:#5d4620}
+.card[data-look="f"] .p-bar{height:6px;border-radius:99px}.card[data-look="f"] .p-bar i{border-radius:99px}
+.card[data-look="f"] .attn{border-radius:99px;padding:8px 14px}
+.card[data-look="f"] .chip{background:#f6f0e4;border-color:#e6dcc7;color:#5d4620}
+.card[data-look="f"] .chip.link{background:#7a5a2e;border-color:#7a5a2e;color:#fff}
+.card[data-look="f"] .lblx{color:#6b6153}
+/* G: a status spine down the left edge, compact rhythm */
+.card[data-look="g"]{border-left:5px solid var(--spine,var(--c-accent))}
+.card[data-look="g"] .slot{padding:9px 14px}
+.card[data-look="g"] .p-bar{height:7px;border-radius:4px}.card[data-look="g"] .p-bar i{border-radius:4px 0 0 4px}
+.card[data-look="g"] .seal{border:1px solid var(--c-good);background:transparent}
+/* H: sage band, ten dots, generous radius */
+.card[data-look="h"] .hd{background:#eef4f0}
+.card[data-look="h"] .slot{padding:12px 18px}
+.card[data-look="h"] .attn{border-radius:16px}
+.card[data-look="h"] .chip{border-color:#bfd0c5}
+.card[data-look="h"] .lblx{letter-spacing:.09em}
+/* I: a dossier. Double rule, serif name, small-caps labels, a five-step stepper */
+.card[data-look="i"]{border-top:4px double var(--c-accent)}
+.card[data-look="i"]{--rail:98px}
+.card[data-look="i"] .lblx,.card[data-look="i"] .attn .k{font-family:var(--c-drug-font);font-size:10px;letter-spacing:.14em;font-weight:700}
+.card[data-look="i"] .drug{font-size:16px;font-weight:600}
+.card[data-look="i"] .seal{border:1px solid var(--c-good);background:transparent;border-radius:2px}
+.card[data-look="i"] .slot{border-top:1px solid var(--c-hair)}
+.card[data-look="i"] .chip{border-radius:3px}
+/* J: gold rule and a timeline that draws goal against forecast */
+.card[data-look="j"]{border-top:3px solid #c99a1d}
+.card[data-look="j"] .seal{border:1px solid var(--c-good);background:transparent}
+.card[data-look="j"] .chip{border-radius:6px}
+/* K: monochrome. Colour is reserved for status. */
+.card[data-look="k"] .seal{background:transparent;border:1px solid #c9c9c9;color:var(--c-ink2)}
+.card[data-look="k"] .cdate{font-size:15px}
+.card[data-look="k"] .chip{border:none;border-bottom:1px solid var(--c-line);border-radius:0;padding:6px 2px;min-height:30px}
+.card[data-look="k"] .chip.link{color:var(--c-ink)}
+.card[data-look="k"] .lblx.acc,.card[data-look="k"] .ai .src{color:var(--c-ink)}
+.card[data-look="k"] .attn{background:transparent;border:1px solid var(--c-warn);border-radius:6px}
+@media (max-width:480px){.tile{padding:10px}.stage{padding:8px}.card{--rail:74px}.card[data-look="i"]{--rail:84px}.slot{padding-left:13px;padding-right:13px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">ALL DATA FICTIONAL · LIGHT ONLY</p>
+  <h1>Appearance Lab</h1>
+  <p class="lede">Eleven looks for the same card. The five current looks are first; six new ones follow. Anatomy and meaning never change between looks: only the surface, type, and the shape of the progress marker do. Pick your top four.</p>
+
+  <div class="bar" role="toolbar" aria-label="Controls">
+    <div class="seg" role="group" aria-label="Record shown">
+      <button type="button" data-rec="216482" aria-pressed="true">Forecast late</button>
+      <button type="button" data-rec="214990" aria-pressed="false">On track</button>
+    </div>
+    <span id="picks" aria-live="polite">Picked 0 of 4</span>
+    <button type="button" class="pill" id="copy">Copy my top 4</button>
+    <button type="button" class="pill quiet" id="clear">Clear</button>
+  </div>
+  <div id="out" role="status"></div>
+
+  <h2 class="sec">CURRENT · A TO E</h2>
+  <section class="grid" id="gridCur"></section>
+  <h2 class="sec">NEW · F TO K</h2>
+  <section class="grid" id="gridNew"></section>
+
+  <p class="foot">The runway in J is drawn from the days to goal and the forecast delta, both on the card. F is inspired by the warm-neutral, bronze-accent feel of agency tools; it borrows no logo, name or pattern from any of them.</p>
+</div>
+
+<script>
+"use strict";
+const DATA = {
+  "216482": { drug:"Metformin HCl ER Tablets, 500 mg", meta:"Meridian Pharmaceuticals (fictional) · Cycle 2", asOf:"data as of Jul 16, 07:12 · extract #412 (fictional)",
+    goal:"Oct 3, 2026", days:"· 80 days", daysTo:80, pct:62, fc:"Oct 17, 2026", fdelta:"▲ +14 d vs goal", late:true, delta:14, conf:"moderate confidence",
+    attn:"IR response due in 6 days — Biopharmaceutics", latest:"Amendment (minor) received Jun 30 — under review",
+    ahead:"Thu huddle — status requested on this ANDA + sister 214990",
+    brief:"Open now: IR response due in 6 days — Biopharmaceutics. Related precedent: ANDA 214990 — same applicant, same facility. Forecast drivers and assumptions: expand → Forecast & assumptions.", sisters:1, notes:3 },
+  "214990": { drug:"Metformin HCl ER Tablets, 750 mg", meta:"Meridian Pharmaceuticals (fictional) · Cycle 3", asOf:"data as of Jul 16, 07:12 · extract #412 (fictional)",
+    goal:"Aug 15, 2026", days:"· 31 days", daysTo:31, pct:88, fc:"Aug 6, 2026", fdelta:"▼ 9 d ahead of goal", late:false, delta:-9, conf:"high confidence",
+    attn:null, latest:"Facility IR resolved — closed Jul 2", ahead:"Aug 1 — labeling final-format confirmation due from applicant",
+    brief:"Related precedent: ANDA 216482 — same applicant, same facility. Forecast drivers and assumptions: expand → Forecast & assumptions.", sisters:1, notes:2 }
+};
+const LOOKS = [
+  { id:"a", cur:true, name:"A · Quiet Fluent", tag:"Native Windows calm. White surface, steel-blue accent, a thin bar. The current default.", prog:"bar", sw:["#fff","#3d6fa5","#177245"] },
+  { id:"b", cur:true, name:"B · Docket Ledger", tag:"Typeset federal docket. Warm paper, archival green, serif title, stamp seal, milestone ticks.", prog:"ticks", sw:["#fbf8f2","#23573f","#211d15"] },
+  { id:"c", cur:true, name:"C · Signal", tag:"Light steel panel. Federal blue, mono numerals, a progress ring.", prog:"ring", sw:["#f7fafd","#005ea2","#177245"] },
+  { id:"d", cur:true, name:"D · Draft", tag:"Engineer's drawing. Navy ink on a graph grid, hatched progress.", prog:"bar", sw:["#fff","#1a4480","#162e51"] },
+  { id:"e", cur:true, name:"E · Instrument", tag:"Medical-device porcelain. Slate on clinical white, capsule geometry.", prog:"bar", sw:["#fcfdfe","#3e5d6d","#1c7a4d"] },
+  { id:"f", cur:false, name:"F · Agency Bronze", tag:"Warm greige and bronze with filled tag pills and a faint geometric field. The familiar agency-tool feel.", prog:"bar", sw:["#f6f0e4","#7a5a2e","#1f6b43"] },
+  { id:"g", cur:false, name:"G · Harbor Teal", tag:"Cool teal with a status spine down the left edge, so a glance tells late from on track. Compact.", prog:"bar", sw:["#eef7f7","#0b6e73","#1b7a4b"] },
+  { id:"h", cur:false, name:"H · Sage Clinical", tag:"Soft sage band, large radii, ten-dot progress. The calmest of the set.", prog:"dots", sw:["#eef4f0","#3a6653","#2d7a4f"] },
+  { id:"i", cur:false, name:"I · Indigo Dossier", tag:"A formal case file. Double rule, serif name and labels, a five-step stepper.", prog:"step", sw:["#fdfcfb","#3b3f8c","#23694a"] },
+  { id:"j", cur:false, name:"J · Cobalt Timeline", tag:"Draws goal against forecast on one timeline, so the gap is the picture. Gold rule on top.", prog:"time", sw:["#fff","#1f4fb4","#c99a1d"] },
+  { id:"k", cur:false, name:"K · Graphite Quiet", tag:"Monochrome. Colour appears only where status needs it. Best on a projector.", prog:"line", sw:["#fdfdfd","#33373c","#8a5800"] }
+];
+const ICON = {
+  pin:'<svg viewBox="0 0 16 16"><path d="M9.5 2.5l4 4-2.2.55a2 2 0 0 0-1.25 1.25L9.5 10.5 5.5 6.5l2.2-.55A2 2 0 0 0 8.95 4.7z"/><path d="M5.5 10.5L2.5 13.5"/></svg>',
+  exp:'<svg viewBox="0 0 16 16"><path d="M9.5 6.5L13 3M13 3h-3.5M13 3v3.5M6.5 9.5L3 13M3 13h3.5M3 13V9.5"/></svg>',
+  x:'<svg viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg>'
+};
+function progress(look, d){
+  const pct = d.pct, n5 = Math.round(pct / 20), n10 = Math.round(pct / 10);
+  switch(look.prog){
+    case "ticks": return `<div class="p-ticks">${[0,1,2,3,4].map(i => `<i class="${i < n5 ? "on" : ""}"></i>`).join("")}</div>`;
+    case "dots": return `<div class="p-dots">${[...Array(10).keys()].map(i => `<i class="${i < n10 ? "on" : ""}"></i>`).join("")}</div>`;
+    case "step": return `<div class="p-step">${[0,1,2,3,4].map(i => (i ? `<b class="${i <= n5 - 1 ? "on" : ""}"></b>` : "") + `<i class="${i < n5 ? "on" : ""}"></i>`).join("")}</div>`;
+    case "line": return `<div class="p-line"><i style="width:${pct}%"></i><b style="left:${pct}%"></b></div>`;
+    case "ring": return "";
+    case "time": {
+      // Runway from today. Domain = today to a little past the later of goal and forecast.
+      const goalD = d.daysTo, fcD = d.daysTo + d.delta, dom = Math.max(goalD, fcD) * 1.08;
+      const goalAt = goalD / dom * 100, fcAt = fcD / dom * 100, lo = Math.min(goalAt, fcAt), hi = Math.max(goalAt, fcAt), cls = d.late ? "" : " good";
+      return `<div class="p-time" aria-hidden="true"><div class="trk"></div><div class="el" style="width:${lo}%"></div>
+        <div class="gap${cls}" style="left:${lo}%;width:${hi - lo}%"></div><div class="tk" style="left:${goalAt}%"></div>
+        <div class="fm${cls}" style="left:${fcAt}%"></div>
+        <span class="lb up l" style="left:0">TODAY</span><span class="lb up" style="left:${goalAt}%">GOAL</span><span class="lb dn" style="left:${fcAt}%">FORECAST</span></div>`;
+    }
+    default: return `<div class="p-bar"><i style="width:${pct}%"></i></div>`;
+  }
+}
+function ringHTML(d){
+  const C = 2 * Math.PI * 21;
+  return `<div class="p-ring" aria-hidden="true"><svg viewBox="0 0 52 52"><circle class="tr" cx="26" cy="26" r="21"></circle><circle class="fg" cx="26" cy="26" r="21" style="stroke-dasharray:${C};stroke-dashoffset:${C * (1 - d.pct / 100)}"></circle></svg><span>${d.pct}%</span></div>`;
+}
+function card(look, id){
+  const d = DATA[id], ring = look.prog === "ring";
+  const spine = d.late ? "#8a5800" : "#1b7a4b";
+  return `<article class="card" data-look="${look.id}" style="--spine:${spine}" aria-label="ANDA ${id} card in look ${look.name}">
+    <div class="slot hd"><div class="idrow"><span class="num">ANDA ${id}</span><span class="seal">✓ Verified</span>
+      <span class="tools">${ICON.pin}${ICON.exp}${ICON.x}</span></div>
+      <h3 class="drug">${d.drug}</h3><div class="meta">${d.meta}</div><div class="fresh">${d.asOf}</div></div>
+    <div class="slot clock">
+      <div class="crow"><span class="lblx">GOAL</span><span class="cdate">${d.goal}</span><span class="cdays">${d.days}</span>${ring ? "" : `<span class="cpct">${d.pct}%</span>`}</div>
+      ${progress(look, d)}${ring ? ringHTML(d) : ""}
+      <div class="crow"><span class="lblx">FORECAST</span><span class="cdate">${d.fc}</span><span class="fdelta ${d.late ? "warn" : "good"}">${d.fdelta}</span></div>
+      <div class="fconf">${d.conf}</div></div>
+    ${d.attn ? `<div class="slot"><div class="attn warn"><span class="k">⚠ NEEDS YOU</span><span><b>${d.attn.split(" — ")[0]}</b> — ${d.attn.split(" — ")[1]}</span></div></div>` : ""}
+    <div class="slot rail"><span class="lblx">LATEST</span><span>${d.latest}</span></div>
+    <div class="slot rail"><span class="lblx acc">AHEAD</span><span>${d.ahead}</span></div>
+    <div class="slot ai"><div class="tag"><span class="lblx acc">OFFLINE BRIEF</span><span class="verify">assembled from the record</span><span class="src">sources ›</span></div><div class="body">${d.brief}</div></div>
+    <div class="slot"><div class="chips"><button class="chip" type="button" tabindex="-1">Copy status</button><button class="chip" type="button" tabindex="-1">Sister ANDA · ${d.sisters}</button><button class="chip" type="button" tabindex="-1">Notes · ${d.notes}</button><button class="chip link" type="button" tabindex="-1">Open in system of record ↗</button></div></div>
+  </article>`;
+}
+let rec = "216482"; const picked = [];
+function render(){
+  for (const [gridId, cur] of [["gridCur", true], ["gridNew", false]]){
+    document.getElementById(gridId).innerHTML = LOOKS.filter(l => l.cur === cur).map(l => `
+      <div class="tile${picked.includes(l.id) ? " picked" : ""}" data-id="${l.id}">
+        <div class="thead"><div><div class="nm">${l.name}<span class="badge ${l.cur ? "cur" : "new"}">${l.cur ? "CURRENT" : "NEW"}</span></div><div class="tg">${l.tag}</div></div>
+          <span class="sw" aria-hidden="true">${l.sw.map(c => `<i style="background:${c}"></i>`).join("")}</span></div>
+        <div class="stage">${card(l, rec)}</div>
+        <button class="pick" type="button" data-pick="${l.id}" aria-pressed="${picked.includes(l.id)}">${picked.includes(l.id) ? "✓ In my top 4" : "Add to my top 4"}</button>
+      </div>`).join("");
+  }
+  document.getElementById("picks").textContent = `Picked ${picked.length} of 4`;
+}
+function summary(){
+  const names = picked.map(id => LOOKS.find(l => l.id === id).name);
+  return names.length ? "My top " + names.length + ": " + names.join(", ") : "Nothing picked yet.";
+}
+document.addEventListener("click", e => {
+  const p = e.target.closest("[data-pick]");
+  if (p){
+    const id = p.dataset.pick, i = picked.indexOf(id);
+    if (i >= 0) picked.splice(i, 1);
+    else if (picked.length < 4) picked.push(id);
+    else { const o = document.getElementById("out"); o.textContent = "You already have four. Remove one first."; o.classList.add("show"); return; }
+    document.getElementById("out").classList.remove("show"); render(); return;
+  }
+  const r = e.target.closest("[data-rec]");
+  if (r){ rec = r.dataset.rec; document.querySelectorAll("[data-rec]").forEach(b => b.setAttribute("aria-pressed", b === r)); render(); }
+});
+document.getElementById("clear").addEventListener("click", () => { picked.length = 0; document.getElementById("out").classList.remove("show"); render(); });
+document.getElementById("copy").addEventListener("click", () => {
+  const text = summary(), o = document.getElementById("out");
+  const show = msg => { o.textContent = msg + "\n" + text; o.classList.add("show"); };
+  (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text) : Promise.reject())
+    .then(() => show("Copied. Paste it into the chat:"), () => show("Select and copy this:"));
+});
+render();
+</script>
+</body>
+</html>

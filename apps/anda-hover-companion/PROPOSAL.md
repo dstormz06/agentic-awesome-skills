@@ -2,6 +2,11 @@
 
 *Template for the director ask — adapt names/numbers to your division. Keep to one page.*
 
+*Where the agency already offers Claude through its own approved AI platform, lead with a pilot
+on that platform instead of a separate API request: it removes the "why not use what we have?"
+question and reuses existing usage limits and logging. The provider seam below makes that a
+configuration change.*
+
 **The ask.** Approve API access to Claude (Anthropic) through an agency-approved channel
 — practically, Claude on AWS GovCloud / Amazon Bedrock (FedRAMP-authorized path) — for a
 small RPM pilot of the ANDA Hover Companion, a Windows tray tool built in-house.
@@ -25,9 +30,13 @@ record content is fenced as data against prompt injection; the app is read-only,
 no agency data, has no telemetry, and every generated sentence is labeled
 "generated — verify before acting." Full threat model: SECURITY.md.
 
-**Cost envelope.** ~3–4K input tokens (mostly cache-served) + ~300 output per lookup ≈
-**$0.01–0.03 per lookup**. A 10-RPM pilot at 30 lookups/day ≈ **under $200/month** —
-against minutes of system-navigation time saved per lookup, per person, per day.
+**Cost envelope (measured, then planned).** The request the app builds for a brief was measured
+on the sample records: about 2,100 to 2,700 characters, roughly 700 to 900 input tokens, plus a
+short reply of about 150 tokens. Real records carry more notes and open items, so plan on about
+**3,000 tokens per brief**. A brief is generated only when the full card opens; peek and invite
+modes make no call. At public list price for a Sonnet-class model that is about a cent per brief,
+roughly **$60 to $240 a month for ten testers at 25 to 100 briefs a day**. These are estimates; the
+pilot replaces them with measured use. (An earlier version of this page quoted unmeasured figures.)
 
 **Pilot plan (8 weeks).** Weeks 1–2: offline mode on pilot machines (works today,
 fictional/sanctioned-extract data), baseline time-to-answer measured. Weeks 3–8: API

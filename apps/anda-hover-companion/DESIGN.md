@@ -380,6 +380,15 @@ streaks, badges, or noise. Ranked by payoff-per-build-effort:
 5. **Time-saved meter** — a quiet counter in Settings ("~47 lookups this week ≈ 3.1 h
    of navigation avoided") — engagement for the user, adoption evidence for the
    director, and the pilot metric for the proposal, all in one number.
+7. **Grounded proofread** *(proposed; not built)* — a second hotkey on the same
+   select-and-press mechanism. It checks a selected draft against the record before
+   anything is sent: dates, drug names and numbers that do not match are flagged first,
+   deterministically and offline, then optional AI suggestions for wording. It never
+   rewrites in place; the user copies the corrected text. Constraints that must hold:
+   the selected text is arbitrary user content, so it is a wider data surface than the
+   structured card record and needs its own approval; it uses its own hotkey so it can
+   never fire by accident; the app shows exactly what will be sent; and it costs roughly
+   2,000 tokens per proofread, so it is metered separately from card briefs.
 6. **Division calibration board** — the competition showpiece: a shared, read-only page
    of the tool's forecast accuracy by division ("median error ±8 days, trailing 6
    months"). An AI tool that publishes its own report card is what "first place in AI
