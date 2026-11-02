@@ -4,7 +4,7 @@
 Point at an ANDA number anywhere on screen → get a calm, one-glance briefing card:
 status, clock, the one thing that needs you, and a grounded AI brief of risks and blind spots.
 
-> Status: design proposal + interactive mockup (`mockup/anda-card.html`). No FDA data,
+> Status: design proposal + interactive mockups (`mockup/appearance-lab.html`, `mockup/windows-simulation.html`). No FDA data,
 > systems, or branding are used — all names, numbers, and records in the mockup are fictional.
 
 ---
@@ -348,22 +348,24 @@ Cutting these is a feature — each one erodes the "calm" contract:
 
 ---
 
-## 10. Mockup — the design studio
+## 10. Mockups — the Appearance Lab and the desktop simulation
 
-Open **`mockup/anda-card.html`** in any browser, desktop or phone. It demonstrates,
-with fictional data:
+The original single-card design studio (`mockup/anda-card.html`, five looks) was **retired on 2026-11-02**: it
+duplicated what the two files below do better, and kept the old A-default and five-look picture alive. It stays in git
+history. Open these in any browser, desktop or phone, with fictional data:
 
-- **Five appearances** (A–E of the §5 table), switchable live — the studio picker is the
-  prototype of the app's Settings → Appearance page. The full fifteen are in
-  `mockup/appearance-lab.html` (a comparison wall, with the compact boxes shown over an open email)
-  and in the desktop simulation `mockup/windows-simulation.html` (default K).
-- **Three consent models** (§2), switchable live, plus long-press on touch.
-- The forecast-first clock (goal vs. forecast with delta + confidence), the single
-  needs-attention signal, the streamed companion brief, pin / expand / keyboard.
-- **Touch-first presentation:** on phones and tablets the card presents as a bottom
-  sheet with a drag handle, scrim, safe-area padding, and 44 px targets — tested
-  against iOS-style touch emulation.
-- The invalid-number whisper. All appearances are light-only (§5).
+- **`mockup/appearance-lab.html`** — a comparison wall of all **fifteen looks** (the §5 table) rendering the same
+  record side by side, with the at-risk and on-track records switchable, and the four compact boxes shown over an open
+  email. It is the quickest way to compare looks and the source of each look's palette and structure.
+- **`mockup/windows-simulation.html`** — a Windows 11 desktop in the browser (default **K**) that ports the app's
+  logic: the recognizer, the placement rule, the three consent models (§2), the offline brief, auto-hide, and the
+  compact boxes (a click or the hotkey again expands them). It shows the forecast-first clock, the single
+  needs-attention signal, a sample streamed companion brief (no model is called), pin / expand / keyboard, and the
+  invalid-number whisper. **On phones and tablets the card presents as a bottom sheet** with a drag handle, scrim and
+  safe-area padding, with no horizontal scroll at 390 px. It is a port, not the app: the window chrome, the hotkey and
+  clipboard hand-off are simulated.
+
+All looks are light-only (§5).
 
 ## 11. Implementation status — the Windows app
 

@@ -231,6 +231,12 @@ not re-read from run 8's.
 | R19 | The tray icon was drawn in the look's accent; with K that is graphite, a dark tile on a dark Windows taskbar | Review of the K default | Tray icon is a fixed federal blue in every look |
 | R20 | The compact box's "needs you" label wrapped in the lab and the simulation | Browser render | Stub widened and set to no-wrap in all three renderers |
 
+### Housekeeping in round 6
+
+The original design studio `mockup/anda-card.html` (five looks, A default) was **retired**, because it had fallen behind the app and
+the other two mockups. References in `DESIGN.md` and `app/README.md` now point at the lab and the simulation. Earlier rounds of this
+report that mention the studio describe a file that is no longer in the tree (it is in git history).
+
 ### Things the owner should decide, not assume
 
 - **K's accent is graphite (`#33373C`).** The surface is light and the look is the one picked from the lab, but the primary

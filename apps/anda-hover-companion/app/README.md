@@ -172,5 +172,5 @@ AndaCompanion/
 AndaCompanion.Tests/    xUnit suite (cross-platform + Windows-only)
 AndaCompanion.Preview/  headless screenshot harness
 ../demo/                sample memo, launcher, START-HERE and the demo guide (bundled by CI)
-../mockup/              design studio (anda-card.html) and the desktop simulation (windows-simulation.html)
+../mockup/              the Appearance Lab (appearance-lab.html) and the desktop simulation (windows-simulation.html)
 ```
