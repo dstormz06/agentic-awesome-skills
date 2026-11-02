@@ -305,7 +305,10 @@ works alone or together with the app. Same method: build it, run it, read the co
 Commit **`e160ed3`** (run 14): Linux and Windows jobs green. Windows self-test **46 PASS, 0 WARN, 0 FAIL, 1 SKIP** (the live Claude connection, by design),
 including the new `native-host-process`, `render-draft`, `render-watch-list` and `watch-line-on-card`. The extension's 18 parity and safety tests pass on both
 runners (counts read from the Linux log; the Windows step is green). 444 non-Windows tests passed locally on this code; the run's own xUnit totals were not
-re-read. A later commit adds a manifest test (below); its run is recorded after the table.
+re-read.
+
+The final code commit is **`142abe2`** (run 15): both jobs green again, now also running the 6 manifest and no-network tests (24 extension tests in all) on both runners. It changed no
+app code, so the self-test counts above are run 14's; run 15's own counts were not re-read, only its green conclusion (the self-test step fails the job on any FAIL).
 
 | Claim | Evidence | Limit |
 |---|---|---|
