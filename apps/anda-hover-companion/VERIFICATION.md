@@ -197,9 +197,54 @@ Ctrl+Alt is AltGr; elevated target windows (documented as a limit); Windows 10; 
 R7, R8, R9 and R11 are defects a user would have met. R9 and R11 were invisible in every earlier round
 because no earlier round ran on Windows.
 
+## Round 6 — K default, fifteen looks, compact boxes, auto-hide, Elsa placeholder
+
+Scope: the product owner asked for K to be the default, the four new compact looks (L–O), an auto-hide feature, and Elsa
+integration "as a placeholder, super easy to incorporate later". Same method as round 5: build it, run it on the Windows
+runner, read the self-test report back from the job log, and say what the run does not prove.
+
+| Claim | Evidence | Limit |
+|---|---|---|
+| K · Graphite Quiet is the default; A–E keep their saved numeric values, so an existing tester's choice does not change; an unknown saved value falls back to K | Unit tests `There_are_fifteen_looks_and_K_is_the_default`, `Saved_settings_keep_their_numeric_meaning…`, `An_existing_testers_choice_is_kept…`, `Unknown_appearance_numbers_and_auto_hide_values_fall_back_safely`; self-test `settings-and-prompts` | A fresh install gets K. An existing install keeps what it saved |
+| All fifteen looks render on Windows with Segoe UI Variable | Self-test `render-card-*` (K ×5 states, A to J) and `render-compact-*` (L, M, N, O) all PASS with plausible sizes | The PNGs are in the run artifact; the artifact host is not reachable from the authoring environment, so these were reviewed from the headless Linux renders of the same code (fallback fonts), not the Windows PNGs |
+| Every text ink meets WCAG AA on every look, including the tinted header bands (F, H), seals, tag chips and the filled chip | `AppearanceTests` (computed contrast, all 15, plus `Added_surfaces_keep_their_text_readable`); lab audit `0 failing` | Computed ratios, not a screen-reader or low-vision session |
+| Compact boxes are much smaller than the card, stay inside the work area at five anchors, and Enter expands | Self-test `compact-boxes`: strip 340×81, tile 196×145, ticket 300×68, badge 181×38 dip, each under 35% of the full card's area | One resolution (1024×768, 100% scaling); no DPI sweep |
+| Compact boxes never take focus | Unit test `A_compact_box_never_takes_focus…` (`ShowActivated` false, not active after show) | **Not exercised against a real email client on Windows.** The runner has no Outlook; whether a particular app steals focus back is untested |
+| Auto-hide hides an idle card, and never one that is hovered, pinned or expanded | `AutoHideTests` (policy and controller with a fake clock, 18 cases); `CompactRenderTests` (real timers, headless); self-test `auto-hide` (a 1 s card gone by 3 s on the Windows runner) | The runner's pointer is not over the card, so "hover keeps it open" is proven by the policy test and the browser simulation, not by a real mouse on Windows |
+| Elsa placeholder: every configuration state resolves to a plain message; plain `http://` is refused; the token never appears in any message or printed settings object; an error status never exposes the body; a failing Elsa falls back to the offline brief | `ElsaTests` (20 cases, fake HTTP handler); self-test `elsa-placeholder`. Defect found by a test: `ElsaSettings.ToString()` would have printed the token (see R15) | **No call to a real Elsa endpoint exists or was made.** Its request and response shape is unknown and is deliberately not guessed |
+| The browser simulation matches: default K, all fifteen looks, compact boxes, auto-hide | 68 Playwright checks (progress form per look, timeline geometry equals the app's formula, spine, compact sizes, no focus, hotkey-again expands, auto-hide with hover / pin / expand / Off, 390 px width) plus the earlier 30 recognizer cases and the placement port | A port, not the app |
+
+Counts on the final commit are in the run named below. Run 7 (commit `58764d7`): Windows job **276 tests, 0 failed**;
+self-test **41 PASS, 0 WARN, 0 FAIL, 1 SKIP** (the live Claude connection, by design); Linux job green.
+Run 8 (commit `f8c1c49`, the **final** commit: it changes only the quoted box sizes in a tagline string, DESIGN and the lab) is
+green on both jobs; its self-test exits non-zero on any FAIL, so a green job means zero FAIL. The counts above were read from run 7's log,
+not re-read from run 8's.
+
+### Defects caught in round 6
+
+| # | Finding | Found by | Disposition |
+|---|---|---|---|
+| R15 | **`ElsaSettings` is a record, and a record prints every member, so any log line or exception formatting it would have printed the token** | A test written to assert the token never appears | `ToString()` overridden to redact; the test now guards it |
+| R16 | A dashed `Line` shape in the ticket forced a 100 px row height, so the "64 px" ticket was 117 px tall | Headless size test | Replaced with a purpose-built control that takes its row's height |
+| R17 | Compact boxes took keyboard focus when shown: someone typing an email would have kept typing into the box, and a stray Enter or Space would have expanded it | Design review of the interaction | Never activated; expansion needs a click or the hotkey again on the same number; a test asserts it |
+| R18 | Sizes were quoted from Linux renders (fallback font); Segoe UI measured wider (strip 81 not 78, tile 145 not 139) | Windows self-test | Taglines, DESIGN and the lab quote the Windows ranges |
+| R19 | The tray icon was drawn in the look's accent; with K that is graphite, a dark tile on a dark Windows taskbar | Review of the K default | Tray icon is a fixed federal blue in every look |
+| R20 | The compact box's "needs you" label wrapped in the lab and the simulation | Browser render | Stub widened and set to no-wrap in all three renderers |
+
+### Things the owner should decide, not assume
+
+- **K's accent is graphite (`#33373C`).** The surface is light and the look is the one picked from the lab, but the primary
+  buttons, checkboxes and the progress line are a dark ink, not a colour. If "no dark colours" is meant to include that,
+  say so and the accent can move to a mid slate; nothing else changes.
+- **Auto-hide defaults to 20 s.** A card opens next to the pointer, not under it, so a reader who keeps the mouse still
+  and does not touch the keyboard will see it hide. Off is one click in Settings; 40 s is the gentler choice.
+- **Existing installs keep their saved look.** Only new installs get K.
+
 ## Still open
 
 GDUFA III tier table (needs the commitment-letter text and the dual-source rule); a rebindable hotkey for
-non-US layouts; UI Automation capture; code signing; the live Claude call; a 508 pass with a screen reader.
+non-US layouts; UI Automation capture; code signing; the live Claude call; **the live Elsa call (the two
+translations in `ElsaMapping.cs`, once the API is available)**; a 508 pass with a screen reader; a real-email-client
+check that compact boxes do not disturb typing; a real-mouse hover check for auto-hide on Windows.
 `npm run test` for the whole repository stops in this authoring environment at an unrelated test that needs a
 newer `git` (`--ref-format=reftable`); `npm run validate` and `npm run security:docs` pass.
