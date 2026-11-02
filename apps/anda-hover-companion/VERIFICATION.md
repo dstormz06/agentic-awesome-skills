@@ -216,9 +216,10 @@ runner, read the self-test report back from the job log, and say what the run do
 
 Counts on the final commit are in the run named below. Run 7 (commit `58764d7`): Windows job **276 tests, 0 failed**;
 self-test **41 PASS, 0 WARN, 0 FAIL, 1 SKIP** (the live Claude connection, by design); Linux job green.
-Run 8 (commit `f8c1c49`, the **final** commit: it changes only the quoted box sizes in a tagline string, DESIGN and the lab) is
-green on both jobs; its self-test exits non-zero on any FAIL, so a green job means zero FAIL. The counts above were read from run 7's log,
-not re-read from run 8's.
+Run 8 (commit `f8c1c49`) was green on both jobs. The **final code commit is `60cf348`** (run 10): the "nothing too dark" palette change
+(K accent `#56626E`, fills nudged in F, G, H, J). Run 10 is green on both jobs, including the Windows self-test, which exits non-zero on any
+FAIL, so a green job means zero FAIL. The 276 / 41-pass figures above were read from run 7's log; the 271 cross-platform tests were re-run
+locally on the final code (269 plus the two new contrast tests). Run 10's own counts were not re-read from its log.
 
 ### Defects caught in round 6
 
