@@ -31,7 +31,11 @@ TRY IT
     model, transparency.
   - With a small box (L to O) showing, press Ctrl+Alt+A again on the same number,
     or click the box, to open the full card.
+  - Tray icon > Watch list: every ANDA with something worth a look, worst first.
   - Tray icon > Prompt library: add your own lens.
+  - Edge extension (optional, separate): see extension\README.md in the repository. It adds
+    a right-click menu in Edge and can use this app's data. Do not add it to a managed
+    computer before IT approves it.
 
 IF SOMETHING DOES NOT WORK
   - Nothing appears when you press Ctrl+Alt+A: another program may own that

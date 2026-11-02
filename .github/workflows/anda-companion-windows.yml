@@ -63,7 +63,7 @@ jobs:
           --results-directory "$env:RUNNER_TEMP/test-results"
 
       - name: Test the Edge extension's rules against the app's own output (no browser needed)
-        run: node --test extension/tests/unit/parity.test.mjs extension/tests/unit/safety.test.mjs
+        run: node --test extension/tests/unit/parity.test.mjs extension/tests/unit/safety.test.mjs extension/tests/unit/manifest.test.mjs
 
       - name: Publish single-file win-x64 executable
         run: >
@@ -150,4 +150,4 @@ jobs:
 
       - name: Test the Edge extension's rules against the app's own output (no browser needed)
         working-directory: apps/anda-hover-companion
-        run: node --test extension/tests/unit/parity.test.mjs extension/tests/unit/safety.test.mjs
+        run: node --test extension/tests/unit/parity.test.mjs extension/tests/unit/safety.test.mjs extension/tests/unit/manifest.test.mjs

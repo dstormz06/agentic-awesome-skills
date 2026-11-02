@@ -232,6 +232,16 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 #menu button:disabled{color:var(--ink3);cursor:default}
 #menu .k{margin-left:auto;color:var(--ink3);font-size:11.5px}
 #menu hr{border:none;border-top:1px solid var(--win-line);margin:5px 4px}
+#ctxmenu{width:330px;padding:6px}
+#ctxmenu button{display:flex;width:100%;align-items:center;gap:8px;border:none;background:none;text-align:left;padding:8px 10px;border-radius:6px;font-size:13px;min-height:34px}
+#ctxmenu button:hover:not(:disabled){background:#eaf0f7}#ctxmenu button:disabled{color:var(--ink3);cursor:default}
+#ctxmenu hr{border:none;border-top:1px solid var(--win-line);margin:5px 4px}
+#ctxmenu .ext{font-weight:650}
+#wlist{width:470px;padding:16px 18px;left:calc(50% - 235px);top:60px;max-height:calc(100% - var(--tb-h) - 84px);overflow:auto}
+#wlist .row{display:flex;gap:10px;align-items:baseline;width:100%;text-align:left;border:none;background:none;padding:8px 6px;border-top:1px solid var(--c-hair);min-height:40px;color:inherit;font:inherit}
+#wlist .row:hover{background:var(--c-mark)}#wlist .n{font-weight:700;min-width:62px}#wlist .t{flex:1;min-width:0}#wlist .t small{display:block;color:var(--c-ink3);font-size:11.5px}
+#wlist .sev{font-size:9.5px;font-weight:800;letter-spacing:.08em;border-radius:99px;padding:1px 8px}
+#wlist .sev.warn{background:var(--c-warn-bg);color:var(--c-warn)}#wlist .sev.bad{background:var(--c-bad-bg);color:var(--c-bad)}#wlist .sev.info{background:var(--c-mark);color:var(--c-ink2)}
 #menu .sub button{padding-left:26px}
 #menu .sub button[aria-checked="true"]::before{content:"●";position:absolute;margin-left:-16px;font-size:9px;color:var(--sim)}
 
@@ -601,7 +611,7 @@ C:\work&gt; </div>
 
   <!-- ===== guide ===== -->
   <section class="win" id="guide" aria-label="Demo guide">
-    <div class="bar"><span class="ttl">Try it in seven steps</span></div>
+    <div class="bar"><span class="ttl">Try it in eight steps</span></div>
     <div class="body">
       <p class="sub">Select a number in any window and press a hotkey. By default you get a small invite; an at-risk ANDA opens a peek by itself. Weekend and holiday goal dates are flagged.</p>
       <ol id="steps">
@@ -613,6 +623,7 @@ C:\work&gt; </div>
         <li data-step="look2"><i>✓</i><span>Select <b>NDA 021234</b>, press the hotkey. No guess.</span></li>
         <li data-step="look3"><i>✓</i><span>Turn on <b>Terminal</b> below, select its number: paused.</span></li>
         <li data-step="draft"><i>✓</i><span>Select the <b>draft reply</b> in Mail, press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>D</kbd>.</span></li>
+        <li data-step="ctx"><i>✓</i><span>In the <b>Browser</b> window, select <b>216482</b> and <b>right-click</b>: the Edge extension's menu.</span></li>
       </ol>
       <div class="lbl">APPS TO TEST</div>
       <div id="appPick" role="group" aria-label="Which simulated apps to show"></div>
@@ -665,6 +676,7 @@ C:\work&gt; </div>
   </div>
 
   <div class="pop" id="menu" role="menu" aria-label="ANDA Hover Companion menu"></div>
+  <div class="pop" id="ctxmenu" role="menu" aria-label="Browser right-click menu (Edge extension, simulated)"></div>
 
   <div id="keys" role="status" aria-live="polite"></div>
 
@@ -694,7 +706,7 @@ C:\work&gt; </div>
     <div style="display:flex;align-items:center;gap:10px"><span style="color:var(--c-ink2);font-size:12.5px">Flag dates within</span><select id="setLead" aria-label="Business days around a federal holiday" style="width:auto"></select><span style="color:var(--c-ink2);font-size:12.5px">business days of a federal holiday</span></div>
     <p class="hint">Weekends and federal holidays are always flagged (U.S. federal calendar, OPM). This only shows you the date; it never says how a goal date rule applies.</p>
     <div class="lbl">MY DATA · ACTIONS · SHORTCUTS</div>
-    <p class="hint" style="margin-top:0">The Windows app lets you point to your own Excel portfolio, notes folder and Drugs@FDA file (read-only, kept on your computer), set your own standing instructions for Proofread / Rewrite / Fact-check, and rebind the three shortcuts. Those need real files and a model connection, so they are not simulated here.</p>
+    <p class="hint" style="margin-top:0">The Windows app lets you point to your own Excel portfolio, notes folder and Drugs@FDA file (read-only, kept on your computer), set your own standing instructions for Proofread / Rewrite / Fact-check, and rebind the three shortcuts. Those need real files and a model connection, so they are not simulated here. The Edge extension is a separate package; the right-click menu in the Browser window below shows what it does.</p>
     <div class="lbl">SELECT &amp; PEEK · CTRL+ALT+A</div>
     <label class="opt"><input type="checkbox" id="setCapture" checked> Read my selection by copying it, then put my clipboard back</label>
     <p class="hint">Off: Ctrl+Alt+A opens the lookup box instead and no keystroke is ever sent. Terminals are always skipped, because Ctrl+C there interrupts a running command.</p>
@@ -726,6 +738,13 @@ C:\work&gt; </div>
     <p class="hint" id="drAiHint">Off until a model is approved and connected. When on, a preview shows the exact text first, nothing is sent until you press Send, and the result is Copy only: the app never pastes or sends for you.</p>
     <div class="lbl">RESULT</div>
     <div id="drOut" aria-live="polite"></div>
+  </div>
+
+  <!-- ===== watch list and page scan ===== -->
+  <div class="app-win" id="wlist" role="dialog" aria-label="Watch list">
+    <div class="hdr"><h3 id="wlTitle">Watch list</h3><button class="pill" id="wlDone" type="button">Done</button></div>
+    <p class="hint" id="wlNote" style="margin:0 0 6px"></p>
+    <div id="wlRows"></div>
   </div>
 
   <!-- ===== prompt library ===== -->
@@ -1363,7 +1382,7 @@ document.addEventListener("keydown", e => {
   }
   if(e.key === "Escape"){
     if(menuOpen() || $("flyout").style.display === "block"){ closeMenus(); return; }
-    for(const id of ["lookup", "plib", "settings", "draft"]) if($(id).style.display === "block"){ closeApp(id); return; }
+    closeCtx(); for(const id of ["lookup", "plib", "settings", "draft", "wlist"]) if($(id).style.display === "block"){ closeApp(id); return; }
     hideChip(); if(compact.style.display === "block") closeCompact(); if(card.style.display === "block") closeCard(); return;
   }
   if(card.style.display !== "block" || /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
@@ -1418,12 +1437,79 @@ document.querySelectorAll("#draft [data-ai]").forEach(b => b.addEventListener("c
   $("drOut").innerHTML = `<div class="find note">${b.dataset.ai}: in the Windows app a preview shows exactly what would be sent (your draft, the matching records, your standing instructions) and nothing leaves until you press Send; the result is Copy only. This simulation never calls a model.</div>`;
 }));
 
+/* ---------------- watch list and page scan (the app's Watch list window and the extension's "scan this page") ---------------- */
+function openList(title, note, rows){
+  closeMenus();
+  $("wlTitle").textContent = title; $("wlNote").textContent = note;
+  const box = $("wlRows"); box.replaceChildren();
+  if(!rows.length){ const p = document.createElement("p"); p.className = "hint"; p.textContent = "Nothing needs a second look in this data."; box.append(p); }
+  rows.forEach(r => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "row";
+    const n = document.createElement("span"); n.className = "n"; n.textContent = r.number;
+    const t = document.createElement("span"); t.className = "t"; t.append(r.drug);
+    [r.line, r.status].filter(Boolean).forEach(x => { const sm = document.createElement("small"); sm.textContent = x; t.append(sm); });
+    b.append(n, t);
+    if(r.sev){ const v = document.createElement("span"); v.className = "sev " + r.sev; v.textContent = r.sev === "bad" ? "ACT" : r.sev === "warn" ? "CHECK" : "NOTE"; b.append(v); }
+    b.addEventListener("click", () => { if(DATA[r.number]){ closeApp("wlist"); openCard(r.number, { anchor:{ x:innerWidth / 2 - 100, y:90 } }); } });
+    box.append(b);
+  });
+  $("wlist").style.display = "block"; if(isSheet()) scrim.style.display = "block";
+}
+function openWatchList(){
+  const sevRank = { bad:2, warn:1, info:0 };
+  const rows = Object.keys(DATA).map(id => {
+    const fl = watchFlags(id), urgent = isUrgent(id);
+    if(!fl.length && !urgent) return null;
+    return { number:id, drug:DATA[id].drug, line:fl.length ? fl[0].text : null, sev:fl.length ? fl.reduce((m, f) => sevRank[f.sev] > sevRank[m] ? f.sev : m, "info") : "info", urgent, goal:ymd(...DATA[id].goalD) };
+  }).filter(Boolean).sort((a, b) => sevRank[b.sev] - sevRank[a.sev] || (b.urgent ? 1 : 0) - (a.urgent ? 1 : 0) || a.goal - b.goal || (a.number < b.number ? -1 : 1));
+  openList("Watch list", `${rows.length} of ${Object.keys(DATA).length} ANDAs have something worth a look. The same rules the card uses, applied to every ANDA in your data when you open this list.`, rows);
+}
+
+/* ---------------- the Edge extension's right-click menu, simulated (Browser window only: it works in Edge pages) ---------------- */
+const ctxmenu = $("ctxmenu");
+function closeCtx(){ ctxmenu.style.display = "none"; }
+function extensionPeek(text, anchor){
+  const number = extractNumber(text);
+  if(!number){ showNotice("No ANDA number in the selection (a number labelled NDA, BLA, IND, DMF or MF is not treated as an ANDA).", anchor); return; }
+  if(!DATA[number]){ showNotice(`${number} is not a recognized ANDA`, anchor); return; }
+  const step = firstStep(number);
+  if(step === "invite") showInvite(`ANDA ${number}`, anchor, () => openCard(number, { anchor }));
+  else openCard(number, { mini:step === "peek", anchor });
+}
+function extensionScan(){
+  const text = $("webBody").innerText, found = [];
+  const re = /\d+/g; let m;
+  while((m = re.exec(text))){ if(m[0].length === 6 && !OTHER_LABEL.test(text.slice(0, m.index)) && !found.includes(m[0])) found.push(m[0]); }
+  if(!found.length){ showNotice("No ANDA numbers found on this page.", pointer); return; }
+  openList(`ANDA numbers on this page · ${found.length}`, "Read from this page only, on your click; nothing is sent anywhere.",
+    found.map(n => DATA[n] ? { number:n, drug:DATA[n].drug, status:`Goal ${DATA[n].goal} · forecast ${DATA[n].fc} (${DATA[n].fdelta.replace("▲", "").replace("▼", "").trim()})`, sev:(watchFlags(n)[0] || {}).sev || null, line:(watchFlags(n)[0] || {}).text || null } : { number:n, drug:"Not in your data", status:"Nothing to show for this number", sev:null }));
+}
+$("webBody").addEventListener("contextmenu", e => {
+  e.preventDefault(); closeMenus(); closeCtx();
+  const sel = getSelection().toString().trim(), anchor = { x:e.clientX, y:e.clientY };
+  const short = sel.length > 22 ? sel.slice(0, 22) + "…" : sel;
+  ctxmenu.replaceChildren();
+  const add = (label, fn, o = {}) => { const b = document.createElement("button"); b.type = "button"; b.setAttribute("role", "menuitem"); b.textContent = label; if(o.ext) b.className = "ext"; if(o.off) b.disabled = true; b.addEventListener("click", () => { closeCtx(); markStep("ctx"); fn(); }); ctxmenu.append(b); };
+  add("Copy", () => { if(navigator.clipboard) navigator.clipboard.writeText(sel).catch(() => {}); }, { off:!sel });
+  ctxmenu.append(document.createElement("hr"));
+  if(sel){
+    add(`ANDA Companion: peek at “${short}”`, () => extensionPeek(sel, anchor), { ext:true });
+    add("ANDA Companion: check this text as a draft", () => openDraft(sel), { ext:true });
+  }
+  add("ANDA Companion: scan this page for ANDA numbers", () => extensionScan(), { ext:true });
+  ctxmenu.style.display = "block";
+  const [x, y] = placeNear(e.clientX, e.clientY, ctxmenu.offsetWidth, ctxmenu.offsetHeight, workArea(), 2, 2);
+  ctxmenu.style.left = x + "px"; ctxmenu.style.top = y + "px"; ctxmenu.style.right = "auto"; ctxmenu.style.bottom = "auto";
+});
+document.addEventListener("pointerdown", e => { if(!e.target.closest("#ctxmenu")) closeCtx(); }, true);
+$("wlDone").addEventListener("click", () => closeApp("wlist"));
+
 /* ---------------- app windows ---------------- */
 function showApp(id){ closeMenus(); $(id).style.display = "block"; if(isSheet()){ scrim.style.display = "block"; } }
 function closeApp(id){ $(id).style.display = "none"; if(card.style.display !== "block") scrim.style.display = "none"; }
 scrim.addEventListener("click", () => {
   if(card.style.display === "block" && !pinnedCard) closeCard();
-  ["lookup", "plib", "settings", "draft"].forEach(id => { if($(id).style.display === "block" && id !== "settings") closeApp(id); });
+  ["lookup", "plib", "settings", "draft", "wlist"].forEach(id => { if($(id).style.display === "block" && id !== "settings") closeApp(id); });
   scrim.style.display = "none";
 });
 $("setDone").addEventListener("click", () => closeApp("settings"));
@@ -1518,6 +1604,7 @@ function openMenu(){
   menu.append(
     item("Lookup ANDA…", "Ctrl+Alt+Space", () => openLookup(pointer)),
     item("Check a draft…", "Ctrl+Alt+D", () => openDraft("")),
+    item("Watch list…", "", () => openWatchList()),
     item("Demo: at-risk card", "", () => openCard("216482", { anchor:trayAnchor() })),
     item("Demo: healthy card", "", () => openCard("214990", { anchor:trayAnchor() })),
     document.createElement("hr"));
@@ -1567,7 +1654,7 @@ document.addEventListener("pointerdown", e => {
 }, true);
 
 function exitApp(){
-  state.running = false; closeCard(); hideChip(); ["lookup", "plib", "settings", "draft"].forEach(closeApp);
+  state.running = false; closeCard(); hideChip(); closeCtx(); ["lookup", "plib", "settings", "draft", "wlist"].forEach(closeApp);
   $("appIcon").style.display = "none"; $("deskIcon").classList.add("attn");
   showKeys("look", "The app has exited. Double-click Start-Demo.bat on the desktop to start it again.");
 }

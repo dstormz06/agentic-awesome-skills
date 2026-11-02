@@ -85,6 +85,15 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   never guesses. **The Drugs@FDA file layout the parser expects has not been checked against a real
   download** (FDA's sites were not reachable from the build environment), so treat RLD as unverified
   until someone opens a real file. `Services/ReferenceData.cs`.
+- **Watch list** — tray → *Watch list…*: every ANDA in your data (the demo records, or your portfolio) that has something worth a look, worst
+  first, with the same rules the card uses. Computed when you open it; nothing runs in the background. Notes (a date near a holiday, no goal date) are
+  hidden until you ask. Click a row to open its card. `Services/WatchList.cs`.
+- **Edge extension, together with this app** — the same exe is the browser extension's native-messaging host: when Edge starts it with an
+  extension origin as the first argument it answers on stdin/stdout (no window, no tray, read-only, no network) with the cards, draft checks,
+  settings and watch list built from **your** portfolio file and settings, so the extension and the app show the same facts. Settings,
+  *Edge extension*, **Connect** writes a manifest and a current-user registry value that allows exactly one extension ID; **Disconnect** removes
+  them. `Services/NativeHost.cs`, `NativeHostRegistration.cs`, `CardModel.cs`. The extension itself is in `../extension/` and also works
+  without this app; see its README.
 - **Usage log (optional, off by default)** — a local CSV of `date,event,seconds`, from a fixed list of
   event names. It never contains an ANDA number, text, a name or a path. `Services/UsageLog.cs`.
 - **Select & Peek, safely** — it reads the selection by sending Ctrl+C, and every step exists
@@ -126,8 +135,8 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   or NDC is refused, because those are also six digits and showing the wrong card is worse than none.
 - **Accessibility** — every text ink meets WCAG AA (4.5:1) on every appearance, including the tinted header bands, seals and chips some looks add, enforced by tests. Compact boxes are mouse-and-hotkey only by design (they never take focus); the full card they open is keyboard-complete.
 
-Not built: Outlook context, a right-click menu item (Windows does not let one app extend other apps'
-menus; the real routes are an Edge extension or an Outlook add-in, each a separate approved package),
+Not built: mailbox-level Outlook context (decided against; the Edge extension covers Outlook on the web with selection, draft check and page scan),
+a right-click item inside desktop programs (Windows does not allow it; the Edge extension provides it in Edge pages),
 an official PSG source, and a live Elsa or Claude call. Planned next: UI Automation text-under-cursor
 capture (slots in behind `TextCaptureService` without touching callers), real data adapters, MSIX
 packaging, code signing. See `../ROADMAP.md` for what is built and what is not.
@@ -155,7 +164,7 @@ dotnet test AndaCompanion.Tests                              # everything (Windo
 dotnet test AndaCompanion.Tests --filter "Category!=Windows" # what runs on Linux/macOS
 ```
 
-421 cross-platform tests at the time of writing (recognizer, status line, GDUFA rules, the federal-holiday
+444 cross-platform tests at the time of writing (recognizer, status line, GDUFA rules, the federal-holiday
 calendar against OPM's dates, watch rules, urgency, draft check, portfolio and notes readers, writing prompts,
 hotkey parsing and registration with a fake API, brief fencing and fallback, provider selection, settings,
 contrast, placement, headless renders of the real windows) plus Windows-only tests that use real Win32 (clipboard snapshot/restore, hotkey registration and
@@ -216,14 +225,17 @@ AndaCompanion/
   UI/DraftWindow.*      Ctrl+Alt+D draft check and the writing actions (preview before send, Copy only)
   UI/SettingsWindow.*   appearance, consent, urgent rule, My data, instructions, shortcuts, usage log
   UI/HotkeyCapture.cs   press-a-shortcut box used by the shortcut settings
+  UI/WatchListWindow.*  the portfolio-wide watch list
   UI/ProgressControls   bar / ticks / ring / hatch / capsule / line / dots / step / timeline + D's grid surface
   Services/             hotkeys (checked, rebindable), text capture + clipboard snapshot, settings, brief services,
                         Elsa placeholder (Elsa.cs + ElsaMapping.cs), BusinessCalendar + WatchRules,
-                        UrgencyPolicy, DraftCheck, WritingActions, ReferenceData, UsageLog,
+                        UrgencyPolicy, DraftCheck, WritingActions, ReferenceData, UsageLog, WatchList,
+                        CardModel + NativeHost + NativeHostRegistration (the Edge extension's host),
                         Portfolio/ (xlsx/csv reader, column detection, notes index), self-test, app paths
   Data/                 IAndaRepository + fictional mock data + identifier registry
 AndaCompanion.Tests/    xUnit suite (cross-platform + Windows-only)
 AndaCompanion.Preview/  headless screenshot harness
 ../demo/                sample memo, launcher, START-HERE and the demo guide (bundled by CI)
 ../mockup/              the Appearance Lab (appearance-lab.html) and the desktop simulation (windows-simulation.html)
+../extension/           the Edge/Chromium extension: standalone or together with this app (own README, tests and golden fixture)
 ```

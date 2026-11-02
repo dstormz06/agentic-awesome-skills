@@ -366,12 +366,15 @@ history. Open these in any browser, desktop or phone, with fictional data:
 - **`mockup/appearance-lab.html`** — a comparison wall of all **fifteen looks** (the §5 table) rendering the same
   record side by side, with the at-risk and on-track records switchable, and the four compact boxes shown over an open
   email. It is the quickest way to compare looks and the source of each look's palette and structure.
+- **`extension/`** — the Edge/Chromium extension (see its README): the same card, draft check and watch rules in the browser, reached by the right-click
+  menu, three shortcuts or the toolbar button, standalone or through the app's native-messaging host. It is not a mockup: it loads in a browser engine
+  and is tested end to end there, including against the real host process. The simulation below shows its right-click menu in the Browser window.
 - **`mockup/windows-simulation.html`** — a Windows 11 desktop in the browser (default **K**) that ports the app's
   logic: the recognizer, the placement rule, the three consent models (§2, **whisper default with the urgent-peek
   rule**), the offline brief, auto-hide, the compact boxes (a click or the hotkey again expands them), the **WATCH
   line with the federal-holiday calendar** (OPM dates, 3-business-day window) and the **draft check** (`Ctrl+Alt+D`).
   My data, the writing actions and rebinding shortcuts need real files and a model connection, so the simulation only
-  describes them. It shows the forecast-first clock, the single
+  describes them. It also shows the Edge extension's **right-click menu** (Browser window only, where the extension runs) and the app's **Watch list**. It shows the forecast-first clock, the single
   needs-attention signal, a sample streamed companion brief (no model is called), pin / expand / keyboard, and the
   invalid-number whisper. **On phones and tablets the card presents as a bottom sheet** with a drag handle, scrim and
   safe-area padding, with no horizontal scroll at 390 px. It is a port, not the app: the window chrome, the hotkey and

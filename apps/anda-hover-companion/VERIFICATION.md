@@ -273,7 +273,7 @@ Final code commit **`9762220`** (run 13): Linux job green; Windows job **428 tes
 | The U.S. federal-holiday calendar is right for 2026 and 2027, including observed Friday and Monday dates | `CalendarAndWatchTests` against OPM's published list (2026: Jan 1, Jul 3, Nov 11, Dec 25; 2027: Jan 1, Jun 18, Jul 5, Nov 11, Dec 24); the same dates re-checked in the browser port; self-test `calendar-watch-draft-portfolio` on Windows | Rules, not a feed. Closures declared by executive order or a funding lapse are not predicted; they go in `closures.txt`. **No claim is made about how GDUFA treats a weekend or holiday goal date** |
 | A goal or forecast date on a weekend or federal holiday, or within N business days of one, gets one WATCH line with its evidence and source | Unit tests (ordering, wording, 0/2/3/5 window), headless card tests, 41 browser checks | The demo records are fictional, and the demo clock is frozen at the extract date |
 | Whisper is the default for new installs; an install that saved a choice keeps it; an urgent ANDA opens a peek | `FirstStepTests`, `SettingsTests` (round trip and normalisation), browser flow | Never used by a person. Urgent means a bad attention item, a forecast 7+ days late (3/7/14 selectable) or a passed goal date; these thresholds are a proposal |
-| Three shortcuts are rebindable and validated; all three register on Windows | `HotkeyTests` (parser, validation, fake API), Windows test `Real_hotkey_registration…` (3 registered, 3 problems reported to a second copy), self-test `hotkeys-registered`: all three registered | Only the first two are *pressed* as real keystrokes by the self-test (`hotkeys-delivered`). Rebinding through the Settings window was tested headless, not by a person on Windows |
+| Three shortcuts are rebindable and validated; all three register on Windows | `HotkeyTests` (parser, validation, fake API), Windows test `Real_hotkey_registration…` (3 registered, 3 problems reported to a second copy), self-test `hotkeys-registered`: all three registered | All three are pressed as real keystrokes by the self-test (`hotkeys-delivered`). *(Corrected in round 8: this row first said only two were pressed; the code always pressed every registered shortcut and only the report's wording was stale.)* Rebinding through the Settings window was tested headless, not by a person on Windows |
 | The draft check finds a wrong goal or forecast date, "on track" against a late forecast, "late" against an early forecast, and an unknown ANDA, and says what it did not check | `DraftCheckTests`, headless window tests, browser port (same sample draft) | Deterministic text rules, not language understanding; it only knows numbers, goal/forecast dates and a short list of on-track/late phrases |
 | Proofread, Rewrite and Fact-check show the exact text first and send nothing until Send; the draft is fenced as data | `WritingAndReferenceTests`, `Phase1UiTests` with a fake completer | **Never run against a live model.** Provider prompts are untested for quality |
 | The Excel/CSV portfolio and notes readers parse a workbook, detect and override columns, tolerate Excel having the file open, and refuse oversized or malformed files; unknown values stay "—" | `PortfolioTests` (generated .xlsx and .csv, caps, delimiter detection, notes index), self-test (sample CSV on Windows) | **Tested on generated files only, not on a real RPM workbook.** Real files only after approval |
@@ -293,9 +293,45 @@ Final code commit **`9762220`** (run 13): Linux job green; Windows job **428 tes
 ### What round 7 does not prove
 
 No real FDA data, no real RPM workbook, no live Elsa or Claude call, no Outlook, no right-click menu, no check against FDA's current
-files, no managed-workstation or signed-build run, no real-mouse hover test, no real email client. The Windows self-test does not render
-the draft window or the WATCH line, and does not press the third shortcut; those are covered by headless tests only. Whisper-by-default and
+files, no managed-workstation or signed-build run, no real-mouse hover test, no real email client. The Windows self-test did not render
+the draft window or the WATCH line (round 8 adds both). Whisper-by-default and
 the urgent-peek thresholds are decisions to test with the testers, not facts.
+
+## Round 8 — the Edge extension (standalone and with the app), the host, the watch list, the owner's open decisions
+
+Scope: the owner asked for everything, for every open decision to be made on their behalf (recorded in `ROADMAP.md`), and for an Edge extension that
+works alone or together with the app. Same method: build it, run it, read the counts from the CI log, and say what the runs do not prove.
+
+Commit **`e160ed3`** (run 14): Linux and Windows jobs green. Windows self-test **46 PASS, 0 WARN, 0 FAIL, 1 SKIP** (the live Claude connection, by design),
+including the new `native-host-process`, `render-draft`, `render-watch-list` and `watch-line-on-card`. The extension's 18 parity and safety tests pass on both
+runners (counts read from the Linux log; the Windows step is green). 444 non-Windows tests passed locally on this code; the run's own xUnit totals were not
+re-read. A later commit adds a manifest test (below); its run is recorded after the table.
+
+| Claim | Evidence | Limit |
+|---|---|---|
+| **The extension's JavaScript says exactly what the app says.** Same calendar, watch flags, urgency, cards, draft check, CSV and .xlsx reading | `tests/golden.json` is written by the app's own code (148 date flags, every day of 2026-2027, 27 cards under three clocks, 12 drafts, 30 recognizer texts, 8 portfolio files with 17 date formats and non-dates, an .xlsx with a hidden sheet); the JavaScript reproduces every case. The app's test fails if the app drifts from the file. Both run on Linux and Windows. Breaking the JavaScript on purpose fails 3 of the 7 parity tests | A fixed set of cases, not a proof. A rule not in the fixture could differ |
+| The extension runs only when asked and cannot read other tabs or call out | `manifest.test.mjs`: permissions are exactly `activeTab, scripting, contextMenus, storage` (+ optional `nativeMessaging`), no host permissions, no content script, no web-accessible files, no `externally_connectable`, no inline script, no `fetch`/`XMLHttpRequest`/`WebSocket`/`eval` or URL in any source file; the UI uses a closed shadow root and no `innerHTML` | A static check of the files, not a network capture |
+| It works in a real browser engine, on real pages, with no app | `tests/e2e/standalone.cjs`: **50 checks** in Chromium: whisper chip, urgent peek with its reason, full card, drawer, Copy status (clipboard content checked), NDA/short/unknown numbers not guessed, right-click text, all three consent models, draft check from a field and a contenteditable, page scan, a page with `default-src 'none'; style-src 'none'`, auto-hide (and never under the pointer), focus restored, popup (look up, draft, watch list), settings (.xlsx and .csv import, title row above the header, no column found then fixed by choosing one, wrong file type refused, no silent mixing of sources) | **Chromium, not Edge.** The browser's own context menu and shortcut handling cannot be pressed by automation: the tests call the code those call, on a copy of the extension that may read 127.0.0.1 and has an open shadow root |
+| It works together with the app, over real native messaging | `tests/e2e/native.cjs`: **11 checks** with the real .NET host process started by Chromium: lookup, draft check and watch list answered from a portfolio file, the app's "peek first" consent followed (and not followed when switched off), a demo number is *not found* rather than silently shown, host not installed and a host that lists another extension both give a plain message. Also `NativeHostProcessTests` (real pipes, clean exit) and 17 framing and protocol tests | Linux host. On Windows the published exe is started the way the browser does by the self-test: **first answer 464 ms**, clean exit |
+| Connect and Disconnect work, for one extension ID only | `NativeHostRegistrationTests` (manifest lists exactly one origin, ID format, files, data-folder pointer), a Windows-only test that round-trips the registry value in the current-user hive, headless Settings tests | **Edge itself reading that registry value was not observed**; the path is Microsoft's documented one |
+| Watch list across the portfolio | `WatchListTests`, headless window tests, identical to the extension's in the fixture, render on Windows (`render-watch-list`) | |
+| The new Windows windows render and the card shows the weekend flag | Self-test `render-draft`, `render-watch-list`, `watch-line-on-card` | One resolution |
+
+### Defects caught in round 8
+
+| # | Finding | Found by | Disposition |
+|---|---|---|---|
+| R27 | The settings page offered "(none)" for a column, but clearing a mapping falls back to automatic detection (as in the app), so the label promised something false | `standalone.cjs` | Labelled "(automatic)" |
+| R28 | Without the connection permission the app source said "This browser cannot connect", which is neither true nor useful | `standalone.cjs` | Says the connection is off and where to turn it on |
+| R29 | The host's "not found" message read "…not in your portfolio (Your portfolio: Together.csv)" | `native.cjs` against the real host | Uses the file name |
+| R30 | The extension and the app disagreed on a two-digit year: I assumed a pivot at 2029; the app's runtime pivots at 2049 | The fixture (`10/3/31` is 2031 in the app) | The extension follows the app |
+| R31 | Round 7 said the third shortcut was never pressed by the self-test; the code pressed every registered shortcut and only the report's text was stale | Reading the code while adding checks | Report text fixed, round 7 corrected above |
+
+### What round 8 does not prove
+
+No run in **Edge** itself, none on **Outlook on the web, Teams on the web or SharePoint**, none of the browser's own context menu or shortcut UI, none of Edge Add-ons or enterprise-policy
+installation, none on a managed computer, none with a signed build. The service-worker keep-alive of an open native port was not observed over a long session. The golden file proves
+agreement on its cases only. No live model, no real RPM workbook, no real Drugs@FDA file (still unreachable from the build environment), so the RLD line stays labelled unverified.
 
 ## Still open
 
