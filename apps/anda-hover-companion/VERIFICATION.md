@@ -397,6 +397,10 @@ earlier suites pass and the new one has **65 checks**; `npm run validate` and `n
 | **Middle-click trigger**, off by default, exactly the chosen key held, never swallows the click | The decision rule is unit-tested; the real hook and the injected clicks are exercised by the Windows self-test check `mouse-trigger` | Windows runner, not a person on a real machine; apps that scroll or select on a middle-click behave their own way |
 | **Shortcuts**: a live line per shortcut names one that another program owns | `HotkeyService.Report` tests; the simulation re-binds, refuses one modifier, the Windows key and duplicates, and shows a taken shortcut | The real registration result on the owner's computer has not been seen |
 
+CI: commit **`78c7f5d`** (run 18): Linux and Windows jobs green. The Windows self-test fails the job on any FAIL, so it passed, and its table includes the new **`mouse-trigger` PASS** ("a plain
+middle-click was ignored while Ctrl was required, and Ctrl + middle-click reached the app; the click was passed on untouched"), the Settings window rendering at 492x776 px, and the earlier
+checks unchanged (hotkeys delivered, select-and-peek, placement, compact boxes). The run's own xUnit totals were not re-read; the 492 above are the local Linux count.
+
 ### Defects caught in round 10
 
 | # | Finding | Found by | Disposition |
