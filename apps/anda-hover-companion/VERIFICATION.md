@@ -453,6 +453,30 @@ Nothing here has run against Microsoft, a live model, a real service or the owne
 geometric backgrounds in two looks (D and F), and none is removed until the owner chooses from the Options page. The ten **names** are proposals; availability and any
 trademark question have not been checked.
 
+## Round 12: the name, no patterns, and four new Bronze looks
+
+The owner kept the name **ANDA Companion** and added the nickname **Notula**, chose the recommended Plain paper (D) and Bronze band (F), and asked for every geometric
+background to be removed. Local results on this code: C# **588 passed, 8 skipped**; extension unit **31**; standalone browser test and native-messaging test both pass; simulation:
+all ten suites pass (the new one has **40 checks**); `npm run security:docs` passes.
+
+| Claim | Evidence | Limit |
+|---|---|---|
+| **The name is ANDA Companion (Notula)** wherever the name appears: window titles, tray tooltip, notices, the extension's name and right-click menu, the simulation, the Appearance Lab, the documents, the deck and the one-pager | A search of the whole project for the old name and for any "ANDA Companion" without the nickname; simulation suite 10 checks the page title, every occurrence and the tray label | Folder, executable, settings folder, registry keys and the workflow name keep their technical names on purpose. Availability and trademark have not been checked |
+| **No look draws a grid, hatching, facets or texture**: D has a solid square bar and no grid; F has a solid 5 px band and a plain header; the Ticket's dotted rule and the simulation's dashed list rules are plain lines | `Round12Tests` (no hatch or grid in code, F and D structure), `CompactRenderTests`, simulation suite 10 (no repeating gradient, no grid token, no facets, in the page and in the lab) | Soft colour fades (the Gauge header, E's bar, the simulated desktop) and the animated loading bar were not counted as patterns. Progress markers such as ticks, rings and dots show a value and are kept |
+| **Four new looks, P Gauge, Q Folder, R Rail and S Tag**, in the app, the simulation and the Appearance Lab, each with its own layout and every fact on the card | `Round12Tests` (every fact on each new look; the dial, the tab and square corner, the days column, the centred head), headless renders of both records, contrast and palette tests that run over every look, simulation suite 10 (every fact, shapes, AA text contrast on D, F, P, Q, R, S) | Q has no folded corner and S has a plain bar instead of a ruler, to keep patterns out. In the Windows app the Gauge's dial sits between the goal and the forecast rows, not beside them. The extension has one fixed card look and no appearance switch |
+
+### Defects caught in round 12
+
+| # | Finding | Found by | Disposition |
+|---|---|---|---|
+| R55 | In the Tag layout the progress caption sat on top of the confidence text, because the caption kept an old grid column from its previous home | A render of the new look | The column is set explicitly |
+| R56 | The headless test session was started and stopped for each test class, and sometimes failed on Avalonia's font manager ("fonts:SystemFonts"), so two unrelated tests failed in one full run | The full suite, run after adding a test class | One shared session for the whole run; two full runs passed |
+| R57 | The Ticket's stub rule was dotted and the simulation's list rules dashed: small repeating patterns | A search for dashes and dots after the owner asked for no patterns | Plain lines |
+
+### What round 12 does not prove
+
+Not run in real Edge, on a managed computer, against a live model or Microsoft, or on the owner's machine. The new looks have been rendered headlessly and in a browser, not seen on a real Windows display.
+
 ## Still open
 
 GDUFA III tier table (needs the commitment-letter text and the dual-source rule); a real-keyboard check of rebound shortcuts on

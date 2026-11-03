@@ -35,7 +35,7 @@ itself, or on a managed FDA computer. Please read `VERIFICATION.md` for what has
 ## Run the checks
 
 ```bash
-dotnet test app/AndaCompanion.Tests                                  # app: 557 pass on Linux, plus Windows-only tests on Windows
+dotnet test app/AndaCompanion.Tests                                  # app: 588 pass on Linux, plus Windows-only tests on Windows
 node --test extension/tests/unit/*.test.mjs                          # extension rules, safety, manifest, service
 NODE_PATH=$(npm root -g) node extension/tests/e2e/standalone.cjs     # real Chromium, extension alone (needs playwright)
 dotnet build app/AndaCompanion && NODE_PATH=$(npm root -g) node extension/tests/e2e/native.cjs   # extension with the real host
