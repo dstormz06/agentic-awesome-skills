@@ -398,7 +398,7 @@ connection panel with one-click Test), the Prompt Library (user-stored lenses th
 steer the brief without overriding grounding), and a first-run setup that lands a new
 user in under five minutes. A headless preview harness renders the real windows to
 PNGs for review without a Windows box. See `app/README.md`, `SECURITY.md`, and
-`PROPOSAL.md` (the director one-pager for API access).
+`PROPOSAL.md` (the director one-pager for the pilot ask).
 
 **Live demo and verification.** A GitHub Actions workflow builds the app, runs the full test suite on
 Windows and Linux, publishes a single-file Windows executable with a launcher, sample memo and demo
@@ -406,29 +406,43 @@ guide (`demo/`), and runs the app's own `--selftest` on a real Windows machine. 
 is a browser simulation of the whole tray flow for anyone who cannot run an unsigned program. What was and
 was not verified, with the defects each step found, is recorded in `VERIFICATION.md` round 5.
 
-## 12. Engagement roadmap — six features that make it the daily habit
+**The Edge extension (`extension/`).** The same card in the browser, standalone or together with the app (round 8 in
+`VERIFICATION.md`): a right-click menu on a selected number, three suggested shortcuts, a toolbar popup (look up, draft,
+watch list, this page), a draft check and a page scan. It runs only when asked, on the one tab (`activeTab`, no host
+permissions), makes no network request and uses no AI. It carries its own copy of the rules, kept identical to the app's by a
+golden file the app writes. With the app connected it uses the app's portfolio and settings through native messaging, for one
+extension ID only. The popup's tabs follow the ARIA tabs pattern (arrow keys, one tab stop); it has not been tried with a
+screen reader. Tested in Chromium, not yet in Edge.
+
+## 12. Engagement roadmap — seven features that make it the daily habit
 
 Engagement here means *the tool pays the user every time they touch it* — never
 streaks, badges, or noise. Ranked by payoff-per-build-effort:
 
-1. **Copy-ready status lines** *(next to build)* — every card gets a one-tap "Copy as
+1. **Copy-ready status lines** *(built: the Copy status button)* — every card gets a one-tap "Copy as
    status line": a perfectly formatted sentence for emails and trackers ("ANDA 216482
    (metformin ER 500 mg): cycle 2, 62%, goal Oct 3, forecast Oct 17 (+14 d, moderate);
    IR response due Jul 21."). RPMs write that sentence dozens of times a week; the tool
    that writes it for them gets opened reflexively.
-2. **Morning Runway** — hover the tray icon for a slim, pull-only strip: today across
+2. **Morning Runway** *(partly built: the on-demand Watch list covers the whole portfolio, worst first; the
+   tray-hover strip and agenda meetings are not)* — hover the tray icon for a slim, pull-only strip: today across
    *your whole portfolio* — top three clocks, items due this week, meetings where your
    ANDAs are on an agenda. The first thing checked with coffee; still zero notifications.
-3. **Huddle Mode** — one hotkey before a meeting pins mini-cards for every ANDA on the
+3. **Huddle Mode** *(not built; a concept in the pitch)* — one hotkey before a meeting pins mini-cards for every ANDA on the
    agenda in a neat row; `Esc` sweeps them away. Walking into the huddle pre-armed is
    the moment that converts the skeptics.
-4. **"What changed since Friday"** — per-ANDA diff view: which facts moved since you
+4. **"What changed since Friday"** *(not built)* — per-ANDA diff view: which facts moved since you
    last looked (new submission, slipped forecast, closed item). Answers the Monday
    question directly instead of forcing a re-read.
-5. **Time-saved meter** — a quiet counter in Settings ("~47 lookups this week ≈ 3.1 h
+5. **Time-saved meter** *(not built; the pilot times lookups with a stopwatch instead)* — a quiet counter in Settings ("~47 lookups this week ≈ 3.1 h
    of navigation avoided") — engagement for the user, adoption evidence for the
    director, and the pilot metric for the proposal, all in one number.
-7. **Grounded proofread** *(proposed; not built)* — a second hotkey on the same
+6. **Division calibration board** *(not built)* — the competition showpiece: a shared, read-only page
+   of the tool's forecast accuracy by division ("median error ±8 days, trailing 6
+   months"). An AI tool that publishes its own report card is what "first place in AI
+   automation" looks like to a review committee.
+7. **Grounded proofread** *(built: Ctrl+Alt+D draft check with no AI, plus Proofread, Rewrite and Fact-check that stay off until
+   a model is approved; never run against a live model)* — a second hotkey on the same
    select-and-press mechanism. It checks a selected draft against the record before
    anything is sent: dates, drug names and numbers that do not match are flagged first,
    deterministically and offline, then optional AI suggestions for wording. It never
@@ -437,7 +451,3 @@ streaks, badges, or noise. Ranked by payoff-per-build-effort:
    structured card record and needs its own approval; it uses its own hotkey so it can
    never fire by accident; the app shows exactly what will be sent; and it costs roughly
    2,000 tokens per proofread, so it is metered separately from card briefs.
-6. **Division calibration board** — the competition showpiece: a shared, read-only page
-   of the tool's forecast accuracy by division ("median error ±8 days, trailing 6
-   months"). An AI tool that publishes its own report card is what "first place in AI
-   automation" looks like to a review committee.

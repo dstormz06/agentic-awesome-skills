@@ -78,6 +78,7 @@ user gesture, the shadow root is open so tests can look inside (the shipped file
 
 ## Limits, stated plainly
 
+- **Keyboard and screen reader.** The popup's tabs use the arrow keys and Home/End, and every control is a real button or field with a label; this is checked by script only, **not with a screen reader**.
 - **Tested in Chromium, not in Edge.** Edge is the same engine and the manifest uses only shared APIs, but it has not been run in Edge itself.
 - **The browser's own menu and shortcut handling is not automated.** Tests trigger the same code the menu item or shortcut calls; they cannot press a native context menu or an extension shortcut.
 - **Not tested against Outlook on the web, Teams on the web or SharePoint.** The extension reads the selection and visible text, so it should work

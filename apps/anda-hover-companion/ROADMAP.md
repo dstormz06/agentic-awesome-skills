@@ -1,7 +1,7 @@
 # Roadmap: tester feedback and decisions
 
 Source: comments from two AI workgroup leads after a demo, plus the product owner's decisions. Dated 2026-11-02, updated
-with the Phase 1 build the same day. The status table below says exactly what exists and what does not.
+with the Phase 1 build and the Edge extension, and re-checked against the code on 2026-11-03. The status table below says exactly what exists and what does not.
 
 ## Decisions already made
 
