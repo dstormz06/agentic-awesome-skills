@@ -6526,7 +6526,7 @@
       "findings": [
         {
           "kind": "note",
-          "text": "Nothing to check yet. Paste or type a draft."
+          "text": "Nothing to check yet. Please paste or type a draft."
         }
       ],
       "numbersChecked": 0,
@@ -6538,7 +6538,7 @@
       "findings": [
         {
           "kind": "note",
-          "text": "Nothing to check yet. Paste or type a draft."
+          "text": "Nothing to check yet. Please paste or type a draft."
         }
       ],
       "numbersChecked": 0,
@@ -7252,7 +7252,7 @@
       "expected": {
         "ok": false,
         "count": 0,
-        "message": "No column for the ANDA number was found. Choose which column holds it in Settings.",
+        "message": "No column for the ANDA number was found. Please choose which column holds it in Settings.",
         "headers": [
           "Name",
           "Date"

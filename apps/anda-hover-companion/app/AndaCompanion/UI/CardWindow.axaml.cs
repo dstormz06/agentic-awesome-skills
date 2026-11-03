@@ -337,14 +337,14 @@ public partial class CardWindow : Window
                 ForecastDeltaText.TextWrapping = TextWrapping.Wrap; ForecastConfText.TextWrapping = TextWrapping.Wrap;
                 ForecastConfText.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left;
                 ForecastConfText.Margin = new Thickness(0);
-                _railCaption = Cap("DAYS TO GOAL");
+                _railCaption = Cap("DAYS TO GOAL"); _railCaption.TextWrapping = TextWrapping.Wrap;
                 _railDays = new TextBlock { FontSize = 38, FontWeight = FontWeight.Bold, Foreground = (IBrush)res["C.Accent"]!, FontFamily = (FontFamily)res["C.NumFont"]!, LineHeight = 42 };
-                var left = new StackPanel { Spacing = 5, Margin = new Thickness(12, 14, 10, 12) };
+                var left = new StackPanel { Spacing = 5, Margin = new Thickness(12, 14, 8, 12) };
                 left.Children.Add(_railDays); left.Children.Add(_railCaption); left.Children.Add(ForecastDeltaText); left.Children.Add(ForecastConfText);
                 var wash = new Border { Background = Br(look.RailWash!), BorderBrush = (IBrush)res["C.Line"]!, BorderThickness = new Thickness(0, 0, 1, 0), Child = left };
                 var right = new StackPanel();
                 right.Children.Add(ClockPanel); right.Children.Add(AttentionSlot);
-                var split = new Grid { ColumnDefinitions = new ColumnDefinitions("104,*") };
+                var split = new Grid { ColumnDefinitions = new ColumnDefinitions("114,*") };
                 split.Children.Add(wash); Grid.SetColumn(right, 1); split.Children.Add(right);
                 Slots.Children.Insert(at, split);
                 break;
@@ -602,8 +602,8 @@ public partial class CardWindow : Window
             MailPanel.Children.Add(MailLine(snap.State switch
             {
                 OutlookState.SigningIn => snap.Message,
-                OutlookState.Error => snap.Message + " Open Settings, then Outlook.",
-                _ => "Not signed in to Outlook. Open Settings, then Outlook, to sign in.",
+                OutlookState.Error => snap.Message + " Please open Settings, then Outlook.",
+                _ => "Not signed in to Outlook. Please open Settings, then Outlook, to sign in.",
             }, brush: Ink3()));
             return;
         }

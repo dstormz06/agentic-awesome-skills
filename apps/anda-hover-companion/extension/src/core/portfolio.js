@@ -288,7 +288,7 @@ export function openPortfolio(table, opts) {
   const savedIso = toIso(Date.UTC(savedAt.y, savedAt.m - 1, savedAt.d));
   const result = { headers: table.headers, mapping, rowsByNumber: new Map(), status: { ok: false, count: 0, message: 'Not loaded.' } };
   if (!mapping.number) {
-    result.status = { ok: false, count: 0, message: 'No column for the ANDA number was found. Choose which column holds it in Settings.' };
+    result.status = { ok: false, count: 0, message: 'No column for the ANDA number was found. Please choose which column holds it in Settings.' };
     return finish(result, name, savedIso);
   }
   const col = (key) => (mapping[key] !== undefined ? table.headers.indexOf(mapping[key]) : -1);

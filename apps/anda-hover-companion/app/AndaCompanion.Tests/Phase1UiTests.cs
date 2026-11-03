@@ -281,7 +281,7 @@ public class Phase1UiTests : IClassFixture<HeadlessFixture>
             return (p, n);
         }, CancellationToken.None);
         Assert.Contains("<record number=\"216482\">", preview);
-        Assert.Contains("Type or paste a draft first", emptyNote);
+        Assert.Contains("type or paste a draft first", emptyNote);
         Assert.Empty(fake.Users);
     }
 

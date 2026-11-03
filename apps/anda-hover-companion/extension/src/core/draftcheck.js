@@ -56,7 +56,7 @@ const longIso = (iso) => { const d = new Date(parseIso(iso)); return `${monthNam
 export function checkDraft(draft, lookup) {
   const findings = [];
   if (!draft || !draft.trim())
-    return { findings: [{ kind: 'note', text: 'Nothing to check yet. Paste or type a draft.' }], numbersChecked: 0, datesChecked: 0, statusChecked: 0 };
+    return { findings: [{ kind: 'note', text: 'Nothing to check yet. Please paste or type a draft.' }], numbersChecked: 0, datesChecked: 0, statusChecked: 0 };
 
   let numbersChecked = 0, datesChecked = 0, statusChecked = 0, multi = 0;
   const seenNumbers = new Set(), reportedUnknown = new Set(), seen = new Set();

@@ -3,7 +3,7 @@
         x:Class="AndaCompanion.UI.LookupWindow"
         SystemDecorations="None" TransparencyLevelHint="Transparent" Background="Transparent"
         SizeToContent="WidthAndHeight" CanResize="False" Topmost="True"
-        ShowInTaskbar="False" WindowStartupLocation="CenterScreen" Title="Lookup ANDA">
+        ShowInTaskbar="False" WindowStartupLocation="CenterScreen" Title="ANDA Companion (Notula) — Lookup">
   <Panel Margin="26">
     <Border Background="{DynamicResource C.Bg}" BorderBrush="{DynamicResource C.Line}"
             BorderThickness="1" CornerRadius="{DynamicResource C.Radius}"

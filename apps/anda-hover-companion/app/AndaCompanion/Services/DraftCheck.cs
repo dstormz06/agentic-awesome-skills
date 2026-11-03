@@ -40,7 +40,7 @@ public static class DraftCheck
     {
         var findings = new List<DraftFinding>();
         if (string.IsNullOrWhiteSpace(draft))
-            return new(new[] { new DraftFinding(DraftFindingKind.Note, "Nothing to check yet. Paste or type a draft.") }, 0, 0, 0);
+            return new(new[] { new DraftFinding(DraftFindingKind.Note, "Nothing to check yet. Please paste or type a draft.") }, 0, 0, 0);
 
         int numbersChecked = 0, datesChecked = 0, statusChecked = 0, multi = 0;
         var seenNumbers = new HashSet<string>();

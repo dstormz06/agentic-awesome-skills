@@ -20,10 +20,10 @@ public sealed record CaptureResult(CaptureOutcome Outcome, string? Text = null)
     /// <summary>A short plain-language notice for outcomes the user should hear about; null when silence is right.</summary>
     public string? Notice => Outcome switch
     {
-        CaptureOutcome.TerminalInFront => "Paused in terminals. Type the number instead",
-        CaptureOutcome.ModifiersHeld => "Release Ctrl and Alt, then try again",
-        CaptureOutcome.ClipboardBusy => "Clipboard is busy. Try again",
-        CaptureOutcome.ClipboardTooLarge => "Clipboard too large to preserve. Use lookup",
+        CaptureOutcome.TerminalInFront => "Paused in terminals. Please type the number.",
+        CaptureOutcome.ModifiersHeld => "Please release Ctrl and Alt, then try again",
+        CaptureOutcome.ClipboardBusy => "The clipboard is busy. Please try again",
+        CaptureOutcome.ClipboardTooLarge => "Clipboard too large. Please use the lookup box",
         _ => null,
     };
 }

@@ -105,3 +105,68 @@ public class Round12Tests : IClassFixture<HeadlessFixture>
         Assert.Equal(Avalonia.Layout.HorizontalAlignment.Center, r.Item2);
     }
 }
+
+/// <summary>Every full look has to survive the awkward records a real portfolio produces: nothing known, very long text, peek mode and an open drawer.</summary>
+[Collection("Global state")]
+public class LookRobustnessTests : IClassFixture<HeadlessFixture>
+{
+    private readonly HeadlessFixture _fx;
+    public LookRobustnessTests(HeadlessFixture fx) => _fx = fx;
+    private static void Settle() { Dispatcher.UIThread.RunJobs(); AvaloniaHeadlessPlatform.ForceRenderTimerTick(); }
+
+    public static IEnumerable<AppearanceId> FullLooks => Appearances.All.Where(a => !a.IsCompact).Select(a => a.Id);
+    public static IEnumerable<object[]> Cases() => from id in FullLooks from v in new[] { "sparse", "long", "peek", "drawer", "healthy" } select new object[] { id, v };
+
+    private static AndaRecord Sparse() => new()
+    {
+        Number = "123456", Drug = "Unknown product", Meta = AndaRecord.Unknown, GoalDate = AndaRecord.Unknown, GoalDays = "", ProgressPct = -1,
+        ForecastDate = AndaRecord.Unknown, ForecastDelta = AndaRecord.Unknown, ForecastLate = false, ForecastConfidence = "", Latest = AndaRecord.Unknown,
+        Pending = Array.Empty<PendingItem>(), Notes = Array.Empty<NoteItem>(), ForecastDetail = "", Sisters = Array.Empty<SisterRef>(),
+    };
+
+    private static AndaRecord Long() => Demo with
+    {
+        Drug = "Metformin Hydrochloride Extended-Release Tablets, 500 mg and 750 mg, film-coated, in blister packs of thirty and one hundred",
+        Meta = "A very long applicant name that goes on (fictional) Pharmaceuticals and Distribution Partners International · Cycle 2",
+        Attention = new AttentionItem(AttentionLevel.Bad, "An information request response is overdue by eleven days and the facility inspection is still unresolved, so please look today"),
+        Latest = "An amendment with a very long description was received on Jun 30 and is still under review by three different disciplines",
+        Ahead = "A long anticipation line that keeps going: the Thursday huddle, a leadership request for status and two sister applications to compare",
+        ForecastConfidence = "moderate confidence, based on only two earlier cycles",
+    };
+
+    private static AndaRecord Demo => new MockAndaRepository().Find("216482")!;
+
+    [Theory, MemberData(nameof(Cases))]
+    public async Task The_card_renders_inside_its_frame_with_its_facts(AppearanceId id, string variant)
+    {
+        var r = await _fx.Session.Dispatch(() =>
+        {
+            ThemeManager.Apply(id);
+            var repo = new MockAndaRepository();
+            var rec = variant switch { "sparse" => Sparse(), "long" => Long(), "healthy" => repo.Find("214990")!, _ => Demo };
+            var w = new CardWindow(new OfflineBriefService(), repo.Find) { CloseWhenDeactivated = false, Today = () => new DateOnly(2026, 11, 2) };
+            w.Show(rec, new PixelPoint(40, 40), variant == "peek"); Settle();
+            if (variant == "drawer") { w.FindControl<Button>("ExpBtn")!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent)); Settle(); }
+            var root = w.FindControl<Border>("Root")!;
+            var frame = w.CaptureRenderedFrame();
+            double rootW = root.Bounds.Width;
+            var outside = w.GetVisualDescendants().OfType<TextBlock>().Where(t => t.IsVisible && !string.IsNullOrEmpty(t.Text) && t.IsEffectivelyVisible)
+                .Select(t => (t.Text, Right: t.TranslatePoint(new Point(t.Bounds.Width, 0), root)?.X ?? 0)).Where(x => x.Right > rootW + 1).Select(x => x.Text).ToList();
+            var texts = w.GetVisualDescendants().OfType<TextBlock>().Where(t => t.IsEffectivelyVisible).Select(t => t.Text ?? "").ToList();
+            string? dir = Environment.GetEnvironmentVariable("ANDA_SHOT_DIR");
+            if (dir is not null && frame is not null) { Directory.CreateDirectory(dir); frame.Save(Path.Combine(dir, $"{id}-{variant}.png")); }
+            w.Close(); Settle();
+            ThemeManager.Apply(Appearances.Default);
+            return (frame, rootW, outside, texts);
+        }, CancellationToken.None);
+
+        Assert.NotNull(r.frame);
+        Assert.InRange(r.rootW, 360, 520);
+        Assert.True(r.outside.Count == 0, $"{id}/{variant}: text sticks out of the card: {string.Join(" | ", r.outside.Take(3))}");
+        string all = string.Join("\n", r.texts);
+        Assert.Contains(variant == "sparse" ? "123456" : variant == "healthy" ? "214990" : "216482", all);
+        if (variant != "peek") { Assert.Contains("PSG", all); Assert.Contains("RLD LABEL", all); }   // both reference lines are on every full card (a peek is the short form)
+        if (variant == "sparse") Assert.DoesNotContain("NaN", all);
+        if (variant is "peek") Assert.DoesNotContain("OFFLINE BRIEF", all);                   // a peek makes no brief
+    }
+}

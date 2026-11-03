@@ -101,7 +101,7 @@ public sealed class OutlookService : IDisposable
     public static string? ValidateSetup(OutlookSettings s)
     {
         if (!s.Enabled) return "Outlook is off.";
-        if (!Guid.TryParseExact((s.ClientId ?? "").Trim(), "D", out _)) return "Enter the Application (client) ID your organization gave you. It looks like 12345678-1234-1234-1234-123456789abc.";
+        if (!Guid.TryParseExact((s.ClientId ?? "").Trim(), "D", out _)) return "Please enter the Application (client) ID your organization gave you. It looks like 12345678-1234-1234-1234-123456789abc.";
         if (!Tenant.IsMatch((s.TenantId ?? "").Trim())) return "The directory (tenant) must be \"organizations\", a directory ID or your organization's domain name.";
         return null;
     }
@@ -112,7 +112,7 @@ public sealed class OutlookService : IDisposable
         if (ValidateSetup(s) is { } problem) return new(s.Enabled ? OutlookState.NotSetUp : OutlookState.Off, problem);
         if (_snapshot.State is OutlookState.SigningIn or OutlookState.Error) return _snapshot;
         if (_token is not null && _now() < _expires) return new(OutlookState.SignedIn, "Signed in to Outlook (read-only). The sign-in ends when the app closes.");
-        return new(OutlookState.SignedOut, _snapshot.State == OutlookState.SignedOut && _snapshot.Message.Length > 0 ? _snapshot.Message : "Not signed in. Press Sign in.");
+        return new(OutlookState.SignedOut, _snapshot.State == OutlookState.SignedOut && _snapshot.Message.Length > 0 ? _snapshot.Message : "Not signed in. Please press Sign in.");
     }
 
     private void Set(OutlookSnapshot next) { lock (_gate) _snapshot = next; Changed?.Invoke(); }
@@ -148,7 +148,7 @@ public sealed class OutlookService : IDisposable
             string device = r.GetProperty("device_code").GetString() ?? "", code = r.GetProperty("user_code").GetString() ?? "", uri = r.GetProperty("verification_uri").GetString() ?? "";
             int interval = r.TryGetProperty("interval", out var iv) && iv.TryGetInt32(out int i) ? Math.Clamp(i, 1, 30) : 5;
             int lifetime = r.TryGetProperty("expires_in", out var ex) && ex.TryGetInt32(out int e) ? Math.Clamp(e, 30, 1800) : 900;
-            Set(new(OutlookState.SigningIn, $"Open {uri} in your browser and enter the code {code}. Then wait here.", code, uri));
+            Set(new(OutlookState.SigningIn, $"Please open {uri} in your browser and enter the code {code}, then wait here.", code, uri));
 
             var until = _now().AddSeconds(lifetime);
             while (_now() < until)

@@ -68,7 +68,7 @@ const PAGE = `<!doctype html><meta charset="utf-8"><title>Huddle prep</title><bo
   await page.evaluate(() => getSelection().removeAllRanges());
   await h.trigger(worker, 'peek');
   await notice().waitFor({ timeout: 5000 });
-  h.ok((await text(notice())).includes('Select an ANDA number first'), 'no selection: it says what to do');
+  h.ok((await text(notice())).includes('select an ANDA number first'), 'no selection: it says what to do');
   await page.keyboard.press('Escape');
 
   // ---- right-click text from the browser's own menu is used even when the page selection is gone ----
@@ -168,11 +168,11 @@ const PAGE = `<!doctype html><meta charset="utf-8"><title>Huddle prep</title><bo
     await page.locator('#' + id).focus(); await page.evaluate((i) => document.getElementById(i).select(), id);
     await h.trigger(worker, 'peek');
     await notice().waitFor({ timeout: 5000 });
-    h.ok((await text(notice())).includes('Select an ANDA number first') && (await card().count()) === 0 && (await chip().count()) === 0, `a ${id === 'pw' ? 'password' : id === 'cc' ? 'card-number' : 'one-time-code'} field is not read for a peek, even with its text selected`);
+    h.ok((await text(notice())).includes('select an ANDA number first') && (await card().count()) === 0 && (await chip().count()) === 0, `a ${id === 'pw' ? 'password' : id === 'cc' ? 'card-number' : 'one-time-code'} field is not read for a peek, even with its text selected`);
     await page.keyboard.press('Escape');
     await h.trigger(worker, 'draft');
     await notice().waitFor({ timeout: 5000 });
-    h.ok((await text(notice())).includes('Select some text') && (await panel().count()) === 0, '... nor for a draft check');
+    h.ok((await text(notice())).includes('select some text') && (await panel().count()) === 0, '... nor for a draft check');
     await page.keyboard.press('Escape');
   }
   await page.locator('#draft').focus(); await page.evaluate(() => document.getElementById('draft').select());

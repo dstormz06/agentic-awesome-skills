@@ -221,11 +221,11 @@ public class HotkeyParserTests
     }
 
     [Theory]
-    [InlineData("", "Press the keys")]
-    [InlineData("A", "Add a key after|at least two modifiers")]
+    [InlineData("", "press the keys")]
+    [InlineData("A", "add a key after|at least two modifiers")]
     [InlineData("Ctrl+C", "at least two modifiers")]
     [InlineData("Alt+F4", "at least two modifiers")]
-    [InlineData("Shift+Alt", "Add a key")]
+    [InlineData("Shift+Alt", "add a key")]
     [InlineData("Shift+A", "at least two modifiers")]
     [InlineData("Ctrl+Win+A", "reserved by Windows")]
     [InlineData("Ctrl+Alt+A+B", "one key")]

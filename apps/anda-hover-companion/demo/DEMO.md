@@ -1,6 +1,6 @@
 # Live demo guide: ANDA Companion (Notula)
 
-Fictional data only. A concept prototype, not an FDA product. About five minutes.
+Thank you for trying it. Fictional data only. A concept prototype, not an FDA product. About five minutes.
 
 > **If your organization manages your computer (for example, FDA staff), please do not download or run the Windows
 > build on it until your IT or security team has approved it.** It is an unsigned program that sends keystrokes and

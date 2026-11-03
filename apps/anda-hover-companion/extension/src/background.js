@@ -36,7 +36,7 @@ const send = (tabId, msg) => chrome.tabs.sendMessage(tabId, msg, { frameId: 0 })
 async function cannotRunHere(tab) {
   await chrome.action.setBadgeBackgroundColor({ color: '#8a5800', tabId: tab.id });
   await chrome.action.setBadgeText({ text: '!', tabId: tab.id });
-  await chrome.action.setTitle({ title: 'ANDA Companion (Notula) cannot run on this page. Use the toolbar button to look a number up.', tabId: tab.id });
+  await chrome.action.setTitle({ title: 'ANDA Companion (Notula) cannot run on this page. Please use the toolbar button to look a number up.', tabId: tab.id });
   setTimeout(() => { chrome.action.setBadgeText({ text: '', tabId: tab.id }).catch(() => {}); chrome.action.setTitle({ title: 'ANDA Companion (Notula)', tabId: tab.id }).catch(() => {}); }, 6000);
 }
 
@@ -55,9 +55,9 @@ async function peek(tab, menuText) {
     const text = (menuText && menuText.trim()) || (sel && sel.text) || '';
     const anchor = sel && sel.top ? sel.rect : null;   // a selection inside a frame is not placed near itself; the card goes to the corner
     const settings = await service.effectiveSettings();
-    if (!text.trim()) return send(tabId, { type: 'anda:notice', text: 'Select an ANDA number first, then use the shortcut or right-click.', autoHideSeconds: settings.autoHideSeconds });
+    if (!text.trim()) return send(tabId, { type: 'anda:notice', text: 'Please select an ANDA number first, then use the shortcut or right-click.', autoHideSeconds: settings.autoHideSeconds });
     if (extractNumber(text) === null)
-      return send(tabId, { type: 'anda:notice', text: 'No ANDA number in the selection (a number labelled NDA, BLA, IND, DMF or MF is not treated as an ANDA). Use the toolbar button to type one.', anchor, autoHideSeconds: settings.autoHideSeconds });
+      return send(tabId, { type: 'anda:notice', text: 'No ANDA number in the selection (a number labelled NDA, BLA, IND, DMF or MF is not treated as an ANDA). Please use the toolbar button to type one.', anchor, autoHideSeconds: settings.autoHideSeconds });
     const r = await service.lookup(text);
     if (!r.ok) return send(tabId, { type: 'anda:notice', text: r.message, anchor, autoHideSeconds: settings.autoHideSeconds });
     return send(tabId, { type: 'anda:show', step: r.step, card: r.card, anchor, reason: r.step === 'peek' && r.card.urgency.isUrgent ? r.card.urgency.reason : null, autoHideSeconds: r.settings.autoHideSeconds });
@@ -71,7 +71,7 @@ async function checkDraft(tab, menuText) {
     try { drafts = await run(tabId, pageDraft, true); } catch (e) { /* skipped frames */ }
     const d = drafts.find((x) => x.text && x.text.trim()) || { text: '', from: 'selection' };
     const text = (menuText && menuText.trim()) || d.text;
-    if (!text.trim()) return send(tabId, { type: 'anda:notice', text: 'Select some text, or click into the message you are writing, then try again.', autoHideSeconds: settings.autoHideSeconds });
+    if (!text.trim()) return send(tabId, { type: 'anda:notice', text: 'Please select some text, or click into the message you are writing, then try again.', autoHideSeconds: settings.autoHideSeconds });
     const r = await service.draft(text);
     if (!r.ok) return send(tabId, { type: 'anda:notice', text: r.message, autoHideSeconds: settings.autoHideSeconds });
     return send(tabId, { type: 'anda:panel', kind: 'draft', title: 'Check a draft', result: r.result, note: `Checked ${text.length.toLocaleString()} characters from ${menuText ? 'your selection' : d.from}. Nothing was sent anywhere.`, autoHideSeconds: settings.autoHideSeconds });

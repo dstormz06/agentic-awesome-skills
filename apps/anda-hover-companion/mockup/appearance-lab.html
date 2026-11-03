@@ -201,13 +201,14 @@ h2.sec{font-size:13px;letter-spacing:.12em;font-weight:700;color:var(--ink3);mar
 .card[data-look="q"] .idrow .num{background:var(--c-accent);color:#fff;padding:6px 14px;margin:-14px 0 -6px -16px;border-radius:0 0 12px 0}
 .card[data-look="q"] .seal{background:transparent;border:1.5px solid var(--c-good);border-radius:4px;color:var(--c-good)}
 .card[data-look="q"] .chip{border:none;border-bottom:1px solid var(--c-line);border-radius:0;padding:6px 2px;min-height:36px}
-.card[data-look="r"] .split{display:grid;grid-template-columns:104px 1fr}
-.card[data-look="r"] .lft{display:flex;flex-direction:column;gap:5px;background:#f6efe2;border-right:1px solid var(--c-line);padding:14px 10px 12px 12px}
+.card[data-look="r"] .split{display:grid;grid-template-columns:114px 1fr}
+.card[data-look="r"] .lft{display:flex;flex-direction:column;gap:5px;background:#f6efe2;border-right:1px solid var(--c-line);padding:14px 8px 12px 12px}
 .card[data-look="r"] .lft b{font-size:38px;line-height:1;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--c-accent)}
 .card[data-look="r"] .lft .cap{font-size:9.5px;font-weight:800;letter-spacing:.12em;color:var(--c-ink3)}
 .card[data-look="r"] .lft .rd{font-size:11.5px;font-weight:700;color:var(--c-warn)}.card[data-look="r"] .lft .rd.good{color:var(--c-good)}
 .card[data-look="r"] .lft .rc{font-size:10.5px;color:var(--c-ink3)}
 .card[data-look="r"] .p-bar{height:6px;border-radius:0}.card[data-look="r"] .p-bar i{border-radius:0}
+.card[data-look="r"] .rgt .lblx{width:64px}.card[data-look="r"] .rgt .crow{gap:8px;flex-wrap:wrap}
 .card[data-look="s"] .hd{text-align:center;position:relative;padding-top:26px}
 .card[data-look="s"] .hd::before{content:"";position:absolute;top:9px;left:50%;width:54px;height:11px;margin-left:-27px;border-radius:99px;border:1.5px solid var(--c-accent);background:rgba(122,90,46,.10)}
 .card[data-look="s"] .idrow{justify-content:center}
@@ -220,6 +221,7 @@ h2.sec{font-size:13px;letter-spacing:.12em;font-weight:700;color:var(--ink3);mar
 .card[data-look="s"] .foot2{display:flex;justify-content:space-between;font-size:10.5px;color:var(--c-ink3)}
 .card[data-look="s"] .p-bar{margin:12px 0 4px}
 .card[data-look="s"] .chips{justify-content:center}
+@media (max-width:420px){.card[data-look="r"] .split{grid-template-columns:92px 1fr}.card[data-look="r"] .lft{padding:12px 6px 10px 10px}.card[data-look="r"] .lft b{font-size:30px}.card[data-look="r"] .rgt .lblx{width:54px}}
 /* ---- the structural signature of each look ---- */
 .card[data-look="b"] .seal{border:1.5px solid var(--c-good);border-radius:4px;transform:rotate(-2.5deg);padding:2px 7px;background:transparent}
 .card[data-look="b"] .drug{font-size:16px;font-style:italic}

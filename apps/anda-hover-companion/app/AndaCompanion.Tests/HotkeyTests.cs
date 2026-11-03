@@ -75,7 +75,7 @@ public class HotkeyTests
         Assert.False(peek.Registered);
         string message = HotkeyService.Describe(peek)!;
         Assert.Contains("Ctrl+Alt+A is already used by another program", message);
-        Assert.Contains("Choose another shortcut in Settings, or use the tray icon", message);
+        Assert.Contains("choose another shortcut in Settings, or use the tray icon", message);
 
         Assert.True(status.Single(s => s.Binding.Id == HotkeyService.IdLookup).Registered);   // one failure must not block the other
     }

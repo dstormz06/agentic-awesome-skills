@@ -31,7 +31,7 @@ public class CaptureTests
     public void Outcomes_that_need_a_word_to_the_user_have_a_notice_and_the_rest_are_silent()
     {
         Assert.Contains("terminals", new CaptureResult(CaptureOutcome.TerminalInFront).Notice);
-        Assert.Contains("Release Ctrl and Alt", new CaptureResult(CaptureOutcome.ModifiersHeld).Notice);
+        Assert.Contains("release Ctrl and Alt", new CaptureResult(CaptureOutcome.ModifiersHeld).Notice);
         Assert.Contains("busy", new CaptureResult(CaptureOutcome.ClipboardBusy).Notice);
         Assert.Contains("too large", new CaptureResult(CaptureOutcome.ClipboardTooLarge).Notice);
         Assert.Null(new CaptureResult(CaptureOutcome.Captured, "216482").Notice);
@@ -50,7 +50,7 @@ public class CaptureTests
     public void Notice_lifetime_scales_with_length_within_sane_bounds()
     {
         Assert.Equal(TimeSpan.FromSeconds(2.5), ChipWindow.NoticeLifetime("Hi"));
-        Assert.True(ChipWindow.NoticeLifetime("Paused in terminals. Type the number instead") > TimeSpan.FromSeconds(3.5));
+        Assert.True(ChipWindow.NoticeLifetime("Paused in terminals. Please type the number.") > TimeSpan.FromSeconds(3.5));
         Assert.Equal(TimeSpan.FromSeconds(8), ChipWindow.NoticeLifetime(new string('x', 500)));
     }
 

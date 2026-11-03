@@ -209,7 +209,7 @@ internal static class SelfTest
         await Safe(report, "chip-notice", async () =>
         {
             var chip = new ChipWindow();
-            chip.ShowNotice("Paused in terminals. Type the number instead", Anchor);
+            chip.ShowNotice("Paused in terminals. Please type the number.", Anchor);
             report.Add(await ShootAsync(chip, "chip-notice", o.OutDir, false));
             chip.Close();
         });

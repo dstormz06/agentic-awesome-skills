@@ -454,8 +454,8 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 :root[data-dir="q"] .seal{background:transparent;border:1.5px solid var(--c-good);border-radius:4px;color:var(--c-good)}
 :root[data-dir="q"] .p-bar{display:none}:root[data-dir="q"] .p-line{display:block}
 :root[data-dir="q"] .chip{border:none;border-bottom:1px solid var(--c-line);border-radius:0;padding:6px 2px;min-height:36px}
-:root[data-dir="r"] .clockwrap{display:grid;grid-template-columns:104px 1fr}
-:root[data-dir="r"] .railcol{display:flex;flex-direction:column;gap:5px;grid-row:1/3;background:#f6efe2;border-right:1px solid var(--c-line);padding:14px 10px 12px 12px}
+:root[data-dir="r"] .clockwrap{display:grid;grid-template-columns:114px 1fr}
+:root[data-dir="r"] .railcol{display:flex;flex-direction:column;gap:5px;grid-row:1/3;background:#f6efe2;border-right:1px solid var(--c-line);padding:14px 8px 12px 12px}
 :root[data-dir="r"] .railcol b{font-size:38px;line-height:1;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--c-accent)}
 :root[data-dir="r"] .railcol .cap{font-size:9.5px;font-weight:800;letter-spacing:.12em;color:var(--c-ink3)}
 :root[data-dir="r"] .railcol .rdelta{font-size:11.5px;font-weight:700;color:var(--c-warn)}
@@ -464,6 +464,7 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 :root[data-dir="r"] .clockwrap>.slot.clock{grid-column:2;border-top:1px solid var(--c-hair)}
 :root[data-dir="r"] .clockwrap>.attn-slot{grid-column:2}
 :root[data-dir="r"] .clock .cdays,:root[data-dir="r"] .clock .fdelta,:root[data-dir="r"] .clock .fconf{display:none}
+:root[data-dir="r"] .clock .lblx{width:64px}:root[data-dir="r"] .clock .crow{gap:8px;flex-wrap:wrap}
 :root[data-dir="r"] .p-bar{height:6px;border-radius:0}:root[data-dir="r"] .p-bar i{border-radius:0}
 :root[data-dir="s"] .hd{text-align:center;position:relative;padding-top:26px}
 :root[data-dir="s"] .hd::before{content:"";position:absolute;top:9px;left:50%;width:54px;height:11px;margin-left:-27px;border-radius:99px;border:1.5px solid var(--c-accent);background:var(--c-mark)}
@@ -482,6 +483,7 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 :root[data-dir="s"] .cpct::after{content:" through review"}
 :root[data-dir="s"] .fconf{grid-column:2;grid-row:5;margin:0}
 :root[data-dir="s"] .chips{justify-content:center}
+@media (max-width:420px){:root[data-dir="r"] .clockwrap{grid-template-columns:92px 1fr}:root[data-dir="r"] .railcol{padding:12px 6px 10px 10px}:root[data-dir="r"] .railcol b{font-size:30px}:root[data-dir="r"] .clock .lblx{width:54px}:root[data-dir="r"] .clock .cdate{font-size:12.5px}}
 
 /* ---- structure of the new looks ---- */
 :root[data-dir="f"] #card{border-top:5px solid var(--c-accent)}
@@ -692,9 +694,9 @@ C:\work&gt; </div>
 
   <!-- ===== guide ===== -->
   <section class="win" id="guide" aria-label="Demo guide">
-    <div class="bar"><span class="ttl">Try it in eight steps</span></div>
+    <div class="bar"><span class="ttl">Try it in nine steps</span></div>
     <div class="body">
-      <p class="sub">Select a number in any window and press a hotkey. By default you get a small invite; an at-risk ANDA opens a peek by itself. Weekend and holiday goal dates are flagged.</p>
+      <p class="sub">Please select a number in any window and press a shortcut. By default you will see a small invite, and an at-risk ANDA opens a peek by itself. Weekend and holiday goal dates are flagged.</p>
       <ol id="steps">
         <li data-step="pin"><i>✓</i><span>Click <b>^</b> in the tray, then <b>Pin</b> the icon.</span></li>
         <li data-step="peek"><i>✓</i><span>Select <b>216482</b> (at risk), press <span data-kbd="peek"></span>: a peek opens by itself.</span></li>
@@ -797,7 +799,7 @@ C:\work&gt; </div>
     <div class="krow"><span>Lookup box</span><input type="text" id="keyBoxLook" readonly aria-label="Lookup shortcut"><button class="pill quiet" type="button" data-keyreset="look">Reset</button></div>
     <div class="krow"><span>Check a draft</span><input type="text" id="keyBoxDraft" readonly aria-label="Check a draft shortcut"><button class="pill quiet" type="button" data-keyreset="draft">Reset</button></div>
     <div class="keystatus" id="keyStatus" role="status"></div>
-    <p class="hint">Use at least two modifiers, one of them Ctrl or Alt, so everyday shortcuts like Ctrl+C keep working. On keyboards where Ctrl+Alt is AltGr, choose Ctrl+Shift instead. Never the Windows key.</p>
+    <p class="hint">Please use at least two modifiers, one of them Ctrl or Alt, so everyday shortcuts like Ctrl+C keep working. On keyboards where Ctrl+Alt is AltGr, choose Ctrl+Shift instead. Never the Windows key.</p>
     <div class="lbl">OTHER WAYS TO START IT</div>
     <label class="opt"><input type="checkbox" id="setMiddle"> Middle-click (wheel button) on selected text starts Select &amp; Peek</label>
     <div class="wrap" id="setMiddleMod"></div>
@@ -1188,7 +1190,7 @@ const showMention = mt => new Date(Date.UTC(2000, mt.mon - 1, 1)).toLocaleDateSt
 function draftCheck(draft){
   const findings = [], seenF = new Set(), seenN = new Set(), unknownSeen = new Set();
   const add = (kind, text) => { if(!seenF.has(kind + text)){ seenF.add(kind + text); findings.push({ kind, text }); } };
-  if(!draft || !draft.trim()) return { findings:[{ kind:"note", text:"Nothing to check yet. Paste or type a draft." }] };
+  if(!draft || !draft.trim()) return { findings:[{ kind:"note", text:"Nothing to check yet. Please paste or type a draft." }] };
   let numbers = 0, dates = 0, status = 0, multi = 0;
   for(const paragraph of draft.split(/\r?\n\s*\r?\n/)){
     let context = null;
@@ -1448,7 +1450,7 @@ function copyStatus(){
   const text = statusLine(current), btn = $("chipCopy");
   const done = () => { btn.textContent = "Copied ✓"; setTimeout(() => btn.textContent = "Copy status", 1200); };
   (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text) : Promise.reject())
-    .then(done, () => showNotice("The browser blocked copying. Status line: " + text, anchorForCard()));
+    .then(done, () => showNotice("Your browser blocked copying, so here is the status line: " + text, anchorForCard()));
 }
 const anchorForCard = () => ({ x: card.offsetLeft + 12, y: card.offsetTop + card.offsetHeight - 40 });
 
@@ -1555,7 +1557,7 @@ function hotkey(kind, source){
   if(!state.capture){ showKeys(kind); openLookup(anchor); return; }
   if(focusedWin === "term"){
     showKeys(kind);
-    showNotice("Paused in terminals. Type the number instead", anchor); markStep("look3"); openLookup(anchor); return;
+    showNotice("Paused in terminals. Please type the number.", anchor); markStep("look3"); openLookup(anchor); return;
   }
   const sel = getSelection().toString().trim() ? { text:getSelection().toString() } : lastSel;
   showKeys(kind, sel ? "Copied your selection, read it, put your clipboard back ✓" : "");
@@ -1885,7 +1887,7 @@ function comboFromEvent(e){
 function validateCombo(c){
   const mods = c.split("+").slice(0, -1);
   if(mods.includes("Win")) return "Do not use the Windows key: Windows keeps those for itself.";
-  if(mods.length < 2) return "Use at least two modifiers (Ctrl, Alt, Shift) so everyday shortcuts like Ctrl+C keep working.";
+  if(mods.length < 2) return "Please use at least two modifiers (Ctrl, Alt, Shift) so everyday shortcuts like Ctrl+C keep working.";
   if(!mods.includes("Ctrl") && !mods.includes("Alt")) return "One of the modifiers must be Ctrl or Alt.";
   return null;
 }
@@ -2008,15 +2010,15 @@ function validPath(p){
 }
 function validateMyApi(a){
   const ep = (a.endpoint || "").trim();
-  if(!ep) return "Enter the endpoint address of your API (https://…).";
+  if(!ep) return "Please enter the endpoint address of your API (https://…).";
   let u; try{ u = new URL(ep); }catch(e){ return "The endpoint must be an https:// address (http:// is accepted only for localhost). Nothing was sent."; }
   const local = ["localhost", "127.0.0.1", "[::1]"].includes(u.hostname);
   if(!(u.protocol === "https:" || (u.protocol === "http:" && local))) return "The endpoint must be an https:// address (http:// is accepted only for localhost). Nothing was sent.";
-  if(u.username || u.password) return "Do not put a user name or password in the address. Use the environment variable for the token. Nothing was sent.";
+  if(u.username || u.password) return "Please do not put a user name or password in the address; use the environment variable for the token instead. Nothing was sent.";
   try{ JSON.parse(fillTemplate(a.template || EXAMPLE_TEMPLATE, a.model)); }catch(e){ return "The request body is not valid JSON once the placeholders are filled in."; }
-  if(!validPath(a.path)) return "The reply path is not valid. Use names and [numbers], for example choices[0].message.content";
+  if(!validPath(a.path)) return "The reply path is not valid. Please use names and [numbers], for example choices[0].message.content";
   const v = (a.env || "").trim();
-  if(v && !/^[A-Za-z_][A-Za-z0-9_]{0,127}$/.test(v)) return "That is not an environment variable name. Put the NAME of the variable here, never the token itself.";
+  if(v && !/^[A-Za-z_][A-Za-z0-9_]{0,127}$/.test(v)) return "That does not look like an environment variable name. Please enter the NAME of the variable, never the token itself.";
   return null;
 }
 const EXAMPLE_TEMPLATE = '{"model":"{{model}}","max_tokens":{{max_tokens}},"messages":[{"role":"system","content":"{{system}}"},{"role":"user","content":"{{user}}"}]}';
@@ -2063,9 +2065,9 @@ function paintData(){
 $("dataUpdate").addEventListener("click", () => {
   const url = $("dataUrl").value.trim(), out = $("dataRefStatus"); out.dataset.keep = "1";
   let u = null; try{ u = new URL(url); }catch(e){}
-  out.textContent = !url ? "Paste the address of the Drugs@FDA data file first. Nothing was fetched."
+  out.textContent = !url ? "Please paste the address of the Drugs@FDA data file first. Nothing was fetched."
     : (!u || !(u.protocol === "https:" || (u.protocol === "http:" && ["localhost", "127.0.0.1"].includes(u.hostname)))) ? "The address must start with https:// (http:// is accepted only for localhost). Nothing was fetched."
-    : u.username || u.password ? "Do not put a user name or password in the address. Nothing was fetched."
+    : u.username || u.password ? "Please do not put a user name or password in the address. Nothing was fetched."
     : "Simulation: nothing was fetched. In the Windows app this downloads that one address, only when you press the button, and keeps it only if it really is a Drugs@FDA data file.";
 });
 paintData();
@@ -2170,7 +2172,7 @@ const OL_CODE = "DEMO-4821";
 function olProblem(){
   const o = state.outlook;
   if(!o.on) return "Outlook is off.";
-  if(!GUID_OK.test(o.client.trim())) return "Enter the Application (client) ID your organization gave you. It looks like 12345678-1234-1234-1234-123456789abc.";
+  if(!GUID_OK.test(o.client.trim())) return "Please enter the Application (client) ID your organization gave you. It looks like 12345678-1234-1234-1234-123456789abc.";
   if(!TENANT_OK.test(o.tenant.trim())) return "The directory (tenant) must be \"organizations\", a directory ID or your organization's domain name.";
   return null;
 }
@@ -2178,9 +2180,9 @@ function olProblem(){
 function olState(){
   const o = state.outlook, bad = olProblem();
   if(bad) return { id:o.on ? "notsetup" : "off", text:bad };
-  if(o.step === "code") return { id:"signing", text:`Open https://microsoft.com/devicelogin in your browser and enter the code ${OL_CODE}. Then wait here. (Rehearsal: the sign-in completes by itself in a moment.)` };
+  if(o.step === "code") return { id:"signing", text:`Please open https://microsoft.com/devicelogin in your browser and enter the code ${OL_CODE}, then wait here. (Rehearsal: the sign-in completes by itself in a moment.)` };
   if(o.step === "in") return { id:"in", text:"Signed in to Outlook (read-only, rehearsal). The sign-in ends when the app closes." };
-  return { id:"out", text:o.msg || "Not signed in. Press Sign in." };
+  return { id:"out", text:o.msg || "Not signed in. Please press Sign in." };
 }
 function paintOutlook(){
   const o = state.outlook, st = olState();
@@ -2247,7 +2249,7 @@ function paintMail(id){
   const line = (text, css) => { const p = document.createElement("div"); p.textContent = text; p.style.cssText = css || ""; box.appendChild(p); };
   if(st.id !== "in"){
     $("x-mail-n").textContent = "";
-    line(st.id === "signing" ? st.text : "Not signed in to Outlook. Open Settings, then Outlook, to sign in.", "color:var(--c-ink3)");
+    line(st.id === "signing" ? st.text : "Not signed in to Outlook. Please open Settings, then Outlook, to sign in.", "color:var(--c-ink3)");
     return;
   }
   const items = fakeMail(id).slice(0, o.max);
@@ -2374,7 +2376,7 @@ function setTaken(kind, on){
   state.taken[kind] = on; paintKeys();
   if(on && state.running){
     const other = kind === "look" ? state.keys.peek : state.keys.look;
-    showNotice(`${state.keys[kind]} is already used by another program. Use ${other} or the tray icon.`, { x:innerWidth - 360, y:innerHeight - 150 });
+    showNotice(`${state.keys[kind]} is already used by another program. Please use ${other} or the tray icon.`, { x:innerWidth - 360, y:innerHeight - 150 });
   }
 }
 $("swConflict").addEventListener("change", e => setTaken("peek", e.target.checked));
@@ -2392,8 +2394,8 @@ $("expBtn").addEventListener("click", toggleExpand);
 $("chipCopy").addEventListener("click", copyStatus);
 $("moreBtn").addEventListener("click", () => { card.classList.remove("mini"); if(current) renderBrief(current); if($("watchSlot").style.display !== "none") markStep("watch"); setTimeout(clampCard, 0); });
 $("chipSister").addEventListener("click", () => { const s = current && DATA[current].sisters[0]; if(s){ current = s[0]; fill(current); renderBrief(current); setTimeout(clampCard, 0); } });
-$("chipNotes").addEventListener("click", () => showNotice("Not wired in this prototype. In the full build this opens the project notes.", anchorForCard()));
-$("chipOpen").addEventListener("click", () => showNotice("Not wired in this prototype. The full build links to your system of record.", anchorForCard()));
+$("chipNotes").addEventListener("click", () => showNotice("This is not connected in the prototype. In the full build it opens the project notes.", anchorForCard()));
+$("chipOpen").addEventListener("click", () => showNotice("This is not connected in the prototype. The full build links to your system of record.", anchorForCard()));
 card.addEventListener("click", e => {
   const s = e.target.closest(".sister");
   if(s && DATA[s.dataset.anda]){ current = s.dataset.anda; fill(current); renderBrief(current); setTimeout(clampCard, 0); }

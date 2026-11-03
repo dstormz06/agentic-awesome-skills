@@ -51,24 +51,24 @@ public static class CustomApiConfig
     {
         env ??= Environment.GetEnvironmentVariable;
         string endpoint = (s.Endpoint ?? "").Trim();
-        if (endpoint.Length == 0) return new(false, null, "Enter the endpoint address of your API (https://…).");
+        if (endpoint.Length == 0) return new(false, null, "Please enter the endpoint address of your API (https://…).");
         if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var uri) ||
             !(uri.Scheme == Uri.UriSchemeHttps || (uri.Scheme == Uri.UriSchemeHttp && uri.IsLoopback)))
             return new(false, null, "The endpoint must be an https:// address (http:// is accepted only for localhost). Nothing was sent.");
         if (!string.IsNullOrEmpty(uri.UserInfo))
-            return new(false, null, "Do not put a user name or password in the address. Use the environment variable for the token. Nothing was sent.");
+            return new(false, null, "Please do not put a user name or password in the address; use the environment variable for the token instead. Nothing was sent.");
 
         if (CustomApiMapping.TryFill(s.RequestTemplate, "system", "user", 16, s.Model, out _) is { } templateError)
             return new(false, null, templateError);
         if (!CustomApiMapping.IsValidPath(s.ResponsePath))
-            return new(false, null, "The reply path is not valid. Use names and [numbers], for example choices[0].message.content");
+            return new(false, null, "The reply path is not valid. Please use names and [numbers], for example choices[0].message.content");
 
         string? token = null;
         string var = (s.SecretEnvVar ?? "").Trim();
         if (var.Length > 0)
         {
             if (!System.Text.RegularExpressions.Regex.IsMatch(var, "^[A-Za-z_][A-Za-z0-9_]{0,127}$"))
-                return new(false, null, "That is not an environment variable name. Put the NAME of the variable here, never the token itself.");
+                return new(false, null, "That does not look like an environment variable name. Please enter the NAME of the variable, never the token itself.");
             token = env(var)?.Trim();
             if (string.IsNullOrEmpty(token))
                 return new(false, null, $"The environment variable {var} is not set on this PC, so no token can be sent. Set it through your approved channel and press Test again.");

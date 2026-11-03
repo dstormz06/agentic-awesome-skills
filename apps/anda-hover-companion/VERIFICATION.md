@@ -457,7 +457,7 @@ trademark question have not been checked.
 
 The owner kept the name **ANDA Companion** and added the nickname **Notula**, chose the recommended Plain paper (D) and Bronze band (F), and asked for every geometric
 background to be removed. Local results on this code: C# **588 passed, 8 skipped**; extension unit **31**; standalone browser test and native-messaging test both pass; simulation:
-all ten suites pass (the new one has **40 checks**); `npm run security:docs` passes.
+all ten suites pass (the new one has **39 checks**); `npm run security:docs` passes.
 
 | Claim | Evidence | Limit |
 |---|---|---|
@@ -480,6 +480,34 @@ at 492x788 px, and `mouse-trigger` and the earlier checks still pass. The extens
 ### What round 12 does not prove
 
 Not run in real Edge, on a managed computer, against a live model or Microsoft, or on the owner's machine. The new looks have been rendered headlessly and in a browser, not seen on a real Windows display.
+
+## Round 13: a pre-demo audit and a courteous tone pass
+
+The owner asked for a triple check before a director's test and for everything to sound slightly polite and professional. Local results on this code: C# **663 passed, 8 skipped**;
+extension unit **31**; standalone browser test **68 checks**; native-messaging test **11 checks**; simulation suites 1 to 12 all pass, including a new look-by-viewport matrix of
+**1,090 checks** and a director's-walkthrough suite of **24 checks**; `npm run security:docs` passes.
+
+| Claim | Evidence | Limit |
+|---|---|---|
+| **Every full look in the app shows its facts and stays inside its window** in five situations: a sparse record, very long text, the short peek, the expanded mail drawer, and a healthy record | `LookRobustnessTests` (75 cases: the 15 full looks by 5 situations; no text outside the card, the number shown, PSG and RLD lines on every full card, no "NaN"), headless renders. The four compact boxes have their own render tests | Headless frames are used for layout only; no real Windows display was used |
+| **Every look in the simulation opens inside the window at seven screen sizes** (1920x1080, 1366x768, 1280x720, 1024x768, 768x1024, 390x844 and 360x640) for two records, with no inner horizontal scroll and no page-level scroll; the Lab and the options page also have no sideways scroll at 1440, 768 and 360 px | Simulation suite 11 (1,090 checks: 19 looks by 2 records by 4 checks, plus the per-size and Lab checks) | A Chromium engine, not Edge; a real phone was not used. The matrix checks position and overflow, not text contrast; contrast is covered by suites 10 and the C# palette tests |
+| **The main demo steps work in the simulation**: the urgent peek, Full brief, the PSG and RLD lines, the offline pill, the 10-second auto-hide (and a pinned card staying), the invite on a healthy ANDA, an NDA number declining to open a card, the lookup box, the draft check, the tray menu, the Watch list and Settings | Simulation suite 12 (24 checks, one of which waits 11 seconds in real time) | Simulated shortcuts and clipboard; "Copy status" and the clipboard restore are covered by earlier suites, not this one; the Windows build was not re-run by hand |
+| **Wording is courteous and brief** across the app (window titles, hints, notices, errors), the extension, the simulation, the documents, the deck and the one-pager | A search of the whole project; the notice-length test (50 characters at most) still passes; golden strings changed in C#, JavaScript and `golden.json` together | A matter of taste: the owner may want some lines softer or firmer |
+
+### Defects caught in round 13
+
+| # | Finding | Found by | Disposition |
+|---|---|---|---|
+| R58 | In the Rail look the "DAYS TO GOAL" caption was clipped in the app, and the simulation scrolled sideways at 1920, 1366 and 1280 px for one record | The new robustness test and the matrix | Wider column, a wrapped caption, a narrower label, and a phone rule |
+| R59 | The simulation's guide said "eight steps" above nine items | A fresh read | "nine steps" |
+| R60 | The old uppercase name survived in `START-HERE.txt` (the earlier search was case-sensitive) | A case-insensitive search | Renamed |
+| R61 | Adding "Please" made one capture notice longer than 50 characters, and two extension tests expected the old capital letter | The notice-length test and the extension test | Shorter wording; tests updated |
+| R62 | The round 12 note said "40 checks" for a suite that has 39 | A recount | Corrected |
+
+### What round 13 does not prove
+
+Not run in real Edge, on a managed computer, against a live model or Microsoft, on a real RPM workbook or a real Drugs@FDA file, or on the owner's machine. The Windows build
+has not been re-run by hand. Name availability and trademark are unchecked.
 
 ## Still open
 

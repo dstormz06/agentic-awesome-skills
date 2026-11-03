@@ -3,7 +3,7 @@
         x:Class="AndaCompanion.UI.PromptLibraryWindow"
         SystemDecorations="None" TransparencyLevelHint="Transparent" Background="Transparent"
         SizeToContent="WidthAndHeight" CanResize="False" Topmost="True"
-        ShowInTaskbar="False" WindowStartupLocation="CenterOwner" Title="Prompt Library">
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner" Title="ANDA Companion (Notula) — Prompt library">
 
   <Window.Styles>
     <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource C.Font}"/></Style>

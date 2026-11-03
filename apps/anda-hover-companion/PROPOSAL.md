@@ -77,3 +77,5 @@ used it. `VERIFICATION.md` lists every claim with its evidence, its limit and ea
 second, and the model behind one interface (`ELSA-INTEGRATION.md`), so the approved platform is a setting and not a
 rewrite. Goal-date logic is versioned per GDUFA cycle: GDUFA III is encoded today, and GDUFA IV can drop in when its
 commitment letter is final.
+
+Thank you for considering this proposal. Please let me know which figures or wording you would like adjusted.

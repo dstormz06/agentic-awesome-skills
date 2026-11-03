@@ -39,11 +39,11 @@ public sealed class HotkeyService : IDisposable
     public static readonly IReadOnlyList<HotkeyBinding> Bindings = new[]
     {
         new HotkeyBinding(IdPeek, "Select & Peek", "Ctrl+Alt+A",
-            ModControl | ModAlt | ModNoRepeat, 0x41, "Choose another shortcut in Settings, or use the tray icon."),
+            ModControl | ModAlt | ModNoRepeat, 0x41, "Please choose another shortcut in Settings, or use the tray icon."),
         new HotkeyBinding(IdLookup, "Lookup", "Ctrl+Alt+Space",
-            ModControl | ModAlt | ModNoRepeat, 0x20, "Choose another shortcut in Settings, or use the tray icon."),
+            ModControl | ModAlt | ModNoRepeat, 0x20, "Please choose another shortcut in Settings, or use the tray icon."),
         new HotkeyBinding(IdDraft, "Check a draft", "Ctrl+Alt+D",
-            ModControl | ModAlt | ModNoRepeat, 0x44, "Choose another shortcut in Settings, or use the tray icon."),
+            ModControl | ModAlt | ModNoRepeat, 0x44, "Please choose another shortcut in Settings, or use the tray icon."),
     };
 
     /// <summary>The three bindings with the shortcuts a person chose. An invalid or duplicate choice falls back to its default.</summary>

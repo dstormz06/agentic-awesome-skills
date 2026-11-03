@@ -53,7 +53,7 @@ public sealed class PortfolioRepository : IAndaRepository
             if (!map.ContainsKey("number"))
             {
                 Headers = table.Headers; Mapping = map; _rows = new(); _byApplicant = new(StringComparer.OrdinalIgnoreCase);
-                Status = new(false, 0, "No column for the ANDA number was found. Choose which column holds it in Settings.");
+                Status = new(false, 0, "No column for the ANDA number was found. Please choose which column holds it in Settings.");
                 return;
             }
             int Col(string key) => map.TryGetValue(key, out var h) ? table.Headers.ToList().IndexOf(h) : -1;

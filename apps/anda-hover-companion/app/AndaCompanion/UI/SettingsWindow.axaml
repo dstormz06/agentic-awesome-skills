@@ -94,7 +94,7 @@
             <Button Grid.Row="2" Grid.Column="2" Name="DraftKeyReset" Content="Reset"/>
           </Grid>
           <TextBlock Name="KeyStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
-          <TextBlock Classes="hint" Text="Use at least two modifiers, one of them Ctrl or Alt, so everyday shortcuts like Ctrl+C keep working. On keyboards where Ctrl+Alt is AltGr, choose Ctrl+Shift instead. Windows reports at once if another program already owns a shortcut."/>
+          <TextBlock Classes="hint" Text="Please use at least two modifiers, one of them Ctrl or Alt, so everyday shortcuts like Ctrl+C keep working. On keyboards where Ctrl+Alt is AltGr, choose Ctrl+Shift instead. Windows reports at once if another program already owns a shortcut."/>
         </StackPanel>
 
         <StackPanel Spacing="6">

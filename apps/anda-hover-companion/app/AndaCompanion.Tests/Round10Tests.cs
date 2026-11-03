@@ -80,7 +80,7 @@ public class CustomApiTests
     private static Func<string, string?> Env(string? token) => n => n == "MY_TEST_TOKEN" ? token : null;
 
     [Theory]
-    [InlineData("", "Enter the endpoint")]
+    [InlineData("", "enter the endpoint")]
     [InlineData("http://api.example.test/v1", "https://")]
     [InlineData("ftp://api.example.test", "https://")]
     [InlineData("https://user:pw@api.example.test/v1", "user name or password")]
@@ -382,7 +382,7 @@ public class ReferenceUpdateTests
     }
 
     [Theory]
-    [InlineData("", "Paste the address")]
+    [InlineData("", "paste the address")]
     [InlineData("http://files.example.test/a.zip", "https://")]
     [InlineData("https://u:p@files.example.test/a.zip", "user name or password")]
     [InlineData("not a url", "https://")]

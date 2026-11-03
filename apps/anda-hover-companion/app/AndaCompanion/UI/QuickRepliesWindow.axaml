@@ -3,7 +3,7 @@
         x:Class="AndaCompanion.UI.QuickRepliesWindow"
         SystemDecorations="None" TransparencyLevelHint="Transparent" Background="Transparent"
         SizeToContent="WidthAndHeight" CanResize="False" Topmost="True"
-        ShowInTaskbar="False" WindowStartupLocation="CenterOwner" Title="Quick replies">
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner" Title="ANDA Companion (Notula) — Quick replies">
 
   <Window.Styles>
     <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource C.Font}"/></Style>

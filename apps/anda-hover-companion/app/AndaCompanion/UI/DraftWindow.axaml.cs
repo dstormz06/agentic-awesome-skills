@@ -87,7 +87,7 @@ public partial class DraftWindow : Window
     private void Prepare(WritingAction action)
     {
         string draft = DraftBox.Text ?? "";
-        if (string.IsNullOrWhiteSpace(draft)) { ResultNote.Text = "Type or paste a draft first."; ResultPanel.IsVisible = true; return; }
+        if (string.IsNullOrWhiteSpace(draft)) { ResultNote.Text = "Please type or paste a draft first."; ResultPanel.IsVisible = true; return; }
         var records = WritingPrompts.RecordsIn(draft, _lookup);
         string? lens = _settings.ActiveLens is { } name ? _prompts.GetText(name) : null;
         _pending = WritingPrompts.Build(action, draft, _settings.WritingInstructions(), lens, records);

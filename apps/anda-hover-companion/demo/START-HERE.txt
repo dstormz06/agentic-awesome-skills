@@ -1,5 +1,5 @@
-ANDA HOVER COMPANION: LIVE DEMO
-Windows 10 or 11, 64-bit. Fictional data only. A prototype, not an FDA product.
+ANDA COMPANION (NOTULA): LIVE DEMO
+Thank you for trying it. Windows 10 or 11, 64-bit. Fictional data only. A prototype, not an FDA product.
 
 BEFORE YOU START
 If your organization manages this computer, please do not run the demo until your IT or

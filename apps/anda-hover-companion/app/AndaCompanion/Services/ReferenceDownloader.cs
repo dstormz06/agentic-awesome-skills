@@ -16,11 +16,11 @@ public static class ReferenceDownloader
         CancellationToken ct = default)
     {
         string address = (url ?? "").Trim();
-        if (address.Length == 0) return (false, "Paste the address of the Drugs@FDA data file first. Nothing was fetched.");
+        if (address.Length == 0) return (false, "Please paste the address of the Drugs@FDA data file first. Nothing was fetched.");
         if (!Uri.TryCreate(address, UriKind.Absolute, out var uri) ||
             !(uri.Scheme == Uri.UriSchemeHttps || (uri.Scheme == Uri.UriSchemeHttp && uri.IsLoopback)))
             return (false, "The address must start with https:// (http:// is accepted only for localhost). Nothing was fetched.");
-        if (!string.IsNullOrEmpty(uri.UserInfo)) return (false, "Do not put a user name or password in the address. Nothing was fetched.");
+        if (!string.IsNullOrEmpty(uri.UserInfo)) return (false, "Please do not put a user name or password in the address. Nothing was fetched.");
 
         string temp = destination + ".part";
         try
