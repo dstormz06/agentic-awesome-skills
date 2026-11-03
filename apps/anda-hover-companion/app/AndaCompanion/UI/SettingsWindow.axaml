@@ -29,6 +29,16 @@
           <TextBlock FontSize="15" FontWeight="Bold" Foreground="{DynamicResource C.Ink}" Text="Settings"/>
           <Button Grid.Column="1" Name="CloseBtn" Classes="primary" Content="Done"/>
         </Grid>
+        <!-- Is the app actually connected to an API? Always visible, never implied. -->
+        <Border Name="ConnBanner" CornerRadius="8" Padding="10,7" Background="{DynamicResource C.Mark}">
+          <Grid ColumnDefinitions="Auto,8,*">
+            <Ellipse Name="ConnBannerDot" Width="9" Height="9" VerticalAlignment="Center" StrokeThickness="1.6"/>
+            <StackPanel Grid.Column="2" Spacing="1">
+              <TextBlock Name="ConnBannerLabel" FontSize="11.5" FontWeight="Bold"/>
+              <TextBlock Name="ConnBannerText" FontSize="11" TextWrapping="Wrap" Foreground="{DynamicResource C.Ink2}"/>
+            </StackPanel>
+          </Grid>
+        </Border>
         <!-- Scrolls only when the screen is too short to show every section (small laptops). -->
         <ScrollViewer Name="Body" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Spacing="14" Margin="0,0,2,0">
@@ -87,6 +97,19 @@
         </StackPanel>
 
         <StackPanel Spacing="6">
+          <TextBlock Classes="lbl" Text="OTHER WAYS TO START IT"/>
+          <CheckBox Name="MiddleCheck">
+            <TextBlock Text="Middle-click (wheel button) on selected text starts Select &amp; Peek" TextWrapping="Wrap"/>
+          </CheckBox>
+          <StackPanel Orientation="Horizontal" Spacing="4">
+            <TextBlock Text="Hold" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}" Margin="0,0,8,0"/>
+            <WrapPanel Name="MiddleModPanel"/>
+          </StackPanel>
+          <TextBlock Name="MiddleStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+          <TextBlock Classes="hint" Text="Off by default. It uses a Windows mouse hook that sees only the middle button (never the pointer position or any text), and the click still goes to the program under it. Some security software flags mouse hooks. A plain middle-click scrolls or opens links in many programs, so Ctrl is recommended. The tray icon (click for the lookup box) and the shortcuts above always work. In Edge the extension adds a right-click menu instead; an extension cannot watch the middle button without running on every page, so it does not."/>
+        </StackPanel>
+
+        <StackPanel Spacing="6">
           <TextBlock Classes="lbl" Text="WEEKEND AND HOLIDAY WARNING"/>
           <WrapPanel Name="HolidayPanel"/>
           <TextBlock Classes="hint" Text="Flags a goal or forecast date on a weekend or federal holiday, or this many business days before or after a federal holiday. It shows the nearest business days; it does not decide how a date is handled."/>
@@ -114,15 +137,27 @@
             <Button Grid.Column="2" Name="ReferenceClear" Content="Clear"/>
           </Grid>
           <TextBlock Name="ReferenceStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <TextBox Name="ReferenceUrlBox" Watermark="Optional: the https address of the Drugs@FDA data file, to update it from FDA" AutomationProperties.Name="Drugs@FDA data file address"/>
+            <Button Grid.Column="1" Name="ReferenceUpdate" Content="Update now"/>
+          </Grid>
+          <TextBlock Name="ReferenceUpdateStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+          <TextBlock Classes="hint" Text="Update now fetches that one address, only when you press it, and keeps the file only if it really is a Drugs@FDA data file. It needs the network and is the only thing here that does. The address is the file link on FDA's Drugs@FDA data files page; this app does not guess it. The PSG line has no official source connected: it shows a date from a PSG column in your own sheet, or says it is not available."/>
           <TextBlock Classes="hint" Text="This tool only reads these files and never changes them. Nothing is sent anywhere. It shows only what your sheet contains: a forecast or progress that is not in it stays blank. The PSG date shown is the one in your own sheet; no official PSG source is connected yet."/>
         </StackPanel>
 
         <StackPanel Spacing="6">
-          <TextBlock Classes="lbl" Text="MY WRITING INSTRUCTIONS"/>
+          <TextBlock Classes="lbl" Text="MY WRITING · TONE, STYLE, SIGN-OFF, QUICK REPLIES"/>
+          <WrapPanel Name="TonePanel"/>
           <TextBox Name="InstructionsBox" AcceptsReturn="True" TextWrapping="Wrap" Height="76"
-                   Watermark="Always applied to Proofread, Rewrite and Fact-check, in your own words. For example: plain words, no jargon, keep it under 120 words."
+                   Watermark="Your style in your own words. For example: plain words, no jargon, keep it under 120 words."
                    AutomationProperties.Name="My standing writing instructions"/>
-          <TextBlock Classes="hint" Text="Your named lenses (below) are added on top. Instructions can never override the fixed rules: no changed numbers or dates, no invented facts."/>
+          <TextBox Name="SignOffBox" Watermark="How you sign off, for example: Thanks, Pat" AutomationProperties.Name="My sign-off"/>
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <TextBlock Name="RepliesSummary" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+            <Button Grid.Column="1" Name="RepliesManage" Content="Quick replies…" Foreground="{DynamicResource C.Accent}" Background="{DynamicResource C.Mark}"/>
+          </Grid>
+          <TextBlock Classes="hint" Text="Tone, style and sign-off steer Proofread, Rewrite and Fact-check (only once a model is approved). They can never override the fixed rules: no changed numbers or dates, no invented facts. Quick replies are templates filled from the card (no AI): the Quick replies button on a card copies one with its numbers and dates filled in."/>
         </StackPanel>
 
         <StackPanel Spacing="6">
@@ -145,14 +180,32 @@
         </StackPanel>
 
         <StackPanel Spacing="6">
-          <TextBlock Classes="lbl" Text="AI CONNECTION · CLAUDE OR ELSA"/>
+          <TextBlock Classes="lbl" Text="CONNECTION · WHICH API, IF ANY"/>
+          <WrapPanel Name="ProviderPanel"/>
           <Grid ColumnDefinitions="*,8,Auto">
             <TextBlock Name="ConnStatus" FontSize="12" Foreground="{DynamicResource C.Ink2}"
                        TextWrapping="Wrap" VerticalAlignment="Center"/>
             <Button Grid.Column="2" Name="TestBtn" Classes="primary" Content="Test" VerticalAlignment="Top"
                     ToolTip.Tip="Send one tiny request to prove the channel end to end"/>
           </Grid>
-          <TextBlock Classes="hint" Text="The app is fully functional offline. When API access is approved, set ANTHROPIC_API_KEY (Claude) or follow ELSA-INTEGRATION.md (Elsa) through the agency-approved channel and press Test."/>
+          <Expander Name="MyApiExpander" Header="My API: the address, header and body of my own service">
+            <StackPanel Spacing="5" Margin="0,4,0,0">
+              <TextBox Name="ApiName" Watermark="A name for it, for example Division API" AutomationProperties.Name="My API name"/>
+              <TextBox Name="ApiEndpoint" Watermark="https://… (the address your service gives you)" AutomationProperties.Name="My API address"/>
+              <Grid ColumnDefinitions="*,8,*">
+                <TextBox Name="ApiHeader" Watermark="Header, for example Authorization" AutomationProperties.Name="My API token header"/>
+                <TextBox Grid.Column="2" Name="ApiScheme" Watermark="Before the token, for example Bearer" AutomationProperties.Name="My API token prefix"/>
+              </Grid>
+              <TextBox Name="ApiEnvVar" Watermark="NAME of the environment variable that holds the token (never the token)" AutomationProperties.Name="My API token variable name"/>
+              <TextBox Name="ApiModel" Watermark="Model or agent name, if your service wants one" AutomationProperties.Name="My API model"/>
+              <TextBox Name="ApiTemplate" AcceptsReturn="True" TextWrapping="Wrap" Height="96" FontFamily="{DynamicResource C.NumFont}" FontSize="11.5"
+                       Watermark="Request body (JSON). Placeholders: {{system}} {{user}} {{max_tokens}} {{model}}" AutomationProperties.Name="My API request body"/>
+              <TextBox Name="ApiPath" Watermark="Where the reply text is, for example choices[0].message.content" AutomationProperties.Name="My API reply path"/>
+              <WrapPanel Name="ApiTimeoutPanel"/>
+              <TextBlock Classes="hint" Text="Nothing here is a secret: the token stays in the environment variable you name and is never saved by this app. Only https:// addresses are used (http:// for localhost). The body shown is only an example of one common shape; use the shape your own service documents. A reply that does not have text at the path is reported without showing what came back."/>
+            </StackPanel>
+          </Expander>
+          <TextBlock Classes="hint" Text="Auto uses a key (ANTHROPIC_API_KEY) or Elsa setup from the environment if one exists, and is otherwise offline. Offline never sends anything. The app is fully functional offline. This line is the truth: it says Connected only after a request has really succeeded."/>
         </StackPanel>
 
         <StackPanel Spacing="6">

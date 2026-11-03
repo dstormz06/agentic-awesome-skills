@@ -2312,7 +2312,10 @@
           }
         ],
         "watchMore": 1,
-        "reference": null,
+        "reference": {
+          "psg": "Jan 14, 2026 \u00B7 fictional demo date",
+          "rld": "Mar 3, 2026 \u00B7 fictional demo date"
+        },
         "pending": [
           {
             "title": "IR response \u2014 Biopharmaceutics",
@@ -2471,7 +2474,10 @@
           }
         ],
         "watchMore": 1,
-        "reference": null,
+        "reference": {
+          "psg": "Jan 14, 2026 \u00B7 fictional demo date",
+          "rld": "Mar 3, 2026 \u00B7 fictional demo date"
+        },
         "pending": [
           {
             "title": "IR response \u2014 Biopharmaceutics",
@@ -2630,7 +2636,10 @@
           }
         ],
         "watchMore": 1,
-        "reference": null,
+        "reference": {
+          "psg": "Jan 14, 2026 \u00B7 fictional demo date",
+          "rld": "Mar 3, 2026 \u00B7 fictional demo date"
+        },
         "pending": [
           {
             "title": "IR response \u2014 Biopharmaceutics",
@@ -2761,7 +2770,10 @@
           }
         ],
         "watchMore": 0,
-        "reference": null,
+        "reference": {
+          "psg": "Nov 20, 2025 \u00B7 fictional demo date",
+          "rld": "Mar 3, 2026 \u00B7 fictional demo date"
+        },
         "pending": [],
         "notes": [
           {
@@ -2877,7 +2889,10 @@
           }
         ],
         "watchMore": 0,
-        "reference": null,
+        "reference": {
+          "psg": "Nov 20, 2025 \u00B7 fictional demo date",
+          "rld": "Mar 3, 2026 \u00B7 fictional demo date"
+        },
         "pending": [],
         "notes": [
           {
@@ -2993,7 +3008,10 @@
           }
         ],
         "watchMore": 0,
-        "reference": null,
+        "reference": {
+          "psg": "Nov 20, 2025 \u00B7 fictional demo date",
+          "rld": "Mar 3, 2026 \u00B7 fictional demo date"
+        },
         "pending": [],
         "notes": [
           {
@@ -3122,7 +3140,10 @@
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
         "watch": [],
         "watchMore": 0,
-        "reference": null,
+        "reference": {
+          "psg": "Jan 14, 2026 \u00B7 fictional demo date",
+          "rld": "Mar 3, 2026 \u00B7 fictional demo date"
+        },
         "pending": [
           {
             "title": "IR response \u2014 Biopharmaceutics",
@@ -3266,7 +3287,10 @@
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
         "watch": [],
         "watchMore": 0,
-        "reference": null,
+        "reference": {
+          "psg": "Jan 14, 2026 \u00B7 fictional demo date",
+          "rld": "Mar 3, 2026 \u00B7 fictional demo date"
+        },
         "pending": [
           {
             "title": "IR response \u2014 Biopharmaceutics",
@@ -3410,7 +3434,10 @@
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
         "watch": [],
         "watchMore": 0,
-        "reference": null,
+        "reference": {
+          "psg": "Jan 14, 2026 \u00B7 fictional demo date",
+          "rld": "Mar 3, 2026 \u00B7 fictional demo date"
+        },
         "pending": [
           {
             "title": "IR response \u2014 Biopharmaceutics",
@@ -3569,7 +3596,10 @@
           }
         ],
         "watchMore": 1,
-        "reference": null,
+        "reference": {
+          "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+          "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+        },
         "pending": [
           {
             "title": "IR response \u2014 Biopharmaceutics",
@@ -3713,7 +3743,10 @@
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
         "watch": [],
         "watchMore": 0,
-        "reference": null,
+        "reference": {
+          "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+          "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+        },
         "pending": [
           {
             "title": "IR response \u2014 Biopharmaceutics",
@@ -3872,7 +3905,10 @@
           }
         ],
         "watchMore": 1,
-        "reference": null,
+        "reference": {
+          "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+          "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+        },
         "pending": [
           {
             "title": "IR response \u2014 Biopharmaceutics",
@@ -4031,7 +4067,10 @@
           }
         ],
         "watchMore": 1,
-        "reference": null,
+        "reference": {
+          "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+          "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+        },
         "pending": [
           {
             "title": "IR response \u2014 Biopharmaceutics",
@@ -4183,7 +4222,10 @@
           }
         ],
         "watchMore": 0,
-        "reference": null,
+        "reference": {
+          "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+          "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+        },
         "pending": [
           {
             "title": "IR response \u2014 Biopharmaceutics",
@@ -4335,7 +4377,10 @@
           }
         ],
         "watchMore": 0,
-        "reference": null,
+        "reference": {
+          "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+          "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+        },
         "pending": [
           {
             "title": "IR response \u2014 Biopharmaceutics",
@@ -4494,7 +4539,10 @@
           }
         ],
         "watchMore": 1,
-        "reference": null,
+        "reference": {
+          "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+          "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+        },
         "pending": [
           {
             "title": "IR response \u2014 Biopharmaceutics",
@@ -4638,7 +4686,10 @@
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
         "watch": [],
         "watchMore": 0,
-        "reference": null,
+        "reference": {
+          "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+          "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+        },
         "pending": [
           {
             "title": "IR response \u2014 Biopharmaceutics",
@@ -4797,7 +4848,10 @@
           }
         ],
         "watchMore": 1,
-        "reference": null,
+        "reference": {
+          "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+          "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+        },
         "pending": [
           {
             "title": "IR response \u2014 Biopharmaceutics",
@@ -4958,7 +5012,7 @@
         "watchMore": 1,
         "reference": {
           "psg": "Aug 21, 2026 \u00B7 from your sheet, not an official source",
-          "rld": null
+          "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
         },
         "pending": [
           {
@@ -5113,7 +5167,7 @@
         "watchMore": 0,
         "reference": {
           "psg": "Aug 21, 2026 \u00B7 from your sheet, not an official source",
-          "rld": null
+          "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
         },
         "pending": [
           {
@@ -5282,7 +5336,7 @@
         "watchMore": 2,
         "reference": {
           "psg": "Aug 21, 2026 \u00B7 from your sheet, not an official source",
-          "rld": null
+          "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
         },
         "pending": [
           {
@@ -5435,7 +5489,10 @@
           }
         ],
         "watchMore": 0,
-        "reference": null,
+        "reference": {
+          "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+          "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+        },
         "pending": [
           {
             "title": "IR response \u2014 Biopharmaceutics",
@@ -5587,7 +5644,10 @@
           }
         ],
         "watchMore": 0,
-        "reference": null,
+        "reference": {
+          "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+          "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+        },
         "pending": [
           {
             "title": "IR response \u2014 Biopharmaceutics",
@@ -5739,7 +5799,10 @@
           }
         ],
         "watchMore": 0,
-        "reference": null,
+        "reference": {
+          "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+          "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+        },
         "pending": [
           {
             "title": "IR response \u2014 Biopharmaceutics",
@@ -5891,7 +5954,10 @@
           }
         ],
         "watchMore": 0,
-        "reference": null,
+        "reference": {
+          "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+          "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+        },
         "pending": [
           {
             "title": "IR response \u2014 Biopharmaceutics",
@@ -6035,7 +6101,10 @@
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
         "watch": [],
         "watchMore": 0,
-        "reference": null,
+        "reference": {
+          "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+          "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+        },
         "pending": [
           {
             "title": "IR response \u2014 Biopharmaceutics",
@@ -6194,7 +6263,10 @@
           }
         ],
         "watchMore": 1,
-        "reference": null,
+        "reference": {
+          "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+          "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+        },
         "pending": [
           {
             "title": "IR response \u2014 Biopharmaceutics",
@@ -6686,7 +6758,10 @@
               }
             ],
             "watchMore": 1,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -6761,7 +6836,7 @@
             "watchMore": 3,
             "reference": {
               "psg": "Aug 21, 2026 \u00B7 from your sheet, not an official source",
-              "rld": null
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
             },
             "pending": [],
             "notes": [
@@ -6826,7 +6901,10 @@
               }
             ],
             "watchMore": 1,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -6880,7 +6958,10 @@
               }
             ],
             "watchMore": 1,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -7041,7 +7122,10 @@
               }
             ],
             "watchMore": 2,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -7093,7 +7177,10 @@
               }
             ],
             "watchMore": 0,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [
               {
@@ -7242,7 +7329,10 @@
               }
             ],
             "watchMore": 0,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -7289,7 +7379,10 @@
               }
             ],
             "watchMore": 0,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -7401,7 +7494,10 @@
               }
             ],
             "watchMore": 0,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -7520,7 +7616,10 @@
               }
             ],
             "watchMore": 1,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -7574,7 +7673,10 @@
               }
             ],
             "watchMore": 1,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -7613,7 +7715,10 @@
             "ahead": null,
             "watch": [],
             "watchMore": 0,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -7660,7 +7765,10 @@
               }
             ],
             "watchMore": 0,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -7699,7 +7807,10 @@
             "ahead": null,
             "watch": [],
             "watchMore": 0,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -7753,7 +7864,10 @@
               }
             ],
             "watchMore": 1,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -7807,7 +7921,10 @@
               }
             ],
             "watchMore": 1,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -7861,7 +7978,10 @@
               }
             ],
             "watchMore": 1,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -7915,7 +8035,10 @@
               }
             ],
             "watchMore": 1,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -7969,7 +8092,10 @@
               }
             ],
             "watchMore": 1,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -8016,7 +8142,10 @@
               }
             ],
             "watchMore": 0,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -8063,7 +8192,10 @@
               }
             ],
             "watchMore": 0,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -8110,7 +8242,10 @@
               }
             ],
             "watchMore": 0,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -8157,7 +8292,10 @@
               }
             ],
             "watchMore": 0,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -8211,7 +8349,10 @@
               }
             ],
             "watchMore": 1,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -8258,7 +8399,10 @@
               }
             ],
             "watchMore": 0,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -8305,7 +8449,10 @@
               }
             ],
             "watchMore": 0,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -8545,7 +8692,10 @@
               }
             ],
             "watchMore": 0,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -8671,7 +8821,10 @@
               }
             ],
             "watchMore": 2,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [
               {
@@ -8728,7 +8881,10 @@
               }
             ],
             "watchMore": 0,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [],
             "forecastDetail": "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
@@ -8780,7 +8936,10 @@
               }
             ],
             "watchMore": 0,
-            "reference": null,
+            "reference": {
+              "psg": "not available: no PSG date in your data, and no official PSG source is connected",
+              "rld": "not available: no Drugs@FDA file chosen (app: Settings, My data)"
+            },
             "pending": [],
             "notes": [
               {

@@ -35,6 +35,10 @@ public partial class App : Application
     private int _captureBusy;
     private string? _trayError;
     private ICompanionBriefService _briefs = new OfflineBriefService();
+    private readonly QuickReplyService _replies = new();
+    private MouseTriggerService? _mouse;
+    private string? _mouseProblem;
+    private string _providerFingerprint = "";
     private Settings _settings = new();
     private HotkeyService? _hotkeys;
     private TrayIcon? _tray;
@@ -54,7 +58,8 @@ public partial class App : Application
         _calendar = BusinessCalendar.FromFile(AppPaths.ClosuresFile);
         UsageLog.Configure(_settings.UsageLog && SelfTestRun is null);
         ApplyData();
-        _briefs = BriefServiceFactory.Create(() => _prompts.GetText(_settings.ActiveLens));
+        _briefs = BriefServiceFactory.Create(() => _prompts.GetText(_settings.ActiveLens), _settings);
+        _providerFingerprint = ProviderFingerprint();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
@@ -71,7 +76,10 @@ public partial class App : Application
             // A tray failure must be reported, not fatal: the hotkeys still work without it.
             try { _tray = BuildTrayIcon(desktop); }
             catch (Exception ex) { _trayError = ex.Message; }
-            desktop.Exit += (_, _) => { _hotkeys.Dispose(); _tray?.Dispose(); };
+            desktop.Exit += (_, _) => { _hotkeys.Dispose(); _mouse?.Dispose(); _tray?.Dispose(); };
+            ConnectionStatus.Changed += () => Dispatcher.UIThread.Post(UpdateTrayTip);
+            UpdateTrayTip();
+            ApplyMouseTrigger();
 
             if (SelfTestRun is { } selfTest)
             {
@@ -212,7 +220,7 @@ public partial class App : Application
         {
             AutoHideSeconds = _settings.AutoHideSeconds,
             Calendar = _calendar, Watch = new WatchSettings(HolidayLeadBusinessDays: _settings.HolidayLeadDays),
-            Today = Today, Reference = ReferenceFor,
+            Today = Today, Reference = ReferenceFor, QuickReplies = () => _replies.Replies,
         };
         card.Closed += (_, _) => { if (ReferenceEquals(_card, card)) _card = null; };
         _card = card;
@@ -242,9 +250,11 @@ public partial class App : Application
         }
         else { _portfolio = null; _repository.Current = _demo; }
 
-        if (_settings.ReferenceDataPath is { Length: > 0 } path && path != _drugsLoadedFrom && !_drugsLoading && SelfTestRun is null)
+        // The stamp includes the file's time, so a file replaced by Update now (same path) is read again.
+        string? stamp = _settings.ReferenceDataPath is { Length: > 0 } p0 ? p0 + "|" + (File.Exists(p0) ? File.GetLastWriteTimeUtc(p0).Ticks : 0) : null;
+        if (_settings.ReferenceDataPath is { Length: > 0 } path && stamp != _drugsLoadedFrom && !_drugsLoading && SelfTestRun is null)
         {
-            _drugsLoading = true; _drugsMessage = "Reading the Drugs@FDA file…"; _drugsLoadedFrom = path;
+            _drugsLoading = true; _drugsMessage = "Reading the Drugs@FDA file…"; _drugsLoadedFrom = stamp;
             Task.Run(() => DrugsAtFdaFile.TryLoad(path, out var msg) is { } f ? (f, msg) : (null, msg)).ContinueWith(t =>
                 Dispatcher.UIThread.Post(() => { _drugs = t.Result.Item1; _drugsMessage = t.Result.msg; _drugsLoading = false; }));
         }
@@ -278,7 +288,7 @@ public partial class App : Application
     private void OpenDraft(string text)
     {
         if (_draftWindow is not null) { _draftWindow.Close(); _draftWindow = null; }
-        var win = new DraftWindow(text, _repository.Find, new WritingService(ChatCompleterFactory.Create()), _settings, _prompts);
+        var win = new DraftWindow(text, _repository.Find, new WritingService(ChatCompleterFactory.CreateReporting(_settings)), _settings, _prompts);
         win.Closed += (_, _) => { if (ReferenceEquals(_draftWindow, win)) _draftWindow = null; };
         _draftWindow = win;
         win.Show();
@@ -304,7 +314,7 @@ public partial class App : Application
     {
         if (_settingsWindow is not null) { _settingsWindow.Activate(); return; }
         _settingsWindow = new SettingsWindow(_settings, _prompts, ApplySettings,
-            new SettingsHooks(HotkeyStatusLine, () => _portfolio, () => _drugsMessage));
+            new SettingsHooks(() => HotkeyService.Report(_hotkeys?.Status ?? Array.Empty<HotkeyStatus>()), () => _portfolio, () => _drugsMessage, MouseStatusLine), _replies);
         _settingsWindow.Closed += (_, _) => _settingsWindow = null;
         _settingsWindow.Show();
     }
@@ -405,11 +415,43 @@ public partial class App : Application
         ThemeManager.Apply(_settings.Appearance, _settings.CardOpacity);
         UsageLog.Configure(_settings.UsageLog && SelfTestRun is null);
         _hotkeys?.Reconfigure(HotkeyService.FromCombos(_settings.PeekHotkey, _settings.LookupHotkey, _settings.DraftHotkey));
+        // A new brief service only when the connection itself changed: changing a look must not reset "connected" to "not tested".
+        if (ProviderFingerprint() != _providerFingerprint)
+        {
+            _providerFingerprint = ProviderFingerprint();
+            _briefs = BriefServiceFactory.Create(() => _prompts.GetText(_settings.ActiveLens), _settings);
+        }
+        ApplyMouseTrigger();
         ApplyData();
         // Live preview: if a card is open, rebuild it in place with the new look.
         if ((_card is not null || _compact is not null) && _lastCard is { } last)
             OpenCard(last.Record, last.Near, last.Mini);
     }
+
+    /// <summary>Which connection is chosen and how it is described, never a secret (the token is only ever an environment variable's name).</summary>
+    private string ProviderFingerprint() => _settings.Provider + "|" + System.Text.Json.JsonSerializer.Serialize(_settings.CustomApi);
+
+    private void UpdateTrayTip()
+    {
+        if (_tray is null) return;
+        _tray.ToolTipText = $"ANDA Hover Companion · {ConnectionStatus.Current.Label}";
+    }
+
+    /// <summary>Starts or stops the middle-click trigger to match Settings. The hook exists only while the setting is on.</summary>
+    private void ApplyMouseTrigger()
+    {
+        bool want = _settings.MiddleClickTrigger && SelfTestRun is null && OperatingSystem.IsWindows();
+        if (!want) { _mouse?.Dispose(); _mouse = null; _mouseProblem = null; return; }
+        if (_mouse is not null) return;                       // the chosen key is read live on every click
+        var service = new MouseTriggerService(() => _settings.MiddleClickModifier, () => _ = OnHotkeyAsync(HotkeyService.IdPeek));
+        if (service.Start()) { _mouse = service; _mouseProblem = null; }
+        else { _mouseProblem = service.Problem; service.Dispose(); ShowNotice(_mouseProblem ?? "The middle-click trigger could not start."); }
+    }
+
+    private string? MouseStatusLine() =>
+        _mouse is not null
+            ? $"On: {(_settings.MiddleClickModifier == "None" ? "" : _settings.MiddleClickModifier + " + ")}middle-click on selected text."
+            : _mouseProblem ?? "Not running.";
 
     private void DemoCard(string number)
     {

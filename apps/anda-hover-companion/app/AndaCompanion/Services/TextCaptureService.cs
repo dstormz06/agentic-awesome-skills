@@ -148,6 +148,17 @@ public static class TextCaptureService
     internal static void SendKeys(params (ushort Vk, bool Up)[] keys) =>
         SendInput(keys.Select(k => KeyInput(k.Vk, k.Up)).ToArray());
 
+    /// <summary>Injects a middle-button click (optionally with Ctrl held). Used by the self-test to exercise the middle-click trigger for real.</summary>
+    internal static void SendMiddleClick(bool ctrl)
+    {
+        var list = new List<Input>();
+        if (ctrl) list.Add(KeyInput(0x11, up: false));
+        list.Add(new Input { type = 0, u = new InputUnion { mi = new MouseInput { dwFlags = 0x0020 } } });   // MOUSEEVENTF_MIDDLEDOWN
+        list.Add(new Input { type = 0, u = new InputUnion { mi = new MouseInput { dwFlags = 0x0040 } } });   // MOUSEEVENTF_MIDDLEUP
+        if (ctrl) list.Add(KeyInput(0x11, up: true));
+        SendInput(list.ToArray());
+    }
+
     private static void SendCtrlC() => SendInput(new[]
     {
         KeyInput(0x11, up: false), // Ctrl down

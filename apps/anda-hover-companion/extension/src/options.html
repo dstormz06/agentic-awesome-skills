@@ -43,8 +43,11 @@
   <textarea id="closures" aria-label="Extra closures" placeholder="2026-12-24 Executive order closing"></textarea>
   <p class="hint">One per line: a date, then a name. Weekends and federal holidays are always included (U.S. federal calendar, OPM). Closures announced at short notice are not predicted, so add them here. This only flags the date; it never says how a goal-date rule applies.</p>
 
-  <h2>Shortcuts</h2>
-  <p class="hint">Suggested: Alt+Shift+A peek, Alt+Shift+D check a draft, Alt+Shift+S scan the page. Edge leaves out a suggestion that another extension or Edge itself already uses. <a id="shortcuts" tabindex="0" role="link" style="color:var(--accent);cursor:pointer;text-decoration:underline">Change them in Edge</a>.</p>
+  <h2>Ways to start it</h2>
+  <table class="map" id="cmds" aria-label="Shortcuts and other ways to start the extension"><tbody></tbody></table>
+  <div class="row" style="margin-top:6px"><button type="button" id="shortcuts">Change shortcuts in Edge</button></div>
+  <p class="hint" id="cmdNote">Edge leaves out a suggested shortcut that another extension or Edge itself already uses, and shows it here as not set. Choose another one in Edge's shortcut page.</p>
+  <p class="hint">Other ways: the right-click menu on selected text, and the toolbar button. A middle-click trigger is not offered here on purpose: an extension can only watch the mouse by running a script on every page you open, and this one is built to run only when you ask. The Windows app offers a middle-click option.</p>
 
   <h2>What this extension can and cannot do</h2>
   <p class="hint">It runs on a page only when you press a shortcut, use the right-click menu or click its button, and only on that tab (the "active tab" permission). It has no permission to read pages you have not asked about, to use your history, or to call any website. It does not use AI.</p>

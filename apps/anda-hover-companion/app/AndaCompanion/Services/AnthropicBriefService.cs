@@ -113,10 +113,12 @@ public static class ConnectionService
             sw.Stop();
             var text = string.Concat(response.Content
                 .Select(b => b.TryPickText(out var tb) ? tb.Text : string.Empty)).Trim();
+            ConnectionStatus.Success("Claude · claude-opus-4-8");
             return $"Connected · claude-opus-4-8 · {sw.ElapsedMilliseconds} ms · response: \"{text}\"";
         }
         catch (Exception ex)
         {
+            ConnectionStatus.Failure("Claude · claude-opus-4-8", ex.GetType().Name);
             return $"Connection failed: {ex.GetType().Name} — {ex.Message}";
         }
     }
@@ -134,11 +136,59 @@ public static class ConnectionService
             var sw = Stopwatch.StartNew();
             var text = await completer.CompleteAsync("Reply with exactly: OK", "Reply with exactly: OK", 16, CancellationToken.None);
             sw.Stop();
+            ConnectionStatus.Success(completer.ProviderName);
             return $"Connected · {completer.ProviderName} · {sw.ElapsedMilliseconds} ms · response: \"{text.Trim()}\"";
         }
         catch (Exception ex)
         {
+            ConnectionStatus.Failure("Elsa", ex is ElsaException ? ex.Message : ex.GetType().Name);
             return $"Connection failed: {ex.GetType().Name} — {ex.Message}";
+        }
+    }
+
+    /// <summary>The one-request check for the person's own API. Explains what is missing, or proves the channel end to end.</summary>
+    public static async Task<string> TestMyApiAsync(CustomApiSettings s, Func<string, string?>? env = null, HttpMessageHandler? handler = null)
+    {
+        var inspection = CustomApiConfig.Inspect(s, env);
+        if (!inspection.Ok) return inspection.Message;
+        var completer = CustomApiConfig.CreateCompleter(s, env, handler)!;
+        try
+        {
+            var sw = Stopwatch.StartNew();
+            string text = await completer.CompleteAsync("Reply with exactly: OK", "Reply with exactly: OK", 16, CancellationToken.None);
+            sw.Stop();
+            ConnectionStatus.Success(completer.ProviderName);
+            return $"Connected · {completer.ProviderName} · {sw.ElapsedMilliseconds} ms · response: \"{text.Trim()}\"";
+        }
+        catch (Exception ex)
+        {
+            ConnectionStatus.Failure(completer.ProviderName, ex is ElsaException ? ex.Message : ex.GetType().Name);
+            return $"Connection failed: {(ex is ElsaException ? ex.Message : ex.GetType().Name)}";
+        }
+        finally { (completer as IDisposable)?.Dispose(); }
+    }
+
+    /// <summary>The Settings panel's one-line description for the chosen connection (before any request is made).</summary>
+    public static string DescribeFor(Settings settings, Func<string, string?>? env = null) => settings.Provider switch
+    {
+        ProviderChoice.Offline => "Offline is chosen. Nothing is ever sent.",
+        ProviderChoice.MyApi => CustomApiConfig.Inspect(settings.CustomApi, env).Message,
+        ProviderChoice.Claude => string.IsNullOrEmpty((env ?? Environment.GetEnvironmentVariable)("ANTHROPIC_API_KEY"))
+            ? "Claude is chosen, but no ANTHROPIC_API_KEY is set on this PC. Briefs stay offline."
+            : "Key detected — press Test to verify the channel.",
+        _ => Describe(env),
+    };
+
+    /// <summary>Tests whichever connection the settings choose.</summary>
+    public static Task<string> TestForAsync(Settings settings, Func<string, string?>? env = null, HttpMessageHandler? handler = null)
+    {
+        switch (settings.Provider)
+        {
+            case ProviderChoice.Offline:
+                ConnectionStatus.Reset();
+                return Task.FromResult("Offline is chosen, so nothing was sent. Choose Auto, Claude or My API to test a connection.");
+            case ProviderChoice.MyApi: return TestMyApiAsync(settings.CustomApi, env, handler);
+            default: return TestAsync();
         }
     }
 }

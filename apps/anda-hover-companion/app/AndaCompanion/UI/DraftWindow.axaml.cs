@@ -90,7 +90,7 @@ public partial class DraftWindow : Window
         if (string.IsNullOrWhiteSpace(draft)) { ResultNote.Text = "Type or paste a draft first."; ResultPanel.IsVisible = true; return; }
         var records = WritingPrompts.RecordsIn(draft, _lookup);
         string? lens = _settings.ActiveLens is { } name ? _prompts.GetText(name) : null;
-        _pending = WritingPrompts.Build(action, draft, _settings.StandingInstructions, lens, records);
+        _pending = WritingPrompts.Build(action, draft, _settings.WritingInstructions(), lens, records);
         PreviewBox.Text = _pending.Preview();
         PreviewPanel.IsVisible = true;
         ResultPanel.IsVisible = false;

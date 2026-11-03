@@ -108,22 +108,25 @@ public sealed class ElsaChatCompleter : IChatCompleter, IDisposable
     private readonly ElsaSettings _settings;
     private readonly IElsaMapping _mapping;
     private readonly HttpClient _http;
+    private readonly string? _displayName;
 
-    public ElsaChatCompleter(ElsaSettings settings, IElsaMapping mapping, HttpMessageHandler? handler = null)
+    public ElsaChatCompleter(ElsaSettings settings, IElsaMapping mapping, HttpMessageHandler? handler = null,
+        string? displayName = null, int timeoutSeconds = 30)
     {
         _settings = settings;
         _mapping = mapping;
-        _http = new HttpClient(handler ?? mapping.CreateHandler()) { Timeout = TimeSpan.FromSeconds(30) };
+        _displayName = displayName;
+        _http = new HttpClient(handler ?? mapping.CreateHandler()) { Timeout = TimeSpan.FromSeconds(timeoutSeconds) };
     }
 
-    public string ProviderName => string.IsNullOrWhiteSpace(_settings.Model) ? "Elsa" : $"Elsa · {_settings.Model}";
+    public string ProviderName => (_displayName ?? "Elsa") + (string.IsNullOrWhiteSpace(_settings.Model) ? "" : $" · {_settings.Model}");
 
     public async Task<string> CompleteAsync(string system, string user, int maxTokens, CancellationToken ct)
     {
         using var request = _mapping.BuildRequest(_settings, system, user, maxTokens);
         using var response = await _http.SendAsync(request, ct);
         if (!response.IsSuccessStatusCode)
-            throw new ElsaException($"Elsa answered {(int)response.StatusCode} {response.ReasonPhrase}.");
+            throw new ElsaException($"{_displayName ?? "Elsa"} answered {(int)response.StatusCode} {response.ReasonPhrase}.");
         return _mapping.ReadReply(await response.Content.ReadAsStringAsync(ct));
     }
 

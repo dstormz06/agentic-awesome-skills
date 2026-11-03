@@ -49,9 +49,16 @@ public static class ChatCompleterFactory
     /// the endpoint is configured safely AND the mapping has been written; otherwise — like any unknown provider —
     /// it resolves to null and the app runs offline, loudly (Settings says exactly why) rather than wrongly.
     /// </summary>
-    public static IChatCompleter? Create(Func<string, string?>? env = null, IElsaMapping? mapping = null)
+    public static IChatCompleter? Create(Func<string, string?>? env = null, IElsaMapping? mapping = null, Settings? settings = null)
     {
         env ??= Environment.GetEnvironmentVariable;
+        // The person's choice in Settings wins over the environment. Auto (the default) keeps the earlier behaviour.
+        switch (settings?.Provider)
+        {
+            case ProviderChoice.Offline: return null;
+            case ProviderChoice.MyApi: return CustomApiConfig.CreateCompleter(settings.CustomApi, env);
+            case ProviderChoice.Claude: return string.IsNullOrEmpty(env("ANTHROPIC_API_KEY")) ? null : new AnthropicChatCompleter();
+        }
         string provider = env("ANDA_COMPANION_PROVIDER")?.Trim().ToLowerInvariant() ?? "anthropic";
         return provider switch
         {
@@ -60,6 +67,10 @@ public static class ChatCompleterFactory
             _ => null, // no key, or an unknown provider → offline mode
         };
     }
+
+    /// <summary>The completer the app really uses: the same choice, wrapped so every real request updates <see cref="ConnectionStatus"/>.</summary>
+    public static IChatCompleter? CreateReporting(Settings? settings = null, Func<string, string?>? env = null) =>
+        Create(env, null, settings) is { } inner ? new ReportingChatCompleter(inner) : null;
 
     private static IChatCompleter? ElsaChatCompleterOrNull(Func<string, string?> env, IElsaMapping mapping) =>
         ElsaConfig.Inspect(env, mapping) is { Status: ElsaStatus.Ready, Settings: { } settings }

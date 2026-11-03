@@ -32,6 +32,11 @@ TRY IT
   - With a small box (L to O) showing, press Ctrl+Alt+A again on the same number,
     or click the box, to open the full card.
   - Tray icon > Watch list: every ANDA with something worth a look, worst first.
+  - Every card shows a PSG line and an RLD LABEL line (a date, or a brief reason there
+    is none) and a pill that says whether an API is connected. Offline is the default.
+  - The Quick replies button (or R) on a card copies one of your own templates, filled in.
+  - Settings > Shortcuts shows which shortcut another program owns; Settings > Other ways to
+    start it has an optional middle-click (off by default); Settings > Connection has My API.
   - Tray icon > Prompt library: add your own lens.
   - Edge extension (optional, separate): see extension\README.md in the repository. It adds
     a right-click menu in Edge and can use this app's data. Do not add it to a managed

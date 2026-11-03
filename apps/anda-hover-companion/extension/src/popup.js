@@ -105,6 +105,14 @@ $('scanGo').addEventListener('click', async () => {
 });
 
 // ---------- footer ----------
-(async () => { const s = await ask({ type: 'svc:status' }); $('source').textContent = s ? `Source: ${s.label}${s.ok ? '' : ' (not reachable)'}` : ''; })();
+(async () => {
+  const s = await ask({ type: 'svc:status' });
+  const el = $('source');
+  el.replaceChildren();
+  if (!s) return;
+  // A dot only for the one thing that can be connected or not: the desktop app. Demo records and a spreadsheet are local files.
+  if (s.kind === 'app') { const dot = document.createElement('span'); dot.className = 'dot ' + (s.ok ? 'on' : 'off'); dot.setAttribute('aria-hidden', 'true'); el.append(dot); }
+  el.append(document.createTextNode(`Source: ${s.label}${s.ok ? '' : ' (not reachable)'} · No AI: this extension never calls an API`));
+})();
 $('openOptions').addEventListener('click', () => chrome.runtime.openOptionsPage());
 select('look');

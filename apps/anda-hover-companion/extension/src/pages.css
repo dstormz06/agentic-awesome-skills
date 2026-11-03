@@ -17,6 +17,7 @@ textarea{min-height:110px;resize:vertical}
 .foot{border-top:1px solid var(--hair);padding:8px 14px;color:var(--ink3);font-size:11.5px;display:flex;gap:8px;align-items:center}
 .foot .linkbtn{color:var(--accent);margin-left:auto;cursor:pointer;text-decoration:underline;background:none;border:0;padding:2px 4px;font:inherit}
 .foot .linkbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;border:1.5px solid var(--ink3);margin-right:6px;vertical-align:0}.dot.on{background:var(--good);border-color:var(--good)}.dot.off{border-color:var(--bad)}
 .status{margin:6px 0;padding:8px 10px;border-radius:8px;background:var(--mark);color:var(--ink2)}
 .status.bad{background:#f9e9e9;color:var(--bad)}.status.ok{background:#e6f1ea;color:var(--good)}
 label.opt{display:flex;gap:8px;align-items:center;min-height:30px;color:var(--ink2)}

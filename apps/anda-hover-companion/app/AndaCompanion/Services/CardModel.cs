@@ -6,7 +6,7 @@ namespace AndaCompanion.Services;
 public sealed record CardWatchFlag(string Code, string Severity, string Text, string Why, string Source);
 public sealed record CardAttention(string Level, string Text);
 public sealed record CardUrgency(bool IsUrgent, string? Reason);
-public sealed record CardReference(string? Psg, string? Rld);
+public sealed record CardReference(string Psg, string Rld);
 public sealed record CardBrief(string Tag, string Text, bool Generated);
 
 /// <summary>
@@ -19,7 +19,7 @@ public sealed record CardModel(
     string GoalDate, string GoalDays, int? DaysToGoal, int? Progress,
     string ForecastDate, string ForecastDelta, bool ForecastLate, bool HasForecast, int? ForecastDeltaDays, string ForecastConfidence,
     CardAttention? Attention, string Latest, string? Ahead,
-    IReadOnlyList<CardWatchFlag> Watch, int WatchMore, CardReference? Reference,
+    IReadOnlyList<CardWatchFlag> Watch, int WatchMore, CardReference Reference,
     IReadOnlyList<PendingItem> Pending, IReadOnlyList<NoteItem> Notes, string ForecastDetail, IReadOnlyList<SisterRef> Sisters,
     CardBrief Brief, string StatusLine, CardUrgency Urgency);
 
@@ -42,8 +42,9 @@ public static class CardModels
     public static CardModel Build(AndaRecord r, CardContext ctx)
     {
         var flags = WatchRules.Evaluate(r, ctx.Today, ctx.Calendar, new WatchSettings(HolidayLeadBusinessDays: ctx.HolidayLeadDays));
-        var info = ctx.Reference?.Invoke(r);
-        CardReference? reference = info is not null && (info.PsgText is not null || info.RldText is not null) ? new(info.PsgText, info.RldText) : null;
+        // Always two lines: the PSG date and the RLD labeling date, or a brief reason there is none.
+        var info = ctx.Reference?.Invoke(r) ?? ReferenceResolver.For(r, null, "", null, loading: false);
+        var reference = new CardReference(info.PsgText ?? ReferenceResolver.NoPsg, info.RldText ?? ReferenceResolver.NoRld);
         bool urgent = UrgencyPolicy.IsUrgent(r, ctx.Today, ctx.Calendar, ctx.UrgentLateDays);
         return new CardModel(
             r.Number, r.Kind, r.Drug, r.Meta, r.DataAsOf, r.SourceLabel, r.Demo,

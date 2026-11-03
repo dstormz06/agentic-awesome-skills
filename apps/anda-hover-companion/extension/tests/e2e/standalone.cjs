@@ -203,6 +203,10 @@ const PAGE = `<!doctype html><meta charset="utf-8"><title>Huddle prep</title><bo
   await popup.fill('#num', 'ANDA 216482'); await popup.keyboard.press('Enter');
   await popup.locator('.card').waitFor();
   h.ok((await popup.locator('.card').innerText()).includes('Metformin HCl ER Tablets, 500 mg'), 'popup: look up a number');
+  {
+    const t0 = (await popup.locator('.card').innerText()).replace(/\s+/g, ' ');
+    h.ok(t0.includes('PSG Jan 14, 2026 · fictional demo date') && t0.includes('RLD LABEL Mar 3, 2026 · fictional demo date'), 'card: always two reference lines, here the fictional demo dates, labelled as fictional');
+  }
   await popup.fill('#num', '999999'); await popup.keyboard.press('Enter');
   await popup.locator('#lookMsg').waitFor({ state: 'visible' });
   h.ok((await popup.locator('#lookMsg').innerText()).includes('999999 is not a recognized ANDA'), 'popup: an unknown number is said plainly');
@@ -233,12 +237,19 @@ const PAGE = `<!doctype html><meta charset="utf-8"><title>Huddle prep</title><bo
   h.ok(await opt.isChecked('input[name=consent][value=whisper]'), 'settings: whisper is the default');
   await opt.setInputFiles('#file', path.resolve(__dirname, '..', 'fixtures', 'portfolio.xlsx'));
   await opt.locator('#importStatus.ok').waitFor({ timeout: 8000 });
+  {
+    const rows = (await opt.locator('#cmds tr').allInnerTexts()).join(' | ');
+    h.ok(rows.includes('Right-click menu') && rows.includes('Toolbar button') && /Peek at the selected ANDA number/.test(rows), 'settings: "Ways to start it" lists the right-click menu, the toolbar button and each shortcut');
+    h.ok((await opt.locator('#cmdNote').innerText()).includes('another extension or Edge itself'), 'settings: says why a shortcut can be not set');
+    h.ok((await opt.innerText('main')).includes('A middle-click trigger is not offered here on purpose'), 'settings: says plainly why the extension has no middle-click trigger');
+  }
   h.ok((await opt.locator('#importStatus').innerText()).startsWith('Loaded 3 ANDAs from portfolio.xlsx'), 'settings: the workbook (hidden sheet skipped, dates converted) loads: ' + (await opt.locator('#importStatus').innerText()));
   h.ok(await opt.isChecked('input[name=source][value=imported]'), 'settings: the imported file becomes the data source');
   await popup.reload(); await popup.fill('#num', '700001'); await popup.keyboard.press('Enter');
   await popup.locator('.card').waitFor();
   t = (await popup.locator('.card').innerText()).replace(/\s+/g, ' ');
   h.ok(t.includes('Warfarin tabs') && t.includes('YOUR FILE') && t.includes('Oct 17, 2026') && t.includes('—') === true && /goal date \(Sat Oct 3\) passed/i.test(t), 'popup: a row from the workbook shows as the person\'s data, with an honest "—" for unknown progress');
+  h.ok(t.includes('PSG not available: no PSG date in your data') && t.includes('RLD LABEL not available: no Drugs@FDA file chosen'), 'card: with your own data and no source, both reference lines say briefly that the date is not available');
   await popup.fill('#num', '216482'); await popup.keyboard.press('Enter');
   await popup.locator('#lookMsg').waitFor({ state: 'visible' });
   h.ok((await popup.locator('#lookMsg').innerText()).includes('216482 is not in your portfolio (portfolio.xlsx)'), 'with the sheet as the source, demo numbers are not found (no silent mixing)');

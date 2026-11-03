@@ -142,16 +142,19 @@ public class HeadlessRenderTests : IClassFixture<HeadlessFixture>
             win.Show();
             Dispatcher.UIThread.RunJobs();
             var found = new[] { "AppearancePanel", "CompactPanel", "AutoHidePanel", "ConsentPanel", "CaptureCheck", "OpacitySlider", "LensCombo", "TestBtn", "CloseBtn",
-                    "EscalateCheck", "LatePanel", "HolidayPanel", "PeekKeyBox", "LookupKeyBox", "DraftKeyBox", "PortfolioBox", "NotesBox", "ReferenceBox", "InstructionsBox", "UsageCheck" }
+                    "EscalateCheck", "LatePanel", "HolidayPanel", "PeekKeyBox", "LookupKeyBox", "DraftKeyBox", "PortfolioBox", "NotesBox", "ReferenceBox", "InstructionsBox", "UsageCheck",
+                    "ConnBanner", "MiddleCheck", "ProviderPanel", "MyApiExpander", "ApiEndpoint", "TonePanel", "SignOffBox", "RepliesManage", "ReferenceUrlBox", "ReferenceUpdate" }
                 .Where(n => win.FindControl<Control>(n) is not null).ToList();
             int radios = win.GetVisualDescendants().OfType<RadioButton>().Count();
             win.Close();
             return (found, radios);
         }, CancellationToken.None);
 
-        Assert.Equal(20, names.found.Count);
+        Assert.Equal(30, names.found.Count);
         // fifteen appearances + four auto-hide choices + three consent models + three "late" choices + four holiday-lead choices
-        Assert.Equal(15 + 4 + 3 + 3 + 4, names.radios);
+        // + four connection choices + five tones + four middle-click keys. (The four API-timeout choices sit inside the collapsed
+        // "My API" expander, whose content is not part of the visual tree until it is opened.)
+        Assert.Equal(15 + 4 + 3 + 3 + 4 + 4 + 5 + 4, names.radios);
     }
 
     [Fact]

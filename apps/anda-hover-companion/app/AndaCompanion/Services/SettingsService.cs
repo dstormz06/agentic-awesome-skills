@@ -53,6 +53,42 @@ public sealed class Settings
     /// <summary>Standing instructions added to every writing action (proofread, rewrite, fact-check), in the RPM's own words.</summary>
     public string StandingInstructions { get; set; } = "";
 
+    /// <summary>Preferred tone for writing actions: "", Plain, Formal, Warm or Direct. A style preference only; it can never change a fact.</summary>
+    public string Tone { get; set; } = "";
+    public static readonly IReadOnlyList<string> ToneChoices = new[] { "", "Plain", "Formal", "Warm", "Direct" };
+
+    /// <summary>How the person signs a message, used by the writing actions when they rewrite one. Empty = no sign-off added.</summary>
+    public string SignOff { get; set; } = "";
+
+    /// <summary>Which connection generated text uses. Auto = decided by the environment, as before.</summary>
+    public ProviderChoice Provider { get; set; } = ProviderChoice.Auto;
+
+    /// <summary>The person's own API, described here instead of in code. Used only when Provider is MyApi.</summary>
+    public CustomApiSettings CustomApi { get; set; } = new();
+
+    /// <summary>
+    /// Start Select &amp; Peek from a middle-click (the wheel button) on selected text. Off by default: it needs a Windows mouse hook,
+    /// which some security software flags. Never swallows the click.
+    /// </summary>
+    public bool MiddleClickTrigger { get; set; }
+
+    /// <summary>A key that must be held with the middle-click: None, Ctrl, Shift or Alt. Ctrl is recommended: a plain middle-click scrolls and opens links.</summary>
+    public string MiddleClickModifier { get; set; } = "Ctrl";
+    public static readonly IReadOnlyList<string> MiddleClickModifiers = new[] { "None", "Ctrl", "Shift", "Alt" };
+
+    /// <summary>An https address the person pastes to fetch a newer Drugs@FDA zip when they press Update. Never fetched automatically.</summary>
+    public string? ReferenceDataUrl { get; set; }
+
+    /// <summary>The standing instructions plus tone and sign-off, as one block for the writing actions. Facts are never up for change.</summary>
+    public string WritingInstructions()
+    {
+        var parts = new List<string>();
+        if (!string.IsNullOrWhiteSpace(Tone) && ToneChoices.Contains(Tone)) parts.Add($"Tone: {Tone.ToLowerInvariant()}.");
+        if (!string.IsNullOrWhiteSpace(StandingInstructions)) parts.Add(StandingInstructions.Trim());
+        if (!string.IsNullOrWhiteSpace(SignOff)) parts.Add($"When you write or rewrite a whole message, end it with this sign-off exactly: {SignOff.Trim()}");
+        return string.Join("\n", parts);
+    }
+
     /// <summary>A local usage log: date, event and seconds, never an ANDA number or any text. Off by default.</summary>
     public bool UsageLog { get; set; }
 
@@ -90,6 +126,12 @@ public static class SettingsService
                 if (!NativeHostRegistration.IsValidExtensionId(loaded.ExtensionId)) loaded.ExtensionId = NativeHostRegistration.DefaultExtensionId;
                 loaded.PortfolioColumns ??= new();
                 loaded.StandingInstructions ??= "";
+                loaded.Tone = Settings.ToneChoices.Contains(loaded.Tone ?? "") ? loaded.Tone ?? "" : "";
+                loaded.SignOff ??= "";
+                loaded.CustomApi ??= new();
+                loaded.CustomApi.RequestTemplate = string.IsNullOrWhiteSpace(loaded.CustomApi.RequestTemplate) ? CustomApiSettings.ExampleTemplate : loaded.CustomApi.RequestTemplate;
+                if (!Enum.IsDefined(loaded.Provider)) loaded.Provider = ProviderChoice.Auto;
+                if (!Settings.MiddleClickModifiers.Contains(loaded.MiddleClickModifier ?? "")) loaded.MiddleClickModifier = "Ctrl";
                 if (HotkeyParser.ValidateSet(("Select & Peek", loaded.PeekHotkey), ("Lookup", loaded.LookupHotkey), ("Check a draft", loaded.DraftHotkey)) is not null)
                 { loaded.PeekHotkey = "Ctrl+Alt+A"; loaded.LookupHotkey = "Ctrl+Alt+Space"; loaded.DraftHotkey = "Ctrl+Alt+D"; }
                 if (!Enum.IsDefined(loaded.Appearance)) loaded.Appearance = Appearances.Default;

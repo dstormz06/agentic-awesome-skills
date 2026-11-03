@@ -55,6 +55,7 @@ internal static class SelfTest
             report.Add(await AutoHideAsync(repo));
             report.Add(await HotkeyDeliveryAsync(hotkeys));
             report.Add(await CaptureEndToEndAsync());
+            report.Add(await MouseTriggerAsync());
 
             report.Add(new("claude-connection", CheckStatus.Skip,
                 "not exercised: the self-test makes no network calls. Use Settings → Claude connection → Test."));
@@ -422,6 +423,34 @@ internal static class SelfTest
             return stillThere && hidden
                 ? new(name, CheckStatus.Pass, "a card set to 1 s was visible at 0.5 s and gone by 3 s; hover, pin and drawer rules are covered by unit tests")
                 : new(name, CheckStatus.Fail, $"visible at 0.5 s: {stillThere}; hidden by 3 s: {hidden}");
+        }
+        catch (Exception ex) { return new(name, CheckStatus.Fail, ex.Message); }
+    }
+
+    /// <summary>
+    /// The optional middle-click trigger, for real: install the hook, inject a plain middle-click (must be ignored when Ctrl is
+    /// required), then a Ctrl+middle-click (must reach the app). The click is never swallowed; this only checks the app saw it.
+    /// </summary>
+    private static async Task<CheckResult> MouseTriggerAsync()
+    {
+        const string name = "mouse-trigger";
+        if (!OperatingSystem.IsWindows()) return new(name, CheckStatus.Skip, "Windows only");
+        try
+        {
+            string modifier = "Ctrl";
+            var hit = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            using var service = new MouseTriggerService(() => modifier, () => hit.TrySetResult(), allowInjected: true);
+            if (!service.Start())
+                return new(name, CheckStatus.Warn, service.Problem ?? "the mouse hook could not be installed on this machine");
+
+            TextCaptureService.SendMiddleClick(ctrl: false);
+            bool plainIgnored = await Task.WhenAny(hit.Task, Task.Delay(900)) != hit.Task;
+            await Task.Delay(450);                                   // past the debounce
+            TextCaptureService.SendMiddleClick(ctrl: true);
+            bool ctrlSeen = await Task.WhenAny(hit.Task, Task.Delay(2500)) == hit.Task;
+            return plainIgnored && ctrlSeen
+                ? new(name, CheckStatus.Pass, "a plain middle-click was ignored while Ctrl was required, and Ctrl + middle-click reached the app; the click was passed on untouched")
+                : new(name, CheckStatus.Fail, $"plain click ignored: {plainIgnored}; Ctrl + middle-click seen: {ctrlSeen}");
         }
         catch (Exception ex) { return new(name, CheckStatus.Fail, ex.Message); }
     }

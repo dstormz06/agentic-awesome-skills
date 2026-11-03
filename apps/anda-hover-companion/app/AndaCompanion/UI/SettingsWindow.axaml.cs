@@ -8,7 +8,8 @@ using AndaCompanion.Theming;
 namespace AndaCompanion.UI;
 
 /// <summary>What Settings needs to ask the running app, so the window can show live status (shortcut registration, the loaded portfolio).</summary>
-public sealed record SettingsHooks(Func<string> HotkeyStatus, Func<PortfolioRepository?> Portfolio, Func<string> ReferenceStatus);
+public sealed record SettingsHooks(Func<string> HotkeyStatus, Func<PortfolioRepository?> Portfolio, Func<string> ReferenceStatus,
+    Func<string?>? MouseStatus = null);
 
 public partial class SettingsWindow : Window
 {
@@ -18,10 +19,12 @@ public partial class SettingsWindow : Window
     private bool _loading = true;
 
     private readonly SettingsHooks? _hooks;
+    private readonly QuickReplyService _replies;
 
-    public SettingsWindow(Settings settings, PromptLibraryService prompts, Action onChanged, SettingsHooks? hooks = null)
+    public SettingsWindow(Settings settings, PromptLibraryService prompts, Action onChanged, SettingsHooks? hooks = null, QuickReplyService? replies = null)
     {
         _hooks = hooks;
+        _replies = replies ?? new QuickReplyService();
         _settings = settings;
         _prompts = prompts;
         _onChanged = onChanged;
@@ -99,6 +102,7 @@ public partial class SettingsWindow : Window
         };
 
         BuildNewSections();
+        BuildRound10Sections();
         ReloadLenses();
         LensCombo.SelectionChanged += (_, _) =>
         {
@@ -114,19 +118,128 @@ public partial class SettingsWindow : Window
             win.Show(this);
         };
 
-        ConnStatus.Text = ConnectionService.Describe();
-        TestBtn.Click += async (_, _) =>
-        {
-            TestBtn.IsEnabled = false;
-            ConnStatus.Text = "Testing…";
-            ConnStatus.Text = await ConnectionService.TestAsync();
-            TestBtn.IsEnabled = true;
-        };
-
         CloseBtn.Click += (_, _) => Close();
         Opened += (_, _) => FitToScreen();
         KeyDown += (_, e) => { if (e.Key == Key.Escape) Close(); };
         _loading = false;
+    }
+
+    // ---------------- round 10: connection, my API, writing, triggers, reference update ----------------
+
+    private static Avalonia.Media.IBrush Res(string key) => (Avalonia.Media.IBrush)Avalonia.Application.Current!.Resources[key]!;
+
+    private void PaintConnection()
+    {
+        var c = ConnectionStatus.Current;
+        string brush = c.State switch { ConnectionState.Connected => "C.Good", ConnectionState.Failed => "C.Bad", ConnectionState.SetUp => "C.Warn", _ => "C.Ink3" };
+        string back = c.State switch { ConnectionState.Connected => "C.GoodBg", ConnectionState.Failed => "C.BadBg", ConnectionState.SetUp => "C.WarnBg", _ => "C.Mark" };
+        ConnBannerLabel.Text = c.Label; ConnBannerText.Text = c.Sentence;
+        ConnBannerLabel.Foreground = Res(brush);
+        ConnBannerDot.Stroke = Res(brush);
+        ConnBannerDot.Fill = c.State == ConnectionState.Connected ? Res(brush) : Avalonia.Media.Brushes.Transparent;   // filled only when really connected
+        ConnBanner.Background = Res(back);
+    }
+
+    private void BuildRound10Sections()
+    {
+        // ---- the connection banner, always true ----
+        PaintConnection();
+        void OnConn() => Avalonia.Threading.Dispatcher.UIThread.Post(PaintConnection);
+        ConnectionStatus.Changed += OnConn;
+        Closed += (_, _) => ConnectionStatus.Changed -= OnConn;
+
+        // ---- which connection, and my own API ----
+        var choices = new (ProviderChoice Value, string Label)[]
+        {
+            (ProviderChoice.Auto, "Auto"), (ProviderChoice.Offline, "Offline only"), (ProviderChoice.Claude, "Claude"), (ProviderChoice.MyApi, "My API"),
+        };
+        foreach (var (value, label) in choices)
+        {
+            var rb = new RadioButton { Content = label, GroupName = "provider", IsChecked = value == _settings.Provider, Margin = new Avalonia.Thickness(0, 0, 14, 2) };
+            rb.IsCheckedChanged += (_, _) =>
+            {
+                if (_loading || rb.IsChecked != true) return;
+                _settings.Provider = value;
+                MyApiExpander.IsExpanded = value == ProviderChoice.MyApi;
+                Apply();
+                ConnStatus.Text = ConnectionService.DescribeFor(_settings);
+            };
+            ProviderPanel.Children.Add(rb);
+        }
+        var api = _settings.CustomApi;
+        ApiName.Text = api.Name; ApiEndpoint.Text = api.Endpoint; ApiHeader.Text = api.AuthHeader; ApiScheme.Text = api.AuthScheme;
+        ApiEnvVar.Text = api.SecretEnvVar; ApiModel.Text = api.Model; ApiTemplate.Text = api.RequestTemplate; ApiPath.Text = api.ResponsePath;
+        MyApiExpander.IsExpanded = _settings.Provider == ProviderChoice.MyApi;
+        void SaveApi()
+        {
+            if (_loading) return;
+            api.Name = (ApiName.Text ?? "").Trim(); api.Endpoint = (ApiEndpoint.Text ?? "").Trim(); api.AuthHeader = (ApiHeader.Text ?? "").Trim();
+            api.AuthScheme = (ApiScheme.Text ?? "").Trim(); api.SecretEnvVar = (ApiEnvVar.Text ?? "").Trim(); api.Model = (ApiModel.Text ?? "").Trim();
+            api.RequestTemplate = string.IsNullOrWhiteSpace(ApiTemplate.Text) ? CustomApiSettings.ExampleTemplate : ApiTemplate.Text!;
+            api.ResponsePath = (ApiPath.Text ?? "").Trim();
+            Apply();
+            ConnStatus.Text = ConnectionService.DescribeFor(_settings);
+        }
+        foreach (var box in new[] { ApiName, ApiEndpoint, ApiHeader, ApiScheme, ApiEnvVar, ApiModel, ApiTemplate, ApiPath }) box.LostFocus += (_, _) => SaveApi();
+        foreach (int seconds in CustomApiSettings.TimeoutChoices)
+        {
+            var rb = new RadioButton { Content = $"{seconds} s", GroupName = "apitimeout", IsChecked = seconds == api.TimeoutSeconds, Margin = new Avalonia.Thickness(0, 0, 12, 2) };
+            rb.IsCheckedChanged += (_, _) => { if (!_loading && rb.IsChecked == true) { api.TimeoutSeconds = seconds; Apply(); } };
+            ApiTimeoutPanel.Children.Add(rb);
+        }
+        ConnStatus.Text = ConnectionService.DescribeFor(_settings);
+        TestBtn.Click += async (_, _) =>
+        {
+            SaveApi();
+            TestBtn.IsEnabled = false;
+            ConnStatus.Text = "Testing…";
+            ConnStatus.Text = await ConnectionService.TestForAsync(_settings);
+            TestBtn.IsEnabled = true;
+        };
+
+        // ---- my writing: tone, style, sign-off, quick replies ----
+        foreach (string tone in Settings.ToneChoices)
+        {
+            var rb = new RadioButton { Content = tone.Length == 0 ? "No tone preference" : tone, GroupName = "tone", IsChecked = tone == _settings.Tone, Margin = new Avalonia.Thickness(0, 0, 12, 2) };
+            rb.IsCheckedChanged += (_, _) => { if (!_loading && rb.IsChecked == true) { _settings.Tone = tone; Apply(); } };
+            TonePanel.Children.Add(rb);
+        }
+        SignOffBox.Text = _settings.SignOff;
+        SignOffBox.LostFocus += (_, _) =>
+        {
+            if (_loading || SignOffBox.Text == _settings.SignOff) return;
+            _settings.SignOff = (SignOffBox.Text ?? "").Trim(); Apply();
+        };
+        void PaintReplies() => RepliesSummary.Text = _replies.Replies.Count == 1 ? "1 quick reply" : $"{_replies.Replies.Count} quick replies";
+        PaintReplies();
+        RepliesManage.Click += (_, _) => new QuickRepliesWindow(_replies, () => { PaintReplies(); _onChanged(); }).Show(this);
+
+        // ---- the middle-click trigger (off by default) ----
+        MiddleCheck.IsChecked = _settings.MiddleClickTrigger;
+        void PaintMouse() => Avalonia.Threading.DispatcherTimer.RunOnce(() => MiddleStatus.Text = _settings.MiddleClickTrigger ? _hooks?.MouseStatus?.Invoke() ?? "" : "Off.", TimeSpan.FromMilliseconds(400));
+        MiddleCheck.IsCheckedChanged += (_, _) => { if (_loading) return; _settings.MiddleClickTrigger = MiddleCheck.IsChecked == true; Apply(); PaintMouse(); };
+        foreach (string mod in Settings.MiddleClickModifiers)
+        {
+            var rb = new RadioButton { Content = mod == "None" ? "no key" : mod, GroupName = "middlemod", IsChecked = mod == _settings.MiddleClickModifier, Margin = new Avalonia.Thickness(0, 0, 10, 2) };
+            rb.IsCheckedChanged += (_, _) => { if (!_loading && rb.IsChecked == true) { _settings.MiddleClickModifier = mod; Apply(); } };
+            MiddleModPanel.Children.Add(rb);
+        }
+        MiddleStatus.Text = _settings.MiddleClickTrigger ? _hooks?.MouseStatus?.Invoke() ?? "" : "Off.";
+
+        // ---- live update of the Drugs@FDA file: only when pressed ----
+        ReferenceUrlBox.Text = _settings.ReferenceDataUrl ?? "";
+        ReferenceUpdate.Click += async (_, _) =>
+        {
+            string url = (ReferenceUrlBox.Text ?? "").Trim();
+            _settings.ReferenceDataUrl = url.Length == 0 ? null : url; Apply();
+            ReferenceUpdate.IsEnabled = false;
+            ReferenceUpdateStatus.Text = "Fetching… (this can take a minute)";
+            var (ok, message) = await ReferenceDownloader.UpdateAsync(url, AppPaths.ReferenceDownloadFile);
+            if (ok) { _settings.ReferenceDataPath = AppPaths.ReferenceDownloadFile; ReferenceBox.Text = AppPaths.ReferenceDownloadFile; Apply(); }
+            ReferenceUpdateStatus.Text = message;
+            ReferenceUpdate.IsEnabled = true;
+            Avalonia.Threading.DispatcherTimer.RunOnce(RefreshPortfolioStatus, TimeSpan.FromMilliseconds(900));
+        };
     }
 
     // ---------------- urgent, shortcuts, calendar, my data, writing, usage log ----------------

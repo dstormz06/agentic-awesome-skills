@@ -14,7 +14,7 @@ Prototype, not an FDA product. It makes **no network requests and uses no AI**.
 | Right-click the page, **scan this page for ANDA numbers** (**Alt+Shift+S**) | Lists the numbers on the page with a one-line status each. Reads the visible text on your click only |
 | Click the toolbar button | **Look up** a number, **Draft**, **Watch list** (every ANDA with something worth a look, worst first), **This page** |
 
-It runs only when you ask: a shortcut, the right-click menu or the toolbar button. There is no script running on every page.
+It runs only when you ask: a shortcut, the right-click menu or the toolbar button. There is no script running on every page. Settings, *Ways to start it* lists each of these and the key Edge actually gave every shortcut ("not set" when Edge or another extension has it), with a button to change them. A **middle-click** trigger is not offered here on purpose, because an extension can only watch the mouse by running a script on every page; the Windows app has one. Both cards always show a **PSG** line and an **RLD LABEL** line: a date with its source, or a brief reason there is none.
 
 ## Two ways to use it
 

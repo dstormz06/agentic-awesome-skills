@@ -23,17 +23,29 @@ export function offlineBrief(r) {
   return t.trimEnd();
 }
 
-/** The PSG line: only a date the person keeps in their own sheet, labelled as theirs. No official PSG source is connected. */
+/** Same wording as the app (ReferenceResolver): always two lines, a date with its source or a brief reason there is none. */
+export const NO_PSG = 'not available: no PSG date in your data, and no official PSG source is connected';
+export const NO_RLD = 'not available: no Drugs@FDA file chosen (app: Settings, My data)';
+
+/** The fictional demo records carry made-up reference dates so the layout can be shown. They say so. */
+const DEMO_DATES = { '216482': ['2026-01-14', '2026-03-03'], '214990': ['2025-11-20', '2026-03-03'] };
+const demoText = (r, i) => (r.demo && DEMO_DATES[r.number] ? `${fmtLong(parseIso(DEMO_DATES[r.number][i]))} · fictional demo date` : null);
+
+/** The PSG line: a date the person keeps in their own sheet, labelled as theirs, or the fictional demo date. No official PSG source is connected. */
 export function psgText(r) {
   const p = parseIso(r.psgDateFromSheet);
   return p === null ? null : `${fmtLong(p)} · from your sheet, not an official source`;
+}
+
+/** What the card's PSG and RLD lines say. The extension has no Drugs@FDA file of its own: with the app connected, the app answers. */
+export function referenceFor(r) {
+  return { psg: psgText(r) ?? demoText(r, 0) ?? NO_PSG, rld: demoText(r, 1) ?? NO_RLD };
 }
 
 /** @param ctx {today (UTC ms), calendar, lead, lateDays} */
 export function buildCard(r, ctx) {
   const lead = ctx.lead ?? 3, lateDays = ctx.lateDays ?? 7;
   const flags = evaluateWatch(r, ctx.today, ctx.calendar, { lead });
-  const psg = psgText(r);
   const urgent = isUrgent(r, ctx.today, ctx.calendar, lateDays);
   return {
     number: r.number, kind: r.kind, drug: r.drug, meta: r.meta, freshness: r.dataAsOf ?? null, source: r.sourceLabel ?? null, demo: !!r.demo,
@@ -43,7 +55,7 @@ export function buildCard(r, ctx) {
     attention: r.attention ? { level: r.attention.level === 'bad' ? 'bad' : 'warn', text: r.attention.text } : null,
     latest: r.latest, ahead: r.ahead ?? null,
     watch: flags, watchMore: Math.max(0, flags.length - 1),
-    reference: psg !== null ? { psg, rld: null } : null,
+    reference: referenceFor(r),
     pending: r.pending, notes: r.notes, forecastDetail: r.forecastDetail, sisters: r.sisters,
     brief: { tag: 'OFFLINE BRIEF', text: offlineBrief(r), generated: false },
     statusLine: statusLine(r),

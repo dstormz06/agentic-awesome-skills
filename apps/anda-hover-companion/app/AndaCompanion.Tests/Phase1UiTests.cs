@@ -140,32 +140,36 @@ public class Phase1UiTests : IClassFixture<HeadlessFixture>
     }
 
     [Fact]
-    public async Task The_reference_lines_show_only_what_is_known_and_say_so_when_it_is_not()
+    public async Task The_reference_lines_are_always_two_and_say_briefly_when_a_date_is_not_available()
     {
         var rec = Repo.Find("216482")! with { PsgDateFromSheet = new DateOnly(2026, 8, 21) };
         var shown = await _fx.Session.Dispatch(() =>
         {
             ThemeManager.Apply(AppearanceId.K);
-            var w = new CardWindow(new OfflineBriefService(), Repo.Find)
+            (bool, string?, string?) Read(AndaRecord record, Func<AndaRecord, ReferenceInfo?>? reference)
             {
-                CloseWhenDeactivated = false, Today = () => new DateOnly(2026, 11, 2),
-                Reference = r => new ReferenceInfo(DrugsAtFdaFile.PsgOf(r), "not shown: needs the active ingredient and dosage form in your sheet"),
-            };
-            w.Show(rec, new PixelPoint(40, 40), false);
-            Settle();
-            var res = (w.FindControl<Control>("RefSlot")!.IsVisible, w.FindControl<TextBlock>("PsgText")!.Text, w.FindControl<TextBlock>("RldText")!.Text);
-            w.Close();
-            var w2 = new CardWindow(new OfflineBriefService(), Repo.Find) { CloseWhenDeactivated = false, Today = () => new DateOnly(2026, 11, 2) };
-            w2.Show(Repo.Find("216482")!, new PixelPoint(40, 40), false);
-            Settle();
-            bool hidden = !w2.FindControl<Control>("RefSlot")!.IsVisible;
-            w2.Close();
-            return (res, hidden);
+                var w = new CardWindow(new OfflineBriefService(), Repo.Find)
+                    { CloseWhenDeactivated = false, Today = () => new DateOnly(2026, 11, 2), Reference = reference };
+                w.Show(record, new PixelPoint(40, 40), false);
+                Settle();
+                var res = (w.FindControl<Control>("RefSlot")!.IsVisible, w.FindControl<TextBlock>("PsgText")!.Text, w.FindControl<TextBlock>("RldText")!.Text);
+                w.Close();
+                return res;
+            }
+            var known = Read(rec, r => new ReferenceInfo(DrugsAtFdaFile.PsgOf(r), "not available: needs the active ingredient and dosage form in your sheet"));
+            var demo = Read(Repo.Find("216482")!, null);                                   // the fictional demo record: made-up dates, labelled as such
+            var real = Read(Repo.Find("216482")! with { Demo = false }, null);              // real data, nothing set up: two brief reasons
+            return (known, demo, real);
         }, CancellationToken.None);
-        Assert.True(shown.res.Item1);
-        Assert.Equal("Aug 21, 2026 · from your sheet, not an official source", shown.res.Item2);
-        Assert.StartsWith("not shown:", shown.res.Item3);
-        Assert.True(shown.hidden);
+        Assert.True(shown.known.Item1);
+        Assert.Equal("Aug 21, 2026 · from your sheet, not an official source", shown.known.Item2);
+        Assert.StartsWith("not available:", shown.known.Item3);
+        Assert.True(shown.demo.Item1);
+        Assert.Equal("Jan 14, 2026 · fictional demo date", shown.demo.Item2);
+        Assert.Equal("Mar 3, 2026 · fictional demo date", shown.demo.Item3);
+        Assert.True(shown.real.Item1);
+        Assert.Equal(ReferenceResolver.NoPsg, shown.real.Item2);
+        Assert.Equal(ReferenceResolver.NoRld, shown.real.Item3);
     }
 
     [Theory]

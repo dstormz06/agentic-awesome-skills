@@ -75,6 +75,20 @@ public sealed class HotkeyService : IDisposable
         return result;
     }
 
+    /// <summary>
+    /// One line per shortcut for the Settings panel: a tick, or what is wrong and what to do. Names the likely cause (another program
+    /// already owns the combination) so a shortcut that does nothing is never a mystery.
+    /// </summary>
+    public static string Report(IReadOnlyList<HotkeyStatus> status)
+    {
+        if (status.Count == 0) return "Shortcuts: starting…";
+        return string.Join("\n", status.Select(s => s.Registered
+            ? $"✓ {s.Binding.Name}: {s.Binding.Combo} is active"
+            : s.Win32Error == ErrorHotkeyAlreadyRegistered
+                ? $"✗ {s.Binding.Name}: {s.Binding.Combo} is already used by another program (many apps claim a global shortcut). Choose a different one above; the tray icon always works."
+                : $"✗ {s.Binding.Name}: {s.Binding.Combo} could not be registered (Windows error {s.Win32Error}). Choose a different one above; the tray icon always works."));
+    }
+
     /// <summary>A plain-language problem report, or null when the hotkey registered fine.</summary>
     public static string? Describe(HotkeyStatus s) =>
         s.Registered ? null

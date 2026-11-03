@@ -12,7 +12,7 @@ public static class UsageLog
     /// <summary>The only event names that can be written. Anything else is dropped, so free text can never reach the file.</summary>
     public static readonly IReadOnlySet<string> Events = new HashSet<string>
     {
-        "card_open", "peek_auto_open", "copy_status", "draft_check", "ai_proofread", "ai_rewrite", "ai_fact_check", "watch_flag_shown",
+        "card_open", "peek_auto_open", "copy_status", "copy_reply", "draft_check", "ai_proofread", "ai_rewrite", "ai_fact_check", "watch_flag_shown",
     };
 
     private static readonly object Gate = new();

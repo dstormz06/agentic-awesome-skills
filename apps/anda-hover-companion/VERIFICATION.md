@@ -373,6 +373,46 @@ Not run in **Edge**, not on Outlook on the web, Teams on the web or SharePoint, 
 no managed computer, no signed build, no live model, no real RPM workbook, no real Drugs@FDA file. The timing numbers are from one Linux container; they show the work is no longer
 quadratic, not a promise on a given PC. The audit is mine and of my own code; it is not an independent review, and a person who did not write it should still read `SECURITY.md`.
 
+## Round 10 — the owner's test of the simulation: shortcuts, reference dates, connection status, own API, writing preferences
+
+Scope: the owner tried the published simulation and reported that Ctrl+Alt+Space did nothing, that Settings offered no other shortcuts or ways to start it, that no
+PSG or RLD dates appeared, and that there was no place to point to a portfolio, notes, an API or writing preferences. They asked that the app always say whether an API is
+connected, and whether a middle-click trigger is possible. They asked to be shown options for the Bronze look and four new looks before anything is final.
+
+**What was true.** The Windows app already had rebindable shortcuts, My data and writing instructions; the simulation showed only a hint paragraph where those sections belong, and
+its three shortcuts were hard-coded, so the owner could not find them or change one. The cause of Ctrl+Alt+Space doing nothing on the owner's computer is **not known**: the likeliest
+explanation is that another program already owns that combination (many apps claim a global shortcut), and the browser never sees a key another program took. That is a hypothesis, not
+something observed.
+
+Local results on this code: C# **492 passed, 8 skipped**; extension unit **31**; standalone browser test **68 checks**; native-messaging test **11 checks**; simulation: all seven
+earlier suites pass and the new one has **65 checks**; `npm run validate` and `npm run security:docs` pass.
+
+| Claim | Evidence | Limit |
+|---|---|---|
+| **Both reference lines are always on the card** (PSG and RLD LABEL): a date with its source, or a brief reason there is none | `ReferenceLinesTests`, the card window test, the regenerated golden file (the extension's JavaScript reproduces it), and browser checks in the extension and the simulation. The fictional demo records carry made-up dates that say so | There is **no live PSG date**: no official source is connected. RLD comes from a Drugs@FDA file the person points to, or from Update now |
+| **Update now** fetches a newer Drugs@FDA file only when pressed, from an https address the person pastes, and replaces the old file only if the new one reads as a real Drugs@FDA file | `ReferenceUpdateTests` with a fake server: a good file replaces, a web page does not, a bad address or a 404 fetches nothing or changes nothing | **Never run against FDA** (FDA hosts were unreachable from the build environment); the app does not know or guess FDA's file address |
+| **The app says whether an API is connected**: offline, set up but not tested, connected, or not reachable; never "connected" on a setting alone | `ConnectionStatusTests`, card and Settings window tests, the simulation (which can never say Connected) | "Connected" has been seen only against a fake server |
+| **My API**: a provider described in Settings, https only, the token only ever a variable's name, bad templates and addresses refused in words, errors never show the reply | `CustomApiTests` (24 cases) against a fake handler, including a draft with quotes and newlines that cannot break out of the request | **Never run against any real service** |
+| **My writing**: tone, style, sign-off feed the writing actions; **quick replies** fill from the card with no AI | `QuickReplyTests`, `Settings` round trip, the card button and menu in the simulation | The writing actions themselves are still never run against a live model |
+| **Middle-click trigger**, off by default, exactly the chosen key held, never swallows the click | The decision rule is unit-tested; the real hook and the injected clicks are exercised by the Windows self-test check `mouse-trigger` | Windows runner, not a person on a real machine; apps that scroll or select on a middle-click behave their own way |
+| **Shortcuts**: a live line per shortcut names one that another program owns | `HotkeyService.Report` tests; the simulation re-binds, refuses one modifier, the Windows key and duplicates, and shows a taken shortcut | The real registration result on the owner's computer has not been seen |
+
+### Defects caught in round 10
+
+| # | Finding | Found by | Disposition |
+|---|---|---|---|
+| R44 | In the simulation, a pinned card sat above the tray menu and above Settings, so neither could be clicked | The new simulation test | The tray menu is above every card; a window opened on purpose is above a pinned card |
+| R45 | The simulation's "Claude access is approved" switch did not update the connection pill unless a card was open | The new simulation test | The switch repaints the pill |
+| R46 | The simulation only hinted at Settings that the app really has, and hard-coded its three shortcuts | The owner's test | Real, working (but simulated) sections for shortcuts, other ways to start it, My data, My writing and the connection |
+| R47 | The card hid the PSG and RLD lines when no source was set, so they looked missing | The owner's test | Always two lines, with a brief reason |
+| R48 | Nothing on screen said whether an API was connected | The owner's test | Pill, banner and tooltip, driven by what really happened |
+
+### What round 10 does not prove
+
+No run on the owner's computer, so the Ctrl+Alt+Space cause is a hypothesis. No real service for My API, no FDA host for Update now, no person on a real machine for the middle-click.
+The simulation is a mock: it checks the My API form but sends nothing, and its "My data" pickers are simulated on purpose, because real files should not go into a hosted page.
+The four Bronze header alternatives and four new looks are **proposals** on a separate page; none is in the app or the lab until the owner chooses.
+
 ## Still open
 
 GDUFA III tier table (needs the commitment-letter text and the dual-source rule); a real-keyboard check of rebound shortcuts on

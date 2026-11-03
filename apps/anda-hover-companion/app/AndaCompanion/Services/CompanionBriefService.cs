@@ -39,10 +39,12 @@ public static class BriefServiceFactory
     /// Provider-backed brief when a chat completer is available (Anthropic today;
     /// Elsa or another approved wrapper later via ChatCompleterFactory); offline otherwise.
     /// </summary>
-    public static ICompanionBriefService Create(Func<string?>? lensProvider = null)
+    public static ICompanionBriefService Create(Func<string?>? lensProvider = null, Settings? settings = null)
     {
         var offline = new OfflineBriefService();
-        return ChatCompleterFactory.Create() is { } completer
+        var completer = ChatCompleterFactory.CreateReporting(settings);
+        ConnectionStatus.Configure(completer);   // set up but not tested, or offline: never "connected" until a request succeeds
+        return completer is not null
             ? new GeneratedBriefService(completer, offline, lensProvider)
             : offline;
     }

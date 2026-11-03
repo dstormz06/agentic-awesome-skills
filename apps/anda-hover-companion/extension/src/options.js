@@ -93,6 +93,23 @@ $('connect').addEventListener('click', async () => {
 });
 const shortcuts = () => chrome.tabs.create({ url: 'chrome://extensions/shortcuts' });
 $('shortcuts').addEventListener('click', shortcuts);
-$('shortcuts').addEventListener('keydown', (e) => { if (e.key === 'Enter') shortcuts(); });
+
+// The ways to start it: each command with the key Edge really gave it, or a plain "not set".
+async function paintCommands() {
+  const body = $('cmds').querySelector('tbody');
+  body.replaceChildren();
+  const rows = [['Right-click menu', 'on, for selected text', true], ['Toolbar button', 'on', true]];
+  let commands = [];
+  try { commands = (await chrome.commands.getAll()).filter((c) => !c.name.startsWith('_')); } catch (e) { commands = []; }
+  for (const c of commands) rows.push([c.description || c.name, c.shortcut || 'not set (taken by Edge or another extension)', !!c.shortcut]);
+  for (const [name, how, ok] of rows) {
+    const tr = document.createElement('tr');
+    const a = document.createElement('td'); a.textContent = name;
+    const b = document.createElement('td'); b.textContent = (ok ? '✓ ' : '✗ ') + how;
+    tr.append(a, b);
+    body.append(tr);
+  }
+}
+paintCommands();
 
 await paintSettings(); await paintImport(); await paintStatus();

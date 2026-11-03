@@ -78,13 +78,26 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   (.txt, .md, .docx). Read-only and local; Excel can stay open. Unknown values show as "—", never an
   estimate. Hard limits on file size, rows and columns; no macros, formulas or external links are
   read. `Services/Portfolio/`. Tested on generated sample files, **not on a real RPM workbook**.
-- **Reference dates (RLD labeling, PSG)** — the card can show one date each. **RLD labeling** is the most recent labeling
-  approval date in a Drugs@FDA data file *you* download and point to; the app downloads nothing.
+- **Reference dates (RLD labeling, PSG)** — the card **always shows two lines**, PSG and RLD LABEL: a date with where it came from, or a brief
+  reason there is none ("not available: …"). The fictional demo records carry made-up dates labelled "fictional demo date". **RLD labeling** is the
+  most recent labeling approval date in a Drugs@FDA data file *you* download and point to, **or fetch with Update now** from an https address you paste
+  (only when you press it, kept only if it reads as a real Drugs@FDA file; this build does not know or guess FDA's address).
   **PSG** is shown only if your own sheet has a PSG date column, labelled "from your sheet, not an
-  official source". No official PSG source is connected. If a lookup fails it says "not checked" and
+  official source". No official PSG source is connected, so there is no live PSG date. If a lookup fails it says "not available" and
   never guesses. **The Drugs@FDA file layout the parser expects has not been checked against a real
   download** (FDA's sites were not reachable from the build environment), so treat RLD as unverified
   until someone opens a real file. `Services/ReferenceData.cs`.
+- **Other ways to start it** — Settings → *Shortcuts* shows a live line per shortcut (active, or "already used by another program" with what to do), so a
+  shortcut another program owns is never a mystery. Settings → *Other ways to start it*: an optional **middle-click** on selected text (Windows mouse hook,
+  **off by default**, a chosen key held, Ctrl by default; it never swallows the click). `Services/MouseTrigger.cs`; the rule is unit-tested and the real hook is
+  exercised by the Windows self-test.
+- **Is it connected?** — a pill on every card, a banner at the top of Settings and the tray tooltip say **OFFLINE · no API connected**, **set up, not tested**,
+  **CONNECTED** (only after a request really succeeded) or **NOT REACHABLE**. `Services/ConnectionStatus.cs`.
+- **My API** — Settings → *Connection*: choose Auto, Offline only, Claude or **My API**, a provider described in Settings (address, token header, the NAME of the
+  environment variable holding the token, model, request body template, reply path, timeout) instead of in code. https only; the token is never stored; errors never
+  show the reply. `Services/CustomApi.cs`. Tested against a fake server only; **never run against a real service**.
+- **My writing** — Settings → *My writing*: tone, style, sign-off, and **quick replies** (templates the card fills in from its record with no AI; the Quick replies
+  button or the R key copies one). `Services/QuickReplies.cs`.
 - **Watch list** — tray → *Watch list…*: every ANDA in your data (the demo records, or your portfolio) that has something worth a look, worst
   first, with the same rules the card uses. Computed when you open it; nothing runs in the background. Notes (a date near a holiday, no goal date) are
   hidden until you ask. Click a row to open its card. `Services/WatchList.cs`.
@@ -164,7 +177,7 @@ dotnet test AndaCompanion.Tests                              # everything (Windo
 dotnet test AndaCompanion.Tests --filter "Category!=Windows" # what runs on Linux/macOS
 ```
 
-446 cross-platform tests at the time of writing (recognizer, status line, GDUFA rules, the federal-holiday
+492 cross-platform tests at the time of writing (recognizer, status line, GDUFA rules, the federal-holiday
 calendar against OPM's dates, watch rules, urgency, draft check, portfolio and notes readers, writing prompts,
 hotkey parsing and registration with a fake API, brief fencing and fallback, provider selection, settings,
 contrast, placement, headless renders of the real windows) plus Windows-only tests that use real Win32 (clipboard snapshot/restore, hotkey registration and
@@ -223,7 +236,8 @@ AndaCompanion/
   UI/ChipWindow.*       whisper invite + invalid-number notice
   UI/LookupWindow.*     Ctrl+Alt+Space lookup
   UI/DraftWindow.*      Ctrl+Alt+D draft check and the writing actions (preview before send, Copy only)
-  UI/SettingsWindow.*   appearance, consent, urgent rule, My data, instructions, shortcuts, usage log
+  UI/SettingsWindow.*   appearance, consent, urgent rule, shortcuts and other ways to start it, My data, My writing, connection and My API, usage log
+  UI/QuickRepliesWindow.* the person's own quick replies (templates filled from the card)
   UI/HotkeyCapture.cs   press-a-shortcut box used by the shortcut settings
   UI/WatchListWindow.*  the portfolio-wide watch list
   UI/ProgressControls   bar / ticks / ring / hatch / capsule / line / dots / step / timeline + D's grid surface

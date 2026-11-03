@@ -100,7 +100,7 @@ public sealed class DrugsAtFdaFile
         var (date, message) = RldLabeling(r);
         string rld = date is { } d
             ? $"{d.ToString("MMM d, yyyy", Inv)} · Drugs@FDA, file saved {FileDate.ToString("MMM d", Inv)}"
-            : $"not shown: {message}";
+            : $"not available: {message}";
         return new ReferenceInfo(PsgOf(r), rld);
     }
 

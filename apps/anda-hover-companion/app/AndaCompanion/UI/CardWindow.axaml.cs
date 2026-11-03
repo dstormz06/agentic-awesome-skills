@@ -36,7 +36,10 @@ public partial class CardWindow : Window
     /// <summary>Today's date for the watch rules. Overridable so a test is never at the mercy of the real clock.</summary>
     public Func<DateOnly> Today { get; set; } = () => DateOnly.FromDateTime(DateTime.Now);
 
-    /// <summary>The PSG and RLD-labeling lines, if the person has set up the sources. Null or empty parts are hidden.</summary>
+    /// <summary>The person's quick replies, filled from the open card when one is chosen. Null or empty hides the button.</summary>
+    public Func<IReadOnlyList<QuickReply>>? QuickReplies { get; set; }
+
+    /// <summary>The PSG and RLD-labeling lines. Both are always shown: a date and its source, or a brief reason there is none.</summary>
     public Func<AndaRecord, ReferenceInfo?>? Reference { get; set; }
 
     /// <summary>What the last placement decided and from which numbers. The self-test reports it.</summary>
@@ -55,6 +58,11 @@ public partial class CardWindow : Window
 
         CloseBtn.Click += (_, _) => Close();
         CopyChip.Click += (_, _) => CopyStatusLine();
+        RepliesChip.Click += (_, _) => OpenReplies();
+        PaintConnection();
+        void OnConn() => Dispatcher.UIThread.Post(PaintConnection);
+        ConnectionStatus.Changed += OnConn;
+        Closed += (_, _) => ConnectionStatus.Changed -= OnConn;
         PinBtn.Click += (_, _) => TogglePin();
         ExpBtn.Click += (_, _) => ToggleExpand();
         MoreBtn.Click += (_, _) => ExpandFromMini();
@@ -108,7 +116,45 @@ public partial class CardWindow : Window
             case Key.C when _record is not null && BriefText.Text is { Length: > 0 } text:
                 Clipboard?.SetTextAsync(text); break;
             case Key.S: CopyStatusLine(); break;
+            case Key.R: OpenReplies(); break;
         }
+    }
+
+    /// <summary>The connection pill: a filled dot only when a request has really succeeded; otherwise a hollow one and the plain state.</summary>
+    private void PaintConnection()
+    {
+        var c = ConnectionStatus.Current;
+        string brush = c.State switch { ConnectionState.Connected => "C.Good", ConnectionState.Failed => "C.Bad", ConnectionState.SetUp => "C.Warn", _ => "C.Ink3" };
+        string back = c.State switch { ConnectionState.Connected => "C.GoodBg", ConnectionState.Failed => "C.BadBg", ConnectionState.SetUp => "C.WarnBg", _ => "C.Mark" };
+        var fore = (IBrush)Application.Current!.Resources[brush]!;
+        ConnText.Text = c.Label; ConnText.Foreground = fore;
+        ConnDot.Stroke = fore; ConnDot.Fill = c.State == ConnectionState.Connected ? fore : Brushes.Transparent;
+        ConnPill.Background = (IBrush)Application.Current!.Resources[back]!;
+    }
+
+    private void OpenReplies()
+    {
+        if (_record is null || QuickReplies?.Invoke() is not { Count: > 0 } replies) return;
+        var menu = new ContextMenu();
+        var items = new List<object>();
+        foreach (var reply in replies)
+        {
+            var item = new MenuItem { Header = reply.Name };
+            item.Click += (_, _) => CopyReply(reply);
+            items.Add(item);
+        }
+        menu.ItemsSource = items;
+        menu.Open(RepliesChip);
+    }
+
+    private void CopyReply(QuickReply reply)
+    {
+        if (_record is null) return;
+        var info = Reference?.Invoke(_record);
+        Clipboard?.SetTextAsync(QuickReplyFill.Fill(reply.Text, _record, Today(), info));
+        UsageLog.Record("copy_reply", (DateTime.Now - _shownAt).TotalSeconds);
+        RepliesChip.Content = "Copied ✓";
+        Avalonia.Threading.DispatcherTimer.RunOnce(() => RepliesChip.Content = "Quick replies ▾", TimeSpan.FromSeconds(1.2));
     }
 
     private void TogglePin()
@@ -445,13 +491,13 @@ public partial class CardWindow : Window
 
     private void ShowReference(AndaRecord record)
     {
-        var info = Reference?.Invoke(record);
-        _refShown = info is not null && (info.PsgText is not null || info.RldText is not null);
-        PsgLabel.IsVisible = PsgText.IsVisible = info?.PsgText is not null;
-        RldLabel.IsVisible = RldText.IsVisible = info?.RldText is not null;
-        PsgText.Text = info?.PsgText ?? "";
-        RldText.Text = info?.RldText ?? "";
-        RefSlot.IsVisible = !_mini && _refShown;
+        // Always two lines: each date with its source, or a brief reason there is none.
+        var info = Reference?.Invoke(record) ?? ReferenceResolver.For(record, null, "", null, loading: false);
+        _refShown = true;
+        PsgText.Text = info.PsgText ?? ReferenceResolver.NoPsg;
+        RldText.Text = info.RldText ?? ReferenceResolver.NoRld;
+        RefSlot.IsVisible = !_mini;
+        RepliesChip.IsVisible = QuickReplies?.Invoke() is { Count: > 0 };
     }
 
     private (PixelRect Area, int Width, int Height)? Geometry(PixelPoint at)

@@ -231,6 +231,13 @@
                            Text="generated — verify before acting" VerticalAlignment="Center"/>
                 <TextBlock Grid.Column="3" Name="SourcesLink" FontSize="11.5" Foreground="{DynamicResource C.Accent}" Text="sources ›"/>
               </Grid>
+              <Border Name="ConnPill" CornerRadius="99" Padding="8,2" HorizontalAlignment="Left" Margin="0,0,0,6"
+                      ToolTip.Tip="Whether this app is really connected to an API. It says Connected only after a request has succeeded.">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <Ellipse Name="ConnDot" Width="7" Height="7" VerticalAlignment="Center" StrokeThickness="1.5"/>
+                  <TextBlock Name="ConnText" FontSize="10.5" FontWeight="SemiBold"/>
+                </StackPanel>
+              </Border>
               <TextBlock Name="BriefText" Classes="body2" MinHeight="34"/>
             </StackPanel>
           </StackPanel>
@@ -262,6 +269,9 @@
               <Button Name="CopyChip" Classes="chip" Margin="0,0,7,7" Content="Copy status"
                       ToolTip.Tip="Copy a formatted status sentence for emails and trackers (S)"
                       AutomationProperties.Name="Copy formatted status line"/>
+              <Button Name="RepliesChip" Classes="chip" Margin="0,0,7,7" Content="Quick replies ▾"
+                      ToolTip.Tip="Copy one of your own quick replies, filled in from this card (R)"
+                      AutomationProperties.Name="Copy a quick reply"/>
               <Button Name="SisterChip" Classes="chip" Margin="0,0,7,7"/>
               <Button Name="NotesChip" Classes="chip" Margin="0,0,7,7"/>
               <Button Name="OpenChip" Classes="chip" Foreground="{DynamicResource C.Accent}" Content="Open in system of record ↗"

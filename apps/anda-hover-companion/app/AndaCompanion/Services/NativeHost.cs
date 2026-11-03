@@ -60,14 +60,34 @@ public sealed class NativeHostContext
 
 public static class ReferenceResolver
 {
-    /// <summary>What the card's PSG and RLD lines say, shared by the app and the extension host so the two never differ.</summary>
-    public static ReferenceInfo? For(AndaRecord record, DrugsAtFdaFile? drugs, string drugsMessage, string? referencePath, bool loading)
+    public const string NoPsg = "not available: no PSG date in your data, and no official PSG source is connected";
+    public const string NoRld = "not available: no Drugs@FDA file chosen (app: Settings, My data)";
+
+    /// <summary>The fictional demo records carry made-up reference dates so the layout can be shown. They say so.</summary>
+    private static readonly Dictionary<string, (DateOnly Psg, DateOnly Rld)> DemoDates = new()
     {
-        if (drugs is not null) return drugs.Describe(record);
-        string? psg = DrugsAtFdaFile.PsgOf(record);
-        string? rld = string.IsNullOrWhiteSpace(referencePath) ? null
-            : loading ? "reading the Drugs@FDA file…" : $"not checked: {(drugsMessage.Length > 0 ? drugsMessage : "the Drugs@FDA file could not be used")}";
-        return psg is null && rld is null ? null : new ReferenceInfo(psg, rld);
+        ["216482"] = (new DateOnly(2026, 1, 14), new DateOnly(2026, 3, 3)),
+        ["214990"] = (new DateOnly(2025, 11, 20), new DateOnly(2026, 3, 3)),
+    };
+
+    private static string? DemoText(AndaRecord r, bool psg) =>
+        r.Demo && DemoDates.TryGetValue(r.Number, out var d)
+            ? (psg ? d.Psg : d.Rld).ToString("MMM d, yyyy", System.Globalization.CultureInfo.InvariantCulture) + " · fictional demo date"
+            : null;
+
+    /// <summary>
+    /// What the card's PSG and RLD lines say, shared by the app and the extension host so the two never differ. Always two
+    /// lines: a date with where it came from, or a brief reason there is none. Never null, never a guess.
+    /// </summary>
+    public static ReferenceInfo For(AndaRecord record, DrugsAtFdaFile? drugs, string drugsMessage, string? referencePath, bool loading)
+    {
+        string psg = DrugsAtFdaFile.PsgOf(record) ?? DemoText(record, psg: true) ?? NoPsg;
+        if (drugs is not null) return new ReferenceInfo(psg, drugs.Describe(record).RldText);
+        string rld = string.IsNullOrWhiteSpace(referencePath)
+            ? DemoText(record, psg: false) ?? NoRld
+            : loading ? "reading the Drugs@FDA file…"
+            : $"not available: {(drugsMessage.Length > 0 ? drugsMessage : "the Drugs@FDA file could not be used")}";
+        return new ReferenceInfo(psg, rld);
     }
 }
 
