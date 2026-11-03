@@ -36,6 +36,7 @@ public partial class App : Application
     private string? _trayError;
     private ICompanionBriefService _briefs = new OfflineBriefService();
     private readonly QuickReplyService _replies = new();
+    private OutlookService? _outlook;
     private MouseTriggerService? _mouse;
     private string? _mouseProblem;
     private string _providerFingerprint = "";
@@ -76,7 +77,7 @@ public partial class App : Application
             // A tray failure must be reported, not fatal: the hotkeys still work without it.
             try { _tray = BuildTrayIcon(desktop); }
             catch (Exception ex) { _trayError = ex.Message; }
-            desktop.Exit += (_, _) => { _hotkeys.Dispose(); _mouse?.Dispose(); _tray?.Dispose(); };
+            desktop.Exit += (_, _) => { _hotkeys.Dispose(); _mouse?.Dispose(); _outlook?.Dispose(); _tray?.Dispose(); };
             ConnectionStatus.Changed += () => Dispatcher.UIThread.Post(UpdateTrayTip);
             UpdateTrayTip();
             ApplyMouseTrigger();
@@ -221,6 +222,7 @@ public partial class App : Application
             AutoHideSeconds = _settings.AutoHideSeconds,
             Calendar = _calendar, Watch = new WatchSettings(HolidayLeadBusinessDays: _settings.HolidayLeadDays),
             Today = Today, Reference = ReferenceFor, QuickReplies = () => _replies.Replies,
+            Outlook = Outlook,
         };
         card.Closed += (_, _) => { if (ReferenceEquals(_card, card)) _card = null; };
         _card = card;
@@ -232,6 +234,9 @@ public partial class App : Application
         _card?.Close();
         _compact?.Close();
     }
+
+    /// <summary>Created on first use, so an app that never turns Outlook on never builds it.</summary>
+    private OutlookService Outlook => _outlook ??= new OutlookService(() => _settings.Outlook);
 
     private static DateOnly Today() => DateOnly.FromDateTime(DateTime.Now);
 
@@ -314,7 +319,7 @@ public partial class App : Application
     {
         if (_settingsWindow is not null) { _settingsWindow.Activate(); return; }
         _settingsWindow = new SettingsWindow(_settings, _prompts, ApplySettings,
-            new SettingsHooks(() => HotkeyService.Report(_hotkeys?.Status ?? Array.Empty<HotkeyStatus>()), () => _portfolio, () => _drugsMessage, MouseStatusLine), _replies);
+            new SettingsHooks(() => HotkeyService.Report(_hotkeys?.Status ?? Array.Empty<HotkeyStatus>()), () => _portfolio, () => _drugsMessage, MouseStatusLine, Outlook), _replies);
         _settingsWindow.Closed += (_, _) => _settingsWindow = null;
         _settingsWindow.Show();
     }

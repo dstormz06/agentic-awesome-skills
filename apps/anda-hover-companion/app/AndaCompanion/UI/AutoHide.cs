@@ -13,7 +13,7 @@ public static class AutoHidePolicy
     /// <summary>Seconds offered in Settings; 0 = never hide on its own.</summary>
     public static readonly IReadOnlyList<int> Choices = new[] { 0, 10, 20, 40 };
 
-    public const int Default = 20;
+    public const int Default = 10;
 
     /// <summary>A saved value that is not one of the choices (hand-edited, or from a later build) falls back to the default.</summary>
     public static int Normalize(int seconds) => Choices.Contains(seconds) ? seconds : Default;

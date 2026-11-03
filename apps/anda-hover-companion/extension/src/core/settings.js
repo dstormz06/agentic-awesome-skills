@@ -3,7 +3,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   escalateUrgent: true,        // in whisper mode an urgent ANDA opens a peek by itself
   urgentLateDays: 7,           // forecast this many days past goal (3, 7 or 14) counts as urgent
   holidayLeadDays: 3,          // flag dates within this many business days of a federal holiday (0, 2, 3 or 5)
-  autoHideSeconds: 20,         // 0 = never; never hides while hovered, focused or expanded
+  autoHideSeconds: 10,         // 0 = never; never hides while hovered, focused or expanded
   dataSource: 'demo',          // 'demo' | 'imported' | 'app'
   followApp: true,             // when connected, use the desktop app's settings
   extraClosures: [],           // [{date: 'YYYY-MM-DD', name}] closures declared at short notice

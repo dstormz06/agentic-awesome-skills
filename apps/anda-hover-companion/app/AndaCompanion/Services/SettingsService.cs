@@ -60,11 +60,19 @@ public sealed class Settings
     /// <summary>How the person signs a message, used by the writing actions when they rewrite one. Empty = no sign-off added.</summary>
     public string SignOff { get; set; } = "";
 
+    /// <summary>The Claude model name used when Claude is the connection. Editable in Settings so a change of approved model needs no rebuild.</summary>
+    public string ClaudeModel { get; set; } = DefaultClaudeModel;
+    public const string DefaultClaudeModel = "claude-opus-4-8";
+    public static bool IsValidModelName(string? name) => !string.IsNullOrWhiteSpace(name) && System.Text.RegularExpressions.Regex.IsMatch(name.Trim(), "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,79}$");
+
     /// <summary>Which connection generated text uses. Auto = decided by the environment, as before.</summary>
     public ProviderChoice Provider { get; set; } = ProviderChoice.Auto;
 
     /// <summary>The person's own API, described here instead of in code. Used only when Provider is MyApi.</summary>
     public CustomApiSettings CustomApi { get; set; } = new();
+
+    /// <summary>The optional read-only Outlook connection. Off by default; holds no secret (the sign-in token is never saved).</summary>
+    public OutlookSettings Outlook { get; set; } = new();
 
     /// <summary>
     /// Start Select &amp; Peek from a middle-click (the wheel button) on selected text. Off by default: it needs a Windows mouse hook,
@@ -119,27 +127,34 @@ public static class SettingsService
         {
             if (File.Exists(path))
             {
-                var loaded = JsonSerializer.Deserialize<Settings>(File.ReadAllText(path)) ?? new Settings();
-                loaded.AutoHideSeconds = UI.AutoHidePolicy.Normalize(loaded.AutoHideSeconds);
-                loaded.UrgentLateDays = UrgencyPolicy.Normalize(loaded.UrgentLateDays);
-                if (!Settings.HolidayLeadChoices.Contains(loaded.HolidayLeadDays)) loaded.HolidayLeadDays = 3;
-                if (!NativeHostRegistration.IsValidExtensionId(loaded.ExtensionId)) loaded.ExtensionId = NativeHostRegistration.DefaultExtensionId;
-                loaded.PortfolioColumns ??= new();
-                loaded.StandingInstructions ??= "";
-                loaded.Tone = Settings.ToneChoices.Contains(loaded.Tone ?? "") ? loaded.Tone ?? "" : "";
-                loaded.SignOff ??= "";
-                loaded.CustomApi ??= new();
-                loaded.CustomApi.RequestTemplate = string.IsNullOrWhiteSpace(loaded.CustomApi.RequestTemplate) ? CustomApiSettings.ExampleTemplate : loaded.CustomApi.RequestTemplate;
-                if (!Enum.IsDefined(loaded.Provider)) loaded.Provider = ProviderChoice.Auto;
-                if (!Settings.MiddleClickModifiers.Contains(loaded.MiddleClickModifier ?? "")) loaded.MiddleClickModifier = "Ctrl";
-                if (HotkeyParser.ValidateSet(("Select & Peek", loaded.PeekHotkey), ("Lookup", loaded.LookupHotkey), ("Check a draft", loaded.DraftHotkey)) is not null)
-                { loaded.PeekHotkey = "Ctrl+Alt+A"; loaded.LookupHotkey = "Ctrl+Alt+Space"; loaded.DraftHotkey = "Ctrl+Alt+D"; }
-                if (!Enum.IsDefined(loaded.Appearance)) loaded.Appearance = Appearances.Default;
-                return loaded;
+                return Normalize(JsonSerializer.Deserialize<Settings>(File.ReadAllText(path)) ?? new Settings());
             }
         }
         catch { /* corrupted settings → defaults */ }
         return new Settings();
+    }
+
+    /// <summary>Repairs anything out of range or unknown to the defaults. Used for a saved file and for a restored backup alike.</summary>
+    public static Settings Normalize(Settings loaded)
+    {
+        loaded.AutoHideSeconds = UI.AutoHidePolicy.Normalize(loaded.AutoHideSeconds);
+        loaded.UrgentLateDays = UrgencyPolicy.Normalize(loaded.UrgentLateDays);
+        if (!Settings.HolidayLeadChoices.Contains(loaded.HolidayLeadDays)) loaded.HolidayLeadDays = 3;
+        if (!NativeHostRegistration.IsValidExtensionId(loaded.ExtensionId)) loaded.ExtensionId = NativeHostRegistration.DefaultExtensionId;
+        loaded.PortfolioColumns ??= new();
+        loaded.StandingInstructions ??= "";
+        loaded.Tone = Settings.ToneChoices.Contains(loaded.Tone ?? "") ? loaded.Tone ?? "" : "";
+        loaded.SignOff ??= "";
+        loaded.ClaudeModel = Settings.IsValidModelName(loaded.ClaudeModel) ? loaded.ClaudeModel.Trim() : Settings.DefaultClaudeModel;
+        loaded.Outlook = OutlookSettings.Normalize(loaded.Outlook);
+        loaded.CustomApi ??= new();
+        loaded.CustomApi.RequestTemplate = string.IsNullOrWhiteSpace(loaded.CustomApi.RequestTemplate) ? CustomApiSettings.ExampleTemplate : loaded.CustomApi.RequestTemplate;
+        if (!Enum.IsDefined(loaded.Provider)) loaded.Provider = ProviderChoice.Auto;
+        if (!Settings.MiddleClickModifiers.Contains(loaded.MiddleClickModifier ?? "")) loaded.MiddleClickModifier = "Ctrl";
+        if (HotkeyParser.ValidateSet(("Select & Peek", loaded.PeekHotkey), ("Lookup", loaded.LookupHotkey), ("Check a draft", loaded.DraftHotkey)) is not null)
+        { loaded.PeekHotkey = "Ctrl+Alt+A"; loaded.LookupHotkey = "Ctrl+Alt+Space"; loaded.DraftHotkey = "Ctrl+Alt+D"; }
+        if (!Enum.IsDefined(loaded.Appearance)) loaded.Appearance = Appearances.Default;
+        return loaded;
     }
 
     public static void Save(Settings s, string? path = null)

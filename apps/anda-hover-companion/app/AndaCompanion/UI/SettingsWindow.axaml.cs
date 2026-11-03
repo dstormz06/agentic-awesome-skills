@@ -9,7 +9,7 @@ namespace AndaCompanion.UI;
 
 /// <summary>What Settings needs to ask the running app, so the window can show live status (shortcut registration, the loaded portfolio).</summary>
 public sealed record SettingsHooks(Func<string> HotkeyStatus, Func<PortfolioRepository?> Portfolio, Func<string> ReferenceStatus,
-    Func<string?>? MouseStatus = null);
+    Func<string?>? MouseStatus = null, OutlookService? Outlook = null);
 
 public partial class SettingsWindow : Window
 {
@@ -103,6 +103,7 @@ public partial class SettingsWindow : Window
 
         BuildNewSections();
         BuildRound10Sections();
+        BuildOutlookSection();
         ReloadLenses();
         LensCombo.SelectionChanged += (_, _) =>
         {
@@ -122,6 +123,72 @@ public partial class SettingsWindow : Window
         Opened += (_, _) => FitToScreen();
         KeyDown += (_, e) => { if (e.Key == Key.Escape) Close(); };
         _loading = false;
+    }
+
+    // ---------------- Outlook: optional, read-only ----------------
+
+    private void BuildOutlookSection()
+    {
+        var o = _settings.Outlook;
+        var service = _hooks?.Outlook;
+        OutlookOn.IsChecked = o.Enabled;
+        OutlookClientId.Text = o.ClientId;
+        OutlookTenant.Text = o.TenantId;
+        foreach (var (cloud, label) in new[] { (OutlookCloud.Commercial, "Microsoft 365"), (OutlookCloud.UsGovernment, "Microsoft 365 US Government") })
+        {
+            var rb = new RadioButton { Content = label, GroupName = "outlookcloud", IsChecked = cloud == o.Cloud, Margin = new Avalonia.Thickness(0, 0, 14, 2) };
+            rb.IsCheckedChanged += (_, _) => { if (!_loading && rb.IsChecked == true) { o.Cloud = cloud; Apply(); PaintOutlook(); } };
+            OutlookCloudPanel.Children.Add(rb);
+        }
+        foreach (int n in OutlookSettings.MaxItemChoices)
+        {
+            var rb = new RadioButton { Content = $"Show {n} messages", GroupName = "outlookmax", IsChecked = n == o.MaxItems, Margin = new Avalonia.Thickness(0, 0, 12, 2) };
+            rb.IsCheckedChanged += (_, _) => { if (!_loading && rb.IsChecked == true) { o.MaxItems = n; Apply(); } };
+            OutlookMaxPanel.Children.Add(rb);
+        }
+
+        void Save()
+        {
+            if (_loading) return;
+            o.Enabled = OutlookOn.IsChecked == true;
+            o.ClientId = (OutlookClientId.Text ?? "").Trim();
+            o.TenantId = string.IsNullOrWhiteSpace(OutlookTenant.Text) ? "organizations" : OutlookTenant.Text!.Trim();
+            if (!o.Enabled) service?.SignOut();      // turning it off also forgets the sign-in
+            Apply();
+            PaintOutlook();
+        }
+        OutlookOn.IsCheckedChanged += (_, _) => Save();
+        OutlookClientId.LostFocus += (_, _) => Save();
+        OutlookTenant.LostFocus += (_, _) => Save();
+
+        void PaintOutlook()
+        {
+            var snap = service?.Snapshot ?? new OutlookSnapshot(o.Enabled ? OutlookState.NotSetUp : OutlookState.Off, o.Enabled ? "Outlook is not available in this window." : "Outlook is off.");
+            OutlookFields.IsEnabled = o.Enabled;
+            OutlookStatus.Text = (snap.State == OutlookState.SignedIn ? "● " : "○ ") + snap.Message;
+            OutlookStatus.Foreground = Res(snap.State switch { OutlookState.SignedIn => "C.Good", OutlookState.Error => "C.Bad", OutlookState.SigningIn => "C.Warn", _ => "C.Ink2" });
+            bool code = snap.State == OutlookState.SigningIn && !string.IsNullOrEmpty(snap.UserCode);
+            OutlookCopy.IsVisible = code;
+            OutlookOpen.IsVisible = code && OutlookService.IsMicrosoftAddress(snap.VerificationUrl);
+            OutlookSignIn.IsEnabled = service is not null && snap.State is OutlookState.SignedOut or OutlookState.Error or OutlookState.NotSetUp or OutlookState.SignedIn && OutlookService.ValidateSetup(o) is null;
+            OutlookSignOut.IsEnabled = service is not null && snap.State is OutlookState.SignedIn or OutlookState.SigningIn;
+            OutlookSignIn.Content = snap.State == OutlookState.SignedIn ? "Sign in again" : "Sign in";
+        }
+        void OnChanged() => Avalonia.Threading.Dispatcher.UIThread.Post(PaintOutlook);
+        if (service is not null) { service.Changed += OnChanged; Closed += (_, _) => service.Changed -= OnChanged; }
+        PaintOutlook();
+
+        OutlookSignIn.Click += async (_, _) => { Save(); if (service is not null) await service.SignInAsync(); };
+        OutlookSignOut.Click += (_, _) => service?.SignOut();
+        OutlookCopy.Click += async (_, _) =>
+        {
+            if (service?.Snapshot.UserCode is { Length: > 0 } c && Clipboard is { } clip) { await clip.SetTextAsync(c); OutlookCopy.Content = "Copied ✓"; Avalonia.Threading.DispatcherTimer.RunOnce(() => OutlookCopy.Content = "Copy code", TimeSpan.FromSeconds(1.4)); }
+        };
+        OutlookOpen.Click += async (_, _) =>
+        {
+            var url = service?.Snapshot.VerificationUrl;
+            if (OutlookService.IsMicrosoftAddress(url) && TopLevel.GetTopLevel(this)?.Launcher is { } launcher) await launcher.LaunchUriAsync(new Uri(url!));
+        };
     }
 
     // ---------------- round 10: connection, my API, writing, triggers, reference update ----------------
@@ -213,6 +280,72 @@ public partial class SettingsWindow : Window
         void PaintReplies() => RepliesSummary.Text = _replies.Replies.Count == 1 ? "1 quick reply" : $"{_replies.Replies.Count} quick replies";
         PaintReplies();
         RepliesManage.Click += (_, _) => new QuickRepliesWindow(_replies, () => { PaintReplies(); _onChanged(); }).Show(this);
+
+        // ---- the Claude model name: change it here, no rebuild ----
+        ClaudeModelBox.Text = _settings.ClaudeModel;
+        ClaudeModelBox.LostFocus += (_, _) =>
+        {
+            if (_loading) return;
+            string text = (ClaudeModelBox.Text ?? "").Trim();
+            _settings.ClaudeModel = Settings.IsValidModelName(text) ? text : Settings.DefaultClaudeModel;
+            ClaudeModelBox.Text = _settings.ClaudeModel;
+            Apply();
+            ConnStatus.Text = ConnectionService.DescribeFor(_settings);
+        };
+
+        // ---- go to a section ----
+        var sections = ((StackPanel)Body.Content!).Children.OfType<StackPanel>()
+            .Select(p => (Panel: p, Title: (p.Children.FirstOrDefault() as TextBlock)?.Text))
+            .Where(x => !string.IsNullOrEmpty(x.Title) && x.Panel.Children[0] is TextBlock { Classes: var c } && c.Contains("lbl")).ToList();
+        JumpBox.ItemsSource = sections.Select(x => x.Title).ToList();
+        JumpBox.SelectionChanged += (_, _) =>
+        {
+            if (JumpBox.SelectedIndex < 0) return;
+            sections[JumpBox.SelectedIndex].Panel.BringIntoView();
+            JumpBox.SelectedIndex = -1;
+        };
+
+        // ---- back up, restore, reset ----
+        BackupSave.Click += async (_, _) =>
+        {
+            var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+            {
+                Title = "Save a backup of my settings", SuggestedFileName = $"anda-companion-backup-{DateTime.Now:yyyy-MM-dd}.json",
+                DefaultExtension = "json", FileTypeChoices = new[] { new FilePickerFileType("Backup") { Patterns = new[] { "*.json" } } },
+            });
+            if (file?.TryGetLocalPath() is not { } path) return;
+            try { File.WriteAllText(path, SettingsBackup.Export(_settings, _prompts, _replies)); BackupStatus.Text = "Saved. It holds no secret and no file location."; }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { BackupStatus.Text = "The backup could not be saved there. Please choose another folder."; }
+        };
+        BackupRestore.Click += async (_, _) =>
+        {
+            string? path = await PickFileAsync("Choose a backup to restore", new[] { "*.json" }, "Backup");
+            if (path is null) return;
+            string text;
+            try { text = new FileInfo(path).Length > SettingsBackup.MaxBytes ? "" : File.ReadAllText(path); }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { BackupStatus.Text = "That file could not be read."; return; }
+            var (ok, message) = SettingsBackup.Import(text, _settings, _prompts, _replies);
+            BackupStatus.Text = message;
+            if (!ok) return;
+            Apply();
+            BackupStatus.Text = message + " Please open Settings again to see the new values.";
+            Avalonia.Threading.DispatcherTimer.RunOnce(Close, TimeSpan.FromSeconds(1.2));
+        };
+        bool armed = false;
+        SettingsReset.Click += (_, _) =>
+        {
+            if (!armed)
+            {
+                armed = true; SettingsReset.Content = "Click again to reset";
+                BackupStatus.Text = "This puts every setting, lens and quick reply back to the starting values. File locations are kept.";
+                Avalonia.Threading.DispatcherTimer.RunOnce(() => { armed = false; SettingsReset.Content = "Reset all settings…"; }, TimeSpan.FromSeconds(6));
+                return;
+            }
+            SettingsBackup.Reset(_settings, _prompts, _replies);
+            Apply();
+            BackupStatus.Text = "Everything is back to the starting values. Please open Settings again.";
+            Avalonia.Threading.DispatcherTimer.RunOnce(Close, TimeSpan.FromSeconds(1.2));
+        };
 
         // ---- the middle-click trigger (off by default) ----
         MiddleCheck.IsChecked = _settings.MiddleClickTrigger;

@@ -46,6 +46,30 @@ public sealed class PromptLibraryService
         }
     }
 
+    public const int MaxLenses = 100, MaxNameChars = 80, MaxTextChars = 4000;
+
+    /// <summary>The three lenses a new install starts with.</summary>
+    public static IReadOnlyList<LensPrompt> Starters { get; } = new LensPrompt[]
+    {
+        new("Facility focus",
+            "Weight facility and inspection signals heaviest: shared sites, unresolved findings, " +
+            "inspection assumptions. Name the facility linkage explicitly when one exists."),
+        new("Director summary",
+            "Write for a division director skimming between meetings: lead with the forecast delta " +
+            "and the single decision or risk that needs their awareness. No review-discipline jargon."),
+        new("First-cycle watch",
+            "Emphasize anything that threatens first-cycle approval: response quality history, " +
+            "unresolved deficiencies, and assumptions that have not been pressure-tested."),
+    };
+
+    /// <summary>Replaces every lens (a restored backup, or a reset). Entries without a name or over the limits are dropped.</summary>
+    public void ReplaceAll(IEnumerable<LensPrompt> prompts)
+    {
+        _prompts = prompts.Where(p => !string.IsNullOrWhiteSpace(p?.Name) && p.Text is not null && p.Name.Length <= MaxNameChars && p.Text.Length <= MaxTextChars)
+            .GroupBy(p => p.Name.Trim(), StringComparer.OrdinalIgnoreCase).Select(g => new LensPrompt(g.Key, g.Last().Text)).Take(MaxLenses).ToList();
+        Save();
+    }
+
     public void Upsert(LensPrompt prompt)
     {
         _prompts.RemoveAll(p => p.Name.Equals(prompt.Name, StringComparison.OrdinalIgnoreCase));

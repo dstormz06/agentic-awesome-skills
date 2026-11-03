@@ -93,6 +93,14 @@ public sealed class QuickReplyService
         return null;
     }
 
+    /// <summary>Replaces every reply (a restored backup, or a reset), keeping only valid ones within the limits.</summary>
+    public void ReplaceAll(IEnumerable<QuickReply> replies)
+    {
+        _replies = replies.Where(r => !string.IsNullOrWhiteSpace(r?.Name) && r.Text is not null && r.Name.Trim().Length <= MaxNameChars && r.Text.Length <= MaxTextChars)
+            .GroupBy(r => r.Name.Trim(), StringComparer.OrdinalIgnoreCase).Select(g => new QuickReply(g.Key, g.Last().Text)).Take(MaxReplies).ToList();
+        Save();
+    }
+
     public void Delete(string name) { _replies.RemoveAll(r => r.Name.Equals(name, StringComparison.OrdinalIgnoreCase)); Save(); }
 
     private void Save()

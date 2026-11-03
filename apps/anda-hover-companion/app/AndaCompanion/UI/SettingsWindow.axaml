@@ -39,6 +39,7 @@
             </StackPanel>
           </Grid>
         </Border>
+        <ComboBox Name="JumpBox" HorizontalAlignment="Stretch" PlaceholderText="Go to a section…" AutomationProperties.Name="Go to a section"/>
         <!-- Scrolls only when the screen is too short to show every section (small laptops). -->
         <ScrollViewer Name="Body" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Spacing="14" Margin="0,0,2,0">
@@ -106,7 +107,7 @@
             <WrapPanel Name="MiddleModPanel"/>
           </StackPanel>
           <TextBlock Name="MiddleStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
-          <TextBlock Classes="hint" Text="Off by default. It uses a Windows mouse hook that sees only the middle button (never the pointer position or any text), and the click still goes to the program under it. Some security software flags mouse hooks. A plain middle-click scrolls or opens links in many programs, so Ctrl is recommended. The tray icon (click for the lookup box) and the shortcuts above always work. In Edge the extension adds a right-click menu instead; an extension cannot watch the middle button without running on every page, so it does not."/>
+          <TextBlock Classes="hint" Text="Off by default. It uses a Windows mouse hook that sees only the middle button, never the pointer position or any text, and the click still reaches the program under it. Some security software flags mouse hooks. A plain middle-click scrolls or opens links in many programs, so Ctrl is recommended. The shortcuts above and the tray icon always work."/>
         </StackPanel>
 
         <StackPanel Spacing="6">
@@ -188,6 +189,7 @@
             <Button Grid.Column="2" Name="TestBtn" Classes="primary" Content="Test" VerticalAlignment="Top"
                     ToolTip.Tip="Send one tiny request to prove the channel end to end"/>
           </Grid>
+          <TextBox Name="ClaudeModelBox" Watermark="Claude model name (default: claude-opus-4-8)" AutomationProperties.Name="Claude model name"/>
           <Expander Name="MyApiExpander" Header="My API: the address, header and body of my own service">
             <StackPanel Spacing="5" Margin="0,4,0,0">
               <TextBox Name="ApiName" Watermark="A name for it, for example Division API" AutomationProperties.Name="My API name"/>
@@ -217,6 +219,40 @@
             <Button Name="ExtDisconnect" Content="Disconnect"/>
           </StackPanel>
           <TextBlock Classes="hint" Text="Lets the ANDA Hover Companion extension in Edge read your data through this app, so both show the same facts. Current user only, no admin rights, and only the extension ID above can use it. The extension also works without this app."/>
+        </StackPanel>
+
+        <StackPanel Spacing="6">
+          <TextBlock Classes="lbl" Text="OUTLOOK · OPTIONAL, READ-ONLY"/>
+          <CheckBox Name="OutlookOn">
+            <TextBlock Text="Show recent Outlook mail about the open ANDA" TextWrapping="Wrap"/>
+          </CheckBox>
+          <StackPanel Name="OutlookFields" Spacing="5">
+            <WrapPanel Name="OutlookCloudPanel"/>
+            <TextBox Name="OutlookClientId" Watermark="Application (client) ID your organization gave you" AutomationProperties.Name="Outlook application ID" FontFamily="{DynamicResource C.NumFont}" FontSize="12"/>
+            <TextBox Name="OutlookTenant" Watermark="Directory (tenant): organizations, or your organization's domain" AutomationProperties.Name="Outlook directory"/>
+            <WrapPanel Name="OutlookMaxPanel"/>
+            <TextBlock Name="OutlookStatus" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+            <WrapPanel>
+              <Button Name="OutlookSignIn" Classes="primary" Content="Sign in" Margin="0,0,8,6"/>
+              <Button Name="OutlookOpen" Content="Open the sign-in page" Margin="0,0,8,6" IsVisible="False"/>
+              <Button Name="OutlookCopy" Content="Copy code" Margin="0,0,8,6" IsVisible="False"/>
+              <Button Name="OutlookSignOut" Content="Sign out" Margin="0,0,8,6"/>
+            </WrapPanel>
+          </StackPanel>
+          <TextBlock Classes="hint" Text="Off by default. When on, an open card can list the latest messages that mention its six-digit number: sender, subject, date and a short preview. It is read-only and searches only for that number."/>
+          <TextBlock Classes="hint" Text="You sign in on Microsoft's own page, so this app never sees your password. The sign-in stays in memory and ends when the app closes. Mail is never saved and never sent to an AI service."/>
+          <TextBlock Classes="hint" Text="Your organization must register an app and allow mail access. Please ask your IT service desk for its Application (client) ID. This part was written from Microsoft's public documentation and tested against a stand-in server only, not against Microsoft."/>
+        </StackPanel>
+
+        <StackPanel Spacing="6">
+          <TextBlock Classes="lbl" Text="BACK UP, RESTORE, RESET"/>
+          <WrapPanel>
+            <Button Name="BackupSave" Content="Save a backup…" Margin="0,0,8,6"/>
+            <Button Name="BackupRestore" Content="Restore a backup…" Margin="0,0,8,6"/>
+            <Button Name="SettingsReset" Content="Reset all settings…" Margin="0,0,8,6"/>
+          </WrapPanel>
+          <TextBlock Name="BackupStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+          <TextBlock Classes="hint" Text="A backup holds your settings, lenses and quick replies, so a new PC or a colleague can start from yours. It never holds a secret or a file location."/>
         </StackPanel>
 
         <StackPanel Spacing="6">

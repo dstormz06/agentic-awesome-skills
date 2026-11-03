@@ -11,7 +11,7 @@ public class SettingsTests
     {
         var s = new Settings();
         Assert.Equal(AppearanceId.K, s.Appearance);      // K · Graphite Quiet is the default
-        Assert.Equal(20, s.AutoHideSeconds);
+        Assert.Equal(10, s.AutoHideSeconds);
         Assert.Equal(ConsentModel.Whisper, s.Consent);     // whisper invite is the default (tester feedback)
         Assert.True(s.EscalateUrgent); Assert.Equal(7, s.UrgentLateDays); Assert.Equal(3, s.HolidayLeadDays);
         Assert.Equal(("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+D"), (s.PeekHotkey, s.LookupHotkey, s.DraftHotkey));
@@ -52,7 +52,7 @@ public class SettingsTests
         File.WriteAllText(path, "{ \"Appearance\": 99, \"AutoHideSeconds\": -5 }");
         var s = SettingsService.Load(path);
         Assert.Equal(AppearanceId.K, s.Appearance);
-        Assert.Equal(20, s.AutoHideSeconds);
+        Assert.Equal(10, s.AutoHideSeconds);
     }
 
     [Theory]

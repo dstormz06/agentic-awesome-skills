@@ -211,7 +211,7 @@ full card. Trade-off, stated plainly: because a compact box is not focused it is
 the full card it opens is the keyboard-complete one.
 
 **Auto-hide.** A card or compact box hides itself after Off / 10 / 20 / 40 s with no pointer or key
-activity (default 20 s). It **never** hides while the pointer is over it, while the card is pinned, or
+activity (default 10 s). It **never** hides while the pointer is over it, while the card is pinned, or
 while the drawer is expanded: each is an "I am using this" signal, and taking a card away mid-sentence
 is worse than leaving it. The rule is a pure function (`AutoHidePolicy.ShouldHide`) with a fake-clock
 test.

@@ -93,8 +93,9 @@ public static class ConnectionService
             : "Offline mode — deterministic briefs. Ready for API access when approved.";
     }
 
-    public static async Task<string> TestAsync()
+    public static async Task<string> TestAsync(string? model = null)
     {
+        model = Settings.IsValidModelName(model) ? model!.Trim() : Settings.DefaultClaudeModel;
         if (ElsaConfig.IsSelected()) return await TestElsaAsync();
         if (!HasKey)
             return "Offline mode — no API key detected. Briefs are assembled deterministically from the " +
@@ -106,19 +107,19 @@ public static class ConnectionService
             var client = new AnthropicClient();
             var response = await client.Messages.Create(new()
             {
-                Model = "claude-opus-4-8",
+                Model = model,
                 MaxTokens = 16,
                 Messages = [new() { Role = "user", Content = "Reply with exactly: OK" }],
             });
             sw.Stop();
             var text = string.Concat(response.Content
                 .Select(b => b.TryPickText(out var tb) ? tb.Text : string.Empty)).Trim();
-            ConnectionStatus.Success("Claude · claude-opus-4-8");
-            return $"Connected · claude-opus-4-8 · {sw.ElapsedMilliseconds} ms · response: \"{text}\"";
+            ConnectionStatus.Success("Claude · " + model);
+            return $"Connected · {model} · {sw.ElapsedMilliseconds} ms · response: \"{text}\"";
         }
         catch (Exception ex)
         {
-            ConnectionStatus.Failure("Claude · claude-opus-4-8", ex.GetType().Name);
+            ConnectionStatus.Failure("Claude · " + model, ex.GetType().Name);
             return $"Connection failed: {ex.GetType().Name} — {ex.Message}";
         }
     }
@@ -188,7 +189,7 @@ public static class ConnectionService
                 ConnectionStatus.Reset();
                 return Task.FromResult("Offline is chosen, so nothing was sent. Choose Auto, Claude or My API to test a connection.");
             case ProviderChoice.MyApi: return TestMyApiAsync(settings.CustomApi, env, handler);
-            default: return TestAsync();
+            default: return TestAsync(settings.ClaudeModel);
         }
     }
 }

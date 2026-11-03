@@ -16,6 +16,8 @@ Prototype, not an FDA product. It makes **no network requests and uses no AI**.
 
 It runs only when you ask: a shortcut, the right-click menu or the toolbar button. There is no script running on every page. Settings, *Ways to start it* lists each of these and the key Edge actually gave every shortcut ("not set" when Edge or another extension has it), with a button to change them. A **middle-click** trigger is not offered here on purpose, because an extension can only watch the mouse by running a script on every page; the Windows app has one. Both cards always show a **PSG** line and an **RLD LABEL** line: a date with its source, or a brief reason there is none.
 
+What the extension leaves to the desktop app, on purpose: quick replies, the Outlook setting, the connection to an API and any generated text. The extension never calls an API and has no access to mail.
+
 ## Two ways to use it
 
 **Standalone** (nothing else installed). Settings, *Where the data comes from*:

@@ -1,66 +1,70 @@
-ANDA HOVER COMPANION - LIVE DEMO (Windows 10/11, 64-bit)
-=========================================================
-Fictional demo data only. A concept prototype, not an FDA product.
+ANDA HOVER COMPANION: LIVE DEMO
+Windows 10 or 11, 64-bit. Fictional data only. A prototype, not an FDA product.
 
-IF THIS COMPUTER IS MANAGED BY YOUR ORGANIZATION: do not run this until your IT or
-security team has approved it. It is an unsigned program that sends keystrokes and
-reads the clipboard. Use the browser demo or the slides instead.
+BEFORE YOU START
+If your organization manages this computer, please do not run the demo until your IT or
+security team has approved it. It is an unsigned program that sends keystrokes and reads
+the clipboard. Use the browser simulation or the slides instead.
 
-SET UP - about 2 minutes
-  1. Right-click the downloaded .zip > Extract All. (Do not run it from inside the zip.)
+SET UP (about 2 minutes)
+  1. Right-click the downloaded .zip and choose Extract All. Do not run it from inside the zip.
   2. Double-click Start-Demo.bat.
-  3. Windows may warn "Windows protected your PC" because the demo is not
-     code-signed. That is expected for an unsigned prototype. If your
-     organization allows it: More info > Run anyway.
-  4. A Settings window and a sample card open. A sample memo opens in Notepad.
-  5. Find the tray icon near the clock. Windows 11 hides new icons under the
-     ^ arrow: drag the icon onto the taskbar to keep it visible.
+  3. If Windows says "Windows protected your PC", that is expected: the demo is not
+     code-signed. If your organization allows it, choose More info, then Run anyway.
+  4. A Settings window and a sample card open, and a sample memo opens in Notepad.
+  5. Find the tray icon near the clock. Windows 11 hides new icons under the ^ arrow.
+     Drag the icon onto the taskbar to keep it visible.
 
 TRY IT
-  - In Notepad, double-click a number such as 216482, then press Ctrl+Alt+A.
-    A new install starts in the Whisper setting: a small invite you click.
-    An at-risk ANDA such as 216482 opens a small peek by itself (Settings can
-    turn that off). Click "Full brief" to see the whole card, including the
-    WATCH line about weekend and holiday dates.
-  - Select any text and press Ctrl+Alt+D to check a draft against the record
-    (no AI, nothing leaves the computer). The three shortcuts can be changed in
-    Settings.
-  - Press Ctrl+Alt+Space from anywhere and type a number.
-  - Tray icon > Settings: switch appearance (15 looks; K is the default; L to O
-    are small boxes that stay out of the way of an email), auto-hide, consent
-    model, transparency.
-  - With a small box (L to O) showing, press Ctrl+Alt+A again on the same number,
-    or click the box, to open the full card.
-  - Tray icon > Watch list: every ANDA with something worth a look, worst first.
-  - Every card shows a PSG line and an RLD LABEL line (a date, or a brief reason there
-    is none) and a pill that says whether an API is connected. Offline is the default.
-  - The Quick replies button (or R) on a card copies one of your own templates, filled in.
-  - Settings > Shortcuts shows which shortcut another program owns; Settings > Other ways to
-    start it has an optional middle-click (off by default); Settings > Connection has My API.
-  - Tray icon > Prompt library: add your own lens.
-  - Edge extension (optional, separate): see extension\README.md in the repository. It adds
-    a right-click menu in Edge and can use this app's data. Do not add it to a managed
-    computer before IT approves it.
+  1. In Notepad, double-click a number such as 216482 and press Ctrl+Alt+A.
+     A new install shows a small invite that you click. An at-risk ANDA such as 216482
+     opens a small peek by itself (Settings can turn that off). Click "Full brief" to
+     see the whole card, including the WATCH line about weekend and holiday dates.
+  2. Select any text and press Ctrl+Alt+D. It checks a draft against the record.
+     No AI is used and nothing leaves the computer.
+  3. Press Ctrl+Alt+Space from anywhere and type a number.
+  4. Open the tray icon's Watch list: every ANDA with something worth a look, worst first.
+  5. Read the card's PSG and RLD LABEL lines (a date, or a brief reason there is none) and
+     the pill that says whether an API is connected. Offline is the default.
+  6. Press the Quick replies button (or R) on a card to copy one of your own templates, filled in.
+
+MAKE IT YOURS (tray icon, then Settings)
+  A "Go to" list at the top jumps to any section. Nothing here needs a rebuild.
+  - Appearance: 15 looks (K is the default; L to O are small boxes that stay out of the way
+    of an email), auto-hide (10 seconds to start), transparency, how a card opens.
+  - Shortcuts: your own keys, with a live note on any that another program already uses.
+    An optional middle-click is off by default.
+  - My data: your Excel or CSV portfolio, notes folder and Drugs@FDA file. They are only read.
+  - My writing: tone, style, sign-off and quick replies.
+  - Connection: Auto, Offline, Claude (with its model name) or your own API. The banner says
+    "Connected" only after a request has really succeeded.
+  - Outlook (optional, off by default): read-only mail about the open ANDA.
+  - Back up, restore or reset your settings.
+  - Tray icon, then Prompt library: add your own lens.
 
 IF SOMETHING DOES NOT WORK
-  - Nothing appears when you press Ctrl+Alt+A: another program may own that
-    combination. The tray menu shows which hotkeys are live ("Hotkeys: ...").
-    Ctrl+Alt+Space and the tray icon always work.
-  - Blocked by your computer's security software: that is the organization's
-    policy working. Use the browser demo instead, which installs nothing.
-  - Check the app yourself: open a Command Prompt in this folder and run
+  - Nothing appears when you press Ctrl+Alt+A: another program may own that combination.
+    The tray menu shows which shortcuts are live. Ctrl+Alt+Space and the tray icon always work.
+  - Blocked by your computer's security software: that is your organization's policy at
+    work. Please use the browser simulation instead. It installs nothing.
+  - To check the app yourself, open a Command Prompt in this folder and run:
         AndaCompanion.exe --selftest report
-    It takes about a minute and then writes report\report.md with what works
-    on your machine, plus pictures. Do not type or click while it runs: it
-    presses the hotkeys itself. Your clipboard is put back afterwards.
+    It takes about a minute and writes report\report.md with what works on your machine,
+    plus pictures. Please do not type or click while it runs, because it presses the shortcuts
+    itself. Your clipboard is put back afterwards.
+
+EDGE EXTENSION (optional, separate)
+  See extension\README.md in the repository. It adds a right-click menu in Edge and can use
+  this app's data. Please do not add it to a managed computer before IT approves it.
 
 CHECK THE DOWNLOAD
   SHA256SUMS.txt lists the expected hash of AndaCompanion.exe. In PowerShell:
         Get-FileHash .\AndaCompanion.exe -Algorithm SHA256
 
 REMOVE IT
-  Close the app from the tray icon (Exit), then delete this folder. Nothing was
-  installed and nothing was written outside the "data" folder.
+  Choose Exit from the tray icon, then delete this folder. Nothing was installed, and nothing
+  was written outside the "data" folder.
 
-NO CLAUDE ACCESS IS NEEDED. The app works offline. Generated briefs only
-appear after API access is approved and a key is configured.
+NO AI ACCESS IS NEEDED
+  The app works fully offline. Generated briefs appear only after API access is approved and
+  chosen in Settings.

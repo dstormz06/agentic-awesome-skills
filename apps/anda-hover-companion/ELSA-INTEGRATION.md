@@ -1,6 +1,15 @@
 # Plugging in Elsa
 
-**Status: wired as a placeholder. Five steps remain, and only one of them is code.**
+**Status: wired as a placeholder. There are two ways in, and the first needs no code.**
+
+**Fastest: describe Elsa's API in Settings.** Open **Settings, Connection, My API** and fill in the address, the header that carries the
+token, the *name* of the environment variable that holds the token, the model or agent name, the request body and where the reply text is.
+Press **Test**. Nothing is rebuilt and no code is written. The same form works for any other service, so a change of approved platform is a
+change of settings. It has been tested against a fake server only, never against a real service. The banner at the top of Settings says
+Connected only after a request has really succeeded.
+
+**Or write the two translations in code** (the five-step checklist below). Choose this if Elsa needs something a form cannot express, such as
+integrated Windows authentication or a client certificate.
 
 The app already knows how to talk to "a chat model behind a provider seam". Claude is one provider.
 Elsa is the second, and everything around it is built and tested: choosing it, reading its settings,

@@ -417,6 +417,38 @@ No run on the owner's computer, so the Ctrl+Alt+Space cause is a hypothesis. No 
 The simulation is a mock: it checks the My API form but sends nothing, and its "My data" pickers are simulated on purpose, because real files should not go into a hosted page.
 The four Bronze header alternatives and four new looks are **proposals** on a separate page; none is in the app or the lab until the owner chooses.
 
+## Round 11: change things in the app, Outlook (optional), a pattern audit, names, and a writing pass
+
+Local results on this code: C# **557 passed, 8 skipped**; extension unit **31**; standalone browser test and native-messaging test both pass; simulation: all nine suites pass
+(the new one has **54 checks**); `npm run security:docs` passes.
+
+| Claim | Evidence | Limit |
+|---|---|---|
+| **Auto-hide is 10 seconds by default** in the app, the extension and the simulation | `AutoHideTests`, `SettingsTests`, the extension's default settings, simulation suites 4 and 9 | A real-mouse hover check on Windows is still open |
+| **The Claude model name is a Settings field**; an invalid name falls back to the default | `CustomizationTests` (factory, status text, damaged settings file) | Never run against the live API |
+| **Back up, restore and reset settings, lenses and quick replies**; no secret and no file location inside; a damaged, oversized or newer file changes nothing; out-of-range values are repaired | `CustomizationTests`, `Round11UiTests` (two-step reset), simulation suite 9 (a real file round trip, three refusals, a repaired file, reset) | The operating system's own save and open dialogs are not exercised by the tests |
+| **A Go to list** jumps to any Settings section | `Round11UiTests`, simulation suite 9 | |
+| **Outlook (optional, read-only, off by default)**: device sign-in, `Mail.Read` only, token in memory, a search only for a six-digit number, plain-text results, one plain sentence per failure | `OutlookTests` (44 cases) against a fake Microsoft server: pending, slow-down, declined and expired codes; both clouds use only their own addresses; the request is a GET with a Bearer token and no write scope; anything that is not exactly six ASCII digits makes no request; control characters are cleaned; 401, 403, 429 and 500 are explained without the server text; the token is absent from saved settings and from a backup; sign-out ends a sign-in in progress; a token expires by the clock; the card's drawer exists only when Outlook is on and searches only when opened | **Never run against Microsoft.** Written from Microsoft's public documentation. The US Government addresses are from memory and unverified. The `$search` result order and the consent an organization requires are unverified. A person with a real tenant must try it |
+| **The simulation rehearses Outlook** with a made-up code and made-up messages; it contacts nothing | Simulation suite 9 | It proves the screens, not the connection |
+| **The documents are shorter and plainer, and say what the code does now** (the deck gained a Settings slide; the one-pager is still one page) | Rebuilt and checked page by page; the claims in them were re-read against this table | A reader has not yet judged whether they read well |
+
+### Defects caught in round 11
+
+| # | Finding | Found by | Disposition |
+|---|---|---|---|
+| R49 | The Outlook number check used `$` and `\d`, so `216482` followed by a new line, or six non-ASCII digits, would have passed | Writing the edge-case tests | `^[0-9]{6}\z`, with both cases tested |
+| R50 | The Application ID check accepted forms Microsoft does not show (braces, no hyphens) | Comparing the app with the simulation's rule | Only the hyphenated form is accepted, tested both ways |
+| R51 | If a second Sign in cancelled the first, the first could still write "Sign-in cancelled" over the second | Reading the cancel path | Only the current sign-in reports a cancellation |
+| R52 | The simulation reused the name `pick`, so the whole page failed to start | The first run of the existing suites | Renamed; never published |
+| R53 | The deck, one-pager, proposal, roadmap, app README and demo guide still said Outlook was "decided against", counted 440 tests and gave a 20 s auto-hide | The owner's request, then a search for each claim | All updated; the roadmap keeps the earlier decision for the extension, which still has no mailbox access |
+| R54 | The one-pager overflowed to a second page after the new wording | Rendering it | Trimmed and re-rendered: one page |
+
+### What round 11 does not prove
+
+Nothing here has run against Microsoft, a live model, a real service or the owner's computer. The three **appearance** items are still proposals: the audit found three
+geometric backgrounds in two looks (D and F), and none is removed until the owner chooses from the Options page. The ten **names** are proposals; availability and any
+trademark question have not been checked.
+
 ## Still open
 
 GDUFA III tier table (needs the commitment-letter text and the dual-source rule); a real-keyboard check of rebound shortcuts on

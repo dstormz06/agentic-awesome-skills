@@ -21,18 +21,19 @@ public interface IChatCompleter
     Task<string> CompleteAsync(string system, string user, int maxTokens, CancellationToken ct);
 }
 
-/// <summary>Claude via the official Anthropic C# SDK (claude-opus-4-8).</summary>
-public sealed class AnthropicChatCompleter : IChatCompleter
+/// <summary>Claude via the official Anthropic C# SDK. The model name comes from Settings, so a change needs no rebuild.</summary>
+public sealed class AnthropicChatCompleter(string? model = null) : IChatCompleter
 {
     private readonly AnthropicClient _client = new();
+    private readonly string _model = Settings.IsValidModelName(model) ? model!.Trim() : Settings.DefaultClaudeModel;
 
-    public string ProviderName => "Anthropic · claude-opus-4-8";
+    public string ProviderName => "Anthropic · " + _model;
 
     public async Task<string> CompleteAsync(string system, string user, int maxTokens, CancellationToken ct)
     {
         var response = await _client.Messages.Create(new()
         {
-            Model = "claude-opus-4-8",
+            Model = _model,
             MaxTokens = maxTokens,
             System = system,
             Messages = [new() { Role = "user", Content = user }],
@@ -57,12 +58,12 @@ public static class ChatCompleterFactory
         {
             case ProviderChoice.Offline: return null;
             case ProviderChoice.MyApi: return CustomApiConfig.CreateCompleter(settings.CustomApi, env);
-            case ProviderChoice.Claude: return string.IsNullOrEmpty(env("ANTHROPIC_API_KEY")) ? null : new AnthropicChatCompleter();
+            case ProviderChoice.Claude: return string.IsNullOrEmpty(env("ANTHROPIC_API_KEY")) ? null : new AnthropicChatCompleter(settings.ClaudeModel);
         }
         string provider = env("ANDA_COMPANION_PROVIDER")?.Trim().ToLowerInvariant() ?? "anthropic";
         return provider switch
         {
-            "anthropic" when ConnectionService.HasKey => new AnthropicChatCompleter(),
+            "anthropic" when ConnectionService.HasKey => new AnthropicChatCompleter(settings?.ClaudeModel),
             "elsa" => ElsaChatCompleterOrNull(env, mapping ?? ElsaMapping.Current),
             _ => null, // no key, or an unknown provider → offline mode
         };

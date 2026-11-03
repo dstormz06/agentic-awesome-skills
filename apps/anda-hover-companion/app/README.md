@@ -13,10 +13,11 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
 2. First run opens **Settings** automatically: pick an appearance (the default is **K · Graphite
    Quiet**), a consent model, auto-hide and your transparency — a demo card appears alongside so
    every choice previews live.
-3. Optional, the day API access is approved: set `ANTHROPIC_API_KEY` (agency-approved
-   channel), press **Test** in Settings. Done — no reinstall, no code change. For **Elsa**, follow
-   `../ELSA-INTEGRATION.md`: the app is already wired for it; two small methods remain to be written
-   when Elsa's API is available.
+3. Optional, the day API access is approved: open **Settings, Connection**. For Claude, set
+   `ANTHROPIC_API_KEY` (agency-approved channel), choose Claude, check the model name and press **Test**.
+   For any other API, choose **My API** and fill in its address, header, request body and reply path; the token
+   stays in an environment variable you name. No reinstall, no code change. For **Elsa**, follow
+   `../ELSA-INTEGRATION.md`: until its two small translations are written, My API covers it.
 
 ## What works today
 
@@ -25,12 +26,13 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   `%AppData%\AndaCompanion\settings.json`.
 - **Settings window** — Appearance (fifteen looks, **light-only by product decision**; **K ·
   Graphite Quiet is the default**): eleven full cards (A–K) and four **compact boxes** (L–O),
-  Auto-hide (Off / 10 / 20 / 40 s, default 20), Consent model (**Whisper invite is the default** for
+  Auto-hide (Off / 10 / 20 / 40 s, default 10), Consent model (**Whisper invite is the default** for
   new installs; an install that already saved a choice keeps it), **urgent items** (in whisper mode an
   at-risk or late ANDA opens a peek by itself), the weekend/holiday window, **My data**,
   **standing instructions** for the writing actions, **three rebindable shortcuts**, an optional
   **usage log** (off by default), **card transparency slider** (85–100%; text always stays opaque),
-  companion lens picker, and the **AI connection panel** (Claude or Elsa) with one-click Test.
+  companion lens picker, and the **connection panel** (Auto, Offline, Claude with its model name, or My API) with one-click Test.
+  A **Go to** list at the top jumps to any section.
 - **Compact boxes (L–O)** — a Strip, a Tile, a Ticket and a Badge, about 340 × 63–81, 196 × 123–145,
   300 × 64–68 and 150–185 × 38 px (measured on Windows), so a card never blankets the email being read. They make **no AI call**,
   **never take keyboard focus** (typing in the email continues undisturbed), and open their sibling
@@ -96,6 +98,17 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
 - **My API** — Settings → *Connection*: choose Auto, Offline only, Claude or **My API**, a provider described in Settings (address, token header, the NAME of the
   environment variable holding the token, model, request body template, reply path, timeout) instead of in code. https only; the token is never stored; errors never
   show the reply. `Services/CustomApi.cs`. Tested against a fake server only; **never run against a real service**.
+- **Claude model** — Settings → *Connection* has a model-name box (default `claude-opus-4-8`, checked against Anthropic's list on 2026-10-06; a newer
+  model exists). Change it when your agency approves another; an invalid name falls back to the default. `Services/SettingsService.cs`.
+- **Outlook (optional, read-only, off by default)** — Settings → *Outlook*: the Application (client) ID your organization registered, your directory, and
+  Microsoft 365 or US Government. **Sign in** uses Microsoft's device sign-in (you type a short code on Microsoft's own page; the app never sees your
+  password). The token lives in memory only and ends with the app or **Sign out**. An open card's *Recent Outlook mail* drawer searches only for that
+  card's six-digit number (`Mail.Read`, never a write or send permission) and shows sender, subject, date and a short preview as plain text. Nothing is
+  saved or sent to any AI service. `Services/Outlook.cs`. Written from Microsoft's public documentation and tested against a stand-in server only;
+  **never run against Microsoft**. It needs your organization to register an app and allow mail access.
+- **Back up, restore, reset** — Settings → *Back up, restore, reset*: save your settings, lenses and quick replies to a file, restore them on another PC,
+  or reset to a new install. A backup holds no secret and no file location, and a damaged or newer file is refused without changing anything.
+  `Services/SettingsBackup.cs`.
 - **My writing** — Settings → *My writing*: tone, style, sign-off, and **quick replies** (templates the card fills in from its record with no AI; the Quick replies
   button or the R key copies one). `Services/QuickReplies.cs`.
 - **Watch list** — tray → *Watch list…*: every ANDA in your data (the demo records, or your portfolio) that has something worth a look, worst
@@ -125,7 +138,7 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   drawer (watch list, pending items, notes, forecast drivers, sister ANDAs), pin (`Space`),
   expand (`E`), copy brief (`C`), `Esc` to close.
 - **Companion brief** — provider-pluggable via the `IChatCompleter` seam
-  (`Services/BriefProvider.cs`). Today: the official Anthropic SDK (`claude-opus-4-8`)
+  (`Services/BriefProvider.cs`). Today: the official Anthropic SDK (the model named in Settings, `claude-opus-4-8` by default)
   when `ANTHROPIC_API_KEY` is set; otherwise a deterministic offline brief. **Elsa is a wired
   placeholder** (`Services/Elsa.cs`, `Services/ElsaMapping.cs`): provider selection
   (`ANDA_COMPANION_PROVIDER=elsa`), configuration from `ANDA_ELSA_*` environment variables, an
@@ -148,8 +161,7 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   or NDC is refused, because those are also six digits and showing the wrong card is worse than none.
 - **Accessibility** — every text ink meets WCAG AA (4.5:1) on every appearance, including the tinted header bands, seals and chips some looks add, enforced by tests. Compact boxes are mouse-and-hotkey only by design (they never take focus); the full card they open is keyboard-complete.
 
-Not built: mailbox-level Outlook context (decided against; the Edge extension covers Outlook on the web with selection, draft check and page scan),
-a right-click item inside desktop programs (Windows does not allow it; the Edge extension provides it in Edge pages),
+Not built: a right-click item inside desktop programs (Windows does not allow it; the Edge extension provides it in Edge pages),
 an official PSG source, and a live Elsa or Claude call. Planned next: UI Automation text-under-cursor
 capture (slots in behind `TextCaptureService` without touching callers), real data adapters, MSIX
 packaging, code signing. See `../ROADMAP.md` for what is built and what is not.
@@ -177,7 +189,7 @@ dotnet test AndaCompanion.Tests                              # everything (Windo
 dotnet test AndaCompanion.Tests --filter "Category!=Windows" # what runs on Linux/macOS
 ```
 
-492 cross-platform tests at the time of writing (recognizer, status line, GDUFA rules, the federal-holiday
+557 cross-platform tests at the time of writing (recognizer, status line, GDUFA rules, the federal-holiday
 calendar against OPM's dates, watch rules, urgency, draft check, portfolio and notes readers, writing prompts,
 hotkey parsing and registration with a fake API, brief fencing and fallback, provider selection, settings,
 contrast, placement, headless renders of the real windows) plus Windows-only tests that use real Win32 (clipboard snapshot/restore, hotkey registration and
@@ -215,9 +227,9 @@ screenshots are the typography evidence.
 
 ## Claude configuration
 
-Set `ANTHROPIC_API_KEY` to enable generated briefs. The request uses the official SDK and the
-`claude-opus-4-8` model ID, which matches Anthropic's current model list; **it has not been run against the
-live API** (no key in the build environment). Moving to a newer model needs a larger token budget and an
+Set `ANTHROPIC_API_KEY` to enable generated briefs. The request uses the official SDK and the model named in
+Settings, `claude-opus-4-8` by default (it matched Anthropic's model list when last checked, 2026-10-06, and a newer
+model exists). **It has not been run against the live API** (no key in the build environment). Moving to a newer model needs a larger token budget and an
 effort setting, because newer models always think and thinking tokens count toward the limit; the
 deterministic offline brief covers any failure. For any real FDA deployment this
 must instead point at an agency-approved channel (e.g. Claude on Amazon Bedrock in
@@ -236,7 +248,7 @@ AndaCompanion/
   UI/ChipWindow.*       whisper invite + invalid-number notice
   UI/LookupWindow.*     Ctrl+Alt+Space lookup
   UI/DraftWindow.*      Ctrl+Alt+D draft check and the writing actions (preview before send, Copy only)
-  UI/SettingsWindow.*   appearance, consent, urgent rule, shortcuts and other ways to start it, My data, My writing, connection and My API, usage log
+  UI/SettingsWindow.*   appearance, consent, urgent rule, shortcuts and other ways to start it, My data, My writing, connection and My API, Outlook, backup, usage log
   UI/QuickRepliesWindow.* the person's own quick replies (templates filled from the card)
   UI/HotkeyCapture.cs   press-a-shortcut box used by the shortcut settings
   UI/WatchListWindow.*  the portfolio-wide watch list
@@ -244,6 +256,7 @@ AndaCompanion/
   Services/             hotkeys (checked, rebindable), text capture + clipboard snapshot, settings, brief services,
                         Elsa placeholder (Elsa.cs + ElsaMapping.cs), BusinessCalendar + WatchRules,
                         UrgencyPolicy, DraftCheck, WritingActions, ReferenceData, UsageLog, WatchList,
+                        Outlook (optional read-only mail), SettingsBackup (back up, restore, reset),
                         CardModel + NativeHost + NativeHostRegistration (the Edge extension's host),
                         Portfolio/ (xlsx/csv reader, column detection, notes index), self-test, app paths
   Data/                 IAndaRepository + fictional mock data + identifier registry

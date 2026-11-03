@@ -27,7 +27,7 @@ public class AutoHideTests
     }
 
     [Theory]
-    [InlineData(0, 0)] [InlineData(10, 10)] [InlineData(40, 40)] [InlineData(7, 20)] [InlineData(-1, 20)] [InlineData(3600, 20)]
+    [InlineData(0, 0)] [InlineData(10, 10)] [InlineData(40, 40)] [InlineData(7, 10)] [InlineData(-1, 10)] [InlineData(3600, 10)]
     public void Normalize(int input, int expected) => Assert.Equal(expected, AutoHidePolicy.Normalize(input));
 
     private sealed class Rig

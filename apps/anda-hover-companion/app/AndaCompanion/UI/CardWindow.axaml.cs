@@ -39,6 +39,10 @@ public partial class CardWindow : Window
     /// <summary>The person's quick replies, filled from the open card when one is chosen. Null or empty hides the button.</summary>
     public Func<IReadOnlyList<QuickReply>>? QuickReplies { get; set; }
 
+    /// <summary>The optional Outlook connection. Null or off hides the mail drawer; nothing is searched until the drawer is opened.</summary>
+    public OutlookService? Outlook { get; set; }
+    private string? _mailFor;
+
     /// <summary>The PSG and RLD-labeling lines. Both are always shown: a date and its source, or a brief reason there is none.</summary>
     public Func<AndaRecord, ReferenceInfo?>? Reference { get; set; }
 
@@ -361,6 +365,7 @@ public partial class CardWindow : Window
         LatestText.Text = record.Latest;
         AheadText.Text = record.Ahead ?? "";
         ShowWatch(record);
+        PrepareMail();
         ShowReference(record);
         FreshnessText.Text = record.DataAsOf ?? "";
         FreshnessText.IsVisible = record.DataAsOf is not null;
@@ -459,6 +464,71 @@ public partial class CardWindow : Window
         var screen = Screens.ScreenFromPoint(at) ?? Screens.Primary;
         if (screen is null) return;
         Body.MaxHeight = Math.Max(240, screen.WorkingArea.Height / screen.Scaling - 52 - 2 - Body.Margin.Top);
+    }
+
+    // ---------------- Outlook (optional, read-only) ----------------
+
+    private bool _mailWired;
+
+    /// <summary>Shows or hides the mail drawer for the card that is open now. Nothing is searched until the person opens the drawer.</summary>
+    private void PrepareMail()
+    {
+        _mailFor = null;
+        MailPanel.Children.Clear();
+        MailExpander.IsExpanded = false;
+        MailExpander.IsVisible = Outlook is { } o && o.Snapshot.State != OutlookState.Off;
+        if (_mailWired) return;
+        _mailWired = true;
+        MailExpander.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == Expander.IsExpandedProperty && MailExpander.IsExpanded && _record is { } r && _mailFor != r.Number) _ = LoadMailAsync(r);
+        };
+    }
+
+    private TextBlock MailLine(string text, double size = 12.5, bool strong = false, IBrush? brush = null, Thickness? margin = null) => new()
+    {
+        Text = text, FontSize = size, TextWrapping = TextWrapping.Wrap, Foreground = brush ?? Ink2(),
+        FontWeight = strong ? FontWeight.SemiBold : FontWeight.Normal, Margin = margin ?? new Thickness(0),
+    };
+
+    private async Task LoadMailAsync(AndaRecord record)
+    {
+        if (Outlook is not { } service) return;
+        _mailFor = record.Number;
+        MailPanel.Children.Clear();
+        var snap = service.Snapshot;
+        if (snap.State != OutlookState.SignedIn)
+        {
+            _mailFor = null;     // try again when the drawer is next opened, after the person has signed in
+            MailPanel.Children.Add(MailLine(snap.State switch
+            {
+                OutlookState.SigningIn => snap.Message,
+                OutlookState.Error => snap.Message + " Open Settings, then Outlook.",
+                _ => "Not signed in to Outlook. Open Settings, then Outlook, to sign in.",
+            }, brush: Ink3()));
+            return;
+        }
+        MailPanel.Children.Add(MailLine("Looking in Outlook…", brush: Ink3()));
+        MailResult result;
+        try { result = await service.SearchAsync(record.Number); }
+        catch (OperationCanceledException) { return; }
+        if (_record?.Number != record.Number) return;      // the card moved on while Outlook answered
+        MailPanel.Children.Clear();
+        MailHeader.Text = result.Ok && result.Items.Count > 0 ? $"Recent Outlook mail · {result.Items.Count}" : "Recent Outlook mail";
+        if (!result.Ok || result.Items.Count == 0)
+        {
+            _mailFor = result.Ok ? record.Number : null;
+            MailPanel.Children.Add(MailLine(result.Message, brush: Ink3()));
+            return;
+        }
+        foreach (var m in result.Items)
+        {
+            MailPanel.Children.Add(MailLine(m.Subject, strong: true, margin: new Thickness(0, 6, 0, 0)));
+            MailPanel.Children.Add(MailLine(string.Join(" · ", new[] { m.From, m.Received?.LocalDateTime.ToString("MMM d, yyyy") ?? "" }.Where(x => x.Length > 0)), 11, brush: Ink3()));
+            if (m.Preview.Length > 0) MailPanel.Children.Add(MailLine(m.Preview));
+        }
+        MailPanel.Children.Add(MailLine("Read from your Outlook for this ANDA number only. Not saved, not sent to any AI service.", 10.5, brush: Ink3(), margin: new Thickness(0, 8, 0, 0)));
+        Dispatcher.UIThread.Post(ClampToScreen, DispatcherPriority.Loaded);
     }
 
     private IReadOnlyList<WatchFlag> _watchFlags = Array.Empty<WatchFlag>();
