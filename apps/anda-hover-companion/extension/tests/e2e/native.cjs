@@ -21,7 +21,7 @@ function installHost(userData, { origin = `chrome-extension://${h.EXPECTED_ID}/`
   const home = fs.mkdtempSync(path.join(os.tmpdir(), 'anda-home-'));
   fs.mkdirSync(path.join(home, 'data'), { recursive: true });
   const csv = path.join(home, 'Together.csv');
-  fs.writeFileSync(csv, 'ANDA,Product,Applicant,Goal date,Forecast date,Status\n930001,Together drug,Birch,2026-10-03,2026-10-17,In review\n930002,Quiet drug,Birch,2027-03-02,2027-03-01,Waiting\n');
+  fs.writeFileSync(csv, 'ANDA,Product,Applicant,Goal date,Forecast date,Status\n930001,Together drug,Birch,2026-10-03,2026-10-17,In review\n930002,Quiet drug,Birch,2031-03-04,2031-03-03,Waiting\n');
   // the app's own settings: its portfolio, and "peek first" as its consent model (ConsentModel.PeekFirst = 1)
   fs.writeFileSync(path.join(home, 'data', 'settings.json'), JSON.stringify({ PortfolioPath: csv, Consent: 1, FirstRunDone: true }));
 

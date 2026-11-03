@@ -94,6 +94,30 @@ public class ExtensionUiTests : IClassFixture<HeadlessFixture>
     }
 
     [Fact]
+    public async Task Connect_is_refused_from_a_development_run_so_the_browser_is_never_pointed_at_dotnet()
+    {
+        string dir = Temp.NewDir();
+        Environment.SetEnvironmentVariable(NativeHostRegistration.DirEnvVar, dir);
+        try
+        {
+            var r = await _fx.Session.Dispatch(() =>
+            {
+                ThemeManager.Apply(AppearanceId.K);
+                var w = new SettingsWindow(new Settings(), new PromptLibraryService(Path.Combine(Temp.NewDir(), "p.json")), () => { });
+                w.Show(); Settle();
+                w.FindControl<Button>("ExtConnect")!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent)); Settle();
+                var text = w.FindControl<TextBlock>("ExtStatus")!.Text;
+                w.Close(); Settle();
+                return text;
+            }, CancellationToken.None);
+            // the test host's executable is "dotnet" (or the test runner), never AndaCompanion.exe
+            Assert.Contains("Connect from the installed AndaCompanion.exe", r);
+            Assert.False(File.Exists(NativeHostRegistration.ManifestPath));
+        }
+        finally { Environment.SetEnvironmentVariable(NativeHostRegistration.DirEnvVar, null); }
+    }
+
+    [Fact]
     public void A_saved_extension_id_that_is_not_valid_falls_back_to_the_default()
     {
         string path = Path.Combine(Temp.NewDir(), "settings.json");

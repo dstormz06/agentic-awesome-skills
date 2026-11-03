@@ -319,9 +319,23 @@ export function openPortfolio(table, opts) {
 
 function finish(result, name, savedIso) {
   const rows = result.rowsByNumber;
+  for (const r of rows.values()) { r.ingredientKey = r.ingredient.toLowerCase(); r.drugKey = first(r.drug).toLowerCase(); }   // computed once, not on every comparison
   const sameProduct = (a, b) => {
-    if (a.ingredient.length > 0 && b.ingredient.length > 0) return a.ingredient.toLowerCase() === b.ingredient.toLowerCase();
-    return first(a.drug).length > 0 && first(a.drug).toLowerCase() === first(b.drug).toLowerCase();
+    if (a.ingredient.length > 0 && b.ingredient.length > 0) return a.ingredientKey === b.ingredientKey;
+    return a.drugKey.length > 0 && a.drugKey === b.drugKey;
+  };
+  let byApplicant = null;   // built once, so a card's sister ANDAs are found without scanning every row
+  const sameApplicantRows = (applicant) => {
+    if (byApplicant === null) {
+      byApplicant = new Map();
+      for (const r of rows.values()) {
+        if (r.applicant.length === 0) continue;
+        const k = r.applicant.toLowerCase();
+        if (!byApplicant.has(k)) byApplicant.set(k, []);
+        byApplicant.get(k).push(r);
+      }
+    }
+    return byApplicant.get(applicant.toLowerCase()) || [];
   };
   const find = (number, todayIso) => {
     const row = rows.get(number);
@@ -340,9 +354,12 @@ function finish(result, name, savedIso) {
       } else delta = 'no goal date to compare';
     }
     const notes = row.notes.length > 0 ? [{ who: 'Your sheet', text: row.notes }] : [];
-    const sisters = [...rows.values()]
-      .filter((x) => x.number !== number && row.applicant.length > 0 && x.applicant.toLowerCase() === row.applicant.toLowerCase() && sameProduct(x, row))
-      .slice(0, 3).map((x) => ({ number: x.number, description: `${x.drug.length > 0 ? x.drug : 'same product'} — same applicant` }));
+    const sisters = [];
+    if (row.applicant.length > 0)
+      for (const x of sameApplicantRows(row.applicant)) {
+        if (sisters.length === 3) break;
+        if (x.number !== number && sameProduct(x, row)) sisters.push({ number: x.number, description: `${x.drug.length > 0 ? x.drug : 'same product'} — same applicant` });
+      }
     const meta = [row.applicant, row.cycle.length > 0 ? `Cycle ${row.cycle}` : ''].filter((x) => x.length > 0).join(' · ');
     const saved = parseIso(savedIso);
     return {

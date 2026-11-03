@@ -68,25 +68,27 @@ export function createService({ storage, native = null, now = () => new Date() }
 
   const fail = (e) => ({ ok: false, error: e.code || 'error', message: e.message || 'Something went wrong.' });
 
+  /** One answer for one number from an already-chosen source (null for the desktop app). */
+  async function lookupWith(settings, rp, number, ctx) {
+    let card;
+    if (useApp(settings)) {
+      const r = await needNative().request({ type: 'lookup', number });
+      if (!r.ok) return { ok: false, error: r.error, message: r.message };
+      card = r.card;
+    } else {
+      const rec = rp.find(number);
+      if (!rec) return { ok: false, error: 'not-found', message: rp.kind === 'imported' ? `${number} is not in your portfolio (${rp.imported.name})` : `${number} is not a recognized ANDA` };
+      card = buildCard(rec, ctx);
+    }
+    return { ok: true, card, step: firstStep(settings.consent, settings.escalateUrgent, card.urgency.isUrgent), settings: { consent: settings.consent, autoHideSeconds: settings.autoHideSeconds } };
+  }
+
   /** @returns {ok:true, card, step} or {ok:false, error, message} */
   async function lookup(text) {
     const settings = await effectiveSettings();
     const number = extractNumber(text);
     if (number === null) return { ok: false, error: 'bad-number', message: 'That is not an ANDA number.' };
-    try {
-      let card;
-      if (useApp(settings)) {
-        const r = await needNative().request({ type: 'lookup', number });
-        if (!r.ok) return { ok: false, error: r.error, message: r.message };
-        card = r.card;
-      } else {
-        const rp = await repo(settings);
-        const rec = rp.find(number);
-        if (!rec) return { ok: false, error: 'not-found', message: rp.kind === 'imported' ? `${number} is not in your portfolio (${rp.imported.name})` : `${number} is not a recognized ANDA` };
-        card = buildCard(rec, await ctxFor(settings));
-      }
-      return { ok: true, card, step: firstStep(settings.consent, settings.escalateUrgent, card.urgency.isUrgent), settings: { consent: settings.consent, autoHideSeconds: settings.autoHideSeconds } };
-    } catch (e) { return fail(e); }
+    try { return await lookupWith(settings, useApp(settings) ? null : await repo(settings), number, await ctxFor(settings)); } catch (e) { return fail(e); }
   }
 
   async function draft(text) {
@@ -117,8 +119,11 @@ export function createService({ storage, native = null, now = () => new Date() }
   async function scan(numbers) {
     const settings = await effectiveSettings();
     const items = [];
+    let rp = null, ctx = null;
+    try { rp = useApp(settings) ? null : await repo(settings); ctx = await ctxFor(settings); } catch (e) { return fail(e); }   // the data is read once, not once per number
     for (const n of numbers.slice(0, 40)) {
-      const r = await lookup(n);
+      let r;
+      try { r = await lookupWith(settings, rp, n, ctx); } catch (e) { return fail(e); }
       if (r.ok) items.push({ number: n, drug: r.card.drug, status: `Goal ${r.card.goalDate}${r.card.hasForecast ? ` · forecast ${r.card.forecastDate} (${r.card.forecastDelta.replace('▲', '').replace('▼', '').trim()})` : ''}`,
         topFlag: r.card.watch[0] ? r.card.watch[0].text : null, severity: r.card.watch[0] ? r.card.watch[0].severity : null });
       else if (r.error === 'not-found') items.push({ number: n, drug: 'Not in your data', status: 'Nothing to show for this number', topFlag: null, severity: null });

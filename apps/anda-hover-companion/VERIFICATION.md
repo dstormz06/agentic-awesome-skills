@@ -314,7 +314,7 @@ app code, so the self-test counts above are run 14's; run 15's own counts were n
 |---|---|---|
 | **The extension's JavaScript says exactly what the app says.** Same calendar, watch flags, urgency, cards, draft check, CSV and .xlsx reading | `tests/golden.json` is written by the app's own code (148 date flags, every day of 2026-2027, 27 cards under three clocks, 12 drafts, 30 recognizer texts, 8 portfolio files with 17 date formats and non-dates, an .xlsx with a hidden sheet); the JavaScript reproduces every case. The app's test fails if the app drifts from the file. Both run on Linux and Windows. Breaking the JavaScript on purpose fails 3 of the 7 parity tests | A fixed set of cases, not a proof. A rule not in the fixture could differ |
 | The extension runs only when asked and cannot read other tabs or call out | `manifest.test.mjs`: permissions are exactly `activeTab, scripting, contextMenus, storage` (+ optional `nativeMessaging`), no host permissions, no content script, no web-accessible files, no `externally_connectable`, no inline script, no `fetch`/`XMLHttpRequest`/`WebSocket`/`eval` or URL in any source file; the UI uses a closed shadow root and no `innerHTML` | A static check of the files, not a network capture |
-| It works in a real browser engine, on real pages, with no app | `tests/e2e/standalone.cjs`: **50 checks** in Chromium: whisper chip, urgent peek with its reason, full card, drawer, Copy status (clipboard content checked), NDA/short/unknown numbers not guessed, right-click text, all three consent models, draft check from a field and a contenteditable, page scan, a page with `default-src 'none'; style-src 'none'`, auto-hide (and never under the pointer), focus restored, popup (look up, draft, watch list), settings (.xlsx and .csv import, title row above the header, no column found then fixed by choosing one, wrong file type refused, no silent mixing of sources) | **Chromium, not Edge.** The browser's own context menu and shortcut handling cannot be pressed by automation: the tests call the code those call, on a copy of the extension that may read 127.0.0.1 and has an open shadow root |
+| It works in a real browser engine, on real pages, with no app | `tests/e2e/standalone.cjs`: **63 checks** in Chromium: whisper chip, urgent peek with its reason, full card, drawer, Copy status (clipboard content checked), NDA/short/unknown numbers not guessed, right-click text, all three consent models, draft check from a field and a contenteditable, page scan, a page with `default-src 'none'; style-src 'none'`, auto-hide (and never under the pointer), focus restored, popup (look up, draft, watch list), settings (.xlsx and .csv import, title row above the header, no column found then fixed by choosing one, wrong file type refused, no silent mixing of sources) | **Chromium, not Edge.** The browser's own context menu and shortcut handling cannot be pressed by automation: the tests call the code those call, on a copy of the extension that may read 127.0.0.1 and has an open shadow root |
 | It works together with the app, over real native messaging | `tests/e2e/native.cjs`: **11 checks** with the real .NET host process started by Chromium: lookup, draft check and watch list answered from a portfolio file, the app's "peek first" consent followed (and not followed when switched off), a demo number is *not found* rather than silently shown, host not installed and a host that lists another extension both give a plain message. Also `NativeHostProcessTests` (real pipes, clean exit) and 17 framing and protocol tests | Linux host. On Windows the published exe is started the way the browser does by the self-test: **first answer 464 ms**, clean exit |
 | Connect and Disconnect work, for one extension ID only | `NativeHostRegistrationTests` (manifest lists exactly one origin, ID format, files, data-folder pointer), a Windows-only test that round-trips the registry value in the current-user hive, headless Settings tests | **Edge itself reading that registry value was not observed**; the path is Microsoft's documented one |
 | Watch list across the portfolio | `WatchListTests`, headless window tests, identical to the extension's in the fixture, render on Windows (`render-watch-list`) | |
@@ -335,6 +335,35 @@ app code, so the self-test counts above are run 14's; run 15's own counts were n
 No run in **Edge** itself, none on **Outlook on the web, Teams on the web or SharePoint**, none of the browser's own context menu or shortcut UI, none of Edge Add-ons or enterprise-policy
 installation, none on a managed computer, none with a signed build. The service-worker keep-alive of an open native port was not observed over a long session. The golden file proves
 agreement on its cases only. No live model, no real RPM workbook, no real Drugs@FDA file (still unreachable from the build environment), so the RLD line stays labelled unverified.
+
+## Round 9 — a full audit of the extension and its host, and a check that the documents say what the code does
+
+Scope: the owner asked to verify and audit everything and to rebuild the affected artifacts. Method: re-run every suite, read the new code again looking for
+what the tests would not catch (large inputs, hostile pages, stale state, wrong launch mode, claims in the documents), fix, add a test for each fix.
+
+Local results on this code (read from the runs, not recalled): C# **446 passed, 8 skipped** (Windows-only); extension unit **31 passed**; standalone browser test **63 checks**;
+native-messaging test **11 checks**; contrast audit of the extension palette 0 failures; `npm run validate` and `npm run security:docs` pass; a search of the app folder
+for key and token patterns finds only placeholder strings in the tests (`sk-ant-test-not-a-real-key`), no key or certificate files. The extension's private signing key is not in the repository.
+
+### Defects caught in round 9
+
+| # | Finding | Found by | Disposition |
+|---|---|---|---|
+| R32 | Finding the sister applications of a card compared every record with every other one (quadratic): a 5,000-row portfolio took too long to build all cards | Reading the code, then a timing test | Applicant index in the app and the extension; 5,000 rows build in under 6 s with the app's test, and in well under a second in the extension |
+| R33 | The holiday list for a year was recomputed for every date asked about | Same timing test | Computed once per year |
+| R34 | A selection inside a password or other sensitive field could be read as "the selected text" | Reading what the page reader touches | Sensitive fields read nothing; checked in the browser test |
+| R35 | After the extension was updated, an already-open tab kept a dead script that threw on the next key press | Reasoning about extension updates | The script checks that its extension is still alive and goes quiet; checked by simulating a stale script |
+| R36 | "Connect" in Settings, started from `dotnet run`, would have registered `dotnet` itself as the native-messaging host instead of the app | Reading the registration path | Refused unless the running file is the app itself; test added |
+| R37 | A page scan re-read the imported portfolio once per number found | Reading the scan path | Read once per scan |
+| R38 | The native test used dates in 2027 that would have become "past" and changed the expected card | Looking for clock-dependent tests | Dates moved; the rest of the suite already used a fixed clock |
+| R39 | The popup's tabs could not be moved with the arrow keys (ARIA tabs pattern), every tab was a tab stop, and "Settings" was a link without a link target | Accessibility review | Arrow keys, Home and End; one tab stop; Settings is a button; 5 browser checks |
+| R40 | `ProgressControl` threw when drawn at zero width (found when three headless card tests failed behind a masking teardown error) | Failing tests | Early return and a safe clamp; regression test |
+
+### What round 9 does not prove
+
+Not run in **Edge**, not on Outlook on the web, Teams on the web or SharePoint, not with a **screen reader** (the keyboard path and the labels are checked by script only),
+no managed computer, no signed build, no live model, no real RPM workbook, no real Drugs@FDA file. The timing numbers are from one Linux container; they show the work is no longer
+quadratic, not a promise on a given PC. The audit is mine and of my own code; it is not an independent review, and a person who did not write it should still read `SECURITY.md`.
 
 ## Still open
 

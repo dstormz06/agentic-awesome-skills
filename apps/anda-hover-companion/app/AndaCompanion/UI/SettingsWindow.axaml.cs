@@ -200,8 +200,11 @@ public partial class SettingsWindow : Window
         {
             string id = (ExtIdBox.Text ?? "").Trim();
             if (!NativeHostRegistration.IsValidExtensionId(id)) { PaintExt("That is not an extension ID (32 letters from a to p; copy it from the extension's Settings page)."); return; }
+            string exe = Environment.ProcessPath ?? "";
+            if (!Path.GetFileNameWithoutExtension(exe).Equals("AndaCompanion", StringComparison.OrdinalIgnoreCase))
+            { PaintExt("Connect from the installed AndaCompanion.exe. This copy was started through a development tool, so the browser could not start it."); return; }
             _settings.ExtensionId = id; Apply();
-            var (_, message) = NativeHostRegistration.Install(Environment.ProcessPath ?? "", id);
+            var (_, message) = NativeHostRegistration.Install(exe, id);
             PaintExt(message);
         };
         ExtDisconnect.Click += (_, _) => { var (_, message) = NativeHostRegistration.Uninstall(); PaintExt(message); };

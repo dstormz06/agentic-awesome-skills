@@ -158,6 +158,45 @@ const PAGE = `<!doctype html><meta charset="utf-8"><title>Huddle prep</title><bo
   h.ok(await page.evaluate(() => document.activeElement && document.activeElement.id) === 'draft', 'closing the card returns focus to the field you were typing in');
   await h.setSettings(worker, { consent: 'whisper' });
 
+  // ---- fields that hold secrets are never read, even when their text is selected ----
+  await goto('/');
+  await page.evaluate(() => {
+    const mk = (attrs) => { const i = document.createElement('input'); Object.assign(i, attrs); i.value = 'ANDA 216482 hunter2'; document.body.append(i); return i; };
+    mk({ type: 'password', id: 'pw' }); mk({ type: 'text', id: 'cc', name: 'cc-number' }); mk({ type: 'text', id: 'otp' }).setAttribute('autocomplete', 'one-time-code'); mk({ type: 'number', id: 'num' });
+  });
+  for (const id of ['pw', 'cc', 'otp']) {
+    await page.locator('#' + id).focus(); await page.evaluate((i) => document.getElementById(i).select(), id);
+    await h.trigger(worker, 'peek');
+    await notice().waitFor({ timeout: 5000 });
+    h.ok((await text(notice())).includes('Select an ANDA number first') && (await card().count()) === 0 && (await chip().count()) === 0, `a ${id === 'pw' ? 'password' : id === 'cc' ? 'card-number' : 'one-time-code'} field is not read for a peek, even with its text selected`);
+    await page.keyboard.press('Escape');
+    await h.trigger(worker, 'draft');
+    await notice().waitFor({ timeout: 5000 });
+    h.ok((await text(notice())).includes('Select some text') && (await panel().count()) === 0, '... nor for a draft check');
+    await page.keyboard.press('Escape');
+  }
+  await page.locator('#draft').focus(); await page.evaluate(() => document.getElementById('draft').select());
+  await h.trigger(worker, 'draft');
+  await panel().waitFor({ timeout: 5000 });
+  h.ok(true, 'an ordinary text box is still read when you ask');
+  await page.keyboard.press('Escape');
+
+  // ---- a page script left over from before an extension update is replaced, not trusted ----
+  // (A real reload cannot be driven in this headless harness, so the old script's "my connection is gone" state is set directly, in the same isolated world.)
+  await h.select(page, '#a2');
+  await h.trigger(worker, 'peek');
+  await chip().waitFor({ timeout: 5000 });
+  await page.keyboard.press('Escape');
+  await worker.evaluate(async () => {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: () => { globalThis.__andaCompanionLoaded = { alive: () => false }; } });
+  });
+  await h.select(page, '#a2');
+  await h.trigger(worker, 'peek');
+  await chip().waitFor({ timeout: 5000 });
+  h.ok((await page.locator('[data-anda-companion]').count()) === 1, 'a dead page script is cleared away and replaced: one copy of the UI host, and it works');
+  await page.keyboard.press('Escape');
+
   // ---- the toolbar popup, opened as a tab ----
   const popup = await context.newPage();
   await popup.goto(`chrome-extension://${id}/src/popup.html`);
@@ -176,6 +215,17 @@ const PAGE = `<!doctype html><meta charset="utf-8"><title>Huddle prep</title><bo
   await popup.locator('.item').first().waitFor();
   h.ok((await popup.locator('#watchOut .item').first().innerText()).includes('216482'), 'popup: the watch list leads with the at-risk ANDA');
   h.ok((await popup.locator('#source').innerText()).includes('Fictional demo data'), 'popup: says which data it is showing');
+  // keyboard: the tabs are one tab stop and the arrow keys move between them (ARIA tabs pattern); Settings is a real button
+  await popup.focus('#t-watch'); await popup.keyboard.press('ArrowRight');
+  h.ok(await popup.evaluate(() => document.activeElement.id === 't-page' && document.getElementById('t-page').getAttribute('aria-selected') === 'true' && !document.getElementById('p-page').hidden),
+    'popup: ArrowRight moves to the next tab and focuses it');
+  await popup.keyboard.press('Home');
+  h.ok(await popup.evaluate(() => document.activeElement.id === 't-look' && !document.getElementById('p-look').hidden), 'popup: Home goes to the first tab');
+  await popup.keyboard.press('ArrowLeft');
+  h.ok(await popup.evaluate(() => document.activeElement.id === 't-page'), 'popup: ArrowLeft from the first tab wraps to the last');
+  h.ok(await popup.evaluate(() => [...document.querySelectorAll('[role=tab]')].filter((t) => t.tabIndex === 0).length === 1), 'popup: only the selected tab is a tab stop');
+  h.ok(await popup.evaluate(() => document.getElementById('openOptions').tagName === 'BUTTON'), 'popup: Settings is a real button (keyboard and screen reader)');
+  await popup.click('#t-look');
 
   // ---- the settings page: importing a spreadsheet (xlsx and csv), mapping, and using it ----
   const opt = await context.newPage();

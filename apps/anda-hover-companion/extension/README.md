@@ -66,7 +66,7 @@ and the app's test fails if the app drifts from the committed file. To change a 
 ## Tests
 
 ```bash
-node --test extension/tests/unit/parity.test.mjs extension/tests/unit/safety.test.mjs extension/tests/unit/manifest.test.mjs     # no dependencies; run in CI on Linux and Windows
+node --test extension/tests/unit/parity.test.mjs extension/tests/unit/safety.test.mjs extension/tests/unit/manifest.test.mjs extension/tests/unit/service.test.mjs     # no dependencies; run in CI on Linux and Windows
 # end to end in a real browser engine (needs Playwright's Chromium; Edge is not available in the build environment):
 NODE_PATH=$(npm root -g) node extension/tests/e2e/standalone.cjs
 dotnet build app/AndaCompanion && NODE_PATH=$(npm root -g) node extension/tests/e2e/native.cjs   # the real .NET host over native messaging

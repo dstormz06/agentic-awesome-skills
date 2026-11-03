@@ -2,8 +2,12 @@
 // It draws the card, invite and result panels inside a closed shadow root, so the page can neither restyle nor read them.
 (function () {
   'use strict';
-  if (globalThis.__andaCompanionLoaded) return;
-  globalThis.__andaCompanionLoaded = true;
+  // After the extension is updated or reloaded, a page that was already open still holds the old script, whose connection to the
+  // extension is gone. A live script means "already here"; a dead one is cleared away and replaced.
+  const prior = globalThis.__andaCompanionLoaded;
+  if (prior && prior.alive()) return;
+  if (prior) { const old = document.querySelector('[data-anda-companion]'); if (old) old.remove(); }
+  globalThis.__andaCompanionLoaded = { alive: () => { try { return !!chrome.runtime.id; } catch (e) { return false; } } };
   const UI = globalThis.AndaUI;
   const { h } = UI;
 

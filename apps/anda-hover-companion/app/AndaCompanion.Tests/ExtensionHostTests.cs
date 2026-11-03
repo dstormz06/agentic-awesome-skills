@@ -192,6 +192,26 @@ public class WatchListTests
     }
 }
 
+public class LargePortfolioTests
+{
+    [Fact]
+    public void Five_thousand_rows_load_and_build_their_watch_list_in_well_under_the_time_a_person_would_notice()
+    {
+        var sb = new StringBuilder("ANDA,Product,Applicant,Goal date,Forecast date,Status\n");
+        for (int i = 0; i < 5000; i++) sb.Append($"{100000 + i},Drug {i % 50} tabs,Company {i % 10},2026-12-{1 + i % 28:00},2027-01-05,In review\n");
+        string path = Path.Combine(Temp.NewDir(), "big.csv");
+        File.WriteAllText(path, sb.ToString());
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+        var repo = new AndaCompanion.Services.Portfolio.PortfolioRepository(path, today: () => new DateOnly(2026, 11, 3));
+        Assert.True(repo.Status.Ok, repo.Status.Message);
+        var list = WatchList.Build(repo, new CardContext(new DateOnly(2026, 11, 3), new BusinessCalendar()));
+        clock.Stop();
+        Assert.Equal(5000, list.Total);
+        Assert.True(clock.ElapsedMilliseconds < 6000, $"took {clock.ElapsedMilliseconds} ms (it was quadratic before the applicant index)");
+        Assert.Equal(3, repo.Find("100000")!.Sisters.Count);   // sisters are still found, three at most
+    }
+}
+
 public class NativeHostRegistrationTests
 {
     [Fact]

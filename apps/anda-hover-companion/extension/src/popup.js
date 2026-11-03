@@ -8,12 +8,28 @@ UI.mountStyles(document);
 
 // ---------- tabs ----------
 const TABS = ['look', 'draft', 'watch', 'page'];
-function select(name) {
-  for (const t of TABS) { $('t-' + t).setAttribute('aria-selected', String(t === name)); $('p-' + t).hidden = t !== name; }
-  if (name === 'look') $('num').focus();
+function select(name, focusTab) {
+  for (const t of TABS) {
+    $('t-' + t).setAttribute('aria-selected', String(t === name));
+    $('t-' + t).tabIndex = t === name ? 0 : -1; // one tab stop; arrow keys move between tabs
+    $('p-' + t).hidden = t !== name;
+  }
+  if (focusTab) $('t-' + name).focus();
+  else if (name === 'look') $('num').focus();
   if (name === 'watch') loadWatch();
 }
-for (const t of TABS) $('t-' + t).addEventListener('click', () => select(t));
+for (const t of TABS) {
+  $('t-' + t).addEventListener('click', () => select(t));
+  $('t-' + t).addEventListener('keydown', (e) => {
+    const at = TABS.indexOf(t);
+    const to = e.key === 'ArrowRight' ? (at + 1) % TABS.length : e.key === 'ArrowLeft' ? (at + TABS.length - 1) % TABS.length
+      : e.key === 'Home' ? 0 : e.key === 'End' ? TABS.length - 1 : -1;
+    if (to < 0) return;
+    e.preventDefault();
+    select(TABS[to], true);
+  });
+}
+for (const t of TABS.slice(1)) $('t-' + t).tabIndex = -1;
 
 // ---------- look up ----------
 let card = null, expanded = false;
@@ -91,5 +107,4 @@ $('scanGo').addEventListener('click', async () => {
 // ---------- footer ----------
 (async () => { const s = await ask({ type: 'svc:status' }); $('source').textContent = s ? `Source: ${s.label}${s.ok ? '' : ' (not reachable)'}` : ''; })();
 $('openOptions').addEventListener('click', () => chrome.runtime.openOptionsPage());
-$('openOptions').addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') chrome.runtime.openOptionsPage(); });
 select('look');

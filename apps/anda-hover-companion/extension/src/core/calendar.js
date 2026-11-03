@@ -58,11 +58,14 @@ export class BusinessCalendar {
     this.extra = (extra || []).map((e) => ({ t: parseIso(e.date), name: e.name || 'Closure' })).filter((e) => e.t !== null);
   }
 
+  #cache = new Map();
+  #year(y) { let l = this.#cache.get(y); if (!l) { l = holidaysOf(y); this.#cache.set(y, l); } return l; }
+
   holidayOn(t) {
     for (const e of this.extra) if (e.t === t) return { observed: t, actual: t, name: e.name };
     const year = new Date(t).getUTCFullYear();
     // a New Year's Day on a Saturday is observed on Dec 31 of the year before, so look one year ahead in December
-    const all = holidaysOf(year).concat(new Date(t).getUTCMonth() === 11 ? holidaysOf(year + 1) : []);
+    const all = this.#year(year).concat(new Date(t).getUTCMonth() === 11 ? this.#year(year + 1) : []);
     return all.find((h) => h.observed === t) || null;
   }
 

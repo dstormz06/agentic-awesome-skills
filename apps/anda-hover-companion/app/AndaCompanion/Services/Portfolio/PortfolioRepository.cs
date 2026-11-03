@@ -23,6 +23,7 @@ public sealed class PortfolioRepository : IAndaRepository
     private readonly string? _notesFolder;
     private readonly Func<DateOnly> _today;
     private Dictionary<string, Row> _rows = new();
+    private Dictionary<string, List<Row>> _byApplicant = new(StringComparer.OrdinalIgnoreCase);   // so a card's sister ANDAs are found without scanning every row
     private Dictionary<string, List<NoteSnippet>> _notes = new();
     private DateTime _loadedWrite;
     private long _loadedLength;
@@ -51,7 +52,7 @@ public sealed class PortfolioRepository : IAndaRepository
             var map = PortfolioColumns.Detect(table.Headers, _overrides);
             if (!map.ContainsKey("number"))
             {
-                Headers = table.Headers; Mapping = map; _rows = new();
+                Headers = table.Headers; Mapping = map; _rows = new(); _byApplicant = new(StringComparer.OrdinalIgnoreCase);
                 Status = new(false, 0, "No column for the ANDA number was found. Choose which column holds it in Settings.");
                 return;
             }
@@ -72,6 +73,8 @@ public sealed class PortfolioRepository : IAndaRepository
                     Date(r, cSub), Cell(r, cIng), Cell(r, cForm), Cell(r, cStr), Date(r, cPsg));
             }
             Headers = table.Headers; Mapping = map; _rows = rows;
+            _byApplicant = rows.Values.Where(r => r.Applicant.Length > 0).GroupBy(r => r.Applicant, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
             _loadedWrite = info.LastWriteTime; _loadedLength = info.Length;
             _asOf = DateOnly.FromDateTime(info.LastWriteTime);
             _notes = NotesIndex.Build(_notesFolder);
@@ -127,9 +130,8 @@ public sealed class PortfolioRepository : IAndaRepository
             foreach (var s in snippets.OrderByDescending(x => x.Date).Take(3))
                 notes.Add(new NoteItem($"{s.File} · {s.Date.ToString("MMM d", Inv)}", s.Text));
 
-        var sisters = _rows.Values
-            .Where(x => x.Number != number && row.Applicant.Length > 0 && string.Equals(x.Applicant, row.Applicant, StringComparison.OrdinalIgnoreCase) &&
-                        SameProduct(x, row))
+        var sisters = (row.Applicant.Length > 0 && _byApplicant.TryGetValue(row.Applicant, out var sameApplicant) ? sameApplicant : new List<Row>())
+            .Where(x => x.Number != number && SameProduct(x, row))
             .Take(3).Select(x => new SisterRef(x.Number, $"{(x.Drug.Length > 0 ? x.Drug : "same product")} — same applicant")).ToList();
 
         string meta = string.Join(" · ", new[] { row.Applicant, row.Cycle.Length > 0 ? $"Cycle {row.Cycle}" : "" }.Where(x => x.Length > 0));
