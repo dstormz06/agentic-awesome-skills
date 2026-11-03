@@ -1,4 +1,4 @@
-# ANDA Hover Companion for Edge (prototype)
+# ANDA Companion (Notula) for Edge (prototype)
 
 A Microsoft Edge (Chromium) extension that does in the browser what the Windows tray app does on the desktop: select an ANDA number, get its
 forecast card, with the weekend and federal-holiday **WATCH** line, a **draft check**, a portfolio-wide **watch list**, and a one-click
@@ -9,8 +9,8 @@ Prototype, not an FDA product. It makes **no network requests and uses no AI**.
 
 | You do | It does |
 |---|---|
-| Select an ANDA number on a page, right-click, **ANDA Companion: peek at "…"** (or press **Alt+Shift+A**) | Whisper invite by default: a small chip you click. An at-risk or late ANDA opens a peek by itself and says why. Settings choose "peek first" or "full card" instead |
-| Select text, or click into the message you are writing, then **ANDA Companion: check this text as a draft** (**Alt+Shift+D**) | Compares the ANDA numbers, goal and forecast dates and on-track or late wording with your data. No AI. Says what it did not check |
+| Select an ANDA number on a page, right-click, **ANDA Companion (Notula): peek at "…"** (or press **Alt+Shift+A**) | Whisper invite by default: a small chip you click. An at-risk or late ANDA opens a peek by itself and says why. Settings choose "peek first" or "full card" instead |
+| Select text, or click into the message you are writing, then **ANDA Companion (Notula): check this text as a draft** (**Alt+Shift+D**) | Compares the ANDA numbers, goal and forecast dates and on-track or late wording with your data. No AI. Says what it did not check |
 | Right-click the page, **scan this page for ANDA numbers** (**Alt+Shift+S**) | Lists the numbers on the page with a one-line status each. Reads the visible text on your click only |
 | Click the toolbar button | **Look up** a number, **Draft**, **Watch list** (every ANDA with something worth a look, worst first), **This page** |
 

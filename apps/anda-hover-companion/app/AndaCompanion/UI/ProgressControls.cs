@@ -7,8 +7,8 @@ namespace AndaCompanion.UI;
 
 /// <summary>
 /// Renders the active appearance's progress form. One control, nine forms —
-/// thin bar (A), milestone ticks (B), ring (C), hatched rule (D), capsule (E),
-/// line with a dot (K), ten dots (H), five-step stepper (I), goal-versus-forecast timeline (J).
+/// thin bar (A, F, G, S), milestone ticks (B), ring (C), solid square bar (D, R), capsule (E),
+/// line with a dot (K, Q), ten dots (H), five-step stepper (I), goal-versus-forecast timeline (J), half dial (P).
 /// Form changes with appearance; the value and its meaning never do.
 /// </summary>
 public sealed class ProgressControl : Control
@@ -64,11 +64,13 @@ public sealed class ProgressControl : Control
             ProgressVariant.Line => 10,
             ProgressVariant.Dots => 9,
             ProgressVariant.Capsule => 8,
-            ProgressVariant.Hatch => 6,
+            ProgressVariant.Solid => 6,
+            ProgressVariant.Gauge => 62,
             ProgressVariant.Ticks => 5,
             _ => 4,
         };
         double w = Variant == ProgressVariant.Ring ? 52
+            : Variant == ProgressVariant.Gauge ? 112
             : double.IsFinite(availableSize.Width) ? availableSize.Width : 240;
         return new Size(w, h);
     }
@@ -99,21 +101,40 @@ public sealed class ProgressControl : Control
                 }
                 break;
 
-            case ProgressVariant.Hatch:
-                var line = new Pen(new SolidColorBrush(Res("C.Line")), 1);
-                ctx.DrawRectangle(track, line, new Rect(0.5, 0.5, w - 1, 5));
-                double fw = w * pct;
-                if (fw > 2)
-                {
-                    using (ctx.PushClip(new Rect(0, 0, fw, 6)))
-                    {
-                        var hatch = new Pen(fill, 2);
-                        for (double x = -6; x < fw + 6; x += 6)
-                            ctx.DrawLine(hatch, new Point(x, 7), new Point(x + 7, -1));
-                    }
-                    ctx.DrawRectangle(null, new Pen(fill, 1), new Rect(0.5, 0.5, fw - 1, 5));
-                }
+            case ProgressVariant.Solid:
+                // D and R: a square-ended solid bar. No hatching, no outline pattern.
+                ctx.DrawRectangle(track, null, new Rect(0, 0, w, 6));
+                if (pct > 0) ctx.DrawRectangle(fill, null, new Rect(0, 0, Math.Max(2, w * pct), 6));
                 break;
+
+            case ProgressVariant.Gauge:
+                {
+                    // P: a half dial opening upward, the value inside it.
+                    double thick = 9, rad = Math.Min(w / 2, h) - thick / 2 - 1;
+                    var centre = new Point(w / 2, h - thick / 2 - 1);
+                    void Arc(IBrush brush, double fraction)
+                    {
+                        if (fraction <= 0) return;
+                        double sweep = Math.PI * Math.Clamp(fraction, 0, 1);
+                        var start = new Point(centre.X - rad, centre.Y);
+                        var end = new Point(centre.X - rad * Math.Cos(sweep), centre.Y - rad * Math.Sin(sweep));
+                        var g = new StreamGeometry();
+                        using (var c = g.Open())
+                        {
+                            c.BeginFigure(start, false);
+                            c.ArcTo(end, new Size(rad, rad), 0, false, SweepDirection.Clockwise);
+                            c.EndFigure(false);
+                        }
+                        ctx.DrawGeometry(null, new Pen(brush, thick, lineCap: PenLineCap.Round), g);
+                    }
+                    Arc(track, 0.9999);
+                    Arc(fill, pct);
+                    var gtf = new Typeface((FontFamily)Application.Current!.Resources["C.NumFont"]!, weight: FontWeight.Bold);
+                    var gtext = new FormattedText($"{Value:0}%", System.Globalization.CultureInfo.InvariantCulture,
+                        FlowDirection.LeftToRight, gtf, 16, new SolidColorBrush(Res("C.Ink")));
+                    ctx.DrawText(gtext, new Point(w / 2 - gtext.Width / 2, h - gtext.Height - 3));
+                    break;
+                }
 
             case ProgressVariant.Capsule:
                 ctx.DrawRectangle(track, null, new RoundedRect(new Rect(0, 0, w, 8), 4));
@@ -232,21 +253,5 @@ public sealed class ProgressControl : Control
         ctx.DrawText(goal, new Point(goalX, 0));
         var fc = Label("FORECAST");
         ctx.DrawText(fc, new Point(Math.Clamp(fx - fc.Width / 2, 0, Math.Max(0, w - fc.Width)), h - fc.Height));
-    }
-}
-
-
-/// <summary>Faint graph-grid surface behind the card — appearance D's signature.</summary>
-public sealed class GridSurface : Control
-{
-    public override void Render(DrawingContext ctx)
-    {
-        var color = ((ISolidColorBrush)Application.Current!.Resources["C.Grid"]!).Color;
-        if (color.A == 0) return;
-        var pen = new Pen(new SolidColorBrush(color), 1);
-        for (double x = 14; x < Bounds.Width; x += 14)
-            ctx.DrawLine(pen, new Point(x, 0), new Point(x, Bounds.Height));
-        for (double y = 14; y < Bounds.Height; y += 14)
-            ctx.DrawLine(pen, new Point(0, y), new Point(Bounds.Width, y));
     }
 }

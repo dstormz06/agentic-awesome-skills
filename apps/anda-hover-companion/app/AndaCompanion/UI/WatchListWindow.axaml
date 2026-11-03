@@ -3,7 +3,7 @@
         x:Class="AndaCompanion.UI.WatchListWindow"
         SystemDecorations="None" TransparencyLevelHint="Transparent" Background="Transparent"
         SizeToContent="WidthAndHeight" CanResize="False" Topmost="True"
-        ShowInTaskbar="False" WindowStartupLocation="CenterScreen" Title="ANDA Companion — Watch list">
+        ShowInTaskbar="False" WindowStartupLocation="CenterScreen" Title="ANDA Companion (Notula) — Watch list">
 
   <Window.Styles>
     <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource C.Font}"/></Style>

@@ -17,9 +17,9 @@ const MENU = { peek: 'anda-peek', draft: 'anda-draft', scan: 'anda-scan' };
 // ---------- the right-click menu ----------
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.removeAll(() => {
-    chrome.contextMenus.create({ id: MENU.peek, title: 'ANDA Companion: peek at “%s”', contexts: ['selection'] });
-    chrome.contextMenus.create({ id: MENU.draft, title: 'ANDA Companion: check this text as a draft', contexts: ['selection', 'editable'] });
-    chrome.contextMenus.create({ id: MENU.scan, title: 'ANDA Companion: scan this page for ANDA numbers', contexts: ['page'] });
+    chrome.contextMenus.create({ id: MENU.peek, title: 'ANDA Companion (Notula): peek at “%s”', contexts: ['selection'] });
+    chrome.contextMenus.create({ id: MENU.draft, title: 'ANDA Companion (Notula): check this text as a draft', contexts: ['selection', 'editable'] });
+    chrome.contextMenus.create({ id: MENU.scan, title: 'ANDA Companion (Notula): scan this page for ANDA numbers', contexts: ['page'] });
   });
 });
 
@@ -36,8 +36,8 @@ const send = (tabId, msg) => chrome.tabs.sendMessage(tabId, msg, { frameId: 0 })
 async function cannotRunHere(tab) {
   await chrome.action.setBadgeBackgroundColor({ color: '#8a5800', tabId: tab.id });
   await chrome.action.setBadgeText({ text: '!', tabId: tab.id });
-  await chrome.action.setTitle({ title: 'ANDA Companion cannot run on this page. Use the toolbar button to look a number up.', tabId: tab.id });
-  setTimeout(() => { chrome.action.setBadgeText({ text: '', tabId: tab.id }).catch(() => {}); chrome.action.setTitle({ title: 'ANDA Hover Companion', tabId: tab.id }).catch(() => {}); }, 6000);
+  await chrome.action.setTitle({ title: 'ANDA Companion (Notula) cannot run on this page. Use the toolbar button to look a number up.', tabId: tab.id });
+  setTimeout(() => { chrome.action.setBadgeText({ text: '', tabId: tab.id }).catch(() => {}); chrome.action.setTitle({ title: 'ANDA Companion (Notula)', tabId: tab.id }).catch(() => {}); }, 6000);
 }
 
 async function withPage(tab, job) {

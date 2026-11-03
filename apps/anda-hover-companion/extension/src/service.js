@@ -165,7 +165,7 @@ export function createService({ storage, native = null, now = () => new Date() }
     const s = await getSettings();
     if (useApp(s)) {
       if (!native) return { kind: 'app', ok: false, label: 'Desktop app', message: 'The desktop app connection is turned off.' };
-      try { const r = await native.request({ type: 'hello' }); return { kind: 'app', ok: !!r.ok, label: r.dataLabel, message: r.ok ? `Connected to ANDA Hover Companion ${r.version}. ${r.dataKind === 'portfolio' ? r.dataMessage : 'The app is using its fictional demo records.'}` : r.message, count: r.count }; }
+      try { const r = await native.request({ type: 'hello' }); return { kind: 'app', ok: !!r.ok, label: r.dataLabel, message: r.ok ? `Connected to ANDA Companion (Notula) ${r.version}. ${r.dataKind === 'portfolio' ? r.dataMessage : 'The app is using its fictional demo records.'}` : r.message, count: r.count }; }
       catch (e) { return { kind: 'app', ok: false, label: 'Desktop app', message: e.message }; }
     }
     if (s.dataSource === 'imported') {

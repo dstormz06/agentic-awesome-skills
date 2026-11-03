@@ -141,6 +141,10 @@ internal static class SelfTest
             new("card-i", AppearanceId.I, "216482", false, false, 1.0, false),
             new("card-j", AppearanceId.J, "216482", false, false, 1.0, true),
             new("card-j-healthy", AppearanceId.J, "214990", false, false, 1.0, false),
+            new("card-p", AppearanceId.P, "216482", false, false, 1.0, false),
+            new("card-q", AppearanceId.Q, "216482", false, false, 1.0, false),
+            new("card-r", AppearanceId.R, "214990", false, false, 1.0, false),
+            new("card-s", AppearanceId.S, "216482", false, false, 1.0, false),
             new("compact-l", AppearanceId.L, "216482", false, false, 1.0, true),
             new("compact-m", AppearanceId.M, "216482", false, false, 1.0, false),
             new("compact-n", AppearanceId.N, "216482", false, false, 1.0, false),
@@ -599,12 +603,12 @@ internal static class SelfTest
         public void Write()
         {
             var counts = Enum.GetValues<CheckStatus>().ToDictionary(s => s.ToString().ToLowerInvariant(), s => _checks.Count(c => c.Status == s));
-            var json = new { app = "ANDA Hover Companion", startedUtc = _started, counts, checks = _checks };
+            var json = new { app = "ANDA Companion (Notula)", startedUtc = _started, counts, checks = _checks };
             File.WriteAllText(Path.Combine(_dir, "report.json"), JsonSerializer.Serialize(json,
                 new JsonSerializerOptions { WriteIndented = true, Converters = { new JsonStringEnumConverter() } }));
 
             var md = new StringBuilder();
-            md.AppendLine("# ANDA Hover Companion — self-test report");
+            md.AppendLine("# ANDA Companion (Notula) — self-test report");
             md.AppendLine();
             md.AppendLine($"{_started:u} · pass {counts["pass"]} · warn {counts["warn"]} · fail {counts["fail"]} · skipped {counts["skip"]}");
             md.AppendLine();

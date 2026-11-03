@@ -27,7 +27,7 @@ public static class NativeHostRegistration
     public static string ManifestJson(string exePath, string extensionId) => JsonSerializer.Serialize(new
     {
         name = HostName,
-        description = "ANDA Hover Companion: lets the browser extension read your own data through the desktop app",
+        description = "ANDA Companion (Notula): lets the browser extension read your own data through the desktop app",
         path = exePath,
         type = "stdio",
         allowed_origins = new[] { $"chrome-extension://{extensionId}/" },

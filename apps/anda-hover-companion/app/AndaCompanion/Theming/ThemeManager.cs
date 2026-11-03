@@ -37,7 +37,6 @@ public static class ThemeManager
         Brush("C.Bad", palette.Bad); Brush("C.BadBg", palette.BadBg);
         Brush("C.Track", palette.Track); Brush("C.Fill", palette.Fill);
         Brush("C.Mark", palette.Mark);
-        Brush("C.Grid", palette.Grid ?? "#00FFFFFF");
 
         // Fluent's own controls (checkbox, radio, slider fill) read SystemAccentColor*; point them at the
         // appearance's accent so nothing in the app shows a stray default Windows blue.

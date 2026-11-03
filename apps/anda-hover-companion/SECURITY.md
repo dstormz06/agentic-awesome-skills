@@ -1,4 +1,4 @@
-# Security posture — ANDA Hover Companion
+# Security posture — ANDA Companion (Notula)
 
 Defense-in-depth for a tool that will eventually sit next to nonpublic, commercially
 confidential application data. "Bullet-proof" is not a claim any honest engineer makes;

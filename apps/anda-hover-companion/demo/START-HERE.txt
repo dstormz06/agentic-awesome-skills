@@ -30,7 +30,7 @@ TRY IT
 
 MAKE IT YOURS (tray icon, then Settings)
   A "Go to" list at the top jumps to any section. Nothing here needs a rebuild.
-  - Appearance: 15 looks (K is the default; L to O are small boxes that stay out of the way
+  - Appearance: 19 looks (K is the default; L to O are small boxes that stay out of the way
     of an email), auto-hide (10 seconds to start), transparency, how a card opens.
   - Shortcuts: your own keys, with a live note on any that another program already uses.
     An optional middle-click is off by default.

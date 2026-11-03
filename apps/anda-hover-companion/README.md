@@ -1,4 +1,4 @@
-# ANDA Hover Companion
+# ANDA Companion (Notula)
 
 A prototype for FDA DPM review project managers (RPMs). Select an ANDA number anywhere and a small card shows the goal date
 against the forecast, what needs attention, a WATCH line (weekends, federal holidays, passed goals), the PSG and RLD dates, and
@@ -29,7 +29,7 @@ itself, or on a managed FDA computer. Please read `VERIFICATION.md` for what has
 | `extension/` | The Edge extension source, unit tests, browser tests and the golden file the app wrote | Loading it unpacked in Edge (`extension/README.md`) |
 | `extension/tests/golden.json` | Cases written by the app's own code that the extension must reproduce exactly | Keeping the two implementations in agreement |
 | `mockup/windows-simulation.html` | A browser simulation of the whole experience (card, right-click, watch list, draft check, Settings, guided steps). Calls no model, contacts no server, installs nothing | Showing the idea on a managed computer |
-| `mockup/appearance-lab.html` | The 15 light looks side by side | Choosing a look |
+| `mockup/appearance-lab.html` | The 19 light looks side by side | Choosing a look |
 | `demo/` | `START-HERE.txt`, `DEMO.md`, a launcher and a sample memo for the demo build | Running the demo build on a machine IT has allowed |
 
 ## Run the checks

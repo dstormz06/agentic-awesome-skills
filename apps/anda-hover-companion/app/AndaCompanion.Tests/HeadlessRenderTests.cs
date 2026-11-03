@@ -25,8 +25,11 @@ public class TestApp : AndaCompanion.App
 
 public sealed class HeadlessFixture : IDisposable
 {
-    public HeadlessUnitTestSession Session { get; } = HeadlessUnitTestSession.StartNew(typeof(TestApp));
-    public void Dispose() => Session.Dispose();
+    // One Avalonia session for the whole test run. Starting and stopping a session per test class raced on Avalonia's
+    // static font manager ("fonts:SystemFonts") now and then, so the session is shared and ends with the process.
+    private static readonly Lazy<HeadlessUnitTestSession> Shared = new(() => HeadlessUnitTestSession.StartNew(typeof(TestApp)));
+    public HeadlessUnitTestSession Session => Shared.Value;
+    public void Dispose() { }
 }
 
 /// <summary>Opens the real windows in every appearance and inspects what actually rendered.</summary>
@@ -151,10 +154,10 @@ public class HeadlessRenderTests : IClassFixture<HeadlessFixture>
         }, CancellationToken.None);
 
         Assert.Equal(31, names.found.Count);
-        // fifteen appearances + four auto-hide choices + three consent models + three "late" choices + four holiday-lead choices
+        // nineteen appearances + four auto-hide choices + three consent models + three "late" choices + four holiday-lead choices
         // + four connection choices + five tones + four middle-click keys + two Outlook clouds + three Outlook message counts. (The four API-timeout choices sit inside the collapsed
         // "My API" expander, whose content is not part of the visual tree until it is opened.)
-        Assert.Equal(15 + 4 + 3 + 3 + 4 + 4 + 5 + 4 + 2 + 3, names.radios);
+        Assert.Equal(19 + 4 + 3 + 3 + 4 + 4 + 5 + 4 + 2 + 3, names.radios);
     }
 
     [Fact]

@@ -1,4 +1,4 @@
-# One-pager: pilot proposal for the ANDA Hover Companion
+# One-pager: pilot proposal for the ANDA Companion (Notula)
 
 *A template for the director ask. Please adapt the names and numbers to your division, and keep it to one page. All
 data in the prototype is fictional, and it is not an FDA product. Status as of 2026-11-03.*
@@ -16,7 +16,7 @@ generated. An optional AI-written brief is labelled "generated, verify before ac
 
 **Yours to adjust, with no rebuild.** Shortcuts, files, connection, writing style and look are all set in the app's
 Settings: your own keys; your Excel or CSV portfolio, notes folder and Drugs@FDA file; Offline, Claude (with its model
-name) or your own API described in a form; tone, sign-off and quick replies; fifteen looks. Settings can be backed up,
+name) or your own API described in a form; tone, sign-off and quick replies; nineteen looks. Settings can be backed up,
 restored and reset. A backup holds no secret and no file path.
 
 **Where it fits the work, and how each is measured** (hypotheses to confirm with the testers):

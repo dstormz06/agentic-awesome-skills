@@ -267,6 +267,7 @@ public partial class CardWindow : Window
             top = look.TopRuleHeight;
         }
         Body.Margin = new Thickness(look.StatusSpine ? 5 : 0, top, 0, 0);
+        ApplyLayout(a, look);
 
         // Chips
         foreach (var chip in new[] { CopyChip, SisterChip, NotesChip, OpenChip })
@@ -295,6 +296,98 @@ public partial class CardWindow : Window
         }
     }
 
+    // ---------------- card layouts (P–S): the same blocks, arranged differently ----------------
+
+    private TextBlock? _railDays, _railCaption;
+    private string _pctSuffix = "";
+
+    private static void Detach(Control c) { if (c.Parent is Panel p) p.Children.Remove(c); }
+
+    private TextBlock Cap(string text) => new() { Classes = { "lbl" }, Text = text };
+
+    private void ApplyLayout(Appearance a, Structure look)
+    {
+        var res = Application.Current!.Resources;
+        double h = look.SlotPadH, v = look.SlotPadV;
+        switch (look.Layout)
+        {
+            case CardLayout.Folder:
+            {
+                // The number sits on a bronze tab in the top-left corner; the corner itself is square.
+                double r = a.Radius;
+                Root.CornerRadius = new CornerRadius(0, r, r, r);
+                NumTab.Background = (IBrush)res["C.Accent"]!;
+                NumTab.Padding = new Thickness(14, 6);
+                NumTab.CornerRadius = new CornerRadius(0, 0, 12, 0);
+                NumText.Foreground = Brushes.White;
+                HeaderBand.Padding = new Thickness(0, 0, h, v + 2);
+                foreach (var t in new[] { DrugText, MetaText, FreshnessText })
+                    t.Margin = new Thickness(h, t.Margin.Top == 0 ? 0 : t.Margin.Top + (t == DrugText ? 4 : 0), 0, 0);
+                ToolsPanel.Margin = new Thickness(0, 4, 0, 0);
+                break;
+            }
+            case CardLayout.Rail:
+            {
+                // A tinted column on the left carries the days to goal; goal, forecast and the attention line read down the right.
+                int at = Slots.Children.IndexOf(ClockPanel);
+                Slots.Children.Remove(ClockPanel);
+                Slots.Children.Remove(AttentionSlot);
+                GoalDaysText.IsVisible = false;
+                Detach(ForecastDeltaText); Detach(ForecastConfText);
+                ForecastDeltaText.TextWrapping = TextWrapping.Wrap; ForecastConfText.TextWrapping = TextWrapping.Wrap;
+                ForecastConfText.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left;
+                ForecastConfText.Margin = new Thickness(0);
+                _railCaption = Cap("DAYS TO GOAL");
+                _railDays = new TextBlock { FontSize = 38, FontWeight = FontWeight.Bold, Foreground = (IBrush)res["C.Accent"]!, FontFamily = (FontFamily)res["C.NumFont"]!, LineHeight = 42 };
+                var left = new StackPanel { Spacing = 5, Margin = new Thickness(12, 14, 10, 12) };
+                left.Children.Add(_railDays); left.Children.Add(_railCaption); left.Children.Add(ForecastDeltaText); left.Children.Add(ForecastConfText);
+                var wash = new Border { Background = Br(look.RailWash!), BorderBrush = (IBrush)res["C.Line"]!, BorderThickness = new Thickness(0, 0, 1, 0), Child = left };
+                var right = new StackPanel();
+                right.Children.Add(ClockPanel); right.Children.Add(AttentionSlot);
+                var split = new Grid { ColumnDefinitions = new ColumnDefinitions("104,*") };
+                split.Children.Add(wash); Grid.SetColumn(right, 1); split.Children.Add(right);
+                Slots.Children.Insert(at, split);
+                break;
+            }
+            case CardLayout.Tag:
+            {
+                // An ID tag: a small slot with the tools beside it, a centred head, goal and forecast in two columns.
+                var slot = new Border { Width = 54, Height = 11, CornerRadius = new CornerRadius(99), BorderThickness = new Thickness(1.5), BorderBrush = (IBrush)res["C.Accent"]!, Background = (IBrush)res["C.Mark"]!, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center };
+                var top = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto,*"), Margin = new Thickness(0, -6, 0, 2) };
+                Detach(ToolsPanel);
+                ToolsPanel.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right;
+                Grid.SetColumn(slot, 1); top.Children.Add(slot);
+                Grid.SetColumn(ToolsPanel, 2); top.Children.Add(ToolsPanel);
+                HeaderPanel.Children.Insert(0, top);
+                HeaderGrid.ColumnDefinitions = new ColumnDefinitions("*,Auto,8,Auto,*");
+                Grid.SetColumn(NumTab, 1); Grid.SetColumn(Seal, 3);
+                foreach (var t in new[] { DrugText, MetaText, FreshnessText })
+                { t.TextAlignment = TextAlignment.Center; t.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center; }
+                NumText.FontSize = 18;
+
+                Detach(GoalText); Detach(GoalDaysText); Detach(ForecastText); Detach(ForecastDeltaText); Detach(PctText); Detach(ForecastConfText); Detach(Progress);
+                ClockPanel.Children.Clear();
+                TextBlock C(TextBlock t) { t.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center; t.TextAlignment = TextAlignment.Center; return t; }
+                var gl = Cap("GOAL"); gl.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center;
+                var fl = Cap("FORECAST"); fl.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center;
+                var gs = new StackPanel { Spacing = 2 }; gs.Children.Add(gl); gs.Children.Add(C(GoalText)); gs.Children.Add(C(GoalDaysText));
+                var fs = new StackPanel { Spacing = 2 }; fs.Children.Add(fl); fs.Children.Add(C(ForecastText)); fs.Children.Add(C(ForecastDeltaText));
+                var two = new Grid { ColumnDefinitions = new ColumnDefinitions("*,1,*") };
+                var rule = new Border { Background = (IBrush)res["C.Line"]!, Margin = new Thickness(0, 4) };
+                Grid.SetColumn(rule, 1); Grid.SetColumn(fs, 2);
+                two.Children.Add(gs); two.Children.Add(rule); two.Children.Add(fs);
+                Progress.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch; Progress.Margin = new Thickness(0, 12, 0, 4);
+                var foot = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto") };
+                ForecastConfText.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right; ForecastConfText.Margin = new Thickness(0);
+                Grid.SetColumn(PctText, 0); Grid.SetColumn(ForecastConfText, 1); foot.Children.Add(PctText); foot.Children.Add(ForecastConfText);
+                ClockPanel.Children.Add(two); ClockPanel.Children.Add(Progress); ClockPanel.Children.Add(foot);
+                _pctSuffix = " through review";
+                ChipsWrap.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center;
+                break;
+            }
+        }
+    }
+
     private void SetMiniVisibility()
     {
         AttentionSlot.IsVisible = !_mini && _record?.Attention is not null;
@@ -318,11 +411,17 @@ public partial class CardWindow : Window
         MetaText.Text = record.Meta;
         GoalText.Text = record.GoalDate;
         GoalDaysText.Text = record.GoalDays;
-        bool ring = ThemeManager.Current.Progress == ProgressVariant.Ring;
+        bool ring = ThemeManager.Current.Progress is ProgressVariant.Ring or ProgressVariant.Gauge;   // the value sits inside the shape
         bool timeline = ThemeManager.Current.Progress == ProgressVariant.Timeline && record.DaysToGoal is not null && record.ForecastDeltaDays is not null;
         // A sheet that has no progress or forecast shows nothing there, never an estimate.
         Progress.IsVisible = record.HasProgress || timeline;
-        PctText.Text = ring || !record.HasProgress ? "" : record.ProgressPct + "%";
+        PctText.Text = ring || !record.HasProgress ? "" : record.ProgressPct + "%" + _pctSuffix;
+        if (_railDays is not null)
+        {
+            int? days = record.DaysToGoal;
+            _railDays.Text = days is null ? "—" : Math.Abs(days.Value).ToString();
+            _railCaption!.Text = days is < 0 ? "DAYS PAST GOAL" : "DAYS TO GOAL";
+        }
         Progress.HorizontalAlignment = ring
             ? Avalonia.Layout.HorizontalAlignment.Right
             : Avalonia.Layout.HorizontalAlignment.Stretch;

@@ -34,15 +34,16 @@ public class AppearanceTests
     }
 
     [Fact]
-    public void There_are_fifteen_looks_and_K_is_the_default()
+    public void There_are_nineteen_looks_and_K_is_the_default()
     {
         Assert.Equal(new[]
             {
                 AppearanceId.A, AppearanceId.B, AppearanceId.C, AppearanceId.D, AppearanceId.E, AppearanceId.F, AppearanceId.G,
                 AppearanceId.H, AppearanceId.I, AppearanceId.J, AppearanceId.K, AppearanceId.L, AppearanceId.M, AppearanceId.N, AppearanceId.O,
+                AppearanceId.P, AppearanceId.Q, AppearanceId.R, AppearanceId.S,
             },
             Appearances.All.Select(a => a.Id));
-        Assert.Equal(11, Appearances.All.Count(a => !a.IsCompact));
+        Assert.Equal(15, Appearances.All.Count(a => !a.IsCompact));
         Assert.Equal(4, Appearances.All.Count(a => a.IsCompact));
         Assert.Equal(AppearanceId.K, Appearances.Default);
         Assert.Equal(AppearanceId.K, new AndaCompanion.Services.Settings().Appearance);
@@ -55,6 +56,7 @@ public class AppearanceTests
         // The settings file stores the enum as a number. A–E must keep 0–4 or an existing tester's choice would change.
         Assert.Equal(new[] { 0, 1, 2, 3, 4 }, new[] { AppearanceId.A, AppearanceId.B, AppearanceId.C, AppearanceId.D, AppearanceId.E }.Select(i => (int)i));
         Assert.Equal(AppearanceId.K, (AppearanceId)10);
+        Assert.Equal(new[] { 15, 16, 17, 18 }, new[] { AppearanceId.P, AppearanceId.Q, AppearanceId.R, AppearanceId.S }.Select(i => (int)i));
     }
 
     [Fact]
@@ -123,8 +125,8 @@ public class AppearanceTests
     [Fact]
     public void Each_full_look_family_has_its_own_progress_shape()
     {
-        // Nine distinct forms across the eleven full looks (A, F and G share the thin bar).
-        Assert.Equal(9, Appearances.All.Where(a => !a.IsCompact).Select(a => a.Progress).Distinct().Count());
+        // Ten distinct forms across the fifteen full looks (A, F, G and S share the thin bar; D and R share the solid bar; K and Q the line).
+        Assert.Equal(10, Appearances.All.Where(a => !a.IsCompact).Select(a => a.Progress).Distinct().Count());
         Assert.Equal(ProgressVariant.Line, Appearances.K.Progress);
         Assert.Equal(ProgressVariant.Timeline, Appearances.J.Progress);
     }

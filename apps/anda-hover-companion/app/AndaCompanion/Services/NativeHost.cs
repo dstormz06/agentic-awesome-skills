@@ -138,7 +138,7 @@ public sealed class NativeHostSession(NativeHostContext ctx)
 
     private JsonObject Hello() => new()
     {
-        ["ok"] = true, ["protocol"] = Protocol, ["app"] = "ANDA Hover Companion", ["version"] = Version,
+        ["ok"] = true, ["protocol"] = Protocol, ["app"] = "ANDA Companion (Notula)", ["version"] = Version,
         ["dataKind"] = ctx.DataKind, ["dataLabel"] = ctx.DataLabel, ["dataMessage"] = ctx.DataMessage,
         ["count"] = ctx.Repository.Numbers.Count,
     };

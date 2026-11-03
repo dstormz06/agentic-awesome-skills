@@ -1,4 +1,4 @@
-# ANDA Hover Companion — Windows app (v0)
+# ANDA Companion (Notula) — Windows app (v0)
 
 A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
 **All bundled data is fictional.** Not an FDA product; a concept prototype.
@@ -24,8 +24,8 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
 - **Tray app** — quiet icon, no notifications. Menu: lookup, demo cards, quick
   Appearance switch, **Settings…**, **Prompt library…**. All persisted to
   `%AppData%\AndaCompanion\settings.json`.
-- **Settings window** — Appearance (fifteen looks, **light-only by product decision**; **K ·
-  Graphite Quiet is the default**): eleven full cards (A–K) and four **compact boxes** (L–O),
+- **Settings window** — Appearance (nineteen looks, **light-only by product decision**; **K ·
+  Graphite Quiet is the default**): fifteen full cards (A–K and P–S, none with a pattern behind it) and four **compact boxes** (L–O),
   Auto-hide (Off / 10 / 20 / 40 s, default 10), Consent model (**Whisper invite is the default** for
   new installs; an install that already saved a choice keeps it), **urgent items** (in whisper mode an
   at-risk or late ANDA opens a peek by itself), the weekend/holiday window, **My data**,
@@ -216,7 +216,7 @@ screenshots, and the test results. Outcomes and their limits are recorded in `..
 
 ## Preview harness (no Windows box needed)
 
-Renders the real card in all eleven full looks, and the four compact boxes, to PNGs via Avalonia's headless platform:
+Renders the real card in all fifteen full looks, and the four compact boxes, to PNGs via Avalonia's headless platform:
 
 ```bash
 dotnet run --project AndaCompanion.Preview -- ./shots
@@ -252,7 +252,7 @@ AndaCompanion/
   UI/QuickRepliesWindow.* the person's own quick replies (templates filled from the card)
   UI/HotkeyCapture.cs   press-a-shortcut box used by the shortcut settings
   UI/WatchListWindow.*  the portfolio-wide watch list
-  UI/ProgressControls   bar / ticks / ring / hatch / capsule / line / dots / step / timeline + D's grid surface
+  UI/ProgressControls   bar / ticks / ring / solid / capsule / line / dots / step / timeline / gauge
   Services/             hotkeys (checked, rebindable), text capture + clipboard snapshot, settings, brief services,
                         Elsa placeholder (Elsa.cs + ElsaMapping.cs), BusinessCalendar + WatchRules,
                         UrgencyPolicy, DraftCheck, WritingActions, ReferenceData, UsageLog, WatchList,

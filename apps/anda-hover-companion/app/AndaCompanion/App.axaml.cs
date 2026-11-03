@@ -374,7 +374,7 @@ public partial class App : Application
         var tray = new TrayIcon
         {
             Icon = new WindowIcon(RenderTrayBitmap()),
-            ToolTipText = "ANDA Hover Companion (fictional demo data)",
+            ToolTipText = "ANDA Companion (Notula) · fictional demo data",
             Menu = menu,
         };
         tray.Clicked += (_, _) => OpenLookup();
@@ -439,7 +439,7 @@ public partial class App : Application
     private void UpdateTrayTip()
     {
         if (_tray is null) return;
-        _tray.ToolTipText = $"ANDA Hover Companion · {ConnectionStatus.Current.Label}";
+        _tray.ToolTipText = $"ANDA Companion (Notula) · {ConnectionStatus.Current.Label}";
     }
 
     /// <summary>Starts or stops the middle-click trigger to match Settings. The hook exists only while the setting is on.</summary>

@@ -3,7 +3,7 @@
         x:Class="AndaCompanion.UI.DraftWindow"
         SystemDecorations="None" TransparencyLevelHint="Transparent" Background="Transparent"
         SizeToContent="WidthAndHeight" CanResize="False" Topmost="True"
-        ShowInTaskbar="False" WindowStartupLocation="CenterScreen" Title="ANDA Companion — Check a draft">
+        ShowInTaskbar="False" WindowStartupLocation="CenterScreen" Title="ANDA Companion (Notula) — Check a draft">
 
   <Window.Styles>
     <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource C.Font}"/></Style>

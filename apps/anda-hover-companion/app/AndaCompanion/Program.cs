@@ -31,10 +31,10 @@ public static class Program
             // Double-clicking twice is the most common demo mistake, because the tray icon can sit
             // under the ^ overflow. Say so plainly instead of starting a second copy that fights for hotkeys.
             MessageBox(IntPtr.Zero,
-                "ANDA Hover Companion is already running.\n\n" +
+                "ANDA Companion (Notula) is already running.\n\n" +
                 "Look for its icon near the clock. Windows 11 may hide it under the ^ arrow; " +
                 "drag it onto the taskbar to keep it visible.\n\nPress Ctrl+Alt+Space to open the lookup box.",
-                "ANDA Hover Companion", 0x40 /* MB_ICONINFORMATION */);
+                "ANDA Companion (Notula)", 0x40 /* MB_ICONINFORMATION */);
             return 0;
         }
 
@@ -53,8 +53,8 @@ public static class Program
             }
             catch { /* nothing more we can do */ }
             if (OperatingSystem.IsWindows())
-                MessageBox(IntPtr.Zero, $"ANDA Hover Companion stopped unexpectedly.\n\n{ex.Message}\n\nDetails: {log}",
-                    "ANDA Hover Companion", 0x10 /* MB_ICONERROR */);
+                MessageBox(IntPtr.Zero, $"ANDA Companion (Notula) stopped unexpectedly.\n\n{ex.Message}\n\nDetails: {log}",
+                    "ANDA Companion (Notula)", 0x10 /* MB_ICONERROR */);
             return 1;
         }
     }

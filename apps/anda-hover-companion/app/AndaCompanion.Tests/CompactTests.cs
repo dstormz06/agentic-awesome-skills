@@ -268,13 +268,17 @@ public class CompactRenderTests : IClassFixture<HeadlessFixture>
     }
 
     [Fact]
-    public async Task F_fills_the_open_chip_and_tints_its_header_and_H_tints_its_band()
+    public async Task F_fills_the_open_chip_under_a_bronze_band_with_a_plain_header_and_H_tints_its_band()
     {
-        var f = await Inspect(AppearanceId.F, "216482", w => (w.FindControl<Button>("OpenChip")!.Classes.Contains("filled"), Colour(w.FindControl<Button>("OpenChip")!.Background), Colour(w.FindControl<Border>("HeaderBand")!.Background)));
+        var f = await Inspect(AppearanceId.F, "216482", w => (w.FindControl<Button>("OpenChip")!.Classes.Contains("filled"), Colour(w.FindControl<Button>("OpenChip")!.Background),
+            w.FindControl<Border>("HeaderBand")!.Background is null, w.FindControl<Border>("TopRule")!.IsVisible, w.FindControl<Border>("TopRule")!.Height, Colour(w.FindControl<Border>("TopRule")!.Background)));
         var h = await Inspect(AppearanceId.H, "216482", w => Colour(w.FindControl<Border>("HeaderBand")!.Background));
         Assert.True(f.Item1);
         Assert.Equal(Color.Parse("#7A5A2E"), f.Item2);
-        Assert.Equal(Color.Parse("#F8F2E6"), f.Item3);
+        Assert.True(f.Item3);                                           // no tint behind the header
+        Assert.True(f.Item4);
+        Assert.Equal(5, f.Item5);                                       // a solid 5 px bronze band across the top
+        Assert.Equal(Color.Parse("#7A5A2E"), f.Item6);
         Assert.Equal(Color.Parse("#EEF4F0"), h);
     }
 

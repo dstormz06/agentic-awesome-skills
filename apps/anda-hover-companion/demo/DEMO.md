@@ -1,4 +1,4 @@
-# Live demo guide: ANDA Hover Companion
+# Live demo guide: ANDA Companion (Notula)
 
 Fictional data only. A concept prototype, not an FDA product. About five minutes.
 
@@ -41,7 +41,7 @@ desktop, and says so on screen. The shortcut, clipboard and file pickers are sim
 | 1:50 | Click **Copy status** and paste it into the memo. | "The sentence I retype a dozen times a week, in one click." |
 | 2:15 | Select **NDA 021234** and press Ctrl+Alt+A. | "The same six digits but a different application type. It declines to guess and opens the lookup box. A wrong card is worse than none." |
 | 2:45 | Copy any text, open a card, then paste. | "It read my selection by copying it, then put my clipboard back exactly as it was." |
-| 3:15 | Tray, then Settings. Pick **L · Graphite Strip**, select a number and press Ctrl+Alt+A. Click the strip to open the full card. Switch back to **K**. | "Fifteen looks. The small boxes stay out of the way of an open email, make no AI call and never take the keyboard. A card hides itself after 10 seconds idle, but never while I am reading it." |
+| 3:15 | Tray, then Settings. Pick **L · Graphite Strip**, select a number and press Ctrl+Alt+A. Click the strip to open the full card. Switch back to **K**. | "Nineteen looks. The small boxes stay out of the way of an open email, make no AI call and never take the keyboard. A card hides itself after 10 seconds idle, but never while I am reading it." |
 | 3:45 | Select the draft reply in the memo and press **Ctrl+Alt+D**. | "It checks my draft against the record, with no AI: a wrong goal date, 'on track' against a late forecast, a number it does not know. It says what it checked and what it did not." (The memo has a draft with three deliberate mistakes.) |
 | 4:00 | Tray, then **Watch list**. | "Every ANDA in my data with something worth a look, worst first. Nothing runs in the background." |
 | 4:10 | Settings: use the **Go to** list to show Shortcuts, Connection, Outlook and Back up. | "Everything I might want to change is here, with no rebuild: my own keys, my files, my API or model name, my writing style, and a backup I can move to another PC." |

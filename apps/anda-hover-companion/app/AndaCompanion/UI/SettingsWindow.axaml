@@ -3,7 +3,7 @@
         x:Class="AndaCompanion.UI.SettingsWindow"
         SystemDecorations="None" TransparencyLevelHint="Transparent" Background="Transparent"
         SizeToContent="WidthAndHeight" CanResize="False" Topmost="True"
-        ShowInTaskbar="False" WindowStartupLocation="CenterScreen" Title="ANDA Companion — Settings">
+        ShowInTaskbar="False" WindowStartupLocation="CenterScreen" Title="ANDA Companion (Notula) — Settings">
 
   <Window.Styles>
     <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource C.Font}"/></Style>
@@ -218,7 +218,7 @@
             <Button Name="ExtConnect" Classes="primary" Content="Connect"/>
             <Button Name="ExtDisconnect" Content="Disconnect"/>
           </StackPanel>
-          <TextBlock Classes="hint" Text="Lets the ANDA Hover Companion extension in Edge read your data through this app, so both show the same facts. Current user only, no admin rights, and only the extension ID above can use it. The extension also works without this app."/>
+          <TextBlock Classes="hint" Text="Lets the ANDA Companion (Notula) extension in Edge read your data through this app, so both show the same facts. Current user only, no admin rights, and only the extension ID above can use it. The extension also works without this app."/>
         </StackPanel>
 
         <StackPanel Spacing="6">

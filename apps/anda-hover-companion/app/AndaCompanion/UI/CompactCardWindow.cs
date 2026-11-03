@@ -38,14 +38,14 @@ public static class CompactText
     }
 }
 
-/// <summary>A dashed vertical rule that takes the height of its row (a stretched Line would force a height of its own).</summary>
-internal sealed class Perforation : Control
+/// <summary>A plain vertical rule that takes the height of its row (a stretched Line would force a height of its own).</summary>
+internal sealed class StubRule : Control
 {
     protected override Size MeasureOverride(Size availableSize) => new(1, 0);
 
     public override void Render(DrawingContext context)
     {
-        var pen = new Pen((IBrush)Application.Current!.Resources["C.Ink3"]!, 1) { DashStyle = new DashStyle(new double[] { 2, 3 }, 0) };
+        var pen = new Pen((IBrush)Application.Current!.Resources["C.Line"]!, 1);
         context.DrawLine(pen, new Point(0.5, 0), new Point(0.5, Bounds.Height));
     }
 }
@@ -318,7 +318,7 @@ public sealed class CompactCardWindow : Window
             stub.Children.Add(warn);
         }
 
-        var perforation = new Perforation { Margin = new Thickness(0, 6) };
+        var stubRule = new StubRule { Margin = new Thickness(0, 6) };
 
         var close = CloseButton();
         close.HorizontalAlignment = HorizontalAlignment.Right;
@@ -336,8 +336,8 @@ public sealed class CompactCardWindow : Window
 
         var row = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,1,Auto") };
         row.Children.Add(stub);
-        Grid.SetColumn(perforation, 1);
-        row.Children.Add(perforation);
+        Grid.SetColumn(stubRule, 1);
+        row.Children.Add(stubRule);
         var mainHost = new Panel { Children = { main, close } };
         Grid.SetColumn(mainHost, 2);
         row.Children.Add(mainHost);

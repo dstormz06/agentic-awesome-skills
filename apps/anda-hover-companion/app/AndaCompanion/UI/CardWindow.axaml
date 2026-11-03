@@ -69,7 +69,6 @@
             BorderBrush="{DynamicResource C.Line}" BorderThickness="1"
             BoxShadow="0 18 42 -10 #59000000" ClipToBounds="True">
       <Panel>
-        <ui:GridSurface/>
         <!-- Structural signatures (set from the appearance in code): status spine (G), top rule (I, J). -->
         <Border Name="Spine" Width="5" HorizontalAlignment="Left" IsVisible="False" ZIndex="2"/>
         <Border Name="TopRule" VerticalAlignment="Top" IsVisible="False" ZIndex="2"/>
@@ -80,16 +79,18 @@
           <!-- identity -->
           <Border Name="HeaderBand" Padding="16,14,16,12">
           <StackPanel Name="HeaderPanel">
-            <Grid ColumnDefinitions="Auto,8,Auto,*,Auto">
-              <TextBlock Name="NumText" FontSize="15" FontWeight="Bold"
-                         FontFamily="{DynamicResource C.NumFont}" Foreground="{DynamicResource C.Ink}"
-                         VerticalAlignment="Center" Text="ANDA 216482"/>
+            <Grid Name="HeaderGrid" ColumnDefinitions="Auto,8,Auto,*,Auto">
+              <Border Name="NumTab" VerticalAlignment="Center">
+                <TextBlock Name="NumText" FontSize="15" FontWeight="Bold"
+                           FontFamily="{DynamicResource C.NumFont}" Foreground="{DynamicResource C.Ink}"
+                           VerticalAlignment="Center" Text="ANDA 216482"/>
+              </Border>
               <Border Name="Seal" Grid.Column="2" Background="{DynamicResource C.GoodBg}"
                       CornerRadius="99" Padding="8,3" VerticalAlignment="Center">
                 <TextBlock Name="SealText" FontSize="10" FontWeight="Bold" LetterSpacing="0.8"
                            Foreground="{DynamicResource C.Good}" Text="✓ VERIFIED"/>
               </Border>
-              <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="2">
+              <StackPanel Name="ToolsPanel" Grid.Column="4" Orientation="Horizontal" Spacing="2">
                 <Button Name="PinBtn" Classes="tool" ToolTip.Tip="Pin (Space)" AutomationProperties.Name="Pin card">
                   <Path Data="M9.5 2.5l4 4-2.2.55a2 2 0 0 0-1.25 1.25L9.5 10.5 5.5 6.5l2.2-.55A2 2 0 0 0 8.95 4.7z M5.5 10.5L2.5 13.5" Width="16" Height="16" Fill="{x:Null}"/>
                 </Button>
@@ -112,7 +113,7 @@
 
           <!-- clock: goal + progress + forecast (the headline) -->
           <StackPanel Name="ClockPanel" Margin="16,11,16,12">
-            <Grid Margin="0,0,0,7">
+            <Grid Name="GoalRow" Margin="0,0,0,7">
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" SharedSizeGroup="LabelRail"/>
                 <ColumnDefinition Width="9"/>
@@ -130,7 +131,7 @@
             </Grid>
             <ui:ProgressControl Name="Progress" HorizontalAlignment="Stretch"/>
             <Border Name="ForecastSep" Height="1" Background="{DynamicResource C.Hair}" Margin="0,9,0,0"/>
-            <Grid Margin="0,8,0,0">
+            <Grid Name="ForecastRow" Margin="0,8,0,0">
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" SharedSizeGroup="LabelRail"/>
                 <ColumnDefinition Width="9"/>

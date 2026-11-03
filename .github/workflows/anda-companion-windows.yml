@@ -1,6 +1,6 @@
 name: ANDA Companion (Windows)
 
-# Builds, tests and packages the ANDA Hover Companion on a real Windows machine, then runs the app's
+# Builds, tests and packages the ANDA Companion (Notula) on a real Windows machine, then runs the app's
 # own --selftest there. This workflow is the "Windows box": it is how hotkeys, the clipboard, the tray
 # icon, Segoe UI rendering and on-screen placement get verified without a local Windows computer.
 # All bundled data is fictional; this is a concept prototype, not an FDA product.

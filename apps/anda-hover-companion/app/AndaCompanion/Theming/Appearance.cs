@@ -3,13 +3,17 @@ using Avalonia.Media;
 namespace AndaCompanion.Theming;
 
 /// <summary>
-/// Fifteen looks. A–K are the full card (K is the product default); L–O are the compact forms, which
+/// Nineteen looks. A–K and P–S are full cards (K is the product default); L–O are the compact forms, which
 /// borrow a sibling's palette and expand into that sibling's full card. Saved settings store the numeric
-/// value, so new members are only ever appended.
+/// value, so new members are only ever appended. No look draws a pattern, texture or grid behind its content.
 /// </summary>
-public enum AppearanceId { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O }
+public enum AppearanceId { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S }
 
-public enum ProgressVariant { Bar, Ticks, Ring, Hatch, Capsule, Line, Dots, Step, Timeline }
+public enum ProgressVariant { Bar, Ticks, Ring, Solid, Capsule, Line, Dots, Step, Timeline, Gauge }
+
+/// <summary>How the card's blocks are arranged. Standard is the common anatomy; the others rearrange the same
+/// blocks (the facts and their order of importance never change).</summary>
+public enum CardLayout { Standard, Gauge, Folder, Rail, Tag }
 
 /// <summary>Full = the regular quick-look card. The rest are the compact boxes (see CompactCardWindow).</summary>
 public enum CardForm { Full, Strip, Tile, Ticket, Badge }
@@ -44,6 +48,8 @@ public sealed record Structure
     public double SlotPadV { get; init; } = 10;
     public double SlotPadH { get; init; } = 16;
     public double DateSize { get; init; } = 13.5;
+    public CardLayout Layout { get; init; } = CardLayout.Standard;
+    public string? RailWash { get; init; }              // Rail: the tinted column that carries the days
 }
 
 /// <summary>
@@ -54,7 +60,7 @@ public sealed record Structure
 public sealed record Palette(
     string Bg, string Ink, string Ink2, string Ink3, string Hair, string Line,
     string Accent, string Accent2, string Good, string GoodBg, string Warn, string WarnBg,
-    string Bad, string BadBg, string Track, string Fill, string Mark, string? Grid = null);
+    string Bad, string BadBg, string Track, string Fill, string Mark);
 
 /// <summary>
 /// An appearance = palette + structural signature. Appearance is preference,
@@ -117,11 +123,11 @@ public static class Appearances
 
     public static readonly Appearance D = new(
         AppearanceId.D, "D · Draft",
-        "Engineer's drawing — federal navy ink (USWDS) on white, graph grid, drafting mono, hatched progress.",
+        "Engineer's drawing — federal navy ink (USWDS) on plain white paper, drafting mono, square corners, a solid progress bar.",
         new("#FFFFFF", "#14181D", "#4E5560", "#6F757F", "#E3E7EC", "#C9CFD8",
             "#1A4480", "#162E51", "#106B3C", "#E5F2EA", "#8A5800", "#FAF1DC",
-            "#A03030", "#F8E9E9", "#E6E9EE", "#1A4480", "#1A1A4480", Grid: "#0D1A4480"),
-        Radius: 4, Progress: ProgressVariant.Hatch,
+            "#A03030", "#F8E9E9", "#E6E9EE", "#1A4480", "#1A1A4480"),
+        Radius: 4, Progress: ProgressVariant.Solid,
         BodyFont: Sans, NumFont: Mono, DrugFont: Sans,
         DrugItalic: false, StampSeal: true, MonoLabels: true);
 
@@ -137,7 +143,7 @@ public static class Appearances
 
     public static readonly Appearance F = new(
         AppearanceId.F, "F · Agency Bronze",
-        "Warm greige and bronze, a tinted header and filled tag chips — the familiar agency-tool feel.",
+        "Warm greige and bronze, a solid bronze band across the top and filled tag chips — the familiar agency-tool feel.",
         new("#FFFFFF", "#25201A", "#584F43", "#6B6153", "#EEE9DF", "#E0D8C9",
             "#7A5A2E", "#5D4620", "#1F6B43", "#E6F2EA", "#8F4A00", "#FDEEDB",
             "#A33636", "#F9E9E9", "#E9E2D3", "#9C7539", "#1A7A5A2E"),
@@ -147,7 +153,7 @@ public static class Appearances
     {
         Look = new()
         {
-            HeaderTint = "#F8F2E6",
+            TopRule = "#7A5A2E", TopRuleHeight = 5,
             Seal = SealStyle.Tinted, SealFill = "#F1E7D6", SealInk = "#5D4620",
             Attention = AttentionShape.Pill,
             Chips = ChipStyle.Tint, ChipFill = "#F6F0E4", ChipLine = "#E6DCC7", ChipInk = "#5D4620",
@@ -226,6 +232,67 @@ public static class Appearances
         },
     };
 
+    // ---- Four more Bronze looks (P–S): same palette family as F, each with its own shape. ----
+
+    private static readonly Palette Bronze = new("#FFFFFF", "#25201A", "#584F43", "#6B6153", "#EEE9DF", "#E0D8C9",
+        "#7A5A2E", "#5D4620", "#1F6B43", "#E6F2EA", "#8F4A00", "#FDEEDB",
+        "#A33636", "#F9E9E9", "#E9E2D3", "#9C7539", "#1A7A5A2E");
+
+    public static readonly Appearance P = new(
+        AppearanceId.P, "P · Bronze Gauge",
+        "A half dial carries the progress. Soft round corners and pill-shaped warnings on the bronze palette.",
+        Bronze, Radius: 18, Progress: ProgressVariant.Gauge,
+        BodyFont: Sans, NumFont: Sans, DrugFont: Sans,
+        DrugItalic: false, StampSeal: false, MonoLabels: false)
+    {
+        Look = new()
+        {
+            HeaderTint = "#F8F2E6", Layout = CardLayout.Gauge,
+            Seal = SealStyle.Tinted, SealFill = "#F1E7D6", SealInk = "#5D4620",
+            Attention = AttentionShape.Pill,
+            Chips = ChipStyle.Tint, ChipFill = "#FBF7EE", ChipLine = "#D9CDB4", ChipInk = "#5D4620",
+        },
+    };
+
+    public static readonly Appearance Q = new(
+        AppearanceId.Q, "Q · Bronze Folder",
+        "A case-file folder: the number on a bronze tab, a plain edge and a thin line for progress.",
+        Bronze with { Bg = "#FBF8F1", Hair = "#ECE5D6" }, Radius: 14, Progress: ProgressVariant.Line,
+        BodyFont: Sans, NumFont: Sans, DrugFont: Sans,
+        DrugItalic: false, StampSeal: true, MonoLabels: false)
+    {
+        Look = new() { Layout = CardLayout.Folder, Chips = ChipStyle.Underline },
+    };
+
+    public static readonly Appearance R = new(
+        AppearanceId.R, "R · Bronze Rail",
+        "A tinted column carries the days to goal in large figures; the detail reads down the right. Squarer corners.",
+        Bronze, Radius: 6, Progress: ProgressVariant.Solid,
+        BodyFont: Sans, NumFont: Sans, DrugFont: Sans,
+        DrugItalic: false, StampSeal: false, MonoLabels: false)
+    {
+        Look = new()
+        {
+            Layout = CardLayout.Rail, RailWash = "#F6EFE2",
+            Seal = SealStyle.Tinted, SealFill = "#F1E7D6", SealInk = "#5D4620",
+        },
+    };
+
+    public static readonly Appearance S = new(
+        AppearanceId.S, "S · Bronze Tag",
+        "An ID tag: a centred head, goal and forecast in two columns, and a plain bar for progress.",
+        Bronze, Radius: 18, Progress: ProgressVariant.Bar,
+        BodyFont: Sans, NumFont: Sans, DrugFont: Sans,
+        DrugItalic: false, StampSeal: false, MonoLabels: false)
+    {
+        Look = new()
+        {
+            Layout = CardLayout.Tag, DateSize = 15,
+            Seal = SealStyle.Tinted, SealFill = "#F1E7D6", SealInk = "#5D4620",
+            Chips = ChipStyle.Tint, ChipFill = "#F6EFE2", ChipLine = "#E6DCC7", ChipInk = "#5D4620",
+        },
+    };
+
     // ---- Compact forms: small boxes that stay out of the way of an open email. They borrow a sibling's
     // palette, make no AI call, and expand into that sibling's full card on click (or the E key). ----
 
@@ -246,7 +313,7 @@ public static class Appearances
     public static readonly Appearance N = F with
     {
         Id = AppearanceId.N, Name = "N · Bronze Ticket",
-        Tagline = "A slim ticket with a perforated stub: number left, forecast right. About 300 × 64–68 px. Agency Bronze palette.",
+        Tagline = "A slim ticket with a stub: number left, forecast right. About 300 × 64–68 px. Agency Bronze palette.",
         Form = CardForm.Ticket, ExpandsAs = AppearanceId.F,
     };
 
@@ -257,7 +324,7 @@ public static class Appearances
         Form = CardForm.Badge, ExpandsAs = AppearanceId.G,
     };
 
-    public static readonly IReadOnlyList<Appearance> All = new[] { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O };
+    public static readonly IReadOnlyList<Appearance> All = new[] { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S };
 
     /// <summary>The product default, by direction of the product owner (replaced A on 2026-11-02).</summary>
     public static readonly AppearanceId Default = AppearanceId.K;

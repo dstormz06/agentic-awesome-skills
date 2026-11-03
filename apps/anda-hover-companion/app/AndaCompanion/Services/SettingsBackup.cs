@@ -17,7 +17,7 @@ public static class SettingsBackup
     public sealed class Backup
     {
         public int Version { get; set; }
-        public string App { get; set; } = "ANDA Hover Companion";
+        public string App { get; set; } = "ANDA Companion (Notula)";
         public DateTime SavedAt { get; set; }
         public Settings Settings { get; set; } = new();
         public List<LensPrompt> Lenses { get; set; } = new();

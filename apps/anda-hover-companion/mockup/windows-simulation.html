@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light">
 <meta name="claude:viewport-fit-sides" content="cover">
-<title>ANDA Companion Desktop Simulation</title>
+<title>ANDA Companion (Notula) simulation</title>
 <style>
 /* Layout: a light desktop stage. Floating windows on wide screens; the same windows stack in one column on phones.
    One look only: the product is light-only by decision, so every color below is set explicitly (no dark variants). */
@@ -22,7 +22,7 @@
   --op:100%;
 }
 
-/* ---- card tokens: eleven light full-card looks (K is the product default); L–O are compact boxes that borrow a sibling's tokens ---- */
+/* ---- card tokens: fifteen light full-card looks (K is the product default); L–O are compact boxes that borrow a sibling's tokens ---- */
 :root[data-dir="a"]{
   --c-bg:#ffffff; --c-ink:#1a1d21; --c-ink2:#5c6370; --c-ink3:#70757c;
   --c-hair:#eceae6; --c-line:#e2e0db; --c-accent:#3d6fa5; --c-accent2:#2d5a8c;
@@ -62,8 +62,7 @@
   --c-bad:#a03030; --c-bad-bg:#f8e9e9; --c-track:#e6e9ee; --c-fill:#1a4480;
   --c-mark:rgba(26,68,128,.10); --c-radius:4px;
   --c-shadow:0 16px 32px -12px rgba(18,30,52,.20),0 2px 4px rgba(18,30,52,.08);
-  --c-grid:rgba(26,68,128,.05);
-  --c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;
+    --c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;
   --c-drug-font:var(--c-font);
   --c-num-font:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace;
 }
@@ -79,6 +78,10 @@
 }
 
 :root[data-dir="f"]{--c-bg:#fff;--c-ink:#25201a;--c-ink2:#584f43;--c-ink3:#6b6153;--c-hair:#eee9df;--c-line:#e0d8c9;--c-accent:#7a5a2e;--c-accent2:#5d4620;--c-good:#1f6b43;--c-good-bg:#e6f2ea;--c-warn:#8f4a00;--c-warn-bg:#fdeedb;--c-bad:#a33636;--c-bad-bg:#f9e9e9;--c-track:#e9e2d3;--c-fill:#9c7539;--c-mark:rgba(122,90,46,.10);--c-radius:12px;--c-shadow:0 24px 48px -12px rgba(58,44,24,.24),0 4px 12px rgba(58,44,24,.07);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
+:root[data-dir="p"]{--c-bg:#fff;--c-ink:#25201a;--c-ink2:#584f43;--c-ink3:#6b6153;--c-hair:#eee9df;--c-line:#e0d8c9;--c-accent:#7a5a2e;--c-accent2:#5d4620;--c-good:#1f6b43;--c-good-bg:#e6f2ea;--c-warn:#8f4a00;--c-warn-bg:#fdeedb;--c-bad:#a33636;--c-bad-bg:#f9e9e9;--c-track:#e9e2d3;--c-fill:#9c7539;--c-mark:rgba(122,90,46,.10);--c-radius:18px;--c-shadow:0 24px 48px -12px rgba(58,44,24,.24),0 4px 12px rgba(58,44,24,.07);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
+:root[data-dir="q"]{--c-bg:#fbf8f1;--c-ink:#25201a;--c-ink2:#584f43;--c-ink3:#6b6153;--c-hair:#ece5d6;--c-line:#e0d8c9;--c-accent:#7a5a2e;--c-accent2:#5d4620;--c-good:#1f6b43;--c-good-bg:#e6f2ea;--c-warn:#8f4a00;--c-warn-bg:#fdeedb;--c-bad:#a33636;--c-bad-bg:#f9e9e9;--c-track:#e9e2d3;--c-fill:#9c7539;--c-mark:rgba(122,90,46,.10);--c-radius:14px;--c-shadow:0 24px 48px -12px rgba(58,44,24,.24),0 4px 12px rgba(58,44,24,.07);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
+:root[data-dir="r"]{--c-bg:#fff;--c-ink:#25201a;--c-ink2:#584f43;--c-ink3:#6b6153;--c-hair:#eee9df;--c-line:#e0d8c9;--c-accent:#7a5a2e;--c-accent2:#5d4620;--c-good:#1f6b43;--c-good-bg:#e6f2ea;--c-warn:#8f4a00;--c-warn-bg:#fdeedb;--c-bad:#a33636;--c-bad-bg:#f9e9e9;--c-track:#e9e2d3;--c-fill:#9c7539;--c-mark:rgba(122,90,46,.10);--c-radius:6px;--c-shadow:0 24px 48px -12px rgba(58,44,24,.24),0 4px 12px rgba(58,44,24,.07);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
+:root[data-dir="s"]{--c-bg:#fff;--c-ink:#25201a;--c-ink2:#584f43;--c-ink3:#6b6153;--c-hair:#eee9df;--c-line:#e0d8c9;--c-accent:#7a5a2e;--c-accent2:#5d4620;--c-good:#1f6b43;--c-good-bg:#e6f2ea;--c-warn:#8f4a00;--c-warn-bg:#fdeedb;--c-bad:#a33636;--c-bad-bg:#f9e9e9;--c-track:#e9e2d3;--c-fill:#9c7539;--c-mark:rgba(122,90,46,.10);--c-radius:18px;--c-shadow:0 24px 48px -12px rgba(58,44,24,.24),0 4px 12px rgba(58,44,24,.07);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
 :root[data-dir="g"]{--c-bg:#fcfefe;--c-ink:#12262b;--c-ink2:#42606a;--c-ink3:#557078;--c-hair:#e3eeee;--c-line:#cfe0e1;--c-accent:#0b6e73;--c-accent2:#08565a;--c-good:#1b7a4b;--c-good-bg:#e2f2ea;--c-warn:#8a5800;--c-warn-bg:#fbf1db;--c-bad:#a33636;--c-bad-bg:#f9e9e9;--c-track:#dceaeb;--c-fill:#288a8f;--c-mark:rgba(11,110,115,.10);--c-radius:10px;--c-shadow:0 20px 40px -12px rgba(10,50,56,.22),0 3px 10px rgba(10,50,56,.07);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace}
 :root[data-dir="h"]{--c-bg:#fbfcfa;--c-ink:#1f2a24;--c-ink2:#4a5a50;--c-ink3:#5b6b61;--c-hair:#e6ede7;--c-line:#d3ded6;--c-accent:#3a6653;--c-accent2:#2d5142;--c-good:#246a45;--c-good-bg:#e1f0e6;--c-warn:#8a5800;--c-warn-bg:#faf0d9;--c-bad:#a33636;--c-bad-bg:#f9e9e9;--c-track:#e1e9e3;--c-fill:#578a71;--c-mark:rgba(58,102,83,.10);--c-radius:20px;--c-shadow:0 26px 50px -14px rgba(30,60,44,.20),0 4px 10px rgba(30,60,44,.06);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
 :root[data-dir="i"]{--c-bg:#fdfcfb;--c-ink:#1d1c26;--c-ink2:#4d4b5e;--c-ink3:#5f5d72;--c-hair:#e9e7ef;--c-line:#d8d5e3;--c-accent:#3b3f8c;--c-accent2:#2d3070;--c-good:#23694a;--c-good-bg:#e4f1ea;--c-warn:#8a5200;--c-warn-bg:#f8eed9;--c-bad:#a33636;--c-bad-bg:#f9e9e9;--c-track:#e4e2ee;--c-fill:#5a5fb0;--c-mark:rgba(59,63,140,.10);--c-radius:3px;--c-shadow:0 18px 34px -12px rgba(30,28,70,.22),0 3px 6px rgba(30,28,70,.07);--c-font:"Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:Georgia,Cambria,"Times New Roman",serif;--c-num-font:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace}
@@ -355,10 +358,8 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 .p-ringwrap .rv{position:absolute;inset:0;display:grid;place-items:center;font-size:11.5px;font-weight:700;font-family:var(--c-num-font)}
 :root[data-dir="b"] .p-bar{display:none}:root[data-dir="b"] .p-ticks{display:flex}
 :root[data-dir="c"] .p-bar{display:none}:root[data-dir="c"] .p-ringwrap{display:block}:root[data-dir="c"] .cpct{display:none}
-:root[data-dir="d"] #card{background-color:color-mix(in srgb,var(--c-bg) var(--op),transparent);
-  background-image:linear-gradient(var(--c-grid) 1px,transparent 1px),linear-gradient(90deg,var(--c-grid) 1px,transparent 1px);background-size:14px 14px}
-:root[data-dir="d"] .p-bar{height:6px;border-radius:0;outline:1px solid var(--c-line)}
-:root[data-dir="d"] .p-bar i{border-radius:0;background:repeating-linear-gradient(45deg,var(--c-fill) 0 3px,transparent 3px 6px);box-shadow:inset 0 0 0 1px var(--c-fill)}
+:root[data-dir="d"] .p-bar{height:6px;border-radius:0}
+:root[data-dir="d"] .p-bar i{border-radius:0}
 :root[data-dir="e"] .p-bar{height:8px;border-radius:99px}
 :root[data-dir="e"] .p-bar i{border-radius:99px;background:linear-gradient(90deg,var(--c-accent),var(--c-fill))}
 :root[data-dir="e"] .attn{border-radius:14px}
@@ -389,13 +390,13 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 #ext summary::before{content:"›";color:var(--c-ink3);transition:transform .12s;font-size:14px}
 #ext details[open] summary::before{transform:rotate(90deg)}
 #ext .cnt{padding:0 16px 12px;font-size:12.5px;color:var(--c-ink2)}
-.rowi{display:flex;gap:8px;padding:6px 0;border-top:1px dashed var(--c-hair);align-items:baseline}
+.rowi{display:flex;gap:8px;padding:6px 0;border-top:1px solid var(--c-hair);align-items:baseline}
 .rowi:first-child{border-top:none}
 .rowi .due{margin-left:auto;white-space:nowrap;font-size:11.5px;color:var(--c-ink3)}
 .rowi .due.warn{color:var(--c-warn);font-weight:650}
-.notei{padding:7px 0;border-top:1px dashed var(--c-hair)}.notei:first-child{border-top:none}
+.notei{padding:7px 0;border-top:1px solid var(--c-hair)}.notei:first-child{border-top:none}
 .notei .who{font-size:11px;color:var(--c-ink3);margin-bottom:1px}
-.sister{color:var(--c-accent);cursor:pointer;border-bottom:1.5px dotted var(--c-accent)}
+.sister{color:var(--c-accent);cursor:pointer;border-bottom:1.5px solid var(--c-accent)}
 .chips{display:flex;gap:7px;flex-wrap:wrap}
 .chip{font-size:12px;padding:8px 13px;border-radius:99px;min-height:36px;border:1px solid var(--c-line);background:none;color:var(--c-ink2);font-family:inherit}
 .chip:hover{color:var(--c-ink);border-color:var(--c-ink3)}
@@ -434,8 +435,56 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 :root[data-dir="h"] .p-bar,:root[data-dir="i"] .p-bar,:root[data-dir="j"] .p-bar,:root[data-dir="k"] .p-bar{display:none}
 :root[data-dir="h"] .p-dots{display:flex}:root[data-dir="i"] .p-step{display:flex}:root[data-dir="j"] .p-time{display:block}:root[data-dir="k"] .p-line{display:block}
 
+/* ---- P · Bronze Gauge, Q · Bronze Folder, R · Bronze Rail, S · Bronze Tag: no pattern, no texture ---- */
+.clockwrap{display:contents}
+.clockwrap>.slot.clock{border-top:1px solid var(--c-hair)}
+.railcol{display:none}
+.p-gauge{display:none;position:relative;width:112px;height:62px;margin:0 0 6px auto}
+.p-gauge svg{width:112px;height:62px;display:block}
+.p-gauge .tr{fill:none;stroke:var(--c-track);stroke-width:9;stroke-linecap:round}
+.p-gauge .fg{fill:none;stroke:var(--c-fill);stroke-width:9;stroke-linecap:round}
+.p-gauge span{position:absolute;left:0;right:0;bottom:1px;text-align:center;font-size:16px;font-weight:700;font-variant-numeric:tabular-nums}
+:root[data-dir="p"] .p-bar,:root[data-dir="p"] .cpct{display:none}:root[data-dir="p"] .p-gauge{display:block}
+:root[data-dir="p"] .hd{background:#f8f2e6}
+:root[data-dir="p"] .seal,:root[data-dir="q"] .seal,:root[data-dir="r"] .seal,:root[data-dir="s"] .seal{background:#f1e7d6;color:#5d4620}
+:root[data-dir="p"] .attn{border-radius:99px;padding:8px 14px}
+:root[data-dir="p"] .chip,:root[data-dir="s"] .chip{background:#fbf7ee;border-color:#d9cdb4;color:#5d4620}
+:root[data-dir="q"] #card{border-top-left-radius:0}
+:root[data-dir="q"] .idrow .num{background:var(--c-accent);color:#fff;padding:6px 14px;margin:-14px 0 -6px -16px;border-radius:0 0 12px 0;font-size:15px}
+:root[data-dir="q"] .seal{background:transparent;border:1.5px solid var(--c-good);border-radius:4px;color:var(--c-good)}
+:root[data-dir="q"] .p-bar{display:none}:root[data-dir="q"] .p-line{display:block}
+:root[data-dir="q"] .chip{border:none;border-bottom:1px solid var(--c-line);border-radius:0;padding:6px 2px;min-height:36px}
+:root[data-dir="r"] .clockwrap{display:grid;grid-template-columns:104px 1fr}
+:root[data-dir="r"] .railcol{display:flex;flex-direction:column;gap:5px;grid-row:1/3;background:#f6efe2;border-right:1px solid var(--c-line);padding:14px 10px 12px 12px}
+:root[data-dir="r"] .railcol b{font-size:38px;line-height:1;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--c-accent)}
+:root[data-dir="r"] .railcol .cap{font-size:9.5px;font-weight:800;letter-spacing:.12em;color:var(--c-ink3)}
+:root[data-dir="r"] .railcol .rdelta{font-size:11.5px;font-weight:700;color:var(--c-warn)}
+:root[data-dir="r"] .railcol .rdelta.good{color:var(--c-good)}
+:root[data-dir="r"] .railcol .rconf{font-size:10.5px;color:var(--c-ink3)}
+:root[data-dir="r"] .clockwrap>.slot.clock{grid-column:2;border-top:1px solid var(--c-hair)}
+:root[data-dir="r"] .clockwrap>.attn-slot{grid-column:2}
+:root[data-dir="r"] .clock .cdays,:root[data-dir="r"] .clock .fdelta,:root[data-dir="r"] .clock .fconf{display:none}
+:root[data-dir="r"] .p-bar{height:6px;border-radius:0}:root[data-dir="r"] .p-bar i{border-radius:0}
+:root[data-dir="s"] .hd{text-align:center;position:relative;padding-top:26px}
+:root[data-dir="s"] .hd::before{content:"";position:absolute;top:9px;left:50%;width:54px;height:11px;margin-left:-27px;border-radius:99px;border:1.5px solid var(--c-accent);background:var(--c-mark)}
+:root[data-dir="s"] .idrow{justify-content:center}
+:root[data-dir="s"] .idrow .tools{position:absolute;top:2px;right:6px;margin:0}
+:root[data-dir="s"] .num{font-size:18px}
+:root[data-dir="s"] .clockmain{display:grid;grid-template-columns:1fr 1fr;column-gap:12px}
+:root[data-dir="s"] .clockmain>.crow{display:contents}
+:root[data-dir="s"] .clockmain .lblx{width:auto;text-align:center;grid-row:1}
+:root[data-dir="s"] .clockmain .cdate{text-align:center;font-size:15px;grid-row:2}
+:root[data-dir="s"] .clockmain .cdays,:root[data-dir="s"] .clockmain .fdelta{text-align:center;grid-row:3}
+:root[data-dir="s"] .crow.g .lblx,:root[data-dir="s"] .crow.g .cdate,:root[data-dir="s"] .crow.g .cdays{grid-column:1}
+:root[data-dir="s"] .crow.f .lblx,:root[data-dir="s"] .crow.f .cdate,:root[data-dir="s"] .crow.f .fdelta{grid-column:2}
+:root[data-dir="s"] .clockmain>.p-bar{grid-column:1/3;grid-row:4;margin:12px 0 4px}
+:root[data-dir="s"] .cpct{grid-column:1;grid-row:5;margin:0;text-align:left}
+:root[data-dir="s"] .cpct::after{content:" through review"}
+:root[data-dir="s"] .fconf{grid-column:2;grid-row:5;margin:0}
+:root[data-dir="s"] .chips{justify-content:center}
+
 /* ---- structure of the new looks ---- */
-:root[data-dir="f"] .hd{background-image:linear-gradient(115deg,rgba(255,255,255,0) 40%,#fff 92%),linear-gradient(60deg,rgba(162,123,63,.10) 25%,transparent 25.5%),linear-gradient(120deg,rgba(162,123,63,.07) 25%,transparent 25.5%),linear-gradient(0deg,rgba(162,123,63,.05) 50%,transparent 50%);background-size:100% 100%,34px 59px,34px 59px,34px 30px;background-color:#f8f2e6}
+:root[data-dir="f"] #card{border-top:5px solid var(--c-accent)}
 :root[data-dir="f"] .seal{background:#f1e7d6;color:#5d4620}
 :root[data-dir="f"] .p-bar{height:6px;border-radius:99px}:root[data-dir="f"] .p-bar i{border-radius:99px}
 :root[data-dir="f"] .attn{border-radius:99px;padding:8px 14px}
@@ -497,7 +546,7 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 #compact.ticket .row{display:flex}
 #compact.ticket .stub{width:80px;white-space:nowrap;padding:8px 6px 8px 10px;display:flex;flex-direction:column;justify-content:center;gap:1px}
 #compact.ticket .stub .n{font-size:14px}#compact.ticket .stub .nd{font-size:10.5px;font-weight:650;color:var(--c-warn)}
-#compact.ticket .perf{width:0;border-left:1px dotted var(--c-ink3);margin:6px 0}
+#compact.ticket .perf{width:0;border-left:1px solid var(--c-line);margin:6px 0}
 #compact.ticket .main{flex:1;min-width:0;padding:9px 4px 8px 10px}
 #compact.ticket .main .dg{font-size:12px;font-weight:650}
 #compact.ticket .main .fc{display:flex;gap:5px;align-items:baseline;font-size:12.5px;margin-top:2px;white-space:nowrap}
@@ -569,7 +618,7 @@ details.myapi input,details.myapi textarea{margin:0 0 6px}
 <body>
 <div class="desk" id="desk">
   <div class="banner" role="note">
-    <b>Browser simulation</b><span class="long">of the ANDA Hover Companion Windows app ·</span><span class="short">fictional data · not an FDA product</span>
+    <b>Browser simulation</b><span class="long">of the ANDA Companion (Notula) Windows app ·</span><span class="short">fictional data · not an FDA product</span>
     <span class="sp"></span>
     <button id="resetBtn" type="button" aria-label="Reset the simulation">Reset</button>
   </div>
@@ -696,7 +745,7 @@ C:\work&gt; </div>
     </div>
     <div class="tray">
       <button id="chev" type="button" aria-label="Show hidden icons" aria-expanded="false"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 9l4-4 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-      <button id="appIcon" type="button" aria-label="ANDA Hover Companion tray icon. Click for lookup, right-click or long-press for the menu."><span class="glyph"></span></button>
+      <button id="appIcon" type="button" aria-label="ANDA Companion (Notula) tray icon. Click for lookup, right-click or long-press for the menu."><span class="glyph"></span></button>
       <button type="button" tabindex="-1" aria-hidden="true" class="hide-narrow"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 6.5a9 9 0 0112 0M4 9a6 6 0 018 0M6.2 11.4a3 3 0 013.6 0" stroke="#454b53" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="13" r=".9" fill="#454b53"/></svg></button>
       <button type="button" tabindex="-1" aria-hidden="true" class="hide-narrow"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2.5 6h2.5L8.5 3v10L5 10H2.5z" fill="#454b53"/><path d="M11 5.5a3.5 3.5 0 010 5" stroke="#454b53" stroke-width="1.4" stroke-linecap="round"/></svg></button>
       <div class="clock" aria-label="Clock, simulated"><div>10:42 AM</div><div>7/16/2026</div></div>
@@ -704,12 +753,12 @@ C:\work&gt; </div>
   </div>
 
   <div class="pop" id="flyout" role="dialog" aria-label="Hidden icons">
-    <button class="it" id="flyIcon" type="button"><span class="glyph big"></span><span><b>ANDA Hover Companion</b><br><small style="margin:0">Click: lookup · Right-click or long-press: menu</small></span></button>
+    <button class="it" id="flyIcon" type="button"><span class="glyph big"></span><span><b>ANDA Companion (Notula)</b><br><small style="margin:0">Click: lookup · Right-click or long-press: menu</small></span></button>
     <button class="btn pin" id="pinBtn2" type="button">Pin to taskbar (like dragging it out)</button>
     <small>Windows 11 hides new tray icons here. Pinning keeps this one visible.</small>
   </div>
 
-  <div class="pop" id="menu" role="menu" aria-label="ANDA Hover Companion menu"></div>
+  <div class="pop" id="menu" role="menu" aria-label="ANDA Companion (Notula) menu"></div>
   <div class="pop" id="replyMenu" role="menu" aria-label="Quick replies"></div>
   <div class="pop" id="ctxmenu" role="menu" aria-label="Browser right-click menu (Edge extension, simulated)"></div>
 
@@ -903,21 +952,25 @@ C:\work&gt; </div>
     <div class="meta" id="c-meta"></div>
     <div class="fresh" id="c-fresh"></div>
   </div>
+  <div class="clockwrap">
+  <div class="railcol" id="c-rail" aria-hidden="true"><b id="c-rail-n"></b><span class="cap" id="c-rail-cap">DAYS TO GOAL</span><span class="rdelta" id="c-rail-d"></span><span class="rconf" id="c-rail-c"></span></div>
   <div class="slot clock">
     <div class="clockmain">
-      <div class="crow"><span class="lblx">GOAL</span><span class="cdate" id="c-goal"></span><span class="cdays" id="c-days"></span><span class="cpct" id="c-pct"></span></div>
+      <div class="crow g"><span class="lblx">GOAL</span><span class="cdate" id="c-goal"></span><span class="cdays" id="c-days"></span><span class="cpct" id="c-pct"></span></div>
       <div class="p-bar"><i id="c-fill"></i></div>
       <div class="p-ticks" id="c-ticks"><i></i><i></i><i></i><i></i><i></i></div>
       <div class="p-dots" id="c-dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <div class="p-step" id="c-step" aria-hidden="true"><i></i><b></b><i></i><b></b><i></i><b></b><i></i><b></b><i></i></div>
       <div class="p-line" id="c-line" aria-hidden="true"><i></i><b></b></div>
       <div class="p-time" id="c-time" aria-hidden="true"></div>
+      <div class="p-gauge" aria-hidden="true"><svg viewBox="0 0 112 62"><path class="tr" pathLength="100" d="M10 56 A46 46 0 0 1 102 56"/><path class="fg" id="c-gfg" pathLength="100" d="M10 56 A46 46 0 0 1 102 56"/></svg><span id="c-gv"></span></div>
       <div class="p-ringwrap" aria-hidden="true"><svg viewBox="0 0 52 52"><circle class="tr" cx="26" cy="26" r="21"></circle><circle class="fg" id="c-ring" cx="26" cy="26" r="21"></circle></svg><span class="rv" id="c-ringv"></span></div>
-      <div class="crow"><span class="lblx">FORECAST</span><span class="cdate" id="c-fc"></span><span class="fdelta" id="c-fdelta"></span></div>
+      <div class="crow f"><span class="lblx">FORECAST</span><span class="cdate" id="c-fc"></span><span class="fdelta" id="c-fdelta"></span></div>
       <div class="fconf" id="c-fconf"></div>
     </div>
   </div>
   <div class="slot attn-slot" id="attnSlot"><div class="attn warn" id="c-attn"><span class="k">⚠ NEEDS YOU</span><span id="c-attn-t"></span></div></div>
+  </div>
   <div class="slot rail latest"><span class="lblx">LATEST</span><span id="c-latest"></span></div>
   <div class="slot rail ahead" id="aheadSlot"><span class="lblx acc">AHEAD</span><span id="c-ahead"></span></div>
   <div class="slot rail watch" id="watchSlot"><span class="lblx">WATCH</span><span><span class="wtxt" id="c-watch"></span> <span class="more" id="c-watch-more"></span></span></div>
@@ -950,7 +1003,7 @@ C:\work&gt; </div>
 <script>
 "use strict";
 /* ============================================================
-   ANDA Hover Companion: browser simulation.
+   ANDA Companion (Notula): browser simulation.
    Faithful ports of the Windows app's logic (recognizer, placement, consent flow, offline brief, status line);
    simulated parts: window chrome, the hotkey and clipboard hand-off, and the sample "generated" brief.
    All records are fictional. Nothing leaves this page.
@@ -1197,7 +1250,8 @@ const RING_C = 2 * Math.PI * 21;
 /* [id, name, token set it uses, form]. L–O are compact boxes that borrow a sibling's tokens and expand into its full card. */
 const LOOKS = [["a","A · Quiet Fluent","a","full"],["b","B · Docket Ledger","b","full"],["c","C · Signal","c","full"],["d","D · Draft","d","full"],["e","E · Instrument","e","full"],
   ["f","F · Agency Bronze","f","full"],["g","G · Harbor Teal","g","full"],["h","H · Sage Clinical","h","full"],["i","I · Indigo Dossier","i","full"],["j","J · Cobalt Timeline","j","full"],["k","K · Graphite Quiet","k","full"],
-  ["l","L · Graphite Strip","k","strip"],["m","M · Fluent Tile","a","tile"],["n","N · Bronze Ticket","f","ticket"],["o","O · Teal Badge","g","badge"]];
+  ["l","L · Graphite Strip","k","strip"],["m","M · Fluent Tile","a","tile"],["n","N · Bronze Ticket","f","ticket"],["o","O · Teal Badge","g","badge"],
+  ["p","P · Bronze Gauge","p","full"],["q","Q · Bronze Folder","q","full"],["r","R · Bronze Rail","r","full"],["s","S · Bronze Tag","s","full"]];
 const AUTO_CHOICES = [0, 10, 20, 40];
 const CONSENTS = [["full","① Full card: the hotkey press is the consent"],["peek","② Peek first: expand for the full brief"],["whisper","③ Whisper invite: opens only if clicked (default)"]];
 let prompts = [
@@ -1306,6 +1360,9 @@ function fill(id){
   $("x-notes").innerHTML = d.notes.map(([who, t]) => `<div class="notei"><div class="who">${who}</div>${t}</div>`).join("");
   $("x-forecast").textContent = d.forecast;
   paintMail(id);
+  $("c-gfg").style.strokeDasharray = d.pct + " 100"; $("c-gv").textContent = d.pct + "%";
+  $("c-rail-n").textContent = String(Math.abs(d.daysTo)); $("c-rail-cap").textContent = d.daysTo < 0 ? "DAYS PAST GOAL" : "DAYS TO GOAL";
+  $("c-rail-d").textContent = d.fdelta; $("c-rail-d").classList.toggle("good", !d.late); $("c-rail-c").textContent = d.fconf;
   $("x-sisters").innerHTML = d.sisters.map(([n, desc]) =>
     `<div class="rowi"><span><span class="sister" data-anda="${n}" role="button" tabindex="0">ANDA ${n}</span> — ${desc}</span></div>`).join("");
   { /* WATCH: the top flag on the card, the full list with evidence in the drawer */
@@ -1636,10 +1693,10 @@ $("webBody").addEventListener("contextmenu", e => {
   add("Copy", () => { if(navigator.clipboard) navigator.clipboard.writeText(sel).catch(() => {}); }, { off:!sel });
   ctxmenu.append(document.createElement("hr"));
   if(sel){
-    add(`ANDA Companion: peek at “${short}”`, () => extensionPeek(sel, anchor), { ext:true });
-    add("ANDA Companion: check this text as a draft", () => openDraft(sel), { ext:true });
+    add(`ANDA Companion (Notula): peek at “${short}”`, () => extensionPeek(sel, anchor), { ext:true });
+    add("ANDA Companion (Notula): check this text as a draft", () => openDraft(sel), { ext:true });
   }
-  add("ANDA Companion: scan this page for ANDA numbers", () => extensionScan(), { ext:true });
+  add("ANDA Companion (Notula): scan this page for ANDA numbers", () => extensionScan(), { ext:true });
   ctxmenu.style.display = "block";
   const [x, y] = placeNear(e.clientX, e.clientY, ctxmenu.offsetWidth, ctxmenu.offsetHeight, workArea(), 2, 2);
   ctxmenu.style.left = x + "px"; ctxmenu.style.top = y + "px"; ctxmenu.style.right = "auto"; ctxmenu.style.bottom = "auto";
@@ -1804,7 +1861,7 @@ $("deskIcon").addEventListener("click", e => { if(e.detail === 0 || coarse.match
 function launch(){
   if(state.running) return;
   state.running = true; $("appIcon").style.display = ""; $("deskIcon").classList.remove("attn");
-  showNotice("ANDA Hover Companion started. Look for its icon near the clock.", { x:innerWidth - 300, y:innerHeight - 140 });
+  showNotice("ANDA Companion (Notula) started. Look for its icon near the clock.", { x:innerWidth - 300, y:innerHeight - 140 });
 }
 
 /* ---------------- round 10: shortcuts, middle-click, my data, my writing, my API, connection ---------------- */
@@ -1927,7 +1984,7 @@ function paintConn(){
   const c = connInfo();
   $("c-conn").className = c.cls; $("c-conn").innerHTML = `<i></i><span id="c-conn-t"></span>`; $("c-conn-t").textContent = c.label;
   $("setBanner").className = "connbar " + c.cls; $("setBannerLabel").textContent = c.label; $("setBannerText").textContent = c.text;
-  $("appIcon").title = "ANDA Hover Companion · " + c.label;
+  $("appIcon").title = "ANDA Companion (Notula) · " + c.label;
   $("setConn").textContent = connStatusText();
 }
 function connStatusText(){

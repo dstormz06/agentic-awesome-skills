@@ -1,4 +1,4 @@
-# ANDA Hover Companion — UX & Product Design Proposal
+# ANDA Companion (Notula) — UX & Product Design Proposal
 
 **A Windows tray micro-app for FDA OGD Regulatory Project Managers.**
 Point at an ANDA number anywhere on screen → get a calm, one-glance briefing card:
@@ -177,9 +177,10 @@ a deep link to the record in the system of record.
 
 ## 5. Visual language
 
-**Appearance is a preference, never information.** The card ships with **fifteen
-selectable looks** (Windows app: Settings → Appearance): eleven full cards (A–K) and four
-compact boxes (L–O). **K · Graphite Quiet is the default** (changed from A on 2026-11-02 by the
+**Appearance is a preference, never information.** The card ships with **nineteen
+selectable looks** (Windows app: Settings → Appearance): fifteen full cards (A–K and P–S) and four
+compact boxes (L–O). **No look draws a grid, hatching, texture or other pattern behind its content**
+(the owner's decision, 2026-11-03). **K · Graphite Quiet is the default** (changed from A on 2026-11-02 by the
 product owner); the rest are user options. All full looks share identical anatomy, slot
 order, status semantics, and interactions — switching appearance never moves, adds,
 or removes information:
@@ -189,9 +190,9 @@ or removes information:
 | A | Quiet Fluent | Native Windows calm — white surface, steel-blue accent, system type | Thin 4 px bar |
 | B | Docket Ledger | Typeset federal docket — warm paper, archival green, serif title, stamp seal | Milestone ticks |
 | C | Signal | Light steel command panel — cool sky surface, federal blue, mono numerals | Ring |
-| D | Draft | Engineer's drawing — federal navy ink on white, graph grid, drafting mono | Hatched rule |
+| D | Draft | Engineer's drawing — federal navy ink on plain white paper, drafting mono, square corners | Solid square bar |
 | E | Instrument | Medical-device porcelain — slate steel on clinical white, capsule geometry, soft large radii | Capsule |
-| F | Agency Bronze | Warm greige and bronze, tinted header, filled tag chips (an agency-tool feel; no logo, name or pattern borrowed) | Thin bar |
+| F | Agency Bronze | Warm greige and bronze, a solid 5 px bronze band across the top, plain header, filled tag chips (an agency-tool feel; no logo, name or pattern borrowed) | Thin bar |
 | G | Harbor Teal | Cool teal with a **status spine** down the left edge (amber = late, green = on track); compact spacing | Thin bar |
 | H | Sage Clinical | Soft sage band, generous radii and spacing; the calmest | Ten dots |
 | I | Indigo Dossier | A formal case file — double rule, serif name and labels | Five-step stepper |
@@ -199,8 +200,12 @@ or removes information:
 | **K** | **Graphite Quiet** *(default)* | Monochrome in soft slate (accent `#56626E`, not near-black) — colour appears only where status needs it; outlined attention, text-only chips; quiet in a meeting, sharp on a projector | Line with a dot |
 | L | Graphite Strip | Compact (about 340 × 63–81 px): number, goal, forecast, status edge | — |
 | M | Fluent Tile | Compact (about 196 × 123–145 px): the forecast gap in large type, one attention line | — |
-| N | Bronze Ticket | Compact (about 300 × 64–68 px): a slim ticket with a perforated stub | — |
+| N | Bronze Ticket | Compact (about 300 × 64–68 px): a slim ticket with a stub | — |
 | O | Teal Badge | Compact (about 150–185 × 38 px): a status pill with the number and the gap | — |
+| P | Bronze Gauge | Bronze palette; soft round corners, pill-shaped warnings, a header wash | Half dial |
+| Q | Bronze Folder | Bronze palette on warm paper; the number on a bronze tab, a plain edge, underlined chips | Line with a dot |
+| R | Bronze Rail | Bronze palette; a tinted column carries the days to goal in large figures, the detail reads down the right | Solid square bar |
+| S | Bronze Tag | Bronze palette; an ID-tag head (a small slot, centred), goal and forecast in two columns | Thin bar |
 
 **Compact boxes (L–O).** They exist so the tool never blankets the email being read or
 written. A compact box borrows a full look's palette (K, A, F, G respectively), shows only
@@ -363,7 +368,7 @@ The original single-card design studio (`mockup/anda-card.html`, five looks) was
 duplicated what the two files below do better, and kept the old A-default and five-look picture alive. It stays in git
 history. Open these in any browser, desktop or phone, with fictional data:
 
-- **`mockup/appearance-lab.html`** — a comparison wall of all **fifteen looks** (the §5 table) rendering the same
+- **`mockup/appearance-lab.html`** — a comparison wall of all **nineteen looks** (the §5 table) rendering the same
   record side by side, with the at-risk and on-track records switchable, and the four compact boxes shown over an open
   email. It is the quickest way to compare looks and the source of each look's palette and structure.
 - **`extension/`** — the Edge/Chromium extension (see its README): the same card, draft check and watch rules in the browser, reached by the right-click
@@ -384,7 +389,7 @@ All looks are light-only (§5).
 
 ## 11. Implementation status — the Windows app
 
-**`app/`** contains the working v0: a .NET 8 / Avalonia tray application with all fifteen
+**`app/`** contains the working v0: a .NET 8 / Avalonia tray application with all nineteen
 looks (K default; four of them compact boxes) selectable from the tray menu, auto-hide, all three consent models
 (Whisper default, with the urgent-peek rule), three rebindable global hotkeys (`Ctrl+Alt+A` Select & Peek,
 `Ctrl+Alt+Space` lookup, `Ctrl+Alt+D` check a draft), the weekend and federal-holiday WATCH line, the draft
