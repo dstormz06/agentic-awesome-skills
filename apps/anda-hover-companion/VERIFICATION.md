@@ -465,6 +465,10 @@ all ten suites pass (the new one has **40 checks**); `npm run security:docs` pas
 | **No look draws a grid, hatching, facets or texture**: D has a solid square bar and no grid; F has a solid 5 px band and a plain header; the Ticket's dotted rule and the simulation's dashed list rules are plain lines | `Round12Tests` (no hatch or grid in code, F and D structure), `CompactRenderTests`, simulation suite 10 (no repeating gradient, no grid token, no facets, in the page and in the lab) | Soft colour fades (the Gauge header, E's bar, the simulated desktop) and the animated loading bar were not counted as patterns. Progress markers such as ticks, rings and dots show a value and are kept |
 | **Four new looks, P Gauge, Q Folder, R Rail and S Tag**, in the app, the simulation and the Appearance Lab, each with its own layout and every fact on the card | `Round12Tests` (every fact on each new look; the dial, the tab and square corner, the days column, the centred head), headless renders of both records, contrast and palette tests that run over every look, simulation suite 10 (every fact, shapes, AA text contrast on D, F, P, Q, R, S) | Q has no folded corner and S has a plain bar instead of a ruler, to keep patterns out. In the Windows app the Gauge's dial sits between the goal and the forecast rows, not beside them. The extension has one fixed card look and no appearance switch |
 
+CI: commit **`aad40dd`** (run 21, the final state of this round's code and documents; run 20 on the commit before it was replaced by it): Linux and Windows jobs green. The Windows self-test is
+**51 PASS, 0 WARN, 0 FAIL, 1 SKIP** (the live Claude connection, by design). It now renders the four new looks (`render-card-p`, `-q`, `-r`, `-s`: all PASS at 424x720 px) and the Settings window
+at 492x788 px, and `mouse-trigger` and the earlier checks still pass. The extension's 31 unit tests pass on both machines. The run's own xUnit totals were not re-read; the 588 above are the local Linux count.
+
 ### Defects caught in round 12
 
 | # | Finding | Found by | Disposition |
