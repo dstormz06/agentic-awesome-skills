@@ -361,6 +361,7 @@ CI: commit **`292363e`** (run 16): Linux and Windows jobs green. On Windows the 
 | R38 | The native test used dates in 2027 that would have become "past" and changed the expected card | Looking for clock-dependent tests | Dates moved; the rest of the suite already used a fixed clock |
 | R39 | The popup's tabs could not be moved with the arrow keys (ARIA tabs pattern), every tab was a tab stop, and "Settings" was a link without a link target | Accessibility review | Arrow keys, Home and End; one tab stop; Settings is a button; 5 browser checks |
 | R40 | `ProgressControl` threw when drawn at zero width (found when three headless card tests failed behind a masking teardown error) | Failing tests | Early return and a safe clamp; regression test |
+| R41 | The two **published pages** (desktop simulation, appearance lab) were never republished after rounds 7 to 9: the simulation was still the Nov 1 version without the whisper default, watch list, draft check or Edge right-click menu, and the lab still showed eleven looks with the dark graphite K. I had refreshed the downloadable copies and said so, which is not the same thing | The owner asked whether the simulation artifact was rebuilt; I compared the live pages with the repo files | Both republished to their existing links from the repo files; the live pages' scripts and styles were then compared with the repo byte for byte. Rule from now on: any change to `mockup/*.html` is followed by a republish and a comparison of the live page |
 
 ### What round 9 does not prove
 
