@@ -148,7 +148,7 @@ public sealed class NativeHostSession(NativeHostContext ctx)
         string? number = AndaValidator.Extract(text);
         if (number is null) return Err("bad-number", "That is not an ANDA number.");
         if (ctx.Repository.Find(number) is not { } record)
-            return Err("not-found", ctx.DataKind == "portfolio" ? $"{number} is not in your portfolio ({ctx.DataFile})" : $"{number} is not a recognized ANDA");
+            return Err("not-found", ctx.DataKind == "portfolio" ? $"{number} is not in your portfolio ({ctx.DataFile})" : $"{number} is not in the available records.");
         var card = CardModels.Build(record, ctx.Card());
         return new JsonObject { ["ok"] = true, ["card"] = JsonSerializer.SerializeToNode(card, CardModels.Json) };
     }

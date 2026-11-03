@@ -24,7 +24,7 @@ public partial class LookupWindow : Window
         var number = AndaValidator.Extract(Input.Text);
         if (number is null)
         {
-            ErrorText.Text = "Not a recognized ANDA number.";
+            ErrorText.Text = "Please enter a six-digit ANDA number.";
             ErrorText.IsVisible = true;
             return;
         }

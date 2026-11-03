@@ -28,7 +28,7 @@ public static class EntityKinds
     /// </summary>
     public static readonly EntityKind Anda =
         new("ANDA",
-            @"(?:ANDA[-\s#]?)?(?<!\d)(?<!\b(?:NDA|BLA|IND|DMF|NDC|MF)(?:[-\s#:.]|No\b|Number\b)*)(\d{6})(?!\d)",
+            @"(?:ANDA[-\s#]?)?(?<![0-9])(?<!\b(?:NDA|BLA|IND|DMF|NDC|MF)(?:[-\s#:.]|No(?![A-Za-z])|Number(?![A-Za-z]))*)([0-9]{6})(?![0-9])",
             "Abbreviated New Drug Application");
 
     /// <summary>

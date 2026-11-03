@@ -274,7 +274,7 @@ h2.sec{font-size:13px;letter-spacing:.12em;font-weight:700;color:var(--ink3);mar
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap" role="main">
   <p class="eyebrow">ALL DATA FICTIONAL · LIGHT ONLY</p>
   <h1>Appearance Lab</h1>
   <p class="lede">All nineteen looks are options in the app, and K is the default. Fifteen full cards, then four compact boxes that stay out of the way of an open email. None draws a grid, hatching or texture. Anatomy and meaning never change between looks: only the surface, type, and the shape of the progress marker do.</p>
@@ -300,6 +300,7 @@ h2.sec{font-size:13px;letter-spacing:.12em;font-weight:700;color:var(--ink3);mar
 
 <script>
 "use strict";
+document.documentElement.lang = document.documentElement.lang || "en";   /* the viewer's own page may omit it */
 const DATA = {
   "216482": { drug:"Metformin HCl ER Tablets, 500 mg", meta:"Meridian Pharmaceuticals (fictional) · Cycle 2", asOf:"data as of Jul 16, 07:12 · extract #412 (fictional)",
     goal:"Oct 3, 2026", days:"· 80 days", daysTo:80, pct:62, fc:"Oct 17, 2026", fdelta:"▲ +14 d vs goal", late:true, delta:14, conf:"moderate confidence",

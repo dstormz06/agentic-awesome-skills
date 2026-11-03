@@ -77,7 +77,7 @@ export function createService({ storage, native = null, now = () => new Date() }
       card = r.card;
     } else {
       const rec = rp.find(number);
-      if (!rec) return { ok: false, error: 'not-found', message: rp.kind === 'imported' ? `${number} is not in your portfolio (${rp.imported.name})` : `${number} is not a recognized ANDA` };
+      if (!rec) return { ok: false, error: 'not-found', message: rp.kind === 'imported' ? `${number} is not in your portfolio (${rp.imported.name})` : `${number} is not in the available records.` };
       card = buildCard(rec, ctx);
     }
     return { ok: true, card, step: firstStep(settings.consent, settings.escalateUrgent, card.urgency.isUrgent), settings: { consent: settings.consent, autoHideSeconds: settings.autoHideSeconds } };

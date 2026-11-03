@@ -241,7 +241,7 @@ public partial class App : Application
     private static DateOnly Today() => DateOnly.FromDateTime(DateTime.Now);
 
     private string NotFoundMessage(string number) =>
-        _portfolio is { Status.Ok: true } p ? $"{number} is not in your portfolio ({p.FileName})" : $"{number} is not a recognized ANDA";
+        _portfolio is { Status.Ok: true } p ? $"{number} is not in your portfolio ({p.FileName})" : $"{number} is not in the available records.";
 
     // ---------- my data: the fictional demo records, or the person's own portfolio ----------
 

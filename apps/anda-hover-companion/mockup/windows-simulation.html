@@ -115,7 +115,7 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
   -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
   font-size:12px; color:var(--ink2);
 }
-.banner b{color:var(--ink);font-weight:650;white-space:nowrap}
+.banner b,.banner h1{color:var(--ink);font-weight:650;white-space:nowrap;font-size:inherit;margin:0}
 .banner .sp{flex:1}
 .banner span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .banner button{border:1px solid var(--win-line);background:#fff;border-radius:99px;padding:4px 11px;font-size:12px;min-height:26px}
@@ -168,7 +168,7 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 #web .addr{display:flex;gap:8px;padding:6px 10px;border-bottom:1px solid var(--win-line);user-select:none;-webkit-user-select:none}
 #web .addr .url{flex:1;background:#f1f3f5;border-radius:99px;padding:4px 12px;font-size:12px;color:var(--ink2)}
 #web .body{font:13px/1.5 "Segoe UI",-apple-system,system-ui,sans-serif;color:#1f2328}
-#web h3{margin:0 0 6px;font-size:14px}
+#web h2{margin:0 0 6px;font-size:14px}
 #web table{border-collapse:collapse;width:100%;font-size:12px;margin:0 0 14px}
 #web th,#web td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--win-line);vertical-align:top}
 #web th{font-size:10px;letter-spacing:.08em;color:var(--ink3);font-weight:800}
@@ -259,7 +259,7 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 /* ===================== in-app windows (use the appearance tokens) ===================== */
 .app-win{position:absolute;z-index:42;display:none;background:var(--c-bg);color:var(--c-ink);border:1px solid var(--c-line);
          border-radius:var(--c-radius);box-shadow:var(--c-shadow);font-family:var(--c-font);font-size:13px}
-.app-win h3{margin:0;font-size:15px}
+.app-win h2{margin:0;font-size:15px}
 .app-win .hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .app-win .lbl{font-size:9.5px;font-weight:800;letter-spacing:.13em;color:var(--c-ink3);margin:14px 0 6px}
 .app-win .lbl:first-of-type{margin-top:0}
@@ -622,9 +622,9 @@ details.myapi input,details.myapi textarea{margin:0 0 6px}
 </style>
 </head>
 <body>
-<div class="desk" id="desk">
+<div class="desk" id="desk" role="main">
   <div class="banner" role="note">
-    <b>Browser simulation</b><span class="long">of the ANDA Companion (Notula) Windows app ·</span><span class="short">fictional data · not an FDA product</span>
+    <h1>Browser simulation</h1><span class="long">of the ANDA Companion (Notula) Windows app ·</span><span class="short">fictional data · not an FDA product</span>
     <span class="sp"></span>
     <button id="resetBtn" type="button" aria-label="Reset the simulation">Reset</button>
   </div>
@@ -673,12 +673,12 @@ Demo author
       <div class="tabs" aria-hidden="true"><span>My portfolio (demo)</span></div>
       <div class="addr" aria-hidden="true"><span>‹ ›</span><span class="url">tracker.example/portfolio</span></div>
       <div class="body" id="webBody" tabindex="0"><span class="tag">FICTIONAL PAGE · NOT A REAL SITE</span>
-        <h3>My portfolio</h3>
+        <h2>My portfolio</h2>
         <table><thead><tr><th>ANDA</th><th>DRUG</th><th>GOAL</th><th>MY NOTE</th></tr></thead><tbody>
           <tr><td><span class="pick" data-pick="216482">216482</span></td><td>Metformin HCl ER 500 mg</td><td>Oct 3</td><td>IR response due next week</td></tr>
           <tr><td><span class="pick" data-pick="214990">214990</span></td><td>Metformin HCl ER 750 mg</td><td>Aug 15</td><td>Labeling final format pending</td></tr>
         </tbody></table>
-        <h3>Numbers that should NOT open a card</h3>
+        <h2>Numbers that should NOT open a card</h2>
         <table><tbody>
           <tr><td><span class="pick" data-pick="NDA 021234">NDA 021234</span></td><td>another application type, though it has six digits</td></tr>
           <tr><td><span class="pick" data-pick="12345">12345</span></td><td>only five digits</td></tr>
@@ -774,12 +774,12 @@ C:\work&gt; </div>
   <div class="app-win" id="lookup" role="dialog" aria-label="Lookup ANDA">
     <div class="lbl" style="margin-top:0">LOOKUP · CTRL+ALT+SPACE</div>
     <div class="r"><input type="text" id="lookupIn" placeholder="ANDA number, e.g. 216482" inputmode="numeric" autocomplete="off" aria-label="ANDA number"><button class="pill" id="lookupGo" type="button">Go</button></div>
-    <div class="err" id="lookupErr" role="alert">Not a recognized ANDA number.</div>
+    <div class="err" id="lookupErr" role="alert">Please enter a six-digit ANDA number.</div>
   </div>
 
   <!-- ===== settings ===== -->
   <div class="app-win" id="settings" role="dialog" aria-label="Settings">
-    <div class="hdr"><h3>Settings</h3><button class="pill" id="setDone" type="button">Done</button></div>
+    <div class="hdr"><h2>Settings</h2><button class="pill" id="setDone" type="button">Done</button></div>
     <div class="connbar" id="setBanner" role="status"><i></i><div><b id="setBannerLabel"></b><span id="setBannerText"></span></div></div>
     <div style="display:flex;align-items:center;gap:10px;margin:0 0 6px"><span style="color:var(--c-ink2);font-size:12.5px">Go to</span><select id="setJump" aria-label="Go to a section of Settings" style="width:auto;max-width:100%"></select></div>
     <div class="lbl">APPEARANCE · FULL CARD</div>
@@ -882,7 +882,7 @@ C:\work&gt; </div>
 
   <!-- ===== quick replies ===== -->
   <div class="app-win" id="replies" role="dialog" aria-label="Quick replies">
-    <div class="hdr"><h3>Quick replies</h3><button class="pill" id="rpClose" type="button">Done</button></div>
+    <div class="hdr"><h2>Quick replies</h2><button class="pill" id="rpClose" type="button">Done</button></div>
     <div class="cols">
       <div class="list" id="rpList"></div>
       <div>
@@ -899,7 +899,7 @@ C:\work&gt; </div>
 
   <!-- ===== draft check ===== -->
   <div class="app-win" id="draft" role="dialog" aria-label="Check a draft">
-    <div class="hdr"><h3>Check a draft</h3><button class="pill" id="drDone" type="button">Done</button></div>
+    <div class="hdr"><h2>Check a draft</h2><button class="pill" id="drDone" type="button">Done</button></div>
     <textarea id="drText" aria-label="Draft text" placeholder="Paste or type an email or chat draft"></textarea>
     <div class="acts">
       <button class="pill" id="drCheck" type="button">Check against the record</button>
@@ -918,14 +918,14 @@ C:\work&gt; </div>
 
   <!-- ===== watch list and page scan ===== -->
   <div class="app-win" id="wlist" role="dialog" aria-label="Watch list">
-    <div class="hdr"><h3 id="wlTitle">Watch list</h3><button class="pill" id="wlDone" type="button">Done</button></div>
+    <div class="hdr"><h2 id="wlTitle">Watch list</h2><button class="pill" id="wlDone" type="button">Done</button></div>
     <p class="hint" id="wlNote" style="margin:0 0 6px"></p>
     <div id="wlRows"></div>
   </div>
 
   <!-- ===== prompt library ===== -->
   <div class="app-win" id="plib" role="dialog" aria-label="Prompt library">
-    <div class="hdr"><h3>Prompt library</h3><button class="pill" id="plClose" type="button">Done</button></div>
+    <div class="hdr"><h2>Prompt library</h2><button class="pill" id="plClose" type="button">Done</button></div>
     <div class="cols">
       <div class="list" id="plList"></div>
       <div>
@@ -1008,6 +1008,7 @@ C:\work&gt; </div>
 
 <script>
 "use strict";
+document.documentElement.lang = document.documentElement.lang || "en";   /* the viewer's own page may omit it */
 /* ============================================================
    ANDA Companion (Notula): browser simulation.
    Faithful ports of the Windows app's logic (recognizer, placement, consent flow, offline brief, status line);
@@ -1054,7 +1055,7 @@ const DATA = {
 
 /* Recognizer: six-digit number, but never one labelled as another application type (NDA, BLA, IND, DMF, MF, NDC).
    Same behavior as Data/EntityKinds.cs; scanned without regex lookbehind so older Safari parses this file. */
-const OTHER_LABEL = /(?:^|[^A-Za-z0-9_])(?:NDA|BLA|IND|DMF|NDC|MF)(?:[-\s#:.]|No\b|Number\b)*$/i;
+const OTHER_LABEL = /(?:^|[^A-Za-z0-9_])(?:NDA|BLA|IND|DMF|NDC|MF)(?:[-\s#:.]|No(?![A-Za-z])|Number(?![A-Za-z]))*$/i;
 function extractNumber(text){
   if(!text) return null;
   const re = /\d+/g; let m;
@@ -1568,7 +1569,7 @@ function hotkey(kind, source){
   showKeys(kind, sel ? "Copied your selection, read it, put your clipboard back ✓" : "");
   const number = sel ? extractNumber(sel.text) : null;
   if(!number){ if(sel) markStep("look2"); openLookup(anchor); return; }
-  if(!DATA[number]){ showNotice(`${number} is not a recognized ANDA`, anchor); return; }
+  if(!DATA[number]){ showNotice(`${number} is not in the available records.`, anchor); return; }
   markStep("peek");
   if(compactId === number && compact.style.display === "block"){ expandCompact(); return; }   /* compact boxes never take focus: the hotkey again is the keyboard way in */
   /* Two-stage consent: the hotkey is stage one. In whisper mode an urgent ANDA skips the invite and opens a peek (no AI call). */
@@ -1608,13 +1609,13 @@ let lookupAnchor = null;
 function openLookup(anchor){
   closeMenus(); lookupAnchor = anchor || pointer;
   const box = $("lookup"); box.style.display = "block"; $("lookupErr").style.display = "none"; $("lookupIn").value = "";
-  setTimeout(() => $("lookupIn").focus(), 30);
+  $("lookupIn").focus(); setTimeout(() => $("lookupIn").focus(), 30);
 }
 function submitLookup(){
   const n = extractNumber($("lookupIn").value);
   if(!n){ $("lookupErr").style.display = "block"; return; }
   closeApp("lookup");
-  if(!DATA[n]){ showNotice(`${n} is not a recognized ANDA`, lookupAnchor); return; }
+  if(!DATA[n]){ showNotice(`${n} is not in the available records.`, lookupAnchor); return; }
   markStep("look");
   openCard(n, { mini: state.mode === "peek", anchor: lookupAnchor });
 }
@@ -1678,7 +1679,7 @@ function closeCtx(){ ctxmenu.style.display = "none"; }
 function extensionPeek(text, anchor){
   const number = extractNumber(text);
   if(!number){ showNotice("No ANDA number in the selection (a number labelled NDA, BLA, IND, DMF or MF is not treated as an ANDA).", anchor); return; }
-  if(!DATA[number]){ showNotice(`${number} is not a recognized ANDA`, anchor); return; }
+  if(!DATA[number]){ showNotice(`${number} is not in the available records.`, anchor); return; }
   const step = firstStep(number);
   if(step === "invite") showInvite(`ANDA ${number}`, anchor, () => openCard(number, { anchor }));
   else openCard(number, { mini:step === "peek", anchor });

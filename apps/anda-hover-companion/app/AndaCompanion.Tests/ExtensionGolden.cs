@@ -44,6 +44,7 @@ internal static class GoldenFixture
             "216482", "ANDA 216482", "anda-216482", "ANDA#216482", "see ANDA 214990, then the labeling", "(216482)", "Ref: 216482.", "a\n216482\nb",
             "12345", "1234567", "21648a", "abc", "", "   ", "9216482", "2164829", "x216482y", "NDA 021234", "NDA021234", "NDA: 021234", "NDA No. 021234",
             "nda #021234", "DMF 012345", "IND 123456", "BLA 125000", "MF-012345", "ANDA/NDA 216482", "NDA 021234 and ANDA 216482", "ANDA 021234", "IND 123456; 214990",
+            "NDA No123456", "nda no123456", "NDA Number066785", "NDA Number 066785", "NDA Notes 123456", "ANDA 216482 and NDA No123456", "\uFF12\uFF11\uFF16\uFF14\uFF18\uFF12", "\uFF12\uFF11\uFF16\uFF14\uFF18\uFF12 then 216482",
         };
         root["recognizer"] = N(texts.Select(t => new { text = t, number = AndaValidator.Extract(t) }));
 

@@ -312,7 +312,7 @@ app code, so the self-test counts above are run 14's; run 15's own counts were n
 
 | Claim | Evidence | Limit |
 |---|---|---|
-| **The extension's JavaScript says exactly what the app says.** Same calendar, watch flags, urgency, cards, draft check, CSV and .xlsx reading | `tests/golden.json` is written by the app's own code (148 date flags, every day of 2026-2027, 27 cards under three clocks, 12 drafts, 30 recognizer texts, 8 portfolio files with 17 date formats and non-dates, an .xlsx with a hidden sheet); the JavaScript reproduces every case. The app's test fails if the app drifts from the file. Both run on Linux and Windows. Breaking the JavaScript on purpose fails 3 of the 7 parity tests | A fixed set of cases, not a proof. A rule not in the fixture could differ |
+| **The extension's JavaScript says exactly what the app says.** Same calendar, watch flags, urgency, cards, draft check, CSV and .xlsx reading | `extension/tests/golden.json` is written by the app's own code (148 date flags, every day of 2026-2027, 27 cards under three clocks, 12 drafts, 30 recognizer texts, 8 portfolio files with 17 date formats and non-dates, an .xlsx with a hidden sheet); the JavaScript reproduces every case. The app's test fails if the app drifts from the file. Both run on Linux and Windows. Breaking the JavaScript on purpose fails 3 of the 7 parity tests | A fixed set of cases, not a proof. A rule not in the fixture could differ |
 | The extension runs only when asked and cannot read other tabs or call out | `manifest.test.mjs`: permissions are exactly `activeTab, scripting, contextMenus, storage` (+ optional `nativeMessaging`), no host permissions, no content script, no web-accessible files, no `externally_connectable`, no inline script, no `fetch`/`XMLHttpRequest`/`WebSocket`/`eval` or URL in any source file; the UI uses a closed shadow root and no `innerHTML` | A static check of the files, not a network capture |
 | It works in a real browser engine, on real pages, with no app | `tests/e2e/standalone.cjs`: **63 checks** in Chromium: whisper chip, urgent peek with its reason, full card, drawer, Copy status (clipboard content checked), NDA/short/unknown numbers not guessed, right-click text, all three consent models, draft check from a field and a contenteditable, page scan, a page with `default-src 'none'; style-src 'none'`, auto-hide (and never under the pointer), focus restored, popup (look up, draft, watch list), settings (.xlsx and .csv import, title row above the header, no column found then fixed by choosing one, wrong file type refused, no silent mixing of sources) | **Chromium, not Edge.** The browser's own context menu and shortcut handling cannot be pressed by automation: the tests call the code those call, on a copy of the extension that may read 127.0.0.1 and has an open shadow root |
 | It works together with the app, over real native messaging | `tests/e2e/native.cjs`: **11 checks** with the real .NET host process started by Chromium: lookup, draft check and watch list answered from a portfolio file, the app's "peek first" consent followed (and not followed when switched off), a demo number is *not found* rather than silently shown, host not installed and a host that lists another extension both give a plain message. Also `NativeHostProcessTests` (real pipes, clean exit) and 17 framing and protocol tests | Linux host. On Windows the published exe is started the way the browser does by the self-test: **first answer 464 ms**, clean exit |
@@ -513,6 +513,34 @@ and these notes, which do not start a build. The run's own xUnit totals were not
 
 Not run in real Edge, on a managed computer, against a live model or Microsoft, on a real RPM workbook or a real Drugs@FDA file, or on the owner's machine. The Windows build
 has not been re-run by hand. Name availability and trademark are unchecked.
+
+## Round 14: a second pre-demo audit, with tests that were not run before
+
+The owner asked again for an explicit test of everything before a director's test. This round added checks of kinds not run earlier: the simulation inside a frame (as the artifact viewer shows it), an automated accessibility scan,
+keyboard-only use, and a differential fuzz of the number recognizer and the draft check across the app's C#, the extension's JavaScript and the simulation. Local results on this code: C# **663 passed, 8 skipped**; extension unit **31**;
+standalone browser test **68 checks**; native-messaging test **11 checks**; simulation suites 1 to 17 all pass; `npm run security:docs` passes.
+
+| Claim | Evidence | Limit |
+|---|---|---|
+| **The demo path works when the page is shown inside a frame of any width** from 1100 down to 390 px: peek, full brief, lookup, draft check, Watch list and Settings open inside the frame, at the right width, with no sideways scroll | Simulation suite 14 (152 checks, eight frame widths) | A Chromium frame on a local file, not the viewer itself |
+| **No WCAG 2.0/2.1 A or AA failure, and no best-practice failure, that axe-core 4.10.2 can find** in the simulation (desktop and phone, eight card looks, the expanded card and all six windows), the Appearance Lab or the options record | Simulation suite 15 (34 scans, zero violations) | An automated scan finds only part of what a screen-reader user meets; the manual 508 pass in "Still open" is not done |
+| **The page can be used from the keyboard alone**: every Tab stop is a visible control with a focus ring; the lookup box takes the keyboard at once; Tab moves through the card; Esc closes the card and the draft check; E expands the card and S copies the status | Simulation suite 16 (12 checks) | Chromium only |
+| **The number recognizer gives the same answer in the app, the extension and the simulation** on 20,000 generated strings, and the draft check gives the same findings in the app and the extension on 6,000 generated drafts, with no exception in either | A differential fuzz run on this code (generated corpus, seeded, kept out of the repository), plus eight new fixed cases in the shared golden fixture that the app, the extension and simulation suite 17 must all reproduce (38 cases) | Generated text, not real emails. The fuzz compares implementations with each other; it cannot show that all three are wrong in the same way |
+
+### Defects caught in round 14
+
+| # | Finding | Found by | Disposition |
+|---|---|---|---|
+| R64 | **A number written as `NDA No123456` or `NDA Number066785` (no space after the label) was treated as an ANDA by the app and the extension**, although the simulation rejected it. Showing an ANDA card for a labelled NDA number is the wrong-card case the recognizer exists to prevent | The differential fuzz (25 of 20,000 strings) | The label pattern now accepts a digit straight after "No" or "Number" in all three; eight cases added to the golden fixture |
+| R65 | The app's recognizer accepted non-ASCII digits (for example full-width `２１６４８２`) as a number, where the extension and simulation did not; the card lookup then reported it as unknown, and an ASCII number later in the same text could be skipped | The same fuzz (437 differences) | The app's pattern is now ASCII digits only, like the other two; two golden cases added |
+| R66 | The simulation's lookup box took focus 30 ms after it opened, so very fast typing (or a script) was lost | A keyboard test | Focus is set at once, with the delayed focus kept as a backstop |
+| R67 | The simulation had no main landmark or top-level heading, jumped from a level-1 heading to level 3, and the options record had invalid table roles on a list and no language | The accessibility scan | A main landmark, one `h1`, level-2 headings for the windows, valid roles and an explicit page language |
+| R68 | "999999 is not a recognized ANDA" and "Not a recognized ANDA number." were blunt and imprecise: the first means the number is not in the available data, the second that nothing like an ANDA number was typed | A wording review | "999999 is not in the available records." and "Please enter a six-digit ANDA number." in the app, the extension, the native host and the simulation |
+
+### What round 14 does not prove
+
+Not run in real Edge, inside the Claude artifact viewer itself, on a managed computer, against a live model or Microsoft, on a real RPM workbook or a real Drugs@FDA file, or on the owner's machine. The Windows build has not been run by hand.
+Name availability and trademark are unchecked.
 
 ## Still open
 

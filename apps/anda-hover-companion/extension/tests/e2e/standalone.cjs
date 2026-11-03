@@ -59,7 +59,7 @@ const PAGE = `<!doctype html><meta charset="utf-8"><title>Huddle prep</title><bo
   await page.keyboard.press('Escape');
 
   // ---- what is not an ANDA is not guessed ----
-  for (const [sel, expect, label] of [['#nda', 'No ANDA number in the selection', 'NDA 021234'], ['#short', 'No ANDA number in the selection', 'a five-digit number'], ['#unk', '999999 is not a recognized ANDA', 'an unknown six-digit number']]) {
+  for (const [sel, expect, label] of [['#nda', 'No ANDA number in the selection', 'NDA 021234'], ['#short', 'No ANDA number in the selection', 'a five-digit number'], ['#unk', '999999 is not in the available records', 'an unknown six-digit number']]) {
     await h.select(page, sel); await h.trigger(worker, 'peek');
     await notice().waitFor({ timeout: 5000 });
     h.ok((await text(notice())).includes(expect), `${label}: ${expect}`);
@@ -209,7 +209,7 @@ const PAGE = `<!doctype html><meta charset="utf-8"><title>Huddle prep</title><bo
   }
   await popup.fill('#num', '999999'); await popup.keyboard.press('Enter');
   await popup.locator('#lookMsg').waitFor({ state: 'visible' });
-  h.ok((await popup.locator('#lookMsg').innerText()).includes('999999 is not a recognized ANDA'), 'popup: an unknown number is said plainly');
+  h.ok((await popup.locator('#lookMsg').innerText()).includes('999999 is not in the available records'), 'popup: an unknown number is said plainly');
   await popup.click('#t-draft');
   await popup.fill('#draftText', 'ANDA 216482 goal date is Oct 3, 2026.');
   await popup.click('#draftGo');
