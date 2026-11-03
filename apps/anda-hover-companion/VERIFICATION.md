@@ -432,6 +432,10 @@ Local results on this code: C# **557 passed, 8 skipped**; extension unit **31**;
 | **The simulation rehearses Outlook** with a made-up code and made-up messages; it contacts nothing | Simulation suite 9 | It proves the screens, not the connection |
 | **The documents are shorter and plainer, and say what the code does now** (the deck gained a Settings slide; the one-pager is still one page) | Rebuilt and checked page by page; the claims in them were re-read against this table | A reader has not yet judged whether they read well |
 
+CI: code commit **`bba1417`** (run 19): Linux and Windows jobs green. The Windows self-test is **47 PASS, 0 WARN, 0 FAIL, 1 SKIP** (the live Claude connection, by design), including
+`mouse-trigger` and the Settings window rendering at 492x788 px with the new sections; the Edge extension's 31 unit tests pass on both machines (read from the log). The run's own xUnit totals
+were not re-read; the 557 above are the local Linux count. The later commit changed only the simulation and this file, which the workflow does not watch.
+
 ### Defects caught in round 11
 
 | # | Finding | Found by | Disposition |
