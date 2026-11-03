@@ -7,7 +7,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <title>ANDA Companion (Notula) simulation</title>
 <style>
-/* Layout: a light desktop stage. Floating windows on wide screens; the same windows stack in one column on phones.
+/* Layout: a light desktop stage. Floating windows on wide screens; the same windows stack in one column on narrow ones. Small floating cards at every width except a phone held upright.
    One look only: the product is light-only by decision, so every color below is set explicitly (no dark variants). */
 :root{
   /* desktop chrome */
@@ -606,13 +606,17 @@ details.myapi input,details.myapi textarea{margin:0 0 6px}
   #appPick button{min-height:44px}
   .banner,#taskbar{position:fixed}
   .banner{padding-left:max(14px,env(safe-area-inset-left,0px))}
-  .app-win{position:fixed;left:12px !important;right:12px;width:auto !important;top:calc(var(--banner-h) + 12px) !important;max-height:calc(100dvh - var(--banner-h) - var(--tb-h) - 28px)}
+  .app-win{position:fixed;left:50% !important;translate:-50% 0;max-width:calc(100vw - 24px);top:calc(var(--banner-h) + 12px) !important;max-height:calc(100dvh - var(--banner-h) - var(--tb-h) - 28px)}
   #lookup{top:22% !important}
   #plib .cols{grid-template-columns:1fr}
   #plib .list{display:flex;flex-wrap:wrap}
   #taskbar .mid{display:none}
   #keys{bottom:calc(var(--tb-h) + 14px + env(safe-area-inset-bottom,0px))}
   .hide-narrow{display:none}
+}
+/* only on a phone held upright do the in-app windows span the screen */
+@media (max-width:600px){
+  .app-win{left:12px !important;right:12px;translate:none;width:auto !important;max-width:none}
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
 </style>
@@ -1244,8 +1248,9 @@ const steps = {};
 let current = null, pinnedCard = false, focusedWin = "mail", lastSel = null, deselecting = false;
 let pointer = { x: Math.round(innerWidth * 0.4), y: Math.round(innerHeight * 0.4) };
 let chipTimer = null, streamTimer = null, keysTimer = null, chipAccept = null;
-const coarse = matchMedia("(pointer:coarse)"), narrow = matchMedia("(max-width:1040px)");
-const isSheet = () => coarse.matches || narrow.matches;
+/* The card is a small floating window, as in the Windows app, at every width except a phone held upright (600 px or less), where it becomes a bottom sheet. */
+const coarse = matchMedia("(pointer:coarse)"), phone = matchMedia("(max-width:600px)");
+const isSheet = () => phone.matches;
 const card = $("card"), scrim = $("scrim"), chip = $("chip");
 const RING_C = 2 * Math.PI * 21;
 

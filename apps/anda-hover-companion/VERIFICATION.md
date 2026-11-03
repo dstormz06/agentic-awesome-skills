@@ -485,7 +485,7 @@ Not run in real Edge, on a managed computer, against a live model or Microsoft, 
 
 The owner asked for a triple check before a director's test and for everything to sound slightly polite and professional. Local results on this code: C# **663 passed, 8 skipped**;
 extension unit **31**; standalone browser test **68 checks**; native-messaging test **11 checks**; simulation suites 1 to 12 all pass, including a new look-by-viewport matrix of
-**1,090 checks** and a director's-walkthrough suite of **24 checks**; `npm run security:docs` passes.
+**1,090 checks**, a director's-walkthrough suite of **24 checks** and a card-and-window width suite of **254 checks**; `npm run security:docs` passes.
 
 | Claim | Evidence | Limit |
 |---|---|---|
@@ -507,6 +507,7 @@ and these notes, which do not start a build. The run's own xUnit totals were not
 | R60 | The old uppercase name survived in `START-HERE.txt` (the earlier search was case-sensitive) | A case-insensitive search | Renamed |
 | R61 | Adding "Please" made one capture notice longer than 50 characters, and two extension tests expected the old capital letter | The notice-length test and the extension test | Shorter wording; tests updated |
 | R62 | The round 12 note said "40 checks" for a suite that has 39 | A recount | Corrected |
+| R63 | **In the simulation the card became a full-width bottom sheet whenever the window was 1040 px wide or narrower, or the pointer was touch**, and the Settings, Lookup, Draft, Watch list and Prompt library windows stretched edge to edge at the same widths. A narrow preview pane (as in the Claude artifact viewer) therefore looked like a phone, and the card was "full width" almost every time. It is a floating 372 px card, as in the Windows app | The owner, while demoing; the earlier suites checked that the card stayed inside the window, not how wide it was | The bottom sheet and the full-width windows now apply only at 600 px or less (a phone held upright). Above that the card and the windows keep their own width and stay inside the window. New simulation suite 13 (254 checks: four looks and six windows at ten window sizes, touch and mouse) |
 
 ### What round 13 does not prove
 
