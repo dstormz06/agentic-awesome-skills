@@ -345,6 +345,9 @@ Local results on this code (read from the runs, not recalled): C# **446 passed, 
 native-messaging test **11 checks**; contrast audit of the extension palette 0 failures; `npm run validate` and `npm run security:docs` pass; a search of the app folder
 for key and token patterns finds only placeholder strings in the tests (`sk-ant-test-not-a-real-key`), no key or certificate files. The extension's private signing key is not in the repository.
 
+CI: commit **`292363e`** (run 16): Linux and Windows jobs green. On Windows the extension's 31 unit tests pass (read from the log) and the self-test is **46 PASS, 0 WARN, 0 FAIL, 1 SKIP**
+(the live Claude connection, by design); the real exe answered over stdin/stdout for the native host in **571 ms** on the first try. The run's own xUnit totals were not re-read; the 446 above are the local Linux count.
+
 ### Defects caught in round 9
 
 | # | Finding | Found by | Disposition |
