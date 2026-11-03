@@ -531,6 +531,9 @@ CI: commit **`01f2739`** (run 23): Linux and Windows jobs green. The Windows sel
 the hotkeys delivered as real keystrokes and Select & Peek working end to end. The extension's 31 unit tests pass on both machines, so the app and the extension still reproduce the shared fixture,
 including the eight new recognizer cases. The run's own xUnit totals were not re-read; the 663 above are the local Linux count.
 
+A second run, **run 24** (commit **`b5e5e87`**), rebuilt the Windows demo bundle after `DESIGN.md` was corrected (R69): Linux and Windows jobs green again, with the same Windows self-test result
+(**51 PASS, 0 WARN, 0 FAIL, 1 SKIP**). The demo bundle to download is the one from run 24, not run 23.
+
 ### Defects caught in round 14
 
 | # | Finding | Found by | Disposition |
