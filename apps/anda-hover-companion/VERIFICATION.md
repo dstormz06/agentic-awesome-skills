@@ -420,13 +420,13 @@ The four Bronze header alternatives and four new looks are **proposals** on a se
 ## Round 11: change things in the app, Outlook (optional), a pattern audit, names, and a writing pass
 
 Local results on this code: C# **557 passed, 8 skipped**; extension unit **31**; standalone browser test and native-messaging test both pass; simulation: all nine suites pass
-(the new one has **54 checks**); `npm run security:docs` passes.
+(the new one has **56 checks**); `npm run security:docs` passes.
 
 | Claim | Evidence | Limit |
 |---|---|---|
 | **Auto-hide is 10 seconds by default** in the app, the extension and the simulation | `AutoHideTests`, `SettingsTests`, the extension's default settings, simulation suites 4 and 9 | A real-mouse hover check on Windows is still open |
 | **The Claude model name is a Settings field**; an invalid name falls back to the default | `CustomizationTests` (factory, status text, damaged settings file) | Never run against the live API |
-| **Back up, restore and reset settings, lenses and quick replies**; no secret and no file location inside; a damaged, oversized or newer file changes nothing; out-of-range values are repaired | `CustomizationTests`, `Round11UiTests` (two-step reset), simulation suite 9 (a real file round trip, three refusals, a repaired file, reset) | The operating system's own save and open dialogs are not exercised by the tests |
+| **Back up, restore and reset settings, lenses and quick replies**; no secret and no file location inside; a damaged, oversized or newer file changes nothing; out-of-range values are repaired | `CustomizationTests`, `Round11UiTests` (two-step reset), simulation suite 9 (a real file round trip, pasted text, three refusals, a repaired file, reset) | The operating system's own save and open dialogs are not exercised by the tests |
 | **A Go to list** jumps to any Settings section | `Round11UiTests`, simulation suite 9 | |
 | **Outlook (optional, read-only, off by default)**: device sign-in, `Mail.Read` only, token in memory, a search only for a six-digit number, plain-text results, one plain sentence per failure | `OutlookTests` (44 cases) against a fake Microsoft server: pending, slow-down, declined and expired codes; both clouds use only their own addresses; the request is a GET with a Bearer token and no write scope; anything that is not exactly six ASCII digits makes no request; control characters are cleaned; 401, 403, 429 and 500 are explained without the server text; the token is absent from saved settings and from a backup; sign-out ends a sign-in in progress; a token expires by the clock; the card's drawer exists only when Outlook is on and searches only when opened | **Never run against Microsoft.** Written from Microsoft's public documentation. The US Government addresses are from memory and unverified. The `$search` result order and the consent an organization requires are unverified. A person with a real tenant must try it |
 | **The simulation rehearses Outlook** with a made-up code and made-up messages; it contacts nothing | Simulation suite 9 | It proves the screens, not the connection |

@@ -818,8 +818,11 @@ C:\work&gt; </div>
     </div>
     <input type="file" id="bkFile" accept=".json,application/json" hidden aria-label="Choose a backup file">
     <div class="hint" id="bkStatus" role="status" style="color:var(--c-ink2)"></div>
-    <details class="myapi" id="bkDetails"><summary>Backup text</summary><textarea id="bkText" rows="5" readonly aria-label="Backup text" style="font:11px ui-monospace,Consolas,monospace"></textarea></details>
-    <p class="hint">A backup holds your settings, lenses and quick replies, so a new PC or a colleague can start from yours. It never holds a secret or a file location. In this simulation the file is saved by your browser; the Windows app asks where to save it.</p>
+    <details class="myapi" id="bkDetails"><summary>Backup as text: copy it, or paste one to restore</summary>
+      <textarea id="bkText" rows="5" aria-label="Backup text" style="font:11px ui-monospace,Consolas,monospace"></textarea>
+      <div style="display:flex;flex-wrap:wrap;gap:8px"><button class="pill quiet" id="bkCopy" type="button">Copy</button><button class="pill quiet" id="bkRestoreText" type="button">Restore from this text</button></div>
+    </details>
+    <p class="hint">A backup holds your settings, lenses and quick replies, so a new PC or a colleague can start from yours. It never holds a secret or a file location. In this simulation your browser may block the file download; the text box above gives the same backup, so it can be copied and pasted back. The Windows app asks where to save a file.</p>
   </div>
 
   <!-- ===== quick replies ===== -->
@@ -2267,14 +2270,22 @@ $("bkSave").addEventListener("click", () => {
   const text = backupText();
   try{ const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type:"application/json" })); a.download = "anda-companion-backup.json"; document.body.appendChild(a); a.click(); a.remove(); }catch(e){}
   $("bkText").value = text; $("bkDetails").open = true;
-  $("bkStatus").textContent = "Saved as anda-companion-backup.json. If your browser blocked the download, copy the text below instead. It holds no secret.";
+  $("bkStatus").textContent = "Backup ready. A file download was tried; if your browser blocked it, copy the text below instead. It holds no secret.";
 });
 $("bkRestore").addEventListener("click", () => $("bkFile").click());
+function showImport(text){
+  const [ok, msg] = importBackup(text);
+  $("bkStatus").textContent = msg; $("bkStatus").style.color = ok ? "var(--c-good)" : "var(--c-bad)";
+}
+$("bkRestoreText").addEventListener("click", () => showImport($("bkText").value));
+$("bkCopy").addEventListener("click", () => {
+  if(navigator.clipboard) navigator.clipboard.writeText($("bkText").value).catch(() => {});
+  $("bkCopy").textContent = "Copied ✓"; setTimeout(() => { $("bkCopy").textContent = "Copy"; }, 1400);
+});
 $("bkFile").addEventListener("change", async e => {
   const f = e.target.files && e.target.files[0]; e.target.value = "";
   if(!f) return;
-  const [ok, msg] = importBackup(await f.text());
-  $("bkStatus").textContent = msg; $("bkStatus").style.color = ok ? "var(--c-good)" : "var(--c-bad)";
+  showImport(await f.text());
 });
 let resetTimer = null;
 $("bkReset").addEventListener("click", () => {
