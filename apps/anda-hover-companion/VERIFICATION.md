@@ -527,6 +527,10 @@ standalone browser test **68 checks**; native-messaging test **11 checks**; simu
 | **The page can be used from the keyboard alone**: every Tab stop is a visible control with a focus ring; the lookup box takes the keyboard at once; Tab moves through the card; Esc closes the card and the draft check; E expands the card and S copies the status | Simulation suite 16 (12 checks) | Chromium only |
 | **The number recognizer gives the same answer in the app, the extension and the simulation** on 20,000 generated strings, and the draft check gives the same findings in the app and the extension on 6,000 generated drafts, with no exception in either | A differential fuzz run on this code (generated corpus, seeded, kept out of the repository), plus eight new fixed cases in the shared golden fixture that the app, the extension and simulation suite 17 must all reproduce (38 cases) | Generated text, not real emails. The fuzz compares implementations with each other; it cannot show that all three are wrong in the same way |
 
+CI: commit **`01f2739`** (run 23): Linux and Windows jobs green. The Windows self-test is **51 PASS, 0 WARN, 0 FAIL, 1 SKIP** (the live Claude connection, by design), with all nineteen looks rendered,
+the hotkeys delivered as real keystrokes and Select & Peek working end to end. The extension's 31 unit tests pass on both machines, so the app and the extension still reproduce the shared fixture,
+including the eight new recognizer cases. The run's own xUnit totals were not re-read; the 663 above are the local Linux count.
+
 ### Defects caught in round 14
 
 | # | Finding | Found by | Disposition |
