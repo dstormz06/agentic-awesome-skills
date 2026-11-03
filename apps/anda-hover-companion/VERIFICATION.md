@@ -540,6 +540,7 @@ including the eight new recognizer cases. The run's own xUnit totals were not re
 | R66 | The simulation's lookup box took focus 30 ms after it opened, so very fast typing (or a script) was lost | A keyboard test | Focus is set at once, with the delayed focus kept as a backstop |
 | R67 | The simulation had no main landmark or top-level heading, jumped from a level-1 heading to level 3, and the options record had invalid table roles on a list and no language | The accessibility scan | A main landmark, one `h1`, level-2 headings for the windows, valid roles and an explicit page language |
 | R68 | "999999 is not a recognized ANDA" and "Not a recognized ANDA number." were blunt and imprecise: the first means the number is not in the available data, the second that nothing like an ANDA number was typed | A wording review | "999999 is not in the available records." and "Please enter a six-digit ANDA number." in the app, the extension, the native host and the simulation |
+| R69 | `DESIGN.md` (which is also copied into the Windows demo bundle) still quoted the old lookup message "Not a recognized ANDA" after R68 changed it, because the search for the old wording covered code and tests but not the documents | The owner asked whether the published artifacts and files were all current; the check of every sent file and of the documents against the code | `DESIGN.md` quotes the new messages; the search now covers every document type. A new CI run rebuilds the demo bundle so it carries the corrected file |
 
 ### What round 14 does not prove
 

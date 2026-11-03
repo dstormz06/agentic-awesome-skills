@@ -87,7 +87,7 @@ search (`Ctrl+Alt+Space`) as the path that always works.
 
 **Validation before anything renders:** captured text is matched against
 `^(?:ANDA[-\s#]?)?(\d{6})$`, then checked against a locally cached index of real ANDA
-numbers. Invalid → in manual modes, a 1-line inline whisper ("Not a recognized ANDA");
+numbers. Invalid → in manual modes, a 1-line inline whisper ("Please enter a six-digit ANDA number." in the lookup box; "<number> is not in the available records." for a well-formed number with no record);
 in dwell mode, **nothing at all** (silence beats a false alarm).
 
 ---
