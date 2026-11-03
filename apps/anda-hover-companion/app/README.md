@@ -159,6 +159,9 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   the cursor, flipped at an edge, clamped to the work area. A card taller than the screen scrolls.
 - **Recognizer** — six digits, optionally prefixed `ANDA`. A number labelled NDA, BLA, IND, DMF, MF
   or NDC is refused, because those are also six digits and showing the wrong card is worse than none.
+  This holds even when the digits follow the label with no space (`NDA No123456`). Only ASCII digits 0 to 9
+  count, so a full-width or other non-ASCII digit string is never read as a number. The extension and the browser
+  simulation use the same rule, and a shared fixture (`extension/tests/golden.json`) keeps the three in step.
 - **Accessibility** — every text ink meets WCAG AA (4.5:1) on every appearance, including the tinted header bands, seals and chips some looks add, enforced by tests. Compact boxes are mouse-and-hotkey only by design (they never take focus); the full card they open is keyboard-complete.
 
 Not built: a right-click item inside desktop programs (Windows does not allow it; the Edge extension provides it in Edge pages),
