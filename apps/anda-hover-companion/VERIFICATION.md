@@ -494,11 +494,15 @@ extension unit **31**; standalone browser test **68 checks**; native-messaging t
 | **The main demo steps work in the simulation**: the urgent peek, Full brief, the PSG and RLD lines, the offline pill, the 10-second auto-hide (and a pinned card staying), the invite on a healthy ANDA, an NDA number declining to open a card, the lookup box, the draft check, the tray menu, the Watch list and Settings | Simulation suite 12 (24 checks, one of which waits 11 seconds in real time) | Simulated shortcuts and clipboard; "Copy status" and the clipboard restore are covered by earlier suites, not this one; the Windows build was not re-run by hand |
 | **Wording is courteous and brief** across the app (window titles, hints, notices, errors), the extension, the simulation, the documents, the deck and the one-pager | A search of the whole project; the notice-length test (50 characters at most) still passes; golden strings changed in C#, JavaScript and `golden.json` together | A matter of taste: the owner may want some lines softer or firmer |
 
+CI: commit **`e550d41`** (run 22): Linux and Windows jobs green. The Windows self-test is **51 PASS, 0 WARN, 0 FAIL, 1 SKIP** (the live Claude connection, by design), including all
+nineteen looks' renders, the Settings window, the hotkeys delivered as real keystrokes and Select & Peek end to end. The later commits of this round change only the simulation, the Appearance Lab
+and these notes, which do not start a build. The run's own xUnit totals were not re-read; the 663 above are the local Linux count.
+
 ### Defects caught in round 13
 
 | # | Finding | Found by | Disposition |
 |---|---|---|---|
-| R58 | In the Rail look the "DAYS TO GOAL" caption was clipped in the app, and the simulation scrolled sideways at 1920, 1366 and 1280 px for one record | The new robustness test and the matrix | Wider column, a wrapped caption, a narrower label, and a phone rule |
+| R58 | In the Rail look the "DAYS TO GOAL" caption was clipped in the app, and the simulation scrolled sideways at 1920, 1366 and 1280 px for one record; on a 390 px phone the "FORECAST" label touched its date | The new robustness test, the matrix and a screenshot | Wider column, a wrapped caption, a narrower label, a phone rule and a slightly wider phone label |
 | R59 | The simulation's guide said "eight steps" above nine items | A fresh read | "nine steps" |
 | R60 | The old uppercase name survived in `START-HERE.txt` (the earlier search was case-sensitive) | A case-insensitive search | Renamed |
 | R61 | Adding "Please" made one capture notice longer than 50 characters, and two extension tests expected the old capital letter | The notice-length test and the extension test | Shorter wording; tests updated |
