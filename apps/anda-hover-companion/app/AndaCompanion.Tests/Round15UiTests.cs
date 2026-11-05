@@ -436,6 +436,36 @@ public class Round15UiTests : IClassFixture<HeadlessFixture>
     }
 
     [Fact]
+    public async Task Expanding_a_peek_to_the_full_card_shows_the_drawer_and_runs_only_agents_set_to_run_by_themselves()
+    {
+        var r = await _fx.Session.Dispatch(async () =>
+        {
+            ThemeManager.Apply(AppearanceId.A);
+            var quiet = new Handler(_ => Json("{\"answer\":\"- a\"}"));
+            var s1 = new AgentService(() => new[] { Hub() }, Env, quiet);
+            var w1 = NewCard(s1); w1.Show(Demo, new PixelPoint(40, 40), mini: true); Settle();
+            bool hiddenOnPeek = !w1.FindControl<Expander>("AgentsExpander")!.IsVisible;
+            Click(w1.FindControl<Button>("MoreBtn")!); await Task.Delay(120); Settle();
+            bool shownAfterExpand = w1.FindControl<Expander>("AgentsExpander")!.IsVisible;
+            int askedWhenSetToOnRequest = quiet.Sent;                                       // "only when I ask" stays that way
+            w1.Close(); Settle();
+
+            var auto = new Handler(_ => Json("{\"answer\":\"- a\"}"));
+            var s2 = new AgentService(() => new[] { Hub(a => a.AutoRun = AgentRun.OnFullCard) }, Env, auto);
+            var w2 = NewCard(s2); w2.Show(Demo, new PixelPoint(40, 40), mini: true); await Task.Delay(120); Settle();
+            int onPeek = auto.Sent;
+            Click(w2.FindControl<Button>("MoreBtn")!);
+            await Until(() => auto.Sent > 0); w2.Close(); Settle();
+            return (hiddenOnPeek, shownAfterExpand, askedWhenSetToOnRequest, onPeek, afterExpand: auto.Sent);
+        }, CancellationToken.None);
+        Assert.True(r.hiddenOnPeek);
+        Assert.True(r.shownAfterExpand);
+        Assert.Equal(0, r.askedWhenSetToOnRequest);
+        Assert.Equal(0, r.onPeek);                                                          // a peek never asks an agent
+        Assert.Equal(1, r.afterExpand);
+    }
+
+    [Fact]
     public async Task An_agent_is_asked_when_Run_is_pressed_its_words_are_shown_and_items_are_added_only_on_a_click()
     {
         var r = await _fx.Session.Dispatch(async () =>

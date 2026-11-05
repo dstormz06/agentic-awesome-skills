@@ -192,6 +192,7 @@ public partial class CardWindow : Window
     {
         _mini = false;
         SetMiniVisibility();
+        PrepareAgents();                    // the full card is stage two: the agents drawer appears now, and agents set to run by themselves are asked
         if (_record is not null) _ = LoadBriefAsync(_record);
         Dispatcher.UIThread.Post(ClampToScreen, DispatcherPriority.Loaded);
     }

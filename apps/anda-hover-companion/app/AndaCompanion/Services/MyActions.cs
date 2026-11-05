@@ -167,8 +167,8 @@ public static class ActionFill
     public static string CleanSelection(string? text)
     {
         var sb = new StringBuilder();
-        foreach (char c in text ?? "")
-            if (!char.IsControl(c) || c is '\n' or '\t') sb.Append(c == '\r' ? '\n' : c);
+        foreach (char c in (text ?? "").Replace("\r\n", "\n").Replace('\r', '\n'))
+            if (!char.IsControl(c) || c is '\n' or '\t') sb.Append(c);
         string t = sb.ToString().Trim();
         return t.Length > MaxSelectionChars ? t[..MaxSelectionChars] : t;
     }

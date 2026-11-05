@@ -54,7 +54,32 @@ public static class SettingsBackup
         CopyFrom(target, clean, skip: ThisPcOnly);
         lenses.ReplaceAll(backup.Lenses ?? new());
         replies.ReplaceAll(backup.Replies ?? new());
-        return (true, $"Restored your settings, {lenses.Prompts.Count} lenses and {replies.Replies.Count} quick replies. File locations on this PC were kept.");
+        string message = $"Restored your settings, {lenses.Prompts.Count} lenses and {replies.Replies.Count} quick replies. File locations on this PC were kept.";
+        return (true, message + SwitchOffConnections(target));
+    }
+
+    /// <summary>
+    /// A backup is a file anyone can edit or send, and a connection is an address plus the NAME of an environment variable whose value is sent to it.
+    /// So a restore never switches on a connection that sends data or a token off this PC: My API goes back to Auto and every agent comes back
+    /// switched off and not automatic. The address and variable name are kept, so the person can read them and switch the connection on themselves.
+    /// </summary>
+    public static string SwitchOffConnections(Settings target)
+    {
+        var notes = new List<string>();
+        if (target.Provider == ProviderChoice.MyApi)
+        {
+            target.Provider = ProviderChoice.Auto;
+            notes.Add("My API was not switched on: please check its address and token variable name in Settings, then choose My API again.");
+        }
+        int wereOn = 0;
+        foreach (var agent in target.Agents)
+        {
+            if (agent.Enabled || agent.AutoRun != AgentRun.Never) wereOn++;
+            agent.Enabled = false; agent.AutoRun = AgentRun.Never;
+        }
+        if (wereOn > 0)
+            notes.Add($"{(wereOn == 1 ? "1 agent" : wereOn + " agents")} came back switched off: please check {(wereOn == 1 ? "its" : "their")} address in Settings, then switch {(wereOn == 1 ? "it" : "them")} on.");
+        return notes.Count == 0 ? "" : " " + string.Join(" ", notes);
     }
 
     /// <summary>Back to what a new install starts with. File locations are kept, so the person's data is still found.</summary>

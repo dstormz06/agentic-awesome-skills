@@ -224,7 +224,7 @@ test.
 **Nothing too dark (product owner, 2026-11-02).** Beyond the light-only rule, no accent or progress fill may be near-black (a test enforces a minimum luminance on every look's accent and fill), and every progress fill must stay at least 3:1 against its track. Text inks stay dark enough for AA contrast; that is legibility, not decoration.
 
 **Light-only, by product decision.** All dark variants are retired (C was redesigned
-from dark glass into a light steel panel). A per-user **transparency slider** (85–100%,
+from dark glass into a light steel panel). A per-user **transparency slider** (30–100%,
 card surface only — text and status inks always stay opaque) provides the "sits
 lightly on my screen" quality dark themes used to serve.
 
@@ -418,6 +418,15 @@ permissions), makes no network request and uses no AI. It carries its own copy o
 golden file the app writes. With the app connected it uses the app's portfolio and settings through native messaging, for one
 extension ID only. The popup's tabs follow the ARIA tabs pattern (arrow keys, one tab stop); it has not been tried with a
 screen reader. Tested in Chromium, not yet in Edge.
+
+**Round 15: my actions, agents and the to-do list.** Three additions that keep the same rules as the card.
+*My actions*: the person writes a prompt (or a to-do line) and gives it a shortcut; the shortcut is the consent act, as for every other
+shortcut. A prompt that goes to an AI or an agent first shows the exact text and waits for Send; "send at once" is a per-action opt-in. *Agents*:
+Alert Hub and Triaging Agent are listed but off, because their addresses and formats are not known and are not guessed; each is reached through the
+same connector as "My API". A peek never asks an agent; the *Agent findings* drawer belongs to the full card and shows each answer as the agent's own
+words, never as a fact from the record. *To-do list*: one list of the person's own items and items derived from their data, worst first, refreshed only
+while it is open. Nothing is added to it by a reply: the person ticks the lines they want and presses a button. *Settings* is arranged in seven groups
+under headings, with a strong line between groups and a fine line between settings, so a long page can be scanned.
 
 ## 12. Engagement roadmap — seven features that make it the daily habit
 

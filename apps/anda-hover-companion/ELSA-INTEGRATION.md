@@ -2,6 +2,8 @@
 
 **Status: wired as a placeholder. There are two ways in, and the first needs no code.**
 
+**Agents use the same form.** Settings, My agents (round 15) takes the same fields for each agent, such as Alert Hub or Triaging Agent, whose addresses and formats are not known here. That is separate from Elsa: an agent is asked only for the card's facts, on a click or by the person's choice.
+
 **Fastest: describe Elsa's API in Settings.** Open **Settings, Connection, My API** and fill in the address, the header that carries the
 token, the *name* of the environment variable that holds the token, the model or agent name, the request body and where the reply text is.
 Press **Test**. Nothing is rebuilt and no code is written. The same form works for any other service, so a change of approved platform is a

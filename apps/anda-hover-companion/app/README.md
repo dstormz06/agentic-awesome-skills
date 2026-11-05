@@ -30,9 +30,28 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   new installs; an install that already saved a choice keeps it), **urgent items** (in whisper mode an
   at-risk or late ANDA opens a peek by itself), the weekend/holiday window, **My data**,
   **standing instructions** for the writing actions, **three rebindable shortcuts**, an optional
-  **usage log** (off by default), **card transparency slider** (85–100%; text always stays opaque),
+  **usage log** (off by default), **card transparency slider** (30–100%; text always stays opaque),
   companion lens picker, and the **connection panel** (Auto, Offline, Claude with its model name, or My API) with one-click Test.
-  A **Go to** list at the top jumps to any section.
+  A **Go to** list at the top jumps to any section. Settings is arranged in seven groups separated by lines: *Look and feel*, *How it
+  starts*, *Dates*, *My files and writing*, *My actions, agents and to-do list*, *AI and connections*, *Maintenance*.
+- **My actions** — your own prompt, AI request, agent request or to-do item, started by a keyboard shortcut you choose (or from the tray menu's
+  *My actions*). Four kinds: *Add to my to-do list*; *Fill my prompt and show it* (no AI is called; copy the text); *Ask my AI* (shows exactly what
+  would be sent and sends only after you press Send, unless you turn that off for that one action); *Run one of my agents*. Placeholders such as
+  `{number}`, `{drug}`, `{goal}`, `{forecast}` are filled from the card, and `{selection}` is the text you selected, sent to an AI or agent only
+  fenced as data. Up to eight; three starters, none with a shortcut. A press with nothing useful selected asks for an ANDA number instead of doing
+  nothing. `Services/MyActions.cs`, `UI/ActionRunner.cs`, `UI/ActionWindow`.
+- **My agents** — **Alert Hub** and **Triaging Agent** are listed, **switched off and without an address**: this app does not know their
+  addresses or message format and does not guess, so each needs the details your IT team gives you (address, token header, the *name* of the
+  environment variable that holds the token, request body, reply path). Your own agents use the same form (up to eight). An agent is asked only
+  when you press Run on a card or use its action, unless you set it to run by itself: when a full card opens, or only for an at-risk ANDA. A
+  peek never asks an agent, and an automatic agent cannot use `{selection}`. Its answer appears in the card's *Agent findings* drawer as the
+  agent's own words (plain text, never run, never passed on); an item joins your to-do list only when you press its button. A restored backup
+  brings every agent back switched off. `Services/Agents.cs`.
+- **To-do list** — *To-do list…* in the tray menu: your own items plus items from your data (at-risk ANDAs, weekend and holiday dates, action
+  items), by the same rules as the card and the watch list, worst first. Finish, snooze or delete; ticking off an item from your data keeps it done
+  until the situation changes. It refreshes itself only while it is open (every 15 s, 30 s, 1 min or 5 min, or never) and at once when the list
+  changes; a changed portfolio file is read at the next refresh; nothing runs when it is closed. It is kept in `todo.json`, plain text on this PC, and
+  is never sent anywhere. `Services/Todo.cs`, `UI/TodoWindow`.
 - **Compact boxes (L–O)** — a Strip, a Tile, a Ticket and a Badge, about 340 × 63–81, 196 × 123–145,
   300 × 64–68 and 150–185 × 38 px (measured on Windows), so a card never blankets the email being read. They make **no AI call**,
   **never take keyboard focus** (typing in the email continues undisturbed), and open their sibling
@@ -192,10 +211,10 @@ dotnet test AndaCompanion.Tests                              # everything (Windo
 dotnet test AndaCompanion.Tests --filter "Category!=Windows" # what runs on Linux/macOS
 ```
 
-663 cross-platform tests at the time of writing (recognizer, status line, GDUFA rules, the federal-holiday
+762 cross-platform tests at the time of writing (recognizer, status line, GDUFA rules, the federal-holiday
 calendar against OPM's dates, watch rules, urgency, draft check, portfolio and notes readers, writing prompts,
 hotkey parsing and registration with a fake API, brief fencing and fallback, provider selection, settings,
-contrast, placement, headless renders of the real windows) plus Windows-only tests that use real Win32 (clipboard snapshot/restore, hotkey registration and
+contrast, placement, the to-do list, custom actions, the agent connector, headless renders and interaction tests of the real windows) plus Windows-only tests that use real Win32 (clipboard snapshot/restore, hotkey registration and
 conflict, owner window). Tests never touch the real `%AppData%`.
 
 ## Self-test — evidence from the machine it runs on
@@ -207,7 +226,7 @@ AndaCompanion.exe --selftest report
 Renders every window to PNG, then exercises the Windows integration for real and writes
 `report\report.md` and `report.json`: hotkeys registered and delivered (it presses them), tray icon,
 Segoe UI present, clipboard snapshot/restore, card placement at five screen anchors, and an end-to-end
-Select & Peek from a real selection. Each check is PASS, WARN (this machine needs attention), SKIP
+Select & Peek from a real selection. It also renders the to-do list, an action window and the card's agents drawer, using canned text, so no agent or AI is contacted. Each check is PASS, WARN (this machine needs attention), SKIP
 (could not be tested, with the reason) or FAIL. It is hermetic (own data folder) and makes no network
 calls. Your clipboard is restored afterwards. Do not type or click while it runs.
 

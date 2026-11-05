@@ -17,7 +17,10 @@ generated. An optional AI-written brief is labelled "generated, verify before ac
 **Yours to adjust, with no rebuild.** Shortcuts, files, connection, writing style and look are all set in the app's
 Settings: your own keys; your Excel or CSV portfolio, notes folder and Drugs@FDA file; Offline, Claude (with its model
 name) or your own API described in a form; tone, sign-off and quick replies; nineteen looks. Settings can be backed up,
-restored and reset. A backup holds no secret and no file path.
+restored and reset. A backup holds no secret and no file path, and a restore never switches on a connection that sends data away.
+You can also write your own **actions** (a prompt, an AI request or an agent request on a shortcut you choose), keep a **to-do list** that
+includes what your data says needs a look, and register agents such as the division's Alert Hub and Triaging Agent. Those two are listed but
+not connected: their addresses and formats are needed from DPM IT.
 
 **Where it fits the work, and how each is measured** (hypotheses to confirm with the testers):
 
@@ -27,6 +30,7 @@ restored and reset. A backup holds no secret and no file path.
 | Draft check: a draft's numbers, dates and status against the record | Before sending a status email | Mismatches caught per week | Built |
 | Weekend and federal-holiday flags on goal and forecast dates | On the card, before a date is quoted | Near-misses caught early | Built |
 | Watch list: every ANDA with something worth a look, worst first | Start of day, opened on demand | Near-misses caught early | Built |
+| To-do list: your own items plus what your data says needs a look, worst first | Start of day, opened on demand; added to by your own shortcuts | Items finished on time | Built (one person, one PC) |
 | Huddle prep: a ranked glance at every ANDA on an agenda | Before the weekly huddle | Prep minutes per huddle | Next (concept only) |
 
 "Built" means it exists and passes automated tests. No tester has used it, and none of it has touched real data.

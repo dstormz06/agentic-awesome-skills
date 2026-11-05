@@ -294,8 +294,8 @@ public sealed class AgentService
     public static string Clean(string? reply)
     {
         var sb = new StringBuilder();
-        foreach (char c in reply ?? "")
-            if (!char.IsControl(c) || c is '\n' or '\t') sb.Append(c == '\r' ? '\n' : c);
+        foreach (char c in (reply ?? "").Replace("\r\n", "\n").Replace('\r', '\n'))
+            if (!char.IsControl(c) || c is '\n' or '\t') sb.Append(c);
         string t = Regex.Replace(sb.ToString(), @"\n{3,}", "\n\n").Trim();
         return t.Length > AgentRules.MaxFindingChars ? t[..AgentRules.MaxFindingChars].TrimEnd() + "…" : t;
     }

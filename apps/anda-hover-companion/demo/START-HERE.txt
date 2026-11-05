@@ -31,11 +31,17 @@ TRY IT
 MAKE IT YOURS (tray icon, then Settings)
   A "Go to" list at the top jumps to any section. Nothing here needs a rebuild.
   - Appearance: 19 looks (K is the default; L to O are small boxes that stay out of the way
-    of an email), auto-hide (10 seconds to start), transparency, how a card opens.
+    of an email), auto-hide (10 seconds to start), transparency (30 to 100 percent), how a card opens.
   - Shortcuts: your own keys, with a live note on any that another program already uses.
     An optional middle-click is off by default.
   - My data: your Excel or CSV portfolio, notes folder and Drugs@FDA file. They are only read.
   - My writing: tone, style, sign-off and quick replies.
+  - My actions: your own prompt, AI request or agent request on a shortcut you choose, or a
+    to-do item. Anything that goes to an AI or an agent shows you the exact text first.
+  - My agents: Alert Hub and Triaging Agent are listed but switched off, because their
+    addresses are not known here. Your IT team supplies them. Your own agents work the same way.
+  - My to-do list: the tray icon's "To-do list..." shows your items and what your data says needs
+    a look. It updates itself only while it is open.
   - Connection: Auto, Offline, Claude (with its model name) or your own API. The banner says
     "Connected" only after a request has really succeeded.
   - Outlook (optional, off by default): read-only mail about the open ANDA.

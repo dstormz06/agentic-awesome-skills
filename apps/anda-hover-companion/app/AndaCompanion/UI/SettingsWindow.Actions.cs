@@ -174,7 +174,7 @@ public partial class SettingsWindow
                 Id = unique, Name = $"My agent {n}", Prompt = "Tell me what you know about ANDA {number} ({drug}). One finding per line, each starting with \"- \".",
                 Api = new CustomApiSettings { Name = $"My agent {n}" },
             });
-            Apply(); RebuildAgents();
+            Apply(); RebuildAgents(); RebuildActions();
         };
         RebuildAgents();
     }
@@ -200,7 +200,7 @@ public partial class SettingsWindow
 
         var enabled = new CheckBox { IsChecked = a.Enabled, Content = new TextBlock { Text = "On" }, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center };
         enabled.IsCheckedChanged += (_, _) => { if (_loading) return; a.Enabled = enabled.IsChecked == true; Check(); Apply(); };
-        var name = Field("Agent name", "A name for the agent", a.Name, v => { a.Name = v.Trim(); a.Api.Name = a.Name; Check(); Apply(); });
+        var name = Field("Agent name", "A name for the agent", a.Name, v => { a.Name = v.Trim(); a.Api.Name = a.Name; Check(); Apply(); RebuildActions(); });
         var remove = new Button { Content = "Remove", IsEnabled = !preset };
         AutomationProperties.SetName(remove, "Remove the agent " + a.Name);
         remove.Click += (_, _) => { _settings.Agents.Remove(a); foreach (var act in _settings.MyActions.Where(x => x.AgentId == a.Id)) act.AgentId = ""; Apply(); RebuildAgents(); RebuildActions(); };

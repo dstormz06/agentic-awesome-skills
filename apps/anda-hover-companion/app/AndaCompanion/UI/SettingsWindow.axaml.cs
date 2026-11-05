@@ -331,6 +331,7 @@ public partial class SettingsWindow : Window
             BackupStatus.Text = message;
             if (!ok) return;
             Apply();
+            RebuildActions(); RebuildAgents();           // the editors now hold the restored lists, not the old ones
             BackupStatus.Text = message + " Please open Settings again to see the new values.";
             Avalonia.Threading.DispatcherTimer.RunOnce(Close, TimeSpan.FromSeconds(1.2));
         };
@@ -346,6 +347,7 @@ public partial class SettingsWindow : Window
             }
             SettingsBackup.Reset(_settings, _prompts, _replies);
             Apply();
+            RebuildActions(); RebuildAgents();
             BackupStatus.Text = "Everything is back to the starting values. Please open Settings again.";
             Avalonia.Threading.DispatcherTimer.RunOnce(Close, TimeSpan.FromSeconds(1.2));
         };

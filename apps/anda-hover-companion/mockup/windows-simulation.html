@@ -618,6 +618,49 @@ details.myapi input,details.myapi textarea{margin:0 0 6px}
 @media (max-width:600px){
   .app-win{left:12px !important;right:12px;translate:none;width:auto !important;max-width:none}
 }
+/* ===================== round 15: settings groups, my actions, agents, to-do list ===================== */
+#actwin,#todo{z-index:52}
+#lookup{z-index:53}
+#card.above{z-index:53}
+.app-win h3.grp{margin:0;padding:14px 0 2px;font-size:15px;font-weight:700;color:var(--c-ink)}
+.app-win hr.rule{border:0;height:2px;background:var(--c-line);margin:20px 0 0}
+.app-win hr.hair{border:0;height:1px;background:var(--c-hair);margin:12px 0 0}
+.bx{border:1px solid var(--c-line);border-radius:8px;padding:10px;margin:0 0 8px;display:grid;gap:6px}
+.bx .top{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center}
+.bx .two{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:8px}
+.bx select{padding-left:7px;padding-right:2px;font-size:12.5px}
+.bx .krow2{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center}
+.bx .stat{font-size:11.5px;color:var(--c-ink2)}
+.bx .bad{font-size:11.5px;color:var(--c-bad)}
+.bx details summary{cursor:pointer;font-size:12.5px;color:var(--c-ink2);padding:4px 0}
+.bx details input,.bx details textarea,.bx details select{margin:0 0 6px}
+.bx .ph{font-size:10.5px;color:var(--c-ink3)}
+#actwin{width:560px;padding:18px 20px;left:calc(50% - 280px);top:64px;max-height:calc(100% - var(--tb-h) - 80px);overflow:auto}
+#actwin textarea{min-height:110px;resize:vertical}
+#actwin .acts{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+#awSuggestList label.opt{align-items:flex-start;padding:2px 0}
+#todo{width:640px;padding:18px 20px;left:calc(50% - 320px);top:48px;max-height:calc(100% - var(--tb-h) - 64px);overflow:auto}
+#todo .tdadd{display:grid;grid-template-columns:1fr 150px auto;gap:8px;margin-top:10px}
+#todo .acts{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+#tdRows .gh{font-size:9.5px;font-weight:800;letter-spacing:.13em;color:var(--c-ink3);margin:14px 2px 2px}
+#tdRows .tr{display:grid;grid-template-columns:30px 52px 1fr auto;gap:6px;align-items:start;border-top:1px solid var(--c-hair);padding:6px 2px}
+#tdRows .tr .tag{font-size:9.5px;font-weight:800;margin-top:5px}
+#tdRows .tr .tag.bad{color:var(--c-bad)}#tdRows .tr .tag.warn{color:var(--c-warn)}#tdRows .tr .tag.info{color:var(--c-ink2)}#tdRows .tr .tag.you{color:var(--c-accent)}
+#tdRows .tr .t{min-width:0;font-size:13px}
+#tdRows .tr.done .t b{color:var(--c-ink3);text-decoration:line-through;font-weight:400}
+#tdRows .tr .t small{display:block;font-size:11px;color:var(--c-ink3)}
+#tdRows .tr .t small.bad{color:var(--c-bad)}
+#tdRows .tr .btns{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+#tdRows .tr .btns button{border:none;background:var(--c-mark);color:var(--c-accent);border-radius:99px;padding:3px 10px;font-size:11.5px;font-weight:650;min-height:28px}
+#x-agents .ag{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:8px}
+#x-agents .ag b{font-size:12.5px}
+#x-agents .ag button,#x-agents .it button{border:none;background:var(--c-mark);color:var(--c-accent);border-radius:99px;padding:3px 10px;font-size:11.5px;font-weight:650;min-height:28px}
+#x-agents .it{display:flex;gap:8px;align-items:flex-start;justify-content:space-between;margin-top:3px}
+#x-agents .st{font-size:12px;color:var(--c-ink2);white-space:pre-line}
+#x-agents .st.bad{color:var(--c-bad)}
+#x-agents .fine{font-size:10.5px;color:var(--c-ink3);margin-top:6px}
+@media (max-width:600px){#tdRows .tr{grid-template-columns:30px 1fr}#tdRows .tr .tag{grid-column:2;margin:5px 0 0}#tdRows .tr .t{grid-column:2}#tdRows .tr .btns{grid-column:2;justify-content:flex-start}}
+@media (max-width:1040px){#todo .tdadd{grid-template-columns:1fr}.bx .two,.bx .top{grid-template-columns:1fr}.bx .krow2{grid-template-columns:1fr auto auto}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
 </style>
 </head>
@@ -730,12 +773,16 @@ C:\work&gt; </div>
         <button class="btn key" type="button" id="keyDraft" aria-label="Press Control Alt D">Ctrl+Alt+D</button>
         <button class="btn" type="button" id="trayMenuBtn">Tray menu</button>
         <button class="btn" type="button" id="openSettingsBtn">Settings</button>
+        <button class="btn" type="button" id="openTodoBtn">To-do list</button>
       </div>
+      <div class="lbl">MY ACTIONS · THEIR SHORTCUTS</div>
+      <div class="row" id="actKeys" aria-label="Press one of your own shortcuts"></div>
       <div class="lbl">WHAT IF…</div>
       <label class="sw"><input type="checkbox" id="swConflict"> Another program already owns <span data-key="peek"></span></label>
       <label class="sw"><input type="checkbox" id="swConflictLook"> Another program already owns <span data-key="look"></span></label>
       <label class="sw"><input type="checkbox" id="swToday"> Pretend today is Oct 1, 2026 (goal dates get close)</label>
       <label class="sw"><input type="checkbox" id="swAi"> Claude access is approved (sample brief)</label>
+      <label class="sw"><input type="checkbox" id="swAgentFail"> An agent cannot be reached (rehearse a failure)</label>
       <p class="fine">Simulated here: the desktop, look-alike app windows (no logos, no real products), the hotkey and clipboard hand-off, the sample brief. No data leaves this page.</p>
     </div>
   </section>
@@ -781,22 +828,33 @@ C:\work&gt; </div>
   <div class="app-win" id="settings" role="dialog" aria-label="Settings">
     <div class="hdr"><h2>Settings</h2><button class="pill" id="setDone" type="button">Done</button></div>
     <div class="connbar" id="setBanner" role="status"><i></i><div><b id="setBannerLabel"></b><span id="setBannerText"></span></div></div>
-    <div style="display:flex;align-items:center;gap:10px;margin:0 0 6px"><span style="color:var(--c-ink2);font-size:12.5px">Go to</span><select id="setJump" aria-label="Go to a section of Settings" style="width:auto;max-width:100%"></select></div>
+    <div style="display:flex;align-items:center;gap:10px;margin:0 0 6px"><span style="color:var(--c-ink2);font-size:12.5px;flex:none;white-space:nowrap">Go to</span><select id="setJump" aria-label="Go to a section of Settings" style="width:auto;max-width:100%"></select></div>
+    <h3 class="grp">Look and feel</h3>
     <div class="lbl">APPEARANCE · FULL CARD</div>
     <div class="wrap" id="setLook"></div>
+    <hr class="hair">
     <div class="lbl">APPEARANCE · COMPACT BOX</div>
     <div class="wrap" id="setCompact"></div>
     <p class="hint">Compact boxes are small enough to leave an open email readable. They make no AI call and never take keyboard focus: click one, or press the hotkey again on the same number, to open its full card. All looks share identical anatomy and meaning. This is preference, never information.</p>
+    <hr class="hair">
+    <div class="lbl">CARD TRANSPARENCY</div>
+    <div style="display:flex;align-items:center;gap:10px"><input type="range" id="setOp" min="30" max="100" step="1" value="100" aria-label="Card transparency"><span id="setOpV" style="width:42px;text-align:right">100%</span></div>
+    <p class="hint">100% is solid; 30% lets what is behind the card show through. Only the card surface becomes translucent. Text and status colors stay fully opaque, but on a busy background they are easier to read at a higher value.</p>
+    <hr class="hair">
     <div class="lbl">AUTO-HIDE</div>
     <div class="wrap" id="setAuto"></div>
     <p class="hint">Hides a card or box after this long with no mouse or key activity. Never while your pointer is over it, while it is pinned, or while the drawer is open.</p>
+    <hr class="rule">
+    <h3 class="grp">How it starts</h3>
     <div class="lbl">CONSENT MODEL</div>
     <div id="setConsent"></div>
     <label class="opt"><input type="checkbox" id="setUrgent" checked> Open a peek by itself for an at-risk or late ANDA (whisper mode only)</label>
     <p class="hint">Still starts only from your own selection and shortcut. A peek makes no AI call. Off: the invite always waits for your click.</p>
-    <div class="lbl">WEEKEND &amp; HOLIDAY WATCH</div>
-    <div style="display:flex;align-items:center;gap:10px"><span style="color:var(--c-ink2);font-size:12.5px">Flag dates within</span><select id="setLead" aria-label="Business days around a federal holiday" style="width:auto"></select><span style="color:var(--c-ink2);font-size:12.5px">business days of a federal holiday</span></div>
-    <p class="hint">Weekends and federal holidays are always flagged (U.S. federal calendar, OPM). This only shows you the date; it never says how a goal date rule applies.</p>
+    <hr class="hair">
+    <div class="lbl">SELECT &amp; PEEK</div>
+    <label class="opt"><input type="checkbox" id="setCapture" checked> Read my selection by copying it, then put my clipboard back</label>
+    <p class="hint">Off: <span data-key="peek"></span> opens the lookup box instead and no keystroke is ever sent. Terminals are always skipped, because Ctrl+C there interrupts a running command.</p>
+    <hr class="hair">
     <div class="lbl">SHORTCUTS · CLICK A BOX, THEN PRESS THE KEYS</div>
     <div class="sim-note">If a shortcut does nothing here, your computer or another program probably uses it before this page can see it (many apps claim a global shortcut). Pick another below, or use the on-screen buttons or the tray icon, which always work.</div>
     <div class="krow"><span>Select &amp; Peek</span><input type="text" id="keyBoxPeek" readonly aria-label="Select and Peek shortcut"><button class="pill quiet" type="button" data-keyreset="peek">Reset</button></div>
@@ -804,14 +862,19 @@ C:\work&gt; </div>
     <div class="krow"><span>Check a draft</span><input type="text" id="keyBoxDraft" readonly aria-label="Check a draft shortcut"><button class="pill quiet" type="button" data-keyreset="draft">Reset</button></div>
     <div class="keystatus" id="keyStatus" role="status"></div>
     <p class="hint">Please use at least two modifiers, one of them Ctrl or Alt, so everyday shortcuts like Ctrl+C keep working. On keyboards where Ctrl+Alt is AltGr, choose Ctrl+Shift instead. Never the Windows key.</p>
+    <hr class="hair">
     <div class="lbl">OTHER WAYS TO START IT</div>
     <label class="opt"><input type="checkbox" id="setMiddle"> Middle-click (wheel button) on selected text starts Select &amp; Peek</label>
     <div class="wrap" id="setMiddleMod"></div>
     <p class="hint">Off by default. In the Windows app it uses a mouse hook that sees only the middle button, never the pointer position or any text, and the click still reaches the program under it. Some security software flags mouse hooks. A plain middle-click scrolls or opens links in many programs, so Ctrl is recommended. Here it works on the text in the windows below; the page only stops the browser's own scroll mode. The shortcuts and the tray icon always work.</p>
-    <div class="lbl">SELECT &amp; PEEK</div>
-    <label class="opt"><input type="checkbox" id="setCapture" checked> Read my selection by copying it, then put my clipboard back</label>
-    <p class="hint">Off: <span data-key="peek"></span> opens the lookup box instead and no keystroke is ever sent. Terminals are always skipped, because Ctrl+C there interrupts a running command.</p>
-        <div class="lbl">MY DATA · YOUR OWN FILES, READ-ONLY, ON THIS PC</div>
+    <hr class="rule">
+    <h3 class="grp">Dates</h3>
+    <div class="lbl">WEEKEND &amp; HOLIDAY WATCH</div>
+    <div style="display:flex;align-items:center;gap:10px"><span style="color:var(--c-ink2);font-size:12.5px">Flag dates within</span><select id="setLead" aria-label="Business days around a federal holiday" style="width:auto"></select><span style="color:var(--c-ink2);font-size:12.5px">business days of a federal holiday</span></div>
+    <p class="hint">Weekends and federal holidays are always flagged (U.S. federal calendar, OPM). This only shows you the date; it never says how a goal date rule applies.</p>
+    <hr class="rule">
+    <h3 class="grp">My files and writing</h3>
+    <div class="lbl">MY DATA · YOUR OWN FILES, READ-ONLY, ON THIS PC</div>
     <div class="sim-note">Simulated here. In the Windows app, Choose… opens a file picker and the file stays on your PC and is only ever read. Nothing is read or sent from this page, so do not use real files with it.</div>
     <div class="frow"><input type="text" id="dataPortfolio" readonly placeholder="Your ANDA portfolio (.xlsx or .csv). Empty = fictional demo data." aria-label="Portfolio file"><button class="pill quiet" id="dataPortfolioPick" type="button">Choose…</button><button class="pill quiet" id="dataPortfolioClear" type="button">Clear</button></div>
     <div class="hint" id="dataPortfolioStatus" style="margin:0 0 8px"></div>
@@ -820,18 +883,44 @@ C:\work&gt; </div>
     <div class="frow"><input type="text" id="dataUrl" placeholder="Optional: the https address of the Drugs@FDA data file, to update it from FDA" aria-label="Drugs@FDA data file address"><button class="pill quiet" id="dataUpdate" type="button">Update now</button><span></span></div>
     <div class="hint" id="dataRefStatus" style="margin:0 0 4px"></div>
     <p class="hint">Update now fetches that one address, only when you press it, and keeps the file only if it really is a Drugs@FDA data file. It needs the network and is the only thing here that does. The address is the file link on FDA's Drugs@FDA data files page; the app does not guess it. The PSG line has no official source connected: it shows a date from a PSG column in your own sheet, or says it is not available.</p>
+    <hr class="hair">
     <div class="lbl">MY WRITING · TONE, STYLE, SIGN-OFF, QUICK REPLIES</div>
     <div class="wrap" id="setTone"></div>
     <textarea id="setStyle" rows="3" placeholder="Your style in your own words. For example: plain words, no jargon, keep it under 120 words." aria-label="My writing instructions"></textarea>
     <input type="text" id="setSignoff" placeholder="How you sign off, for example: Thanks, Pat" aria-label="My sign-off" style="margin-top:6px">
     <div class="frow" style="margin-top:6px"><span id="repliesSummary" style="font-size:12px;color:var(--c-ink2)"></span><button class="pill quiet" id="repliesManage" type="button">Quick replies…</button><span></span></div>
     <p class="hint">Tone, style and sign-off steer Proofread, Rewrite and Fact-check (only once a model is approved). They can never override the fixed rules: no changed numbers or dates, no invented facts. Quick replies are templates filled from the card (no AI): the Quick replies button on a card copies one with its numbers and dates filled in.</p>
-    <div class="lbl">CARD TRANSPARENCY</div>
-    <div style="display:flex;align-items:center;gap:10px"><input type="range" id="setOp" min="85" max="100" step="1" value="100" aria-label="Card transparency"><span id="setOpV" style="width:42px;text-align:right">100%</span></div>
-    <p class="hint">Only the card surface becomes translucent. Text and status colors stay fully readable.</p>
+    <hr class="rule">
+    <h3 class="grp">My actions, agents and to-do list</h3>
+    <div class="lbl">MY ACTIONS · YOUR OWN PROMPT, AGENT OR TO-DO ITEM, ON YOUR OWN SHORTCUT</div>
+    <div class="sim-note">Simulated here. Nothing is sent from this page: an AI or agent reply below is a labelled stand-in, never a real answer.</div>
+    <div id="actList"></div>
+    <div class="wrap"><button class="pill quiet" id="actAdd" type="button">Add an action</button></div>
+    <div class="keystatus" id="actStatus" role="status"></div>
+    <p class="hint">Select a number anywhere, then press the shortcut you chose for an action. Add to my to-do list puts it on your list. Fill my prompt shows your own prompt with the card's facts filled in, ready to copy; no AI is called. Ask my AI and Run an agent show exactly what would be sent, and send only after you press Send (unless you turn that off for that one action). Every action is also in the tray menu.</p>
+    <hr class="hair">
+    <div class="lbl">MY AGENTS · ALERT HUB, TRIAGING AGENT AND YOUR OWN</div>
+    <div id="agList"></div>
+    <div class="wrap"><button class="pill quiet" id="agAdd" type="button">Add an agent</button></div>
+    <div class="keystatus" id="agStatus" role="status"></div>
+    <p class="hint">An agent is any service you can reach with an address. Alert Hub and Triaging Agent are listed so they can be set up: this app does not know their addresses or message format and does not guess them, so each stays off until you enter the details your IT team gives you. Nothing is sent for an agent that is off. The token stays in the environment variable you name and is never saved by this app.</p>
+    <p class="hint">An agent is asked only when you press Run on a card or use its action, unless you set it to run by itself. By itself means: when a full card opens, or only when the ANDA is at risk. A peek never asks an agent. Its answer appears in the card's drawer as the agent's own words, and nothing joins your to-do list until you press its button.</p>
+    <hr class="hair">
+    <div class="lbl">MY TO-DO LIST · LIVE, FROM YOUR ITEMS AND YOUR DATA</div>
+    <label class="opt"><input type="checkbox" id="todoAuto" checked> Include items from my data (at-risk ANDAs, weekend and holiday dates, action items)</label>
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px"><span style="color:var(--c-ink2);font-size:12.5px">While the list is open, refresh every</span><div class="wrap" id="todoRefresh"></div></div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">
+      <button class="pill quiet" id="todoOpen" type="button">Open the to-do list</button>
+      <button class="pill quiet" id="todoClearSet" type="button">Clear finished items</button>
+    </div>
+    <div class="keystatus" id="todoStatus" role="status"></div>
+    <p class="hint">The list updates itself only while it is open: at the interval you chose, and at once when you change the list. A changed portfolio file is picked up at the next refresh. When it is closed nothing runs. In the Windows app it is kept in a plain file on this PC (todo.json) that you can read, and is never sent anywhere; here it lives only in this page's memory. Items from your data follow the same rules as the card, so the two cannot disagree; ticking one off keeps it done until the date or the situation changes.</p>
+    <hr class="rule">
+    <h3 class="grp">AI and connections</h3>
     <div class="lbl">COMPANION LENS · PROMPT LIBRARY</div>
     <div style="display:flex;gap:8px"><select id="setLens" aria-label="Companion lens"></select><button class="pill quiet" id="setManage" type="button">Manage…</button></div>
     <p class="hint">Your own stored prompt steers the brief's emphasis. A lens can never override grounding.</p>
+    <hr class="hair">
     <div class="lbl">CONNECTION · WHICH API, IF ANY</div>
     <div class="wrap" id="setProvider"></div>
     <div style="display:flex;gap:10px;align-items:flex-start"><div id="setConn" style="flex:1;color:var(--c-ink2);font-size:12px"></div><button class="pill" id="setTest" type="button">Test</button></div>
@@ -847,6 +936,7 @@ C:\work&gt; </div>
       <p class="hint">Nothing here is a secret: the token stays in the environment variable you name and is never saved by the app. Only https:// addresses are used (http:// for localhost). The body shown is only an example of one common shape; use the shape your own service documents. A reply that does not have text at the path is reported without showing what came back. In this simulation the form is checked but nothing is ever sent.</p>
     </details>
     <p class="hint">Auto uses a key (ANTHROPIC_API_KEY) or Elsa setup from the environment if one exists, and is otherwise offline. Offline never sends anything. The app is fully functional offline. The banner at the top says Connected only after a request has really succeeded; this page can never make one, so it never says Connected.</p>
+    <hr class="hair">
     <div class="lbl">OUTLOOK · OPTIONAL, READ-ONLY</div>
     <div class="sim-note">Rehearsal only. This page never contacts Microsoft and has no mailbox. Sign in shows the steps with a made-up code, and the card shows made-up messages.</div>
     <label class="opt"><input type="checkbox" id="olOn"> Show recent Outlook mail about the open ANDA</label>
@@ -865,6 +955,8 @@ C:\work&gt; </div>
     <p class="hint">Off by default. When on, an open card can list the latest messages that mention its six-digit number: sender, subject, date and a short preview. It is read-only and searches only for that number.</p>
     <p class="hint">You sign in on Microsoft's own page, so the app never sees your password. The sign-in stays in memory and ends when the app closes. Mail is never saved and never sent to an AI service.</p>
     <p class="hint">Your organization must register an app and allow mail access. Please ask your IT service desk for its Application (client) ID. Written from Microsoft's public documentation and tested against a stand-in server only, not against Microsoft.</p>
+    <hr class="rule">
+    <h3 class="grp">Maintenance</h3>
     <div class="lbl">BACK UP, RESTORE, RESET</div>
     <div style="display:flex;flex-wrap:wrap;gap:8px">
       <button class="pill quiet" id="bkSave" type="button">Save a backup…</button>
@@ -914,6 +1006,48 @@ C:\work&gt; </div>
     <p class="hint" id="drAiHint">Off until a model is approved and connected. When on, a preview shows the exact text first, nothing is sent until you press Send, and the result is Copy only: the app never pastes or sends for you.</p>
     <div class="lbl">RESULT</div>
     <div id="drOut" aria-live="polite"></div>
+  </div>
+
+  <!-- ===== my action (prompt, AI or agent) ===== -->
+  <div class="app-win" id="actwin" role="dialog" aria-label="My action">
+    <div class="hdr"><div><h2 id="awTitle">My action</h2><div class="hint" id="awSub" style="margin:2px 0 0"></div></div><button class="pill" id="awClose" type="button">Close</button></div>
+    <div class="lbl" id="awPromptH">YOUR PROMPT</div>
+    <textarea id="awPrompt" readonly rows="6" aria-label="The prompt"></textarea>
+    <p class="hint" id="awNote"></p>
+    <div class="acts">
+      <button class="pill quiet" id="awCopyPrompt" type="button">Copy prompt</button>
+      <button class="pill" id="awSend" type="button" hidden>Send</button>
+    </div>
+    <div id="awResult" hidden>
+      <hr class="hair">
+      <div class="lbl" id="awResultH">THE REPLY</div>
+      <textarea id="awResultBox" readonly rows="6" aria-label="The result"></textarea>
+      <div class="acts"><button class="pill quiet" id="awCopyResult" type="button">Copy result</button></div>
+      <div id="awSuggest" hidden>
+        <div class="lbl">SUGGESTED TO-DO ITEMS · TICK THE ONES YOU WANT</div>
+        <div id="awSuggestList"></div>
+        <button class="pill quiet" id="awAddTodo" type="button" disabled>Add ticked items to my to-do list</button>
+      </div>
+    </div>
+    <div class="keystatus" id="awStatus" role="status"></div>
+  </div>
+
+  <!-- ===== to-do list ===== -->
+  <div class="app-win" id="todo" role="dialog" aria-label="To-do list">
+    <div class="hdr"><h2>To-do list</h2><button class="pill" id="tdDone" type="button">Done</button></div>
+    <p class="hint" id="tdSummary" style="margin:0"></p>
+    <p class="hint" id="tdLive" style="margin:2px 0 8px"></p>
+    <hr class="hair">
+    <div class="tdadd">
+      <input type="text" id="tdAddIn" maxlength="200" placeholder="Add something to do…" aria-label="New to-do item">
+      <select id="tdDue" aria-label="Due date for the new item"></select>
+      <button class="pill" id="tdAdd" type="button">Add</button>
+    </div>
+    <div class="keystatus" id="tdAddStatus" role="status"></div>
+    <div id="tdRows"></div>
+    <hr class="hair">
+    <div class="acts"><button class="pill quiet" id="tdRefresh" type="button">Refresh now</button><button class="pill quiet" id="tdClear" type="button">Clear finished</button></div>
+    <p class="hint" id="tdFooter"></p>
   </div>
 
   <!-- ===== watch list and page scan ===== -->
@@ -992,6 +1126,7 @@ C:\work&gt; </div>
     <details><summary>Pending &amp; urgent items <span id="x-pending-n" style="font-weight:400;color:var(--c-ink3)"></span></summary><div class="cnt" id="x-pending"></div></details>
     <details><summary>Recent project notes</summary><div class="cnt" id="x-notes"></div></details>
     <details id="x-mail-d" hidden><summary>Recent Outlook mail <span id="x-mail-n" style="font-weight:400;color:var(--c-ink3)"></span></summary><div class="cnt" id="x-mail"></div></details>
+    <details id="x-agents-d" hidden><summary><span id="x-agents-t">Agent findings</span></summary><div class="cnt" id="x-agents"></div></details>
     <details><summary>Forecast &amp; assumptions</summary><div class="cnt" id="x-forecast"></div></details>
     <details><summary>Sister / related ANDAs</summary><div class="cnt" id="x-sisters"></div></details>
   </div>
@@ -1246,6 +1381,7 @@ const state = { dir:"k", look:"k", form:"full", autoHide:10, mode:"whisper", esc
   myApi:{ name:"My API", endpoint:"", header:"Authorization", scheme:"Bearer", env:"", model:"", template:"", path:"choices[0].message.content" },
   replies:null };
 const steps = {};
+const APP_WINS = ["lookup", "plib", "settings", "draft", "wlist", "replies", "actwin", "todo"];
 let current = null, pinnedCard = false, focusedWin = "mail", lastSel = null, deselecting = false;
 let pointer = { x: Math.round(innerWidth * 0.4), y: Math.round(innerHeight * 0.4) };
 let chipTimer = null, streamTimer = null, keysTimer = null, chipAccept = null;
@@ -1387,6 +1523,7 @@ function fill(id){
   $("chipSister").textContent = "Sister ANDA · " + d.sisters.length; $("chipSister").hidden = d.sisters.length === 0;
   $("chipNotes").textContent = "Notes · " + d.notes.length;
   paintRefs(id);
+  paintAgents();
 }
 function renderBrief(id){
   clearInterval(streamTimer);
@@ -1429,10 +1566,12 @@ function openCard(id, opts = {}){
   current = id; fill(id); setPin(false);
   card.classList.remove("expanded");
   card.classList.toggle("mini", !!opts.mini);
+  card.classList.toggle("above", !!opts.above);    /* opened from the to-do list: in front of that window */
   card.classList.toggle("sheet", isSheet());
   card.style.display = "block";
   /* Final content first, then place: the brief changes the height, and a card placed before it arrives can overflow. */
   if(opts.mini) $("c-ai").textContent = ""; else renderBrief(id);
+  prepareAgents();                                 /* the agents drawer belongs to the full card; a peek never asks an agent */
   if(isSheet()){ scrim.style.display = "block"; card.style.left = card.style.top = ""; card.style.maxHeight = ""; }
   else { scrim.style.display = "none"; limitHeight(); placeCard(opts.anchor || pointer); }
   if(!opts.mini && $("watchSlot").style.display !== "none") markStep("watch");
@@ -1445,7 +1584,7 @@ function closeCard(){
   clearInterval(autoTimer);
   clearInterval(streamTimer); clearTimeout(streamTimer);
   card.style.display = "none"; scrim.style.display = "none";
-  setPin(false); card.classList.remove("expanded", "mini"); current = null;
+  setPin(false); card.classList.remove("expanded", "mini", "above"); current = null; $("x-agents-d").hidden = true;
 }
 function setPin(v){
   pinnedCard = v; card.classList.toggle("pinned", v); $("pinBtn").classList.toggle("on", v);
@@ -1488,8 +1627,8 @@ chip.addEventListener("click", () => { const go = chipAccept; hideChip(); if(go)
 /* ---------------- keystroke overlay ---------------- */
 function showKeys(kind, extra){
   const k = $("keys");
-  const parts = keyVia === "middle" ? (state.middleMod === "None" ? [] : [state.middleMod]).concat("Middle-click") : state.keys[kind].split("+");
-  k.innerHTML = `<span>${parts.map(p => `<kbd>${p}</kbd>`).join(" + ")}</span>` + (extra ? `<span>${extra}</span>` : "");
+  const parts = keyVia === "middle" ? (state.middleMod === "None" ? [] : [state.middleMod]).concat("Middle-click") : (state.keys[kind] || kind).split("+");
+  k.innerHTML = `<span>${parts.map(p => `<kbd>${escHTML(p)}</kbd>`).join(" + ")}</span>` + (extra ? `<span>${escHTML(extra)}</span>` : "");
   k.classList.add("show"); clearTimeout(keysTimer);
   keysTimer = setTimeout(() => k.classList.remove("show"), 2000);
 }
@@ -1583,11 +1722,13 @@ document.addEventListener("keydown", e => {
   if(combo){
     const kind = Object.keys(state.keys).find(k => state.keys[k] === combo);
     if(kind){ e.preventDefault(); hotkey(kind, "keyboard"); return; }
+    const act = state.actions.find(a => a.enabled && a.hotkey && a.hotkey === combo);
+    if(act){ e.preventDefault(); actionHotkey(act, "keyboard"); return; }
   }
   if(e.key === "Escape"){
     if($("replyMenu").style.display === "block"){ $("replyMenu").style.display = "none"; return; }
     if(menuOpen() || $("flyout").style.display === "block"){ closeMenus(); return; }
-    closeCtx(); for(const id of ["lookup", "plib", "settings", "draft", "wlist", "replies"]) if($(id).style.display === "block"){ closeApp(id); return; }
+    closeCtx(); for(const id of APP_WINS) if($(id).style.display === "block"){ closeApp(id); return; }
     hideChip(); if(compact.style.display === "block") closeCompact(); if(card.style.display === "block") closeCard(); return;
   }
   if(card.style.display !== "block" || /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
@@ -1606,16 +1747,18 @@ document.querySelectorAll(".apps .pick").forEach(el => el.addEventListener("dblc
 
 /* ---------------- lookup ---------------- */
 let lookupAnchor = null;
-function openLookup(anchor){
-  closeMenus(); lookupAnchor = anchor || pointer;
+function openLookup(anchor, handler){
+  closeMenus(); lookupAnchor = anchor || pointer; lookupHandler = handler || null;
   const box = $("lookup"); box.style.display = "block"; $("lookupErr").style.display = "none"; $("lookupIn").value = "";
   $("lookupIn").focus(); setTimeout(() => $("lookupIn").focus(), 30);
 }
 function submitLookup(){
   const n = extractNumber($("lookupIn").value);
   if(!n){ $("lookupErr").style.display = "block"; return; }
+  const onNumber = lookupHandler; lookupHandler = null;
   closeApp("lookup");
   if(!DATA[n]){ showNotice(`${n} is not in the available records.`, lookupAnchor); return; }
+  if(onNumber){ onNumber(n); return; }
   markStep("look");
   openCard(n, { mini: state.mode === "peek", anchor: lookupAnchor });
 }
@@ -1714,10 +1857,14 @@ $("wlDone").addEventListener("click", () => closeApp("wlist"));
 
 /* ---------------- app windows ---------------- */
 function showApp(id){ closeMenus(); $(id).style.display = "block"; if(isSheet()){ scrim.style.display = "block"; } }
-function closeApp(id){ $(id).style.display = "none"; if(card.style.display !== "block") scrim.style.display = "none"; }
+function closeApp(id){
+  $(id).style.display = "none"; if(card.style.display !== "block") scrim.style.display = "none";
+  if(id === "todo") tdStop();                      /* nothing runs once the list is closed */
+  if(id === "actwin") awToken++;                   /* a reply that arrives after the window is closed is dropped */
+}
 scrim.addEventListener("click", () => {
   if(card.style.display === "block" && !pinnedCard) closeCard();
-  ["lookup", "plib", "settings", "draft", "wlist", "replies"].forEach(id => { if($(id).style.display === "block" && id !== "settings") closeApp(id); });
+  APP_WINS.forEach(id => { if($(id).style.display === "block" && id !== "settings") closeApp(id); });
   scrim.style.display = "none";
 });
 $("setDone").addEventListener("click", () => closeApp("settings"));
@@ -1799,7 +1946,8 @@ function openMenu(){
   menu.innerHTML = ""; let sub = false;
   const item = (label, key, fn, o = {}) => {
     const b = document.createElement("button"); b.type = "button"; b.setAttribute("role", "menuitem");
-    b.innerHTML = `<span>${label}</span>` + (key ? `<span class="k">${key}</span>` : "");
+    const lab = document.createElement("span"); lab.textContent = label; b.append(lab);
+    if(key){ const k = document.createElement("span"); k.className = "k"; k.textContent = key; b.append(k); }
     if(o.disabled) b.disabled = true;
     if(o.checked !== undefined) b.setAttribute("aria-checked", o.checked);
     b.addEventListener("click", () => { if(fn) fn(); if(!o.keep) closeMenus(); });
@@ -1809,6 +1957,7 @@ function openMenu(){
     item("Lookup ANDA…", state.keys.look, () => openLookup(pointer)),
     item("Check a draft…", state.keys.draft, () => openDraft("")),
     item("Watch list…", "", () => openWatchList()),
+    item("To-do list…", "", () => openTodo()),
     item("Demo: at-risk card", "", () => openCard("216482", { anchor:trayAnchor() })),
     item("Demo: healthy card", "", () => openCard("214990", { anchor:trayAnchor() })),
     document.createElement("hr"));
@@ -1820,7 +1969,13 @@ function openMenu(){
   const ahBox = document.createElement("div"); ahBox.className = "sub"; ahBox.hidden = true;
   AUTO_CHOICES.forEach(sec => ahBox.append(item(sec ? sec + " s" : "Off", "", () => { state.autoHide = sec; const r = document.querySelector(`input[name=autohide][value=${sec}]`); if(r) r.checked = true; }, { checked:state.autoHide === sec })));
   ah.addEventListener("click", () => { ahBox.hidden = !ahBox.hidden; });
-  menu.append(ap, subBox, ah, ahBox,
+  const ma = item("My actions", "▸", null, { keep:true });
+  const maBox = document.createElement("div"); maBox.className = "sub"; maBox.hidden = true;
+  const acts = state.actions.filter(a => a.enabled);
+  if(!acts.length) maBox.append(item("No actions yet. Add one in Settings.", "", null, { disabled:true }));
+  acts.forEach(a => maBox.append(item(a.name, a.hotkey || "", () => runActionFromMenu(a))));
+  ma.addEventListener("click", () => { maBox.hidden = !maBox.hidden; });
+  menu.append(ma, maBox, ap, subBox, ah, ahBox,
     item("Settings…", "", () => showApp("settings")),
     item("Prompt library…", "", () => { showApp("plib"); renderPrompts(0); }),
     item("Quick replies…", "", () => { showApp("replies"); renderReplies(0); }),
@@ -1860,7 +2015,7 @@ document.addEventListener("pointerdown", e => {
 }, true);
 
 function exitApp(){
-  state.running = false; closeCard(); hideChip(); closeCtx(); ["lookup", "plib", "settings", "draft", "wlist", "replies"].forEach(closeApp);
+  state.running = false; closeCard(); hideChip(); closeCtx(); APP_WINS.forEach(closeApp);
   $("appIcon").style.display = "none"; $("deskIcon").classList.add("attn");
   showKeys("look", "The app has exited. Double-click Start-Demo.bat on the desktop to start it again.");
 }
@@ -1890,8 +2045,11 @@ function comboFromEvent(e){
   return m.length ? m.join("+") + "+" + k : null;
 }
 /* the app's rules (HotkeyParser): at least two modifiers, one of them Ctrl or Alt, never the Windows key */
+const KEY_PART = /^(?:[A-Z0-9]|F(?:[1-9]|1\d|2[0-4])|Space|Enter|Tab|`|-|=|\[|\]|;|'|,|\.|\/|\\|Up|Down|Left|Right|Insert|Delete|Home|End|PageUp|PageDown)$/;
 function validateCombo(c){
-  const mods = c.split("+").slice(0, -1);
+  const parts = String(c).split("+"), last = parts[parts.length - 1], mods = parts.slice(0, -1), order = ["Ctrl", "Alt", "Shift", "Win"];
+  /* a shortcut is a few known modifiers in a fixed order and one known key, nothing else: it can come from a restored file and is drawn on the page */
+  if(!KEY_PART.test(last) || mods.some(m => !order.includes(m)) || mods.join("+") !== order.filter(m => mods.includes(m)).join("+")) return "That shortcut is not valid. Please press the keys again.";
   if(mods.includes("Win")) return "Do not use the Windows key: Windows keeps those for itself.";
   if(mods.length < 2) return "Please use at least two modifiers (Ctrl, Alt, Shift) so everyday shortcuts like Ctrl+C keep working.";
   if(!mods.includes("Ctrl") && !mods.includes("Alt")) return "One of the modifiers must be Ctrl or Alt.";
@@ -1902,11 +2060,12 @@ function findDup(keys){
     if(keys[KEYKINDS[i][0]] === keys[KEYKINDS[j][0]]) return `${KEYKINDS[i][1]} and ${KEYKINDS[j][1]} cannot use the same shortcut.`;
   return null;
 }
-const kbdHTML = combo => combo.split("+").map(p => `<kbd>${p}</kbd>`).join("+");
+const escHTML = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const kbdHTML = combo => combo.split("+").map(p => `<kbd>${escHTML(p)}</kbd>`).join("+");
 function keyReport(){
   return KEYKINDS.map(([k, name]) => state.taken[k]
     ? `✗ ${name}: ${state.keys[k]} is already used by another program (many apps claim a global shortcut). Choose a different one above; the tray icon always works.`
-    : `✓ ${name}: ${state.keys[k]} is active`).join("\n");
+    : `✓ ${name}: ${state.keys[k]} is active`).concat((state.actions || []).filter(a => a.enabled && a.hotkey).map(a => `✓ ${a.name}: ${a.hotkey} is active`)).join("\n");
 }
 function paintKeys(){
   $("keyPeek").textContent = state.keys.peek; $("keyLook").textContent = state.keys.look; $("keyDraft").textContent = state.keys.draft;
@@ -1927,13 +2086,17 @@ function paintKeys(){
       const err = validateCombo(combo); if(err){ $("keyStatus").textContent = `${name}: ${err}`; return; }
       const next = { ...state.keys, [kind]: combo }, dup = findDup(next);
       if(dup){ $("keyStatus").textContent = dup; return; }
-      state.keys = next; paintKeys();
+      const mine = state.actions.find(a => a.hotkey === combo);
+      if(mine){ $("keyStatus").textContent = `${name}: ${combo} is already used by your action ${mine.name}. Please choose another shortcut.`; return; }
+      state.keys = next; paintKeys(); renderActions();
     });
   });
   document.querySelectorAll("[data-keyreset]").forEach(b => b.addEventListener("click", () => {
     const kind = b.dataset.keyreset, next = { ...state.keys, [kind]: KEY_DEFAULT[kind] }, dup = findDup(next);
     if(dup){ $("keyStatus").textContent = dup; return; }
-    state.keys = next; paintKeys();
+    const mine = state.actions.find(a => a.hotkey === KEY_DEFAULT[kind]);
+    if(mine){ $("keyStatus").textContent = `${KEY_DEFAULT[kind]} is already used by your action ${mine.name}. Please choose another shortcut.`; return; }
+    state.keys = next; paintKeys(); renderActions();
   }));
   paintKeys();
 })();
@@ -1953,7 +2116,7 @@ function middleRule(on, mod, ctrl, shift, alt){
   $("setMiddle").addEventListener("change", e => { state.middle = e.target.checked; });
   document.addEventListener("mousedown", e => {
     if(e.button !== 1 || !state.middle || !state.running) return;
-    if(e.target.closest("#settings, #plib, #replies, #lookup, #draft, #wlist, #card, #chip, #menu, #flyout, #replyMenu, #taskbar, .banner, #guide, #compact")) return;
+    if(e.target.closest("#settings, #plib, #replies, #lookup, #draft, #wlist, #actwin, #todo, #card, #chip, #menu, #flyout, #replyMenu, #taskbar, .banner, #guide, #compact")) return;
     if(!middleRule(state.middle, state.middleMod, e.ctrlKey, e.shiftKey, e.altKey)) return;
     e.preventDefault();
     pointer = { x:e.clientX, y:e.clientY };
@@ -2006,22 +2169,24 @@ function connStatusText(){
 }
 const hostOf = u => { try{ return new URL(u).hostname; }catch(e){ return ""; } };
 /* the app's CustomApiConfig.Inspect, line for line, minus the environment check */
-function fillTemplate(t, model){
+function fillTemplate(t, model, fields){
   const esc = x => JSON.stringify(x).slice(1, -1);
-  return t.split("{{system}}").join(esc("s")).split("{{user}}").join(esc("u")).split("{{model}}").join(esc(model || "")).split("{{max_tokens}}").join("16");
+  let out = t.split("{{system}}").join(esc("s")).split("{{user}}").join(esc("u")).split("{{model}}").join(esc(model || "")).split("{{max_tokens}}").join("16");
+  (fields || []).forEach(f => { out = out.split("{{" + f + "}}").join("0"); });   /* an agent's body may name card fields; each counts as "0" for this check, as in the app */
+  return out;
 }
 function validPath(p){
   if(!p || !p.trim()) return false;
   return p.trim().split(".").every(part => part.length > 0 && /^[A-Za-z0-9_-]*(\[\d+\])*$/.test(part));
 }
-function validateMyApi(a){
+function validateMyApi(a, fields){
   const ep = (a.endpoint || "").trim();
   if(!ep) return "Please enter the endpoint address of your API (https://…).";
   let u; try{ u = new URL(ep); }catch(e){ return "The endpoint must be an https:// address (http:// is accepted only for localhost). Nothing was sent."; }
   const local = ["localhost", "127.0.0.1", "[::1]"].includes(u.hostname);
   if(!(u.protocol === "https:" || (u.protocol === "http:" && local))) return "The endpoint must be an https:// address (http:// is accepted only for localhost). Nothing was sent.";
   if(u.username || u.password) return "Please do not put a user name or password in the address; use the environment variable for the token instead. Nothing was sent.";
-  try{ JSON.parse(fillTemplate(a.template || EXAMPLE_TEMPLATE, a.model)); }catch(e){ return "The request body is not valid JSON once the placeholders are filled in."; }
+  try{ JSON.parse(fillTemplate(a.template || EXAMPLE_TEMPLATE, a.model, fields)); }catch(e){ return "The request body is not valid JSON once the placeholders are filled in."; }
   if(!validPath(a.path)) return "The reply path is not valid. Please use names and [numbers], for example choices[0].message.content";
   const v = (a.env || "").trim();
   if(v && !/^[A-Za-z_][A-Za-z0-9_]{0,127}$/.test(v)) return "That does not look like an environment variable name. Please enter the NAME of the variable, never the token itself.";
@@ -2094,15 +2259,18 @@ const STARTERS = [
 ];
 state.replies = STARTERS.map(([name, text]) => ({ name, text }));
 const REPLY_HELP = ["number", "drug", "applicant", "cycle", "progress", "goal", "forecast", "delta", "confidence", "attention", "latest", "next", "status", "today", "psg", "rld"];
-function fillReply(tpl, id){
+function replyValues(id){
   const d = DATA[id], dot = d.meta.lastIndexOf("·"), ref = refLines(id), has = d.fc && d.fc !== "—";
-  const v = {
+  return {
     number:id, drug:d.drug, applicant:(dot >= 0 ? d.meta.slice(0, dot) : d.meta).trim(), cycle:dot >= 0 ? d.meta.slice(dot + 1).trim() : "(not in my data)",
     progress:d.pct >= 0 ? d.pct + "%" : "(not in my data)", goal:d.goal, forecast:has ? d.fc : "(not in my data)",
     delta:has ? d.fdelta.replace("▲", "").replace("▼", "").trim() : "(not in my data)", confidence:has ? d.fconf : "(not in my data)",
     attention:d.attn || "no open action items in the record", latest:d.latest || "(not in my data)", next:d.ahead || "(not in my data)",
     status:statusLine(id), today:longDate(demoToday()), psg:ref.psg, rld:ref.rld,
   };
+}
+function fillReply(tpl, id, extra){
+  const v = Object.assign(replyValues(id), extra || {});   /* one pass: a value is never read again as a placeholder */
   return tpl.replace(/\{([a-z]+)\}/g, (m, k) => k in v ? v[k] : m);
 }
 function openReplies(){
@@ -2268,6 +2436,647 @@ function paintMail(id){
   line("Read from your Outlook for this ANDA number only. Not saved, not sent to any AI service. (Rehearsal: made-up messages.)", "font-size:10.5px;color:var(--c-ink3);margin-top:8px");
 }
 
+/* ---------------- round 15: my actions, my agents and the to-do list ----------------
+   Ports of Services/MyActions.cs, Agents.cs, Todo.cs and UI/ActionRunner.cs. Nothing here is sent anywhere: a reply from an AI or an agent is a
+   labelled stand-in built from the record's own rules, never a real answer. A reply is plain text; it is never run, and a to-do item is added only on a click. */
+const ACT_KINDS = ["Add to my to-do list", "Fill my prompt and show it", "Ask my AI (after a preview)", "Run one of my agents"];
+const ACT_MAX = 8, ACT_NAME_MAX = 40, ACT_TEXT_MAX = 4000, DUE_CHOICES = [0, 1, 2, 3, 5, 10], SEL_MAX = 2000, MISSING = "(not in my data)";
+const AGENT_MAX = 8, AGENT_NAME_MAX = 40, AGENT_ITEMS_MAX = 8, FINDING_MAX = 2000, CACHE_CHOICES = [0, 5, 15, 60], TIMEOUTS = [10, 30, 60, 120];
+const AGENT_RUNS = [["Only when I ask", 0], ["When a full card opens", 1], ["Only when the ANDA is at risk", 2]];
+const ACT_PLACEHOLDERS = REPLY_HELP.concat(["selection"]);
+const TODO_MAX = 500, TODO_TITLE_MAX = 200, TODO_NOTE_MAX = 500, KEEP_DONE_DAYS = 30, SHOW_DONE_DAYS = 7, AUTO_CAP = 400;
+const TODO_REFRESH = [0, 15, 30, 60, 300];
+
+const stripCtl = s => String(s == null ? "" : s).replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+const cleanLine = (s, max) => { const t = stripCtl(String(s == null ? "" : s).trim()).trim(); return t.length > max ? t.slice(0, max) : t; };
+const oneLine = (s, max) => { const t = String(s == null ? "" : s).replace(/[\u0000-\u001F\u007F-\u009F]/g, " ").replace(/\s+/g, " ").trim(); return t.length > max ? t.slice(0, max).trimEnd() : t; };
+function h(tag, props, ...kids){
+  const e = document.createElement(tag);
+  Object.entries(props || {}).forEach(([k, v]) => {
+    if(v == null || v === false) return;
+    if(k === "class") e.className = v; else if(k === "text") e.textContent = v; else if(k === "value") e.value = v;
+    else if(k === "aria") e.setAttribute("aria-label", v); else if(k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v === true ? "" : v);
+  });
+  kids.forEach(c => { if(c != null) e.append(c); });
+  return e;
+}
+
+/* ---- the starters and presets ---- */
+const newApi = name => ({ name, endpoint:"", header:"Authorization", scheme:"Bearer", env:"", model:"", template:EXAMPLE_TEMPLATE, path:"choices[0].message.content", timeout:30 });
+const starterActions = () => [
+  { name:"Add to my to-do list", enabled:true, hotkey:"", kind:0, template:"Follow up on ANDA {number}", due:2, agentId:"", direct:false },
+  { name:"Prepare a status question", enabled:true, hotkey:"", kind:1, template:"Please give me a short status on ANDA {number} ({drug}). Goal date {goal}, forecast {forecast} ({delta}). Needs action: {attention}.", due:2, agentId:"", direct:false },
+  { name:"Ask my AI for next steps", enabled:true, hotkey:"", kind:2, template:"Using only the facts below, suggest up to five next steps for the project manager. One per line, each starting with \"- \".\nANDA {number} ({drug}). Goal {goal}, forecast {forecast} ({delta}). Latest: {latest}. Needs action: {attention}.", due:2, agentId:"", direct:false },
+];
+const presetAgents = () => [
+  { id:"alert-hub", name:"Alert Hub", enabled:false, prompt:"List any alerts you hold for ANDA {number} ({drug}). One finding per line, each starting with \"- \". If there are none, say so.", api:newApi("Alert Hub"), auto:0, cache:15 },
+  { id:"triaging-agent", name:"Triaging Agent", enabled:false, prompt:"Triage ANDA {number} ({drug}). Goal date {goal}, forecast {forecast} ({delta}). Needs action: {attention}. Say what to look at first. One item per line, each starting with \"- \".", api:newApi("Triaging Agent"), auto:0, cache:15 },
+];
+const isPreset = a => a.id === "alert-hub" || a.id === "triaging-agent";
+Object.assign(state, { actions:starterActions(), agents:presetAgents(), todoAuto:true, todoRefresh:30, agentFail:false });
+const todoStore = { items:[], autoDone:{}, autoSnoozed:{}, seq:0 };
+let agentCache = {}, agentFailed = {}, agentBusy = {}, lookupHandler = null;
+
+/* ---- rules (MyActionRules, AgentRules) ---- */
+function shortcutsInUse(except){
+  return [["Select & Peek", state.keys.peek], ["Lookup box", state.keys.look], ["Check a draft", state.keys.draft]]
+    .concat(state.actions.filter(x => x !== except && x.hotkey).map(x => [x.name, x.hotkey]));
+}
+function validateAction(a, others){
+  if(!a.name.trim()) return "Please give the action a name.";
+  if(a.name.trim().length > ACT_NAME_MAX) return `A name can be up to ${ACT_NAME_MAX} characters.`;
+  if((a.template || "").length > ACT_TEXT_MAX) return "The text can be up to 4,000 characters.";
+  if(a.kind >= 1 && !(a.template || "").trim()) return "Please write the prompt this action uses.";
+  if(a.kind === 3 && !a.agentId.trim()) return "Please choose which agent to run.";
+  if(a.hotkey){
+    const err = validateCombo(a.hotkey); if(err) return err;
+    const dup = others.find(([, key]) => key === a.hotkey); if(dup) return `${a.hotkey} is already used by ${dup[0]}. Please choose another shortcut.`;
+  }
+  return null;
+}
+const unknownPlaceholders = t => [...new Set([...(t || "").matchAll(/\{([A-Za-z_]+)\}/g)].map(m => m[1]).filter(n => !ACT_PLACEHOLDERS.includes(n)))];
+const usesSelection = (prompt, api) => (prompt || "").includes("{selection}") || ((api && api.template) || "").includes("{{selection}}");
+function validateAgent(a){
+  if(!a.name.trim()) return "Please give the agent a name.";
+  if(a.name.trim().length > AGENT_NAME_MAX) return `A name can be up to ${AGENT_NAME_MAX} characters.`;
+  if(!a.prompt.trim()) return "Please write what the agent is asked.";
+  if(a.prompt.length > ACT_TEXT_MAX) return "The prompt can be up to 4,000 characters.";
+  if(a.auto !== 0 && usesSelection(a.prompt, a.api)) return "An agent that runs by itself cannot use {selection}, because selected text can come from an email. Remove it, or set this agent to run only when you ask.";
+  return null;
+}
+/* the same check as the app's CustomApiConfig.Inspect: every body field counts as "0", and the environment variable is not checked here */
+const agentSetupProblem = a => validateMyApi({ name:a.name, endpoint:a.api.endpoint, header:a.api.header, scheme:a.api.scheme, env:a.api.env, model:a.api.model, template:a.api.template, path:a.api.path }, ACT_PLACEHOLDERS);
+const slug = s => { let t = ""; for(const c of String(s || "").trim().toLowerCase()){ if(/[a-z0-9]/.test(c)) t += c; else if(t.length && t[t.length - 1] !== "-") t += "-"; } t = t.replace(/^-+|-+$/g, ""); return t.length > 40 ? t.slice(0, 40).replace(/-+$/g, "") : t; };
+function normActions(list, reserved){
+  const out = [], taken = new Set(reserved || []), names = new Set();
+  (Array.isArray(list) ? list : []).filter(a => a && typeof a === "object").slice(0, ACT_MAX).forEach(a => {
+    let name = cleanLine(a.name, ACT_NAME_MAX); if(!name) name = `My action ${out.length + 1}`;
+    let unique = name, n = 2; while(names.has(unique.toLowerCase())) unique = `${name} ${n++}`; names.add(unique.toLowerCase()); if(unique.length > ACT_NAME_MAX) unique = unique.slice(0, ACT_NAME_MAX);
+    const hk = typeof a.hotkey === "string" ? a.hotkey.trim() : "";
+    const hotkey = hk && !validateCombo(hk) && !taken.has(hk) ? hk : ""; if(hotkey) taken.add(hotkey);
+    const tpl = typeof a.template === "string" ? a.template.slice(0, ACT_TEXT_MAX) : "";
+    out.push({ name:unique, enabled:a.enabled !== false, hotkey, kind:[0, 1, 2, 3].includes(a.kind) ? a.kind : 1, template:tpl, due:DUE_CHOICES.includes(a.due) ? a.due : 2, agentId:cleanLine(a.agentId, 40), direct:a.direct === true });
+  });
+  return out;
+}
+function normAgents(list){
+  const out = [], ids = new Set();
+  (Array.isArray(list) ? list : []).filter(a => a && typeof a === "object").slice(0, AGENT_MAX).forEach(a => {
+    let name = cleanLine(a.name, AGENT_NAME_MAX); if(!name) name = `My agent ${out.length + 1}`;
+    let id = slug(a.id) || slug(name) || "agent", unique = id, n = 2; while(ids.has(unique)) unique = `${id}-${n++}`; ids.add(unique);
+    const api = (a.api && typeof a.api === "object") ? a.api : {}, d = newApi(name), tr = v => typeof v === "string" ? v.trim() : "";
+    const clean = { name, endpoint:tr(api.endpoint).slice(0, 400), header:tr(api.header).slice(0, 100), scheme:tr(api.scheme).slice(0, 100), env:tr(api.env).slice(0, 128), model:tr(api.model).slice(0, 100),
+      template:(typeof api.template === "string" && api.template.trim()) ? api.template.slice(0, 4000) : d.template, path:tr(api.path).slice(0, 200), timeout:TIMEOUTS.includes(api.timeout) ? api.timeout : 30 };
+    const prompt = typeof a.prompt === "string" ? a.prompt.slice(0, ACT_TEXT_MAX) : "";
+    let auto = [0, 1, 2].includes(a.auto) ? a.auto : 0; if(auto !== 0 && usesSelection(prompt, clean)) auto = 0;
+    out.push({ id:unique, name, enabled:a.enabled === true, prompt, api:clean, auto, cache:CACHE_CHOICES.includes(a.cache) ? a.cache : 15 });
+  });
+  presetAgents().forEach(p => { if(out.length < AGENT_MAX && !out.some(x => x.id === p.id)) out.push(p); });
+  return out;
+}
+
+/* ---- filling a prompt (ActionFill) ---- */
+function cleanSelection(text){
+  const t = String(text == null ? "" : text).replace(/\r\n?/g, "\n").replace(/[\u0000-\u0008\u000B-\u001F\u007F-\u009F]/g, "").trim();
+  return t.length > SEL_MAX ? t.slice(0, SEL_MAX) : t;
+}
+const fenceSel = s => "<selection>\n" + s.replace(/<\/\s*selection/gi, "</ selection") + "\n</selection>";
+function fillNoRecord(tpl, extra){
+  const v = {}; REPLY_HELP.forEach(k => { v[k] = MISSING; }); v.today = longDate(demoToday()); Object.assign(v, extra || {});
+  return tpl.replace(/\{([a-z]+)\}/g, (m, k) => k in v ? v[k] : m);
+}
+function actionPrompt(tpl, id, selection, fence){
+  const sel = cleanSelection(selection), extra = { selection:sel ? (fence ? fenceSel(sel) : sel) : MISSING };
+  return id ? fillReply(tpl, id, extra) : fillNoRecord(tpl, extra);
+}
+function actionTitle(tpl, id, selection){
+  const sel = cleanSelection(selection);
+  let title;
+  if(id) title = oneLine(fillReply(tpl, id, { selection:sel.split("\n")[0] }), 100000);
+  else { const first = sel.split("\n").find(l => l.trim()); title = first ? oneLine(first, 100000) : ""; }
+  if(!title) return null;
+  return title.length > 200 ? title.slice(0, 200).trimEnd() : title;
+}
+function parseSuggestions(reply, max = 10){
+  const out = [];
+  for(const raw of String(reply || "").split("\n")){
+    const m = /^\s*(?:[-*•–]|\d{1,2}[.)]|\[[ xX]\])\s+(.+?)\s*$/.exec(raw.replace(/\r$/, "")); if(!m) continue;
+    const t = stripCtl(m[1].replace(/\*\*/g, "")).trim();
+    if(t.length < 3 || t.length > 160) continue;
+    if(out.some(x => x.toLowerCase() === t.toLowerCase())) continue;
+    out.push(t); if(out.length >= max) break;
+  }
+  return out;
+}
+const cleanReply = r => { let t = String(r == null ? "" : r).replace(/\r\n?/g, "\n").replace(/[\u0000-\u0008\u000B-\u001F\u007F-\u009F]/g, ""); t = t.replace(/\n{3,}/g, "\n\n").trim(); return t.length > FINDING_MAX ? t.slice(0, FINDING_MAX).trimEnd() + "…" : t; };
+
+/* ---- the to-do store (TodoService) ---- */
+const isoDate = t => new Date(t).toISOString().slice(0, 10);
+const parseIso = s => /^\d{4}-\d{2}-\d{2}$/.test(s || "") ? Date.UTC(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10)) : null;
+const todoListeners = new Set();
+const todoChanged = () => todoListeners.forEach(f => f());
+function todoAdd(title, number, note, dueMs, source){
+  const t = oneLine(title, TODO_TITLE_MAX);
+  if(!t) return { added:false, reason:"Please type what needs doing." };
+  const n = /^[0-9]{6}$/.test(number || "") ? number : null;
+  const same = todoStore.items.find(i => !i.done && i.number === n && i.title.toLowerCase() === t.toLowerCase());
+  if(same) return { added:false, item:same };
+  if(todoStore.items.length >= TODO_MAX){
+    const old = todoStore.items.filter(i => i.done).sort((a, b) => (a.doneOn || "") < (b.doneOn || "") ? -1 : 1)[0];
+    if(!old) return { added:false, reason:`The list is full (${TODO_MAX} items). Please finish or delete some.` };
+    todoStore.items.splice(todoStore.items.indexOf(old), 1);
+  }
+  const item = { id:"t" + (++todoStore.seq), title:t, number:n, note:note ? oneLine(note, TODO_NOTE_MAX) : null, due:dueMs == null ? null : isoDate(dueMs), done:false, doneOn:null, snoozedUntil:null, created:isoDate(demoToday()), source:oneLine(source, 60) || "You" };
+  todoStore.items.push(item); todoChanged();
+  return { added:true, item };
+}
+const todoById = id => todoStore.items.find(i => i.id === id);
+const todoSetDone = (id, on) => { const i = todoById(id); if(!i) return; i.done = on; i.doneOn = on ? isoDate(demoToday()) : null; if(on) i.snoozedUntil = null; todoChanged(); };
+const todoSnooze = (id, until) => { const i = todoById(id); if(i){ i.snoozedUntil = isoDate(until); todoChanged(); } };
+const todoWake = id => { const i = todoById(id); if(i){ i.snoozedUntil = null; todoChanged(); } };
+const todoDelete = id => { const k = todoStore.items.findIndex(i => i.id === id); if(k >= 0){ todoStore.items.splice(k, 1); todoChanged(); } };
+function todoClearDone(){ const n = todoStore.items.filter(i => i.done).length; todoStore.items = todoStore.items.filter(i => !i.done); if(n) todoChanged(); return n; }
+function dueDate(today, businessDays){ let d = today; for(let i = 0; i < Math.min(30, Math.max(0, businessDays)); i++) d = nextBiz(d); return d; }
+
+/* ---- the live list (TodoBuilder) ---- */
+const priorityOf = (sev, due, today) => sev === "bad" || (due != null && due <= today) ? 0 : sev === "warn" || (due != null && due <= today + 7 * DAY) ? 1 : 2;
+const stableHash = s => { let x = 2166136261; for(const c of s.trim().toLowerCase()){ x ^= c.charCodeAt(0); x = Math.imul(x, 16777619) >>> 0; } return x.toString(16).padStart(8, "0"); };
+const dKey = t => t == null ? "-" : isoDate(t);
+function urgentReason(id){ const d = DATA[id]; return d.delta >= LATE_DAYS ? `Forecast is ${d.delta} days after the goal` : (watchFlags(id).find(f => f.sev === "bad") || {}).text; }
+function autoRowsFor(id){
+  const d = DATA[id], today = demoToday(), rows = [], goal = ymd(...d.goalD), fc = ymd(...d.fcD);
+  const make = (key, title, detail, due, sev, source) => ({ key, auto:true, title, detail, number:id, due, sev, priority:priorityOf(sev, due, today), done:false, snoozedUntil:null, source, itemId:null });
+  if(isUrgent(id)) rows.push(make(`${id}|urgent|${dKey(goal)}|${dKey(fc)}`, `ANDA ${id}: at risk. ${urgentReason(id)}`, "From your data: a forecast well after the goal, a serious action item, or a passed goal date.", goal, "bad", "Your data"));
+  watchFlags(id).filter(f => f.sev !== "info").forEach(f => {
+    const date = f.code === "goal-passed" || f.code === "goal-soon" || f.code === "goal-date-calendar" ? goal : f.code === "forecast-date-calendar" ? fc : null;
+    const due = f.code === "goal-passed" ? today : (f.code === "goal-soon" || f.code === "goal-date-calendar" || f.code === "forecast-date-calendar") ? date : null;
+    rows.push(make(`${id}|${f.code}|${dKey(date)}`, `ANDA ${id}: ${f.text}`, f.why, due, f.sev, f.src));
+  });
+  if(d.attn) rows.push(make(`${id}|attention|${stableHash(d.attn)}`, `ANDA ${id}: ${d.attn}`, "From the record: the item that needs action.", null, "warn", "The record"));
+  return rows;
+}
+function todoView(){
+  const today = demoToday(), rows = [], live = new Set();
+  if(state.todoAuto){
+    const auto = Object.keys(DATA).flatMap(autoRowsFor);
+    auto.forEach(a => live.add(a.key));
+    auto.slice(0, AUTO_CAP * 4).forEach(a => {
+      const doneOn = todoStore.autoDone[a.key], done = doneOn !== undefined;
+      const su = parseIso(todoStore.autoSnoozed[a.key]), snooze = su != null && su > today ? su : null;
+      if(done && (parseIso(doneOn) == null || Math.round((today - parseIso(doneOn)) / DAY) > SHOW_DONE_DAYS)) return;
+      rows.push(Object.assign({}, a, { done, snoozedUntil:done ? null : snooze, priority:done ? 3 : snooze != null ? 4 : a.priority }));
+    });
+  }
+  todoStore.items.forEach(i => {
+    const due = parseIso(i.due), sev = due != null ? (due < today ? "bad" : due === today ? "warn" : "info") : "info";
+    if(i.done && (parseIso(i.doneOn) == null || Math.round((today - parseIso(i.doneOn)) / DAY) > SHOW_DONE_DAYS)) return;
+    const su = parseIso(i.snoozedUntil), snooze = !i.done && su != null && su > today ? su : null;
+    rows.push({ key:"m|" + i.id, auto:false, title:i.title, detail:i.note, number:i.number, due, sev, priority:i.done ? 3 : snooze != null ? 4 : priorityOf(sev, due, today), done:i.done, snoozedUntil:snooze, source:i.source, itemId:i.id });
+  });
+  /* forget marks for items that no longer exist, ended snoozes and old finished items (TodoService.Prune) */
+  Object.keys(todoStore.autoDone).forEach(k => { if(!live.has(k)) delete todoStore.autoDone[k]; });
+  Object.keys(todoStore.autoSnoozed).forEach(k => { const u = parseIso(todoStore.autoSnoozed[k]); if(!live.has(k) || u == null || u <= today) delete todoStore.autoSnoozed[k]; });
+  todoStore.items = todoStore.items.filter(i => !(i.done && parseIso(i.doneOn) != null && Math.round((today - parseIso(i.doneOn)) / DAY) > KEEP_DONE_DAYS));
+  todoStore.items.forEach(i => { if(i.snoozedUntil && (parseIso(i.snoozedUntil) == null || parseIso(i.snoozedUntil) <= today)) i.snoozedUntil = null; });
+  const rank = s => s === "bad" ? 2 : s === "warn" ? 1 : 0;
+  rows.sort((a, b) => a.priority - b.priority || (a.due == null ? 1 : 0) - (b.due == null ? 1 : 0) || (a.due || 0) - (b.due || 0) || rank(b.sev) - rank(a.sev)
+    || ((a.number || "~") < (b.number || "~") ? -1 : (a.number || "~") > (b.number || "~") ? 1 : 0) || (a.title < b.title ? -1 : a.title > b.title ? 1 : 0));
+  let shown = 0; const capped = rows.filter(r => !r.auto || ++shown <= AUTO_CAP);
+  return { rows:capped, open:capped.filter(r => r.priority <= 2).length, now:capped.filter(r => r.priority === 0).length, snoozed:capped.filter(r => r.priority === 4).length, auto:capped.filter(r => r.auto).length, builtAt:new Date() };
+}
+
+/* ---- the to-do window (UI/TodoWindow) ---- */
+const TD_GROUPS = [[0, "NEEDS A LOOK NOW"], [1, "SOON"], [2, "LATER"], [3, "DONE IN THE LAST 7 DAYS"], [4, "SNOOZED"]];
+const TD_DUE = [["No date", -1], ["Today", 0], ["Tomorrow", 1], ["In 3 days", 3], ["In a week", 7]];
+let tdTimer = null, tdSig = "", tdView = null;
+const isOpen = id => $(id).style.display === "block";
+function tdStop(){ clearInterval(tdTimer); tdTimer = null; $("todo").dataset.live = ""; }
+function tdApplyTimer(){
+  tdStop(); const s = state.todoRefresh;
+  if(s > 0 && isOpen("todo")){ tdTimer = setInterval(() => tdReload(false), s * 1000); $("todo").dataset.live = String(s); }
+  $("tdLive").textContent = s > 0
+    ? `Refreshes itself every ${s >= 60 ? (s / 60) + " min" : s + " s"} while this window is open, and at once when the list changes. A changed data file is picked up at the next refresh. Nothing runs when it is closed.`
+    : "Automatic refresh is off. Press Refresh now to update. Nothing runs when this window is closed.";
+}
+function tdReload(force){
+  if(!isOpen("todo")) return;
+  const v = tdView = todoView();
+  const sig = v.rows.map(r => `${r.key}|${r.done}|${r.priority}|${r.title}|${r.snoozedUntil}`).join("\n") + "#" + v.open;
+  $("tdSummary").textContent = v.rows.length === 0 ? "Nothing on your list, and nothing in your data needs a look."
+    : `${v.open} open · ${v.now} need a look now` + (v.snoozed > 0 ? ` · ${v.snoozed} snoozed` : "") + (v.auto > 0 ? ` · ${v.auto} from your data` : "");
+  $("tdFooter").textContent = `Updated ${v.builtAt.toLocaleTimeString("en-US", { hour:"numeric", minute:"2-digit", second:"2-digit" })}. ${state.data.portfolio ? "Using my-portfolio.xlsx (simulated)." : "Using the fictional demo records."} Items from your data follow the same rules as the card and the watch list; they say what the data shows and decide nothing. Click a number to open its card.`;
+  if(!force && sig === tdSig) return;
+  tdSig = sig; tdDraw(v);
+}
+function tdDraw(v){
+  const box = $("tdRows"), today = demoToday(); box.replaceChildren();
+  if(!v.rows.length){ box.append(h("p", { class:"hint", text:"Nothing to do. Add an item above, or give one of your actions a shortcut in Settings." })); return; }
+  TD_GROUPS.forEach(([pr, heading]) => {
+    const group = v.rows.filter(r => r.priority === pr); if(!group.length) return;
+    box.append(h("div", { class:"gh", text:`${heading} · ${group.length}` }));
+    group.forEach(row => box.append(tdRow(row, today)));
+  });
+}
+function tdRow(row, today){
+  const tone = row.sev === "bad" ? "bad" : row.sev === "warn" ? "warn" : "info";
+  const done = h("input", { type:"checkbox", aria:`Mark finished: ${row.title}` }); done.checked = row.done;
+  done.addEventListener("change", () => {
+    const on = done.checked; if(on === row.done) return;
+    if(row.auto){ if(on){ todoStore.autoDone[row.key] = isoDate(today); delete todoStore.autoSnoozed[row.key]; } else delete todoStore.autoDone[row.key]; todoChanged(); }
+    else todoSetDone(row.itemId, on);
+  });
+  const tag = h("span", { class:"tag " + (row.auto ? tone : "you"), text:row.auto ? (row.sev === "bad" ? "ACT" : row.sev === "warn" ? "CHECK" : "NOTE") : "YOURS" });
+  const meta = [];
+  if(row.due != null) meta.push((row.done || row.priority >= 3 ? "due " : row.due < today ? "overdue since " : "due ") + shortDate(row.due));
+  if(row.snoozedUntil != null) meta.push("snoozed until " + shortDate(row.snoozedUntil));
+  if(!row.auto) meta.push("added by " + row.source);
+  const text = h("div", { class:"t" }, h("b", { text:row.title, style:row.done ? "" : "font-weight:400" }));
+  if(meta.length) text.append(h("small", { class:row.sev === "bad" && !row.done ? "bad" : "", text:meta.join(" · ") }));
+  if(row.detail && !row.done) text.append(h("small", { text:row.detail }));
+  const btns = h("div", { class:"btns" });
+  if(row.number) btns.append(h("button", { type:"button", text:row.number, aria:`Open the card for ANDA ${row.number}`, onclick:() => {
+    const r = $("todo").getBoundingClientRect();
+    openCard(row.number, { anchor:{ x:Math.min(r.right + 8, innerWidth - 390), y:r.top + 24 }, above:true });
+  } }));
+  if(!row.done){
+    const asleep = row.snoozedUntil != null;
+    btns.append(h("button", { type:"button", text:asleep ? "Wake" : "Snooze", aria:(asleep ? "Wake: " : "Snooze until the next business day: ") + row.title, onclick:() => {
+      if(asleep){ if(row.auto){ delete todoStore.autoSnoozed[row.key]; todoChanged(); } else todoWake(row.itemId); }
+      else { const until = nextBiz(today); if(row.auto){ todoStore.autoSnoozed[row.key] = isoDate(until); todoChanged(); } else todoSnooze(row.itemId, until); }
+    } }));
+  }
+  if(!row.auto && row.itemId) btns.append(h("button", { type:"button", text:"Delete", aria:"Delete: " + row.title, onclick:() => todoDelete(row.itemId) }));
+  return h("div", { class:"tr" + (row.done ? " done" : "") }, done, tag, text, btns);
+}
+function openTodo(){
+  closeMenus(); showApp("todo"); tdApplyTimer(); tdReload(true);
+  setTimeout(() => $("tdAddIn").focus(), 30);
+}
+function tdAddTyped(){
+  const text = $("tdAddIn").value, days = TD_DUE[Math.max(0, $("tdDue").selectedIndex)][1], today = demoToday();
+  const due = days < 0 ? null : days === 0 ? today : days === 1 ? nextBiz(today) : today + days * DAY;
+  const r = todoAdd(text, extractNumber(text), null, due, "You");
+  if(r.reason){ $("tdAddStatus").textContent = r.reason; return; }
+  $("tdAddStatus").textContent = r.added ? "Added." : "That is already on your list.";
+  if(r.added){ $("tdAddIn").value = ""; $("tdDue").selectedIndex = 0; }
+  $("tdAddIn").focus();
+}
+TD_DUE.forEach(([label]) => $("tdDue").append(h("option", { text:label })));
+$("tdAdd").addEventListener("click", tdAddTyped);
+$("tdAddIn").addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); tdAddTyped(); } });
+$("tdDone").addEventListener("click", () => closeApp("todo"));
+$("tdRefresh").addEventListener("click", () => tdReload(true));
+$("tdClear").addEventListener("click", () => { const n = todoClearDone(); $("tdAddStatus").textContent = n === 0 ? "Nothing finished to clear." : `Cleared ${n} finished ${n === 1 ? "item" : "items"}.`; });
+todoListeners.add(() => tdReload(false));
+$("openTodoBtn").addEventListener("click", openTodo);
+
+/* ---- the action window (UI/ActionWindow) ---- */
+let awModel = null, awSent = false, awBusy = false, awToken = 0;
+function showAction(model){
+  closeMenus(); awModel = model; awSent = false; awBusy = false; awToken++;
+  $("awTitle").textContent = model.title; $("awSub").textContent = model.sub; $("awPromptH").textContent = model.promptH; $("awPrompt").value = model.prompt; $("awNote").textContent = model.note;
+  $("awResultH").textContent = model.resultH || "THE RESULT"; $("awResult").hidden = true; $("awSuggest").hidden = true; $("awSuggestList").replaceChildren(); $("awStatus").textContent = ""; $("awResultBox").value = "";
+  $("awSend").hidden = !model.send; $("awSend").textContent = model.sendLabel || "Send"; $("awSend").disabled = false; $("awAddTodo").disabled = true;
+  showApp("actwin");
+  if(model.send && model.sendOnOpen) awSend(); else setTimeout(() => ($("awSend").hidden ? $("awCopyPrompt") : $("awSend")).focus(), 30);
+}
+async function awSend(){
+  const m = awModel; if(!m || !m.send || awBusy) return;
+  awBusy = true; const token = awToken; $("awSend").disabled = true; $("awStatus").textContent = "Sending… only the text above is sent.";
+  let reply;
+  try{ reply = await m.send(); }
+  catch(e){ reply = { ok:false, text:"", message:"It did not complete. Nothing was changed.", items:[] }; }
+  if(token !== awToken) return;                 /* the window was closed or replaced while waiting */
+  awBusy = false; awSent = true; $("awSend").disabled = false; $("awSend").textContent = "Send again"; $("awStatus").textContent = reply.message;
+  $("awResult").hidden = !reply.ok; if(!reply.ok) return;
+  $("awResultBox").value = reply.text;
+  const list = $("awSuggestList"); list.replaceChildren();
+  reply.items.forEach(item => {
+    const cb = h("input", { type:"checkbox" }); cb.addEventListener("change", () => { $("awAddTodo").disabled = !list.querySelector("input:checked"); });
+    list.append(h("label", { class:"opt" }, cb, h("span", { text:item })));
+  });
+  $("awSuggest").hidden = !(reply.items.length && m.addLines); $("awAddTodo").disabled = true;
+}
+function awAddTicked(){
+  const m = awModel; if(!m || !m.addLines) return;
+  const boxes = [...$("awSuggestList").querySelectorAll("input:checked")]; if(!boxes.length) return;
+  const added = m.addLines(boxes.map(b => b.parentElement.querySelector("span").textContent));
+  $("awStatus").textContent = added === 0 ? "Those are already on your list." : `Added ${added} ${added === 1 ? "item" : "items"} to your to-do list.`;
+  boxes.forEach(b => { b.disabled = true; }); $("awAddTodo").disabled = true;
+}
+function copyText(text, btn, label){
+  const done = () => { btn.textContent = "Copied ✓"; setTimeout(() => { btn.textContent = label; }, 1400); };
+  (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text) : Promise.reject()).then(done, () => { $("awStatus").textContent = "The clipboard is not available. Please select the text and press Ctrl+C."; });
+}
+$("awClose").addEventListener("click", () => closeApp("actwin"));
+$("awSend").addEventListener("click", awSend);
+$("awAddTodo").addEventListener("click", awAddTicked);
+$("awCopyPrompt").addEventListener("click", () => copyText($("awPrompt").value, $("awCopyPrompt"), "Copy prompt"));
+$("awCopyResult").addEventListener("click", () => copyText($("awResultBox").value, $("awCopyResult"), "Copy result"));
+
+/* ---- stand-in replies: built from this page's own rules and labelled as such; nothing is sent anywhere ---- */
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function standInLines(id, name){
+  if(!id) return ["Review the selected text and decide what follows from it."];
+  const d = DATA[id], lines = [];
+  if(name === "Alert Hub") { watchFlags(id).forEach(f => lines.push(f.text)); if(d.attn) lines.push("Open item: " + d.attn); if(!lines.length) lines.push("No alerts in this sample data."); }
+  else {
+    if(d.attn) lines.push("Look first at: " + d.attn);
+    watchFlags(id).slice(0, 2).forEach(f => lines.push(f.text));
+    if(d.ahead) lines.push("Prepare for: " + d.ahead);
+    if(d.late && d.sisters.length) lines.push(`Check sister ANDA ${d.sisters[0][0]} for the same facility finding.`);
+    if(!lines.length) lines.push("No open items need action.");
+  }
+  return lines.map(l => l.length > 158 ? l.slice(0, 157) + "…" : l).slice(0, AGENT_ITEMS_MAX);
+}
+function standIn(who, id, name){
+  const lines = standInLines(id, name);
+  return `Simulated stand-in for ${who}. This page never contacts an AI or an agent; this text is built from the record's own rules.\n` + lines.map(l => "- " + l).join("\n");
+}
+async function simulatedAi(id){
+  await sleep(450);
+  const text = cleanReply(standIn("your AI", id, "AI"));
+  return { ok:true, text, message:"From your AI (simulated stand-in). Verify before acting.", items:parseSuggestions(text) };
+}
+const agentReachable = () => !state.agentFail;
+async function askAgent(ag, id, selection, force, promptOverride){
+  const key = ag.id + "|" + id + (promptOverride ? "#" + stableHash(promptOverride + "|" + cleanSelection(selection)) : "");
+  if(agentSetupProblem(ag)){ return { agentId:ag.id, name:ag.name, number:id, state:"notset", text:"", items:[], at:Date.now(), message:agentSetupProblem(ag) }; }
+  if(!force && !promptOverride){ const c = agentCache[ag.id + "|" + id]; if(c && ag.cache > 0 && (Date.now() - c.at) / 60000 < ag.cache) return c; }
+  if(agentBusy[key]) return agentBusy[key];
+  const task = (async () => {
+    await Promise.resolve();                       /* the caller records the task first, so the drawer can say "Asking…" */
+    paintAgents();
+    await sleep(500);
+    let res;
+    if(!agentReachable()) res = { agentId:ag.id, name:ag.name, number:id, state:"failed", text:"", items:[], at:Date.now(), message:`${ag.name} could not be reached. Please check the address and your network.` };
+    else {
+      const text = cleanReply(standIn(ag.name, id, ag.name));
+      res = { agentId:ag.id, name:ag.name, number:id, state:"done", text, items:parseSuggestions(text, AGENT_ITEMS_MAX), at:Date.now(), message:`From ${ag.name} (simulated stand-in). Verify before acting.` };
+    }
+    if(!promptOverride){ if(res.state === "done"){ agentCache[ag.id + "|" + id] = res; delete agentFailed[ag.id + "|" + id]; } else agentFailed[ag.id + "|" + id] = res; }
+    delete agentBusy[key]; paintAgents();
+    return res;
+  })();
+  agentBusy[key] = task;
+  return task;
+}
+function clearAgentCache(){ agentCache = {}; agentFailed = {}; paintAgents(); }
+
+/* ---- running an action (UI/ActionRunner) ---- */
+const shorten = t => t.length <= 60 ? t : t.slice(0, 57).trimEnd() + "…";
+const aiReady = () => connInfo().cls === "set";
+function addLines(lines, number, source){ let n = 0; lines.forEach(l => { if(todoAdd(l, number, null, null, source).added) n++; }); return n; }
+function askForAnda(a, anchor){ openLookup(anchor, number => executeAction(a, number, number, "", anchor)); }
+function runCustomAction(a, selection, anchor){
+  const clean = cleanSelection(selection), number = extractNumber(clean), known = number && DATA[number] ? number : null;
+  if(!known && (clean.length === 0 || a.kind === 3)){
+    if(number){ showNotice(`${number} is not in the available records.`, anchor); return; }
+    askForAnda(a, anchor); return;
+  }
+  executeAction(a, known, number, clean, anchor);
+}
+function runActionFromMenu(a){
+  const problem = validateAction(a, []);
+  if(problem){ showNotice(`${a.name}: ${problem}`, pointer); return; }
+  askForAnda(a, { ...pointer });
+}
+function executeAction(a, id, number, selection, anchor){
+  const today = demoToday(), subject = id ? `ANDA ${id} · ${DATA[id].drug}` : "Your selected text", owner = id || number;
+  if(a.kind === 0){
+    const title = actionTitle(a.template, id, selection);
+    if(!title){ showNotice("Nothing to add yet. Please select an ANDA number or some text, then try again.", anchor); return; }
+    const r = todoAdd(title, owner, null, dueDate(today, a.due), a.name);
+    showNotice(r.reason || (r.added ? "Added to your to-do list: " + shorten(title) : "That is already on your to-do list."), anchor); return;
+  }
+  if(a.kind === 1){
+    showAction({ title:a.name, sub:subject, promptH:"YOUR PROMPT, FILLED IN", prompt:actionPrompt(a.template, id, selection, false), note:"Nothing was sent anywhere. Please copy the text into the tool you use.", send:null }); return;
+  }
+  const prompt = actionPrompt(a.template, id, selection, true);
+  if(a.kind === 2){
+    if(!aiReady()){ showAction({ title:a.name, sub:subject, promptH:"YOUR PROMPT, FILLED IN", prompt, note:"No AI connection is ready, so nothing can be sent. You can set one up in Settings, or copy this text into the tool you use. Nothing was sent.", send:null }); return; }
+    showAction({ title:a.name, sub:subject, promptH:"THIS IS EXACTLY WHAT WILL BE SENT", prompt,
+      note:`Nothing has been sent yet. Pressing Send sends only the text above, with a short fixed instruction that treats selected text as data, to your AI connection (${connInfo().label}). (Simulation: a labelled stand-in answers; nothing is sent.)`,
+      resultH:"THE REPLY, AS RECEIVED", send:() => simulatedAi(id), sendOnOpen:a.direct, addLines:lines => addLines(lines, owner, a.name) }); return;
+  }
+  if(!id){ showNotice("An agent needs an ANDA from your data. Please select a number and try again.", anchor); return; }
+  const ag = state.agents.find(x => x.id === a.agentId);
+  const problem = !ag ? "That agent is not in your list any more. Please choose another in Settings." : !ag.enabled ? `${ag.name} is switched off. Please switch it on in Settings.` : agentSetupProblem(ag);
+  if(!ag || problem){ showAction({ title:a.name, sub:subject, promptH:"YOUR PROMPT, FILLED IN", prompt, note:(problem || "The agent is not set up.") + " Nothing was sent.", send:null }); return; }
+  const host = hostOf(ag.api.endpoint) || "the address you set";
+  showAction({ title:a.name, sub:subject, promptH:"THIS IS WHAT WILL BE SENT TO " + ag.name.toUpperCase(), prompt,
+    note:`Nothing has been sent yet. Pressing Send asks ${ag.name} at ${host}. It sends this text and only the fields named in the request body you set up in Settings. (Simulation: a labelled stand-in answers; nothing is sent.)`,
+    resultH:`${ag.name.toUpperCase()} REPLIED`, sendOnOpen:a.direct, addLines:lines => addLines(lines, id, ag.name),
+    send:async () => { const f = await askAgent(ag, id, selection, true, a.template); return { ok:f.state === "done", text:f.text, message:f.message, items:f.items }; } });
+}
+/* the hotkey path: the selection is read like Select & Peek reads it, then the action decides what to do with it */
+function actionHotkey(a, source){
+  keyVia = null;
+  if(!state.running){ showKeys(a.hotkey, "The app is not running"); return; }
+  const anchor = source === "button" ? (lastSel ? { x:lastSel.x, y:lastSel.y } : { ...pointer }) : { ...pointer };
+  let text = null;
+  if(state.capture){
+    if(focusedWin === "term"){ showKeys(a.hotkey); showNotice("Paused in terminals. Please type the number.", anchor); }
+    else { const s = getSelection().toString().trim() ? getSelection().toString() : (lastSel ? lastSel.text : null); text = s; showKeys(a.hotkey, s ? "Copied your selection, read it, put your clipboard back ✓" : ""); }
+  } else showKeys(a.hotkey);
+  runCustomAction(a, text, anchor);
+}
+
+/* ---- the agents drawer on the card (CardWindow.PrepareAgents / PaintAgents) ---- */
+const enabledAgents = () => state.agents.filter(a => a.enabled);
+const timeText = t => new Date(t).toLocaleTimeString("en-US", { hour:"numeric", minute:"2-digit" });
+function latestFinding(ag, id){
+  const done = agentCache[ag.id + "|" + id], failed = agentFailed[ag.id + "|" + id];
+  return failed && (!done || failed.at >= done.at) ? failed : done || null;
+}
+function prepareAgents(){
+  const d = $("x-agents-d");
+  d.open = false; d.hidden = true; $("x-agents").replaceChildren();
+  if(!current || card.classList.contains("mini") || !enabledAgents().length) return;
+  d.hidden = false; paintAgents();
+  const risk = isUrgent(current);
+  state.agents.filter(a => a.enabled && !agentSetupProblem(a) && (a.auto === 1 || (a.auto === 2 && risk))).forEach(a => { askAgent(a, current, null, false); });
+}
+function paintAgents(){
+  const d = $("x-agents-d");
+  if(!current || d.hidden || card.classList.contains("mini")) return;
+  const id = current, box = $("x-agents"); box.replaceChildren();
+  let answered = 0;
+  enabledAgents().forEach(ag => {
+    const last = latestFinding(ag, id), running = Object.keys(agentBusy).some(k => k === ag.id + "|" + id), problem = agentSetupProblem(ag);
+    if(last && last.state === "done") answered++;
+    const label = running ? "Asking…" : last && last.state === "done" ? "Ask again" : last && last.state === "failed" ? "Try again" : "Run";
+    const run = h("button", { type:"button", text:label, aria:`${last ? "Ask again" : "Run"} ${ag.name} for ANDA ${id}`, onclick:() => { askAgent(ag, id, null, true); } });
+    run.disabled = running || !!problem;
+    box.append(h("div", { class:"ag" }, h("b", { text:ag.name }), run));
+    const status = problem ? `Not set up. ${problem} Please open Settings, then My agents.`
+      : running ? `Asking ${ag.name}… only what its prompt names is sent.`
+      : !last ? `Not asked yet. Press Run to ask ${ag.name} about this ANDA, or set it to run by itself in Settings.`
+      : last.state === "done" ? last.text : last.message;
+    box.append(h("div", { class:"st" + (last && last.state === "failed" ? " bad" : ""), text:status }));
+    if(last && last.state === "done"){
+      last.items.slice(0, AGENT_ITEMS_MAX).forEach(item => {
+        const add = h("button", { type:"button", text:"Add to to-do", aria:"Add to my to-do list: " + item });
+        add.addEventListener("click", () => { const n = addLines([item], id, ag.name); add.textContent = n > 0 ? "Added ✓" : "On your list"; add.disabled = true; });
+        box.append(h("div", { class:"it" }, h("span", { class:"st", text:"• " + item }), add));
+      });
+      box.append(h("div", { class:"fine", text:`${last.message} Asked at ${timeText(last.at)}.` }));
+    }
+  });
+  box.append(h("div", { class:"fine", text:"These are the agents' own words, shown as received, not facts from the record. They are never run or passed on, and nothing is added to your to-do list until you press its button." }));
+  $("x-agents-t").textContent = answered > 0 ? `Agent findings · ${answered}` : "Agent findings";
+  setTimeout(clampCard, 0);
+}
+
+/* ---- Settings: my actions, my agents, my to-do list ---- */
+const selOptions = (sel, labels, index) => { sel.replaceChildren(...labels.map(l => h("option", { text:l }))); sel.selectedIndex = index; };
+function afterActionsChanged(){ paintActionKeys(); $("keyStatus").textContent = keyReport(); }
+function paintActionKeys(){
+  const row = $("actKeys"); row.replaceChildren();
+  const list = state.actions.filter(a => a.enabled && a.hotkey);
+  if(!list.length) row.append(h("span", { class:"fine", style:"margin:0", text:"None yet. Give an action a shortcut in Settings, then press it here." }));
+  list.forEach(a => row.append(h("button", { class:"btn key", type:"button", text:a.hotkey, title:a.name, aria:`Press ${a.hotkey.replace(/\+/g, " ")} for ${a.name}`, onclick:() => actionHotkey(a, "button") })));
+}
+function renderActions(){
+  const box = $("actList"); box.replaceChildren();
+  if(!state.actions.length) box.append(h("p", { class:"hint", text:"No actions yet. Press Add an action to make one." }));
+  state.actions.forEach(a => box.append(actionEditor(a)));
+  afterActionsChanged();
+}
+function agentSelect(a){
+  const sel = h("select", { aria:"Which agent to run", class:"agsel" });
+  selOptions(sel, state.agents.map(x => x.name), state.agents.findIndex(x => x.id === a.agentId));
+  sel.addEventListener("change", () => { if(sel.selectedIndex >= 0){ a.agentId = state.agents[sel.selectedIndex].id; afterActionsChanged(); } });
+  return sel;
+}
+function refreshAgentSelects(){
+  document.querySelectorAll("#actList .agsel").forEach((sel, i) => {
+    const owner = state.actions.filter(x => x.kind === 3)[i]; if(!owner) return;
+    selOptions(sel, state.agents.map(x => x.name), state.agents.findIndex(x => x.id === owner.agentId));
+  });
+}
+function actionEditor(a){
+  const problem = h("div", { class:"bad" });
+  const check = () => {
+    const p = validateAction(a, shortcutsInUse(a)), unk = unknownPlaceholders(a.template);
+    problem.textContent = p || (unk.length ? `Not a known placeholder: ${unk.map(u => "{" + u + "}").join(", ")}. It will be left as typed.` : ""); problem.hidden = !problem.textContent;
+  };
+  const on = h("input", { type:"checkbox", aria:`Action on: ${a.name}` }); on.checked = a.enabled; on.addEventListener("change", () => { a.enabled = on.checked; afterActionsChanged(); });
+  const name = h("input", { type:"text", value:a.name, aria:"Action name", placeholder:"A name, for example Add to my to-do list", maxlength:String(ACT_NAME_MAX + 20) });
+  const remove = h("button", { class:"pill quiet", type:"button", text:"Remove", aria:"Remove the action " + a.name, onclick:() => { state.actions.splice(state.actions.indexOf(a), 1); renderActions(); } });
+  const keyBox = h("input", { type:"text", readonly:true, value:a.hotkey, aria:"Shortcut for " + a.name, placeholder:"Click here, then press the keys" });
+  const run = h("button", { class:"pill quiet", type:"button", text:"Run…", aria:`Run the action ${a.name} now`, onclick:() => runActionFromMenu(a) });
+  name.addEventListener("input", () => {
+    a.name = name.value.trim(); check();
+    remove.setAttribute("aria-label", "Remove the action " + a.name); keyBox.setAttribute("aria-label", "Shortcut for " + a.name); run.setAttribute("aria-label", `Run the action ${a.name} now`); on.setAttribute("aria-label", `Action on: ${a.name}`);
+    afterActionsChanged(); refreshAgentSelects();
+  });
+  const kind = h("select", { aria:"What the action does" }); selOptions(kind, ACT_KINDS, a.kind);
+  kind.addEventListener("change", () => {
+    a.kind = kind.selectedIndex;
+    if(a.kind === 3 && !state.agents.some(x => x.id === a.agentId) && state.agents.length) a.agentId = state.agents[0].id;   /* an agent action starts on the first agent, so it is complete as soon as it is chosen */
+    renderActions();
+  });
+  let extra = null;
+  if(a.kind === 0){
+    extra = h("select", { aria:"When it is due" }); selOptions(extra, DUE_CHOICES.map(n => n === 0 ? "Due today" : n === 1 ? "Due in 1 business day" : `Due in ${n} business days`), Math.max(0, DUE_CHOICES.indexOf(a.due)));
+    extra.addEventListener("change", () => { a.due = DUE_CHOICES[extra.selectedIndex]; });
+  } else if(a.kind === 3) extra = agentSelect(a);
+  keyBox.dataset.keycapture = "1";
+  keyBox.addEventListener("keydown", e => {
+    if(["Control", "Alt", "Shift", "Meta"].includes(e.key)) return;
+    e.preventDefault(); e.stopPropagation();
+    const combo = comboFromEvent(e);
+    if(!combo){ $("actStatus").textContent = `${a.name}: that key cannot be used.`; return; }
+    const err = validateCombo(combo); if(err){ $("actStatus").textContent = `${a.name}: ${err}`; return; }
+    const owner = shortcutsInUse(a).find(([, key]) => key === combo);
+    if(owner){ $("actStatus").textContent = `${combo} is already used by ${owner[0]}. Please choose another shortcut.`; return; }
+    a.hotkey = combo; keyBox.value = combo; check(); afterActionsChanged();
+    $("actStatus").textContent = `${a.name}: ${combo} is active. (In the Windows app Windows confirms this a moment later.)`;
+  });
+  const clear = h("button", { class:"pill quiet", type:"button", text:"Clear", aria:"Clear the shortcut for " + a.name, onclick:() => { a.hotkey = ""; keyBox.value = ""; check(); afterActionsChanged(); } });
+  const tpl = h("textarea", { rows:"3", value:a.template, aria:"Text for " + a.name, placeholder:a.kind === 0 ? "The to-do title, for example: Follow up on ANDA {number}" : "Your prompt. The card's facts are filled in where you write a placeholder." });
+  tpl.addEventListener("input", () => { a.template = tpl.value.length > ACT_TEXT_MAX ? tpl.value.slice(0, ACT_TEXT_MAX) : tpl.value; check(); });
+  const parts = [h("div", { class:"top" }, h("label", { class:"opt" }, on, "On"), name, remove), h("div", { class:"two" }, kind, extra), h("div", { class:"krow2" }, keyBox, clear, run), tpl,
+    h("div", { class:"ph", text:"Placeholders: " + ACT_PLACEHOLDERS.map(p => "{" + p + "}").join(" ") })];
+  if(a.kind >= 2){
+    const direct = h("input", { type:"checkbox" }); direct.checked = a.direct; direct.addEventListener("change", () => { a.direct = direct.checked; });
+    parts.push(h("label", { class:"opt" }, direct, "Send as soon as I press the shortcut, without the preview step"));
+  }
+  parts.push(problem); check();
+  return h("div", { class:"bx" }, ...parts);
+}
+$("actAdd").addEventListener("click", () => {
+  if(state.actions.length >= ACT_MAX){ $("actStatus").textContent = `You can keep up to ${ACT_MAX} actions.`; return; }
+  state.actions.push({ name:`My action ${state.actions.length + 1}`, enabled:true, hotkey:"", kind:0, template:"Follow up on ANDA {number}", due:2, agentId:"", direct:false });
+  renderActions();
+});
+
+function agentEditor(a){
+  const status = h("div", { class:"stat" }), problem = h("div", { class:"bad" });
+  const check = () => {
+    const setup = agentSetupProblem(a); status.textContent = !a.enabled ? "Off. Nothing is sent." : setup === null ? "On and set up." : "On, but not set up: " + setup;
+    const p = validateAgent(a); problem.textContent = p || ""; problem.hidden = !p;
+  };
+  const changed = () => { check(); afterAgentsChanged(); };
+  const on = h("input", { type:"checkbox", aria:`Agent on: ${a.name}` }); on.checked = a.enabled; on.addEventListener("change", () => { a.enabled = on.checked; changed(); });
+  const name = h("input", { type:"text", value:a.name, aria:"Agent name", placeholder:"A name for the agent" });
+  const remove = h("button", { class:"pill quiet", type:"button", text:"Remove", aria:"Remove the agent " + a.name, onclick:() => {
+    state.agents.splice(state.agents.indexOf(a), 1); state.actions.forEach(x => { if(x.agentId === a.id) x.agentId = ""; });
+    renderAgents(); renderActions(); afterAgentsChanged();
+  } });
+  remove.disabled = isPreset(a);
+  name.addEventListener("input", () => { a.name = name.value.trim(); a.api.name = a.name; remove.setAttribute("aria-label", "Remove the agent " + a.name); on.setAttribute("aria-label", `Agent on: ${a.name}`); changed(); refreshAgentSelects(); });
+  const field = (key, label, ph, mono) => { const i = h("input", { type:"text", value:a.api[key], aria:label, placeholder:ph }); if(mono) i.style.font = "11.5px ui-monospace,Consolas,monospace"; i.addEventListener("input", () => { a.api[key] = i.value.trim(); changed(); }); return i; };
+  const body = h("textarea", { rows:"4", value:a.api.template, aria:"Request body", placeholder:"Request body (JSON). Placeholders: {{user}} {{system}} {{model}} {{max_tokens}} and the card fields such as {{number}} {{drug}} {{goal}}" });
+  body.style.font = "11.5px ui-monospace,Consolas,monospace";
+  body.addEventListener("input", () => { a.api.template = body.value.trim() ? body.value : EXAMPLE_TEMPLATE; changed(); });
+  const timeout = h("select", { aria:"Wait at most" }); selOptions(timeout, TIMEOUTS.map(t => `Wait up to ${t} seconds`), Math.max(0, TIMEOUTS.indexOf(a.api.timeout)));
+  timeout.addEventListener("change", () => { a.api.timeout = TIMEOUTS[timeout.selectedIndex]; });
+  const conn = h("details", { class:"myapi" }, h("summary", { text:"Connection: the address, header and body of this agent" }),
+    field("endpoint", "Agent address", "https://… (the address your IT team gives you)"),
+    h("div", { class:"two" }, field("header", "Token header", "Header, for example Authorization"), field("scheme", "Token prefix", "Before the token, for example Bearer")),
+    field("env", "Token variable name", "NAME of the environment variable that holds the token (never the token)"),
+    field("model", "Agent model", "Model or agent name, if the service wants one"), body, field("path", "Reply path", "Where the reply text is, for example choices[0].message.content"), timeout);
+  if(!isPreset(a) && !a.api.endpoint) conn.open = true;
+  const prompt = h("textarea", { rows:"3", value:a.prompt, aria:"What this agent is asked", placeholder:"What the agent is asked, with placeholders such as {number} and {drug}" });
+  prompt.addEventListener("input", () => { a.prompt = prompt.value.length > ACT_TEXT_MAX ? prompt.value.slice(0, ACT_TEXT_MAX) : prompt.value; changed(); });
+  const auto = h("select", { aria:"When this agent runs" }); selOptions(auto, AGENT_RUNS.map(r => r[0]), Math.max(0, AGENT_RUNS.findIndex(r => r[1] === a.auto)));
+  auto.addEventListener("change", () => {
+    const previous = a.auto; a.auto = AGENT_RUNS[auto.selectedIndex][1];
+    const refused = validateAgent(a);
+    if(refused && a.auto !== 0){ a.auto = previous; auto.selectedIndex = Math.max(0, AGENT_RUNS.findIndex(r => r[1] === previous)); $("agStatus").textContent = refused; return; }
+    $("agStatus").textContent = a.auto === 0 ? "" : `${a.name} will now run by itself ${a.auto === 1 ? "whenever a full card opens" : "when a full card opens for an at-risk ANDA"}. A peek never runs it. Only the fields its prompt and body name are sent.`;
+    changed();
+  });
+  const cache = h("select", { aria:"How long to reuse an answer" }); selOptions(cache, CACHE_CHOICES.map(m => m === 0 ? "Always ask again" : `Reuse an answer for ${m} minutes`), Math.max(0, CACHE_CHOICES.indexOf(a.cache)));
+  cache.addEventListener("change", () => { a.cache = CACHE_CHOICES[cache.selectedIndex]; });
+  check();
+  return h("div", { class:"bx" }, h("div", { class:"top" }, h("label", { class:"opt" }, on, "On"), name, remove), status, conn, prompt, h("div", { class:"two" }, auto, cache), problem);
+}
+function afterAgentsChanged(){ clearAgentCache(); refreshAgentSelects(); }
+function renderAgents(){ const box = $("agList"); box.replaceChildren(); state.agents.forEach(a => box.append(agentEditor(a))); }
+$("agAdd").addEventListener("click", () => {
+  if(state.agents.length >= AGENT_MAX){ $("agStatus").textContent = `You can keep up to ${AGENT_MAX} agents.`; return; }
+  const n = state.agents.length + 1; let id = slug(`my agent ${n}`), unique = id, k = 2; while(state.agents.some(x => x.id === unique)) unique = `${id}-${k++}`;
+  state.agents.push({ id:unique, name:`My agent ${n}`, enabled:false, prompt:"Tell me what you know about ANDA {number} ({drug}). One finding per line, each starting with \"- \".", api:newApi(`My agent ${n}`), auto:0, cache:15 });
+  renderAgents(); renderActions(); afterAgentsChanged();
+});
+
+(function buildTodoSettings(){
+  TODO_REFRESH.forEach(sec => {
+    const l = document.createElement("label"); l.className = "opt";
+    l.innerHTML = `<input type="radio" name="todorefresh" value="${sec}" ${sec === state.todoRefresh ? "checked" : ""}> ${sec === 0 ? "never (only when I ask)" : sec < 60 ? sec + " s" : (sec / 60) + " min"}`;
+    l.firstChild.addEventListener("change", () => { state.todoRefresh = sec; if(isOpen("todo")){ tdApplyTimer(); } });
+    $("todoRefresh").appendChild(l);
+  });
+  $("todoAuto").addEventListener("change", e => { state.todoAuto = e.target.checked; tdReload(true); });
+  $("todoOpen").addEventListener("click", openTodo);
+  $("todoClearSet").addEventListener("click", () => { const n = todoClearDone(); $("todoStatus").textContent = n === 0 ? "Nothing finished to clear." : `Cleared ${n} finished ${n === 1 ? "item" : "items"}.`; });
+  renderActions(); renderAgents();
+})();
+
 /* backup, restore, reset: what the Windows app does, for the choices on this page. File locations and the what-if switches are not part of it. */
 const BACKUP_KIND = "anda-hover-companion-backup", BACKUP_VERSION = 1;
 function snapSettings(){
@@ -2276,7 +3085,8 @@ function snapSettings(){
     keys:{ ...s.keys }, middleClick:s.middle, middleModifier:s.middleMod, tone:s.tone, style:s.style, signOff:s.signoff,
     provider:s.provider, claudeModel:s.claudeModel,
     myApi:{ name:m.name, endpoint:m.endpoint, header:m.header, scheme:m.scheme, env:m.env, model:m.model, template:m.template, path:m.path },
-    outlook:{ enabled:o.on, cloud:o.cloud, clientId:o.client, tenant:o.tenant, maxItems:o.max }, lens:s.lens };
+    outlook:{ enabled:o.on, cloud:o.cloud, clientId:o.client, tenant:o.tenant, maxItems:o.max }, lens:s.lens,
+    actions:JSON.parse(JSON.stringify(s.actions)), agents:JSON.parse(JSON.stringify(s.agents)), todoShowFromData:s.todoAuto, todoRefreshSeconds:s.todoRefresh };
 }
 const DEFAULT_SETTINGS = snapSettings(), DEFAULT_PROMPTS = prompts.map(p => [...p]), DEFAULT_REPLIES = state.replies.map(r => ({ ...r }));
 const oneOf = (v, list, fallback) => list.includes(v) ? v : fallback;
@@ -2286,9 +3096,13 @@ function applySettings(x){
   const look = oneOf(x.appearance, LOOKS.map(l => l[0]), d.appearance); if(look !== s.look) applyLook(look);
   s.autoHide = oneOf(x.autoHide, AUTO_CHOICES, d.autoHide); s.mode = oneOf(x.consent, CONSENTS.map(c => c[0]), d.consent);
   s.escalate = typeof x.escalate === "boolean" ? x.escalate : d.escalate; s.lead = oneOf(x.holidayLead, [0, 2, 3, 5], d.holidayLead);
-  s.capture = typeof x.capture === "boolean" ? x.capture : d.capture; s.op = Math.min(100, Math.max(85, Math.round(+x.opacity || d.opacity)));
+  s.capture = typeof x.capture === "boolean" ? x.capture : d.capture; s.op = x.opacity === undefined ? d.opacity : (n => isFinite(n) ? Math.min(100, Math.max(30, Math.round(n))) : 100)(+x.opacity);
   const k = x.keys || {}, keys = { peek:str(k.peek, 40, ""), look:str(k.look, 40, ""), draft:str(k.draft, 40, "") };
   s.keys = KEYKINDS.every(([kind]) => keys[kind] && !validateCombo(keys[kind])) && !findDup(keys) ? keys : { ...d.keys };
+  s.actions = x.actions === undefined ? starterActions() : normActions(x.actions, Object.values(s.keys));
+  s.agents = normAgents(x.agents); clearAgentCache();
+  s.todoAuto = typeof x.todoShowFromData === "boolean" ? x.todoShowFromData : d.todoShowFromData;
+  s.todoRefresh = oneOf(x.todoRefreshSeconds, TODO_REFRESH, 30);
   s.middle = typeof x.middleClick === "boolean" ? x.middleClick : d.middleClick; s.middleMod = oneOf(x.middleModifier, ["None", "Ctrl", "Shift", "Alt"], d.middleModifier);
   s.tone = oneOf(x.tone, TONES, d.tone); s.style = str(x.style, 2000, ""); s.signoff = str(x.signOff, 200, "");
   s.provider = oneOf(x.provider, ["auto", "offline", "claude", "myapi"], d.provider);
@@ -2305,7 +3119,8 @@ function applySettings(x){
 }
 function syncSettingsUI(){
   const s = state, check = (name, value) => document.querySelectorAll(`input[name=${name}]`).forEach(r => { r.checked = r.value === String(value); });
-  check("look", s.look); check("autohide", s.autoHide); check("consent", s.mode); check("tone", s.tone); check("provider", s.provider); check("midmod", s.middleMod);
+  check("look", s.look); check("autohide", s.autoHide); check("consent", s.mode); check("tone", s.tone); check("provider", s.provider); check("midmod", s.middleMod); check("todorefresh", s.todoRefresh);
+  $("todoAuto").checked = s.todoAuto; renderActions(); renderAgents(); if(isOpen("todo")){ tdApplyTimer(); tdReload(true); }
   $("setUrgent").checked = s.escalate; $("setLead").value = String(s.lead); $("setCapture").checked = s.capture;
   $("setOp").value = s.op; $("setOpV").textContent = s.op + "%"; root.style.setProperty("--op", s.op + "%");
   $("setMiddle").checked = s.middle; $("setStyle").value = s.style; $("setSignoff").value = s.signoff; $("claudeModel").value = s.claudeModel;
@@ -2329,7 +3144,14 @@ function importBackup(text){
   const lenses = clean(b.lenses, 30), replies = clean(b.replies, 30);
   prompts.splice(0, prompts.length, ...lenses.map(l => [l.name, l.text])); state.replies = replies;
   applySettings(b.settings);
-  return [true, `Restored your settings, ${lenses.length} lens${lenses.length === 1 ? "" : "es"} and ${replies.length} quick repl${replies.length === 1 ? "y" : "ies"}. File locations on this PC were kept.`];
+  /* a backup is a file anyone can edit or send: it never switches on a connection that sends data or a token off the PC (the address and variable name are kept to read) */
+  const notes = [];
+  if(state.provider === "myapi"){ state.provider = "auto"; notes.push("My API was not switched on: please check its address and token variable name in Settings, then choose My API again."); }
+  const wereOn = state.agents.filter(a => a.enabled || a.auto !== 0).length;
+  state.agents.forEach(a => { a.enabled = false; a.auto = 0; });
+  if(wereOn) notes.push(`${wereOn === 1 ? "1 agent" : wereOn + " agents"} came back switched off: please check ${wereOn === 1 ? "its" : "their"} address in Settings, then switch ${wereOn === 1 ? "it" : "them"} on.`);
+  if(notes.length) syncSettingsUI();
+  return [true, `Restored your settings, ${lenses.length} lens${lenses.length === 1 ? "" : "es"} and ${replies.length} quick repl${replies.length === 1 ? "y" : "ies"}. File locations on this PC were kept.` + (notes.length ? " " + notes.join(" ") : "")];
 }
 $("bkSave").addEventListener("click", () => {
   const text = backupText();
@@ -2391,6 +3213,7 @@ $("swAi").addEventListener("change", e => {
   state.ai = e.target.checked; paintConn(); if(current && !card.classList.contains("mini")) renderBrief(current);
   document.querySelectorAll("#draft [data-ai]").forEach(b => { b.disabled = !state.ai; });
 });
+$("swAgentFail").addEventListener("change", e => { state.agentFail = e.target.checked; });
 $("swToday").addEventListener("change", e => { state.pretend = e.target.checked; if(current && card.style.display === "block") fill(current); });
 
 /* ---------------- card controls ---------------- */
@@ -2398,13 +3221,13 @@ $("closeBtn").addEventListener("click", closeCard);
 $("pinBtn").addEventListener("click", () => setPin(!pinnedCard));
 $("expBtn").addEventListener("click", toggleExpand);
 $("chipCopy").addEventListener("click", copyStatus);
-$("moreBtn").addEventListener("click", () => { card.classList.remove("mini"); if(current) renderBrief(current); if($("watchSlot").style.display !== "none") markStep("watch"); setTimeout(clampCard, 0); });
-$("chipSister").addEventListener("click", () => { const s = current && DATA[current].sisters[0]; if(s){ current = s[0]; fill(current); renderBrief(current); setTimeout(clampCard, 0); } });
+$("moreBtn").addEventListener("click", () => { card.classList.remove("mini"); if(current){ renderBrief(current); prepareAgents(); } if($("watchSlot").style.display !== "none") markStep("watch"); setTimeout(clampCard, 0); });
+$("chipSister").addEventListener("click", () => { const s = current && DATA[current].sisters[0]; if(s){ current = s[0]; fill(current); renderBrief(current); prepareAgents(); setTimeout(clampCard, 0); } });
 $("chipNotes").addEventListener("click", () => showNotice("This is not connected in the prototype. In the full build it opens the project notes.", anchorForCard()));
 $("chipOpen").addEventListener("click", () => showNotice("This is not connected in the prototype. The full build links to your system of record.", anchorForCard()));
 card.addEventListener("click", e => {
   const s = e.target.closest(".sister");
-  if(s && DATA[s.dataset.anda]){ current = s.dataset.anda; fill(current); renderBrief(current); setTimeout(clampCard, 0); }
+  if(s && DATA[s.dataset.anda]){ current = s.dataset.anda; fill(current); renderBrief(current); prepareAgents(); setTimeout(clampCard, 0); }
 });
 card.addEventListener("keydown", e => { if((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("sister")){ e.preventDefault(); e.target.click(); } });
 $("resetBtn").addEventListener("click", () => { try{ location.reload(); }catch(e){} });
