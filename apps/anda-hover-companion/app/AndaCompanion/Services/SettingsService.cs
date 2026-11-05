@@ -134,7 +134,7 @@ public sealed class Settings
     /// <summary>What a new install, and "Reset all settings", starts with: 92%, so the card sits lightly on the screen. An install that already saved a choice keeps it.</summary>
     public const double DefaultCardOpacity = 0.92;
 
-    /// <summary>Brings any value into 30–100%. A value that is not a number becomes solid (1.0).</summary>
+    /// <summary>Brings any value into 40–100%. A value that is not a number becomes solid (1.0).</summary>
     public static double NormalizeOpacity(double value) => double.IsNaN(value) || double.IsInfinity(value) ? 1.0 : Math.Clamp(value, MinCardOpacity, 1.0);
 
     /// <summary>Name of the active Prompt Library lens (null = no lens).</summary>

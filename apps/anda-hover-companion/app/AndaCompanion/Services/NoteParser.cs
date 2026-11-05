@@ -22,6 +22,7 @@ public static class NoteParser
 {
     public const int MaxInputChars = 6000, MaxItems = 30, MaxTitleChars = 160;
     private static readonly TimeSpan Limit = TimeSpan.FromMilliseconds(250);
+    // Digits are written [0-9], never \d: \d also matches digits of other scripts, which no date code can read. The browser copy of these rules has only ASCII digits too.
     private static Regex R(string pattern) => new(pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, Limit);
 
     private const string Full = "monday|tuesday|wednesday|thursday|friday|saturday|sunday";
@@ -44,7 +45,7 @@ public static class NoteParser
 
     private static readonly string[] Abbreviations = { "dr", "mr", "mrs", "ms", "no", "vs", "e.g", "i.e", "a.m", "p.m", "st", "jr", "sr", "inc", "approx", "etc", "fig", "ext", "dept", "est", "mt", "ave" };
 
-    private static readonly Regex Bullet = R(@"^\s*(?:[-*•–—▪◦·]+|\d{1,3}[.)]|\[[ xX]?\]|(?-i:\(?[a-z][.)]))\s+");
+    private static readonly Regex Bullet = R(@"^\s*(?:[-*•–—▪◦·]+|[0-9]{1,3}[.)]|\[[ xX]?\]|(?-i:\(?[a-z][.)]))\s+");
     private static readonly Regex Header = R(@"^\s*(?:from|to|cc|bcc|subject|sent|date|reply-to|importance|attachments?)\s*:");
     private static readonly Regex GreetingWord = R(@"^\s*(?:hi|hello|hey|dear|thanks|thank you|regards|best regards|kind regards|sincerely|cheers|fyi|fwiw|ok|okay|noted|got it|sounds good)\b[\s,!.\-–]*");
     private static readonly Regex Fraction = R(@"^\s*(?:cup|cups|tsp|tbsp|teaspoon|tablespoon|inch|inches|in\b|lb|lbs|oz|mile|miles|hour|hours|hr|hrs|of|day|days)");
@@ -63,14 +64,14 @@ public static class NoteParser
     private static readonly Regex MonthlyAny = R(@"\b(?:monthly|every month|each month|once a month)\b");
 
     // ---- due dates ----
-    private static readonly Regex Iso = R(@"\b(\d{4})-(\d{2})-(\d{2})\b");
-    private static readonly Regex Numeric = R(@"\b(\d{1,2})/(\d{1,2})(?:/(\d{4}|\d{2}))?\b");
-    private static readonly Regex MonthDay = R(@"\b(" + Months + @")\.?\s+(\d{1,2})(?:st|nd|rd|th)?(?:,?\s+(\d{4}))?\b");
-    private static readonly Regex DayMonth = R(@"\b(\d{1,2})(?:st|nd|rd|th)?\s+(?:of\s+)?(" + Months + @")\.?(?:,?\s+(\d{4}))?\b");
+    private static readonly Regex Iso = R(@"\b([0-9]{4})-([0-9]{2})-([0-9]{2})\b");
+    private static readonly Regex Numeric = R(@"\b([0-9]{1,2})/([0-9]{1,2})(?:/([0-9]{4}|[0-9]{2}))?\b");
+    private static readonly Regex MonthDay = R(@"\b(" + Months + @")\.?\s+([0-9]{1,2})(?:st|nd|rd|th)?(?:,?\s+([0-9]{4}))?\b");
+    private static readonly Regex DayMonth = R(@"\b([0-9]{1,2})(?:st|nd|rd|th)?\s+(?:of\s+)?(" + Months + @")\.?(?:,?\s+([0-9]{4}))?\b");
     private static readonly Regex Today = R(@"\b(?:today|tonight|this evening|this afternoon|this morning|eod|end of (?:the )?day|cob|close of business)\b");
     private static readonly Regex Tomorrow = R(@"\b(?:tomorrow|tmrw|tmr)\b");
     private static readonly Regex DayAfter = R(@"\bday after tomorrow\b");
-    private static readonly Regex InN = R(@"\bin (\d{1,3}) (day|days|week|weeks|month|months)\b");
+    private static readonly Regex InN = R(@"\bin ([0-9]{1,3}) (day|days|week|weeks|month|months)\b");
     private static readonly Regex NextWeek = R(@"\bnext week\b");
     private static readonly Regex ThisWeek = R(@"\b(?:this week|eow|end of (?:the )?week)\b");
     private static readonly Regex Weekend = R(@"\b(?:this weekend|(?:on|over|for) the weekend)\b");
@@ -80,7 +81,7 @@ public static class NoteParser
     private static readonly Regex NextDay = R(@"\bnext (" + Full + @")\b");
     private static readonly Regex Named = R(@"\b(" + Full + @")\b(?!['’]s)(?!s\b)");
     private static readonly Regex Short = R(@"\b(?:by|on|before|until|due|this|next|every|each)\s+(mon|tues?|wed|thur?s?|fri|sat|sun)\b");
-    private static readonly Regex DayOfMonth = R(@"\bthe (\d{1,2})(?:st|nd|rd|th)\b");
+    private static readonly Regex DayOfMonth = R(@"\bthe ([0-9]{1,2})(?:st|nd|rd|th)\b");
 
     private static readonly Regex Space = R(@"\s+");
     private static readonly Regex SplitVerbConnector = R(@"\s+(?:and also|and then|also|plus|then|after that|next)\s+");
@@ -104,7 +105,7 @@ public static class NoteParser
                 if (found.Count >= MaxItems) break;
             }
         }
-        catch (RegexMatchTimeoutException) { /* very odd input: what was found so far is still offered */ }
+        catch (Exception ex) when (ex is RegexMatchTimeoutException or FormatException or OverflowException or ArgumentException) { /* very odd input: what was found so far is still offered */ }
         return found;
     }
 
@@ -116,7 +117,7 @@ public static class NoteParser
             string clean = Clean(text);
             return clean.Length == 0 ? null : Read(clean.Replace('\n', ' '), today, keepEvenIfNote: true);
         }
-        catch (RegexMatchTimeoutException) { return null; }
+        catch (Exception ex) when (ex is RegexMatchTimeoutException or FormatException or OverflowException or ArgumentException) { return null; }
     }
 
     private static string Clean(string? text)
@@ -355,6 +356,12 @@ public static class NoteParser
 
     /// <summary>The first date written in the text (the earliest in the sentence), or null. "next Friday" means the first Friday after today.</summary>
     public static DateOnly? ReadDue(string text, DateOnly today)
+    {
+        try { return ReadDueCore(text ?? "", today); }
+        catch (Exception ex) when (ex is RegexMatchTimeoutException or FormatException or OverflowException or ArgumentException) { return null; }
+    }
+
+    private static DateOnly? ReadDueCore(string text, DateOnly today)
     {
         var hits = new List<(int Index, DateOnly Date)>();
         void Add(Match m, DateOnly? d) { if (m.Success && d is { } v) hits.Add((m.Index, v)); }

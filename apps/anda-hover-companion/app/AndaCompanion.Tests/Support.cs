@@ -49,3 +49,12 @@ public sealed class ShotFactAttribute : FactAttribute
         if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("ANDA_SHOTS_DIR"))) Skip = "Set ANDA_SHOTS_DIR to save pictures of the windows";
     }
 }
+
+/// <summary>Runs only when ANDA_FUZZ_IN names a JSON file of notes to read (a differential check against the browser simulation's copy of the reader).</summary>
+public sealed class FuzzFactAttribute : FactAttribute
+{
+    public FuzzFactAttribute()
+    {
+        if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("ANDA_FUZZ_IN"))) Skip = "Set ANDA_FUZZ_IN and ANDA_FUZZ_OUT to compare the notes reader with the simulation's copy";
+    }
+}

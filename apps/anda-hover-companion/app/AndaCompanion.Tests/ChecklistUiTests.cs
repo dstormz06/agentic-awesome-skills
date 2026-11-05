@@ -372,6 +372,31 @@ public class ChecklistUiTests : IClassFixture<HeadlessFixture>
         Assert.Equal(0, r.ticked);
     }
 
+    // ---------- the actions editor knows the checklist shortcut ----------
+
+    [Fact]
+    public async Task An_action_cannot_take_the_checklist_shortcut_and_says_why()
+    {
+        var r = await _fx.Session.Dispatch(() =>
+        {
+            ThemeManager.Apply(AppearanceId.K);
+            using var home = new EnvScope(AppPaths.HomeEnvVar, Temp.NewDir());
+            var settings = new Settings();
+            var w = new SettingsWindow(settings, new PromptLibraryService(Path.Combine(Temp.NewDir(), "p.json")), () => { });
+            w.Show(); w.ExpandAll(); Settle();
+            Click(w.FindControl<Button>("ActionAdd")!); Settle();
+            var added = settings.MyActions[^1];
+            var box = Named<TextBox>(w, "Shortcut for " + added.Name);
+            box.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.L, KeyModifiers = KeyModifiers.Control | KeyModifiers.Alt }); Settle();
+            string hotkey = added.Hotkey, status = w.FindControl<TextBlock>("ActionsStatus")!.Text ?? "";
+            w.Close(); Settle();
+            return (hotkey, status);
+        }, CancellationToken.None);
+
+        Assert.Equal("", r.hotkey);
+        Assert.Contains("My checklist", r.status);
+    }
+
     // ---------- Settings: My checklist ----------
 
     [Fact]

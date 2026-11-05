@@ -224,9 +224,11 @@ test.
 **Nothing too dark (product owner, 2026-11-02).** Beyond the light-only rule, no accent or progress fill may be near-black (a test enforces a minimum luminance on every look's accent and fill), and every progress fill must stay at least 3:1 against its track. Text inks stay dark enough for AA contrast; that is legibility, not decoration.
 
 **Light-only, by product decision.** All dark variants are retired (C was redesigned
-from dark glass into a light steel panel). A per-user **transparency slider** (30–100%,
+from dark glass into a light steel panel). A per-user **transparency slider** (40–100%, **starting at 92%**,
 card surface only — text and status inks always stay opaque) provides the "sits
-lightly on my screen" quality dark themes used to serve.
+lightly on my screen" quality dark themes used to serve. At the starting 92% every full look keeps its text at AA over a light
+backdrop, and the default look K does so even over a black window (4.96:1); looks A to E and G fall below 4.5:1 over a black window (lowest
+3.85:1), and every look does at 80% over black. That is why the hint says to raise the value over a dark or busy background.
 
 **Palette policy.** Accent hues are anchored to the **U.S. Web Design System** federal
 palette (e.g. D's navy = USWDS `primary-dark #1a4480`, C's federal blue = USWDS
@@ -422,11 +424,20 @@ screen reader. Tested in Chromium, not yet in Edge.
 **Round 15: my actions, agents and the to-do list.** Three additions that keep the same rules as the card.
 *My actions*: the person writes a prompt (or a to-do line) and gives it a shortcut; the shortcut is the consent act, as for every other
 shortcut. A prompt that goes to an AI or an agent first shows the exact text and waits for Send; "send at once" is a per-action opt-in. *Agents*:
-Alert Hub and Triaging Agent are listed but off, because their addresses and formats are not known and are not guessed; each is reached through the
+Alert Hub, Patent Analysis and Triaging Agent are listed but off, because their addresses and formats are not known and are not guessed; each is reached through the
 same connector as "My API". A peek never asks an agent; the *Agent findings* drawer belongs to the full card and shows each answer as the agent's own
-words, never as a fact from the record. *To-do list*: one list of the person's own items and items derived from their data, worst first, refreshed only
-while it is open. Nothing is added to it by a reply: the person ticks the lines they want and presses a button. *Settings* is arranged in seven groups
+words, never as a fact from the record. *ANDA to-do list*: one list of the person's own items and items derived from their data, worst first, refreshed only
+while it is open. Nothing is added to it by a reply: the person ticks the lines they want and presses a button. *Settings* is arranged in groups
 under headings, with a strong line between groups and a fine line between settings, so a long page can be scanned.
+
+**Round 16: My checklist, Notes to checklist and Settings that arrange themselves.** *My checklist* is a second, separate mode (as the draft check is
+apart from the card): its own shortcut chosen in Settings, its own windows and its own file, for anything the person has to do, work or home, with nothing
+taken from their data. Highlighted or pasted notes are read **by plain rules, with no AI**, into suggested items; the reader shows what it understood
+(title, day, urgent, repeat, Work/Home/Other) in fields the person can change, never invents a day, marks a remark as "not a task" instead of ticking it, and adds
+nothing until the person presses Add (or, by their own choice, adds at once with an Undo for the batch). A repeating item comes back by itself and a missed
+one moves on instead of piling up. *Settings* became eight collapsible sections: everything is collapsed except what needs a look, what a new user needs
+first and up to two sections opened often, each with a one-line reason; Expand all, Collapse all and Suggested view are always there, and a Getting
+started card with three plain steps stays until it is hidden. Nothing moves while the person works.
 
 ## 12. Engagement roadmap — seven features that make it the daily habit
 

@@ -30,28 +30,44 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   new installs; an install that already saved a choice keeps it), **urgent items** (in whisper mode an
   at-risk or late ANDA opens a peek by itself), the weekend/holiday window, **My data**,
   **standing instructions** for the writing actions, **three rebindable shortcuts**, an optional
-  **usage log** (off by default), **card transparency slider** (30–100%; text always stays opaque),
+  **usage log** (off by default), **card transparency slider** (40–100%, starting at 92%; text always stays opaque),
   companion lens picker, and the **connection panel** (Auto, Offline, Claude with its model name, or My API) with one-click Test.
-  A **Go to** list at the top jumps to any section. Settings is arranged in seven groups separated by lines: *Look and feel*, *How it
-  starts*, *Dates*, *My files and writing*, *My actions, agents and to-do list*, *AI and connections*, *Maintenance*.
+  A **Go to** list at the top jumps to any section (and opens it). Settings is eight collapsible sections, each with a strong line under it: *Look and feel*, *How it
+  starts*, *Dates*, *My files and writing*, *My checklist*, *My actions, agents and ANDA to-do list*, *AI and connections*, *Maintenance*. **They arrange
+  themselves:** when Settings opens, everything is collapsed except what needs a look (a shortcut Windows did not register, a portfolio file that could not be
+  read, an AI connection that was never tested, an agent or action that is not ready), what a new user needs first (shortcuts, portfolio) and up to two sections
+  opened three or more times; each open section says why. *Suggested view*, *Expand all* and *Collapse all* are always there, and a **Getting started**
+  card with three plain steps stays until hidden. Only a count per section is kept (`settings.json`; no text), can be forgotten, and stops when the
+  arranging is switched off. `Services/SettingsAdvisor.cs`, `UI/SettingsWindow.Adaptive.cs`.
 - **My actions** — your own prompt, AI request, agent request or to-do item, started by a keyboard shortcut you choose (or from the tray menu's
   *My actions*). Four kinds: *Add to my to-do list*; *Fill my prompt and show it* (no AI is called; copy the text); *Ask my AI* (shows exactly what
   would be sent and sends only after you press Send, unless you turn that off for that one action); *Run one of my agents*. Placeholders such as
   `{number}`, `{drug}`, `{goal}`, `{forecast}` are filled from the card, and `{selection}` is the text you selected, sent to an AI or agent only
   fenced as data. Up to eight; three starters, none with a shortcut. A press with nothing useful selected asks for an ANDA number instead of doing
   nothing. `Services/MyActions.cs`, `UI/ActionRunner.cs`, `UI/ActionWindow`.
-- **My agents** — **Alert Hub** and **Triaging Agent** are listed, **switched off and without an address**: this app does not know their
+- **My agents** — **Alert Hub**, **Patent Analysis** and **Triaging Agent** are listed, **switched off and without an address**: this app does not know their
   addresses or message format and does not guess, so each needs the details your IT team gives you (address, token header, the *name* of the
   environment variable that holds the token, request body, reply path). Your own agents use the same form (up to eight). An agent is asked only
   when you press Run on a card or use its action, unless you set it to run by itself: when a full card opens, or only for an at-risk ANDA. A
   peek never asks an agent, and an automatic agent cannot use `{selection}`. Its answer appears in the card's *Agent findings* drawer as the
   agent's own words (plain text, never run, never passed on); an item joins your to-do list only when you press its button. A restored backup
   brings every agent back switched off. `Services/Agents.cs`.
-- **To-do list** — *To-do list…* in the tray menu: your own items plus items from your data (at-risk ANDAs, weekend and holiday dates, action
+- **ANDA to-do list** — *ANDA to-do list…* in the tray menu: your own items plus items from your data (at-risk ANDAs, weekend and holiday dates, action
   items), by the same rules as the card and the watch list, worst first. Finish, snooze or delete; ticking off an item from your data keeps it done
   until the situation changes. It refreshes itself only while it is open (every 15 s, 30 s, 1 min or 5 min, or never) and at once when the list
   changes; a changed portfolio file is read at the next refresh; nothing runs when it is closed. It is kept in `todo.json`, plain text on this PC, and
   is never sent anywhere. `Services/Todo.cs`, `UI/TodoWindow`.
+- **My checklist** — a second, separate mode for anything (work duties, the house), apart from the ANDA to-do list: its own shortcut (chosen in Settings; **Ctrl+Alt+L** at
+  first; *None* is allowed, and the tray menu still opens it), its own windows and its own file (`checklist.json`, plain text on this PC, never sent anywhere).
+  **Notes to checklist**: select messy notes anywhere and press the shortcut (or paste them) and they are read **by plain rules, with no AI**
+  (`Services/NoteParser.cs`) into suggested items: a tidy title (filler such as "don't forget to" removed), a due day ("tomorrow", "by Friday", "Nov 12", "the 1st"),
+  *urgent* ("asap", "!!"), a repeat ("every Friday", "monthly on the 1st"), Work / Home / Other and an ANDA number kept so its card can be opened. A remark that
+  is not a task is offered but not ticked. Each suggestion is editable, and **nothing is added until you press Add** (or, if you chose *Add them at once* for the shortcut,
+  all task-like lines are added with an **Undo** for that batch). **My checklist** groups the list as overdue, today, the next seven days and anytime, says what to
+  start with, shows how today is going, lets you quick-add by typing a sentence (it shows what it understood first), edit, move to tomorrow, delete (with Undo), filter by
+  Work/Home/Other, move overdue items to today and clear finished ones. Items that repeat come back by themselves; a missed repeating item moves to its next day
+  instead of piling up. It refreshes itself only while open, and when the date changes. Limits: 500 items, 200 characters each; notes up to 6,000 characters, 30 suggestions.
+  `Services/Checklist.cs`, `UI/ChecklistWindow`, `UI/NotesWindow`, `UI/ItemFields.cs`, `App.Checklist.cs`.
 - **Compact boxes (L–O)** — a Strip, a Tile, a Ticket and a Badge, about 340 × 63–81, 196 × 123–145,
   300 × 64–68 and 150–185 × 38 px (measured on Windows), so a card never blankets the email being read. They make **no AI call**,
   **never take keyboard focus** (typing in the email continues undisturbed), and open their sibling

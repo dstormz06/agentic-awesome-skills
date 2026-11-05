@@ -18,9 +18,10 @@ generated. An optional AI-written brief is labelled "generated, verify before ac
 Settings: your own keys; your Excel or CSV portfolio, notes folder and Drugs@FDA file; Offline, Claude (with its model
 name) or your own API described in a form; tone, sign-off and quick replies; nineteen looks. Settings can be backed up,
 restored and reset. A backup holds no secret and no file path, and a restore never switches on a connection that sends data away.
-You can also write your own **actions** (a prompt, an AI request or an agent request on a shortcut you choose), keep a **to-do list** that
-includes what your data says needs a look, and register agents such as the division's Alert Hub and Triaging Agent. Those two are listed but
-not connected: their addresses and formats are needed from DPM IT.
+You can also write your own **actions** (a prompt, an AI request or an agent request on a shortcut you choose), keep an **ANDA to-do list** that
+includes what your data says needs a look, keep a separate **checklist** for anything else you must do (highlight messy notes and press its shortcut:
+they become suggested items, read by plain rules with no AI), and register agents such as the division's Alert Hub, Patent Analysis and Triaging Agent. Those three are listed but
+not connected: their addresses and formats are needed from DPM IT. Settings open on what needs a look and keep the rest collapsed, with a Getting started card for the first day.
 
 **Where it fits the work, and how each is measured** (hypotheses to confirm with the testers):
 
@@ -30,7 +31,8 @@ not connected: their addresses and formats are needed from DPM IT.
 | Draft check: a draft's numbers, dates and status against the record | Before sending a status email | Mismatches caught per week | Built |
 | Weekend and federal-holiday flags on goal and forecast dates | On the card, before a date is quoted | Near-misses caught early | Built |
 | Watch list: every ANDA with something worth a look, worst first | Start of day, opened on demand | Near-misses caught early | Built |
-| To-do list: your own items plus what your data says needs a look, worst first | Start of day, opened on demand; added to by your own shortcuts | Items finished on time | Built (one person, one PC) |
+| ANDA to-do list: your own items plus what your data says needs a look, worst first | Start of day, opened on demand; added to by your own shortcuts | Items finished on time | Built (one person, one PC) |
+| My checklist: messy notes (a highlighted email or message) turned into items for work duties and home tasks | Any time; the person selects notes and presses their own shortcut | Items finished on time; notes turned into items per week | Built (one person, one PC; plain rules, not tested on real notes) |
 | Huddle prep: a ranked glance at every ANDA on an agenda | Before the weekly huddle | Prep minutes per huddle | Next (concept only) |
 
 "Built" means it exists and passes automated tests. No tester has used it, and none of it has touched real data.

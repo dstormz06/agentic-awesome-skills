@@ -19,7 +19,7 @@
   --ok:#177245; --bad:#a33636;
   --shadow-win:0 18px 40px -14px rgba(20,30,45,.30),0 2px 8px rgba(20,30,45,.10);
   --tb-h:48px; --banner-h:34px;
-  --op:100%;
+  --op:92%;
 }
 
 /* ---- card tokens: fifteen light full-card looks (K is the product default); L–O are compact boxes that borrow a sibling's tokens ---- */
@@ -662,6 +662,67 @@ details.myapi input,details.myapi textarea{margin:0 0 6px}
 @media (max-width:600px){#tdRows .tr{grid-template-columns:30px 1fr}#tdRows .tr .tag{grid-column:2;margin:5px 0 0}#tdRows .tr .t{grid-column:2}#tdRows .tr .btns{grid-column:2;justify-content:flex-start}}
 @media (max-width:1040px){#todo .tdadd{grid-template-columns:1fr}.bx .two,.bx .top{grid-template-columns:1fr}.bx .krow2{grid-template-columns:1fr auto auto}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+
+/* ===================== round 16: my checklist, notes to checklist, settings that arrange themselves ===================== */
+#card.sheet{background-color:var(--c-bg)}      /* a bottom sheet over its dimmed backdrop is always solid; transparency belongs to the floating card on a desktop */
+#checklist,#notes{z-index:52}
+#checklist{width:660px;padding:18px 20px;left:calc(50% - 330px);top:36px;max-height:calc(100% - var(--tb-h) - 52px);overflow:auto}
+#notes{width:660px;padding:18px 20px;left:calc(50% - 330px);top:52px;max-height:calc(100% - var(--tb-h) - 68px);overflow:auto}
+#notes textarea{min-height:110px;resize:vertical}
+#checklist .cladd{display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-top:10px}
+#checklist .clbar{height:6px;border-radius:3px;background:var(--c-hair);margin:8px 0 6px;overflow:hidden}
+#checklist .clbar i{display:block;height:100%;background:var(--c-accent);width:0}
+#checklist .clfocus{margin:2px 0 8px;font-size:12.5px;font-weight:650;color:var(--c-ink)}
+#checklist .clfilter{display:flex;align-items:center;gap:8px;margin-top:6px}
+#checklist .clfilter .lbl{margin:0}
+#checklist .clfilter select{width:150px}
+#checklist .clfilter .pill{margin-left:auto}
+#checklist .acts,#notes .acts{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+#clRows .gh{font-size:9.5px;font-weight:800;letter-spacing:.13em;color:var(--c-ink3);margin:14px 2px 2px}
+#clRows .gh.bad{color:var(--c-bad)}
+#clRows .cr{display:grid;grid-template-columns:30px 1fr auto;gap:6px;align-items:start;border-top:1px solid var(--c-hair);padding:6px 2px}
+#clRows .cr .t{min-width:0;font-size:13px}
+#clRows .cr .t .urg{display:block;font-size:9.5px;font-weight:800;color:var(--c-bad)}
+#clRows .cr.done .t b{color:var(--c-ink3);text-decoration:line-through;font-weight:400}
+#clRows .cr .t small{display:block;font-size:11px;color:var(--c-ink3)}
+#clRows .cr .t small.bad{color:var(--c-bad)}
+#clRows .cr .btns{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.krow.kl{grid-template-columns:110px minmax(0,1fr) auto}.krow.kl input{min-width:0}
+@media (max-width:600px){.krow.kl{grid-template-columns:minmax(0,1fr) auto}.krow.kl>span:first-child{grid-column:1 / -1}}
+#clRows .cr .btns button{border:none;background:var(--c-mark);color:var(--c-accent);border-radius:99px;padding:3px 10px;font-size:11.5px;font-weight:650;min-height:28px}
+.itf{display:grid;gap:6px;min-width:0}
+.itf .opts{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center}
+.itf .opts select{width:108px}
+.itf .opts input[type=text]{width:150px}
+.itf .opts select.rp{width:156px}
+.itf .opts label.opt{min-height:0}
+.itf .wn{font-size:11px;color:var(--c-ink3)}
+.itf .wn.bad{color:var(--c-bad)}
+.ced{margin:4px 0 6px 30px;padding:10px;border:1px solid var(--c-hair);background:var(--c-mark);border-radius:8px;display:grid;gap:6px}
+.ced .bad{font-size:11.5px;color:var(--c-bad)}
+.ced .row2{display:flex;gap:8px}
+.ntrow{display:grid;grid-template-columns:30px 1fr;gap:6px;padding:8px;border:1px solid var(--c-hair);background:var(--c-mark);border-radius:8px;margin:0 0 6px}
+.ntrow .nt{font-size:11px;color:var(--c-ink3);margin-top:3px}
+.ntrow .prob{font-size:11.5px;color:var(--c-bad);margin-top:3px}
+.ntrow .added{font-size:11.5px;font-weight:650;color:var(--c-good);margin-top:3px}
+details.sec{border-bottom:2px solid var(--c-line)}
+details.sec>summary{list-style:none;cursor:pointer;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:12px 26px 12px 2px;position:relative;min-height:44px}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary::after{content:"";position:absolute;right:8px;top:50%;width:7px;height:7px;border-right:2px solid var(--c-ink2);border-bottom:2px solid var(--c-ink2);transform:translateY(-70%) rotate(45deg);transition:transform .15s}
+details.sec[open]>summary::after{transform:translateY(-30%) rotate(-135deg)}
+details.sec>summary h3.grp{padding:0;margin:0}
+.pillnote{font-size:10.5px;font-weight:650;border-radius:99px;padding:2px 9px;background:var(--c-mark);color:var(--c-accent)}
+.pillnote.attn{background:var(--c-warn-bg);color:var(--c-warn)}
+.pillnote[hidden]{display:none}
+.secbody{padding:2px 0 14px}
+#gs{border:1px solid var(--c-line);background:var(--c-mark);border-radius:8px;padding:12px;margin:8px 0}
+#gs p.st{margin:0 0 6px;font-size:12.5px;color:var(--c-ink)}
+#gs .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+#adaptBar{border:1px solid var(--c-hair);border-radius:8px;padding:8px 10px;margin:8px 0}
+#adaptBar p{margin:0 0 6px;font-size:11.5px;color:var(--c-ink2)}
+#adaptBar .acts{display:flex;flex-wrap:wrap;gap:8px}
+@media (max-width:1040px){#checklist .cladd{grid-template-columns:1fr}.ced{margin-left:0}}
+@media (max-width:600px){#clRows .cr{grid-template-columns:30px 1fr}#clRows .cr .btns{grid-column:2;justify-content:flex-start}}
 </style>
 </head>
 <body>
@@ -708,6 +769,7 @@ Demo author
         <div class="msg"><span class="av" aria-hidden="true">A</span><div><div class="who">Colleague A (demo)</div><div class="bub">Can someone confirm where <span class="pick" data-pick="216482">216482</span> stands against its goal date? Leadership asked.</div></div></div>
         <div class="msg"><span class="av" aria-hidden="true">B</span><div><div class="who">Colleague B (demo)</div><div class="bub">Last I looked it was around 62%. The sister application is <span class="pick" data-pick="214990">214990</span>.</div></div></div>
         <div class="msg me"><span class="av" aria-hidden="true">Me</span><div><div class="who">You</div><div class="bub">Checking now.</div></div></div>
+        <div class="msg me"><span class="av" aria-hidden="true">Me</span><div><div class="who">You · notes to self</div><div class="bub"><span class="pick" data-pick="NOTES">Don't forget to call the plumber about the leak under the sink tomorrow!! Also email Sam re: the Thursday huddle. Need to submit the IR response for ANDA 216482 by Friday. groceries: milk, eggs, bread</span></div></div></div>
       </div>
     </section>
 
@@ -741,7 +803,7 @@ C:\work&gt; </div>
 
   <!-- ===== guide ===== -->
   <section class="win" id="guide" aria-label="Demo guide">
-    <div class="bar"><span class="ttl">Try it in nine steps</span></div>
+    <div class="bar"><span class="ttl">Try it in ten steps</span></div>
     <div class="body">
       <p class="sub">Please select a number in any window and press a shortcut. By default you will see a small invite, and an at-risk ANDA opens a peek by itself. Weekend and holiday goal dates are flagged.</p>
       <ol id="steps">
@@ -753,6 +815,7 @@ C:\work&gt; </div>
         <li data-step="look2"><i>✓</i><span>Select <b>NDA 021234</b>, press the hotkey. No guess.</span></li>
         <li data-step="look3"><i>✓</i><span>Turn on <b>Terminal</b> below, select its number: paused.</span></li>
         <li data-step="draft"><i>✓</i><span>Select the <b>draft reply</b> in Mail, press <span data-kbd="draft"></span>.</span></li>
+        <li data-step="list"><i>✓</i><span>In <b>Chat</b>, select <b>your own notes</b>, press <span data-kbd="list"></span>: they become checklist items.</span></li>
         <li data-step="ctx"><i>✓</i><span>In the <b>Browser</b> window, select <b>216482</b> and <b>right-click</b>: the Edge extension's menu.</span></li>
       </ol>
       <div class="lbl">APPS TO TEST</div>
@@ -764,6 +827,7 @@ C:\work&gt; </div>
         <button class="btn" type="button" data-pickbtn="NDA 021234">NDA 021234</button>
         <button class="btn" type="button" data-pickbtn="12345">12345</button>
         <button class="btn" type="button" data-pickbtn="DRAFT">draft reply</button>
+        <button class="btn" type="button" data-pickbtn="NOTES">messy notes</button>
         <button class="btn" type="button" data-pickbtn="TERM" id="pickTerm" hidden>in Terminal</button>
       </div>
       <div class="lbl">PRESS A HOTKEY</div>
@@ -771,15 +835,18 @@ C:\work&gt; </div>
         <button class="btn key" type="button" id="keyPeek" aria-label="Press Control Alt A">Ctrl+Alt+A</button>
         <button class="btn key" type="button" id="keyLook" aria-label="Press Control Alt Space">Ctrl+Alt+Space</button>
         <button class="btn key" type="button" id="keyDraft" aria-label="Press Control Alt D">Ctrl+Alt+D</button>
+        <button class="btn key" type="button" id="keyList" aria-label="Press Control Alt L">Ctrl+Alt+L</button>
         <button class="btn" type="button" id="trayMenuBtn">Tray menu</button>
         <button class="btn" type="button" id="openSettingsBtn">Settings</button>
-        <button class="btn" type="button" id="openTodoBtn">To-do list</button>
+        <button class="btn" type="button" id="openTodoBtn">ANDA to-do list</button>
+        <button class="btn" type="button" id="openChecklistBtn">My checklist</button>
       </div>
       <div class="lbl">MY ACTIONS · THEIR SHORTCUTS</div>
       <div class="row" id="actKeys" aria-label="Press one of your own shortcuts"></div>
       <div class="lbl">WHAT IF…</div>
       <label class="sw"><input type="checkbox" id="swConflict"> Another program already owns <span data-key="peek"></span></label>
       <label class="sw"><input type="checkbox" id="swConflictLook"> Another program already owns <span data-key="look"></span></label>
+      <label class="sw"><input type="checkbox" id="swConflictList"> Another program already owns <span data-key="list"></span></label>
       <label class="sw"><input type="checkbox" id="swToday"> Pretend today is Oct 1, 2026 (goal dates get close)</label>
       <label class="sw"><input type="checkbox" id="swAi"> Claude access is approved (sample brief)</label>
       <label class="sw"><input type="checkbox" id="swAgentFail"> An agent cannot be reached (rehearse a failure)</label>
@@ -828,8 +895,27 @@ C:\work&gt; </div>
   <div class="app-win" id="settings" role="dialog" aria-label="Settings">
     <div class="hdr"><h2>Settings</h2><button class="pill" id="setDone" type="button">Done</button></div>
     <div class="connbar" id="setBanner" role="status"><i></i><div><b id="setBannerLabel"></b><span id="setBannerText"></span></div></div>
-    <div style="display:flex;align-items:center;gap:10px;margin:0 0 6px"><span style="color:var(--c-ink2);font-size:12.5px;flex:none;white-space:nowrap">Go to</span><select id="setJump" aria-label="Go to a section of Settings" style="width:auto;max-width:100%"></select></div>
-    <h3 class="grp">Look and feel</h3>
+    <div style="display:flex;align-items:center;gap:10px;margin:0 0 6px"><span style="color:var(--c-ink2);font-size:12.5px;flex:none;white-space:nowrap">Go to</span><select id="setJump" aria-label="Go to a section of Settings" style="width:auto;max-width:100%;min-width:0;flex:1 1 auto"></select></div>
+    <!-- Day 1: three plain steps, shown until the person hides them. -->
+    <div id="gs" role="region" aria-label="Getting started">
+      <div class="lbl" style="margin-top:0">GETTING STARTED · THREE STEPS, NOTHING TO SET UP FIRST</div>
+      <p class="st" id="gsStep1"></p>
+      <p class="st" id="gsStep2"></p>
+      <p class="st" id="gsStep3"></p>
+      <div class="acts">
+        <button class="pill quiet" id="gsFiles" type="button">Choose my portfolio file</button>
+        <button class="pill quiet" id="gsChecklist" type="button">Open my checklist</button>
+        <button class="pill" id="gsHide" type="button">Got it, hide this</button>
+      </div>
+      <p class="hint">Everything else here is optional. The app works as it is. You can show this again under Maintenance.</p>
+    </div>
+    <!-- Settings arrange themselves: sections that need a look, or that are used most, are open; the rest are collapsed. -->
+    <div id="adaptBar">
+      <p id="adaptText"></p>
+      <div class="acts"><button class="pill quiet" id="adaptSuggested" type="button">Suggested view</button><button class="pill quiet" id="adaptExpand" type="button">Expand all</button><button class="pill quiet" id="adaptCollapse" type="button">Collapse all</button></div>
+    </div>
+    <details class="sec" id="secLook"><summary><h3 class="grp">Look and feel</h3><span class="pillnote" id="pillLook" hidden></span></summary>
+    <div class="secbody">
     <div class="lbl">APPEARANCE · FULL CARD</div>
     <div class="wrap" id="setLook"></div>
     <hr class="hair">
@@ -838,14 +924,15 @@ C:\work&gt; </div>
     <p class="hint">Compact boxes are small enough to leave an open email readable. They make no AI call and never take keyboard focus: click one, or press the hotkey again on the same number, to open its full card. All looks share identical anatomy and meaning. This is preference, never information.</p>
     <hr class="hair">
     <div class="lbl">CARD TRANSPARENCY</div>
-    <div style="display:flex;align-items:center;gap:10px"><input type="range" id="setOp" min="30" max="100" step="1" value="100" aria-label="Card transparency"><span id="setOpV" style="width:42px;text-align:right">100%</span></div>
-    <p class="hint">100% is solid; 30% lets what is behind the card show through. Only the card surface becomes translucent. Text and status colors stay fully opaque, but on a busy background they are easier to read at a higher value.</p>
+    <div style="display:flex;align-items:center;gap:10px"><input type="range" id="setOp" min="40" max="100" step="1" value="92" aria-label="Card transparency"><span id="setOpV" style="width:42px;text-align:right">92%</span></div>
+    <p class="hint">100% is solid; 40% lets what is behind the card show through. The card starts at 92%. Only the card surface becomes translucent (a bottom sheet on a phone is always solid). Text and status colors stay fully opaque, but on a busy background they are easier to read at a higher value.</p>
     <hr class="hair">
     <div class="lbl">AUTO-HIDE</div>
     <div class="wrap" id="setAuto"></div>
     <p class="hint">Hides a card or box after this long with no mouse or key activity. Never while your pointer is over it, while it is pinned, or while the drawer is open.</p>
-    <hr class="rule">
-    <h3 class="grp">How it starts</h3>
+    </div></details>
+    <details class="sec" id="secStart"><summary><h3 class="grp">How it starts</h3><span class="pillnote" id="pillStart" hidden></span></summary>
+    <div class="secbody">
     <div class="lbl">CONSENT MODEL</div>
     <div id="setConsent"></div>
     <label class="opt"><input type="checkbox" id="setUrgent" checked> Open a peek by itself for an at-risk or late ANDA (whisper mode only)</label>
@@ -867,13 +954,15 @@ C:\work&gt; </div>
     <label class="opt"><input type="checkbox" id="setMiddle"> Middle-click (wheel button) on selected text starts Select &amp; Peek</label>
     <div class="wrap" id="setMiddleMod"></div>
     <p class="hint">Off by default. In the Windows app it uses a mouse hook that sees only the middle button, never the pointer position or any text, and the click still reaches the program under it. Some security software flags mouse hooks. A plain middle-click scrolls or opens links in many programs, so Ctrl is recommended. Here it works on the text in the windows below; the page only stops the browser's own scroll mode. The shortcuts and the tray icon always work.</p>
-    <hr class="rule">
-    <h3 class="grp">Dates</h3>
+    </div></details>
+    <details class="sec" id="secDates"><summary><h3 class="grp">Dates</h3><span class="pillnote" id="pillDates" hidden></span></summary>
+    <div class="secbody">
     <div class="lbl">WEEKEND &amp; HOLIDAY WATCH</div>
-    <div style="display:flex;align-items:center;gap:10px"><span style="color:var(--c-ink2);font-size:12.5px">Flag dates within</span><select id="setLead" aria-label="Business days around a federal holiday" style="width:auto"></select><span style="color:var(--c-ink2);font-size:12.5px">business days of a federal holiday</span></div>
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px"><span style="color:var(--c-ink2);font-size:12.5px">Flag dates within</span><select id="setLead" aria-label="Business days around a federal holiday" style="width:auto"></select><span style="color:var(--c-ink2);font-size:12.5px">business days of a federal holiday</span></div>
     <p class="hint">Weekends and federal holidays are always flagged (U.S. federal calendar, OPM). This only shows you the date; it never says how a goal date rule applies.</p>
-    <hr class="rule">
-    <h3 class="grp">My files and writing</h3>
+    </div></details>
+    <details class="sec" id="secFiles"><summary><h3 class="grp">My files and writing</h3><span class="pillnote" id="pillFiles" hidden></span></summary>
+    <div class="secbody">
     <div class="lbl">MY DATA · YOUR OWN FILES, READ-ONLY, ON THIS PC</div>
     <div class="sim-note">Simulated here. In the Windows app, Choose… opens a file picker and the file stays on your PC and is only ever read. Nothing is read or sent from this page, so do not use real files with it.</div>
     <div class="frow"><input type="text" id="dataPortfolio" readonly placeholder="Your ANDA portfolio (.xlsx or .csv). Empty = fictional demo data." aria-label="Portfolio file"><button class="pill quiet" id="dataPortfolioPick" type="button">Choose…</button><button class="pill quiet" id="dataPortfolioClear" type="button">Clear</button></div>
@@ -890,8 +979,29 @@ C:\work&gt; </div>
     <input type="text" id="setSignoff" placeholder="How you sign off, for example: Thanks, Pat" aria-label="My sign-off" style="margin-top:6px">
     <div class="frow" style="margin-top:6px"><span id="repliesSummary" style="font-size:12px;color:var(--c-ink2)"></span><button class="pill quiet" id="repliesManage" type="button">Quick replies…</button><span></span></div>
     <p class="hint">Tone, style and sign-off steer Proofread, Rewrite and Fact-check (only once a model is approved). They can never override the fixed rules: no changed numbers or dates, no invented facts. Quick replies are templates filled from the card (no AI): the Quick replies button on a card copies one with its numbers and dates filled in.</p>
-    <hr class="rule">
-    <h3 class="grp">My actions, agents and to-do list</h3>
+    </div></details>
+    <details class="sec" id="secChecklist"><summary><h3 class="grp">My checklist</h3><span class="pillnote" id="pillChecklist" hidden></span></summary>
+    <div class="secbody">
+    <div class="lbl">MY CHECKLIST · A SEPARATE LIST FOR ANYTHING, WORK OR HOME</div>
+    <div class="krow kl"><span>Notes to checklist</span><input type="text" id="keyBoxList" readonly aria-label="My checklist shortcut"><span style="display:flex;gap:6px"><button class="pill quiet" type="button" data-keyclear="list">None</button><button class="pill quiet" type="button" data-keyreset="list">Reset</button></span></div>
+    <div class="keystatus" id="listKeyStatus" role="status"></div>
+    <p class="hint">Click the box, then press the keys. Select messy notes anywhere (an email, a message, a scribbled list), press this shortcut, and they become suggested checklist items. None means no shortcut: the tray menu still opens it.</p>
+    <hr class="hair">
+    <div class="lbl">WHEN I PRESS IT</div>
+    <div id="clMode"></div>
+    <p class="hint">Show me the items first lets you untick, change or rename each one before anything is added. Add them at once puts every item that looks like a task on your checklist straight away, with an Undo button for that batch.</p>
+    <hr class="hair">
+    <div class="lbl">OPEN IT · KEEP IT TIDY</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      <button class="pill quiet" id="clOpenSet" type="button">Open my checklist</button>
+      <button class="pill quiet" id="clNotesSet" type="button">Notes to checklist…</button>
+      <button class="pill quiet" id="clClearSet" type="button">Clear finished items</button>
+    </div>
+    <div class="keystatus" id="clSetStatus" role="status"></div>
+    <p class="hint">It is apart from the ANDA to-do list: its own shortcut, its own window and its own file (checklist.json on this PC in the Windows app; here it lives only on this page), and nothing in it comes from your data. Notes are read by simple rules (no AI, nothing is sent anywhere), and the reading never invents a day: what it did not find stays empty. Items that repeat come back by themselves.</p>
+    </div></details>
+    <details class="sec" id="secActions"><summary><h3 class="grp">My actions, agents and ANDA to-do list</h3><span class="pillnote" id="pillActions" hidden></span></summary>
+    <div class="secbody">
     <div class="lbl">MY ACTIONS · YOUR OWN PROMPT, AGENT OR TO-DO ITEM, ON YOUR OWN SHORTCUT</div>
     <div class="sim-note">Simulated here. Nothing is sent from this page: an AI or agent reply below is a labelled stand-in, never a real answer.</div>
     <div id="actList"></div>
@@ -899,24 +1009,25 @@ C:\work&gt; </div>
     <div class="keystatus" id="actStatus" role="status"></div>
     <p class="hint">Select a number anywhere, then press the shortcut you chose for an action. Add to my to-do list puts it on your list. Fill my prompt shows your own prompt with the card's facts filled in, ready to copy; no AI is called. Ask my AI and Run an agent show exactly what would be sent, and send only after you press Send (unless you turn that off for that one action). Every action is also in the tray menu.</p>
     <hr class="hair">
-    <div class="lbl">MY AGENTS · ALERT HUB, TRIAGING AGENT AND YOUR OWN</div>
+    <div class="lbl">MY AGENTS · ALERT HUB, PATENT ANALYSIS, TRIAGING AGENT AND YOUR OWN</div>
     <div id="agList"></div>
     <div class="wrap"><button class="pill quiet" id="agAdd" type="button">Add an agent</button></div>
     <div class="keystatus" id="agStatus" role="status"></div>
-    <p class="hint">An agent is any service you can reach with an address. Alert Hub and Triaging Agent are listed so they can be set up: this app does not know their addresses or message format and does not guess them, so each stays off until you enter the details your IT team gives you. Nothing is sent for an agent that is off. The token stays in the environment variable you name and is never saved by this app.</p>
+    <p class="hint">An agent is any service you can reach with an address. Alert Hub, Patent Analysis and Triaging Agent are listed so they can be set up: this app does not know their addresses or message format and does not guess them, so each stays off until you enter the details your IT team gives you. Nothing is sent for an agent that is off. The token stays in the environment variable you name and is never saved by this app.</p>
     <p class="hint">An agent is asked only when you press Run on a card or use its action, unless you set it to run by itself. By itself means: when a full card opens, or only when the ANDA is at risk. A peek never asks an agent. Its answer appears in the card's drawer as the agent's own words, and nothing joins your to-do list until you press its button.</p>
     <hr class="hair">
-    <div class="lbl">MY TO-DO LIST · LIVE, FROM YOUR ITEMS AND YOUR DATA</div>
+    <div class="lbl">MY ANDA TO-DO LIST · LIVE, FROM YOUR ITEMS AND YOUR DATA</div>
     <label class="opt"><input type="checkbox" id="todoAuto" checked> Include items from my data (at-risk ANDAs, weekend and holiday dates, action items)</label>
     <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px"><span style="color:var(--c-ink2);font-size:12.5px">While the list is open, refresh every</span><div class="wrap" id="todoRefresh"></div></div>
     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">
-      <button class="pill quiet" id="todoOpen" type="button">Open the to-do list</button>
+      <button class="pill quiet" id="todoOpen" type="button">Open the ANDA to-do list</button>
       <button class="pill quiet" id="todoClearSet" type="button">Clear finished items</button>
     </div>
     <div class="keystatus" id="todoStatus" role="status"></div>
     <p class="hint">The list updates itself only while it is open: at the interval you chose, and at once when you change the list. A changed portfolio file is picked up at the next refresh. When it is closed nothing runs. In the Windows app it is kept in a plain file on this PC (todo.json) that you can read, and is never sent anywhere; here it lives only in this page's memory. Items from your data follow the same rules as the card, so the two cannot disagree; ticking one off keeps it done until the date or the situation changes.</p>
-    <hr class="rule">
-    <h3 class="grp">AI and connections</h3>
+    </div></details>
+    <details class="sec" id="secConnections"><summary><h3 class="grp">AI and connections</h3><span class="pillnote" id="pillConnections" hidden></span></summary>
+    <div class="secbody">
     <div class="lbl">COMPANION LENS · PROMPT LIBRARY</div>
     <div style="display:flex;gap:8px"><select id="setLens" aria-label="Companion lens"></select><button class="pill quiet" id="setManage" type="button">Manage…</button></div>
     <p class="hint">Your own stored prompt steers the brief's emphasis. A lens can never override grounding.</p>
@@ -955,8 +1066,9 @@ C:\work&gt; </div>
     <p class="hint">Off by default. When on, an open card can list the latest messages that mention its six-digit number: sender, subject, date and a short preview. It is read-only and searches only for that number.</p>
     <p class="hint">You sign in on Microsoft's own page, so the app never sees your password. The sign-in stays in memory and ends when the app closes. Mail is never saved and never sent to an AI service.</p>
     <p class="hint">Your organization must register an app and allow mail access. Please ask your IT service desk for its Application (client) ID. Written from Microsoft's public documentation and tested against a stand-in server only, not against Microsoft.</p>
-    <hr class="rule">
-    <h3 class="grp">Maintenance</h3>
+    </div></details>
+    <details class="sec" id="secMaintenance"><summary><h3 class="grp">Maintenance</h3><span class="pillnote" id="pillMaintenance" hidden></span></summary>
+    <div class="secbody">
     <div class="lbl">BACK UP, RESTORE, RESET</div>
     <div style="display:flex;flex-wrap:wrap;gap:8px">
       <button class="pill quiet" id="bkSave" type="button">Save a backup…</button>
@@ -970,6 +1082,17 @@ C:\work&gt; </div>
       <div style="display:flex;flex-wrap:wrap;gap:8px"><button class="pill quiet" id="bkCopy" type="button">Copy</button><button class="pill quiet" id="bkRestoreText" type="button">Restore from this text</button></div>
     </details>
     <p class="hint">A backup holds your settings, lenses and quick replies, so a new PC or a colleague can start from yours. It never holds a secret or a file location. In this simulation your browser may block the file download; the text box above gives the same backup, so it can be copied and pasted back. The Windows app asks where to save a file.</p>
+  
+    <hr class="hair">
+    <div class="lbl">THIS WINDOW · ARRANGES ITSELF</div>
+    <label class="opt"><input type="checkbox" id="adaptCheck" checked> Open the sections that need a look or that I use most, and collapse the rest</label>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">
+      <button class="pill quiet" id="adaptReset" type="button">Forget what I use most</button>
+      <button class="pill quiet" id="gsShow" type="button">Show Getting started again</button>
+    </div>
+    <div class="keystatus" id="adaptStatus" role="status"></div>
+    <p class="hint">Sections open when something in them needs attention (a shortcut another program owns, a file that cannot be read, a connection that was not tested), when you are just starting, and when you open them often. The only thing kept is a count of how often you open each section (in the Windows app, in settings.json on this PC; in this simulation, only on this page). No text, no ANDA numbers, nothing is sent anywhere. Turn this off and no more counts are kept.</p>
+    </div></details>
   </div>
 
   <!-- ===== quick replies ===== -->
@@ -1033,8 +1156,8 @@ C:\work&gt; </div>
   </div>
 
   <!-- ===== to-do list ===== -->
-  <div class="app-win" id="todo" role="dialog" aria-label="To-do list">
-    <div class="hdr"><h2>To-do list</h2><button class="pill" id="tdDone" type="button">Done</button></div>
+  <div class="app-win" id="todo" role="dialog" aria-label="ANDA to-do list">
+    <div class="hdr"><h2>ANDA to-do list</h2><button class="pill" id="tdDone" type="button">Done</button></div>
     <p class="hint" id="tdSummary" style="margin:0"></p>
     <p class="hint" id="tdLive" style="margin:2px 0 8px"></p>
     <hr class="hair">
@@ -1048,6 +1171,42 @@ C:\work&gt; </div>
     <hr class="hair">
     <div class="acts"><button class="pill quiet" id="tdRefresh" type="button">Refresh now</button><button class="pill quiet" id="tdClear" type="button">Clear finished</button></div>
     <p class="hint" id="tdFooter"></p>
+  </div>
+
+  <!-- ===== my checklist ===== -->
+  <div class="app-win" id="checklist" role="dialog" aria-label="My checklist">
+    <div class="hdr"><h2>My checklist</h2><button class="pill" id="clDone" type="button">Done</button></div>
+    <p class="hint" id="clSummary" style="margin:0"></p>
+    <div class="clbar" id="clBar" role="img" aria-label="Nothing is due today"><i id="clBarFill"></i></div>
+    <p class="clfocus" id="clFocus" hidden></p>
+    <hr class="hair">
+    <div class="cladd">
+      <input type="text" id="clAddIn" maxlength="200" placeholder="Type what needs doing, for example: pay rent on the 1st every month" aria-label="New checklist item">
+      <button class="pill" id="clAdd" type="button">Add</button>
+      <button class="pill quiet" id="clNotesBtn" type="button">Paste notes…</button>
+    </div>
+    <div class="hint" id="clPreview" hidden></div>
+    <div class="keystatus" id="clStatus" role="status" hidden></div>
+    <div class="clfilter"><span class="lbl">SHOW</span><select id="clFilter" aria-label="Show which items"></select><button class="pill quiet" id="clUndo" type="button" hidden>Undo</button></div>
+    <div id="clRows"></div>
+    <hr class="hair">
+    <div class="acts"><button class="pill quiet" id="clRoll" type="button">Move overdue to today</button><button class="pill quiet" id="clClear" type="button">Clear finished</button></div>
+    <p class="hint" id="clFooter"></p>
+  </div>
+
+  <!-- ===== notes to checklist ===== -->
+  <div class="app-win" id="notes" role="dialog" aria-label="Notes to checklist">
+    <div class="hdr"><h2>Notes to checklist</h2><button class="pill" id="ntClose" type="button">Close</button></div>
+    <div class="lbl">YOUR NOTES</div>
+    <textarea id="ntText" maxlength="6000" rows="5" aria-label="Your notes" placeholder="Paste or type your notes in any order. Or select them anywhere and press the My checklist shortcut."></textarea>
+    <p class="hint" id="ntHint"></p>
+    <div class="lbl" id="ntFoundLabel">SUGGESTED ITEMS</div>
+    <p class="hint" id="ntFoundNote" style="margin:0 0 6px"></p>
+    <div id="ntFound"></div>
+    <div class="acts"><button class="pill" id="ntAdd" type="button">Add the ticked items</button><button class="pill quiet" id="ntAll" type="button">Tick all</button><button class="pill quiet" id="ntNone" type="button">Untick all</button><button class="pill quiet" id="ntUndo" type="button" hidden>Undo</button></div>
+    <p class="hint" id="ntStatus" role="status" hidden></p>
+    <hr class="hair">
+    <div class="acts"><button class="pill quiet" id="ntOpenList" type="button">Open my checklist</button></div>
   </div>
 
   <!-- ===== watch list and page scan ===== -->
@@ -1373,15 +1532,16 @@ const noticeLifetime = text => Math.min(8, Math.max(2.5, 1.2 + text.length / 14)
 
 /* ---------------- state ---------------- */
 let keyVia = null;
-const state = { dir:"k", look:"k", form:"full", autoHide:10, mode:"whisper", escalate:true, lead:3, pretend:false, capture:true, op:100, lens:null, pinned:false, running:true, ai:false,
-  keys:{ peek:"Ctrl+Alt+A", look:"Ctrl+Alt+Space", draft:"Ctrl+Alt+D" }, taken:{ peek:false, look:false, draft:false },
+const state = { dir:"k", look:"k", form:"full", autoHide:10, mode:"whisper", escalate:true, lead:3, pretend:false, capture:true, op:92, lens:null, pinned:false, running:true, ai:false,
+  keys:{ peek:"Ctrl+Alt+A", look:"Ctrl+Alt+Space", draft:"Ctrl+Alt+D", list:"Ctrl+Alt+L" }, taken:{ peek:false, look:false, draft:false, list:false },
+  adaptive:true, gsDone:false, sectionUse:{}, clMode:0,
   middle:false, middleMod:"Ctrl", provider:"auto", tone:"", style:"", signoff:"", claudeModel:"claude-opus-4-8",
   outlook:{ on:false, cloud:"com", client:"", tenant:"organizations", max:5, step:"out", msg:"" },
   data:{ portfolio:null, notes:null, ref:null },
   myApi:{ name:"My API", endpoint:"", header:"Authorization", scheme:"Bearer", env:"", model:"", template:"", path:"choices[0].message.content" },
   replies:null };
 const steps = {};
-const APP_WINS = ["lookup", "plib", "settings", "draft", "wlist", "replies", "actwin", "todo"];
+const APP_WINS = ["lookup", "plib", "settings", "draft", "wlist", "replies", "actwin", "todo", "checklist", "notes"];
 let current = null, pinnedCard = false, focusedWin = "mail", lastSel = null, deselecting = false;
 let pointer = { x: Math.round(innerWidth * 0.4), y: Math.round(innerHeight * 0.4) };
 let chipTimer = null, streamTimer = null, keysTimer = null, chipAccept = null;
@@ -1699,6 +1859,13 @@ function hotkey(kind, source){
     showKeys(kind, t ? "Copied your selection, put your clipboard back ✓" : "");
     openDraft(t); return;
   }
+  if(kind === "list"){
+    if(focusedWin === "term"){ showKeys(kind); showNotice("Paused in terminals. Please paste your notes.", anchor); openNotes(""); return; }
+    const sel2 = getSelection().toString().trim() ? getSelection().toString() : (lastSel ? lastSel.text : "");
+    const t = state.capture ? sel2 : "";
+    showKeys(kind, t ? "Copied your selection, put your clipboard back ✓" : ""); markStep("list");
+    openNotes(t); return;
+  }
   if(!state.capture){ showKeys(kind); openLookup(anchor); return; }
   if(focusedWin === "term"){
     showKeys(kind);
@@ -1728,7 +1895,8 @@ document.addEventListener("keydown", e => {
   if(e.key === "Escape"){
     if($("replyMenu").style.display === "block"){ $("replyMenu").style.display = "none"; return; }
     if(menuOpen() || $("flyout").style.display === "block"){ closeMenus(); return; }
-    closeCtx(); for(const id of APP_WINS) if($(id).style.display === "block"){ closeApp(id); return; }
+    closeCtx(); if(isOpen("checklist") && clEditing){ clCancelEdit(); return; }
+    for(const id of APP_WINS) if($(id).style.display === "block"){ closeApp(id); return; }
     hideChip(); if(compact.style.display === "block") closeCompact(); if(card.style.display === "block") closeCard(); return;
   }
   if(card.style.display !== "block" || /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
@@ -1742,6 +1910,8 @@ document.addEventListener("keydown", e => {
 $("keyPeek").addEventListener("click", () => hotkey("peek", "button"));
 $("keyLook").addEventListener("click", () => hotkey("look", "button"));
 $("keyDraft").addEventListener("click", () => hotkey("draft", "button"));
+$("keyList").addEventListener("click", () => hotkey("list", "button"));
+$("openChecklistBtn").addEventListener("click", () => openChecklist());
 document.querySelectorAll("[data-pickbtn]").forEach(b => b.addEventListener("click", () => pick(b.dataset.pickbtn)));
 document.querySelectorAll(".apps .pick").forEach(el => el.addEventListener("dblclick", () => { lastSel = { text:el.textContent, win:winOf(el), x:el.getBoundingClientRect().right, y:el.getBoundingClientRect().bottom }; }));
 
@@ -1856,10 +2026,12 @@ document.addEventListener("pointerdown", e => { if(!e.target.closest("#ctxmenu")
 $("wlDone").addEventListener("click", () => closeApp("wlist"));
 
 /* ---------------- app windows ---------------- */
-function showApp(id){ closeMenus(); $(id).style.display = "block"; if(isSheet()){ scrim.style.display = "block"; } }
+function showApp(id){ closeMenus(); $(id).style.display = "block"; if(isSheet()){ scrim.style.display = "block"; } if(id === "settings") onSettingsOpen(); }
 function closeApp(id){
   $(id).style.display = "none"; if(card.style.display !== "block") scrim.style.display = "none";
   if(id === "todo") tdStop();                      /* nothing runs once the list is closed */
+  if(id === "checklist") clClose();                /* the same for the checklist */
+  if(id === "notes") clearTimeout(ntDebounce);
   if(id === "actwin") awToken++;                   /* a reply that arrives after the window is closed is dropped */
 }
 scrim.addEventListener("click", () => {
@@ -1939,7 +2111,7 @@ $("plDel").addEventListener("click", () => { if(prompts[plIndex]){ prompts.splic
 const menu = $("menu"), flyout = $("flyout");
 const menuOpen = () => menu.style.display === "block";
 function closeMenus(){ menu.style.display = "none"; flyout.style.display = "none"; $("replyMenu").style.display = "none"; $("chev").setAttribute("aria-expanded", "false"); }
-function hotkeyLine(){ const t = state.taken, k = state.keys; return `Hotkeys: ${k.peek} ${t.peek ? "✗ in use" : "✓"}   ${k.look} ${t.look ? "✗ in use" : "✓"}   ${k.draft} ${t.draft ? "✗ in use" : "✓"}`; }
+function hotkeyLine(){ const t = state.taken, k = state.keys; return `Hotkeys: ${k.peek} ${t.peek ? "✗ in use" : "✓"}   ${k.look} ${t.look ? "✗ in use" : "✓"}   ${k.draft} ${t.draft ? "✗ in use" : "✓"}` + (k.list ? `   ${k.list} ${t.list ? "✗ in use" : "✓"}` : ""); }
 function openMenu(){
   if(!state.running) return;
   flyout.style.display = "none";
@@ -1957,7 +2129,9 @@ function openMenu(){
     item("Lookup ANDA…", state.keys.look, () => openLookup(pointer)),
     item("Check a draft…", state.keys.draft, () => openDraft("")),
     item("Watch list…", "", () => openWatchList()),
-    item("To-do list…", "", () => openTodo()),
+    item("ANDA to-do list…", "", () => openTodo()),
+    item("My checklist…", state.keys.list || "", () => openChecklist()),
+    item("Notes to checklist…", "", () => openNotes("")),
     item("Demo: at-risk card", "", () => openCard("216482", { anchor:trayAnchor() })),
     item("Demo: healthy card", "", () => openCard("214990", { anchor:trayAnchor() })),
     document.createElement("hr"));
@@ -2028,8 +2202,8 @@ function launch(){
 }
 
 /* ---------------- round 10: shortcuts, middle-click, my data, my writing, my API, connection ---------------- */
-const KEYKINDS = [["peek", "Select & Peek", "keyBoxPeek"], ["look", "Lookup box", "keyBoxLook"], ["draft", "Check a draft", "keyBoxDraft"]];
-const KEY_DEFAULT = { peek:"Ctrl+Alt+A", look:"Ctrl+Alt+Space", draft:"Ctrl+Alt+D" };
+const KEYKINDS = [["peek", "Select & Peek", "keyBoxPeek"], ["look", "Lookup box", "keyBoxLook"], ["draft", "Check a draft", "keyBoxDraft"], ["list", "My checklist", "keyBoxList"]];
+const KEY_DEFAULT = { peek:"Ctrl+Alt+A", look:"Ctrl+Alt+Space", draft:"Ctrl+Alt+D", list:"Ctrl+Alt+L" };
 function keyName(e){
   const c = e.code || "";
   if(/^Key[A-Z]$/.test(c)) return c.slice(3);
@@ -2057,23 +2231,24 @@ function validateCombo(c){
 }
 function findDup(keys){
   for(let i = 0; i < KEYKINDS.length; i++) for(let j = i + 1; j < KEYKINDS.length; j++)
-    if(keys[KEYKINDS[i][0]] === keys[KEYKINDS[j][0]]) return `${KEYKINDS[i][1]} and ${KEYKINDS[j][1]} cannot use the same shortcut.`;
+    if(keys[KEYKINDS[i][0]] && keys[KEYKINDS[i][0]] === keys[KEYKINDS[j][0]]) return `${KEYKINDS[i][1]} and ${KEYKINDS[j][1]} cannot use the same shortcut.`;
   return null;
 }
 const escHTML = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const kbdHTML = combo => combo.split("+").map(p => `<kbd>${escHTML(p)}</kbd>`).join("+");
 function keyReport(){
-  return KEYKINDS.map(([k, name]) => state.taken[k]
+  return KEYKINDS.map(([k, name]) => !state.keys[k] ? `– ${name}: no shortcut (the tray menu still opens it)` : state.taken[k]
     ? `✗ ${name}: ${state.keys[k]} is already used by another program (many apps claim a global shortcut). Choose a different one above; the tray icon always works.`
     : `✓ ${name}: ${state.keys[k]} is active`).concat((state.actions || []).filter(a => a.enabled && a.hotkey).map(a => `✓ ${a.name}: ${a.hotkey} is active`)).join("\n");
 }
 function paintKeys(){
   $("keyPeek").textContent = state.keys.peek; $("keyLook").textContent = state.keys.look; $("keyDraft").textContent = state.keys.draft;
+  $("keyList").textContent = state.keys.list || "My checklist (no shortcut)"; $("keyList").setAttribute("aria-label", state.keys.list ? "Press " + state.keys.list.replace(/\+/g, " ") : "My checklist has no shortcut. Press to try the notes window.");
   $("keyPeek").setAttribute("aria-label", "Press " + state.keys.peek.replace(/\+/g, " ")); $("keyLook").setAttribute("aria-label", "Press " + state.keys.look.replace(/\+/g, " ")); $("keyDraft").setAttribute("aria-label", "Press " + state.keys.draft.replace(/\+/g, " "));
-  document.querySelectorAll("[data-key]").forEach(el => { el.textContent = state.keys[el.dataset.key]; });
-  document.querySelectorAll("[data-kbd]").forEach(el => { el.innerHTML = kbdHTML(state.keys[el.dataset.kbd]); });
-  KEYKINDS.forEach(([k, , id]) => { $(id).value = state.keys[k]; });
-  $("keyStatus").textContent = keyReport();
+  document.querySelectorAll("[data-key]").forEach(el => { el.textContent = state.keys[el.dataset.key] || "the tray menu"; });
+  document.querySelectorAll("[data-kbd]").forEach(el => { el.innerHTML = state.keys[el.dataset.kbd] ? kbdHTML(state.keys[el.dataset.kbd]) : "the tray menu"; });
+  KEYKINDS.forEach(([k, , id]) => { $(id).value = state.keys[k] || "None"; });
+  $("keyStatus").textContent = keyReport(); paintGettingStarted();
 }
 (function buildShortcuts(){
   KEYKINDS.forEach(([kind, name, id]) => {
@@ -2082,21 +2257,26 @@ function paintKeys(){
       if(["Control", "Alt", "Shift", "Meta"].includes(e.key)) return;               /* a modifier alone: keep waiting */
       e.preventDefault(); e.stopPropagation();
       const combo = comboFromEvent(e);
-      if(!combo){ $("keyStatus").textContent = `${name}: that key cannot be used.`; return; }
-      const err = validateCombo(combo); if(err){ $("keyStatus").textContent = `${name}: ${err}`; return; }
+      const out = $(kind === "list" ? "listKeyStatus" : "keyStatus");
+      if(!combo){ out.textContent = `${name}: that key cannot be used.`; return; }
+      const err = validateCombo(combo); if(err){ out.textContent = `${name}: ${err}`; return; }
       const next = { ...state.keys, [kind]: combo }, dup = findDup(next);
-      if(dup){ $("keyStatus").textContent = dup; return; }
+      if(dup){ out.textContent = dup; return; }
       const mine = state.actions.find(a => a.hotkey === combo);
-      if(mine){ $("keyStatus").textContent = `${name}: ${combo} is already used by your action ${mine.name}. Please choose another shortcut.`; return; }
-      state.keys = next; paintKeys(); renderActions();
+      if(mine){ out.textContent = `${name}: ${combo} is already used by your action ${mine.name}. Please choose another shortcut.`; return; }
+      state.keys = next; paintKeys(); renderActions(); if(kind === "list") out.textContent = `${name}: ${combo} is active.`;
     });
   });
   document.querySelectorAll("[data-keyreset]").forEach(b => b.addEventListener("click", () => {
-    const kind = b.dataset.keyreset, next = { ...state.keys, [kind]: KEY_DEFAULT[kind] }, dup = findDup(next);
-    if(dup){ $("keyStatus").textContent = dup; return; }
+    const kind = b.dataset.keyreset, next = { ...state.keys, [kind]: KEY_DEFAULT[kind] }, dup = findDup(next), out = $(kind === "list" ? "listKeyStatus" : "keyStatus");
+    if(dup){ out.textContent = dup; return; }
     const mine = state.actions.find(a => a.hotkey === KEY_DEFAULT[kind]);
-    if(mine){ $("keyStatus").textContent = `${KEY_DEFAULT[kind]} is already used by your action ${mine.name}. Please choose another shortcut.`; return; }
+    if(mine){ out.textContent = `${KEY_DEFAULT[kind]} is already used by your action ${mine.name}. Please choose another shortcut.`; return; }
     state.keys = next; paintKeys(); renderActions();
+  }));
+  document.querySelectorAll("[data-keyclear]").forEach(b => b.addEventListener("click", () => {
+    const kind = b.dataset.keyclear; state.keys = { ...state.keys, [kind]: "" }; state.taken[kind] = false; paintKeys(); renderActions();
+    $("listKeyStatus").textContent = "My checklist has no shortcut now. The tray menu still opens it.";
   }));
   paintKeys();
 })();
@@ -2471,9 +2651,10 @@ const starterActions = () => [
 ];
 const presetAgents = () => [
   { id:"alert-hub", name:"Alert Hub", enabled:false, prompt:"List any alerts you hold for ANDA {number} ({drug}). One finding per line, each starting with \"- \". If there are none, say so.", api:newApi("Alert Hub"), auto:0, cache:15 },
+  { id:"patent-analysis", name:"Patent Analysis", enabled:false, prompt:"Summarize any patent or exclusivity information you hold for ANDA {number} ({drug}). One finding per line, each starting with \"- \". If there is none, say so.", api:newApi("Patent Analysis"), auto:0, cache:15 },
   { id:"triaging-agent", name:"Triaging Agent", enabled:false, prompt:"Triage ANDA {number} ({drug}). Goal date {goal}, forecast {forecast} ({delta}). Needs action: {attention}. Say what to look at first. One item per line, each starting with \"- \".", api:newApi("Triaging Agent"), auto:0, cache:15 },
 ];
-const isPreset = a => a.id === "alert-hub" || a.id === "triaging-agent";
+const isPreset = a => a.id === "alert-hub" || a.id === "patent-analysis" || a.id === "triaging-agent";
 Object.assign(state, { actions:starterActions(), agents:presetAgents(), todoAuto:true, todoRefresh:30, agentFail:false });
 const todoStore = { items:[], autoDone:{}, autoSnoozed:{}, seq:0 };
 let agentCache = {}, agentFailed = {}, agentBusy = {}, lookupHandler = null;
@@ -2481,6 +2662,7 @@ let agentCache = {}, agentFailed = {}, agentBusy = {}, lookupHandler = null;
 /* ---- rules (MyActionRules, AgentRules) ---- */
 function shortcutsInUse(except){
   return [["Select & Peek", state.keys.peek], ["Lookup box", state.keys.look], ["Check a draft", state.keys.draft]]
+    .concat(state.keys.list ? [["My checklist", state.keys.list]] : [])
     .concat(state.actions.filter(x => x !== except && x.hotkey).map(x => [x.name, x.hotkey]));
 }
 function validateAction(a, others){
@@ -2780,7 +2962,8 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 function standInLines(id, name){
   if(!id) return ["Review the selected text and decide what follows from it."];
   const d = DATA[id], lines = [];
-  if(name === "Alert Hub") { watchFlags(id).forEach(f => lines.push(f.text)); if(d.attn) lines.push("Open item: " + d.attn); if(!lines.length) lines.push("No alerts in this sample data."); }
+  if(name === "Patent Analysis") lines.push("No patent or exclusivity information is held in this sample data.");
+  else if(name === "Alert Hub") { watchFlags(id).forEach(f => lines.push(f.text)); if(d.attn) lines.push("Open item: " + d.attn); if(!lines.length) lines.push("No alerts in this sample data."); }
   else {
     if(d.attn) lines.push("Look first at: " + d.attn);
     watchFlags(id).slice(0, 2).forEach(f => lines.push(f.text));
@@ -3077,6 +3260,769 @@ $("agAdd").addEventListener("click", () => {
   renderActions(); renderAgents();
 })();
 
+
+/* ===================== round 16: my checklist, notes to checklist, settings that arrange themselves =====================
+   A port of the Windows app's ChecklistService, NoteParser, ChecklistWindow, NotesWindow, SettingsAdvisor and the adaptive Settings.
+   The notes reader below is kept equal to the app's by one shared fixture (checklist-golden.json). Nothing here is sent anywhere. */
+const NP = (() => {
+  /* A word boundary the way the app's regular expressions see one: letters, marks, digits and connectors of every script are word characters (JavaScript's own \b knows only A-Z, 0-9 and _).
+     The app reads text as 16-bit units, so a character outside the Basic Multilingual Plane is two units and is never a word character there; it is the same here. */
+  const W = String.raw`[\p{L}\p{Mn}\p{Nd}\p{Pc}]`, A = String.raw`[\u{10000}-\u{10FFFF}]`;
+  const BW = `(?:(?<=${W})(?<!${A}))`, NBW = `(?:(?<!${W})|(?<=${A}))`, AW = `(?:(?=${W})(?!${A}))`, NAW = `(?:(?!${W})|(?=${A}))`;
+  const WB = `(?:${BW}${NAW}|${NBW}${AW})`;
+  const R = p => new RegExp(p.replace(/\\b/g, () => WB), "iu");
+  const Full = "monday|tuesday|wednesday|thursday|friday|saturday|sunday", Months = "jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sept?(?:ember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?";
+  const VERBS = ["call", "email", "e-mail", "mail", "text", "message", "send", "review", "submit", "check", "update", "schedule", "book", "pay", "buy", "fix", "order", "clean",
+          "follow", "prepare", "draft", "confirm", "finish", "file", "renew", "remind", "ask", "find", "return", "pick", "drop", "cancel", "sign", "upload", "download", "print",
+          "plan", "read", "write", "talk", "speak", "meet", "contact", "reply", "respond", "forward", "share", "attach", "approve", "request", "arrange", "organize", "organise",
+          "set", "sort", "wash", "mow", "water", "feed", "walk", "take", "bring", "get", "make", "add", "remove", "delete", "create", "build", "test", "verify", "discuss",
+          "decide", "research", "look", "investigate", "complete", "close", "open", "start", "stop", "change", "move", "replace", "install", "repair", "paint", "cook", "shop",
+          "vacuum", "dust", "mop", "empty", "pack", "unpack", "ship", "post", "publish", "record", "log", "track", "monitor", "escalate", "notify", "inform", "brief",
+          "summarize", "summarise", "compile", "collect", "gather", "prep", "coordinate", "assign", "delegate", "finalize", "finalise", "resolve", "address", "handle",
+          "process", "reconcile", "double-check", "proofread", "edit", "revise", "rewrite", "cc", "loop", "ping", "nudge", "chase", "thank", "apologize", "invite", "rsvp",
+          "register", "enroll", "apply", "vote", "donate", "charge", "refill", "restock", "tidy", "declutter", "assemble", "hang", "mount", "patch", "seal", "unclog",
+          "flush", "reach", "touch", "double", "make sure", "ensure", "remember", "bake", "sweep", "scrub", "wipe", "fold", "iron", "swap", "rotate", "mark", "tag",];
+  const ABBREV = ["dr", "mr", "mrs", "ms", "no", "vs", "e.g", "i.e", "a.m", "p.m", "st", "jr", "sr", "inc", "approx", "etc", "fig", "ext", "dept", "est", "mt", "ave"];
+  const Bullet = R(String.raw`^\s*(?:[-*•–—▪◦·]+|\d{1,3}[.)]|\[[ xX]?\])\s+`);
+  const Header = R(String.raw`^\s*(?:from|to|cc|bcc|subject|sent|date|reply-to|importance|attachments?)\s*:`);
+  const GreetingWord = R(String.raw`^\s*(?:hi|hello|hey|dear|thanks|thank you|regards|best regards|kind regards|sincerely|cheers|fyi|fwiw|ok|okay|noted|got it|sounds good)\b[\s,!.\-–]*`);
+  const Fraction = R(String.raw`^\s*(?:cup|cups|tsp|tbsp|teaspoon|tablespoon|inch|inches|in\b|lb|lbs|oz|mile|miles|hour|hours|hr|hrs|of|day|days)`);
+  const UrlOnly = R(String.raw`^\s*(?:https?://|www\.)\S+\s*$`);
+  const Lead = R(String.raw`^\s*(?:(?:oh,? )?and also|also|and then|then|plus|oh and|btw|and)[,:]?\s+`);
+  const ListLead = R(String.raw`^\s*(?:groceries|grocery list|shopping list|shopping|errands|to buy|to get|to bring|to pack)\s*[:\-]`);
+  const Filler = R(String.raw`^\s*(?:(?:please|pls)\s+)?(?:don'?t forget to|do not forget to|remember to|need to|needs to|have to|has to|got to|gotta|must|should|todo:?|to do:?|action(?: item)?:?|ai:|task:|reminder:|note to self:?|i need to|i have to|i must|i should|we need to|we should|we must|can you|could you|will you|would you|please|pls)\s+`);
+  const Marker = R(String.raw`^\s*(?:don'?t forget|do not forget|remember to|need to|needs to|have to|has to|got to|gotta|must\b|should\b|todo|to do|action|ai:|task:|reminder|note to self|i need to|i have to|i must|i should|we need to|we should|we must|can you|could you|will you|would you|please|pls)`);
+  const HighWords = R(String.raw`\b(?:urgent|urgently|asap|a\.s\.a\.p|important|critical|immediately|right away|high priority|top priority|time[- ]sensitive|emergency)\b|!!|\(!\)|^\s*!\s`);
+  const Daily = R(String.raw`\b(?:every ?day|daily|each day|each morning|every morning|each evening|every evening|every night|nightly)\b`);
+  const WeekdaysRx = R(String.raw`\b(?:every|each)\s+week ?day\b|\bweek ?days\b|\bmon(?:day)?\s*(?:-|to|through|thru)\s*fri(?:day)?\b`);
+  const WeeklyDay = R(String.raw`\b(?:every|each)\s+(` + Full + String.raw`)\b|\b(?:weekly on|on)\s+(` + Full + String.raw`)s\b|\b(` + Full + String.raw`)s\b`);
+  const WeeklyAny = R(String.raw`\b(?:weekly|every week|each week|once a week)\b`);
+  const MonthlyAny = R(String.raw`\b(?:monthly|every month|each month|once a month)\b`);
+  const Iso = R(String.raw`\b(\d{4})-(\d{2})-(\d{2})\b`);
+  const Numeric = R(String.raw`\b(\d{1,2})/(\d{1,2})(?:/(\d{4}|\d{2}))?\b`);
+  const MonthDay = R(String.raw`\b(` + Months + String.raw`)\.?\s+(\d{1,2})(?:st|nd|rd|th)?(?:,?\s+(\d{4}))?\b`);
+  const DayMonth = R(String.raw`\b(\d{1,2})(?:st|nd|rd|th)?\s+(?:of\s+)?(` + Months + String.raw`)\.?(?:,?\s+(\d{4}))?\b`);
+  const Today = R(String.raw`\b(?:today|tonight|this evening|this afternoon|this morning|eod|end of (?:the )?day|cob|close of business)\b`);
+  const Tomorrow = R(String.raw`\b(?:tomorrow|tmrw|tmr)\b`);
+  const DayAfter = R(String.raw`\bday after tomorrow\b`);
+  const InN = R(String.raw`\bin (\d{1,3}) (day|days|week|weeks|month|months)\b`);
+  const NextWeek = R(String.raw`\bnext week\b`);
+  const ThisWeek = R(String.raw`\b(?:this week|eow|end of (?:the )?week)\b`);
+  const Weekend = R(String.raw`\b(?:this weekend|(?:on|over|for) the weekend)\b`);
+  const CommaLead = R(String.raw`^\s*(?:and then|and also|and|then|also|plus)\s+`);
+  const NextMonth = R(String.raw`\bnext month\b`);
+  const EndMonth = R(String.raw`\b(?:eom|end of (?:the )?month)\b`);
+  const NextDay = R(String.raw`\bnext (` + Full + String.raw`)\b`);
+  const Named = R(String.raw`\b(` + Full + String.raw`)\b(?!['’]s)(?!s\b)`);
+  const Short = R(String.raw`\b(?:by|on|before|until|due|this|next|every|each)\s+(mon|tues?|wed|thur?s?|fri|sat|sun)\b`);
+  const DayOfMonth = R(String.raw`\bthe (\d{1,2})(?:st|nd|rd|th)\b`);
+  const Space = R(String.raw`\s+`);
+  const SplitVerbConnector = R(String.raw`\s+(?:and also|and then|also|plus|then|after that|next)\s+`);
+  const SplitAnd = R(String.raw`\s+and\s+`);
+  const WorkWords = R(String.raw`\b(?:anda|ir|ind|nda|fda|dpm|rpm|supervisor|huddle|meeting|memo|report|review|submission|deficienc\w*|labeling|labelling|cycle|applicant|goal date|forecast|deadline|status|project|team|client|invoice|budget|presentation|slides|spreadsheet|timesheet|calendar|agenda|minutes|email|e-mail|inbox|manager|director|colleague|coworker|training|compliance|audit|policy|sop|procedure|ticket|stakeholder|quarterly|office)\b`);
+  const HomeWords = R(String.raw`\b(?:home|house|apartment|landlord|rent|mortgage|hoa|plumber|plumbing|leak\w*|faucet|sink|toilet|drain|roof|gutters?|furnace|hvac|thermostat|water heater|appliances?|dishwasher|fridge|refrigerator|oven|stove|washer|dryer|laundry|dishes|vacuum\w*|mop\w*|dust\w*|clean\w*|tidy\w*|declutter\w*|trash|garbage|recycl\w*|lawn|mow\w*|garden\w*|yard|fence|paint\w*|repair\w*|handyman|electrician|groceries|grocery|dinner|lunch|cook\w*|kids?|child\w*|school|daycare|dentist|doctor|pharmacy|prescriptions?|vet|pets?|dog|cat|car|oil change|tires?|utilit\w*|electric bill|water bill|gas bill|insurance|garage|basement|attic|closet|bedroom|kitchen|bathroom|living room|sofa|couch|mattress|curtains?|light ?bulbs?|smoke detector|filters?)\b`);
+  
+  const LIMIT = 6000, MAX_ITEMS = 30, MAX_TITLE = 160, D = 864e5;
+  const VERBSET = new Set(VERBS);
+  const BulletB = /^\s*\(?[a-z][.)]\s+/;          /* the letter bullet is case-sensitive, so a capital word is not a bullet */
+  const isLetter = c => /\p{L}/u.test(c), isDigit = c => /\p{Nd}/u.test(c), isLD = c => /[\p{L}\p{Nd}]/u.test(c), isWs = c => /\s/.test(c), isCtl = c => /\p{Cc}/u.test(c);
+  const trimStart = (s, set) => { let i = 0; while(i < s.length && set.includes(s[i])) i++; return s.slice(i); };
+  const trimEnd = (s, set) => { let i = s.length; while(i > 0 && set.includes(s[i - 1])) i--; return s.slice(0, i); };
+  const trimBoth = (s, set) => trimEnd(trimStart(s, set), set);
+  const global = re => new RegExp(re.source, "giu");
+
+  /* ---- dates are UTC milliseconds at midnight ---- */
+  const dow = t => new Date(t).getUTCDay();
+  const ymdOf = t => { const x = new Date(t); return [x.getUTCFullYear(), x.getUTCMonth() + 1, x.getUTCDate()]; };
+  const dim = (y, m) => [31, (y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0)) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m - 1];
+  const utc = (y, m, d) => { const t = new Date(Date.UTC(2000, m - 1, d)); t.setUTCFullYear(y); return t.getTime(); };
+  const addMonths = (t, n) => { const [y, m, d] = ymdOf(t), total = y * 12 + (m - 1) + n, ny = Math.floor(total / 12), nm = total % 12 + 1; return utc(ny, nm, Math.min(d, dim(ny, nm))); };
+  const dayOf = name => ({ mon:1, tue:2, wed:3, thu:4, fri:5, sat:6, sun:0 })[name.toLowerCase().slice(0, 3)];
+  const monthNumber = name => ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"].indexOf(name.toLowerCase().slice(0, 3)) + 1;
+  const onOrAfterDay = (day, from) => { let d = from; while(dow(d) !== day) d += D; return d; };
+  const strictlyAfterDay = (day, from) => onOrAfterDay(day, from + D);
+
+  function onOrAfter(repeat, day, from){
+    let d = from;
+    switch(repeat){
+      case 1: return d;
+      case 2: while(dow(d) === 0 || dow(d) === 6) d += D; return d;
+      case 3: { const want = day >= 0 && day <= 6 ? day : dow(from); while(dow(d) !== want) d += D; return d; }
+      case 4: {
+        const dom = Math.min(31, Math.max(1, day <= 0 ? ymdOf(from)[2] : day));
+        for(let i = 0; i < 400; i++){ const [y, m, dd] = ymdOf(d); if(dd === Math.min(dom, dim(y, m))) return d; d += D; }
+        return from;
+      }
+      default: return from;
+    }
+  }
+
+  function make(year, month, day, yearGiven, today){
+    if(month < 1 || month > 12 || day < 1 || year < 1 || year > 9998 || day > dim(year, month)) return null;
+    let d = utc(year, month, day);
+    /* No year written: this year, unless that is long past (then the next one): a note about 11/12 written in December means next November. */
+    if(!yearGiven && (today - d) / D > 30){ if(day > dim(year + 1, month)) return null; d = utc(year + 1, month, day); }
+    return d;
+  }
+
+  function readDue(text, today){
+    const hits = [], add = (m, d) => { if(m && d != null) hits.push([m.index, d]); };
+    let m = Iso.exec(text); if(m) add(m, make(+m[1], +m[2], +m[3], true, today));
+    for(const mm of text.matchAll(global(Numeric))){
+      if(Fraction.test(text.slice(mm.index + mm[0].length))) continue;        /* "1/2 cup" is not January 2 */
+      let y = ymdOf(today)[0]; const given = mm[3] !== undefined;
+      if(given){ y = +mm[3]; if(y < 100) y += 2000; }
+      const d = make(y, +mm[1], +mm[2], given, today);
+      if(d != null){ add(mm, d); break; }
+    }
+    for(const mm of text.matchAll(global(MonthDay))){
+      const given = mm[3] !== undefined, d = make(given ? +mm[3] : ymdOf(today)[0], monthNumber(mm[1]), +mm[2], given, today);
+      if(d != null){ add(mm, d); break; }
+    }
+    for(const mm of text.matchAll(global(DayMonth))){
+      const given = mm[3] !== undefined, d = make(given ? +mm[3] : ymdOf(today)[0], monthNumber(mm[2]), +mm[1], given, today);
+      if(d != null){ add(mm, d); break; }
+    }
+    if((m = Today.exec(text))) hits.push([m.index, today]);
+    if((m = Tomorrow.exec(text))) hits.push([m.index, today + D]);
+    if((m = DayAfter.exec(text))) hits.push([m.index, today + 2 * D]);
+    if((m = InN.exec(text))){
+      const n = +m[1], unit = m[2].toLowerCase();
+      hits.push([m.index, unit.startsWith("day") ? today + n * D : unit.startsWith("week") ? today + 7 * n * D : addMonths(today, n)]);
+    }
+    if((m = NextWeek.exec(text))) hits.push([m.index, strictlyAfterDay(1, today)]);
+    if((m = ThisWeek.exec(text))) hits.push([m.index, (dow(today) === 6 || dow(today) === 0) ? today : onOrAfterDay(5, today)]);
+    if((m = Weekend.exec(text))) hits.push([m.index, (dow(today) === 6 || dow(today) === 0) ? today : onOrAfterDay(6, today)]);
+    if((m = NextMonth.exec(text))){ const f = addMonths(today, 1), [y, mo] = ymdOf(f); hits.push([m.index, utc(y, mo, 1)]); }
+    if((m = EndMonth.exec(text))){ const [y, mo] = ymdOf(today); hits.push([m.index, utc(y, mo, dim(y, mo))]); }
+    if((m = NextDay.exec(text))) hits.push([m.index, strictlyAfterDay(dayOf(m[1]), today)]);
+    if((m = Named.exec(text))) hits.push([m.index, onOrAfterDay(dayOf(m[1]), today)]);
+    if((m = Short.exec(text))) hits.push([m.index, onOrAfterDay(dayOf(m[1]), today)]);
+    if((m = DayOfMonth.exec(text)) && +m[1] >= 1 && +m[1] <= 31) hits.push([m.index, onOrAfter(4, +m[1], today)]);
+    if(!hits.length) return null;
+    let best = hits[0]; for(const h of hits) if(h[0] < best[0]) best = h;       /* the earliest in the sentence; the first one found if two start together */
+    return best[1];
+  }
+
+  function readRepeat(text){
+    if(Daily.test(text)) return [1, -1];
+    if(WeekdaysRx.test(text)) return [2, -1];
+    const m = WeeklyDay.exec(text);
+    if(m) return [3, dayOf(m[1] || m[2] || m[3])];
+    if(WeeklyAny.test(text)) return [3, -1];
+    if(MonthlyAny.test(text)){ const d = DayOfMonth.exec(text); return [4, d && +d[1] >= 1 && +d[1] <= 31 ? +d[1] : -1]; }
+    return [0, -1];
+  }
+
+  function clean(text){
+    const t = String(text == null ? "" : text).replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+    let out = "";
+    for(let i = 0; i < t.length; i++){
+      const c = t[i];
+      if(out.length >= LIMIT) break;
+      if(c === "\n" || c === "\t") out += c === "\t" ? " " : c;
+      else if(!isCtl(c)) out += c;
+    }
+    return out.trim();
+  }
+
+  function sentences(line){
+    const out = []; let start = 0;
+    for(let i = 0; i < line.length; i++){
+      const c = line[i];
+      if(c === ";"){ out.push(line.slice(start, i)); start = i + 1; continue; }
+      if(c !== "." && c !== "!" && c !== "?") continue;
+      let j = i + 1;
+      while(j < line.length && ".!?\"”)".includes(line[j])) j++;
+      if(j >= line.length) break;
+      if(!isWs(line[j])){ i = j - 1; continue; }
+      let k = j; while(k < line.length && isWs(line[k])) k++;
+      if(k >= line.length) break;
+      if(!(isLD(line[k]) || line[k] === '"' || line[k] === "“" || line[k] === "(")){ i = j - 1; continue; }     /* notes are often typed in lower case */
+      if(c === "."){
+        let s = i; while(s > start && !isWs(line[s - 1])) s--;
+        const token = trimBoth(line.slice(s, i), '("“').toLowerCase();
+        if(ABBREV.includes(token) || (token.length === 1 && isLetter(token)) || Array.prototype.every.call(token, isDigit)){ i = j - 1; continue; }
+      }
+      out.push(line.slice(start, j));                      /* keeps every closing mark, so "!!" still shows how urgent it is */
+      start = k; i = k - 1;
+    }
+    if(start < line.length) out.push(line.slice(start));
+    return out;
+  }
+
+  function stripFiller(text){
+    let s = text.trim();
+    const lead = Lead.exec(s); if(lead) s = s.slice(lead[0].length);
+    const hadMarker = Marker.test(s) || ListLead.test(s);
+    for(let i = 0; i < 2; i++){ const m = Filler.exec(s); if(!m) break; s = s.slice(m[0].length); }
+    return { text:trimStart(s, " -–—:"), hadMarker };
+  }
+  const startsWithVerb = s => { const m = /^[A-Za-z][A-Za-z\-]*/.exec(s); return !!m && VERBSET.has(m[0].toLowerCase()); };
+
+  function splitInside(segment){
+    const s = segment.trim(); if(!s.length) return [];
+    const both = (left, right) => left.trim().includes(" ") && right.trim().includes(" ") && startsWithVerb(stripFiller(left).text) && startsWithVerb(stripFiller(right).text);
+    for(let c = s.indexOf(","); c >= 0; c = s.indexOf(",", c + 1)){       /* "fix the sink, clean the garage, and call the vet" is three tasks */
+      const left = s.slice(0, c), right = s.slice(c + 1).replace(CommaLead, "");
+      if(both(left, right)) return [...splitInside(left), ...splitInside(right)];
+    }
+    for(const connector of [SplitVerbConnector, SplitAnd]){
+      const g = global(connector); let m;
+      while((m = g.exec(s))){
+        const left = s.slice(0, m.index), right = s.slice(m.index + m[0].length);
+        if(both(left, right)) return [...splitInside(left), ...splitInside(right)];
+      }
+    }
+    return [s];
+  }
+
+  function segments(text){
+    const out = [];
+    for(const raw of text.split("\n")){
+      const line = raw.trim(); if(!line.length) continue;
+      if(Bullet.test(line) || BulletB.test(line)){ out.push(...splitInside(line.replace(Bullet.test(line) ? Bullet : BulletB, ""))); continue; }
+      for(const sentence of sentences(line)) out.push(...splitInside(sentence));
+    }
+    return out;
+  }
+
+  function readCategory(text, number){
+    const work = (text.match(global(WorkWords)) || []).length + (number ? 2 : 0), home = (text.match(global(HomeWords)) || []).length;
+    return work === 0 && home === 0 ? 2 : home > work ? 1 : 0;
+  }
+
+  function read(segment, today, keepEvenIfNote){
+    let original = segment.replace(/\s+/g, " ").trim();
+    if(original.length < 3 || !Array.prototype.some.call(original, isLD)) return null;
+    if(!keepEvenIfNote){
+      if(Header.test(original) || UrlOnly.test(original)) return null;
+      /* "Hi Sam" or "Thanks," alone is dropped; "Thanks, please send the report" keeps its task without the greeting. */
+      const g = GreetingWord.exec(original);
+      if(g){
+        const rest = trimBoth(original.slice(g[0].length), " ,!."), words = rest.split(" ").filter(Boolean);
+        if(rest.length === 0 || (words.length <= 2 && !VERBSET.has(trimBoth(words[0], ",.").toLowerCase()) && words.every(w => Array.prototype.every.call(w, c => isLetter(c) || "'-,.".includes(c))))) return null;
+        original = rest;
+      }
+    }
+    const filler = stripFiller(original);
+    let title = trimEnd(filler.text, ".,;:! -–—");
+    if(!title.length) return null;
+    const up = title[0].toUpperCase();
+    title = (up.length === 1 ? up : title[0]) + title.slice(1);          /* one character for one character, as the app does: a sharp s stays a sharp s, not "SS" */
+    if(title.length > MAX_TITLE){ const cut = title.lastIndexOf(" ", MAX_TITLE - 1); title = trimEnd(title.slice(0, cut > 40 ? cut : MAX_TITLE - 1), " ,;") + "…"; }
+    const number = extractNumber(original), high = HighWords.test(original);
+    let [repeat, repeatDay] = readRepeat(original);
+    let due = readDue(original, today);
+    if(due == null && repeat !== 0) due = onOrAfter(repeat, repeatDay, today);
+    if(repeat === 3 && repeatDay < 0) repeatDay = dow(due == null ? today : due);
+    if(repeat === 4 && repeatDay <= 0) repeatDay = ymdOf(due == null ? today : due)[2];
+    if(repeat === 3 && repeatDay < 0) repeatDay = dow(today);
+    const actionable = filler.hadMarker || startsWithVerb(stripFiller(original).text) || high || due != null || repeat !== 0;
+    return { title, category:readCategory(original, number), due, high, repeat, repeatDay, number:number || "", actionable };
+  }
+
+  /* All the items found in the text, in the order written, at most 30. Never throws. */
+  function parse(text, today){
+    const found = [], seen = new Set();
+    try{
+      for(const segment of segments(clean(text))){
+        const item = read(segment, today, false);
+        if(!item) continue;
+        const key = item.title.toLowerCase(); if(seen.has(key)) continue;
+        seen.add(key); found.push(item);
+        if(found.length >= MAX_ITEMS) break;
+      }
+    }catch(e){ /* very odd input: what was found so far is still offered */ }
+    return found;
+  }
+  /* One item from one line the person typed (no splitting), or null if there is nothing in it. */
+  function parseOne(text, today){
+    try{ const c = clean(text); return c.length === 0 ? null : read(c.replace(/\n/g, " "), today, true); }catch(e){ return null; }
+  }
+  return { parse, parseOne, readDue, onOrAfter, firstOccurrence:onOrAfter, MAX_INPUT:LIMIT, MAX_ITEMS, MAX_TITLE };
+})();
+
+/* ---- the checklist store (ChecklistService) ---- */
+const CL_MAX = 500, CL_TITLE_MAX = 200, CL_KEEP_DONE = 30, CL_KEEP_COUNT = 60, CL_RECENT = 7, CL_SOON = 7;
+const CL_CATS = ["Work", "Home", "Other"], CL_REPEATS = ["Does not repeat", "Every day", "Every weekday", "Every week", "Every month"];
+const CL_REPEAT_WORDS = ["never", "every day", "every weekday", "every week", "every month"];
+const clStore = { items:[], doneByDay:{}, seq:0 };
+const clListeners = new Set();
+const clChanged = () => clListeners.forEach(f => f());
+const clToday = () => demoToday();
+const clDom = t => new Date(t).getUTCDate();
+const clById = id => clStore.items.find(i => i.id === id);
+const clOk = (v, list) => list.includes(v);
+function clDayFor(repeat, repeatDay, due, today){
+  const basis = due == null ? today : due;
+  return repeat === 3 ? ((repeatDay >= 0 && repeatDay <= 6) ? repeatDay : dowOf(basis)) : repeat === 4 ? ((repeatDay >= 1 && repeatDay <= 31) ? repeatDay : clDom(basis)) : -1;
+}
+function clAdd(title, cat, due, high, repeat, repeatDay, number, source){
+  const today = clToday(), t = oneLine(title, CL_TITLE_MAX);
+  if(!t) return { item:null, added:false, reason:"Please type what needs doing." };
+  if(!clOk(cat, [0, 1, 2])) cat = 2;
+  if(!clOk(repeat, [0, 1, 2, 3, 4])) repeat = 0;
+  const day = clDayFor(repeat, repeatDay, due, today);
+  if(repeat !== 0 && due == null) due = NP.onOrAfter(repeat, day, today);          /* a repeating item always has a date, so it shows in the right place and comes back on time */
+  const same = clStore.items.find(i => !i.done && i.category === cat && i.title.toLowerCase() === t.toLowerCase());
+  if(same) return { item:{ ...same }, added:false, reason:null };
+  if(clStore.items.length >= CL_MAX){
+    const oldest = clStore.items.filter(i => i.done && i.repeat === 0).sort((a, b) => (a.doneOn || 0) - (b.doneOn || 0))[0];
+    if(!oldest) return { item:null, added:false, reason:`The checklist is full (${CL_MAX} items). Please finish or delete some.` };
+    clStore.items.splice(clStore.items.indexOf(oldest), 1);
+  }
+  const item = { id:"c" + (++clStore.seq) + Math.random().toString(36).slice(2, 7), title:t, category:cat, due:due == null ? null : due, high:!!high, repeat, repeatDay:day,
+    done:false, doneOn:null, created:today, number:/^[0-9]{6}$/.test(number || "") ? number : null, source:oneLine(source, 40) || "You" };
+  clStore.items.push(item); clChanged();
+  return { item:{ ...item }, added:true, reason:null };
+}
+const clAddSuggested = (s, source) => clAdd(s.title, s.category, s.due, s.high, s.repeat, s.repeatDay, s.number, source);
+function clCount(dayMs, by){ if(dayMs == null) return; const k = isoDate(dayMs); clStore.doneByDay[k] = Math.max(0, (clStore.doneByDay[k] || 0) + by); }
+function clSetDone(id, done, today){
+  const i = clById(id); if(!i) return false;
+  if(i.done === done) return true;
+  if(done){ i.done = true; i.doneOn = today; clCount(today, 1); } else { clCount(i.doneOn, -1); i.done = false; i.doneOn = null; }
+  clChanged(); return true;
+}
+function clFinishedIn(days, today){
+  return Object.entries(clStore.doneByDay).reduce((n, [k, v]) => { const d = parseIso(k); return d != null && today - d >= 0 && (today - d) / DAY < days ? n + v : n; }, 0);
+}
+function clEdit(id, title, cat, due, high, repeat, repeatDay){
+  const t = oneLine(title, CL_TITLE_MAX); if(!t) return "Please type what needs doing.";
+  if(!clOk(cat, [0, 1, 2])) cat = 2;
+  if(!clOk(repeat, [0, 1, 2, 3, 4])) repeat = 0;
+  const i = clById(id); if(!i) return "That item is no longer on the list.";
+  const today = clToday(), day = clDayFor(repeat, repeatDay, due, today);
+  if(repeat !== 0 && due == null) due = NP.onOrAfter(repeat, day, today);
+  Object.assign(i, { title:t, category:cat, due:due == null ? null : due, high:!!high, repeat, repeatDay:day });
+  clChanged(); return null;
+}
+const clMoveDue = (id, due) => { const i = clById(id); if(!i) return false; i.due = due; clChanged(); return true; };
+const clDelete = id => { const k = clStore.items.findIndex(i => i.id === id); if(k < 0) return false; clStore.items.splice(k, 1); clChanged(); return true; };
+function clRestore(item){
+  if(clStore.items.length >= CL_MAX || clStore.items.some(i => i.id === item.id)) return false;
+  clStore.items.push({ ...item }); clChanged(); return true;
+}
+function clClearFinished(){
+  const n = clStore.items.filter(i => i.done && i.repeat === 0).length;
+  if(n) { clStore.items = clStore.items.filter(i => !(i.done && i.repeat === 0)); clChanged(); }
+  return n;
+}
+function clRollOver(today){
+  let n = 0;
+  clStore.items.forEach(i => { if(!i.done && i.repeat === 0 && i.due != null && i.due < today){ i.due = today; n++; } });
+  if(n) clChanged();
+  return n;
+}
+/* the next date a repeating item falls due after the occurrence it was last due on, and never before today */
+function clNextDue(i, today){
+  const basis = i.due != null ? i.due : i.doneOn != null ? i.doneOn : today, next = NP.onOrAfter(i.repeat, i.repeatDay, basis + DAY);
+  return next < today ? NP.onOrAfter(i.repeat, i.repeatDay, today) : next;
+}
+/* Run when the window opens, when it refreshes and when the day changes: a repeating item finished on an earlier day comes back open with its next due date,
+   a missed repeating item moves to its next occurrence instead of piling up, and old finished items and old counts are forgotten. */
+function clRefresh(today){
+  let changed = false;
+  clStore.items.filter(i => i.repeat !== 0).forEach(i => {
+    if(i.done && i.doneOn != null && i.doneOn < today){ i.due = clNextDue(i, today); i.done = false; i.doneOn = null; changed = true; }
+    else if(!i.done && i.due != null && i.due < today){ i.due = NP.onOrAfter(i.repeat, i.repeatDay, today); changed = true; }
+  });
+  const before = clStore.items.length;
+  clStore.items = clStore.items.filter(i => !(i.done && i.repeat === 0 && i.doneOn != null && (today - i.doneOn) / DAY > CL_KEEP_DONE));
+  if(clStore.items.length !== before) changed = true;
+  Object.keys(clStore.doneByDay).forEach(k => { const t = parseIso(k); if(t == null || (today - t) / DAY > CL_KEEP_COUNT){ delete clStore.doneByDay[k]; changed = true; } });
+  if(changed) clChanged();
+  return changed;
+}
+/* what the window shows (ChecklistBuilder): overdue, today, the next seven days, anytime, then what was finished in the last seven days */
+function clBuild(all, today, finished7, filter){
+  const items = all.filter(i => filter == null || i.category === filter);
+  const cmpDue = (a, b) => a.due == null ? (b.due == null ? 0 : 1) : b.due == null ? -1 : a.due - b.due;
+  const order = list => list.slice().sort((a, b) => (a.high ? 0 : 1) - (b.high ? 0 : 1) || cmpDue(a, b) || a.category - b.category || (a.title.toLowerCase() < b.title.toLowerCase() ? -1 : a.title.toLowerCase() > b.title.toLowerCase() ? 1 : 0));
+  const open = items.filter(i => !i.done);
+  const overdue = order(open.filter(i => i.due != null && i.due < today)), due0 = order(open.filter(i => i.due === today));
+  const soon = order(open.filter(i => i.due != null && i.due > today && i.due <= today + CL_SOON * DAY));
+  const later = order(open.filter(i => i.due == null || i.due > today + CL_SOON * DAY));
+  const done = items.filter(i => i.done && i.doneOn != null && today - i.doneOn >= 0 && (today - i.doneOn) / DAY < CL_RECENT)
+    .sort((a, b) => b.doneOn - a.doneOn || (a.title.toLowerCase() < b.title.toLowerCase() ? -1 : 1));
+  const groups = [];
+  if(overdue.length) groups.push({ heading:"OVERDUE", items:overdue });
+  if(due0.length) groups.push({ heading:"TODAY", items:due0 });
+  if(soon.length) groups.push({ heading:"COMING UP · NEXT 7 DAYS", items:soon });
+  if(later.length) groups.push({ heading:"ANYTIME", items:later });
+  if(done.length) groups.push({ heading:"DONE IN THE LAST 7 DAYS", items:done });
+  const doneToday = items.filter(i => i.done && i.doneOn === today).length;
+  const todayTotal = overdue.length + due0.length + doneToday;
+  const focus = (overdue.length ? overdue : due0)[0];
+  return { groups, open:open.length, overdue:overdue.length, doneToday, todayTotal, finished7, focus:focus ? focus.title : null };
+}
+
+/* ---- the fields of one item (ItemFields), used by the row editor and by each suggestion ---- */
+function readWhen(text, today){
+  const t = String(text || "").trim();
+  if(!t || /^(none|no date|-)$/i.test(t)) return { ok:true, date:null };
+  const due = NP.readDue(t, today), alt = due != null ? due : NP.readDue("by " + t, today);      /* "Fri" alone is not a date to the reader; "by Fri" is */
+  return alt == null ? { ok:false, date:null } : { ok:true, date:alt };
+}
+const dayText = t => shortDate(t);
+function itemFields(suffix){
+  const sfx = suffix ? " for " + suffix : "";
+  const title = h("input", { type:"text", maxlength:String(CL_TITLE_MAX), aria:"What needs doing" + sfx });
+  const cat = h("select", { aria:"Category" + sfx }); CL_CATS.forEach(c => cat.append(h("option", { text:c }))); cat.selectedIndex = 2;
+  const when = h("input", { type:"text", maxlength:"40", placeholder:"When? (Fri, Nov 12)", aria:"When it is due. Type a day such as tomorrow, Friday or Nov 12" + sfx });
+  const repeat = h("select", { class:"rp", aria:"How often it repeats" + sfx }); CL_REPEATS.forEach(c => repeat.append(h("option", { text:c })));
+  const high = h("input", { type:"checkbox", aria:"Urgent" + sfx });
+  const note = h("div", { class:"wn" });
+  const el = h("div", { class:"itf" }, title, h("div", { class:"opts" }, cat, when, repeat, h("label", { class:"opt" }, high, " Urgent")), note);
+  let loadedDue = null, loadedText = "";
+  const resolve = (rp, due, today) => { const basis = due == null ? today : due, day = rp === 3 ? dowOf(basis) : rp === 4 ? clDom(basis) : -1; return [NP.onOrAfter(rp, day, basis), day]; };
+  const readBox = today => loadedDue != null && when.value.trim() === loadedText ? { ok:true, date:loadedDue } : readWhen(when.value, today);
+  const showWhen = () => {
+    const today = clToday(), r = readBox(today), rp = repeat.selectedIndex;
+    if(!r.ok){ note.textContent = "I could not read that date. Try: today, tomorrow, Friday, Nov 12, or in 3 days."; note.className = "wn bad"; return; }
+    let text = r.date != null ? "Due " + dayText(r.date) : "No due date";
+    if(rp !== 0) text = `${CL_REPEATS[rp]}, starting ${dayText(resolve(rp, r.date, today)[0])}`;
+    note.textContent = text; note.className = "wn";
+  };
+  when.addEventListener("input", showWhen); repeat.addEventListener("change", showWhen);
+  const api = {
+    el, title, cat, when, repeat, high, note,
+    load(t, c, due, hi, rp){
+      title.value = t; cat.selectedIndex = Math.min(2, Math.max(0, c)); high.checked = !!hi; repeat.selectedIndex = Math.min(4, Math.max(0, rp));
+      /* A year is shown when it is not this one, and a day left as it was is kept exactly: "Sep 26" typed in November would otherwise mean next year. */
+      loadedDue = due; loadedText = due == null ? "" : (new Date(due).getUTCFullYear() === new Date(clToday()).getUTCFullYear() ? dayText(due) : dayText(due) + ", " + new Date(due).getUTCFullYear());
+      when.value = loadedText; showWhen();
+    },
+    read(){
+      const today = clToday(), t = title.value.trim(), c = cat.selectedIndex, rp = repeat.selectedIndex, hi = high.checked;
+      if(!t) return { ok:false, error:"Please type what needs doing." };
+      const r = readBox(today);
+      if(!r.ok) return { ok:false, error:"I could not read that date. Try: today, tomorrow, Friday, Nov 12, or in 3 days. Or leave it empty." };
+      let date = r.date, day = -1;
+      if(rp !== 0){ const x = resolve(rp, date, today); date = x[0]; day = x[1]; }          /* a repeating item always has a date that fits its pattern */
+      return { ok:true, title:t, category:c, due:date, high:hi, repeat:rp, repeatDay:day };
+    },
+  };
+  showWhen();
+  return api;
+}
+const clDescribe = (title, cat, due, high, repeat) => {
+  const parts = [CL_CATS[cat]];
+  if(due != null) parts.push("due " + dayText(due));
+  if(repeat !== 0) parts.push("repeats " + CL_REPEAT_WORDS[repeat]);
+  if(high) parts.push("urgent");
+  return `${title} (${parts.join(", ")})`;
+};
+function setText(el, text){ el.textContent = text; el.hidden = !text; }
+
+/* ---- My checklist (ChecklistWindow) ---- */
+let clTimer = null, clSig = "", clDay = null, clView = null, clEditing = null, clEditor = null, clEditorError = "", clDeleted = null, clErrBox = null;
+const CL_FILTERS = ["Everything", "Work", "Home", "Other"];
+const clFilterValue = () => { const i = $("clFilter").selectedIndex; return i >= 1 && i <= 3 ? i - 1 : null; };
+function raiseOver(id, other){ $(id).style.zIndex = "52"; $(other).style.zIndex = "51"; }     /* the window just opened is in front of its neighbour; a card stays in front of both */
+function openChecklist(){
+  closeMenus(); showApp("checklist"); raiseOver("checklist", "notes");
+  clStop(); clTimer = setInterval(() => { if(clToday() !== clDay) clReload(true); }, 30000);
+  clReload(true);
+  setTimeout(() => $("clAddIn").focus(), 30);
+}
+function clStop(){ clearInterval(clTimer); clTimer = null; }
+function clClose(){ clStop(); clEditing = null; clEditor = null; clEditorError = ""; clDeleted = null; $("clUndo").hidden = true; $("clAddIn").value = ""; setText($("clPreview"), ""); setText($("clStatus"), ""); }
+function clReload(force){
+  if(!isOpen("checklist")) return;
+  const today = clToday(); clDay = today; clRefresh(today);
+  const view = clView = clBuild(clStore.items, today, clFinishedIn(CL_RECENT, today), clFilterValue());
+  const sig = view.groups.map(g => g.items.map(i => `${g.heading}|${i.id}|${i.title}|${i.due}|${i.done}|${i.high}|${i.category}|${i.repeat}`).join("\n")).join("\n") + `#${view.open}|${view.finished7}|${clEditing}|${clFilterValue()}|${today}`;
+  clSummary(view); $("clRoll").hidden = !(view.overdue > 0);
+  $("clFooter").textContent = "Saved on this page only in this simulation (the Windows app keeps checklist.json on the PC); nothing is sent anywhere. Items that repeat come back by themselves, and a repeating item you miss moves to its next day instead of piling up.";
+  if(!force && sig === clSig) return;
+  clSig = sig; clDraw(view);
+}
+function clSummary(view){
+  const fill = $("clBarFill"), bar = $("clBar");
+  if(clStore.items.length === 0){
+    $("clSummary").textContent = `Your checklist is empty. Type something above, or select your notes anywhere and press ${state.keys.list || "the tray menu item (no shortcut is set)"} to turn them into items.`;
+    setText($("clFocus"), ""); fill.style.width = "0%"; bar.setAttribute("aria-label", "Nothing is due today"); return;
+  }
+  const bits = [`${view.open} open`];
+  if(view.overdue > 0) bits.push(`${view.overdue} overdue`);
+  if(view.todayTotal > 0) bits.push(`${view.doneToday} of ${view.todayTotal} done today`);
+  bits.push(`${view.finished7} finished in the last 7 days`);
+  $("clSummary").textContent = bits.join(" · ");
+  setText($("clFocus"), view.focus ? "Start with: " + view.focus : view.open === 0 ? "Everything is done. Well done." : "Nothing is due today or overdue. The rest is below.");
+  fill.style.width = view.todayTotal > 0 ? Math.round(100 * view.doneToday / view.todayTotal) + "%" : "0%";
+  bar.setAttribute("aria-label", view.todayTotal > 0 ? `${view.doneToday} of ${view.todayTotal} done today` : "Nothing is due today");
+}
+function clDraw(view){
+  const box = $("clRows"); box.replaceChildren();
+  if(!view.groups.length){ box.append(h("p", { class:"hint", style:"margin:8px 0", text:clStore.items.length === 0 ? "Nothing here yet. Add your first item above, for example “Call the plumber tomorrow”." : "Nothing in this view." })); return; }
+  view.groups.forEach(g => {
+    box.append(h("div", { class:"gh" + (g.heading === "OVERDUE" ? " bad" : ""), text:`${g.heading} · ${g.items.length}` }));
+    g.items.forEach(i => box.append(clRow(i)));
+  });
+}
+function clDue(i){
+  if(i.due == null || i.done) return "";
+  const today = clToday();
+  return i.due < today ? "overdue since " + dayText(i.due) : i.due === today ? "due today" : i.due === today + DAY ? "due tomorrow" : "due " + dayText(i.due);
+}
+function clRow(item){
+  const today = clToday();
+  const done = h("input", { type:"checkbox", aria:(item.done ? "Mark not finished: " : "Mark finished: ") + item.title }); done.checked = item.done;
+  done.addEventListener("change", () => { if(done.checked !== item.done) clSetDone(item.id, done.checked, clToday()); });
+  const meta = [], due = clDue(item); if(due) meta.push(due);
+  meta.push(CL_CATS[item.category]);
+  if(item.repeat !== 0) meta.push("repeats " + CL_REPEAT_WORDS[item.repeat]);
+  if(item.source === "Notes") meta.push("from your notes");
+  const late = !item.done && item.due != null && item.due < today;
+  const t = h("div", { class:"t" });
+  if(item.high && !item.done) t.append(h("span", { class:"urg", text:"URGENT" }));
+  t.append(h("b", { text:item.title, style:item.done ? "" : "font-weight:400" }), h("small", { class:late ? "bad" : "", text:meta.join(" · ") }));
+  const btns = h("div", { class:"btns" });
+  if(item.number) btns.append(h("button", { type:"button", text:item.number, aria:`Open the card for ANDA ${item.number}`, onclick:() => {
+    const r = $("checklist").getBoundingClientRect();
+    openCard(item.number, { anchor:{ x:Math.min(r.right + 8, innerWidth - 390), y:r.top + 24 }, above:true });
+  } }));
+  if(!item.done){
+    btns.append(h("button", { type:"button", text:"Tomorrow", aria:"Move to tomorrow: " + item.title, onclick:() => clMoveDue(item.id, clToday() + DAY) }));
+    btns.append(h("button", { type:"button", text:"Edit", aria:"Edit: " + item.title, onclick:() => clBeginEdit(item) }));
+  }
+  btns.append(h("button", { type:"button", text:"Delete", aria:"Delete: " + item.title, onclick:() => {
+    clDeleted = { ...item };
+    if(clEditing === item.id){ clEditing = null; clEditor = null; }
+    clDelete(item.id); $("clUndo").hidden = false; setText($("clStatus"), "Deleted: " + item.title);
+  } }));
+  const row = h("div", { class:"cr" + (item.done ? " done" : "") }, done, t, btns);
+  if(clEditing !== item.id || !clEditor) return row;
+  const err = clErrBox = h("div", { class:"bad", text:clEditorError }); err.hidden = !clEditorError;
+  const ed = h("div", { class:"ced" }, clEditor.el, err,
+    h("div", { class:"row2" }, h("button", { type:"button", class:"pill", text:"Save", onclick:clSaveEdit }), h("button", { type:"button", class:"pill quiet", text:"Cancel", onclick:clCancelEdit })));
+  return h("div", null, row, ed);
+}
+function clBeginEdit(item){
+  clEditing = item.id; clEditorError = ""; clEditor = itemFields(item.title);
+  clEditor.load(item.title, item.category, item.due, item.high, item.repeat);
+  clEditor.title.addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); clSaveEdit(); } });
+  clReload(true); clEditor.title.focus();
+}
+function clSaveEdit(){
+  if(!clEditing || !clEditor) return;
+  const r = clEditor.read();
+  const fail = msg => { clEditorError = msg; if(clErrBox){ clErrBox.textContent = msg; clErrBox.hidden = !msg; } };
+  if(!r.ok){ fail(r.error); return; }
+  const refused = clEdit(clEditing, r.title, r.category, r.due, r.high, r.repeat, r.repeatDay);
+  if(refused){ fail(refused); return; }
+  clEditing = null; clEditor = null; clEditorError = ""; setText($("clStatus"), "Saved."); clReload(true);
+}
+function clCancelEdit(){ clEditing = null; clEditor = null; clEditorError = ""; clReload(true); }
+function clPreviewTyped(){
+  const item = NP.parseOne($("clAddIn").value, clToday());
+  setText($("clPreview"), item ? "Will add: " + clDescribe(item.title, item.category, item.due, item.high, item.repeat) : "");
+}
+function clAddTyped(){
+  const item = NP.parseOne($("clAddIn").value, clToday());
+  if(!item){ setText($("clStatus"), "Please type what needs doing."); $("clAddIn").focus(); return; }
+  const r = clAddSuggested(item, "You");
+  if(r.reason){ setText($("clStatus"), r.reason); return; }
+  setText($("clStatus"), r.added ? "Added: " + clDescribe(item.title, item.category, item.due, item.high, item.repeat) : "That is already on your list.");
+  if(r.added){ $("clAddIn").value = ""; setText($("clPreview"), ""); }
+  $("clAddIn").focus();
+}
+CL_FILTERS.forEach(f => $("clFilter").append(h("option", { text:f })));
+$("clFilter").addEventListener("change", () => clReload(true));
+$("clAddIn").addEventListener("input", clPreviewTyped);
+$("clAddIn").addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); clAddTyped(); } });
+$("clAdd").addEventListener("click", clAddTyped);
+$("clNotesBtn").addEventListener("click", () => openNotes(""));
+$("clDone").addEventListener("click", () => closeApp("checklist"));
+$("clRoll").addEventListener("click", () => { const n = clRollOver(clToday()); setText($("clStatus"), n === 0 ? "Nothing is overdue." : `Moved ${n} overdue ${n === 1 ? "item" : "items"} to today.`); });
+$("clClear").addEventListener("click", () => { const n = clClearFinished(); setText($("clStatus"), n === 0 ? "Nothing finished to clear. Finished items that repeat stay: they come back by themselves." : `Cleared ${n} finished ${n === 1 ? "item" : "items"}.`); });
+$("clUndo").addEventListener("click", () => {
+  setText($("clStatus"), clDeleted && clRestore(clDeleted) ? "Put back: " + clDeleted.title : "It could not be put back.");
+  clDeleted = null; $("clUndo").hidden = true;
+});
+clListeners.add(() => clReload(false));
+
+/* ---- Notes to checklist (NotesWindow) ---- */
+let ntRows = [], ntLastAdded = [], ntDebounce = null;
+function openNotes(text){
+  closeMenus(); showApp("notes"); raiseOver("notes", "checklist"); clRefresh(clToday());
+  const t = String(text || ""), cut = t.length > NP.MAX_INPUT;
+  $("ntText").value = cut ? t.slice(0, NP.MAX_INPUT) : t;
+  $("ntHint").textContent = `Select your notes anywhere and press ${state.keys.list || "the My checklist item in the tray menu"}, or paste them above. They are read by simple rules: no AI, nothing is sent anywhere. ` +
+    "You can change any suggestion before it is added. Changing the notes above refreshes the suggestions." + (cut ? ` Only the first ${NP.MAX_INPUT.toLocaleString("en-US")} characters were read.` : "");
+  setText($("ntStatus"), ""); ntLastAdded = []; $("ntUndo").hidden = true;
+  ntAnalyse();
+  if(state.clMode === 1 && t.trim()) ntAddAtOnce();
+  if(!t.trim()) setTimeout(() => $("ntText").focus(), 30);
+}
+function ntAnalyse(){
+  clearTimeout(ntDebounce);
+  const text = $("ntText").value, today = clToday(), items = NP.parse(text, today);
+  ntRows = []; $("ntFound").replaceChildren(); $("ntUndo").hidden = true;
+  items.forEach(item => {
+    const f = itemFields(item.title); f.load(item.title, item.category, item.due, item.high, item.repeat);
+    const inc = h("input", { type:"checkbox", aria:"Add to my checklist: " + item.title }); inc.checked = item.actionable;
+    inc.addEventListener("change", ntUpdate);
+    const prob = h("div", { class:"prob" }); prob.hidden = true;
+    const mark = h("div", { class:"added", text:"Added to your checklist" }); mark.hidden = true;
+    const inner = h("div", null, f.el);
+    if(!item.actionable) inner.append(h("div", { class:"nt", text:"This reads like a note, not a task, so it is not ticked. Tick it if you want it on the list." }));
+    inner.append(prob, mark);
+    const row = { inc, f, prob, mark, src:item, added:false };
+    ntRows.push(row); $("ntFound").append(h("div", { class:"ntrow" }, inc, inner));
+  });
+  $("ntFoundLabel").textContent = ntRows.length === 0 ? "SUGGESTED ITEMS" : `SUGGESTED ITEMS · ${ntRows.length}`;
+  setText($("ntFoundNote"), !text.trim() ? "Suggestions appear here as soon as there are notes."
+    : ntRows.length === 0 ? "I did not find anything that looks like a task. You can type one by hand in My checklist."
+    : ntRows.length >= NP.MAX_ITEMS ? `Showing the first ${NP.MAX_ITEMS}. Split very long notes to see the rest.`
+    : "Tick what you want on your list. Change a title, day, repeat or category if the reading is not right.");
+  ntUpdate();
+}
+const ntTicked = () => ntRows.filter(r => !r.added && r.inc.checked);
+function ntUpdate(){
+  const n = ntTicked().length;
+  $("ntAdd").textContent = n === 0 ? "Add the ticked items" : `Add the ${n} ticked ${n === 1 ? "item" : "items"}`;
+  $("ntAdd").disabled = n === 0;
+  $("ntAll").disabled = $("ntNone").disabled = !ntRows.some(r => !r.added);
+}
+function ntAddRows(chosen, atOnce){
+  if(!chosen.length){ setText($("ntStatus"), "Please tick at least one item."); return; }
+  const reads = []; let problems = 0;
+  chosen.forEach(row => {
+    const r = row.f.read(); row.prob.hidden = r.ok; row.prob.textContent = r.ok ? "" : r.error;
+    if(!r.ok) problems++;
+    reads.push([row, r]);
+  });
+  if(problems > 0){ setText($("ntStatus"), `Nothing was added yet. Please fix ${problems} ${problems === 1 ? "item" : "items"} marked in red, or untick ${problems === 1 ? "it" : "them"}.`); return; }
+  const ids = []; let already = 0, full = null;
+  for(const [row, r] of reads){
+    const res = clAdd(r.title, r.category, r.due, r.high, r.repeat, r.repeatDay, row.src.number, "Notes");
+    if(res.reason){ full = res.reason; break; }
+    if(res.added && res.item) ids.push(res.item.id); else already++;
+    row.added = true; row.inc.checked = false; row.inc.disabled = true; row.mark.hidden = false;
+    row.mark.textContent = res.added ? "Added to your checklist" : "Already on your checklist";
+    [row.f.title, row.f.cat, row.f.when, row.f.repeat, row.f.high].forEach(c => { c.disabled = true; });
+  }
+  ntLastAdded = ids; $("ntUndo").hidden = ids.length === 0;
+  const made = ids.length === 0 ? "Nothing new was added" : `Added ${ids.length} ${ids.length === 1 ? "item" : "items"} to your checklist`;
+  setText($("ntStatus"), made + (already > 0 ? ` (${already} already on the list)` : "") + (full ? ". " + full : ".") + (atOnce && ids.length > 0 ? " This was added at once, as you chose in Settings. Press Undo to take it back." : ""));
+  ntUpdate();
+}
+function ntAddAtOnce(){
+  ntRows.forEach(r => { r.inc.checked = r.src.actionable; });
+  const chosen = ntRows.filter(r => r.inc.checked);
+  if(!chosen.length){ setText($("ntStatus"), ntRows.length === 0 ? "I did not find anything to add." : "Nothing looked like a task, so nothing was added. You can tick items yourself."); return; }
+  ntAddRows(chosen, true);
+}
+$("ntText").addEventListener("input", () => { clearTimeout(ntDebounce); ntDebounce = setTimeout(ntAnalyse, 300); });
+$("ntAdd").addEventListener("click", () => ntAddRows(ntTicked(), false));
+$("ntAll").addEventListener("click", () => { ntRows.filter(r => !r.added).forEach(r => { r.inc.checked = true; }); ntUpdate(); });
+$("ntNone").addEventListener("click", () => { ntRows.filter(r => !r.added).forEach(r => { r.inc.checked = false; }); ntUpdate(); });
+$("ntUndo").addEventListener("click", () => {
+  const removed = ntLastAdded.filter(id => clDelete(id)).length; ntLastAdded = [];
+  ntAnalyse(); setText($("ntStatus"), `Removed ${removed} ${removed === 1 ? "item" : "items"} from your checklist.`);
+});
+$("ntClose").addEventListener("click", () => closeApp("notes"));
+$("ntOpenList").addEventListener("click", () => openChecklist());
+
+/* ---- Settings: My checklist ---- */
+(function buildChecklistSettings(){
+  [[0, "Show me the items first, so I can change them (recommended)"], [1, "Add them at once (I can press Undo)"]].forEach(([v, label]) => {
+    const l = document.createElement("label"); l.className = "opt";
+    l.innerHTML = `<input type="radio" name="clmode" value="${v}" ${v === state.clMode ? "checked" : ""}> ${label}`;
+    l.firstChild.addEventListener("change", () => { state.clMode = v; });
+    $("clMode").appendChild(l);
+  });
+  $("clOpenSet").addEventListener("click", openChecklist);
+  $("clNotesSet").addEventListener("click", () => openNotes(""));
+  $("clClearSet").addEventListener("click", () => { const n = clClearFinished(); $("clSetStatus").textContent = n === 0 ? "Nothing finished to clear. Finished items that repeat stay: they come back by themselves." : `Cleared ${n} finished ${n === 1 ? "item" : "items"}.`; });
+})();
+
+/* ---- Settings arrange themselves (SettingsAdvisor, SettingsWindow.Adaptive) ---- */
+const SECS = [["look", "Look and feel"], ["start", "How it starts"], ["dates", "Dates"], ["files", "My files and writing"], ["checklist", "My checklist"], ["actions", "My actions, agents and ANDA to-do list"], ["connections", "AI and connections"], ["maintenance", "Maintenance"]];
+const SEC_USE_MIN = 3, SEC_USE_MAX = 1000, SEC_SUGGEST_MAX = 3;
+const cap1 = k => k[0].toUpperCase() + k.slice(1);
+let secTouched = new Set();
+function settingsFacts(){
+  const problems = new Set();
+  if(state.taken.peek || state.taken.look || state.taken.draft) problems.add("start");
+  if(state.taken.list && state.keys.list) problems.add("checklist");
+  const c = connInfo(), name = state.provider === "myapi" ? (state.myApi.name || "My API") : "Claude";
+  const connection = !state.ai && c.cls === "set" ? `${name} is set up but not tested` : null;
+  let actions = null;
+  for(const a of state.agents) if(a.enabled && agentSetupProblem(a)){ actions = `the agent “${a.name}” is switched on but not ready`; break; }
+  if(!actions) for(const a of state.actions) if(a.enabled && validateAction(a, [])){ actions = `the action “${a.name}” is not ready`; break; }
+  return { problems, portfolio:null, connection, actions, chosen:!!state.data.portfolio };
+}
+/* Everything is collapsed except what is needed most: 1) a section with something that needs a look (always open, however many), 2) when just starting, what a new user needs first,
+   3) up to two sections the person opens often. At most three sections are opened for reasons 2 and 3 together. */
+function adviseSettings(){
+  const f = settingsFacts(), open = new Map();
+  if(state.adaptive){
+    if(f.problems.has("start")) open.set("start", [true, "Needs a look: a shortcut is used by another program"]);
+    if(f.problems.has("checklist")) open.set("checklist", [true, "Needs a look: its shortcut is used by another program"]);
+    if(f.actions) open.set("actions", [true, "Needs a look: " + f.actions]);
+    if(f.portfolio) open.set("files", [true, "Needs a look: " + f.portfolio]);
+    if(f.connection) open.set("connections", [true, "Needs a look: " + f.connection]);
+    let extra = 0;
+    if(!state.gsDone){
+      if(!open.has("files") && !f.chosen){ open.set("files", [false, "Start here: choose your portfolio"]); extra++; }
+      if(!open.has("start")){ open.set("start", [false, "Start here: your shortcuts"]); extra++; }
+    }
+    Object.entries(state.sectionUse).filter(([k, n]) => SECS.some(s => s[0] === k) && k !== "maintenance" && n >= SEC_USE_MIN)
+      .sort((a, b) => b[1] - a[1] || SECS.findIndex(s => s[0] === a[0]) - SECS.findIndex(s => s[0] === b[0])).slice(0, 2)
+      .forEach(([k]) => { if(!open.has(k) && extra < SEC_SUGGEST_MAX){ open.set(k, [false, "You open this often"]); extra++; } });
+  }
+  return SECS.map(([k]) => open.has(k) ? { id:k, open:true, attention:open.get(k)[0], reason:open.get(k)[1] } : { id:k, open:false, attention:false, reason:null });
+}
+function applySuggested(){
+  const advice = adviseSettings();
+  advice.forEach(a => {
+    const d = $("sec" + cap1(a.id)), p = $("pill" + cap1(a.id));
+    d.open = a.open; p.hidden = !a.reason; p.textContent = a.reason || ""; p.classList.toggle("attn", a.attention);
+  });
+  const opened = advice.filter(a => a.open).map(a => SECS.find(s => s[0] === a.id)[1]);
+  $("adaptText").textContent = !state.adaptive ? "Sections stay as you leave them. To have the ones you need opened for you, turn on “Open the sections that need a look” under Maintenance."
+    : opened.length === 0 ? "Everything is in order, so every section is collapsed. Click a heading to open it, or use “Go to” above."
+    : `Opened for you: ${opened.join(", ")}. The other sections are collapsed; click a heading to open one.`;
+}
+const secSetAll = open => SECS.forEach(([k]) => { $("sec" + cap1(k)).open = open; });
+/* counts one opening of a section, once per time Settings is open; only a count is kept, and nothing if arranging is off */
+function secTouch(k){
+  if(!state.adaptive || secTouched.has(k)) return;
+  secTouched.add(k);
+  const use = state.sectionUse; use[k] = Math.min(SEC_USE_MAX, (use[k] || 0) + 1);
+  if(Object.values(use).reduce((a, b) => a + b, 0) > 120) Object.keys(use).forEach(x => { use[x] = Math.ceil(use[x] / 2); });
+}
+function paintGettingStarted(){
+  const chosen = !!state.data.portfolio;
+  $("gs").hidden = state.gsDone;
+  $("gsStep1").textContent = `1. Select an ANDA number in any program (an email, a spreadsheet, a web page), then press ${state.keys.peek}. A small card opens.`;
+  $("gsStep2").textContent = chosen ? "2. Done: your portfolio file is chosen, so the cards use your own ANDAs."
+    : "2. Choose your portfolio file under “My files and writing”, so the cards use your own ANDAs. Until then the app shows fictional demo records.";
+  $("gsStep3").textContent = `3. Select notes anywhere (a message, an email, a scribbled list) and press ${state.keys.list || "the My checklist item in the tray menu"}. They become a checklist you can tick off.`;
+  $("gsFiles").hidden = chosen;
+}
+function onSettingsOpen(){ secTouched = new Set(); paintGettingStarted(); applySuggested(); }
+(function buildAdaptiveSettings(){
+  SECS.forEach(([k]) => {
+    const d = $("sec" + cap1(k));
+    d.querySelector("summary").addEventListener("click", () => { if(!d.open) secTouch(k); });       /* the person is opening it (a click or Enter on the heading) */
+    d.addEventListener("focusin", () => secTouch(k));
+  });
+  $("adaptSuggested").addEventListener("click", applySuggested);
+  $("adaptExpand").addEventListener("click", () => { secSetAll(true); $("adaptText").textContent = "Every section is open. Use “Suggested view” to go back to what matters now, or “Collapse all” to close them."; });
+  $("adaptCollapse").addEventListener("click", () => { secSetAll(false); $("adaptText").textContent = "Every section is collapsed. Click a heading to open one, use “Go to” above, or press “Suggested view”."; });
+  $("adaptCheck").addEventListener("change", e => { state.adaptive = e.target.checked; applySuggested(); });
+  $("adaptReset").addEventListener("click", () => { state.sectionUse = {}; secTouched.clear(); $("adaptStatus").textContent = "Forgotten. The window will now start from what needs a look."; });
+  $("gsShow").addEventListener("click", () => { state.gsDone = false; paintGettingStarted(); $("adaptStatus").textContent = "Getting started is shown at the top again."; applySuggested(); });
+  $("gsHide").addEventListener("click", () => { state.gsDone = true; paintGettingStarted(); });
+  $("gsFiles").addEventListener("click", () => { const d = $("secFiles"); if(!d.open){ secTouch("files"); d.open = true; } d.scrollIntoView({ block:"start" }); });
+  $("gsChecklist").addEventListener("click", openChecklist);
+})();
+
 /* backup, restore, reset: what the Windows app does, for the choices on this page. File locations and the what-if switches are not part of it. */
 const BACKUP_KIND = "anda-hover-companion-backup", BACKUP_VERSION = 1;
 function snapSettings(){
@@ -3086,7 +4032,8 @@ function snapSettings(){
     provider:s.provider, claudeModel:s.claudeModel,
     myApi:{ name:m.name, endpoint:m.endpoint, header:m.header, scheme:m.scheme, env:m.env, model:m.model, template:m.template, path:m.path },
     outlook:{ enabled:o.on, cloud:o.cloud, clientId:o.client, tenant:o.tenant, maxItems:o.max }, lens:s.lens,
-    actions:JSON.parse(JSON.stringify(s.actions)), agents:JSON.parse(JSON.stringify(s.agents)), todoShowFromData:s.todoAuto, todoRefreshSeconds:s.todoRefresh };
+    actions:JSON.parse(JSON.stringify(s.actions)), agents:JSON.parse(JSON.stringify(s.agents)), todoShowFromData:s.todoAuto, todoRefreshSeconds:s.todoRefresh,
+    checklistMode:s.clMode, adaptive:s.adaptive };   /* the counts of opened sections and the hidden Getting started card belong to this PC: they are not in a backup */
 }
 const DEFAULT_SETTINGS = snapSettings(), DEFAULT_PROMPTS = prompts.map(p => [...p]), DEFAULT_REPLIES = state.replies.map(r => ({ ...r }));
 const oneOf = (v, list, fallback) => list.includes(v) ? v : fallback;
@@ -3096,9 +4043,16 @@ function applySettings(x){
   const look = oneOf(x.appearance, LOOKS.map(l => l[0]), d.appearance); if(look !== s.look) applyLook(look);
   s.autoHide = oneOf(x.autoHide, AUTO_CHOICES, d.autoHide); s.mode = oneOf(x.consent, CONSENTS.map(c => c[0]), d.consent);
   s.escalate = typeof x.escalate === "boolean" ? x.escalate : d.escalate; s.lead = oneOf(x.holidayLead, [0, 2, 3, 5], d.holidayLead);
-  s.capture = typeof x.capture === "boolean" ? x.capture : d.capture; s.op = x.opacity === undefined ? d.opacity : (n => isFinite(n) ? Math.min(100, Math.max(30, Math.round(n))) : 100)(+x.opacity);
-  const k = x.keys || {}, keys = { peek:str(k.peek, 40, ""), look:str(k.look, 40, ""), draft:str(k.draft, 40, "") };
-  s.keys = KEYKINDS.every(([kind]) => keys[kind] && !validateCombo(keys[kind])) && !findDup(keys) ? keys : { ...d.keys };
+  s.capture = typeof x.capture === "boolean" ? x.capture : d.capture; s.op = x.opacity === undefined ? d.opacity : (n => isFinite(n) ? Math.min(100, Math.max(40, Math.round(n))) : 100)(+x.opacity);
+  const k = x.keys || {}, three = { peek:str(k.peek, 40, ""), look:str(k.look, 40, ""), draft:str(k.draft, 40, "") };
+  const okThree = ["peek", "look", "draft"].every(kind => three[kind] && !validateCombo(three[kind])) && !findDup({ ...three, list:"" });
+  const base = okThree ? three : { peek:d.keys.peek, look:d.keys.look, draft:d.keys.draft };
+  /* the checklist shortcut: unreadable becomes the default, one that clashes with another becomes none, an empty one means none */
+  let list = typeof k.list === "string" ? str(k.list, 40, "") : d.keys.list;
+  if(list && validateCombo(list)) list = d.keys.list;
+  if(list && [base.peek, base.look, base.draft].includes(list)) list = "";
+  s.keys = { ...base, list };
+  s.clMode = oneOf(x.checklistMode, [0, 1], 0); s.adaptive = typeof x.adaptive === "boolean" ? x.adaptive : true;
   s.actions = x.actions === undefined ? starterActions() : normActions(x.actions, Object.values(s.keys));
   s.agents = normAgents(x.agents); clearAgentCache();
   s.todoAuto = typeof x.todoShowFromData === "boolean" ? x.todoShowFromData : d.todoShowFromData;
@@ -3120,6 +4074,7 @@ function applySettings(x){
 function syncSettingsUI(){
   const s = state, check = (name, value) => document.querySelectorAll(`input[name=${name}]`).forEach(r => { r.checked = r.value === String(value); });
   check("look", s.look); check("autohide", s.autoHide); check("consent", s.mode); check("tone", s.tone); check("provider", s.provider); check("midmod", s.middleMod); check("todorefresh", s.todoRefresh);
+  check("clmode", s.clMode); $("adaptCheck").checked = s.adaptive; paintGettingStarted();
   $("todoAuto").checked = s.todoAuto; renderActions(); renderAgents(); if(isOpen("todo")){ tdApplyTimer(); tdReload(true); }
   $("setUrgent").checked = s.escalate; $("setLead").value = String(s.lead); $("setCapture").checked = s.capture;
   $("setOp").value = s.op; $("setOpV").textContent = s.op + "%"; root.style.setProperty("--op", s.op + "%");
@@ -3184,17 +4139,23 @@ $("bkReset").addEventListener("click", () => {
   }
   clearTimeout(resetTimer); b.dataset.armed = ""; b.textContent = "Reset all settings…";
   prompts.splice(0, prompts.length, ...DEFAULT_PROMPTS.map(p => [...p])); state.replies = DEFAULT_REPLIES.map(r => ({ ...r }));
-  applySettings(DEFAULT_SETTINGS);
+  applySettings(DEFAULT_SETTINGS); state.sectionUse = {}; state.gsDone = false; paintGettingStarted();
   $("bkStatus").textContent = "Everything is back to what a new install starts with. File locations on this PC were kept."; $("bkStatus").style.color = "var(--c-ink2)";
 });
 
-/* go to a section */
+/* go to a section: the group names and the labels inside them; choosing one opens its group first */
 (function buildJump(){
-  const labels = [...document.querySelectorAll("#settings .lbl")], sel = $("setJump");
-  sel.innerHTML = `<option value="-1">Choose a section…</option>` + labels.map((l, i) => `<option value="${i}">${l.textContent.replace(/</g, "&lt;")}</option>`).join("");
+  const entries = [], sel = $("setJump");
+  document.querySelectorAll("#settings details.sec").forEach(d => {
+    const k = d.id.slice(3).toLowerCase();
+    entries.push({ title:d.querySelector("h3.grp").textContent, box:d, key:k, target:d });
+    d.querySelectorAll(".lbl").forEach(l => entries.push({ title:l.textContent, box:d, key:k, target:l }));
+  });
+  sel.innerHTML = `<option value="-1">Choose a section…</option>` + entries.map((e, i) => `<option value="${i}">${e.title.replace(/</g, "&lt;")}</option>`).join("");
   sel.addEventListener("change", () => {
-    const i = +sel.value; if(i >= 0) labels[i].scrollIntoView({ block:"start" });
-    sel.value = "-1";
+    const i = +sel.value; sel.value = "-1"; if(i < 0) return;
+    const e = entries[i]; if(!e.box.open){ secTouch(e.key); e.box.open = true; }
+    e.target.scrollIntoView({ block:"start" });
   });
 })();
 syncSettingsUI();
@@ -3204,17 +4165,18 @@ function setTaken(kind, on){
   state.taken[kind] = on; paintKeys();
   if(on && state.running){
     const other = kind === "look" ? state.keys.peek : state.keys.look;
-    showNotice(`${state.keys[kind]} is already used by another program. Please use ${other} or the tray icon.`, { x:innerWidth - 360, y:innerHeight - 150 });
+    showNotice(kind === "list" ? `${state.keys[kind]} is already used by another program. Please choose another shortcut for My checklist in Settings, or use the tray icon.` : `${state.keys[kind]} is already used by another program. Please use ${other} or the tray icon.`, { x:innerWidth - 360, y:innerHeight - 150 });
   }
 }
 $("swConflict").addEventListener("change", e => setTaken("peek", e.target.checked));
 $("swConflictLook").addEventListener("change", e => setTaken("look", e.target.checked));
+$("swConflictList").addEventListener("change", e => setTaken("list", e.target.checked));
 $("swAi").addEventListener("change", e => {
   state.ai = e.target.checked; paintConn(); if(current && !card.classList.contains("mini")) renderBrief(current);
   document.querySelectorAll("#draft [data-ai]").forEach(b => { b.disabled = !state.ai; });
 });
 $("swAgentFail").addEventListener("change", e => { state.agentFail = e.target.checked; });
-$("swToday").addEventListener("change", e => { state.pretend = e.target.checked; if(current && card.style.display === "block") fill(current); });
+$("swToday").addEventListener("change", e => { state.pretend = e.target.checked; if(current && card.style.display === "block") fill(current); clReload(true); });
 
 /* ---------------- card controls ---------------- */
 $("closeBtn").addEventListener("click", closeCard);

@@ -349,10 +349,10 @@ public partial class App : Application
     {
         var menu = new NativeMenu();
 
-        var lookup = new NativeMenuItem($"Lookup ANDA…\t{_settings.LookupHotkey}");
+        var lookup = _lookupItem = new NativeMenuItem($"Lookup ANDA…\t{_settings.LookupHotkey}");
         lookup.Click += (_, _) => OpenLookup();
         menu.Add(lookup);
-        var draft = new NativeMenuItem($"Check a draft…\t{_settings.DraftHotkey}");
+        var draft = _draftItem = new NativeMenuItem($"Check a draft…\t{_settings.DraftHotkey}");
         draft.Click += (_, _) => OpenDraft("");
         menu.Add(draft);
         var watch = new NativeMenuItem("Watch list…");
@@ -361,7 +361,7 @@ public partial class App : Application
         var todo = new NativeMenuItem("ANDA to-do list…");
         todo.Click += (_, _) => OpenTodoWindow();
         menu.Add(todo);
-        var checklist = new NativeMenuItem(string.IsNullOrWhiteSpace(_settings.ChecklistHotkey) ? "My checklist…" : $"My checklist…\t{_settings.ChecklistHotkey}");
+        var checklist = _checklistItem = new NativeMenuItem(ChecklistMenuLabel());
         checklist.Click += (_, _) => OpenChecklistWindow();
         menu.Add(checklist);
         var notes = new NativeMenuItem("Notes to checklist…");
@@ -397,7 +397,7 @@ public partial class App : Application
         menu.Add(prompts);
 
         menu.Add(new NativeMenuItemSeparator());
-        menu.Add(new NativeMenuItem(HotkeyStatusLine()) { IsEnabled = false });
+        menu.Add(_hotkeyLine = new NativeMenuItem(HotkeyStatusLine()) { IsEnabled = false });
         var exit = new NativeMenuItem("Exit");
         exit.Click += (_, _) => desktop.Shutdown();
         menu.Add(exit);
@@ -419,6 +419,19 @@ public partial class App : Application
         var status = _hotkeys?.Status;
         if (status is null || status.Count == 0) return "Hotkeys: starting…";
         return "Hotkeys: " + string.Join("   ", status.Select(h => $"{h.Binding.Combo} {(h.Registered ? "✓" : "✗ in use")}"));
+    }
+
+    private NativeMenuItem? _lookupItem, _draftItem, _checklistItem, _hotkeyLine;
+
+    private string ChecklistMenuLabel() => string.IsNullOrWhiteSpace(_settings.ChecklistHotkey) ? "My checklist…" : $"My checklist…\t{_settings.ChecklistHotkey}";
+
+    /// <summary>The tray menu names the shortcuts as they are now, not as they were when the app started. The live line waits a moment for Windows to answer.</summary>
+    private void RefreshTrayLabels()
+    {
+        if (_lookupItem is not null) _lookupItem.Header = $"Lookup ANDA…\t{_settings.LookupHotkey}";
+        if (_draftItem is not null) _draftItem.Header = $"Check a draft…\t{_settings.DraftHotkey}";
+        if (_checklistItem is not null) _checklistItem.Header = ChecklistMenuLabel();
+        Avalonia.Threading.DispatcherTimer.RunOnce(() => { if (_hotkeyLine is not null) _hotkeyLine.Header = HotkeyStatusLine(); }, TimeSpan.FromMilliseconds(600));
     }
 
     private NativeMenuItem BuildRadioSubmenu(
@@ -451,6 +464,7 @@ public partial class App : Application
         ThemeManager.Apply(_settings.Appearance, _settings.CardOpacity);
         UsageLog.Configure(_settings.UsageLog && SelfTestRun is null);
         _hotkeys?.Reconfigure(HotkeyBindings());
+        RefreshTrayLabels();
         // A new brief service only when the connection itself changed: changing a look must not reset "connected" to "not tested".
         if (ProviderFingerprint() != _providerFingerprint)
         {
