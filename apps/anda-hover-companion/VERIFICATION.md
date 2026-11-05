@@ -570,7 +570,9 @@ a new simulation suite for this round, **143 checks**; a new accessibility scan 
 | **The new windows pass the same accessibility scan as the rest**: Settings with the new editors, the to-do list, the action window (preview and reply), the card's drawer (not asked, answered, failed) and the tray menu, on desktop and phone | Simulation suite 19 (16 scans, axe-core 4.10.2, no violations) | An automated scan finds only part of what a screen-reader user meets |
 | **The new windows render on a real Windows machine**: the to-do list, an action window with a reply, the card's agents drawer (canned text, no network) and the 30% card | Windows self-test in run 25 (render-todo, todo-list-content, render-action-window, action-window-reply, render-agents-drawer, agents-drawer-finding, render-card-k-transparent-30: all PASS) | The screenshots were not opened by a person here |
 
-CI: commit **`c663690`** (run 25): Linux and Windows jobs green, including the Windows self-test with the new window checks above. The later fixes in this round are recorded in the next paragraph when their run finishes.
+CI: commit **`c663690`** (run 25): Linux and Windows jobs green, including the Windows self-test with the new window checks above.
+
+The final code of this round is commit **`95b9743`** (run 26): Linux and Windows jobs green; the extension's 31 unit tests pass on both machines; the Windows self-test is **58 PASS, 0 WARN, 0 FAIL, 1 SKIP** (the live Claude connection, by design), including the to-do list, the action window, the agents drawer and the 30% card. The run's own xUnit totals were not re-read; the 762 above are the local Linux count. The demo bundle to download is the one from run 26.
 
 ### Defects caught in round 15
 
