@@ -43,6 +43,16 @@ public partial class CardWindow : Window
     public OutlookService? Outlook { get; set; }
     private string? _mailFor;
 
+    /// <summary>The person's registered agents and the service that runs them. Null, or none switched on, hides the drawer section.</summary>
+    public AgentService? Agents { get; set; }
+
+    /// <summary>Whether the urgency rules call this ANDA at risk. Decides which agents the person set to run only then.</summary>
+    public Func<AndaRecord, bool>? AtRisk { get; set; }
+
+    /// <summary>Adds suggested lines from an agent to the to-do list (lines, the ANDA, the agent's name). Returns how many were new.</summary>
+    public Func<IReadOnlyList<string>, AndaRecord, string, int>? AddTodos { get; set; }
+    private bool _agentsWired;
+
     /// <summary>The PSG and RLD-labeling lines. Both are always shown: a date and its source, or a brief reason there is none.</summary>
     public Func<AndaRecord, ReferenceInfo?>? Reference { get; set; }
 
@@ -465,6 +475,7 @@ public partial class CardWindow : Window
         AheadText.Text = record.Ahead ?? "";
         ShowWatch(record);
         PrepareMail();
+        PrepareAgents();
         ShowReference(record);
         FreshnessText.Text = record.DataAsOf ?? "";
         FreshnessText.IsVisible = record.DataAsOf is not null;
@@ -563,6 +574,86 @@ public partial class CardWindow : Window
         var screen = Screens.ScreenFromPoint(at) ?? Screens.Primary;
         if (screen is null) return;
         Body.MaxHeight = Math.Max(240, screen.WorkingArea.Height / screen.Scaling - 52 - 2 - Body.Margin.Top);
+    }
+
+    // ---------------- agent findings (the person's own agents; nothing runs unless they switched it on) ----------------
+
+    /// <summary>
+    /// Shows the agent section for a full card when at least one agent is switched on. A peek and an invite never show it and never
+    /// ask an agent. An agent the person set to run by itself is asked here, once, when the full card opens; the others wait for a click.
+    /// </summary>
+    private void PrepareAgents()
+    {
+        AgentsPanel.Children.Clear();
+        AgentsExpander.IsExpanded = false;
+        AgentsExpander.IsVisible = false;
+        if (Agents is not { } service || _record is not { } record || _mini) return;
+        if (!service.Agents.Any(a => a.Enabled)) return;
+        AgentsExpander.IsVisible = true;
+        if (!_agentsWired)
+        {
+            _agentsWired = true;
+            void OnChanged() => Dispatcher.UIThread.Post(PaintAgents);
+            service.Changed += OnChanged;
+            Closed += (_, _) => service.Changed -= OnChanged;
+        }
+        PaintAgents();
+        bool risk = AtRisk?.Invoke(record) ?? false;
+        foreach (var agent in service.AutoFor(risk)) _ = AskAgentAsync(agent, record, force: false);
+    }
+
+    private async Task AskAgentAsync(AgentSettings agent, AndaRecord record, bool force)
+    {
+        if (Agents is not { } service) return;
+        try { await service.RunAsync(agent, record, Today(), Reference?.Invoke(record), null, force); }
+        catch (Exception) { /* the service reports its own failures as a finding */ }
+    }
+
+    private void PaintAgents()
+    {
+        if (Agents is not { } service || _record is not { } record || !AgentsExpander.IsVisible) return;
+        AgentsPanel.Children.Clear();
+        int answered = 0;
+        foreach (var agent in service.Agents.Where(a => a.Enabled))
+        {
+            var last = service.Latest(agent.Id, record.Number);
+            bool running = service.IsRunning(agent.Id, record.Number);
+            string? problem = service.SetupProblem(agent);
+            if (last is { State: AgentState.Done }) answered++;
+
+            var head = new Grid { ColumnDefinitions = new("*,Auto"), Margin = new Thickness(0, 6, 0, 0) };
+            head.Children.Add(new TextBlock { Text = agent.Name, FontSize = 12.5, FontWeight = FontWeight.SemiBold, Foreground = (IBrush)Application.Current!.Resources["C.Ink"]!, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center });
+            var run = new Button { Content = running ? "Asking…" : last is { State: AgentState.Done } ? "Ask again" : last is { State: AgentState.Failed } ? "Try again" : "Run", IsEnabled = !running && problem is null, Padding = new Thickness(10, 2), FontSize = 11.5 };
+            AutomationProperties.SetName(run, $"{(last is null ? "Run" : "Ask again")} {agent.Name} for ANDA {record.Number}");
+            var captured = agent;
+            run.Click += (_, _) => _ = AskAgentAsync(captured, record, force: true);
+            Grid.SetColumn(run, 1); head.Children.Add(run);
+            AgentsPanel.Children.Add(head);
+
+            string status = problem is not null ? $"Not set up. {problem} Please open Settings, then My agents."
+                : running ? $"Asking {agent.Name}… only what its prompt names is sent."
+                : last is null ? $"Not asked yet. Press Run to ask {agent.Name} about this ANDA, or set it to run by itself in Settings."
+                : last.State == AgentState.Done ? last.Text
+                : last.Message;
+            AgentsPanel.Children.Add(MailLine(status, brush: last?.State == AgentState.Failed ? (IBrush)Application.Current!.Resources["C.Bad"]! : problem is not null || running || last is null ? Ink3() : Ink2()));
+
+            if (last is { State: AgentState.Done } done && AddTodos is { } add)
+                foreach (var item in done.Items.Take(AgentRules.MaxItems))
+                {
+                    var row = new Grid { ColumnDefinitions = new("*,Auto"), Margin = new Thickness(0, 2, 0, 0) };
+                    row.Children.Add(new TextBlock { Text = "• " + item, FontSize = 12, TextWrapping = TextWrapping.Wrap, Foreground = Ink2() });
+                    var btn = new Button { Content = "Add to to-do", Padding = new Thickness(8, 1), FontSize = 11, Margin = new Thickness(8, 0, 0, 0) };
+                    AutomationProperties.SetName(btn, "Add to my to-do list: " + item);
+                    btn.Click += (_, _) => { int n = add(new[] { item }, record, agent.Name); btn.Content = n > 0 ? "Added ✓" : "On your list"; btn.IsEnabled = false; };
+                    Grid.SetColumn(btn, 1); row.Children.Add(btn);
+                    AgentsPanel.Children.Add(row);
+                }
+            if (last is { State: AgentState.Done } d2)
+                AgentsPanel.Children.Add(MailLine($"{d2.Message} Asked at {d2.At:h:mm tt}.", 10.5, brush: Ink3(), margin: new Thickness(0, 4, 0, 0)));
+        }
+        AgentsPanel.Children.Add(MailLine("These are the agents' own words, shown as received, not facts from the record. They are never run or passed on, and nothing is added to your to-do list until you press its button.", 10.5, brush: Ink3(), margin: new Thickness(0, 8, 0, 0)));
+        AgentsHeader.Text = answered > 0 ? $"Agent findings · {answered}" : "Agent findings";
+        Dispatcher.UIThread.Post(ClampToScreen, DispatcherPriority.Loaded);
     }
 
     // ---------------- Outlook (optional, read-only) ----------------

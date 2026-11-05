@@ -10,6 +10,7 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using AndaCompanion.Data;
 using AndaCompanion.Theming;
 using AndaCompanion.UI;
@@ -129,6 +130,7 @@ internal static class SelfTest
             new("card-k-healthy", AppearanceId.K, "214990", false, false, 1.0, false),
             new("card-k-peek", AppearanceId.K, "216482", false, true, 1.0, false),
             new("card-k-transparent-88", AppearanceId.K, "216482", false, false, 0.88, false),
+            new("card-k-transparent-30", AppearanceId.K, "216482", false, false, 0.30, false),
             new("card-a", AppearanceId.A, "216482", false, false, 1.0, false),
             new("card-b-expanded", AppearanceId.B, "216482", true, false, 1.0, false),
             new("card-c", AppearanceId.C, "216482", false, false, 1.0, false),
@@ -241,6 +243,66 @@ internal static class SelfTest
                 : new("watch-line-on-card", CheckStatus.Fail, $"WATCH slot visible={slot}, text='{text}'"));
             await Task.CompletedTask;
         });
+        await Safe(report, "todo", async () =>
+        {
+            // Fictional records and a list file under the report folder; nothing of the real list is touched.
+            var day = new DateOnly(2026, 11, 2);
+            var ctx = new CardContext(day, new BusinessCalendar());
+            var store = new TodoService(Path.Combine(o.OutDir, "home", "todo-check.json"));
+            store.Add("Call the applicant about the inspection", "216482", null, day.AddDays(1), "My action", day);
+            store.Add("Review the information request", null, null, null, "You", day);
+            var win = new TodoWindow(new TodoHooks(() => TodoBuilder.Build(repo, ctx, store, true, DateTime.Now), store, () => 0, () => day, () => ctx.Calendar,
+                (_, _) => { }, () => "Using the fictional demo records."));
+            win.Show();
+            report.Add(await ShootAsync(win, "todo", o.OutDir, false));
+            bool rows = win.View.Rows.Count(r => !r.Auto) == 2 && win.View.Rows.Any(r => r.Auto);
+            win.Close();
+            report.Add(rows ? new("todo-list-content", CheckStatus.Pass, "own items and items from the data are both listed")
+                            : new("todo-list-content", CheckStatus.Fail, "the to-do list did not show both kinds of items"));
+        });
+        await Safe(report, "action-window", async () =>
+        {
+            var model = new ActionWindowModel("Ask my AI for next steps", "ANDA 216482 · Metformin", "THIS IS EXACTLY WHAT WILL BE SENT",
+                "Using only the facts below, suggest up to five next steps. ANDA 216482. Goal Oct 3, 2026.",
+                "Nothing has been sent yet. Pressing Send sends only the text above (a canned reply is used in this check).",
+                "THE REPLY, AS RECEIVED", _ => Task.FromResult(new ActionReply(true, "- Call the applicant\n- Check the IR response", "From your AI. Verify before acting.",
+                    new[] { "Call the applicant", "Check the IR response" })), "Send", false, lines => lines.Count);
+            var win = new ActionWindow(model);
+            win.Show();
+            await win.SendAsync();
+            report.Add(await ShootAsync(win, "action-window", o.OutDir, false));
+            bool ok = win.WasSent && win.Suggestions.Count == 2;
+            win.Close();
+            report.Add(ok ? new("action-window-reply", CheckStatus.Pass, "the reply and two suggested to-do lines were shown; nothing was added without a click")
+                          : new("action-window-reply", CheckStatus.Fail, "the action window did not show the reply"));
+        });
+        await Safe(report, "agents-drawer", async () =>
+        {
+            // A canned reply stands in for an agent, so this makes no network call. It checks the drawer on a real renderer.
+            var hub = AgentRules.Presets().First(p => p.Id == AgentRules.AlertHubId);
+            hub.Enabled = true;
+            hub.Api.Endpoint = "https://agent.example.test/ask"; hub.Api.RequestTemplate = "{\"anda\":\"{{number}}\",\"question\":\"{{user}}\"}"; hub.Api.ResponsePath = "answer";
+            var service = new AgentService(() => new[] { hub }, _ => null, new CannedAgentHandler("{\"answer\":\"- Facility inspection overdue\\n- IR response due soon\"}"));
+            var win = new CardWindow(briefs, repo.Find) { CloseWhenDeactivated = false, Today = () => new DateOnly(2026, 11, 2), Agents = service, AddTodos = (lines, _, _) => lines.Count };
+            win.Show(repo.Find("216482")!, Anchor, false);
+            win.FindControl<Expander>("AgentsExpander")!.IsExpanded = true;
+            var run = win.FindControl<StackPanel>("AgentsPanel")!.GetVisualDescendants().OfType<Button>().FirstOrDefault(b => b.Content as string == "Run");
+            run?.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            for (int i = 0; i < 40 && service.Last(hub.Id, "216482") is null; i++) await Task.Delay(50);
+            await Task.Delay(300);
+            bool shown = win.FindControl<StackPanel>("AgentsPanel")!.GetVisualDescendants().OfType<TextBlock>().Any(t => (t.Text ?? "").Contains("Facility inspection overdue"));
+            report.Add(await ShootAsync(win, "agents-drawer", o.OutDir, false));
+            win.Close();
+            report.Add(shown ? new("agents-drawer-finding", CheckStatus.Pass, "the card showed the agent's reply as its own words (canned reply, no network)")
+                             : new("agents-drawer-finding", CheckStatus.Fail, "the agents drawer did not show the reply"));
+        });
+    }
+
+    /// <summary>Answers an agent request with a fixed reply, so the self-test never needs a network.</summary>
+    private sealed class CannedAgentHandler(string json) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct) =>
+            Task.FromResult(new HttpResponseMessage(System.Net.HttpStatusCode.OK) { Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json") });
     }
 
     private static async Task Safe(Report report, string name, Func<Task> body)

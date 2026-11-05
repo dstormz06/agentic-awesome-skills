@@ -26,7 +26,15 @@ public static class QuickReplyFill
 
     private static readonly Regex Token = new(@"\{([a-z]+)\}", RegexOptions.Compiled);
 
-    public static string Fill(string template, AndaRecord r, DateOnly today, ReferenceInfo? reference = null)
+    public static string Fill(string template, AndaRecord r, DateOnly today, ReferenceInfo? reference = null, IReadOnlyDictionary<string, string>? extras = null)
+    {
+        var values = Values(r, today, reference);
+        if (extras is not null) foreach (var (k, v) in extras) values[k] = v;
+        return Token.Replace(template, m => values.TryGetValue(m.Groups[1].Value, out var v) ? v : m.Value);
+    }
+
+    /// <summary>Every placeholder with the value the card shows for this record ("(not in my data)" where the data has none).</summary>
+    public static Dictionary<string, string> Values(AndaRecord r, DateOnly today, ReferenceInfo? reference = null)
     {
         string meta = r.Meta ?? "";
         int dot = meta.LastIndexOf('·');
@@ -48,6 +56,18 @@ public static class QuickReplyFill
             ["today"] = today.ToString("MMM d, yyyy", CultureInfo.InvariantCulture),
             ["psg"] = info.PsgText ?? ReferenceResolver.NoPsg, ["rld"] = info.RldText ?? ReferenceResolver.NoRld,
         };
+        return values;
+    }
+
+    /// <summary>
+    /// The same fill when no ANDA was selected: every value about an application is "(not in my data)" instead of a guess, and only
+    /// today's date and the extras (for example the selected text) carry a value. Substituted once, never re-read as a placeholder.
+    /// </summary>
+    public static string FillWithoutRecord(string template, DateOnly today, IReadOnlyDictionary<string, string>? extras = null)
+    {
+        var values = Placeholders.ToDictionary(p => p.Name, _ => Missing);
+        values["today"] = today.ToString("MMM d, yyyy", CultureInfo.InvariantCulture);
+        if (extras is not null) foreach (var (k, v) in extras) values[k] = v;
         return Token.Replace(template, m => values.TryGetValue(m.Groups[1].Value, out var v) ? v : m.Value);
     }
 }

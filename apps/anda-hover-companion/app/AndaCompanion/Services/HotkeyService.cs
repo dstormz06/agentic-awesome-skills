@@ -46,8 +46,12 @@ public sealed class HotkeyService : IDisposable
             ModControl | ModAlt | ModNoRepeat, 0x44, "Please choose another shortcut in Settings, or use the tray icon."),
     };
 
-    /// <summary>The three bindings with the shortcuts a person chose. An invalid or duplicate choice falls back to its default.</summary>
-    public static IReadOnlyList<HotkeyBinding> FromCombos(string? peek, string? lookup, string? draft)
+    /// <summary>Custom actions use ids from here upward: the id is this number plus the action's position in Settings.</summary>
+    public const int IdActionBase = 100;
+
+    /// <summary>The three bindings with the shortcuts a person chose, then one for each enabled custom action that has a valid, unused shortcut.
+    /// An invalid or duplicate choice for the three falls back to its default; for an action it is simply left out.</summary>
+    public static IReadOnlyList<HotkeyBinding> FromCombos(string? peek, string? lookup, string? draft, IReadOnlyList<CustomAction>? actions = null)
     {
         var chosen = new[] { (IdPeek, peek), (IdLookup, lookup), (IdDraft, draft) };
         var result = new List<HotkeyBinding>();
@@ -59,6 +63,14 @@ public sealed class HotkeyService : IDisposable
                 result.Add(def with { Combo = norm, Modifiers = mods | ModNoRepeat, VirtualKey = vk });
             else { taken.Add(def.Combo); result.Add(def); }
         }
+        if (actions is not null)
+            for (int i = 0; i < actions.Count; i++)
+            {
+                var a = actions[i];
+                if (a is null || !a.Enabled || string.IsNullOrWhiteSpace(a.Hotkey)) continue;
+                if (HotkeyParser.TryParse(a.Hotkey, out uint mods, out uint vk, out string norm, out _) && taken.Add(norm))
+                    result.Add(new HotkeyBinding(IdActionBase + i, a.Name, norm, mods | ModNoRepeat, vk, "Please choose another shortcut for this action in Settings."));
+            }
         return result;
     }
 

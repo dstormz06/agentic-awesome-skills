@@ -258,6 +258,9 @@
             <Expander Name="MailExpander" Margin="8,0,8,0" IsVisible="False"><Expander.Header><TextBlock Name="MailHeader" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink2}" Text="Recent Outlook mail"/></Expander.Header>
               <StackPanel Name="MailPanel" Margin="12,0,12,8"/>
             </Expander>
+            <Expander Name="AgentsExpander" Margin="8,0,8,0" IsVisible="False"><Expander.Header><TextBlock Name="AgentsHeader" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink2}" Text="Agent findings"/></Expander.Header>
+              <StackPanel Name="AgentsPanel" Margin="12,0,12,8"/>
+            </Expander>
             <Expander Margin="8,0,8,0"><Expander.Header><TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink2}" Text="Forecast &amp; assumptions"/></Expander.Header>
               <TextBlock Name="ForecastDetailText" Classes="body2" Margin="12,0,12,8"/>
             </Expander>

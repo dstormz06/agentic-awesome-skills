@@ -48,7 +48,20 @@ public partial class App : Application
     private SettingsWindow? _settingsWindow;
     private (AndaRecord Record, PixelPoint Near, bool Mini)? _lastCard;
 
-    public App() { _repository = new SwitchableRepository(_demo); }
+    private readonly TodoService _todo = new();
+    private readonly AgentService _agents;
+    private volatile IReadOnlyList<CustomAction> _boundActions = Array.Empty<CustomAction>();
+    private string _agentsFingerprint = "";
+    private ActionRunner? _runner;
+    private ActionWindow? _actionWindow;
+    private TodoWindow? _todoWindow;
+    private NativeMenuItem? _actionsMenu;
+
+    public App()
+    {
+        _repository = new SwitchableRepository(_demo);
+        _agents = new AgentService(() => _settings.Agents);
+    }
 
     public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
@@ -61,6 +74,7 @@ public partial class App : Application
         ApplyData();
         _briefs = BriefServiceFactory.Create(() => _prompts.GetText(_settings.ActiveLens), _settings);
         _providerFingerprint = ProviderFingerprint();
+        _agentsFingerprint = AgentsFingerprint();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
@@ -70,7 +84,7 @@ public partial class App : Application
             _hotkeys = new HotkeyService(
                 onHotkey: id => _ = OnHotkeyAsync(id),
                 onProblem: message => Dispatcher.UIThread.Post(() => ShowNotice(message)),
-                bindings: HotkeyService.FromCombos(_settings.PeekHotkey, _settings.LookupHotkey, _settings.DraftHotkey));
+                bindings: HotkeyBindings());
             _hotkeys.Start();
             _hotkeys.WaitReady(TimeSpan.FromMilliseconds(1500));
 
@@ -119,6 +133,7 @@ public partial class App : Application
 
         if (id == HotkeyService.IdLookup) { Dispatcher.UIThread.Post(OpenLookup); return; }
         if (id == HotkeyService.IdDraft) { await OnDraftHotkeyAsync(); return; }
+        if (id >= HotkeyService.IdActionBase) { await OnActionHotkeyAsync(id - HotkeyService.IdActionBase); return; }
 
         if (Interlocked.Exchange(ref _captureBusy, 1) == 1) return;
         try
@@ -223,6 +238,7 @@ public partial class App : Application
             Calendar = _calendar, Watch = new WatchSettings(HolidayLeadBusinessDays: _settings.HolidayLeadDays),
             Today = Today, Reference = ReferenceFor, QuickReplies = () => _replies.Replies,
             Outlook = Outlook,
+            Agents = _agents, AtRisk = IsAtRisk, AddTodos = AddAgentTodos,
         };
         card.Closed += (_, _) => { if (ReferenceEquals(_card, card)) _card = null; };
         _card = card;
@@ -319,7 +335,8 @@ public partial class App : Application
     {
         if (_settingsWindow is not null) { _settingsWindow.Activate(); return; }
         _settingsWindow = new SettingsWindow(_settings, _prompts, ApplySettings,
-            new SettingsHooks(() => HotkeyService.Report(_hotkeys?.Status ?? Array.Empty<HotkeyStatus>()), () => _portfolio, () => _drugsMessage, MouseStatusLine, Outlook), _replies);
+            new SettingsHooks(() => HotkeyService.Report(_hotkeys?.Status ?? Array.Empty<HotkeyStatus>()), () => _portfolio, () => _drugsMessage, MouseStatusLine, Outlook,
+                OpenTodo: OpenTodoWindow, RunAction: RunActionFromMenu, AgentProblem: _agents.SetupProblem, ClearFinished: _todo.ClearCompleted), _replies);
         _settingsWindow.Closed += (_, _) => _settingsWindow = null;
         _settingsWindow.Show();
     }
@@ -339,6 +356,12 @@ public partial class App : Application
         var watch = new NativeMenuItem("Watch list…");
         watch.Click += (_, _) => OpenWatchList();
         menu.Add(watch);
+        var todo = new NativeMenuItem("To-do list…");
+        todo.Click += (_, _) => OpenTodoWindow();
+        menu.Add(todo);
+        _actionsMenu = new NativeMenuItem("My actions") { Menu = new NativeMenu() };
+        RebuildActionsMenu();
+        menu.Add(_actionsMenu);
 
         var demoRisk = new NativeMenuItem("Demo: at-risk card");
         demoRisk.Click += (_, _) => DemoCard("216482");
@@ -419,7 +442,7 @@ public partial class App : Application
         SettingsService.Save(_settings);
         ThemeManager.Apply(_settings.Appearance, _settings.CardOpacity);
         UsageLog.Configure(_settings.UsageLog && SelfTestRun is null);
-        _hotkeys?.Reconfigure(HotkeyService.FromCombos(_settings.PeekHotkey, _settings.LookupHotkey, _settings.DraftHotkey));
+        _hotkeys?.Reconfigure(HotkeyBindings());
         // A new brief service only when the connection itself changed: changing a look must not reset "connected" to "not tested".
         if (ProviderFingerprint() != _providerFingerprint)
         {
@@ -428,6 +451,10 @@ public partial class App : Application
         }
         ApplyMouseTrigger();
         ApplyData();
+        // Findings from an agent that has since been changed or switched off are not shown any more.
+        if (AgentsFingerprint() != _agentsFingerprint) { _agentsFingerprint = AgentsFingerprint(); _agents.ClearCache(); }
+        RebuildActionsMenu();
+        if (_todoWindow is { } todoWindow) { todoWindow.ApplyTimer(); todoWindow.Reload(force: true); }
         // Live preview: if a card is open, rebuild it in place with the new look.
         if ((_card is not null || _compact is not null) && _lastCard is { } last)
             OpenCard(last.Record, last.Near, last.Mini);

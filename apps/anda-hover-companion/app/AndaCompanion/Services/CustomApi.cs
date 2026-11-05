@@ -47,7 +47,7 @@ public sealed record CustomApiInspection(bool Ok, ElsaSettings? Settings, string
 public static class CustomApiConfig
 {
     /// <summary>Checks everything that can be checked without sending a request. Values are never logged.</summary>
-    public static CustomApiInspection Inspect(CustomApiSettings s, Func<string, string?>? env = null)
+    public static CustomApiInspection Inspect(CustomApiSettings s, Func<string, string?>? env = null, IReadOnlyDictionary<string, string>? extras = null)
     {
         env ??= Environment.GetEnvironmentVariable;
         string endpoint = (s.Endpoint ?? "").Trim();
@@ -58,7 +58,7 @@ public static class CustomApiConfig
         if (!string.IsNullOrEmpty(uri.UserInfo))
             return new(false, null, "Please do not put a user name or password in the address; use the environment variable for the token instead. Nothing was sent.");
 
-        if (CustomApiMapping.TryFill(s.RequestTemplate, "system", "user", 16, s.Model, out _) is { } templateError)
+        if (CustomApiMapping.TryFill(s.RequestTemplate, "system", "user", 16, s.Model, extras, out _) is { } templateError)
             return new(false, null, templateError);
         if (!CustomApiMapping.IsValidPath(s.ResponsePath))
             return new(false, null, "The reply path is not valid. Please use names and [numbers], for example choices[0].message.content");
@@ -77,24 +77,25 @@ public static class CustomApiConfig
             $"{s.Name} configured · {uri.Host}");
     }
 
-    public static IChatCompleter? CreateCompleter(CustomApiSettings s, Func<string, string?>? env = null, HttpMessageHandler? handler = null)
+    public static IChatCompleter? CreateCompleter(CustomApiSettings s, Func<string, string?>? env = null, HttpMessageHandler? handler = null,
+        IReadOnlyDictionary<string, string>? extras = null)
     {
-        var inspection = Inspect(s, env);
+        var inspection = Inspect(s, env, extras);
         return inspection is { Ok: true, Settings: { } es }
-            ? new ElsaChatCompleter(es, new CustomApiMapping(s), handler, displayName: string.IsNullOrWhiteSpace(s.Name) ? "My API" : s.Name.Trim(),
+            ? new ElsaChatCompleter(es, new CustomApiMapping(s, extras), handler, displayName: string.IsNullOrWhiteSpace(s.Name) ? "My API" : s.Name.Trim(),
                 timeoutSeconds: CustomApiSettings.TimeoutChoices.Contains(s.TimeoutSeconds) ? s.TimeoutSeconds : 30)
             : null;
     }
 }
 
 /// <summary>The settings-driven version of the two Elsa translations: build the request from a template, read the text out of the answer.</summary>
-public sealed class CustomApiMapping(CustomApiSettings settings) : IElsaMapping
+public sealed class CustomApiMapping(CustomApiSettings settings, IReadOnlyDictionary<string, string>? extras = null) : IElsaMapping
 {
     public bool IsFilledIn => true;
 
     public HttpRequestMessage BuildRequest(ElsaSettings es, string system, string user, int maxTokens)
     {
-        if (TryFill(settings.RequestTemplate, system, user, maxTokens, settings.Model, out string body) is { } error)
+        if (TryFill(settings.RequestTemplate, system, user, maxTokens, settings.Model, extras, out string body) is { } error)
             throw new ElsaException(error);
         var request = new HttpRequestMessage(HttpMethod.Post, es.Endpoint) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
         string header = (settings.AuthHeader ?? "").Trim();
@@ -142,14 +143,26 @@ public sealed class CustomApiMapping(CustomApiSettings settings) : IElsaMapping
     /// Replaces the placeholders with JSON-escaped values (so a quote or a newline in a draft can never break out of the string)
     /// and checks the result is valid JSON. Returns an error sentence, or null when <paramref name="body"/> is ready.
     /// </summary>
-    public static string? TryFill(string? template, string system, string user, int maxTokens, string? model, out string body)
+    public static string? TryFill(string? template, string system, string user, int maxTokens, string? model, out string body) =>
+        TryFill(template, system, user, maxTokens, model, null, out body);
+
+    private static readonly System.Text.RegularExpressions.Regex Slot = new(@"\{\{([a-z_]+)\}\}", System.Text.RegularExpressions.RegexOptions.Compiled);
+
+    /// <summary>
+    /// As above, with optional named fields (for example number or goal) that a template can place anywhere, JSON-escaped like the rest.
+    /// The template is read once, left to right, so a value that happens to contain {{something}} is never read as a placeholder.
+    /// </summary>
+    public static string? TryFill(string? template, string system, string user, int maxTokens, string? model,
+        IReadOnlyDictionary<string, string>? extras, out string body)
     {
         body = "";
         if (string.IsNullOrWhiteSpace(template)) return "The request body is empty.";
-        string Esc(string s) { string e = JsonEncodedText.Encode(s).ToString(); return e; }
-        string filled = template
-            .Replace("{{system}}", Esc(system)).Replace("{{user}}", Esc(user))
-            .Replace("{{model}}", Esc(model ?? "")).Replace("{{max_tokens}}", maxTokens.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        string Esc(string s) => JsonEncodedText.Encode(s).ToString();
+        var values = new Dictionary<string, string>();
+        if (extras is not null) foreach (var (k, v) in extras) values[k] = Esc(v);
+        values["system"] = Esc(system); values["user"] = Esc(user); values["model"] = Esc(model ?? "");
+        values["max_tokens"] = maxTokens.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        string filled = Slot.Replace(template, m => values.TryGetValue(m.Groups[1].Value, out var v) ? v : m.Value);
         try { using var _ = JsonDocument.Parse(filled); }
         catch (JsonException) { return "The request body is not valid JSON once the placeholders are filled in."; }
         body = filled;

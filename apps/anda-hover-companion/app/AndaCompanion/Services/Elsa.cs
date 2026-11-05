@@ -44,7 +44,11 @@ public interface IElsaMapping
     string ReadReply(string responseBody);
 
     /// <summary>Override only if Elsa needs something special (integrated Windows auth, a client certificate, a proxy).</summary>
-    HttpMessageHandler CreateHandler() => new HttpClientHandler();
+    /// <summary>
+    /// No automatic redirects: a service that answers 3xx must not be able to send a custom token header (for example x-api-key) on to
+    /// another host. A redirect is reported as an error instead.
+    /// </summary>
+    HttpMessageHandler CreateHandler() => new HttpClientHandler { AllowAutoRedirect = false };
 }
 
 /// <summary>The stand-in until the real mapping exists. Fails loudly and specifically rather than guessing.</summary>
@@ -105,6 +109,8 @@ public static class ElsaConfig
 /// <summary>An <see cref="IChatCompleter"/> for Elsa. Shared plumbing only; the Elsa-specific parts live in the mapping.</summary>
 public sealed class ElsaChatCompleter : IChatCompleter, IDisposable
 {
+    public const long MaxReplyBytes = 2 * 1024 * 1024;
+
     private readonly ElsaSettings _settings;
     private readonly IElsaMapping _mapping;
     private readonly HttpClient _http;
@@ -116,7 +122,8 @@ public sealed class ElsaChatCompleter : IChatCompleter, IDisposable
         _settings = settings;
         _mapping = mapping;
         _displayName = displayName;
-        _http = new HttpClient(handler ?? mapping.CreateHandler()) { Timeout = TimeSpan.FromSeconds(timeoutSeconds) };
+        // A reply is a few paragraphs. Refuse anything near this size instead of reading gigabytes into memory.
+        _http = new HttpClient(handler ?? mapping.CreateHandler()) { Timeout = TimeSpan.FromSeconds(timeoutSeconds), MaxResponseContentBufferSize = MaxReplyBytes };
     }
 
     public string ProviderName => (_displayName ?? "Elsa") + (string.IsNullOrWhiteSpace(_settings.Model) ? "" : $" · {_settings.Model}");

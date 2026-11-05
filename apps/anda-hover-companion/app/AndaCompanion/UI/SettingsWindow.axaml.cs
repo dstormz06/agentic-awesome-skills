@@ -9,7 +9,8 @@ namespace AndaCompanion.UI;
 
 /// <summary>What Settings needs to ask the running app, so the window can show live status (shortcut registration, the loaded portfolio).</summary>
 public sealed record SettingsHooks(Func<string> HotkeyStatus, Func<PortfolioRepository?> Portfolio, Func<string> ReferenceStatus,
-    Func<string?>? MouseStatus = null, OutlookService? Outlook = null);
+    Func<string?>? MouseStatus = null, OutlookService? Outlook = null,
+    Action? OpenTodo = null, Action<CustomAction>? RunAction = null, Func<AgentSettings, string?>? AgentProblem = null, Func<int>? ClearFinished = null);
 
 public partial class SettingsWindow : Window
 {
@@ -89,13 +90,14 @@ public partial class SettingsWindow : Window
             Apply();
         };
 
-        OpacitySlider.Value = Math.Round(_settings.CardOpacity * 100);
+        OpacitySlider.Minimum = Settings.MinCardOpacity * 100;      // the XAML says 30 too; one named value keeps them equal (a test checks)
+        OpacitySlider.Value = Math.Round(Settings.NormalizeOpacity(_settings.CardOpacity) * 100);
         OpacityLabel.Text = $"{OpacitySlider.Value:0}%";
         OpacitySlider.PropertyChanged += (_, e) =>
         {
             if (e.Property == Slider.ValueProperty && !_loading)
             {
-                _settings.CardOpacity = OpacitySlider.Value / 100.0;
+                _settings.CardOpacity = Settings.NormalizeOpacity(OpacitySlider.Value / 100.0);
                 OpacityLabel.Text = $"{OpacitySlider.Value:0}%";
                 Apply();
             }
@@ -103,6 +105,7 @@ public partial class SettingsWindow : Window
 
         BuildNewSections();
         BuildRound10Sections();
+        BuildActionSections();
         BuildOutlookSection();
         ReloadLenses();
         LensCombo.SelectionChanged += (_, _) =>

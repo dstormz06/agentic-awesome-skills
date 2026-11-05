@@ -103,8 +103,14 @@ public sealed class Settings
     /// <summary>The Edge extension allowed to talk to this app (its 32-letter ID). Defaults to the extension in this repository.</summary>
     public string ExtensionId { get; set; } = NativeHostRegistration.DefaultExtensionId;
 
-    /// <summary>Card surface transparency, 0.85–1.0. Text always stays opaque.</summary>
+    /// <summary>Card surface opacity, from <see cref="MinCardOpacity"/> (30%) to 1.0 (solid). Text always stays opaque.</summary>
     public double CardOpacity { get; set; } = 1.0;
+
+    /// <summary>The lowest card opacity the slider offers: 30%. A saved or restored value outside 30–100% is brought back into range.</summary>
+    public const double MinCardOpacity = 0.30;
+
+    /// <summary>Brings any value into 30–100%. A value that is not a number becomes solid (1.0).</summary>
+    public static double NormalizeOpacity(double value) => double.IsNaN(value) || double.IsInfinity(value) ? 1.0 : Math.Clamp(value, MinCardOpacity, 1.0);
 
     /// <summary>Name of the active Prompt Library lens (null = no lens).</summary>
     public string? ActiveLens { get; set; }
@@ -114,6 +120,21 @@ public sealed class Settings
     /// Off: Ctrl+Alt+A opens the lookup box instead and no keystroke is ever sent.
     /// </summary>
     public bool CaptureViaCopy { get; set; } = true;
+
+    // ---- my actions, my agents and my to-do list (Settings, My actions) ----
+
+    /// <summary>The person's own actions: a prompt, an agent, or a to-do item, each reachable from its own shortcut and the tray menu.</summary>
+    public List<CustomAction> MyActions { get; set; } = MyActionRules.Starters();
+
+    /// <summary>Agents the person registered (for example Alert Hub and Triaging Agent). Each is off until it is switched on and set up.</summary>
+    public List<AgentSettings> Agents { get; set; } = AgentRules.Presets();
+
+    /// <summary>Include items that come from the person's own data (at-risk ANDAs, dates, action items) in the to-do list.</summary>
+    public bool TodoShowFromData { get; set; } = true;
+
+    /// <summary>While the to-do list is open it refreshes itself this often (0 = only when asked); a changed portfolio file is read at the next refresh.</summary>
+    public int TodoRefreshSeconds { get; set; } = 30;
+    public static readonly IReadOnlyList<int> TodoRefreshChoices = new[] { 0, 15, 30, 60, 300 };
 
     public bool FirstRunDone { get; set; }
 }
@@ -154,6 +175,10 @@ public static class SettingsService
         if (HotkeyParser.ValidateSet(("Select & Peek", loaded.PeekHotkey), ("Lookup", loaded.LookupHotkey), ("Check a draft", loaded.DraftHotkey)) is not null)
         { loaded.PeekHotkey = "Ctrl+Alt+A"; loaded.LookupHotkey = "Ctrl+Alt+Space"; loaded.DraftHotkey = "Ctrl+Alt+D"; }
         if (!Enum.IsDefined(loaded.Appearance)) loaded.Appearance = Appearances.Default;
+        loaded.CardOpacity = Settings.NormalizeOpacity(loaded.CardOpacity);
+        loaded.MyActions = MyActionRules.Normalize(loaded.MyActions, new[] { loaded.PeekHotkey, loaded.LookupHotkey, loaded.DraftHotkey });
+        loaded.Agents = AgentRules.Normalize(loaded.Agents);
+        if (!Settings.TodoRefreshChoices.Contains(loaded.TodoRefreshSeconds)) loaded.TodoRefreshSeconds = 30;
         return loaded;
     }
 

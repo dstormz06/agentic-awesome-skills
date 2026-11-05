@@ -1,0 +1,53 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="AndaCompanion.UI.ActionWindow"
+        SystemDecorations="None" TransparencyLevelHint="Transparent" Background="Transparent"
+        SizeToContent="WidthAndHeight" CanResize="False" Topmost="True"
+        ShowInTaskbar="False" WindowStartupLocation="CenterScreen" Title="ANDA Companion (Notula) — My action">
+
+  <Window.Styles>
+    <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource C.Font}"/></Style>
+    <Style Selector="TextBlock.lbl">
+      <Setter Property="FontSize" Value="9.5"/><Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="LetterSpacing" Value="1.4"/><Setter Property="Foreground" Value="{DynamicResource C.Ink3}"/>
+    </Style>
+    <Style Selector="TextBlock.hint"><Setter Property="FontSize" Value="11.5"/><Setter Property="Foreground" Value="{DynamicResource C.Ink2}"/><Setter Property="TextWrapping" Value="Wrap"/></Style>
+    <Style Selector="Border.rule"><Setter Property="Height" Value="1"/><Setter Property="Background" Value="{DynamicResource C.Hair}"/></Style>
+  </Window.Styles>
+
+  <Panel Margin="26">
+    <Border Background="{DynamicResource C.Bg}" BorderBrush="{DynamicResource C.Line}"
+            BorderThickness="1" CornerRadius="{DynamicResource C.Radius}"
+            BoxShadow="0 18 42 -10 #59000000" Padding="20" Width="560">
+      <StackPanel Spacing="10">
+        <Grid ColumnDefinitions="*,Auto">
+          <StackPanel Spacing="1">
+            <TextBlock Name="TitleText" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource C.Ink}"/>
+            <TextBlock Name="SubText" Classes="hint"/>
+          </StackPanel>
+          <Button Grid.Column="1" Name="CloseBtn" VerticalAlignment="Top" Content="Close"/>
+        </Grid>
+        <Border Classes="rule"/>
+        <TextBlock Name="PromptHeading" Classes="lbl"/>
+        <TextBox Name="PromptBox" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="150" FontSize="12" AutomationProperties.Name="The prompt"/>
+        <TextBlock Name="NoteText" Classes="hint"/>
+        <WrapPanel>
+          <Button Name="CopyPromptBtn" Content="Copy prompt" Margin="0,0,8,0"/>
+          <Button Name="SendBtn" Classes="primary" Content="Send" Margin="0,0,8,0" IsVisible="False"/>
+        </WrapPanel>
+        <StackPanel Name="ResultPanel" Spacing="8" IsVisible="False">
+          <Border Classes="rule"/>
+          <TextBlock Name="ResultHeading" Classes="lbl"/>
+          <TextBox Name="ResultBox" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="150" FontSize="12" AutomationProperties.Name="The result"/>
+          <Button Name="CopyResultBtn" Content="Copy result" HorizontalAlignment="Left"/>
+          <StackPanel Name="SuggestPanel" Spacing="3" IsVisible="False">
+            <TextBlock Classes="lbl" Text="SUGGESTED TO-DO ITEMS · TICK THE ONES YOU WANT"/>
+            <StackPanel Name="SuggestList" Spacing="2"/>
+            <Button Name="AddTodoBtn" Content="Add ticked items to my to-do list" HorizontalAlignment="Left" Margin="0,4,0,0" IsEnabled="False"/>
+          </StackPanel>
+        </StackPanel>
+        <TextBlock Name="StatusText" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+      </StackPanel>
+    </Border>
+  </Panel>
+</Window>
