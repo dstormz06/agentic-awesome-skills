@@ -5,15 +5,15 @@ using AndaCompanion.Data;
 
 namespace AndaCompanion.Services;
 
-public enum ChecklistCategory { Work = 0, Home = 1, Other = 2 }
+public enum TodoCategory { Work = 0, Personal = 1, Other = 2 }
 
 public enum Repeat { None = 0, Daily = 1, Weekdays = 2, Weekly = 3, Monthly = 4 }
 
 /// <summary>One item the note reader found. <see cref="Actionable"/> is false for a sentence that reads like a note, not a task: it is offered, but not ticked.</summary>
-public sealed record SuggestedItem(string Title, ChecklistCategory Category, DateOnly? Due, bool High, Repeat Repeat, int RepeatDay, string? Number, bool Actionable);
+public sealed record SuggestedItem(string Title, TodoCategory Category, DateOnly? Due, bool High, Repeat Repeat, int RepeatDay, string? Number, bool Actionable);
 
 /// <summary>
-/// Turns messy notes (a highlighted paragraph, a pasted email, a list typed in a hurry) into suggested checklist items. It is plain rules, offline:
+/// Turns rough notes (a highlighted paragraph, a pasted email, a list typed in a hurry) into suggested to-do items. It is plain rules, offline:
 /// no AI, no network, nothing leaves the PC. It splits the text into tasks, removes filler such as "don't forget to", and reads a due date,
 /// a priority, a repeat and a category from the words. It never invents anything: a value it did not find stays empty, and the person can change
 /// every field before anything is added. The same rules are ported to the browser simulation and kept equal by a shared fixture.
@@ -39,7 +39,7 @@ public static class NoteParser
         "summarize", "summarise", "compile", "collect", "gather", "prep", "coordinate", "assign", "delegate", "finalize", "finalise", "resolve", "address", "handle",
         "process", "reconcile", "double-check", "proofread", "edit", "revise", "rewrite", "cc", "loop", "ping", "nudge", "chase", "thank", "apologize", "invite", "rsvp",
         "register", "enroll", "apply", "vote", "donate", "charge", "refill", "restock", "tidy", "declutter", "assemble", "hang", "mount", "patch", "seal", "unclog",
-        "flush", "reach", "touch", "double", "make sure", "ensure", "remember", "bake", "sweep", "scrub", "wipe", "fold", "iron", "swap", "rotate", "mark", "tag",
+        "flush", "reach", "touch", "double", "make sure", "ensure", "remember", "bake", "sweep", "scrub", "wipe", "fold", "iron", "swap", "rotate", "mark", "tag", "route", "triage", "prioritize", "prioritise", "reassign", "reschedule", "analyze", "analyse", "evaluate", "assess", "validate", "identify", "determine", "follow-up",
     };
     private static readonly HashSet<string> VerbSet = new(Verbs, StringComparer.OrdinalIgnoreCase);
 
@@ -87,8 +87,8 @@ public static class NoteParser
     private static readonly Regex SplitVerbConnector = R(@"\s+(?:and also|and then|also|plus|then|after that|next)\s+");
     private static readonly Regex SplitAnd = R(@"\s+and\s+");
 
-    private static readonly Regex WorkWords = R(@"\b(?:anda|ir|ind|nda|fda|dpm|rpm|supervisor|huddle|meeting|memo|report|review|submission|deficienc\w*|labeling|labelling|cycle|applicant|goal date|forecast|deadline|status|project|team|client|invoice|budget|presentation|slides|spreadsheet|timesheet|calendar|agenda|minutes|email|e-mail|inbox|manager|director|colleague|coworker|training|compliance|audit|policy|sop|procedure|ticket|stakeholder|quarterly|office)\b");
-    private static readonly Regex HomeWords = R(@"\b(?:home|house|apartment|landlord|rent|mortgage|hoa|plumber|plumbing|leak\w*|faucet|sink|toilet|drain|roof|gutters?|furnace|hvac|thermostat|water heater|appliances?|dishwasher|fridge|refrigerator|oven|stove|washer|dryer|laundry|dishes|vacuum\w*|mop\w*|dust\w*|clean\w*|tidy\w*|declutter\w*|trash|garbage|recycl\w*|lawn|mow\w*|garden\w*|yard|fence|paint\w*|repair\w*|handyman|electrician|groceries|grocery|dinner|lunch|cook\w*|kids?|child\w*|school|daycare|dentist|doctor|pharmacy|prescriptions?|vet|pets?|dog|cat|car|oil change|tires?|utilit\w*|electric bill|water bill|gas bill|insurance|garage|basement|attic|closet|bedroom|kitchen|bathroom|living room|sofa|couch|mattress|curtains?|light ?bulbs?|smoke detector|filters?)\b");
+    private static readonly Regex WorkWords = R(@"\b(?:anda|ir|ind|nda|fda|dpm|rpm|supervisor|huddle|meeting|memo|report|review|submission|deficienc\w*|labeling|labelling|cycle|applicant|goal date|forecast|deadline|status|project|team|client|invoice|budget|presentation|slides|spreadsheet|timesheet|calendar|agenda|minutes|email|e-mail|inbox|manager|director|colleague|coworker|training|compliance|audit|policy|sop|procedure|ticket|stakeholder|quarterly|office|information requests?|discipline|consult\w*|amendments?|inspections?|facilit(?:y|ies)|assessments?|reviewers?|approval|tentative|complete response|controlled correspondence|citizen petition|patents?|exclusivity|bioequivalen\w*|cmc|division|branch|team lead|workload|backlog|queue|one-on-one|performance|appraisal|telework|travel|expenses?|briefing|deliverables?|milestones?|action items?|sign-off|clearance|docket|orange book|paragraph iv|gdufa|huddles?|tracker|tracking sheet)\b");
+    private static readonly Regex PersonalWords = R(@"\b(?:home|house|apartment|landlord|rent|mortgage|hoa|plumber|plumbing|leak\w*|faucet|sink|toilet|drain|roof|gutters?|furnace|hvac|thermostat|water heater|appliances?|dishwasher|fridge|refrigerator|oven|stove|washer|dryer|laundry|dishes|vacuum\w*|mop\w*|dust\w*|clean\w*|tidy\w*|declutter\w*|trash|garbage|recycl\w*|lawn|mow\w*|garden\w*|yard|fence|paint\w*|repair\w*|handyman|electrician|groceries|grocery|dinner|lunch|cook\w*|kids?|child\w*|school|daycare|dentist|doctor|pharmacy|prescriptions?|vet|pets?|dog|cat|car|oil change|tires?|utilit\w*|electric bill|water bill|gas bill|insurance|garage|basement|attic|closet|bedroom|kitchen|bathroom|living room|sofa|couch|mattress|curtains?|light ?bulbs?|smoke detector|filters?)\b");
 
     /// <summary>All the items found in <paramref name="text"/>, in the order written, at most <see cref="MaxItems"/>. Never throws.</summary>
     public static IReadOnlyList<SuggestedItem> Parse(string? text, DateOnly today)
@@ -123,13 +123,42 @@ public static class NoteParser
     private static string Clean(string? text)
     {
         var sb = new StringBuilder();
+        bool cut = false; char next = '\0';
         foreach (char c in (text ?? "").Replace("\r\n", "\n").Replace('\r', '\n'))
         {
-            if (sb.Length >= MaxInputChars) break;
+            if (sb.Length >= MaxInputChars) { cut = true; next = c; break; }
             if (c == '\n' || c == '\t') sb.Append(c == '\t' ? ' ' : c);
             else if (!char.IsControl(c)) sb.Append(c);
         }
-        return sb.ToString().Trim();
+        return (cut ? CutAtWord(sb.ToString(), next) : sb.ToString()).Trim();
+    }
+
+    /// <summary>
+    /// When the reading limit falls inside a sentence, that unfinished last sentence (or line) is dropped, so a cut-off fragment never becomes an item of its own.
+    /// It looks back at most 300 characters; if there is no sentence end or line break there, it drops only the unfinished word. <paramref name="next"/> is the first character that did not fit.
+    /// </summary>
+    private static string CutAtWord(string head, char next)
+    {
+        if (next is '\n' or '\r') return head;                                   // the line ended exactly at the limit
+        int end = head.Length;
+        while (end > 0 && head[end - 1] is ' ' or '\n' or '\r') end--;
+        if (end == 0 || head[end - 1] is '.' or '!' or '?' or ';' or '"' or '”' or ')') return head;     // it ended on a finished sentence
+        int low = Math.Max(0, end - 300), space = -1;
+        for (int i = end - 1; i >= low; i--)
+        {
+            char ch = head[i];
+            if (ch is '.' or '!' or '?' or ';') return head[..(i + 1)];
+            if (ch is '\n' or '\r') return head[..i];
+            if (ch == ' ' && space < 0) space = i;
+        }
+        return space >= 0 ? head[..space] : head;
+    }
+
+    /// <summary>The text for the notes box: unchanged if it fits, otherwise cut at the reading limit without leaving half a word at the end.</summary>
+    public static string FitToLimit(string? text)
+    {
+        string t = text ?? "";
+        return t.Length <= MaxInputChars ? t : CutAtWord(t[..MaxInputChars], t[MaxInputChars]);
     }
 
     // ---------- splitting ----------
@@ -174,12 +203,12 @@ public static class NoteParser
         if (start < line.Length) yield return line[start..];
     }
 
-    /// <summary>Splits "call the plumber and email Sam" into two tasks, but only where both halves start with an action word.</summary>
+    /// <summary>Splits "call the applicant and email the team lead" into two tasks, but only where both halves start with an action word.</summary>
     private static IEnumerable<string> SplitInside(string segment)
     {
         string s = segment.Trim();
         if (s.Length == 0) yield break;
-        for (int c = s.IndexOf(','); c >= 0; c = s.IndexOf(',', c + 1))        // "fix the sink, clean the garage, and call the vet" is three tasks
+        for (int c = s.IndexOf(','); c >= 0; c = s.IndexOf(',', c + 1))        // "update the tracker, file the memo, and call the applicant" is three tasks
         {
             string left = s[..c], right = CommaLead.Replace(s[(c + 1)..], "", 1);
             if (left.Trim().Contains(' ') && right.Trim().Contains(' ') && StartsWithVerb(StripFiller(left, out _)) && StartsWithVerb(StripFiller(right, out _)))
@@ -271,10 +300,10 @@ public static class NoteParser
         return new SuggestedItem(title, ReadCategory(original, number), due, high, repeat, repeatDay, number, actionable);
     }
 
-    private static ChecklistCategory ReadCategory(string text, string? number)
+    private static TodoCategory ReadCategory(string text, string? number)
     {
-        int work = WorkWords.Matches(text).Count + (number is null ? 0 : 2), home = HomeWords.Matches(text).Count;
-        return work == 0 && home == 0 ? ChecklistCategory.Other : home > work ? ChecklistCategory.Home : ChecklistCategory.Work;
+        int work = WorkWords.Matches(text).Count + (number is null ? 0 : 2), home = PersonalWords.Matches(text).Count;
+        return work == 0 && home == 0 ? TodoCategory.Other : home > work ? TodoCategory.Personal : TodoCategory.Work;
     }
 
     // ---------- repeat ----------

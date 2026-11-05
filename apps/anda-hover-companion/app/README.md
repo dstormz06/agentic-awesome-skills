@@ -33,7 +33,7 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   **usage log** (off by default), **card transparency slider** (40–100%, starting at 92%; text always stays opaque),
   companion lens picker, and the **connection panel** (Auto, Offline, Claude with its model name, or My API) with one-click Test.
   A **Go to** list at the top jumps to any section (and opens it). Settings is eight collapsible sections, each with a strong line under it: *Look and feel*, *How it
-  starts*, *Dates*, *My files and writing*, *My checklist*, *My actions, agents and ANDA to-do list*, *AI and connections*, *Maintenance*. **They arrange
+  starts*, *Dates*, *My files and writing*, *My to-do list*, *My actions, agents and ANDA to-do list*, *AI and connections*, *Maintenance*. **They arrange
   themselves:** when Settings opens, everything is collapsed except what needs a look (a shortcut Windows did not register, a portfolio file that could not be
   read, an AI connection that was never tested, an agent or action that is not ready), what a new user needs first (shortcuts, portfolio) and up to two sections
   opened three or more times; each open section says why. *Suggested view*, *Expand all* and *Collapse all* are always there, and a **Getting started**
@@ -57,17 +57,17 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   until the situation changes. It refreshes itself only while it is open (every 15 s, 30 s, 1 min or 5 min, or never) and at once when the list
   changes; a changed portfolio file is read at the next refresh; nothing runs when it is closed. It is kept in `todo.json`, plain text on this PC, and
   is never sent anywhere. `Services/Todo.cs`, `UI/TodoWindow`.
-- **My checklist** — a second, separate mode for anything (work duties, the house), apart from the ANDA to-do list: its own shortcut (chosen in Settings; **Ctrl+Alt+L** at
-  first; *None* is allowed, and the tray menu still opens it), its own windows and its own file (`checklist.json`, plain text on this PC, never sent anywhere).
-  **Notes to checklist**: select messy notes anywhere and press the shortcut (or paste them) and they are read **by plain rules, with no AI**
+- **My to-do list** — a second, separate mode for your daily workload (any task, ANDA related or not), apart from the ANDA to-do list (which is built from your ANDA data): its own shortcut (chosen in Settings; **Ctrl+Alt+L** at
+  first; *None* is allowed, and the tray menu still opens it), its own windows and its own file (`mytodo.json`, plain text on this PC, never sent anywhere).
+  **Notes to my to-do list**: select rough notes anywhere and press the shortcut (or paste them) and they are read **by plain rules, with no AI**
   (`Services/NoteParser.cs`) into suggested items: a tidy title (filler such as "don't forget to" removed), a due day ("tomorrow", "by Friday", "Nov 12", "the 1st"),
-  *urgent* ("asap", "!!"), a repeat ("every Friday", "monthly on the 1st"), Work / Home / Other and an ANDA number kept so its card can be opened. A remark that
+  *urgent* ("asap", "!!"), a repeat ("every Friday", "monthly on the 1st"), Work / Personal / Other and an ANDA number kept so its card can be opened. A remark that
   is not a task is offered but not ticked. Each suggestion is editable, and **nothing is added until you press Add** (or, if you chose *Add them at once* for the shortcut,
-  all task-like lines are added with an **Undo** for that batch). **My checklist** groups the list as overdue, today, the next seven days and anytime, says what to
-  start with, shows how today is going, lets you quick-add by typing a sentence (it shows what it understood first), edit, move to tomorrow, delete (with Undo), filter by
-  Work/Home/Other, move overdue items to today and clear finished ones. Items that repeat come back by themselves; a missed repeating item moves to its next day
+  all task-like lines are added with an **Undo** for that batch). **My to-do list** groups the list as overdue, today, the next seven days and anytime, says what to
+  start with, counts what is urgent, shows how today is going, lets you quick-add by typing a sentence (it shows what it understood first), edit, move to tomorrow, delete (with Undo), filter by
+  Work/Personal/Other, move overdue items to today and clear finished ones. Items that repeat come back by themselves; a missed repeating item moves to its next day
   instead of piling up. It refreshes itself only while open, and when the date changes. Limits: 500 items, 200 characters each; notes up to 6,000 characters, 30 suggestions.
-  `Services/Checklist.cs`, `UI/ChecklistWindow`, `UI/NotesWindow`, `UI/ItemFields.cs`, `App.Checklist.cs`.
+  `Services/MyTodo.cs`, `UI/MyTodoWindow`, `UI/NotesWindow`, `UI/ItemFields.cs`, `App.MyTodo.cs`.
 - **Compact boxes (L–O)** — a Strip, a Tile, a Ticket and a Badge, about 340 × 63–81, 196 × 123–145,
   300 × 64–68 and 150–185 × 38 px (measured on Windows), so a card never blankets the email being read. They make **no AI call**,
   **never take keyboard focus** (typing in the email continues undisturbed), and open their sibling
@@ -179,7 +179,7 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   (`ANDA_COMPANION_PROVIDER=elsa`), configuration from `ANDA_ELSA_*` environment variables, an
   https-only guard, timeout, error handling, offline fallback and the Settings status line are
   done and tested; the only code left is the two translations in `ElsaMapping.cs` (request and
-  reply), because Elsa's API shape is not known and is not guessed. Checklist:
+  reply), because Elsa's API shape is not known and is not guessed. MyTodo:
   `../ELSA-INTEGRATION.md`. Grounding rules, fencing, fallback and UI are untouched by a backend
   swap. Facts and the forecast number never come from any model.
 - **GDUFA-versioned goal-date rules** — `Services/GoalDateRules.cs` encodes the

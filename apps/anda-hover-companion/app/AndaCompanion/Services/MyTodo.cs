@@ -5,12 +5,12 @@ using System.Text.RegularExpressions;
 
 namespace AndaCompanion.Services;
 
-/// <summary>One line of the person's own checklist: anything, for work or home. It is not tied to an ANDA, though an ANDA number in the text is kept so the card can be opened.</summary>
-public sealed class ChecklistItem
+/// <summary>One line of the person's own to-do list: any daily workload, ANDA related or not. It is not tied to an ANDA, though an ANDA number in the text is kept so the card can be opened.</summary>
+public sealed class MyTodoItem
 {
     public string Id { get; set; } = "";
     public string Title { get; set; } = "";
-    public ChecklistCategory Category { get; set; } = ChecklistCategory.Other;
+    public TodoCategory Category { get; set; } = TodoCategory.Other;
     /// <summary>The due date, yyyy-MM-dd, or null.</summary>
     public string? Due { get; set; }
     public bool High { get; set; }
@@ -25,33 +25,33 @@ public sealed class ChecklistItem
     public string Source { get; set; } = "You";
 }
 
-public sealed class ChecklistFile
+public sealed class MyTodoData
 {
     public int Version { get; set; } = 1;
-    public List<ChecklistItem> Items { get; set; } = new();
+    public List<MyTodoItem> Items { get; set; } = new();
     /// <summary>How many items were finished on each day (last 60 days), so the window can say what was done this week.</summary>
     public Dictionary<string, int> DoneByDay { get; set; } = new();
 }
 
-public sealed record ChecklistAddResult(ChecklistItem? Item, bool Added, string? Reason);
+public sealed record MyTodoAddResult(MyTodoItem? Item, bool Added, string? Reason);
 
 /// <summary>
-/// The person's checklist, kept in a plain file (<c>checklist.json</c>) on this PC and never sent anywhere. It is separate from the ANDA to-do list:
+/// The person's to-do list, kept in a plain file (<c>mytodo.json</c>) on this PC and never sent anywhere. It is separate from the ANDA to-do list:
 /// it is for anything, and nothing in it comes from the person's data. Items that repeat come back by themselves (daily, on weekdays, weekly, monthly),
 /// and a missed repeating item is not left as a pile of overdue copies. Written by replacing the file in one step.
 /// </summary>
-public sealed class ChecklistService
+public sealed class MyTodoService
 {
     public const int MaxItems = 500, MaxTitleChars = 200, KeepDoneDays = 30, KeepCountDays = 60;
     private readonly string _path;
     private readonly object _gate = new();
-    private ChecklistFile _file;
+    private MyTodoData _file;
 
     public event Action? Changed;
 
-    public ChecklistService(string? path = null)
+    public MyTodoService(string? path = null)
     {
-        _path = path ?? AppPaths.ChecklistFile;
+        _path = path ?? AppPaths.MyTodoFile;
         _file = Load(_path);
     }
 
@@ -66,20 +66,20 @@ public sealed class ChecklistService
         return t.Length > max ? t[..max].TrimEnd() : t;
     }
 
-    private static ChecklistFile Load(string path)
+    private static MyTodoData Load(string path)
     {
         try
         {
             if (!File.Exists(path) || new FileInfo(path).Length > 4 * 1024 * 1024) return new();
-            return Normalize(JsonSerializer.Deserialize<ChecklistFile>(File.ReadAllText(path)));
+            return Normalize(JsonSerializer.Deserialize<MyTodoData>(File.ReadAllText(path)));
         }
         catch { return new(); }
     }
 
     /// <summary>Repairs a loaded file: limits, valid enums, dates and numbers, unique ids.</summary>
-    public static ChecklistFile Normalize(ChecklistFile? f)
+    public static MyTodoData Normalize(MyTodoData? f)
     {
-        var clean = new ChecklistFile();
+        var clean = new MyTodoData();
         if (f is null) return clean;
         var ids = new HashSet<string>();
         foreach (var raw in (f.Items ?? new()).Where(i => i is not null).Take(MaxItems))
@@ -90,9 +90,9 @@ public sealed class ChecklistService
             if (id.Length == 0 || !ids.Add(id)) { id = NewId(); ids.Add(id); }
             var repeat = Enum.IsDefined(raw.Repeat) ? raw.Repeat : Repeat.None;
             int day = repeat switch { Repeat.Weekly => raw.RepeatDay is >= 0 and <= 6 ? raw.RepeatDay : -1, Repeat.Monthly => raw.RepeatDay is >= 1 and <= 31 ? raw.RepeatDay : -1, _ => -1 };
-            clean.Items.Add(new ChecklistItem
+            clean.Items.Add(new MyTodoItem
             {
-                Id = id, Title = title, Category = Enum.IsDefined(raw.Category) ? raw.Category : ChecklistCategory.Other,
+                Id = id, Title = title, Category = Enum.IsDefined(raw.Category) ? raw.Category : TodoCategory.Other,
                 Due = ParseIso(raw.Due) is { } d ? Iso(d) : null, High = raw.High, Repeat = repeat, RepeatDay = day,
                 Done = raw.Done, DoneOn = ParseIso(raw.DoneOn) is { } dn ? Iso(dn) : null,
                 Created = OneLine(raw.Created, 32), Number = raw.Number is { } n && Regex.IsMatch(n, "^[0-9]{6}$") ? n : null,
@@ -105,13 +105,13 @@ public sealed class ChecklistService
 
     private static string NewId() => Guid.NewGuid().ToString("N")[..12];
 
-    private static ChecklistItem Copy(ChecklistItem i) => new()
+    private static MyTodoItem Copy(MyTodoItem i) => new()
     {
         Id = i.Id, Title = i.Title, Category = i.Category, Due = i.Due, High = i.High, Repeat = i.Repeat, RepeatDay = i.RepeatDay, Done = i.Done,
         DoneOn = i.DoneOn, Created = i.Created, Number = i.Number, Source = i.Source,
     };
 
-    public IReadOnlyList<ChecklistItem> Items { get { lock (_gate) return _file.Items.Select(Copy).ToList(); } }
+    public IReadOnlyList<MyTodoItem> Items { get { lock (_gate) return _file.Items.Select(Copy).ToList(); } }
     public IReadOnlyDictionary<string, int> DoneByDay { get { lock (_gate) return new Dictionary<string, int>(_file.DoneByDay); } }
 
     /// <summary>How many items were finished in the <paramref name="days"/> days up to and including today.</summary>
@@ -121,16 +121,16 @@ public sealed class ChecklistService
             return _file.DoneByDay.Where(kv => ParseIso(kv.Key) is { } d && today.DayNumber - d.DayNumber is >= 0 && today.DayNumber - d.DayNumber < days).Sum(kv => kv.Value);
     }
 
-    public ChecklistAddResult Add(string? title, ChecklistCategory category, DateOnly? due, bool high, Repeat repeat, int repeatDay, string? number, string source, DateOnly today)
+    public MyTodoAddResult Add(string? title, TodoCategory category, DateOnly? due, bool high, Repeat repeat, int repeatDay, string? number, string source, DateOnly today)
     {
         string t = OneLine(title, MaxTitleChars);
         if (t.Length == 0) return new(null, false, "Please type what needs doing.");
-        if (!Enum.IsDefined(category)) category = ChecklistCategory.Other;
+        if (!Enum.IsDefined(category)) category = TodoCategory.Other;
         if (!Enum.IsDefined(repeat)) repeat = Repeat.None;
         int day = repeat switch { Repeat.Weekly => repeatDay is >= 0 and <= 6 ? repeatDay : (int)(due ?? today).DayOfWeek, Repeat.Monthly => repeatDay is >= 1 and <= 31 ? repeatDay : (due ?? today).Day, _ => -1 };
         // A repeating item always has a date, so it is shown in the right place and comes back on time.
         if (repeat != Repeat.None && due is null) due = NoteParser.OnOrAfter(repeat, day, today);
-        ChecklistItem item;
+        MyTodoItem item;
         lock (_gate)
         {
             var same = _file.Items.FirstOrDefault(i => !i.Done && i.Category == category && i.Title.Equals(t, StringComparison.OrdinalIgnoreCase));
@@ -138,10 +138,10 @@ public sealed class ChecklistService
             if (_file.Items.Count >= MaxItems)
             {
                 var oldest = _file.Items.Where(i => i.Done && i.Repeat == Repeat.None).OrderBy(i => i.DoneOn ?? "").FirstOrDefault();
-                if (oldest is null) return new(null, false, $"The checklist is full ({MaxItems} items). Please finish or delete some.");
+                if (oldest is null) return new(null, false, $"The to-do list is full ({MaxItems} items). Please finish or delete some.");
                 _file.Items.Remove(oldest);
             }
-            item = new ChecklistItem
+            item = new MyTodoItem
             {
                 Id = NewId(), Title = t, Category = category, Due = due is { } d ? Iso(d) : null, High = high, Repeat = repeat, RepeatDay = day,
                 Created = Iso(today), Number = number is not null && Regex.IsMatch(number, "^[0-9]{6}$") ? number : null,
@@ -154,10 +154,10 @@ public sealed class ChecklistService
         return new(Copy(item), true, null);
     }
 
-    public ChecklistAddResult AddSuggested(SuggestedItem s, string source, DateOnly today) =>
+    public MyTodoAddResult AddSuggested(SuggestedItem s, string source, DateOnly today) =>
         Add(s.Title, s.Category, s.Due, s.High, s.Repeat, s.RepeatDay, s.Number, source, today);
 
-    private bool Mutate(string id, Action<ChecklistItem> change)
+    private bool Mutate(string id, Action<MyTodoItem> change)
     {
         lock (_gate)
         {
@@ -184,12 +184,12 @@ public sealed class ChecklistService
     }
 
     /// <summary>Changes an item's text and settings. Returns a plain reason if it was refused.</summary>
-    public string? Edit(string id, string? title, ChecklistCategory category, DateOnly? due, bool high, Repeat repeat, int repeatDay, DateOnly? today = null)
+    public string? Edit(string id, string? title, TodoCategory category, DateOnly? due, bool high, Repeat repeat, int repeatDay, DateOnly? today = null)
     {
         var now = today ?? DateOnly.FromDateTime(DateTime.Now);
         string t = OneLine(title, MaxTitleChars);
         if (t.Length == 0) return "Please type what needs doing.";
-        if (!Enum.IsDefined(category)) category = ChecklistCategory.Other;
+        if (!Enum.IsDefined(category)) category = TodoCategory.Other;
         if (!Enum.IsDefined(repeat)) repeat = Repeat.None;
         bool found = Mutate(id, i =>
         {
@@ -214,7 +214,7 @@ public sealed class ChecklistService
     }
 
     /// <summary>Puts back an item that was just deleted (the Undo button). Refused if the list is full or the item is already there.</summary>
-    public bool Restore(ChecklistItem item)
+    public bool Restore(MyTodoItem item)
     {
         lock (_gate)
         {
@@ -249,7 +249,7 @@ public sealed class ChecklistService
     }
 
     /// <summary>The next date a repeating item falls due after the occurrence it was last due on, and never before today.</summary>
-    public static DateOnly NextDue(ChecklistItem i, DateOnly today)
+    public static DateOnly NextDue(MyTodoItem i, DateOnly today)
     {
         var basis = ParseIso(i.Due) ?? ParseIso(i.DoneOn) ?? today;
         var next = NoteParser.OnOrAfter(i.Repeat, i.RepeatDay, basis.AddDays(1));
@@ -291,24 +291,24 @@ public sealed class ChecklistService
     }
 }
 
-public sealed record ChecklistGroup(string Heading, IReadOnlyList<ChecklistItem> Items);
+public sealed record MyTodoGroup(string Heading, IReadOnlyList<MyTodoItem> Items);
 
-/// <summary>What the checklist window shows: groups worst-first, how today is going, and what to start with.</summary>
-public sealed record ChecklistView(IReadOnlyList<ChecklistGroup> Groups, int Open, int Overdue, int DoneToday, int TodayTotal, int Finished7, string? Focus);
+/// <summary>What the to-do list window shows: groups worst-first, how today is going, and what to start with.</summary>
+public sealed record MyTodoView(IReadOnlyList<MyTodoGroup> Groups, int Open, int Urgent, int Overdue, int DoneToday, int TodayTotal, int Finished7, string? Focus);
 
-public static class ChecklistBuilder
+public static class MyTodoBuilder
 {
     public const int RecentDoneDays = 7, ComingUpDays = 7;
 
     /// <summary>
     /// Overdue, then today, then the next seven days, then anything else, then what was finished in the last seven days. In each group a high-priority
-    /// item comes first, then the earlier date, then Work, Home and Other. "Today" counts what is open and due by today plus what was finished today.
+    /// item comes first, then the earlier date, then Work, Personal and Other. "Today" counts what is open and due by today plus what was finished today.
     /// </summary>
-    public static ChecklistView Build(IReadOnlyList<ChecklistItem> all, DateOnly today, int finished7, ChecklistCategory? filter = null)
+    public static MyTodoView Build(IReadOnlyList<MyTodoItem> all, DateOnly today, int finished7, TodoCategory? filter = null)
     {
         var items = all.Where(i => filter is null || i.Category == filter).ToList();
-        DateOnly? Due(ChecklistItem i) => ChecklistService.ParseIso(i.Due);
-        IEnumerable<ChecklistItem> Order(IEnumerable<ChecklistItem> q) => q
+        DateOnly? Due(MyTodoItem i) => MyTodoService.ParseIso(i.Due);
+        IEnumerable<MyTodoItem> Order(IEnumerable<MyTodoItem> q) => q
             .OrderBy(i => i.High ? 0 : 1).ThenBy(i => Due(i) is null ? 1 : 0).ThenBy(i => Due(i) ?? DateOnly.MaxValue)
             .ThenBy(i => (int)i.Category).ThenBy(i => i.Title, StringComparer.OrdinalIgnoreCase);
 
@@ -317,19 +317,19 @@ public static class ChecklistBuilder
         var due0 = Order(open.Where(i => Due(i) == today)).ToList();
         var soon = Order(open.Where(i => Due(i) is { } d && d > today && d <= today.AddDays(ComingUpDays))).ToList();
         var later = Order(open.Where(i => Due(i) is null || Due(i) > today.AddDays(ComingUpDays))).ToList();
-        var done = items.Where(i => i.Done && ChecklistService.ParseIso(i.DoneOn) is { } d && today.DayNumber - d.DayNumber is >= 0 && today.DayNumber - d.DayNumber < RecentDoneDays)
+        var done = items.Where(i => i.Done && MyTodoService.ParseIso(i.DoneOn) is { } d && today.DayNumber - d.DayNumber is >= 0 && today.DayNumber - d.DayNumber < RecentDoneDays)
             .OrderByDescending(i => i.DoneOn).ThenBy(i => i.Title, StringComparer.OrdinalIgnoreCase).ToList();
 
-        var groups = new List<ChecklistGroup>();
+        var groups = new List<MyTodoGroup>();
         if (overdue.Count > 0) groups.Add(new("OVERDUE", overdue));
         if (due0.Count > 0) groups.Add(new("TODAY", due0));
         if (soon.Count > 0) groups.Add(new("COMING UP · NEXT 7 DAYS", soon));
         if (later.Count > 0) groups.Add(new("ANYTIME", later));
         if (done.Count > 0) groups.Add(new("DONE IN THE LAST 7 DAYS", done));
 
-        int doneToday = items.Count(i => i.Done && i.DoneOn == ChecklistService.Iso(today));
+        int doneToday = items.Count(i => i.Done && i.DoneOn == MyTodoService.Iso(today));
         int todayTotal = overdue.Count + due0.Count + doneToday;
         string? focus = (overdue.Count > 0 ? overdue : due0).FirstOrDefault()?.Title;
-        return new ChecklistView(groups, open.Count, overdue.Count, doneToday, todayTotal, finished7, focus);
+        return new MyTodoView(groups, open.Count, open.Count(i => i.High), overdue.Count, doneToday, todayTotal, finished7, focus);
     }
 }

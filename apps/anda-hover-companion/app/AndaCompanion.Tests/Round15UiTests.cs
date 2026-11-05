@@ -72,7 +72,7 @@ public class Round15UiTests : IClassFixture<HeadlessFixture>
             return (groups, sections, hairs, min, max, at40, at65, below, jump);
         }, CancellationToken.None);
 
-        Assert.Equal(new[] { "Look and feel", "How it starts", "Dates", "My files and writing", "My checklist", "My actions, agents and ANDA to-do list", "AI and connections", "Maintenance" }, r.groups);
+        Assert.Equal(new[] { "Look and feel", "How it starts", "Dates", "My files and writing", "My to-do list", "My actions, agents and ANDA to-do list", "AI and connections", "Maintenance" }, r.groups);
         Assert.Equal(r.groups.Count, r.sections);                          // every group is a section with a strong line under it
         Assert.True(r.hairs >= 8, $"{r.hairs} fine lines between the settings inside a group");
         Assert.Equal(40, r.min);
@@ -83,8 +83,8 @@ public class Round15UiTests : IClassFixture<HeadlessFixture>
         Assert.Contains(r.jump, j => j.StartsWith("MY ACTIONS"));
         Assert.Contains(r.jump, j => j.StartsWith("MY AGENTS"));
         Assert.Contains(r.jump, j => j.StartsWith("MY ANDA TO-DO LIST"));
-        Assert.Contains(r.jump, j => j.StartsWith("MY CHECKLIST"));
-        Assert.Contains(r.jump, j => j == "My checklist");                 // the group names are in the list too
+        Assert.Contains(r.jump, j => j.StartsWith("MY TO-DO LIST"));
+        Assert.Contains(r.jump, j => j == "My to-do list");                 // the group names are in the list too
     }
 
     // ---------- Settings: my actions ----------

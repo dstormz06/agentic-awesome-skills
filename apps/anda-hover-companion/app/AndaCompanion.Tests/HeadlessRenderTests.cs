@@ -148,7 +148,7 @@ public class HeadlessRenderTests : IClassFixture<HeadlessFixture>
                     "EscalateCheck", "LatePanel", "HolidayPanel", "PeekKeyBox", "LookupKeyBox", "DraftKeyBox", "PortfolioBox", "NotesBox", "ReferenceBox", "InstructionsBox", "UsageCheck",
                     "ConnBanner", "MiddleCheck", "ProviderPanel", "MyApiExpander", "ApiEndpoint", "TonePanel", "SignOffBox", "RepliesManage", "ReferenceUrlBox", "ReferenceUpdate", "OutlookOn",
                     "ActionsPanel", "ActionAdd", "AgentsPanel", "AgentAdd", "TodoAutoCheck", "TodoRefreshPanel", "TodoOpen",
-                    "ChecklistKeyBox", "ChecklistModePanel", "ChecklistOpen", "AdaptiveCheck", "GettingStarted", "SuggestedBtn" }
+                    "MyTodoKeyBox", "MyTodoModePanel", "MyTodoOpen", "AdaptiveCheck", "GettingStarted", "SuggestedBtn" }
                 .Where(n => win.FindControl<Control>(n) is not null).ToList();
             int radios = win.GetVisualDescendants().OfType<RadioButton>().Count();
             win.Close();
@@ -157,7 +157,7 @@ public class HeadlessRenderTests : IClassFixture<HeadlessFixture>
 
         Assert.Equal(44, names.found.Count);
         // nineteen appearances + four auto-hide choices + three consent models + three "late" choices + four holiday-lead choices
-        // + four connection choices + five tones + four middle-click keys + two Outlook clouds + three Outlook message counts + five to-do refresh choices + two checklist modes. (The four API-timeout choices sit inside the collapsed
+        // + four connection choices + five tones + four middle-click keys + two Outlook clouds + three Outlook message counts + five to-do refresh choices + two to-do list modes. (The four API-timeout choices sit inside the collapsed
         // "My API" expander, whose content is not part of the visual tree until it is opened.)
         Assert.Equal(19 + 4 + 3 + 3 + 4 + 4 + 5 + 4 + 2 + 3 + 5 + 2, names.radios);
     }

@@ -74,7 +74,7 @@ public class Round15Tests
         {
             new() { Name = "ok", Hotkey = "ctrl + alt + t" }, new() { Name = "dup", Hotkey = "Ctrl+Alt+T" },
             new() { Name = "core", Hotkey = "Ctrl+Alt+A" }, new() { Name = "weak", Hotkey = "Ctrl+C" },
-            new() { Name = "win", Hotkey = "Win+Alt+T" }, new() { Name = "junk", Hotkey = "banana" }, new() { Name = "none", Hotkey = "" },
+            new() { Name = "win", Hotkey = "Win+Alt+T" }, new() { Name = "junk", Hotkey = "not a shortcut" }, new() { Name = "none", Hotkey = "" },
         }, reserved);
         Assert.Equal(new[] { "Ctrl+Alt+T", "", "", "", "", "", "" }, clean.Select(a => a.Hotkey));
     }

@@ -19,7 +19,7 @@ public partial class App
     private IReadOnlyList<HotkeyBinding> HotkeyBindings()
     {
         _boundActions = _settings.MyActions.Select(a => a.Clone()).ToList();
-        return HotkeyService.FromCombos(_settings.PeekHotkey, _settings.LookupHotkey, _settings.DraftHotkey, _boundActions, _settings.ChecklistHotkey);
+        return HotkeyService.FromCombos(_settings.PeekHotkey, _settings.LookupHotkey, _settings.DraftHotkey, _boundActions, _settings.MyTodoHotkey);
     }
 
     private string AgentsFingerprint() => System.Text.Json.JsonSerializer.Serialize(_settings.Agents);

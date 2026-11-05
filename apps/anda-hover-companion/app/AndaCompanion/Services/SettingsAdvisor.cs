@@ -1,7 +1,7 @@
 namespace AndaCompanion.Services;
 
 /// <summary>The sections of the Settings window, in the order they are shown.</summary>
-public enum SettingsSection { Look, Start, Dates, Files, Checklist, Actions, Connections, Maintenance }
+public enum SettingsSection { Look, Start, Dates, Files, MyTodo, Actions, Connections, Maintenance }
 
 public static class SettingsSections
 {
@@ -11,7 +11,7 @@ public static class SettingsSections
         (SettingsSection.Start, "Start", "How it starts"),
         (SettingsSection.Dates, "Dates", "Dates"),
         (SettingsSection.Files, "Files", "My files and writing"),
-        (SettingsSection.Checklist, "Checklist", "My checklist"),
+        (SettingsSection.MyTodo, "MyTodo", "My to-do list"),
         (SettingsSection.Actions, "Actions", "My actions, agents and ANDA to-do list"),
         (SettingsSection.Connections, "Connections", "AI and connections"),
         (SettingsSection.Maintenance, "Maintenance", "Maintenance"),
@@ -48,7 +48,7 @@ public static class SettingsAdvisor
         {
             // 1. needs a look
             if (facts.ShortcutProblems.Contains(SettingsSection.Start)) open[SettingsSection.Start] = (true, "Needs a look: a shortcut is used by another program");
-            if (facts.ShortcutProblems.Contains(SettingsSection.Checklist)) open[SettingsSection.Checklist] = (true, "Needs a look: its shortcut is used by another program");
+            if (facts.ShortcutProblems.Contains(SettingsSection.MyTodo)) open[SettingsSection.MyTodo] = (true, "Needs a look: its shortcut is used by another program");
             if (facts.ShortcutProblems.Contains(SettingsSection.Actions)) open[SettingsSection.Actions] = (true, "Needs a look: an action's shortcut is used by another program");
             else if (facts.ActionsProblem is { } ap) open[SettingsSection.Actions] = (true, "Needs a look: " + ap);
             if (facts.PortfolioProblem is { } pp) open[SettingsSection.Files] = (true, "Needs a look: " + pp);

@@ -46,7 +46,7 @@ public partial class SettingsWindow
 
     private void BuildActionSections()
     {
-        BuildMyChecklist();
+        BuildMyMyTodo();
         BuildMyActions();
         BuildMyAgents();
         BuildMyTodo();
@@ -56,7 +56,7 @@ public partial class SettingsWindow
 
     private IEnumerable<(string Name, string Hotkey)> ShortcutsInUse(CustomAction? except) =>
         new[] { ("Select & Peek", _settings.PeekHotkey), ("Lookup box", _settings.LookupHotkey), ("Check a draft", _settings.DraftHotkey) }
-            .Concat(string.IsNullOrWhiteSpace(_settings.ChecklistHotkey) ? Array.Empty<(string, string)>() : new[] { ("My checklist", _settings.ChecklistHotkey) })
+            .Concat(string.IsNullOrWhiteSpace(_settings.MyTodoHotkey) ? Array.Empty<(string, string)>() : new[] { ("My to-do list", _settings.MyTodoHotkey) })
             .Concat(_settings.MyActions.Where(x => !ReferenceEquals(x, except) && !string.IsNullOrWhiteSpace(x.Hotkey)).Select(x => (x.Name, x.Hotkey)));
 
     private void BuildMyActions()

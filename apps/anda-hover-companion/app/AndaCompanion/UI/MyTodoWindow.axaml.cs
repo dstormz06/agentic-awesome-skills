@@ -10,33 +10,33 @@ using AndaCompanion.Services;
 
 namespace AndaCompanion.UI;
 
-/// <summary>What the checklist window needs from the running app. Everything is a callback, so the window can be tested on its own.</summary>
-public sealed record ChecklistHooks(
-    ChecklistService Store, Func<DateOnly> Today, Func<string> Shortcut,
+/// <summary>What the to-do list window needs from the running app. Everything is a callback, so the window can be tested on its own.</summary>
+public sealed record MyTodoHooks(
+    MyTodoService Store, Func<DateOnly> Today, Func<string> Shortcut,
     Action<string?> OpenNotes, Action<string, PixelPoint> OpenCard);
 
 /// <summary>
-/// "My checklist": the person's own list for anything, work or home, kept apart from the ANDA to-do list. Items are grouped (overdue, today,
+/// "My to-do list": the person's own workload list, for any task, ANDA related or not, kept apart from the ANDA to-do list. Items are grouped (overdue, today,
 /// the next seven days, anytime), repeating items come back by themselves, and the list redraws at once when anything changes and when the
 /// day changes. It only runs while it is open. Nothing here is sent anywhere.
 /// </summary>
-public partial class ChecklistWindow : Window
+public partial class MyTodoWindow : Window
 {
-    private readonly ChecklistHooks _hooks;
+    private readonly MyTodoHooks _hooks;
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(30) };
     private readonly Action _onChanged;
-    private ChecklistView _view = new(Array.Empty<ChecklistGroup>(), 0, 0, 0, 0, 0, null);
+    private MyTodoView _view = new(Array.Empty<MyTodoGroup>(), 0, 0, 0, 0, 0, 0, null);
     private string _signature = "";
     private DateOnly _day;
     private string? _editingId;
     private ItemFields? _editor;
     private string _editorError = "";
     private TextBlock? _errorBox;
-    private ChecklistItem? _deleted;
+    private MyTodoItem? _deleted;
 
-    private static readonly string[] Filters = { "Everything", "Work", "Home", "Other" };
+    private static readonly string[] Filters = { "Everything", "Work", "Personal", "Other" };
 
-    public ChecklistWindow(ChecklistHooks hooks)
+    public MyTodoWindow(MyTodoHooks hooks)
     {
         _hooks = hooks;
         InitializeComponent();
@@ -72,16 +72,16 @@ public partial class ChecklistWindow : Window
         Body.MaxHeight = Math.Max(200, Math.Min(380, screen.WorkingArea.Height / screen.Scaling - 420));
     }
 
-    public ChecklistView View => _view;
+    public MyTodoView View => _view;
     public bool TimerRunning => _timer.IsEnabled;
     public string? EditingId => _editingId;
 
-    private ChecklistCategory? Filter => FilterBox.SelectedIndex is >= 1 and <= 3 ? (ChecklistCategory)(FilterBox.SelectedIndex - 1) : null;
+    private TodoCategory? Filter => FilterBox.SelectedIndex is >= 1 and <= 3 ? (TodoCategory)(FilterBox.SelectedIndex - 1) : null;
 
     private IBrush Res(string key) => (IBrush)Application.Current!.Resources[key]!;
 
     /// <summary>How an item reads in a sentence: its title, category, day, repeat and urgency. Used for the preview and the confirmations.</summary>
-    public static string Describe(string title, ChecklistCategory category, DateOnly? due, bool high, Repeat repeat)
+    public static string Describe(string title, TodoCategory category, DateOnly? due, bool high, Repeat repeat)
     {
         var parts = new List<string> { ItemFields.CategoryLabels[(int)category] };
         if (due is { } d) parts.Add("due " + ItemFields.Day(d));
@@ -127,12 +127,12 @@ public partial class ChecklistWindow : Window
         var today = _hooks.Today();
         _day = today;
         _hooks.Store.Refresh(today);
-        _view = ChecklistBuilder.Build(_hooks.Store.Items, today, _hooks.Store.FinishedInLast(ChecklistBuilder.RecentDoneDays, today), Filter);
+        _view = MyTodoBuilder.Build(_hooks.Store.Items, today, _hooks.Store.FinishedInLast(MyTodoBuilder.RecentDoneDays, today), Filter);
         int total = _hooks.Store.Items.Count;
         string signature = string.Join("\n", _view.Groups.SelectMany(g => g.Items.Select(i => $"{g.Heading}|{i.Id}|{i.Title}|{i.Due}|{i.Done}|{i.High}|{i.Category}|{i.Repeat}"))) + $"#{_view.Open}|{_view.Finished7}|{_editingId}|{Filter}|{today}";
         ShowSummary(total);
         RollBtn.IsVisible = _view.Overdue > 0;
-        Footer.Text = "Saved on this PC only (checklist.json); nothing is sent anywhere. Items that repeat come back by themselves, and a repeating item you miss moves to its next day instead of piling up.";
+        Footer.Text = "Saved on this PC only (mytodo.json); nothing is sent anywhere. Items that repeat come back by themselves, and a repeating item you miss moves to its next day instead of piling up.";
         if (!force && signature == _signature) return;
         _signature = signature;
         Draw(total);
@@ -142,18 +142,19 @@ public partial class ChecklistWindow : Window
     {
         if (total == 0)
         {
-            Summary.Text = $"Your checklist is empty. Type something above, or select your notes anywhere and press {_hooks.Shortcut()} to turn them into items.";
+            Summary.Text = $"Your to-do list is empty. Type something above, or select your notes anywhere and press {_hooks.Shortcut()} to turn them into items.";
             FocusLine.Text = "";
             SetBar(0, 0);
             return;
         }
         var bits = new List<string> { $"{_view.Open} open" };
+        if (_view.Urgent > 0) bits.Add($"{_view.Urgent} urgent");
         if (_view.Overdue > 0) bits.Add($"{_view.Overdue} overdue");
         if (_view.TodayTotal > 0) bits.Add($"{_view.DoneToday} of {_view.TodayTotal} done today");
         bits.Add($"{_view.Finished7} finished in the last 7 days");
         Summary.Text = string.Join(" · ", bits);
         FocusLine.Text = _view.Focus is { } f ? "Start with: " + f
-            : _view.Open == 0 ? "Everything is done. Well done." : "Nothing is due today or overdue. The rest is below.";
+            : _view.Open == 0 ? "All items are complete." : "Nothing is due today and nothing is overdue. The remaining items are listed below.";
         SetBar(_view.DoneToday, _view.TodayTotal);
     }
 
@@ -170,7 +171,7 @@ public partial class ChecklistWindow : Window
         {
             Rows.Children.Add(new TextBlock
             {
-                Text = total == 0 ? "Nothing here yet. Add your first item above, for example “Call the plumber tomorrow”." : "Nothing in this view.",
+                Text = total == 0 ? "No items yet. Add your first item above, for example “Send the status update to my supervisor by Friday”." : "Nothing in this view.",
                 Foreground = Res("C.Ink2"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 8),
             });
             return;
@@ -186,15 +187,15 @@ public partial class ChecklistWindow : Window
         }
     }
 
-    private string DuePhrase(ChecklistItem i)
+    private string DuePhrase(MyTodoItem i)
     {
-        if (ChecklistService.ParseIso(i.Due) is not { } d) return "";
+        if (MyTodoService.ParseIso(i.Due) is not { } d) return "";
         var today = _hooks.Today();
         if (i.Done) return "";
         return d < today ? "overdue since " + ItemFields.Day(d) : d == today ? "due today" : d == today.AddDays(1) ? "due tomorrow" : "due " + ItemFields.Day(d);
     }
 
-    private Control MakeRow(ChecklistItem item)
+    private Control MakeRow(MyTodoItem item)
     {
         var grid = new Grid { ColumnDefinitions = new("30,*,Auto"), Margin = new Thickness(2, 3) };
         var done = new CheckBox { IsChecked = item.Done, VerticalAlignment = VerticalAlignment.Top, MinWidth = 24 };
@@ -221,7 +222,7 @@ public partial class ChecklistWindow : Window
         meta.Add(ItemFields.CategoryLabels[(int)item.Category]);
         if (item.Repeat != Repeat.None) meta.Add("repeats " + RepeatWords(item.Repeat));
         if (item.Source == "Notes") meta.Add("from your notes");
-        bool late = !item.Done && ChecklistService.ParseIso(item.Due) is { } dd && dd < _hooks.Today();
+        bool late = !item.Done && MyTodoService.ParseIso(item.Due) is { } dd && dd < _hooks.Today();
         text.Children.Add(new TextBlock { Text = string.Join(" · ", meta), FontSize = 11, Foreground = Res(late ? "C.Bad" : "C.Ink3") });
         Grid.SetColumn(text, 1); grid.Children.Add(text);
 
@@ -264,12 +265,12 @@ public partial class ChecklistWindow : Window
 
     // ---------- editing ----------
 
-    private void BeginEdit(ChecklistItem item)
+    private void BeginEdit(MyTodoItem item)
     {
         _editingId = item.Id;
         _editorError = "";
         _editor = new ItemFields(_hooks.Today, item.Title);
-        _editor.Load(item.Title, item.Category, ChecklistService.ParseIso(item.Due), item.High, item.Repeat);
+        _editor.Load(item.Title, item.Category, MyTodoService.ParseIso(item.Due), item.High, item.Repeat);
         _editor.TitleBox.KeyDown += (_, e) => { if (e.Key == Key.Enter) { SaveEdit(); e.Handled = true; } };
         Reload(force: true);
         _editor.TitleBox.Focus();

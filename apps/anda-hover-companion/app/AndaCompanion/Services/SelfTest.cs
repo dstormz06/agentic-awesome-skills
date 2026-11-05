@@ -296,27 +296,27 @@ internal static class SelfTest
             report.Add(shown ? new("agents-drawer-finding", CheckStatus.Pass, "the card showed the agent's reply as its own words (canned reply, no network)")
                              : new("agents-drawer-finding", CheckStatus.Fail, "the agents drawer did not show the reply"));
         });
-        await Safe(report, "checklist", async () =>
+        await Safe(report, "my-todo", async () =>
         {
-            // Fictional notes and a list file under the report folder; nothing of the real checklist is touched, and nothing is sent anywhere.
+            // Fictional notes and a list file under the report folder; nothing of the real to-do list is touched, and nothing is sent anywhere.
             var day = new DateOnly(2026, 11, 4);
-            string file = Path.Combine(o.OutDir, "home", "checklist-check.json");
+            string file = Path.Combine(o.OutDir, "home", "my-todo-check.json");
             if (File.Exists(file)) File.Delete(file);
-            var store = new ChecklistService(file);
+            var store = new MyTodoService(file);
             var notes = new NotesWindow(new NotesHooks(store, () => day, () => "Ctrl+Alt+L", () => { }),
-                "Don't forget to call the plumber about the leaking faucet tomorrow!!\nsend the weekly status memo every Friday\n- buy milk, eggs and bread\nFYI the huddle moved to 2pm", false);
+                "Don't forget to confirm the facility inspection date with the team tomorrow ASAP\nsend the weekly status memo every Friday\n- update the tracking sheet and email the applicant\nFYI the huddle moved to 2pm", false);
             notes.Show();
-            report.Add(await ShootAsync(notes, "notes-to-checklist", o.OutDir, false));
+            report.Add(await ShootAsync(notes, "notes-to-my-todo-list", o.OutDir, false));
             int found = notes.SuggestionCount;
             notes.AddTicked();
             notes.Close();
-            var win = new ChecklistWindow(new ChecklistHooks(store, () => day, () => "Ctrl+Alt+L", _ => { }, (_, _) => { }));
+            var win = new MyTodoWindow(new MyTodoHooks(store, () => day, () => "Ctrl+Alt+L", _ => { }, (_, _) => { }));
             win.Show();
-            report.Add(await ShootAsync(win, "my-checklist", o.OutDir, false));
+            report.Add(await ShootAsync(win, "my-todo-list", o.OutDir, false));
             bool ok = found >= 3 && store.Items.Count >= 3 && win.View.Open == store.Items.Count(i => !i.Done) && store.Items.Any(i => i.Repeat == Repeat.Weekly);
             win.Close();
-            report.Add(ok ? new("checklist-from-notes", CheckStatus.Pass, $"{found} suggestions were read from messy notes, {store.Items.Count} were added, and the checklist lists them (no AI, no network)")
-                          : new("checklist-from-notes", CheckStatus.Fail, $"found {found}, stored {store.Items.Count}, weekly={store.Items.Any(i => i.Repeat == Repeat.Weekly)}"));
+            report.Add(ok ? new("my-todo-from-notes", CheckStatus.Pass, $"{found} suggestions were read from rough notes, {store.Items.Count} were added, and the to-do list lists them (no AI, no network)")
+                          : new("my-todo-from-notes", CheckStatus.Fail, $"found {found}, stored {store.Items.Count}, weekly={store.Items.Any(i => i.Repeat == Repeat.Weekly)}"));
         });
     }
 

@@ -72,7 +72,7 @@ public partial class SettingsWindow
         GsShow.Click += (_, _) => { _settings.GettingStartedDone = false; Apply(); PaintGettingStarted(); AdaptiveStatus.Text = "Getting started is shown at the top again."; ApplySuggested(); };
         GsHide.Click += (_, _) => { _settings.GettingStartedDone = true; Apply(); PaintGettingStarted(); };
         GsFiles.Click += (_, _) => GoTo(_secs.First(s => s.Id == SettingsSection.Files), null);
-        GsChecklist.Click += (_, _) => _hooks?.OpenChecklist?.Invoke();
+        GsMyTodo.Click += (_, _) => _hooks?.OpenMyTodo?.Invoke();
         PaintGettingStarted();
 
         ApplySuggested();
@@ -83,12 +83,12 @@ public partial class SettingsWindow
     {
         GettingStarted.IsVisible = !_settings.GettingStartedDone;
         bool chosen = !string.IsNullOrWhiteSpace(_settings.PortfolioPath);
-        string notesKey = string.IsNullOrWhiteSpace(_settings.ChecklistHotkey) ? "the My checklist item in the tray menu" : _settings.ChecklistHotkey;
+        string notesKey = string.IsNullOrWhiteSpace(_settings.MyTodoHotkey) ? "the My to-do list item in the tray menu" : _settings.MyTodoHotkey;
         GsStep1.Text = $"1. Select an ANDA number in any program (an email, a spreadsheet, a web page), then press {_settings.PeekHotkey}. A small card opens.";
         GsStep2.Text = chosen
             ? "2. Done: your portfolio file is chosen, so the cards use your own ANDAs."
             : "2. Choose your portfolio file under “My files and writing”, so the cards use your own ANDAs. Until then the app shows fictional demo records.";
-        GsStep3.Text = $"3. Select notes anywhere (a message, an email, a scribbled list) and press {notesKey}. They become a checklist you can tick off.";
+        GsStep3.Text = $"3. Select notes anywhere (a chat message, an email, or rough notes) and press {notesKey}. They become to-do items you can tick off.";
         GsFiles.IsVisible = !chosen;
     }
 
@@ -99,7 +99,7 @@ public partial class SettingsWindow
         var problems = new HashSet<SettingsSection>();
         foreach (var h in _hooks?.Hotkeys?.Invoke() ?? Array.Empty<HotkeyStatus>())
             if (!h.Registered)
-                problems.Add(h.Binding.Id == HotkeyService.IdChecklist ? SettingsSection.Checklist : h.Binding.Id >= HotkeyService.IdActionBase ? SettingsSection.Actions : SettingsSection.Start);
+                problems.Add(h.Binding.Id == HotkeyService.IdMyTodo ? SettingsSection.MyTodo : h.Binding.Id >= HotkeyService.IdActionBase ? SettingsSection.Actions : SettingsSection.Start);
 
         string? portfolio = !string.IsNullOrWhiteSpace(_settings.PortfolioPath) && _hooks?.Portfolio() is { } repo && !repo.Status.Ok ? "your portfolio file could not be read" : null;
         var conn = ConnectionStatus.Current;

@@ -7,28 +7,28 @@ using AndaCompanion.Services;
 
 namespace AndaCompanion.UI;
 
-/// <summary>What the person entered for one checklist item, or why it cannot be used yet.</summary>
-public sealed record ItemRead(string? Error, string Title, ChecklistCategory Category, DateOnly? Due, bool High, Repeat Repeat, int RepeatDay)
+/// <summary>What the person entered for one to-do item, or why it cannot be used yet.</summary>
+public sealed record ItemRead(string? Error, string Title, TodoCategory Category, DateOnly? Due, bool High, Repeat Repeat, int RepeatDay)
 {
     public bool Ok => Error is null;
 }
 
 /// <summary>
-/// The fields of one checklist item, used in two places so they look and behave the same: the editor under a row in "My checklist", and
-/// each suggested item in "Notes to checklist". The date is typed in words ("tomorrow", "Friday", "Nov 12", "in 3 days") and the line under
+/// The fields of one to-do item, used in two places so they look and behave the same: the editor under a row in "My to-do list", and
+/// each suggested item in "Notes to my to-do list". The date is typed in words ("tomorrow", "Friday", "Nov 12", "in 3 days") and the line under
 /// it says which day was understood, so nothing is guessed silently. A date it cannot read is refused, never dropped.
 /// </summary>
 public sealed class ItemFields
 {
     private readonly Func<DateOnly> _today;
-    public TextBox TitleBox { get; } = new() { MaxLength = ChecklistService.MaxTitleChars, TextWrapping = TextWrapping.Wrap };
+    public TextBox TitleBox { get; } = new() { MaxLength = MyTodoService.MaxTitleChars, TextWrapping = TextWrapping.Wrap };
     public ComboBox CategoryBox { get; } = new() { Width = 104 };
     public TextBox WhenBox { get; } = new() { Width = 138, MaxLength = 40, Watermark = "When? (Fri, Nov 12)" };
     public ComboBox RepeatBox { get; } = new() { Width = 154 };
     public CheckBox HighBox { get; } = new() { Content = "Urgent" };
     public TextBlock WhenNote { get; } = new() { FontSize = 11, TextWrapping = TextWrapping.Wrap };
 
-    public static readonly string[] CategoryLabels = { "Work", "Home", "Other" };
+    public static readonly string[] CategoryLabels = { "Work", "Personal", "Other" };
     public static readonly string[] RepeatLabels = { "Does not repeat", "Every day", "Every weekday", "Every week", "Every month" };
 
     public ItemFields(Func<DateOnly> today, string nameSuffix = "")
@@ -78,7 +78,7 @@ public sealed class ItemFields
     private DateOnly? _loadedDue;
     private string _loadedText = "";
 
-    public void Load(string title, ChecklistCategory category, DateOnly? due, bool high, Repeat repeat)
+    public void Load(string title, TodoCategory category, DateOnly? due, bool high, Repeat repeat)
     {
         TitleBox.Text = title;
         CategoryBox.SelectedIndex = Math.Clamp((int)category, 0, 2);
@@ -142,7 +142,7 @@ public sealed class ItemFields
     {
         var today = _today();
         string title = (TitleBox.Text ?? "").Trim();
-        var category = (ChecklistCategory)Math.Clamp(CategoryBox.SelectedIndex, 0, 2);
+        var category = (TodoCategory)Math.Clamp(CategoryBox.SelectedIndex, 0, 2);
         var repeat = CurrentRepeat;
         bool high = HighBox.IsChecked == true;
         if (title.Length == 0) return new("Please type what needs doing.", title, category, null, high, repeat, -1);

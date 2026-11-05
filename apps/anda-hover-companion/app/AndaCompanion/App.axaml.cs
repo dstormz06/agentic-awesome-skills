@@ -133,7 +133,7 @@ public partial class App : Application
 
         if (id == HotkeyService.IdLookup) { Dispatcher.UIThread.Post(OpenLookup); return; }
         if (id == HotkeyService.IdDraft) { await OnDraftHotkeyAsync(); return; }
-        if (id == HotkeyService.IdChecklist) { await OnChecklistHotkeyAsync(); return; }
+        if (id == HotkeyService.IdMyTodo) { await OnMyTodoHotkeyAsync(); return; }
         if (id >= HotkeyService.IdActionBase) { await OnActionHotkeyAsync(id - HotkeyService.IdActionBase); return; }
 
         if (Interlocked.Exchange(ref _captureBusy, 1) == 1) return;
@@ -338,7 +338,7 @@ public partial class App : Application
         _settingsWindow = new SettingsWindow(_settings, _prompts, ApplySettings,
             new SettingsHooks(() => HotkeyService.Report(_hotkeys?.Status ?? Array.Empty<HotkeyStatus>()), () => _portfolio, () => _drugsMessage, MouseStatusLine, Outlook,
                 OpenTodo: OpenTodoWindow, RunAction: RunActionFromMenu, AgentProblem: _agents.SetupProblem, ClearFinished: _todo.ClearCompleted,
-                OpenChecklist: OpenChecklistWindow, OpenNotes: () => OpenNotes(""), ClearChecklistFinished: _checklist.ClearFinished, Hotkeys: () => _hotkeys?.Status ?? Array.Empty<HotkeyStatus>()), _replies);
+                OpenMyTodo: OpenMyTodoWindow, OpenNotes: () => OpenNotes(""), ClearMyTodoFinished: _myTodo.ClearFinished, Hotkeys: () => _hotkeys?.Status ?? Array.Empty<HotkeyStatus>()), _replies);
         _settingsWindow.Closed += (_, _) => _settingsWindow = null;
         _settingsWindow.Show();
     }
@@ -361,10 +361,10 @@ public partial class App : Application
         var todo = new NativeMenuItem("ANDA to-do list…");
         todo.Click += (_, _) => OpenTodoWindow();
         menu.Add(todo);
-        var checklist = _checklistItem = new NativeMenuItem(ChecklistMenuLabel());
-        checklist.Click += (_, _) => OpenChecklistWindow();
-        menu.Add(checklist);
-        var notes = new NativeMenuItem("Notes to checklist…");
+        var todoItem = _myTodoItem = new NativeMenuItem(MyTodoMenuLabel());
+        todoItem.Click += (_, _) => OpenMyTodoWindow();
+        menu.Add(todoItem);
+        var notes = new NativeMenuItem("Notes to my to-do list…");
         notes.Click += (_, _) => OpenNotes("");
         menu.Add(notes);
         _actionsMenu = new NativeMenuItem("My actions") { Menu = new NativeMenu() };
@@ -421,16 +421,16 @@ public partial class App : Application
         return "Hotkeys: " + string.Join("   ", status.Select(h => $"{h.Binding.Combo} {(h.Registered ? "✓" : "✗ in use")}"));
     }
 
-    private NativeMenuItem? _lookupItem, _draftItem, _checklistItem, _hotkeyLine;
+    private NativeMenuItem? _lookupItem, _draftItem, _myTodoItem, _hotkeyLine;
 
-    private string ChecklistMenuLabel() => string.IsNullOrWhiteSpace(_settings.ChecklistHotkey) ? "My checklist…" : $"My checklist…\t{_settings.ChecklistHotkey}";
+    private string MyTodoMenuLabel() => string.IsNullOrWhiteSpace(_settings.MyTodoHotkey) ? "My to-do list…" : $"My to-do list…\t{_settings.MyTodoHotkey}";
 
     /// <summary>The tray menu names the shortcuts as they are now, not as they were when the app started. The live line waits a moment for Windows to answer.</summary>
     private void RefreshTrayLabels()
     {
         if (_lookupItem is not null) _lookupItem.Header = $"Lookup ANDA…\t{_settings.LookupHotkey}";
         if (_draftItem is not null) _draftItem.Header = $"Check a draft…\t{_settings.DraftHotkey}";
-        if (_checklistItem is not null) _checklistItem.Header = ChecklistMenuLabel();
+        if (_myTodoItem is not null) _myTodoItem.Header = MyTodoMenuLabel();
         Avalonia.Threading.DispatcherTimer.RunOnce(() => { if (_hotkeyLine is not null) _hotkeyLine.Header = HotkeyStatusLine(); }, TimeSpan.FromMilliseconds(600));
     }
 

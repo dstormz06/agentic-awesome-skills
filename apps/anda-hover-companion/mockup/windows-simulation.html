@@ -663,21 +663,21 @@ details.myapi input,details.myapi textarea{margin:0 0 6px}
 @media (max-width:1040px){#todo .tdadd{grid-template-columns:1fr}.bx .two,.bx .top{grid-template-columns:1fr}.bx .krow2{grid-template-columns:1fr auto auto}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
 
-/* ===================== round 16: my checklist, notes to checklist, settings that arrange themselves ===================== */
+/* ===================== round 16: my to-do list, notes to my to-do list, settings that arrange themselves ===================== */
 #card.sheet{background-color:var(--c-bg)}      /* a bottom sheet over its dimmed backdrop is always solid; transparency belongs to the floating card on a desktop */
-#checklist,#notes{z-index:52}
-#checklist{width:660px;padding:18px 20px;left:calc(50% - 330px);top:36px;max-height:calc(100% - var(--tb-h) - 52px);overflow:auto}
+#mytodo,#notes{z-index:52}
+#mytodo{width:660px;padding:18px 20px;left:calc(50% - 330px);top:36px;max-height:calc(100% - var(--tb-h) - 52px);overflow:auto}
 #notes{width:660px;padding:18px 20px;left:calc(50% - 330px);top:52px;max-height:calc(100% - var(--tb-h) - 68px);overflow:auto}
 #notes textarea{min-height:110px;resize:vertical}
-#checklist .cladd{display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-top:10px}
-#checklist .clbar{height:6px;border-radius:3px;background:var(--c-hair);margin:8px 0 6px;overflow:hidden}
-#checklist .clbar i{display:block;height:100%;background:var(--c-accent);width:0}
-#checklist .clfocus{margin:2px 0 8px;font-size:12.5px;font-weight:650;color:var(--c-ink)}
-#checklist .clfilter{display:flex;align-items:center;gap:8px;margin-top:6px}
-#checklist .clfilter .lbl{margin:0}
-#checklist .clfilter select{width:150px}
-#checklist .clfilter .pill{margin-left:auto}
-#checklist .acts,#notes .acts{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+#mytodo .cladd{display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-top:10px}
+#mytodo .clbar{height:6px;border-radius:3px;background:var(--c-hair);margin:8px 0 6px;overflow:hidden}
+#mytodo .clbar i{display:block;height:100%;background:var(--c-accent);width:0}
+#mytodo .clfocus{margin:2px 0 8px;font-size:12.5px;font-weight:650;color:var(--c-ink)}
+#mytodo .clfilter{display:flex;align-items:center;gap:8px;margin-top:6px}
+#mytodo .clfilter .lbl{margin:0}
+#mytodo .clfilter select{width:150px}
+#mytodo .clfilter .pill{margin-left:auto}
+#mytodo .acts,#notes .acts{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
 #clRows .gh{font-size:9.5px;font-weight:800;letter-spacing:.13em;color:var(--c-ink3);margin:14px 2px 2px}
 #clRows .gh.bad{color:var(--c-bad)}
 #clRows .cr{display:grid;grid-template-columns:30px 1fr auto;gap:6px;align-items:start;border-top:1px solid var(--c-hair);padding:6px 2px}
@@ -721,7 +721,7 @@ details.sec>summary h3.grp{padding:0;margin:0}
 #adaptBar{border:1px solid var(--c-hair);border-radius:8px;padding:8px 10px;margin:8px 0}
 #adaptBar p{margin:0 0 6px;font-size:11.5px;color:var(--c-ink2)}
 #adaptBar .acts{display:flex;flex-wrap:wrap;gap:8px}
-@media (max-width:1040px){#checklist .cladd{grid-template-columns:1fr}.ced{margin-left:0}}
+@media (max-width:1040px){#mytodo .cladd{grid-template-columns:1fr}.ced{margin-left:0}}
 @media (max-width:600px){#clRows .cr{grid-template-columns:30px 1fr}#clRows .cr .btns{grid-column:2;justify-content:flex-start}}
 </style>
 </head>
@@ -769,7 +769,7 @@ Demo author
         <div class="msg"><span class="av" aria-hidden="true">A</span><div><div class="who">Colleague A (demo)</div><div class="bub">Can someone confirm where <span class="pick" data-pick="216482">216482</span> stands against its goal date? Leadership asked.</div></div></div>
         <div class="msg"><span class="av" aria-hidden="true">B</span><div><div class="who">Colleague B (demo)</div><div class="bub">Last I looked it was around 62%. The sister application is <span class="pick" data-pick="214990">214990</span>.</div></div></div>
         <div class="msg me"><span class="av" aria-hidden="true">Me</span><div><div class="who">You</div><div class="bub">Checking now.</div></div></div>
-        <div class="msg me"><span class="av" aria-hidden="true">Me</span><div><div class="who">You · notes to self</div><div class="bub"><span class="pick" data-pick="NOTES">Don't forget to call the plumber about the leak under the sink tomorrow!! Also email Sam re: the Thursday huddle. Need to submit the IR response for ANDA 216482 by Friday. groceries: milk, eggs, bread</span></div></div></div>
+        <div class="msg me"><span class="av" aria-hidden="true">Me</span><div><div class="who">You · notes to self</div><div class="bub"><span class="pick" data-pick="NOTES">Don't forget to confirm the facility inspection date with the team tomorrow ASAP. Also email the team lead re: the Thursday huddle. Need to submit the IR response for ANDA 216482 by Friday. Send the weekly status update to my supervisor every Friday. The inspection report was very clear and complete.</span></div></div></div>
       </div>
     </section>
 
@@ -815,7 +815,7 @@ C:\work&gt; </div>
         <li data-step="look2"><i>✓</i><span>Select <b>NDA 021234</b>, press the hotkey. No guess.</span></li>
         <li data-step="look3"><i>✓</i><span>Turn on <b>Terminal</b> below, select its number: paused.</span></li>
         <li data-step="draft"><i>✓</i><span>Select the <b>draft reply</b> in Mail, press <span data-kbd="draft"></span>.</span></li>
-        <li data-step="list"><i>✓</i><span>In <b>Chat</b>, select <b>your own notes</b>, press <span data-kbd="list"></span>: they become checklist items.</span></li>
+        <li data-step="list"><i>✓</i><span>In <b>Chat</b>, select <b>your own notes</b>, press <span data-kbd="list"></span>: they become to-do items.</span></li>
         <li data-step="ctx"><i>✓</i><span>In the <b>Browser</b> window, select <b>216482</b> and <b>right-click</b>: the Edge extension's menu.</span></li>
       </ol>
       <div class="lbl">APPS TO TEST</div>
@@ -827,7 +827,7 @@ C:\work&gt; </div>
         <button class="btn" type="button" data-pickbtn="NDA 021234">NDA 021234</button>
         <button class="btn" type="button" data-pickbtn="12345">12345</button>
         <button class="btn" type="button" data-pickbtn="DRAFT">draft reply</button>
-        <button class="btn" type="button" data-pickbtn="NOTES">messy notes</button>
+        <button class="btn" type="button" data-pickbtn="NOTES">rough notes</button>
         <button class="btn" type="button" data-pickbtn="TERM" id="pickTerm" hidden>in Terminal</button>
       </div>
       <div class="lbl">PRESS A HOTKEY</div>
@@ -839,7 +839,7 @@ C:\work&gt; </div>
         <button class="btn" type="button" id="trayMenuBtn">Tray menu</button>
         <button class="btn" type="button" id="openSettingsBtn">Settings</button>
         <button class="btn" type="button" id="openTodoBtn">ANDA to-do list</button>
-        <button class="btn" type="button" id="openChecklistBtn">My checklist</button>
+        <button class="btn" type="button" id="openMyTodoBtn">My to-do list</button>
       </div>
       <div class="lbl">MY ACTIONS · THEIR SHORTCUTS</div>
       <div class="row" id="actKeys" aria-label="Press one of your own shortcuts"></div>
@@ -904,7 +904,7 @@ C:\work&gt; </div>
       <p class="st" id="gsStep3"></p>
       <div class="acts">
         <button class="pill quiet" id="gsFiles" type="button">Choose my portfolio file</button>
-        <button class="pill quiet" id="gsChecklist" type="button">Open my checklist</button>
+        <button class="pill quiet" id="gsMyTodo" type="button">Open my to-do list</button>
         <button class="pill" id="gsHide" type="button">Got it, hide this</button>
       </div>
       <p class="hint">Everything else here is optional. The app works as it is. You can show this again under Maintenance.</p>
@@ -980,25 +980,25 @@ C:\work&gt; </div>
     <div class="frow" style="margin-top:6px"><span id="repliesSummary" style="font-size:12px;color:var(--c-ink2)"></span><button class="pill quiet" id="repliesManage" type="button">Quick replies…</button><span></span></div>
     <p class="hint">Tone, style and sign-off steer Proofread, Rewrite and Fact-check (only once a model is approved). They can never override the fixed rules: no changed numbers or dates, no invented facts. Quick replies are templates filled from the card (no AI): the Quick replies button on a card copies one with its numbers and dates filled in.</p>
     </div></details>
-    <details class="sec" id="secChecklist"><summary><h3 class="grp">My checklist</h3><span class="pillnote" id="pillChecklist" hidden></span></summary>
+    <details class="sec" id="secMyTodo"><summary><h3 class="grp">My to-do list</h3><span class="pillnote" id="pillMyTodo" hidden></span></summary>
     <div class="secbody">
-    <div class="lbl">MY CHECKLIST · A SEPARATE LIST FOR ANYTHING, WORK OR HOME</div>
-    <div class="krow kl"><span>Notes to checklist</span><input type="text" id="keyBoxList" readonly aria-label="My checklist shortcut"><span style="display:flex;gap:6px"><button class="pill quiet" type="button" data-keyclear="list">None</button><button class="pill quiet" type="button" data-keyreset="list">Reset</button></span></div>
+    <div class="lbl">MY TO-DO LIST · YOUR DAILY WORKLOAD, ANDA RELATED OR NOT</div>
+    <div class="krow kl"><span>Notes to my to-do list</span><input type="text" id="keyBoxList" readonly aria-label="My to-do list shortcut"><span style="display:flex;gap:6px"><button class="pill quiet" type="button" data-keyclear="list">None</button><button class="pill quiet" type="button" data-keyreset="list">Reset</button></span></div>
     <div class="keystatus" id="listKeyStatus" role="status"></div>
-    <p class="hint">Click the box, then press the keys. Select messy notes anywhere (an email, a message, a scribbled list), press this shortcut, and they become suggested checklist items. None means no shortcut: the tray menu still opens it.</p>
+    <p class="hint">Click the box, then press the keys. Select rough notes anywhere (an email, a chat message, or rough notes), press this shortcut, and they become suggested to-do items. None means no shortcut: the tray menu still opens it.</p>
     <hr class="hair">
     <div class="lbl">WHEN I PRESS IT</div>
     <div id="clMode"></div>
-    <p class="hint">Show me the items first lets you untick, change or rename each one before anything is added. Add them at once puts every item that looks like a task on your checklist straight away, with an Undo button for that batch.</p>
+    <p class="hint">Show me the items first lets you untick, change or rename each one before anything is added. Add them at once puts every item that looks like a task on your to-do list straight away, with an Undo button for that batch.</p>
     <hr class="hair">
     <div class="lbl">OPEN IT · KEEP IT TIDY</div>
     <div style="display:flex;flex-wrap:wrap;gap:8px">
-      <button class="pill quiet" id="clOpenSet" type="button">Open my checklist</button>
-      <button class="pill quiet" id="clNotesSet" type="button">Notes to checklist…</button>
+      <button class="pill quiet" id="clOpenSet" type="button">Open my to-do list</button>
+      <button class="pill quiet" id="clNotesSet" type="button">Notes to my to-do list…</button>
       <button class="pill quiet" id="clClearSet" type="button">Clear finished items</button>
     </div>
     <div class="keystatus" id="clSetStatus" role="status"></div>
-    <p class="hint">It is apart from the ANDA to-do list: its own shortcut, its own window and its own file (checklist.json on this PC in the Windows app; here it lives only on this page), and nothing in it comes from your data. Notes are read by simple rules (no AI, nothing is sent anywhere), and the reading never invents a day: what it did not find stays empty. Items that repeat come back by themselves.</p>
+    <p class="hint">This is your own workload list, for any task, ANDA related or not. It is apart from the ANDA to-do list, which is built from your ANDA data: it has its own shortcut, window and file (mytodo.json on this PC in the Windows app; here it lives only on this page). Notes are read by simple rules (no AI, nothing is sent anywhere), and the reading never invents a day: what it did not find stays empty. Items that repeat come back by themselves.</p>
     </div></details>
     <details class="sec" id="secActions"><summary><h3 class="grp">My actions, agents and ANDA to-do list</h3><span class="pillnote" id="pillActions" hidden></span></summary>
     <div class="secbody">
@@ -1173,15 +1173,15 @@ C:\work&gt; </div>
     <p class="hint" id="tdFooter"></p>
   </div>
 
-  <!-- ===== my checklist ===== -->
-  <div class="app-win" id="checklist" role="dialog" aria-label="My checklist">
-    <div class="hdr"><h2>My checklist</h2><button class="pill" id="clDone" type="button">Done</button></div>
+  <!-- ===== my to-do list ===== -->
+  <div class="app-win" id="mytodo" role="dialog" aria-label="My to-do list">
+    <div class="hdr"><h2>My to-do list</h2><button class="pill" id="clDone" type="button">Done</button></div>
     <p class="hint" id="clSummary" style="margin:0"></p>
     <div class="clbar" id="clBar" role="img" aria-label="Nothing is due today"><i id="clBarFill"></i></div>
     <p class="clfocus" id="clFocus" hidden></p>
     <hr class="hair">
     <div class="cladd">
-      <input type="text" id="clAddIn" maxlength="200" placeholder="Type what needs doing, for example: pay rent on the 1st every month" aria-label="New checklist item">
+      <input type="text" id="clAddIn" maxlength="200" placeholder="Type a task, for example: send the status update by Friday" aria-label="New to-do item">
       <button class="pill" id="clAdd" type="button">Add</button>
       <button class="pill quiet" id="clNotesBtn" type="button">Paste notes…</button>
     </div>
@@ -1194,11 +1194,11 @@ C:\work&gt; </div>
     <p class="hint" id="clFooter"></p>
   </div>
 
-  <!-- ===== notes to checklist ===== -->
-  <div class="app-win" id="notes" role="dialog" aria-label="Notes to checklist">
-    <div class="hdr"><h2>Notes to checklist</h2><button class="pill" id="ntClose" type="button">Close</button></div>
+  <!-- ===== notes to my to-do list ===== -->
+  <div class="app-win" id="notes" role="dialog" aria-label="Notes to my to-do list">
+    <div class="hdr"><h2>Notes to my to-do list</h2><button class="pill" id="ntClose" type="button">Close</button></div>
     <div class="lbl">YOUR NOTES</div>
-    <textarea id="ntText" maxlength="6000" rows="5" aria-label="Your notes" placeholder="Paste or type your notes in any order. Or select them anywhere and press the My checklist shortcut."></textarea>
+    <textarea id="ntText" maxlength="6000" rows="5" aria-label="Your notes" placeholder="Paste or type your notes in any order. Or select them anywhere and press the My to-do list shortcut."></textarea>
     <p class="hint" id="ntHint"></p>
     <div class="lbl" id="ntFoundLabel">SUGGESTED ITEMS</div>
     <p class="hint" id="ntFoundNote" style="margin:0 0 6px"></p>
@@ -1206,7 +1206,7 @@ C:\work&gt; </div>
     <div class="acts"><button class="pill" id="ntAdd" type="button">Add the ticked items</button><button class="pill quiet" id="ntAll" type="button">Tick all</button><button class="pill quiet" id="ntNone" type="button">Untick all</button><button class="pill quiet" id="ntUndo" type="button" hidden>Undo</button></div>
     <p class="hint" id="ntStatus" role="status" hidden></p>
     <hr class="hair">
-    <div class="acts"><button class="pill quiet" id="ntOpenList" type="button">Open my checklist</button></div>
+    <div class="acts"><button class="pill quiet" id="ntOpenList" type="button">Open my to-do list</button></div>
   </div>
 
   <!-- ===== watch list and page scan ===== -->
@@ -1541,7 +1541,7 @@ const state = { dir:"k", look:"k", form:"full", autoHide:10, mode:"whisper", esc
   myApi:{ name:"My API", endpoint:"", header:"Authorization", scheme:"Bearer", env:"", model:"", template:"", path:"choices[0].message.content" },
   replies:null };
 const steps = {};
-const APP_WINS = ["lookup", "plib", "settings", "draft", "wlist", "replies", "actwin", "todo", "checklist", "notes"];
+const APP_WINS = ["lookup", "plib", "settings", "draft", "wlist", "replies", "actwin", "todo", "mytodo", "notes"];
 let current = null, pinnedCard = false, focusedWin = "mail", lastSel = null, deselecting = false;
 let pointer = { x: Math.round(innerWidth * 0.4), y: Math.round(innerHeight * 0.4) };
 let chipTimer = null, streamTimer = null, keysTimer = null, chipAccept = null;
@@ -1895,7 +1895,7 @@ document.addEventListener("keydown", e => {
   if(e.key === "Escape"){
     if($("replyMenu").style.display === "block"){ $("replyMenu").style.display = "none"; return; }
     if(menuOpen() || $("flyout").style.display === "block"){ closeMenus(); return; }
-    closeCtx(); if(isOpen("checklist") && clEditing){ clCancelEdit(); return; }
+    closeCtx(); if(isOpen("mytodo") && clEditing){ clCancelEdit(); return; }
     for(const id of APP_WINS) if($(id).style.display === "block"){ closeApp(id); return; }
     hideChip(); if(compact.style.display === "block") closeCompact(); if(card.style.display === "block") closeCard(); return;
   }
@@ -1911,7 +1911,7 @@ $("keyPeek").addEventListener("click", () => hotkey("peek", "button"));
 $("keyLook").addEventListener("click", () => hotkey("look", "button"));
 $("keyDraft").addEventListener("click", () => hotkey("draft", "button"));
 $("keyList").addEventListener("click", () => hotkey("list", "button"));
-$("openChecklistBtn").addEventListener("click", () => openChecklist());
+$("openMyTodoBtn").addEventListener("click", () => openMyTodo());
 document.querySelectorAll("[data-pickbtn]").forEach(b => b.addEventListener("click", () => pick(b.dataset.pickbtn)));
 document.querySelectorAll(".apps .pick").forEach(el => el.addEventListener("dblclick", () => { lastSel = { text:el.textContent, win:winOf(el), x:el.getBoundingClientRect().right, y:el.getBoundingClientRect().bottom }; }));
 
@@ -2030,7 +2030,7 @@ function showApp(id){ closeMenus(); $(id).style.display = "block"; if(isSheet())
 function closeApp(id){
   $(id).style.display = "none"; if(card.style.display !== "block") scrim.style.display = "none";
   if(id === "todo") tdStop();                      /* nothing runs once the list is closed */
-  if(id === "checklist") clClose();                /* the same for the checklist */
+  if(id === "mytodo") clClose();                /* the same for the to-do list */
   if(id === "notes") clearTimeout(ntDebounce);
   if(id === "actwin") awToken++;                   /* a reply that arrives after the window is closed is dropped */
 }
@@ -2130,8 +2130,8 @@ function openMenu(){
     item("Check a draft…", state.keys.draft, () => openDraft("")),
     item("Watch list…", "", () => openWatchList()),
     item("ANDA to-do list…", "", () => openTodo()),
-    item("My checklist…", state.keys.list || "", () => openChecklist()),
-    item("Notes to checklist…", "", () => openNotes("")),
+    item("My to-do list…", state.keys.list || "", () => openMyTodo()),
+    item("Notes to my to-do list…", "", () => openNotes("")),
     item("Demo: at-risk card", "", () => openCard("216482", { anchor:trayAnchor() })),
     item("Demo: healthy card", "", () => openCard("214990", { anchor:trayAnchor() })),
     document.createElement("hr"));
@@ -2202,7 +2202,7 @@ function launch(){
 }
 
 /* ---------------- round 10: shortcuts, middle-click, my data, my writing, my API, connection ---------------- */
-const KEYKINDS = [["peek", "Select & Peek", "keyBoxPeek"], ["look", "Lookup box", "keyBoxLook"], ["draft", "Check a draft", "keyBoxDraft"], ["list", "My checklist", "keyBoxList"]];
+const KEYKINDS = [["peek", "Select & Peek", "keyBoxPeek"], ["look", "Lookup box", "keyBoxLook"], ["draft", "Check a draft", "keyBoxDraft"], ["list", "My to-do list", "keyBoxList"]];
 const KEY_DEFAULT = { peek:"Ctrl+Alt+A", look:"Ctrl+Alt+Space", draft:"Ctrl+Alt+D", list:"Ctrl+Alt+L" };
 function keyName(e){
   const c = e.code || "";
@@ -2243,7 +2243,7 @@ function keyReport(){
 }
 function paintKeys(){
   $("keyPeek").textContent = state.keys.peek; $("keyLook").textContent = state.keys.look; $("keyDraft").textContent = state.keys.draft;
-  $("keyList").textContent = state.keys.list || "My checklist (no shortcut)"; $("keyList").setAttribute("aria-label", state.keys.list ? "Press " + state.keys.list.replace(/\+/g, " ") : "My checklist has no shortcut. Press to try the notes window.");
+  $("keyList").textContent = state.keys.list || "My to-do list (no shortcut)"; $("keyList").setAttribute("aria-label", state.keys.list ? "Press " + state.keys.list.replace(/\+/g, " ") : "My to-do list has no shortcut. Press to try the notes window.");
   $("keyPeek").setAttribute("aria-label", "Press " + state.keys.peek.replace(/\+/g, " ")); $("keyLook").setAttribute("aria-label", "Press " + state.keys.look.replace(/\+/g, " ")); $("keyDraft").setAttribute("aria-label", "Press " + state.keys.draft.replace(/\+/g, " "));
   document.querySelectorAll("[data-key]").forEach(el => { el.textContent = state.keys[el.dataset.key] || "the tray menu"; });
   document.querySelectorAll("[data-kbd]").forEach(el => { el.innerHTML = state.keys[el.dataset.kbd] ? kbdHTML(state.keys[el.dataset.kbd]) : "the tray menu"; });
@@ -2276,7 +2276,7 @@ function paintKeys(){
   }));
   document.querySelectorAll("[data-keyclear]").forEach(b => b.addEventListener("click", () => {
     const kind = b.dataset.keyclear; state.keys = { ...state.keys, [kind]: "" }; state.taken[kind] = false; paintKeys(); renderActions();
-    $("listKeyStatus").textContent = "My checklist has no shortcut now. The tray menu still opens it.";
+    $("listKeyStatus").textContent = "My to-do list has no shortcut now. The tray menu still opens it.";
   }));
   paintKeys();
 })();
@@ -2662,7 +2662,7 @@ let agentCache = {}, agentFailed = {}, agentBusy = {}, lookupHandler = null;
 /* ---- rules (MyActionRules, AgentRules) ---- */
 function shortcutsInUse(except){
   return [["Select & Peek", state.keys.peek], ["Lookup box", state.keys.look], ["Check a draft", state.keys.draft]]
-    .concat(state.keys.list ? [["My checklist", state.keys.list]] : [])
+    .concat(state.keys.list ? [["My to-do list", state.keys.list]] : [])
     .concat(state.actions.filter(x => x !== except && x.hotkey).map(x => [x.name, x.hotkey]));
 }
 function validateAction(a, others){
@@ -3261,9 +3261,9 @@ $("agAdd").addEventListener("click", () => {
 })();
 
 
-/* ===================== round 16: my checklist, notes to checklist, settings that arrange themselves =====================
-   A port of the Windows app's ChecklistService, NoteParser, ChecklistWindow, NotesWindow, SettingsAdvisor and the adaptive Settings.
-   The notes reader below is kept equal to the app's by one shared fixture (checklist-golden.json). Nothing here is sent anywhere. */
+/* ===================== round 16: my to-do list, notes to my to-do list, settings that arrange themselves =====================
+   A port of the Windows app's MyTodoService, NoteParser, MyTodoWindow, NotesWindow, SettingsAdvisor and the adaptive Settings.
+   The notes reader below is kept equal to the app's by one shared fixture (mytodo-golden.json). Nothing here is sent anywhere. */
 const NP = (() => {
   /* A word boundary the way the app's regular expressions see one: letters, marks, digits and connectors of every script are word characters (JavaScript's own \b knows only A-Z, 0-9 and _).
      The app reads text as 16-bit units, so a character outside the Basic Multilingual Plane is two units and is never a word character there; it is the same here. */
@@ -3281,7 +3281,7 @@ const NP = (() => {
           "summarize", "summarise", "compile", "collect", "gather", "prep", "coordinate", "assign", "delegate", "finalize", "finalise", "resolve", "address", "handle",
           "process", "reconcile", "double-check", "proofread", "edit", "revise", "rewrite", "cc", "loop", "ping", "nudge", "chase", "thank", "apologize", "invite", "rsvp",
           "register", "enroll", "apply", "vote", "donate", "charge", "refill", "restock", "tidy", "declutter", "assemble", "hang", "mount", "patch", "seal", "unclog",
-          "flush", "reach", "touch", "double", "make sure", "ensure", "remember", "bake", "sweep", "scrub", "wipe", "fold", "iron", "swap", "rotate", "mark", "tag",];
+          "flush", "reach", "touch", "double", "make sure", "ensure", "remember", "bake", "sweep", "scrub", "wipe", "fold", "iron", "swap", "rotate", "mark", "tag", "route", "triage", "prioritize", "prioritise", "reassign", "reschedule", "analyze", "analyse", "evaluate", "assess", "validate", "identify", "determine", "follow-up",];
   const ABBREV = ["dr", "mr", "mrs", "ms", "no", "vs", "e.g", "i.e", "a.m", "p.m", "st", "jr", "sr", "inc", "approx", "etc", "fig", "ext", "dept", "est", "mt", "ave"];
   const Bullet = R(String.raw`^\s*(?:[-*•–—▪◦·]+|\d{1,3}[.)]|\[[ xX]?\])\s+`);
   const Header = R(String.raw`^\s*(?:from|to|cc|bcc|subject|sent|date|reply-to|importance|attachments?)\s*:`);
@@ -3319,8 +3319,8 @@ const NP = (() => {
   const Space = R(String.raw`\s+`);
   const SplitVerbConnector = R(String.raw`\s+(?:and also|and then|also|plus|then|after that|next)\s+`);
   const SplitAnd = R(String.raw`\s+and\s+`);
-  const WorkWords = R(String.raw`\b(?:anda|ir|ind|nda|fda|dpm|rpm|supervisor|huddle|meeting|memo|report|review|submission|deficienc\w*|labeling|labelling|cycle|applicant|goal date|forecast|deadline|status|project|team|client|invoice|budget|presentation|slides|spreadsheet|timesheet|calendar|agenda|minutes|email|e-mail|inbox|manager|director|colleague|coworker|training|compliance|audit|policy|sop|procedure|ticket|stakeholder|quarterly|office)\b`);
-  const HomeWords = R(String.raw`\b(?:home|house|apartment|landlord|rent|mortgage|hoa|plumber|plumbing|leak\w*|faucet|sink|toilet|drain|roof|gutters?|furnace|hvac|thermostat|water heater|appliances?|dishwasher|fridge|refrigerator|oven|stove|washer|dryer|laundry|dishes|vacuum\w*|mop\w*|dust\w*|clean\w*|tidy\w*|declutter\w*|trash|garbage|recycl\w*|lawn|mow\w*|garden\w*|yard|fence|paint\w*|repair\w*|handyman|electrician|groceries|grocery|dinner|lunch|cook\w*|kids?|child\w*|school|daycare|dentist|doctor|pharmacy|prescriptions?|vet|pets?|dog|cat|car|oil change|tires?|utilit\w*|electric bill|water bill|gas bill|insurance|garage|basement|attic|closet|bedroom|kitchen|bathroom|living room|sofa|couch|mattress|curtains?|light ?bulbs?|smoke detector|filters?)\b`);
+  const WorkWords = R(String.raw`\b(?:anda|ir|ind|nda|fda|dpm|rpm|supervisor|huddle|meeting|memo|report|review|submission|deficienc\w*|labeling|labelling|cycle|applicant|goal date|forecast|deadline|status|project|team|client|invoice|budget|presentation|slides|spreadsheet|timesheet|calendar|agenda|minutes|email|e-mail|inbox|manager|director|colleague|coworker|training|compliance|audit|policy|sop|procedure|ticket|stakeholder|quarterly|office|information requests?|discipline|consult\w*|amendments?|inspections?|facilit(?:y|ies)|assessments?|reviewers?|approval|tentative|complete response|controlled correspondence|citizen petition|patents?|exclusivity|bioequivalen\w*|cmc|division|branch|team lead|workload|backlog|queue|one-on-one|performance|appraisal|telework|travel|expenses?|briefing|deliverables?|milestones?|action items?|sign-off|clearance|docket|orange book|paragraph iv|gdufa|huddles?|tracker|tracking sheet)\b`);
+  const PersonalWords = R(String.raw`\b(?:home|house|apartment|landlord|rent|mortgage|hoa|plumber|plumbing|leak\w*|faucet|sink|toilet|drain|roof|gutters?|furnace|hvac|thermostat|water heater|appliances?|dishwasher|fridge|refrigerator|oven|stove|washer|dryer|laundry|dishes|vacuum\w*|mop\w*|dust\w*|clean\w*|tidy\w*|declutter\w*|trash|garbage|recycl\w*|lawn|mow\w*|garden\w*|yard|fence|paint\w*|repair\w*|handyman|electrician|groceries|grocery|dinner|lunch|cook\w*|kids?|child\w*|school|daycare|dentist|doctor|pharmacy|prescriptions?|vet|pets?|dog|cat|car|oil change|tires?|utilit\w*|electric bill|water bill|gas bill|insurance|garage|basement|attic|closet|bedroom|kitchen|bathroom|living room|sofa|couch|mattress|curtains?|light ?bulbs?|smoke detector|filters?)\b`);
   
   const LIMIT = 6000, MAX_ITEMS = 30, MAX_TITLE = 160, D = 864e5;
   const VERBSET = new Set(VERBS);
@@ -3416,15 +3416,34 @@ const NP = (() => {
 
   function clean(text){
     const t = String(text == null ? "" : text).replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-    let out = "";
+    let out = "", cut = false, next = "";
     for(let i = 0; i < t.length; i++){
       const c = t[i];
-      if(out.length >= LIMIT) break;
+      if(out.length >= LIMIT){ cut = true; next = c; break; }
       if(c === "\n" || c === "\t") out += c === "\t" ? " " : c;
       else if(!isCtl(c)) out += c;
     }
-    return out.trim();
+    return (cut ? cutAtWord(out, next) : out).trim();
   }
+
+  /* when the reading limit falls inside a sentence, that unfinished last sentence (or line) is dropped, so a cut-off fragment never becomes an item of its own;
+     it looks back at most 300 characters, and if there is no sentence end or line break there it drops only the unfinished word; "next" is the first character that did not fit */
+  function cutAtWord(head, next){
+    if(next === "\n" || next === "\r") return head;
+    let end = head.length;
+    while(end > 0 && (head[end - 1] === " " || head[end - 1] === "\n" || head[end - 1] === "\r")) end--;
+    if(end === 0 || ".!?;\"”)".includes(head[end - 1])) return head;
+    const low = Math.max(0, end - 300); let space = -1;
+    for(let i = end - 1; i >= low; i--){
+      const ch = head[i];
+      if(ch === "." || ch === "!" || ch === "?" || ch === ";") return head.slice(0, i + 1);
+      if(ch === "\n" || ch === "\r") return head.slice(0, i);
+      if(ch === " " && space < 0) space = i;
+    }
+    return space >= 0 ? head.slice(0, space) : head;
+  }
+  /* the text for the notes box: unchanged if it fits, otherwise cut at the reading limit without leaving half a word at the end */
+  function fit(text){ const t = String(text == null ? "" : text); return t.length <= LIMIT ? t : cutAtWord(t.slice(0, LIMIT), t[LIMIT]); }
 
   function sentences(line){
     const out = []; let start = 0;
@@ -3463,7 +3482,7 @@ const NP = (() => {
   function splitInside(segment){
     const s = segment.trim(); if(!s.length) return [];
     const both = (left, right) => left.trim().includes(" ") && right.trim().includes(" ") && startsWithVerb(stripFiller(left).text) && startsWithVerb(stripFiller(right).text);
-    for(let c = s.indexOf(","); c >= 0; c = s.indexOf(",", c + 1)){       /* "fix the sink, clean the garage, and call the vet" is three tasks */
+    for(let c = s.indexOf(","); c >= 0; c = s.indexOf(",", c + 1)){       /* "update the tracker, file the memo, and call the applicant" is three tasks */
       const left = s.slice(0, c), right = s.slice(c + 1).replace(CommaLead, "");
       if(both(left, right)) return [...splitInside(left), ...splitInside(right)];
     }
@@ -3488,8 +3507,8 @@ const NP = (() => {
   }
 
   function readCategory(text, number){
-    const work = (text.match(global(WorkWords)) || []).length + (number ? 2 : 0), home = (text.match(global(HomeWords)) || []).length;
-    return work === 0 && home === 0 ? 2 : home > work ? 1 : 0;
+    const work = (text.match(global(WorkWords)) || []).length + (number ? 2 : 0), personal = (text.match(global(PersonalWords)) || []).length;
+    return work === 0 && personal === 0 ? 2 : personal > work ? 1 : 0;
   }
 
   function read(segment, today, keepEvenIfNote){
@@ -3540,12 +3559,12 @@ const NP = (() => {
   function parseOne(text, today){
     try{ const c = clean(text); return c.length === 0 ? null : read(c.replace(/\n/g, " "), today, true); }catch(e){ return null; }
   }
-  return { parse, parseOne, readDue, onOrAfter, firstOccurrence:onOrAfter, MAX_INPUT:LIMIT, MAX_ITEMS, MAX_TITLE };
+  return { parse, parseOne, readDue, onOrAfter, firstOccurrence:onOrAfter, fit, MAX_INPUT:LIMIT, MAX_ITEMS, MAX_TITLE };
 })();
 
-/* ---- the checklist store (ChecklistService) ---- */
+/* ---- the to-do list store (MyTodoService) ---- */
 const CL_MAX = 500, CL_TITLE_MAX = 200, CL_KEEP_DONE = 30, CL_KEEP_COUNT = 60, CL_RECENT = 7, CL_SOON = 7;
-const CL_CATS = ["Work", "Home", "Other"], CL_REPEATS = ["Does not repeat", "Every day", "Every weekday", "Every week", "Every month"];
+const CL_CATS = ["Work", "Personal", "Other"], CL_REPEATS = ["Does not repeat", "Every day", "Every weekday", "Every week", "Every month"];
 const CL_REPEAT_WORDS = ["never", "every day", "every weekday", "every week", "every month"];
 const clStore = { items:[], doneByDay:{}, seq:0 };
 const clListeners = new Set();
@@ -3569,7 +3588,7 @@ function clAdd(title, cat, due, high, repeat, repeatDay, number, source){
   if(same) return { item:{ ...same }, added:false, reason:null };
   if(clStore.items.length >= CL_MAX){
     const oldest = clStore.items.filter(i => i.done && i.repeat === 0).sort((a, b) => (a.doneOn || 0) - (b.doneOn || 0))[0];
-    if(!oldest) return { item:null, added:false, reason:`The checklist is full (${CL_MAX} items). Please finish or delete some.` };
+    if(!oldest) return { item:null, added:false, reason:`The to-do list is full (${CL_MAX} items). Please finish or delete some.` };
     clStore.items.splice(clStore.items.indexOf(oldest), 1);
   }
   const item = { id:"c" + (++clStore.seq) + Math.random().toString(36).slice(2, 7), title:t, category:cat, due:due == null ? null : due, high:!!high, repeat, repeatDay:day,
@@ -3635,7 +3654,7 @@ function clRefresh(today){
   if(changed) clChanged();
   return changed;
 }
-/* what the window shows (ChecklistBuilder): overdue, today, the next seven days, anytime, then what was finished in the last seven days */
+/* what the window shows (MyTodoBuilder): overdue, today, the next seven days, anytime, then what was finished in the last seven days */
 function clBuild(all, today, finished7, filter){
   const items = all.filter(i => filter == null || i.category === filter);
   const cmpDue = (a, b) => a.due == null ? (b.due == null ? 0 : 1) : b.due == null ? -1 : a.due - b.due;
@@ -3655,7 +3674,7 @@ function clBuild(all, today, finished7, filter){
   const doneToday = items.filter(i => i.done && i.doneOn === today).length;
   const todayTotal = overdue.length + due0.length + doneToday;
   const focus = (overdue.length ? overdue : due0)[0];
-  return { groups, open:open.length, overdue:overdue.length, doneToday, todayTotal, finished7, focus:focus ? focus.title : null };
+  return { groups, open:open.length, urgent:open.filter(i => i.high).length, overdue:overdue.length, doneToday, todayTotal, finished7, focus:focus ? focus.title : null };
 }
 
 /* ---- the fields of one item (ItemFields), used by the row editor and by each suggestion ---- */
@@ -3716,13 +3735,13 @@ const clDescribe = (title, cat, due, high, repeat) => {
 };
 function setText(el, text){ el.textContent = text; el.hidden = !text; }
 
-/* ---- My checklist (ChecklistWindow) ---- */
+/* ---- My to-do list (MyTodoWindow) ---- */
 let clTimer = null, clSig = "", clDay = null, clView = null, clEditing = null, clEditor = null, clEditorError = "", clDeleted = null, clErrBox = null;
-const CL_FILTERS = ["Everything", "Work", "Home", "Other"];
+const CL_FILTERS = ["Everything", "Work", "Personal", "Other"];
 const clFilterValue = () => { const i = $("clFilter").selectedIndex; return i >= 1 && i <= 3 ? i - 1 : null; };
 function raiseOver(id, other){ $(id).style.zIndex = "52"; $(other).style.zIndex = "51"; }     /* the window just opened is in front of its neighbour; a card stays in front of both */
-function openChecklist(){
-  closeMenus(); showApp("checklist"); raiseOver("checklist", "notes");
+function openMyTodo(){
+  closeMenus(); showApp("mytodo"); raiseOver("mytodo", "notes");
   clStop(); clTimer = setInterval(() => { if(clToday() !== clDay) clReload(true); }, 30000);
   clReload(true);
   setTimeout(() => $("clAddIn").focus(), 30);
@@ -3730,33 +3749,34 @@ function openChecklist(){
 function clStop(){ clearInterval(clTimer); clTimer = null; }
 function clClose(){ clStop(); clEditing = null; clEditor = null; clEditorError = ""; clDeleted = null; $("clUndo").hidden = true; $("clAddIn").value = ""; setText($("clPreview"), ""); setText($("clStatus"), ""); }
 function clReload(force){
-  if(!isOpen("checklist")) return;
+  if(!isOpen("mytodo")) return;
   const today = clToday(); clDay = today; clRefresh(today);
   const view = clView = clBuild(clStore.items, today, clFinishedIn(CL_RECENT, today), clFilterValue());
   const sig = view.groups.map(g => g.items.map(i => `${g.heading}|${i.id}|${i.title}|${i.due}|${i.done}|${i.high}|${i.category}|${i.repeat}`).join("\n")).join("\n") + `#${view.open}|${view.finished7}|${clEditing}|${clFilterValue()}|${today}`;
   clSummary(view); $("clRoll").hidden = !(view.overdue > 0);
-  $("clFooter").textContent = "Saved on this page only in this simulation (the Windows app keeps checklist.json on the PC); nothing is sent anywhere. Items that repeat come back by themselves, and a repeating item you miss moves to its next day instead of piling up.";
+  $("clFooter").textContent = "Saved on this page only in this simulation (the Windows app keeps mytodo.json on the PC); nothing is sent anywhere. Items that repeat come back by themselves, and a repeating item you miss moves to its next day instead of piling up.";
   if(!force && sig === clSig) return;
   clSig = sig; clDraw(view);
 }
 function clSummary(view){
   const fill = $("clBarFill"), bar = $("clBar");
   if(clStore.items.length === 0){
-    $("clSummary").textContent = `Your checklist is empty. Type something above, or select your notes anywhere and press ${state.keys.list || "the tray menu item (no shortcut is set)"} to turn them into items.`;
+    $("clSummary").textContent = `Your to-do list is empty. Type something above, or select your notes anywhere and press ${state.keys.list || "the tray menu item (no shortcut is set)"} to turn them into items.`;
     setText($("clFocus"), ""); fill.style.width = "0%"; bar.setAttribute("aria-label", "Nothing is due today"); return;
   }
   const bits = [`${view.open} open`];
+  if(view.urgent > 0) bits.push(`${view.urgent} urgent`);
   if(view.overdue > 0) bits.push(`${view.overdue} overdue`);
   if(view.todayTotal > 0) bits.push(`${view.doneToday} of ${view.todayTotal} done today`);
   bits.push(`${view.finished7} finished in the last 7 days`);
   $("clSummary").textContent = bits.join(" · ");
-  setText($("clFocus"), view.focus ? "Start with: " + view.focus : view.open === 0 ? "Everything is done. Well done." : "Nothing is due today or overdue. The rest is below.");
+  setText($("clFocus"), view.focus ? "Start with: " + view.focus : view.open === 0 ? "All items are complete." : "Nothing is due today and nothing is overdue. The remaining items are listed below.");
   fill.style.width = view.todayTotal > 0 ? Math.round(100 * view.doneToday / view.todayTotal) + "%" : "0%";
   bar.setAttribute("aria-label", view.todayTotal > 0 ? `${view.doneToday} of ${view.todayTotal} done today` : "Nothing is due today");
 }
 function clDraw(view){
   const box = $("clRows"); box.replaceChildren();
-  if(!view.groups.length){ box.append(h("p", { class:"hint", style:"margin:8px 0", text:clStore.items.length === 0 ? "Nothing here yet. Add your first item above, for example “Call the plumber tomorrow”." : "Nothing in this view." })); return; }
+  if(!view.groups.length){ box.append(h("p", { class:"hint", style:"margin:8px 0", text:clStore.items.length === 0 ? "No items yet. Add your first item above, for example “Send the status update to my supervisor by Friday”." : "Nothing in this view." })); return; }
   view.groups.forEach(g => {
     box.append(h("div", { class:"gh" + (g.heading === "OVERDUE" ? " bad" : ""), text:`${g.heading} · ${g.items.length}` }));
     g.items.forEach(i => box.append(clRow(i)));
@@ -3781,7 +3801,7 @@ function clRow(item){
   t.append(h("b", { text:item.title, style:item.done ? "" : "font-weight:400" }), h("small", { class:late ? "bad" : "", text:meta.join(" · ") }));
   const btns = h("div", { class:"btns" });
   if(item.number) btns.append(h("button", { type:"button", text:item.number, aria:`Open the card for ANDA ${item.number}`, onclick:() => {
-    const r = $("checklist").getBoundingClientRect();
+    const r = $("mytodo").getBoundingClientRect();
     openCard(item.number, { anchor:{ x:Math.min(r.right + 8, innerWidth - 390), y:r.top + 24 }, above:true });
   } }));
   if(!item.done){
@@ -3835,7 +3855,7 @@ $("clAddIn").addEventListener("input", clPreviewTyped);
 $("clAddIn").addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); clAddTyped(); } });
 $("clAdd").addEventListener("click", clAddTyped);
 $("clNotesBtn").addEventListener("click", () => openNotes(""));
-$("clDone").addEventListener("click", () => closeApp("checklist"));
+$("clDone").addEventListener("click", () => closeApp("mytodo"));
 $("clRoll").addEventListener("click", () => { const n = clRollOver(clToday()); setText($("clStatus"), n === 0 ? "Nothing is overdue." : `Moved ${n} overdue ${n === 1 ? "item" : "items"} to today.`); });
 $("clClear").addEventListener("click", () => { const n = clClearFinished(); setText($("clStatus"), n === 0 ? "Nothing finished to clear. Finished items that repeat stay: they come back by themselves." : `Cleared ${n} finished ${n === 1 ? "item" : "items"}.`); });
 $("clUndo").addEventListener("click", () => {
@@ -3844,13 +3864,13 @@ $("clUndo").addEventListener("click", () => {
 });
 clListeners.add(() => clReload(false));
 
-/* ---- Notes to checklist (NotesWindow) ---- */
+/* ---- Notes to my to-do list (NotesWindow) ---- */
 let ntRows = [], ntLastAdded = [], ntDebounce = null;
 function openNotes(text){
-  closeMenus(); showApp("notes"); raiseOver("notes", "checklist"); clRefresh(clToday());
+  closeMenus(); showApp("notes"); raiseOver("notes", "mytodo"); clRefresh(clToday());
   const t = String(text || ""), cut = t.length > NP.MAX_INPUT;
-  $("ntText").value = cut ? t.slice(0, NP.MAX_INPUT) : t;
-  $("ntHint").textContent = `Select your notes anywhere and press ${state.keys.list || "the My checklist item in the tray menu"}, or paste them above. They are read by simple rules: no AI, nothing is sent anywhere. ` +
+  $("ntText").value = cut ? NP.fit(t) : t;
+  $("ntHint").textContent = `Select your notes anywhere and press ${state.keys.list || "the My to-do list item in the tray menu"}, or paste them above. They are read by simple rules: no AI, nothing is sent anywhere. ` +
     "You can change any suggestion before it is added. Changing the notes above refreshes the suggestions." + (cut ? ` Only the first ${NP.MAX_INPUT.toLocaleString("en-US")} characters were read.` : "");
   setText($("ntStatus"), ""); ntLastAdded = []; $("ntUndo").hidden = true;
   ntAnalyse();
@@ -3863,10 +3883,10 @@ function ntAnalyse(){
   ntRows = []; $("ntFound").replaceChildren(); $("ntUndo").hidden = true;
   items.forEach(item => {
     const f = itemFields(item.title); f.load(item.title, item.category, item.due, item.high, item.repeat);
-    const inc = h("input", { type:"checkbox", aria:"Add to my checklist: " + item.title }); inc.checked = item.actionable;
+    const inc = h("input", { type:"checkbox", aria:"Add to my to-do list: " + item.title }); inc.checked = item.actionable;
     inc.addEventListener("change", ntUpdate);
     const prob = h("div", { class:"prob" }); prob.hidden = true;
-    const mark = h("div", { class:"added", text:"Added to your checklist" }); mark.hidden = true;
+    const mark = h("div", { class:"added", text:"Added to your to-do list" }); mark.hidden = true;
     const inner = h("div", null, f.el);
     if(!item.actionable) inner.append(h("div", { class:"nt", text:"This reads like a note, not a task, so it is not ticked. Tick it if you want it on the list." }));
     inner.append(prob, mark);
@@ -3875,7 +3895,7 @@ function ntAnalyse(){
   });
   $("ntFoundLabel").textContent = ntRows.length === 0 ? "SUGGESTED ITEMS" : `SUGGESTED ITEMS · ${ntRows.length}`;
   setText($("ntFoundNote"), !text.trim() ? "Suggestions appear here as soon as there are notes."
-    : ntRows.length === 0 ? "I did not find anything that looks like a task. You can type one by hand in My checklist."
+    : ntRows.length === 0 ? "I did not find anything that looks like a task. You can type one by hand in My to-do list."
     : ntRows.length >= NP.MAX_ITEMS ? `Showing the first ${NP.MAX_ITEMS}. Split very long notes to see the rest.`
     : "Tick what you want on your list. Change a title, day, repeat or category if the reading is not right.");
   ntUpdate();
@@ -3902,11 +3922,11 @@ function ntAddRows(chosen, atOnce){
     if(res.reason){ full = res.reason; break; }
     if(res.added && res.item) ids.push(res.item.id); else already++;
     row.added = true; row.inc.checked = false; row.inc.disabled = true; row.mark.hidden = false;
-    row.mark.textContent = res.added ? "Added to your checklist" : "Already on your checklist";
+    row.mark.textContent = res.added ? "Added to your to-do list" : "Already on your to-do list";
     [row.f.title, row.f.cat, row.f.when, row.f.repeat, row.f.high].forEach(c => { c.disabled = true; });
   }
   ntLastAdded = ids; $("ntUndo").hidden = ids.length === 0;
-  const made = ids.length === 0 ? "Nothing new was added" : `Added ${ids.length} ${ids.length === 1 ? "item" : "items"} to your checklist`;
+  const made = ids.length === 0 ? "Nothing new was added" : `Added ${ids.length} ${ids.length === 1 ? "item" : "items"} to your to-do list`;
   setText($("ntStatus"), made + (already > 0 ? ` (${already} already on the list)` : "") + (full ? ". " + full : ".") + (atOnce && ids.length > 0 ? " This was added at once, as you chose in Settings. Press Undo to take it back." : ""));
   ntUpdate();
 }
@@ -3922,33 +3942,33 @@ $("ntAll").addEventListener("click", () => { ntRows.filter(r => !r.added).forEac
 $("ntNone").addEventListener("click", () => { ntRows.filter(r => !r.added).forEach(r => { r.inc.checked = false; }); ntUpdate(); });
 $("ntUndo").addEventListener("click", () => {
   const removed = ntLastAdded.filter(id => clDelete(id)).length; ntLastAdded = [];
-  ntAnalyse(); setText($("ntStatus"), `Removed ${removed} ${removed === 1 ? "item" : "items"} from your checklist.`);
+  ntAnalyse(); setText($("ntStatus"), `Removed ${removed} ${removed === 1 ? "item" : "items"} from your to-do list.`);
 });
 $("ntClose").addEventListener("click", () => closeApp("notes"));
-$("ntOpenList").addEventListener("click", () => openChecklist());
+$("ntOpenList").addEventListener("click", () => openMyTodo());
 
-/* ---- Settings: My checklist ---- */
-(function buildChecklistSettings(){
+/* ---- Settings: My to-do list ---- */
+(function buildMyTodoSettings(){
   [[0, "Show me the items first, so I can change them (recommended)"], [1, "Add them at once (I can press Undo)"]].forEach(([v, label]) => {
     const l = document.createElement("label"); l.className = "opt";
     l.innerHTML = `<input type="radio" name="clmode" value="${v}" ${v === state.clMode ? "checked" : ""}> ${label}`;
     l.firstChild.addEventListener("change", () => { state.clMode = v; });
     $("clMode").appendChild(l);
   });
-  $("clOpenSet").addEventListener("click", openChecklist);
+  $("clOpenSet").addEventListener("click", openMyTodo);
   $("clNotesSet").addEventListener("click", () => openNotes(""));
   $("clClearSet").addEventListener("click", () => { const n = clClearFinished(); $("clSetStatus").textContent = n === 0 ? "Nothing finished to clear. Finished items that repeat stay: they come back by themselves." : `Cleared ${n} finished ${n === 1 ? "item" : "items"}.`; });
 })();
 
 /* ---- Settings arrange themselves (SettingsAdvisor, SettingsWindow.Adaptive) ---- */
-const SECS = [["look", "Look and feel"], ["start", "How it starts"], ["dates", "Dates"], ["files", "My files and writing"], ["checklist", "My checklist"], ["actions", "My actions, agents and ANDA to-do list"], ["connections", "AI and connections"], ["maintenance", "Maintenance"]];
+const SECS = [["look", "Look and feel"], ["start", "How it starts"], ["dates", "Dates"], ["files", "My files and writing"], ["myTodo", "My to-do list"], ["actions", "My actions, agents and ANDA to-do list"], ["connections", "AI and connections"], ["maintenance", "Maintenance"]];
 const SEC_USE_MIN = 3, SEC_USE_MAX = 1000, SEC_SUGGEST_MAX = 3;
 const cap1 = k => k[0].toUpperCase() + k.slice(1);
 let secTouched = new Set();
 function settingsFacts(){
   const problems = new Set();
   if(state.taken.peek || state.taken.look || state.taken.draft) problems.add("start");
-  if(state.taken.list && state.keys.list) problems.add("checklist");
+  if(state.taken.list && state.keys.list) problems.add("myTodo");
   const c = connInfo(), name = state.provider === "myapi" ? (state.myApi.name || "My API") : "Claude";
   const connection = !state.ai && c.cls === "set" ? `${name} is set up but not tested` : null;
   let actions = null;
@@ -3962,7 +3982,7 @@ function adviseSettings(){
   const f = settingsFacts(), open = new Map();
   if(state.adaptive){
     if(f.problems.has("start")) open.set("start", [true, "Needs a look: a shortcut is used by another program"]);
-    if(f.problems.has("checklist")) open.set("checklist", [true, "Needs a look: its shortcut is used by another program"]);
+    if(f.problems.has("myTodo")) open.set("myTodo", [true, "Needs a look: its shortcut is used by another program"]);
     if(f.actions) open.set("actions", [true, "Needs a look: " + f.actions]);
     if(f.portfolio) open.set("files", [true, "Needs a look: " + f.portfolio]);
     if(f.connection) open.set("connections", [true, "Needs a look: " + f.connection]);
@@ -4002,7 +4022,7 @@ function paintGettingStarted(){
   $("gsStep1").textContent = `1. Select an ANDA number in any program (an email, a spreadsheet, a web page), then press ${state.keys.peek}. A small card opens.`;
   $("gsStep2").textContent = chosen ? "2. Done: your portfolio file is chosen, so the cards use your own ANDAs."
     : "2. Choose your portfolio file under “My files and writing”, so the cards use your own ANDAs. Until then the app shows fictional demo records.";
-  $("gsStep3").textContent = `3. Select notes anywhere (a message, an email, a scribbled list) and press ${state.keys.list || "the My checklist item in the tray menu"}. They become a checklist you can tick off.`;
+  $("gsStep3").textContent = `3. Select notes anywhere (a chat message, an email, or rough notes) and press ${state.keys.list || "the My to-do list item in the tray menu"}. They become to-do items you can tick off.`;
   $("gsFiles").hidden = chosen;
 }
 function onSettingsOpen(){ secTouched = new Set(); paintGettingStarted(); applySuggested(); }
@@ -4020,7 +4040,7 @@ function onSettingsOpen(){ secTouched = new Set(); paintGettingStarted(); applyS
   $("gsShow").addEventListener("click", () => { state.gsDone = false; paintGettingStarted(); $("adaptStatus").textContent = "Getting started is shown at the top again."; applySuggested(); });
   $("gsHide").addEventListener("click", () => { state.gsDone = true; paintGettingStarted(); });
   $("gsFiles").addEventListener("click", () => { const d = $("secFiles"); if(!d.open){ secTouch("files"); d.open = true; } d.scrollIntoView({ block:"start" }); });
-  $("gsChecklist").addEventListener("click", openChecklist);
+  $("gsMyTodo").addEventListener("click", openMyTodo);
 })();
 
 /* backup, restore, reset: what the Windows app does, for the choices on this page. File locations and the what-if switches are not part of it. */
@@ -4033,7 +4053,7 @@ function snapSettings(){
     myApi:{ name:m.name, endpoint:m.endpoint, header:m.header, scheme:m.scheme, env:m.env, model:m.model, template:m.template, path:m.path },
     outlook:{ enabled:o.on, cloud:o.cloud, clientId:o.client, tenant:o.tenant, maxItems:o.max }, lens:s.lens,
     actions:JSON.parse(JSON.stringify(s.actions)), agents:JSON.parse(JSON.stringify(s.agents)), todoShowFromData:s.todoAuto, todoRefreshSeconds:s.todoRefresh,
-    checklistMode:s.clMode, adaptive:s.adaptive };   /* the counts of opened sections and the hidden Getting started card belong to this PC: they are not in a backup */
+    myTodoMode:s.clMode, adaptive:s.adaptive };   /* the counts of opened sections and the hidden Getting started card belong to this PC: they are not in a backup */
 }
 const DEFAULT_SETTINGS = snapSettings(), DEFAULT_PROMPTS = prompts.map(p => [...p]), DEFAULT_REPLIES = state.replies.map(r => ({ ...r }));
 const oneOf = (v, list, fallback) => list.includes(v) ? v : fallback;
@@ -4047,12 +4067,12 @@ function applySettings(x){
   const k = x.keys || {}, three = { peek:str(k.peek, 40, ""), look:str(k.look, 40, ""), draft:str(k.draft, 40, "") };
   const okThree = ["peek", "look", "draft"].every(kind => three[kind] && !validateCombo(three[kind])) && !findDup({ ...three, list:"" });
   const base = okThree ? three : { peek:d.keys.peek, look:d.keys.look, draft:d.keys.draft };
-  /* the checklist shortcut: unreadable becomes the default, one that clashes with another becomes none, an empty one means none */
+  /* the to-do shortcut: unreadable becomes the default, one that clashes with another becomes none, an empty one means none */
   let list = typeof k.list === "string" ? str(k.list, 40, "") : d.keys.list;
   if(list && validateCombo(list)) list = d.keys.list;
   if(list && [base.peek, base.look, base.draft].includes(list)) list = "";
   s.keys = { ...base, list };
-  s.clMode = oneOf(x.checklistMode, [0, 1], 0); s.adaptive = typeof x.adaptive === "boolean" ? x.adaptive : true;
+  s.clMode = oneOf(x.myTodoMode, [0, 1], 0); s.adaptive = typeof x.adaptive === "boolean" ? x.adaptive : true;
   s.actions = x.actions === undefined ? starterActions() : normActions(x.actions, Object.values(s.keys));
   s.agents = normAgents(x.agents); clearAgentCache();
   s.todoAuto = typeof x.todoShowFromData === "boolean" ? x.todoShowFromData : d.todoShowFromData;
@@ -4165,7 +4185,7 @@ function setTaken(kind, on){
   state.taken[kind] = on; paintKeys();
   if(on && state.running){
     const other = kind === "look" ? state.keys.peek : state.keys.look;
-    showNotice(kind === "list" ? `${state.keys[kind]} is already used by another program. Please choose another shortcut for My checklist in Settings, or use the tray icon.` : `${state.keys[kind]} is already used by another program. Please use ${other} or the tray icon.`, { x:innerWidth - 360, y:innerHeight - 150 });
+    showNotice(kind === "list" ? `${state.keys[kind]} is already used by another program. Please choose another shortcut for My to-do list in Settings, or use the tray icon.` : `${state.keys[kind]} is already used by another program. Please use ${other} or the tray icon.`, { x:innerWidth - 360, y:innerHeight - 150 });
   }
 }
 $("swConflict").addEventListener("change", e => setTaken("peek", e.target.checked));

@@ -3,7 +3,7 @@
         x:Class="AndaCompanion.UI.NotesWindow"
         SystemDecorations="None" TransparencyLevelHint="Transparent" Background="Transparent"
         SizeToContent="WidthAndHeight" CanResize="False" Topmost="True"
-        ShowInTaskbar="False" WindowStartupLocation="CenterScreen" Title="ANDA Companion (Notula) — Notes to checklist">
+        ShowInTaskbar="False" WindowStartupLocation="CenterScreen" Title="ANDA Companion (Notula) — Notes to my to-do list">
 
   <Window.Styles>
     <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource C.Font}"/></Style>
@@ -22,7 +22,7 @@
             BoxShadow="0 18 42 -10 #59000000" Padding="20" Width="660">
       <StackPanel Spacing="10">
         <Grid ColumnDefinitions="*,Auto">
-          <TextBlock FontSize="15" FontWeight="Bold" Foreground="{DynamicResource C.Ink}" Text="Notes to checklist"/>
+          <TextBlock FontSize="15" FontWeight="Bold" Foreground="{DynamicResource C.Ink}" Text="Notes to my to-do list"/>
           <Button Grid.Column="1" Name="CloseBtn" Content="Close"/>
         </Grid>
         <ScrollViewer Name="Body" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
@@ -30,7 +30,7 @@
 
           <TextBlock Classes="lbl" Text="YOUR NOTES"/>
           <TextBox Name="NotesBox" AcceptsReturn="True" TextWrapping="Wrap" Height="120" MaxLength="6000"
-                   Watermark="Paste or type your notes in any order. Or select them anywhere and press the My checklist shortcut."
+                   Watermark="Paste or type your notes in any order. Or select them anywhere and press the My to-do list shortcut."
                    AutomationProperties.Name="Your notes"/>
           <TextBlock Name="Hint" Classes="hint"/>
 
@@ -47,7 +47,7 @@
           <TextBlock Name="Status" Classes="hint"/>
           <Border Classes="rule"/>
           <StackPanel Orientation="Horizontal" Spacing="8">
-            <Button Name="OpenBtn" Content="Open my checklist"/>
+            <Button Name="OpenBtn" Content="Open my to-do list"/>
           </StackPanel>
         </StackPanel>
         </ScrollViewer>

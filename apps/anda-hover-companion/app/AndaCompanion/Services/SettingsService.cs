@@ -10,8 +10,8 @@ public enum ConsentModel
     Whisper,    // hotkey shows a small invite chip; the card opens only if it is clicked
 }
 
-/// <summary>What the checklist shortcut does with highlighted notes.</summary>
-public enum ChecklistMode { Review = 0, AddAtOnce = 1 }
+/// <summary>What the to-do shortcut does with highlighted notes.</summary>
+public enum MyTodoMode { Review = 0, AddAtOnce = 1 }
 
 public sealed class Settings
 {
@@ -45,20 +45,20 @@ public sealed class Settings
     public string LookupHotkey { get; set; } = "Ctrl+Alt+Space";
     public string DraftHotkey { get; set; } = "Ctrl+Alt+D";
 
-    // ---- my checklist (Settings, My checklist): a separate feature for anything, with its own shortcut ----
-    public const string DefaultChecklistHotkey = "Ctrl+Alt+L";
+    // ---- my to-do list (Settings, My to-do list): a separate feature for anything, with its own shortcut ----
+    public const string DefaultMyTodoHotkey = "Ctrl+Alt+L";
 
-    /// <summary>Highlight text, press this, and the notes become suggested checklist items. Empty means no shortcut (the tray menu still works).</summary>
-    public string ChecklistHotkey { get; set; } = DefaultChecklistHotkey;
+    /// <summary>Highlight text, press this, and the notes become suggested to-do items. Empty means no shortcut (the tray menu still works).</summary>
+    public string MyTodoHotkey { get; set; } = DefaultMyTodoHotkey;
 
-    /// <summary>What the checklist shortcut does with highlighted notes: show the items first (the default), or add them at once.</summary>
-    public ChecklistMode ChecklistMode { get; set; } = ChecklistMode.Review;
+    /// <summary>What the to-do shortcut does with highlighted notes: show the items first (the default), or add them at once.</summary>
+    public MyTodoMode MyTodoMode { get; set; } = MyTodoMode.Review;
 
-    /// <summary>A saved or restored checklist shortcut, made valid: unreadable becomes the default, one that clashes with another shortcut becomes none.</summary>
-    public static string RepairChecklistHotkey(string? saved, IEnumerable<string> others)
+    /// <summary>A saved or restored to-do shortcut, made valid: unreadable becomes the default, one that clashes with another shortcut becomes none.</summary>
+    public static string RepairMyTodoHotkey(string? saved, IEnumerable<string> others)
     {
         if (saved is not null && saved.Trim().Length == 0) return "";
-        string candidate = HotkeyParser.TryParse(saved, out _, out _, out string norm, out _) ? norm : DefaultChecklistHotkey;
+        string candidate = HotkeyParser.TryParse(saved, out _, out _, out string norm, out _) ? norm : DefaultMyTodoHotkey;
         foreach (var other in others)
             if (HotkeyParser.TryParse(other, out _, out _, out string n, out _) && n == candidate) return "";
         return candidate;
@@ -212,9 +212,9 @@ public static class SettingsService
         { loaded.PeekHotkey = "Ctrl+Alt+A"; loaded.LookupHotkey = "Ctrl+Alt+Space"; loaded.DraftHotkey = "Ctrl+Alt+D"; }
         if (!Enum.IsDefined(loaded.Appearance)) loaded.Appearance = Appearances.Default;
         loaded.CardOpacity = Settings.NormalizeOpacity(loaded.CardOpacity);
-        if (!Enum.IsDefined(loaded.ChecklistMode)) loaded.ChecklistMode = ChecklistMode.Review;
-        loaded.ChecklistHotkey = Settings.RepairChecklistHotkey(loaded.ChecklistHotkey, new[] { loaded.PeekHotkey, loaded.LookupHotkey, loaded.DraftHotkey });
-        loaded.MyActions = MyActionRules.Normalize(loaded.MyActions, new[] { loaded.PeekHotkey, loaded.LookupHotkey, loaded.DraftHotkey, loaded.ChecklistHotkey });
+        if (!Enum.IsDefined(loaded.MyTodoMode)) loaded.MyTodoMode = MyTodoMode.Review;
+        loaded.MyTodoHotkey = Settings.RepairMyTodoHotkey(loaded.MyTodoHotkey, new[] { loaded.PeekHotkey, loaded.LookupHotkey, loaded.DraftHotkey });
+        loaded.MyActions = MyActionRules.Normalize(loaded.MyActions, new[] { loaded.PeekHotkey, loaded.LookupHotkey, loaded.DraftHotkey, loaded.MyTodoHotkey });
         loaded.Agents = AgentRules.Normalize(loaded.Agents);
         if (!Settings.TodoRefreshChoices.Contains(loaded.TodoRefreshSeconds)) loaded.TodoRefreshSeconds = 30;
         loaded.SectionUse = SettingsAdvisor.CleanUse(loaded.SectionUse);

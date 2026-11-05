@@ -5,7 +5,7 @@ using Xunit;
 
 namespace AndaCompanion.Tests;
 
-/// <summary>Round 16, without windows: the checklist shortcut and mode survive a hand-edited settings file or backup, and the shortcut is registered like the others.</summary>
+/// <summary>Round 16, without windows: the to-do shortcut and mode survive a hand-edited settings file or backup, and the shortcut is registered like the others.</summary>
 [Collection("Global state")]
 public class Round16Tests
 {
@@ -17,18 +17,18 @@ public class Round16Tests
     [InlineData("Ctrl+Alt+A", "")]                                 // the same as Select & Peek: none, never two features on one key
     [InlineData("Ctrl+Alt+Space", "")]
     [InlineData("Ctrl+Alt+D", "")]
-    public void The_checklist_shortcut_is_repaired_when_a_saved_file_is_read(string saved, string expected)
+    public void The_myTodo_shortcut_is_repaired_when_a_saved_file_is_read(string saved, string expected)
     {
-        var s = SettingsService.Normalize(new Settings { ChecklistHotkey = saved });
-        Assert.Equal(expected, s.ChecklistHotkey);
+        var s = SettingsService.Normalize(new Settings { MyTodoHotkey = saved });
+        Assert.Equal(expected, s.MyTodoHotkey);
     }
 
     [Fact]
     public void A_null_shortcut_and_an_unknown_mode_are_repaired()
     {
-        var s = SettingsService.Normalize(new Settings { ChecklistHotkey = null!, ChecklistMode = (ChecklistMode)42 });
-        Assert.Equal("Ctrl+Alt+L", s.ChecklistHotkey);            // an unreadable value is the default; only an empty text means "none"
-        Assert.Equal(ChecklistMode.Review, s.ChecklistMode);
+        var s = SettingsService.Normalize(new Settings { MyTodoHotkey = null!, MyTodoMode = (MyTodoMode)42 });
+        Assert.Equal("Ctrl+Alt+L", s.MyTodoHotkey);            // an unreadable value is the default; only an empty text means "none"
+        Assert.Equal(MyTodoMode.Review, s.MyTodoMode);
     }
 
     [Fact]
@@ -39,34 +39,34 @@ public class Round16Tests
         var source = new Settings();
         string json = SettingsBackup.Export(source, lenses, replies);
         var node = System.Text.Json.Nodes.JsonNode.Parse(json)!;
-        node["Settings"]!["ChecklistHotkey"] = "Ctrl+Alt+A";
-        node["Settings"]!["ChecklistMode"] = 9;
+        node["Settings"]!["MyTodoHotkey"] = "Ctrl+Alt+A";
+        node["Settings"]!["MyTodoMode"] = 9;
         node["Settings"]!["SectionUse"] = new System.Text.Json.Nodes.JsonObject { ["Look"] = 9999, ["<b>x</b>"] = 3 };
         var target = new Settings { SectionUse = new() { ["Dates"] = 2 }, GettingStartedDone = true };
         var (ok, _) = SettingsBackup.Import(node.ToJsonString(), target, lenses, replies);
         Assert.True(ok);
-        Assert.Equal("", target.ChecklistHotkey);                  // it clashed with Select & Peek
-        Assert.Equal(ChecklistMode.Review, target.ChecklistMode);
+        Assert.Equal("", target.MyTodoHotkey);                  // it clashed with Select & Peek
+        Assert.Equal(MyTodoMode.Review, target.MyTodoMode);
         Assert.Equal(new[] { "Dates" }, target.SectionUse.Keys);   // a file from another PC cannot plant or change what this PC learned
         Assert.True(target.GettingStartedDone);
     }
 
     [Fact]
-    public void The_checklist_shortcut_is_registered_after_the_three_and_before_the_custom_actions_and_never_twice()
+    public void The_myTodo_shortcut_is_registered_after_the_three_and_before_the_custom_actions_and_never_twice()
     {
         var actions = new List<CustomAction>
         {
-            new() { Name = "Mine", Kind = ActionKind.AddToTodo, Template = "x", Hotkey = "Ctrl+Alt+L", Enabled = true },     // the same keys as the checklist
+            new() { Name = "Mine", Kind = ActionKind.AddToTodo, Template = "x", Hotkey = "Ctrl+Alt+L", Enabled = true },     // the same keys as the to-do list
             new() { Name = "Other", Kind = ActionKind.AddToTodo, Template = "x", Hotkey = "Ctrl+Alt+J", Enabled = true },
         };
         var bindings = HotkeyService.FromCombos("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+D", actions, "Ctrl+Alt+L");
-        Assert.Equal(new[] { HotkeyService.IdPeek, HotkeyService.IdLookup, HotkeyService.IdDraft, HotkeyService.IdChecklist, HotkeyService.IdActionBase + 1 }, bindings.Select(b => b.Id));
+        Assert.Equal(new[] { HotkeyService.IdPeek, HotkeyService.IdLookup, HotkeyService.IdDraft, HotkeyService.IdMyTodo, HotkeyService.IdActionBase + 1 }, bindings.Select(b => b.Id));
         Assert.Equal(bindings.Count, bindings.Select(b => b.Combo).Distinct().Count());
-        Assert.DoesNotContain(HotkeyService.FromCombos("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+D", null, ""), b => b.Id == HotkeyService.IdChecklist);
-        Assert.DoesNotContain(HotkeyService.FromCombos("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+D", null, "nonsense"), b => b.Id == HotkeyService.IdChecklist);
-        Assert.DoesNotContain(HotkeyService.FromCombos("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+D", null, "Ctrl+Alt+A"), b => b.Id == HotkeyService.IdChecklist);
-        var fallback = bindings.First(b => b.Id == HotkeyService.IdChecklist).Fallback;
-        Assert.Contains("My checklist", fallback);
+        Assert.DoesNotContain(HotkeyService.FromCombos("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+D", null, ""), b => b.Id == HotkeyService.IdMyTodo);
+        Assert.DoesNotContain(HotkeyService.FromCombos("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+D", null, "nonsense"), b => b.Id == HotkeyService.IdMyTodo);
+        Assert.DoesNotContain(HotkeyService.FromCombos("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+D", null, "Ctrl+Alt+A"), b => b.Id == HotkeyService.IdMyTodo);
+        var fallback = bindings.First(b => b.Id == HotkeyService.IdMyTodo).Fallback;
+        Assert.Contains("My to-do list", fallback);
         Assert.Contains("tray icon", fallback);
     }
 
@@ -74,11 +74,11 @@ public class Round16Tests
     public void The_saved_settings_file_round_trips_the_new_fields()
     {
         string path = Path.Combine(Temp.NewDir(), "settings.json");
-        var s = new Settings { ChecklistHotkey = "Ctrl+Alt+K", ChecklistMode = ChecklistMode.AddAtOnce, AdaptiveSettings = false, GettingStartedDone = true, SectionUse = new() { ["Files"] = 4 }, CardOpacity = 0.55 };
+        var s = new Settings { MyTodoHotkey = "Ctrl+Alt+K", MyTodoMode = MyTodoMode.AddAtOnce, AdaptiveSettings = false, GettingStartedDone = true, SectionUse = new() { ["Files"] = 4 }, CardOpacity = 0.55 };
         SettingsService.Save(s, path);
         var back = SettingsService.Load(path);
-        Assert.Equal("Ctrl+Alt+K", back.ChecklistHotkey);
-        Assert.Equal(ChecklistMode.AddAtOnce, back.ChecklistMode);
+        Assert.Equal("Ctrl+Alt+K", back.MyTodoHotkey);
+        Assert.Equal(MyTodoMode.AddAtOnce, back.MyTodoMode);
         Assert.False(back.AdaptiveSettings);
         Assert.True(back.GettingStartedDone);
         Assert.Equal(4, back.SectionUse["Files"]);
@@ -86,7 +86,7 @@ public class Round16Tests
         // an older file with none of the new fields gets the defaults
         File.WriteAllText(path, "{\"FirstRunDone\":true}");
         var old = SettingsService.Load(path);
-        Assert.Equal("Ctrl+Alt+L", old.ChecklistHotkey);
+        Assert.Equal("Ctrl+Alt+L", old.MyTodoHotkey);
         Assert.Equal(0.92, old.CardOpacity, 3);
         Assert.True(old.AdaptiveSettings);
         Assert.False(old.GettingStartedDone);
@@ -156,7 +156,7 @@ public class Round16NoteParserAttackTests
     [InlineData("call Sam on ３/４/２０２７")]                       // full-width digits
     [InlineData("call Sam on 𝟐𝟓 Nov")]                           // mathematical digits
     [InlineData("call Sam in ٣ days")]
-    [InlineData("pay rent on the ١٥th every month")]
+    [InlineData("submit the report on the ١٥th every month")]
     [InlineData("call Sam 2026-١١-0٤")]
     [InlineData("call Sam ٢٠٢٦-١١-٠٤")]
     public void Digits_from_other_scripts_never_crash_the_reader(string text)

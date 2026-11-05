@@ -11,7 +11,7 @@ namespace AndaCompanion.UI;
 public sealed record SettingsHooks(Func<string> HotkeyStatus, Func<PortfolioRepository?> Portfolio, Func<string> ReferenceStatus,
     Func<string?>? MouseStatus = null, OutlookService? Outlook = null,
     Action? OpenTodo = null, Action<CustomAction>? RunAction = null, Func<AgentSettings, string?>? AgentProblem = null, Func<int>? ClearFinished = null,
-    Action? OpenChecklist = null, Action? OpenNotes = null, Func<int>? ClearChecklistFinished = null, Func<IReadOnlyList<HotkeyStatus>>? Hotkeys = null);
+    Action? OpenMyTodo = null, Action? OpenNotes = null, Func<int>? ClearMyTodoFinished = null, Func<IReadOnlyList<HotkeyStatus>>? Hotkeys = null);
 
 public partial class SettingsWindow : Window
 {
@@ -480,7 +480,7 @@ public partial class SettingsWindow : Window
                 ("Lookup box", ReferenceEquals(box, LookupKeyBox) ? normalized : _settings.LookupHotkey),
                 ("Check a draft", ReferenceEquals(box, DraftKeyBox) ? normalized : _settings.DraftHotkey),
             };
-            if (!string.IsNullOrWhiteSpace(_settings.ChecklistHotkey)) others.Add(("My checklist", _settings.ChecklistHotkey));
+            if (!string.IsNullOrWhiteSpace(_settings.MyTodoHotkey)) others.Add(("My to-do list", _settings.MyTodoHotkey));
             foreach (var a in _settings.MyActions.Where(a => !string.IsNullOrWhiteSpace(a.Hotkey))) others.Add((a.Name, a.Hotkey));
             if (HotkeyParser.ValidateSet(others.ToArray()) is { } clash) { KeyStatus.Text = clash; return; }
             set(normalized); box.Text = normalized; Apply();
@@ -492,7 +492,7 @@ public partial class SettingsWindow : Window
             string before = get();
             set(fallback);
             var all = new List<(string, string)> { ("Select & Peek", _settings.PeekHotkey), ("Lookup box", _settings.LookupHotkey), ("Check a draft", _settings.DraftHotkey) };
-            if (!string.IsNullOrWhiteSpace(_settings.ChecklistHotkey)) all.Add(("My checklist", _settings.ChecklistHotkey));
+            if (!string.IsNullOrWhiteSpace(_settings.MyTodoHotkey)) all.Add(("My to-do list", _settings.MyTodoHotkey));
             foreach (var a in _settings.MyActions.Where(a => !string.IsNullOrWhiteSpace(a.Hotkey))) all.Add((a.Name, a.Hotkey));
             if (HotkeyParser.ValidateSet(all.ToArray()) is { } clash)
             { set(before); box.Text = before; KeyStatus.Text = clash; return; }          // refused: keep what was there, not a clashing pair

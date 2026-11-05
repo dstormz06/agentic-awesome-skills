@@ -3,11 +3,11 @@
   "today": "2026-11-04",
   "cases": [
     {
-      "text": "Don't forget to call the plumber about the leak under the sink tomorrow!! Also email Sam re: the Thursday huddle. Need to submit the IR response for ANDA 216482 by Friday. groceries: milk, eggs, bread",
+      "text": "Don't forget to confirm the facility inspection date with the team tomorrow ASAP. Also email the team lead re: the Thursday huddle. Need to submit the IR response for ANDA 216482 by Friday. errands: book the dentist, pick up the dry cleaning",
       "items": [
         {
-          "title": "Call the plumber about the leak under the sink tomorrow",
-          "category": 1,
+          "title": "Confirm the facility inspection date with the team tomorrow ASAP",
+          "category": 0,
           "due": "2026-11-05",
           "high": true,
           "repeat": 0,
@@ -16,7 +16,7 @@
           "actionable": true
         },
         {
-          "title": "Email Sam re: the Thursday huddle",
+          "title": "Email the team lead re: the Thursday huddle",
           "category": 0,
           "due": "2026-11-05",
           "high": false,
@@ -36,7 +36,7 @@
           "actionable": true
         },
         {
-          "title": "Groceries: milk, eggs, bread",
+          "title": "Errands: book the dentist, pick up the dry cleaning",
           "category": 1,
           "due": "",
           "high": false,
@@ -47,7 +47,7 @@
         }
       ],
       "one": {
-        "title": "Call the plumber about the leak under the sink tomorrow!! Also email Sam re: the Thursday huddle. Need to submit the IR response for ANDA 216482 by Friday.…",
+        "title": "Confirm the facility inspection date with the team tomorrow ASAP. Also email the team lead re: the Thursday huddle. Need to submit the IR response for ANDA…",
         "category": 0,
         "due": "2026-11-05",
         "high": true,
@@ -59,11 +59,11 @@
       "due": "2026-11-05"
     },
     {
-      "text": "- call the dentist\n* pay the electric bill\n1. email Pat\n2) book the car service\n[ ] order filters\n• water the plants",
+      "text": "- call the applicant\n* submit the timesheet\n1. email Pat\n2) book the conference room\n[ ] order the printer toner\n• update the tracking sheet",
       "items": [
         {
-          "title": "Call the dentist",
-          "category": 1,
+          "title": "Call the applicant",
+          "category": 0,
           "due": "",
           "high": false,
           "repeat": 0,
@@ -72,8 +72,8 @@
           "actionable": true
         },
         {
-          "title": "Pay the electric bill",
-          "category": 1,
+          "title": "Submit the timesheet",
+          "category": 0,
           "due": "",
           "high": false,
           "repeat": 0,
@@ -92,27 +92,7 @@
           "actionable": true
         },
         {
-          "title": "Book the car service",
-          "category": 1,
-          "due": "",
-          "high": false,
-          "repeat": 0,
-          "repeatDay": -1,
-          "number": "",
-          "actionable": true
-        },
-        {
-          "title": "Order filters",
-          "category": 1,
-          "due": "",
-          "high": false,
-          "repeat": 0,
-          "repeatDay": -1,
-          "number": "",
-          "actionable": true
-        },
-        {
-          "title": "Water the plants",
+          "title": "Book the conference room",
           "category": 2,
           "due": "",
           "high": false,
@@ -120,26 +100,10 @@
           "repeatDay": -1,
           "number": "",
           "actionable": true
-        }
-      ],
-      "one": {
-        "title": "Call the dentist * pay the electric bill 1. email Pat 2) book the car service [ ] order filters • water the plants",
-        "category": 1,
-        "due": "",
-        "high": false,
-        "repeat": 0,
-        "repeatDay": -1,
-        "number": "",
-        "actionable": true
-      },
-      "due": ""
-    },
-    {
-      "text": "Call the plumber and email Sam",
-      "items": [
+        },
         {
-          "title": "Call the plumber",
-          "category": 1,
+          "title": "Order the printer toner",
+          "category": 2,
           "due": "",
           "high": false,
           "repeat": 0,
@@ -148,7 +112,7 @@
           "actionable": true
         },
         {
-          "title": "Email Sam",
+          "title": "Update the tracking sheet",
           "category": 0,
           "due": "",
           "high": false,
@@ -159,7 +123,7 @@
         }
       ],
       "one": {
-        "title": "Call the plumber and email Sam",
+        "title": "Call the applicant * submit the timesheet 1. email Pat 2) book the conference room [ ] order the printer toner • update the tracking sheet",
         "category": 0,
         "due": "",
         "high": false,
@@ -171,11 +135,21 @@
       "due": ""
     },
     {
-      "text": "Wash and dry the clothes",
+      "text": "Call the applicant and email the team lead",
       "items": [
         {
-          "title": "Wash and dry the clothes",
-          "category": 2,
+          "title": "Call the applicant",
+          "category": 0,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        },
+        {
+          "title": "Email the team lead",
+          "category": 0,
           "due": "",
           "high": false,
           "repeat": 0,
@@ -185,8 +159,34 @@
         }
       ],
       "one": {
-        "title": "Wash and dry the clothes",
-        "category": 2,
+        "title": "Call the applicant and email the team lead",
+        "category": 0,
+        "due": "",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": ""
+    },
+    {
+      "text": "Review the file and the attachments",
+      "items": [
+        {
+          "title": "Review the file and the attachments",
+          "category": 0,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Review the file and the attachments",
+        "category": 0,
         "due": "",
         "high": false,
         "repeat": 0,
@@ -223,11 +223,11 @@
       "due": ""
     },
     {
-      "text": "Pay rent then email the landlord",
+      "text": "Send the draft then email the team lead",
       "items": [
         {
-          "title": "Pay rent",
-          "category": 1,
+          "title": "Send the draft",
+          "category": 2,
           "due": "",
           "high": false,
           "repeat": 0,
@@ -236,7 +236,7 @@
           "actionable": true
         },
         {
-          "title": "Email the landlord",
+          "title": "Email the team lead",
           "category": 0,
           "due": "",
           "high": false,
@@ -247,8 +247,8 @@
         }
       ],
       "one": {
-        "title": "Pay rent then email the landlord",
-        "category": 1,
+        "title": "Send the draft then email the team lead",
+        "category": 0,
         "due": "",
         "high": false,
         "repeat": 0,
@@ -259,10 +259,10 @@
       "due": ""
     },
     {
-      "text": "Call Dr. Smith's office. Ask about the 3 p.m. slot today",
+      "text": "Call Dr. Smith about the labeling. Ask about the 3 p.m. meeting today",
       "items": [
         {
-          "title": "Call Dr. Smith's office",
+          "title": "Call Dr. Smith about the labeling",
           "category": 0,
           "due": "",
           "high": false,
@@ -272,8 +272,8 @@
           "actionable": true
         },
         {
-          "title": "Ask about the 3 p.m. slot today",
-          "category": 2,
+          "title": "Ask about the 3 p.m. meeting today",
+          "category": 0,
           "due": "2026-11-04",
           "high": false,
           "repeat": 0,
@@ -283,7 +283,7 @@
         }
       ],
       "one": {
-        "title": "Call Dr. Smith's office. Ask about the 3 p.m. slot today",
+        "title": "Call Dr. Smith about the labeling. Ask about the 3 p.m. meeting today",
         "category": 0,
         "due": "2026-11-04",
         "high": false,
@@ -295,11 +295,11 @@
       "due": "2026-11-04"
     },
     {
-      "text": "Take out the trash every Tuesday",
+      "text": "Send the status update to my supervisor every Tuesday",
       "items": [
         {
-          "title": "Take out the trash every Tuesday",
-          "category": 1,
+          "title": "Send the status update to my supervisor every Tuesday",
+          "category": 0,
           "due": "2026-11-10",
           "high": false,
           "repeat": 3,
@@ -309,8 +309,8 @@
         }
       ],
       "one": {
-        "title": "Take out the trash every Tuesday",
-        "category": 1,
+        "title": "Send the status update to my supervisor every Tuesday",
+        "category": 0,
         "due": "2026-11-10",
         "high": false,
         "repeat": 3,
@@ -347,11 +347,11 @@
       "due": ""
     },
     {
-      "text": "Water the plants every weekday",
+      "text": "Review the incoming queue every weekday",
       "items": [
         {
-          "title": "Water the plants every weekday",
-          "category": 2,
+          "title": "Review the incoming queue every weekday",
+          "category": 0,
           "due": "2026-11-04",
           "high": false,
           "repeat": 2,
@@ -361,8 +361,8 @@
         }
       ],
       "one": {
-        "title": "Water the plants every weekday",
-        "category": 2,
+        "title": "Review the incoming queue every weekday",
+        "category": 0,
         "due": "2026-11-04",
         "high": false,
         "repeat": 2,
@@ -373,11 +373,11 @@
       "due": ""
     },
     {
-      "text": "Pay rent on the 1st every month",
+      "text": "Submit the expense report on the 1st every month",
       "items": [
         {
-          "title": "Pay rent on the 1st every month",
-          "category": 1,
+          "title": "Submit the expense report on the 1st every month",
+          "category": 0,
           "due": "2026-12-01",
           "high": false,
           "repeat": 4,
@@ -387,8 +387,8 @@
         }
       ],
       "one": {
-        "title": "Pay rent on the 1st every month",
-        "category": 1,
+        "title": "Submit the expense report on the 1st every month",
+        "category": 0,
         "due": "2026-12-01",
         "high": false,
         "repeat": 4,
@@ -425,11 +425,11 @@
       "due": ""
     },
     {
-      "text": "URGENT: call the landlord",
+      "text": "URGENT: call the applicant",
       "items": [
         {
-          "title": "URGENT: call the landlord",
-          "category": 1,
+          "title": "URGENT: call the applicant",
+          "category": 0,
           "due": "",
           "high": true,
           "repeat": 0,
@@ -439,8 +439,8 @@
         }
       ],
       "one": {
-        "title": "URGENT: call the landlord",
-        "category": 1,
+        "title": "URGENT: call the applicant",
+        "category": 0,
         "due": "",
         "high": true,
         "repeat": 0,
@@ -570,11 +570,11 @@
       "due": "2026-11-06"
     },
     {
-      "text": "The plumber was very nice and quick.",
+      "text": "The inspection report was very clear and complete.",
       "items": [
         {
-          "title": "The plumber was very nice and quick",
-          "category": 1,
+          "title": "The inspection report was very clear and complete",
+          "category": 0,
           "due": "",
           "high": false,
           "repeat": 0,
@@ -584,8 +584,8 @@
         }
       ],
       "one": {
-        "title": "The plumber was very nice and quick",
-        "category": 1,
+        "title": "The inspection report was very clear and complete",
+        "category": 0,
         "due": "",
         "high": false,
         "repeat": 0,
@@ -1064,10 +1064,10 @@
       "due": "2026-11-04"
     },
     {
-      "text": "Add 1/2 cup of sugar",
+      "text": "Add 1/2 inch to the margin",
       "items": [
         {
-          "title": "Add 1/2 cup of sugar",
+          "title": "Add 1/2 inch to the margin",
           "category": 2,
           "due": "",
           "high": false,
@@ -1078,7 +1078,7 @@
         }
       ],
       "one": {
-        "title": "Add 1/2 cup of sugar",
+        "title": "Add 1/2 inch to the margin",
         "category": 2,
         "due": "",
         "high": false,
@@ -1194,10 +1194,10 @@
       "due": ""
     },
     {
-      "text": "Remember to renew my license every year",
+      "text": "Remember to renew my certification every year",
       "items": [
         {
-          "title": "Renew my license every year",
+          "title": "Renew my certification every year",
           "category": 2,
           "due": "",
           "high": false,
@@ -1208,7 +1208,7 @@
         }
       ],
       "one": {
-        "title": "Renew my license every year",
+        "title": "Renew my certification every year",
         "category": 2,
         "due": "",
         "high": false,
@@ -1256,7 +1256,7 @@
       "due": ""
     },
     {
-      "text": "Meeting notes: team agreed on timeline. Action: Pat to send the draft labeling. Follow up with the applicant next Monday. Buy milk",
+      "text": "Meeting notes: team agreed on timeline. Action: Pat to send the draft labeling. Follow up with the applicant next Monday. Update the tracking sheet",
       "items": [
         {
           "title": "Meeting notes: team agreed on timeline",
@@ -1289,8 +1289,8 @@
           "actionable": true
         },
         {
-          "title": "Buy milk",
-          "category": 2,
+          "title": "Update the tracking sheet",
+          "category": 0,
           "due": "",
           "high": false,
           "repeat": 0,
@@ -1300,7 +1300,7 @@
         }
       ],
       "one": {
-        "title": "Meeting notes: team agreed on timeline. Action: Pat to send the draft labeling. Follow up with the applicant next Monday. Buy milk",
+        "title": "Meeting notes: team agreed on timeline. Action: Pat to send the draft labeling. Follow up with the applicant next Monday. Update the tracking sheet",
         "category": 0,
         "due": "2026-11-09",
         "high": false,
@@ -1312,11 +1312,11 @@
       "due": "2026-11-09"
     },
     {
-      "text": "Fix the leaky faucet, clean the garage, and call the vet tomorrow",
+      "text": "Update the tracker, file the memo, and call the applicant tomorrow",
       "items": [
         {
-          "title": "Fix the leaky faucet",
-          "category": 1,
+          "title": "Update the tracker",
+          "category": 0,
           "due": "",
           "high": false,
           "repeat": 0,
@@ -1325,8 +1325,8 @@
           "actionable": true
         },
         {
-          "title": "Clean the garage",
-          "category": 1,
+          "title": "File the memo",
+          "category": 0,
           "due": "",
           "high": false,
           "repeat": 0,
@@ -1335,8 +1335,8 @@
           "actionable": true
         },
         {
-          "title": "Call the vet tomorrow",
-          "category": 1,
+          "title": "Call the applicant tomorrow",
+          "category": 0,
           "due": "2026-11-05",
           "high": false,
           "repeat": 0,
@@ -1346,8 +1346,8 @@
         }
       ],
       "one": {
-        "title": "Fix the leaky faucet, clean the garage, and call the vet tomorrow",
-        "category": 1,
+        "title": "Update the tracker, file the memo, and call the applicant tomorrow",
+        "category": 0,
         "due": "2026-11-05",
         "high": false,
         "repeat": 0,
@@ -1358,11 +1358,11 @@
       "due": "2026-11-05"
     },
     {
-      "text": "clean the gutters this weekend",
+      "text": "Organize the shared folder this weekend",
       "items": [
         {
-          "title": "Clean the gutters this weekend",
-          "category": 1,
+          "title": "Organize the shared folder this weekend",
+          "category": 2,
           "due": "2026-11-07",
           "high": false,
           "repeat": 0,
@@ -1372,8 +1372,8 @@
         }
       ],
       "one": {
-        "title": "Clean the gutters this weekend",
-        "category": 1,
+        "title": "Organize the shared folder this weekend",
+        "category": 2,
         "due": "2026-11-07",
         "high": false,
         "repeat": 0,
@@ -1384,11 +1384,11 @@
       "due": "2026-11-07"
     },
     {
-      "text": "Buy milk, eggs, bread",
+      "text": "Attach the memo, the cover letter, the table",
       "items": [
         {
-          "title": "Buy milk, eggs, bread",
-          "category": 2,
+          "title": "Attach the memo, the cover letter, the table",
+          "category": 0,
           "due": "",
           "high": false,
           "repeat": 0,
@@ -1398,8 +1398,8 @@
         }
       ],
       "one": {
-        "title": "Buy milk, eggs, bread",
-        "category": 2,
+        "title": "Attach the memo, the cover letter, the table",
+        "category": 0,
         "due": "",
         "high": false,
         "repeat": 0,
@@ -1426,6 +1426,68 @@
       "one": {
         "title": "Call Sam, please",
         "category": 2,
+        "due": "",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": ""
+    },
+    {
+      "text": "Assess the facility inspection findings and route them to the team lead by Monday",
+      "items": [
+        {
+          "title": "Assess the facility inspection findings",
+          "category": 0,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        },
+        {
+          "title": "Route them to the team lead by Monday",
+          "category": 0,
+          "due": "2026-11-09",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Assess the facility inspection findings and route them to the team lead by Monday",
+        "category": 0,
+        "due": "2026-11-09",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": "2026-11-09"
+    },
+    {
+      "text": "Follow-up with the applicant on the information request",
+      "items": [
+        {
+          "title": "Follow-up with the applicant on the information request",
+          "category": 0,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Follow-up with the applicant on the information request",
+        "category": 0,
         "due": "",
         "high": false,
         "repeat": 0,

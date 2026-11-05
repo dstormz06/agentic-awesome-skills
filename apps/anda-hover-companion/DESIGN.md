@@ -430,10 +430,10 @@ words, never as a fact from the record. *ANDA to-do list*: one list of the perso
 while it is open. Nothing is added to it by a reply: the person ticks the lines they want and presses a button. *Settings* is arranged in groups
 under headings, with a strong line between groups and a fine line between settings, so a long page can be scanned.
 
-**Round 16: My checklist, Notes to checklist and Settings that arrange themselves.** *My checklist* is a second, separate mode (as the draft check is
-apart from the card): its own shortcut chosen in Settings, its own windows and its own file, for anything the person has to do, work or home, with nothing
+**Round 16: My to-do list, Notes to my to-do list and Settings that arrange themselves.** *My to-do list* is a second, separate mode (as the draft check is
+apart from the card): its own shortcut chosen in Settings, its own windows and its own file, for the person's daily workload (any task, ANDA related or not), with nothing
 taken from their data. Highlighted or pasted notes are read **by plain rules, with no AI**, into suggested items; the reader shows what it understood
-(title, day, urgent, repeat, Work/Home/Other) in fields the person can change, never invents a day, marks a remark as "not a task" instead of ticking it, and adds
+(title, day, urgent, repeat, Work/Personal/Other) in fields the person can change, never invents a day, marks a remark as "not a task" instead of ticking it, and adds
 nothing until the person presses Add (or, by their own choice, adds at once with an Undo for the batch). A repeating item comes back by itself and a missed
 one moves on instead of piling up. *Settings* became eight collapsible sections: everything is collapsed except what needs a look, what a new user needs
 first and up to two sections opened often, each with a one-line reason; Expand all, Collapse all and Suggested view are always there, and a Getting

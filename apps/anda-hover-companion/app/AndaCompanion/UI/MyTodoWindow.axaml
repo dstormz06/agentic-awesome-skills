@@ -1,9 +1,9 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        x:Class="AndaCompanion.UI.ChecklistWindow"
+        x:Class="AndaCompanion.UI.MyTodoWindow"
         SystemDecorations="None" TransparencyLevelHint="Transparent" Background="Transparent"
         SizeToContent="WidthAndHeight" CanResize="False" Topmost="True"
-        ShowInTaskbar="False" WindowStartupLocation="CenterScreen" Title="ANDA Companion (Notula) — My checklist">
+        ShowInTaskbar="False" WindowStartupLocation="CenterScreen" Title="ANDA Companion (Notula) — My to-do list">
 
   <Window.Styles>
     <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource C.Font}"/></Style>
@@ -21,7 +21,7 @@
             BoxShadow="0 18 42 -10 #59000000" Padding="20" Width="660">
       <StackPanel Spacing="10">
         <Grid ColumnDefinitions="*,Auto">
-          <TextBlock FontSize="15" FontWeight="Bold" Foreground="{DynamicResource C.Ink}" Text="My checklist"/>
+          <TextBlock FontSize="15" FontWeight="Bold" Foreground="{DynamicResource C.Ink}" Text="My to-do list"/>
           <Button Grid.Column="1" Name="CloseBtn" Content="Done"/>
         </Grid>
         <TextBlock Name="Summary" Classes="hint"/>
@@ -32,7 +32,7 @@
         <TextBlock Name="FocusLine" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink}" TextWrapping="Wrap"/>
         <Border Classes="rule"/>
         <Grid ColumnDefinitions="*,8,Auto,8,Auto">
-          <TextBox Name="AddBox" MaxLength="200" Watermark="Type what needs doing, for example: pay rent on the 1st every month" AutomationProperties.Name="New checklist item"/>
+          <TextBox Name="AddBox" MaxLength="200" Watermark="Type a task, for example: send the status update by Friday" AutomationProperties.Name="New to-do item"/>
           <Button Grid.Column="2" Name="AddBtn" Classes="primary" Content="Add"/>
           <Button Grid.Column="4" Name="NotesBtn" Content="Paste notes…"/>
         </Grid>

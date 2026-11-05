@@ -44,7 +44,7 @@ MAKE IT YOURS (tray icon, then Settings)
     their addresses are not known here. Your IT team supplies them. Your own agents work the same way.
   - ANDA to-do list: the tray icon's "ANDA to-do list..." shows your items and what your data says
     needs a look. It updates itself only while it is open.
-  - My checklist: a separate list for anything (work or home). Select messy notes anywhere and
+  - My to-do list: a separate list for your daily workload (ANDA related or not). Select rough notes anywhere and
     press Ctrl+Alt+L (or choose another shortcut here): they become suggested items that you can
     change before you press Add. They are read by simple rules on this PC, with no AI.
   - Connection: Auto, Offline, Claude (with its model name) or your own API. The banner says

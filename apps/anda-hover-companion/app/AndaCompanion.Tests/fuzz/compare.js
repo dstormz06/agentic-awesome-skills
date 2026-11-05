@@ -3,7 +3,7 @@ const OTHER_LABEL = /(?:^|[^A-Za-z0-9_])(?:NDA|BLA|IND|DMF|NDC|MF)(?:[-\s#:.]|No
 function extractNumber(text){ if(!text) return null; const re = /\d+/g; let m; while((m = re.exec(text))){ if(m[0].length !== 6) continue; if(OTHER_LABEL.test(text.slice(0, m.index))) continue; return m[0]; } return null; }
 // the reader exactly as it ships in the browser simulation
 const html = fs.readFileSync(require('path').join(__dirname, '..', '..', '..', 'mockup', 'windows-simulation.html'), 'utf8');
-const src = html.slice(html.indexOf('const NP = (() => {'), html.indexOf('/* ---- the checklist store (ChecklistService) ---- */'));
+const src = html.slice(html.indexOf('const NP = (() => {'), html.indexOf('/* ---- the to-do list store (MyTodoService) ---- */'));
 const NP = new Function('extractNumber', src + '\nreturn NP;')(extractNumber);
 const notes = JSON.parse(fs.readFileSync(process.argv[2], 'utf8')), cs = JSON.parse(fs.readFileSync(process.argv[3], 'utf8'));
 const today = Date.UTC(2026, 10, 4), iso = t => t == null ? '' : new Date(t).toISOString().slice(0, 10);

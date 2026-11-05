@@ -71,7 +71,7 @@
             <TextBlock Name="GsStep3" FontSize="12.5" Foreground="{DynamicResource C.Ink}" TextWrapping="Wrap"/>
             <WrapPanel>
               <Button Name="GsFiles" Content="Choose my portfolio file" Margin="0,0,8,6"/>
-              <Button Name="GsChecklist" Content="Open my checklist" Margin="0,0,8,6"/>
+              <Button Name="GsMyTodo" Content="Open my to-do list" Margin="0,0,8,6"/>
               <Button Name="GsHide" Classes="primary" Content="Got it, hide this" Margin="0,0,8,6"/>
             </WrapPanel>
             <TextBlock Classes="hint" Text="Everything else here is optional. The app works as it is. You can show this again under Maintenance."/>
@@ -267,32 +267,32 @@
             </StackPanel>
           </StackPanel>
         </Expander>
-        <Expander Name="SecChecklist" Classes="sec" IsExpanded="False">
+        <Expander Name="SecMyTodo" Classes="sec" IsExpanded="False">
           <Expander.Header>
             <WrapPanel Orientation="Horizontal">
-              <TextBlock Classes="grp" Text="My checklist" VerticalAlignment="Center" Margin="0,0,10,0"/>
-              <Border Name="PillChecklist" Classes="pill" IsVisible="False" VerticalAlignment="Center"><TextBlock Name="PillTextChecklist" Classes="pilltext"/></Border>
+              <TextBlock Classes="grp" Text="My to-do list" VerticalAlignment="Center" Margin="0,0,10,0"/>
+              <Border Name="PillMyTodo" Classes="pill" IsVisible="False" VerticalAlignment="Center"><TextBlock Name="PillTextMyTodo" Classes="pilltext"/></Border>
             </WrapPanel>
           </Expander.Header>
           <StackPanel Spacing="14" Margin="0,8,0,12">
             <StackPanel Spacing="6">
-              <TextBlock Classes="lbl" Text="MY CHECKLIST · A SEPARATE LIST FOR ANYTHING, WORK OR HOME"/>
+              <TextBlock Classes="lbl" Text="MY TO-DO LIST · YOUR DAILY WORKLOAD, ANDA RELATED OR NOT"/>
               <Grid ColumnDefinitions="140,*,Auto,Auto" ColumnSpacing="8">
-                <TextBlock Text="Notes to checklist" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}"/>
-                <TextBox Grid.Column="1" Name="ChecklistKeyBox" IsReadOnly="True" AutomationProperties.Name="My checklist shortcut"/>
-                <Button Grid.Column="2" Name="ChecklistKeyClear" Content="None"/>
-                <Button Grid.Column="3" Name="ChecklistKeyReset" Content="Reset"/>
+                <TextBlock Text="Notes to my to-do list" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}"/>
+                <TextBox Grid.Column="1" Name="MyTodoKeyBox" IsReadOnly="True" AutomationProperties.Name="My to-do list shortcut"/>
+                <Button Grid.Column="2" Name="MyTodoKeyClear" Content="None"/>
+                <Button Grid.Column="3" Name="MyTodoKeyReset" Content="Reset"/>
               </Grid>
-              <TextBlock Name="ChecklistKeyStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
-              <TextBlock Classes="hint" Text="Click the box, then press the keys. Select messy notes anywhere (an email, a message, a scribbled list), press this shortcut, and they become suggested checklist items. None means no shortcut: the tray menu still opens it."/>
+              <TextBlock Name="MyTodoKeyStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+              <TextBlock Classes="hint" Text="Click the box, then press the keys. Select rough notes anywhere (an email, a chat message, or rough notes), press this shortcut, and they become suggested to-do items. None means no shortcut: the tray menu still opens it."/>
             </StackPanel>
 
             <Border Classes="hair"/>
 
             <StackPanel Spacing="6">
               <TextBlock Classes="lbl" Text="WHEN I PRESS IT"/>
-              <StackPanel Name="ChecklistModePanel" Spacing="2"/>
-              <TextBlock Classes="hint" Text="Show me the items first lets you untick, change or rename each one before anything is added. Add them at once puts every item that looks like a task on your checklist straight away, with an Undo button for that batch."/>
+              <StackPanel Name="MyTodoModePanel" Spacing="2"/>
+              <TextBlock Classes="hint" Text="Show me the items first lets you untick, change or rename each one before anything is added. Add them at once puts every item that looks like a task on your to-do list straight away, with an Undo button for that batch."/>
             </StackPanel>
 
             <Border Classes="hair"/>
@@ -300,12 +300,12 @@
             <StackPanel Spacing="6">
               <TextBlock Classes="lbl" Text="OPEN IT · KEEP IT TIDY"/>
               <WrapPanel>
-                <Button Name="ChecklistOpen" Content="Open my checklist" Margin="0,0,8,6"/>
-                <Button Name="ChecklistNotes" Content="Notes to checklist…" Margin="0,0,8,6"/>
-                <Button Name="ChecklistClear" Content="Clear finished items" Margin="0,0,8,6"/>
+                <Button Name="MyTodoOpen" Content="Open my to-do list" Margin="0,0,8,6"/>
+                <Button Name="MyTodoNotes" Content="Notes to my to-do list…" Margin="0,0,8,6"/>
+                <Button Name="MyTodoClear" Content="Clear finished items" Margin="0,0,8,6"/>
               </WrapPanel>
-              <TextBlock Name="ChecklistStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
-              <TextBlock Classes="hint" Text="It is apart from the ANDA to-do list: its own shortcut, its own window and its own file (checklist.json on this PC), and nothing in it comes from your data. Notes are read on this PC by simple rules (no AI, nothing is sent anywhere), and the reading never invents a day: what it did not find stays empty. Items that repeat come back by themselves."/>
+              <TextBlock Name="MyTodoStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+              <TextBlock Classes="hint" Text="This is your own workload list, for any task, ANDA related or not. It is apart from the ANDA to-do list, which is built from your ANDA data: it has its own shortcut, window and file (mytodo.json on this PC). Notes are read on this PC by simple rules (no AI, nothing is sent anywhere), and the reading never invents a day: what it did not find stays empty. Items that repeat come back by themselves."/>
             </StackPanel>
           </StackPanel>
         </Expander>

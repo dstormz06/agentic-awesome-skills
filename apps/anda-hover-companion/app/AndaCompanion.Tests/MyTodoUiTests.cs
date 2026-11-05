@@ -13,12 +13,12 @@ using Xunit;
 
 namespace AndaCompanion.Tests;
 
-/// <summary>"My checklist" in real windows: the list, quick add, editing, undo, the day changing, "Notes to checklist", and its Settings.</summary>
+/// <summary>"My to-do list" in real windows: the list, quick add, editing, undo, the day changing, "Notes to my to-do list", and its Settings.</summary>
 [Collection("Global state")]
-public class ChecklistUiTests : IClassFixture<HeadlessFixture>
+public class MyTodoUiTests : IClassFixture<HeadlessFixture>
 {
     private readonly HeadlessFixture _fx;
-    public ChecklistUiTests(HeadlessFixture fx) => _fx = fx;
+    public MyTodoUiTests(HeadlessFixture fx) => _fx = fx;
 
     private static readonly DateOnly Wed = new(2026, 11, 4);
 
@@ -29,23 +29,23 @@ public class ChecklistUiTests : IClassFixture<HeadlessFixture>
     private static Button ByName(Visual v, string automationName) => All<Button>(v).First(b => AutomationProperties.GetName(b) == automationName);
     private static string Text(Window w, string name) => w.FindControl<TextBlock>(name)!.Text ?? "";
 
-    private static ChecklistService NewStore() => new(Path.Combine(Temp.NewDir(), "checklist.json"));
+    private static MyTodoService NewStore() => new(Path.Combine(Temp.NewDir(), "mytodo.json"));
 
-    private static ChecklistWindow NewChecklist(ChecklistService store, Func<DateOnly> today, List<string>? opened = null, List<string>? cards = null)
+    private static MyTodoWindow NewMyTodo(MyTodoService store, Func<DateOnly> today, List<string>? opened = null, List<string>? cards = null)
     {
-        var w = new ChecklistWindow(new ChecklistHooks(store, today, () => "Ctrl+Alt+L", s => opened?.Add(s ?? "(empty)"), (n, _) => cards?.Add(n)));
+        var w = new MyTodoWindow(new MyTodoHooks(store, today, () => "Ctrl+Alt+L", s => opened?.Add(s ?? "(empty)"), (n, _) => cards?.Add(n)));
         w.Show(); Settle();
         return w;
     }
 
-    private static NotesWindow NewNotes(ChecklistService store, string text, bool atOnce = false, Func<DateOnly>? today = null)
+    private static NotesWindow NewNotes(MyTodoService store, string text, bool atOnce = false, Func<DateOnly>? today = null)
     {
         var w = new NotesWindow(new NotesHooks(store, today ?? (() => Wed), () => "Ctrl+Alt+L", () => { }), text, atOnce);
         w.Show(); Settle();
         return w;
     }
 
-    private const string Messy = "Don't forget to call the plumber about the leak under the sink tomorrow!! Also email Sam re: the Thursday huddle. Need to submit the IR response for ANDA 216482 by Friday. groceries: milk, eggs, bread";
+    private const string Messy = "Don't forget to confirm the facility inspection date with the team tomorrow ASAP. Also email the team lead re: the Thursday huddle. Need to submit the IR response for ANDA 216482 by Friday. errands: book the dentist, pick up the dry cleaning";
 
     // ---------- the list ----------
 
@@ -56,10 +56,10 @@ public class ChecklistUiTests : IClassFixture<HeadlessFixture>
         {
             ThemeManager.Apply(AppearanceId.K);
             var store = NewStore();
-            store.Add("Pay the water bill", ChecklistCategory.Home, Wed.AddDays(-1), false, Repeat.None, -1, null, "You", Wed);
-            store.Add("Send the status memo", ChecklistCategory.Work, Wed, true, Repeat.None, -1, null, "You", Wed);
-            store.Add("Mow the lawn", ChecklistCategory.Home, Wed.AddDays(3), false, Repeat.None, -1, null, "You", Wed);
-            var w = NewChecklist(store, () => Wed);
+            store.Add("Renew the vehicle registration", TodoCategory.Personal, Wed.AddDays(-1), false, Repeat.None, -1, null, "You", Wed);
+            store.Add("Send the status memo", TodoCategory.Work, Wed, true, Repeat.None, -1, null, "You", Wed);
+            store.Add("Book the dentist appointment", TodoCategory.Personal, Wed.AddDays(3), false, Repeat.None, -1, null, "You", Wed);
+            var w = NewMyTodo(store, () => Wed);
             var headings = w.View.Groups.Select(g => g.Heading).ToList();
             string summary = Text(w, "Summary"), focus = Text(w, "FocusLine");
             bool rollVisible = w.FindControl<Button>("RollBtn")!.IsVisible;
@@ -73,7 +73,7 @@ public class ChecklistUiTests : IClassFixture<HeadlessFixture>
         Assert.Equal(new[] { "OVERDUE", "TODAY", "COMING UP · NEXT 7 DAYS" }, r.headings);
         Assert.Contains("3 open", r.summary);
         Assert.Contains("1 overdue", r.summary);
-        Assert.Equal("Start with: Pay the water bill", r.focus);
+        Assert.Equal("Start with: Renew the vehicle registration", r.focus);
         Assert.True(r.rollVisible);
         Assert.Equal(new[] { "Send the status memo" }, r.workOnly);
     }
@@ -85,9 +85,9 @@ public class ChecklistUiTests : IClassFixture<HeadlessFixture>
         {
             ThemeManager.Apply(AppearanceId.K);
             var store = NewStore();
-            var w = NewChecklist(store, () => Wed);
+            var w = NewMyTodo(store, () => Wed);
             var box = w.FindControl<TextBox>("AddBox")!;
-            box.Text = "pay rent on the 1st every month"; Settle();
+            box.Text = "submit the expense report on the 1st every month"; Settle();
             string preview = Text(w, "AddPreview");
             Click(w.FindControl<Button>("AddBtn")!); Settle();
             var item = store.Items.SingleOrDefault();
@@ -96,7 +96,7 @@ public class ChecklistUiTests : IClassFixture<HeadlessFixture>
             box.Text = "   "; Click(w.FindControl<Button>("AddBtn")!); Settle();
             string empty = Text(w, "AddStatus");
             // the same thing again is not added twice
-            box.Text = "pay rent on the 1st every month"; Click(w.FindControl<Button>("AddBtn")!); Settle();
+            box.Text = "submit the expense report on the 1st every month"; Click(w.FindControl<Button>("AddBtn")!); Settle();
             string twice = Text(w, "AddStatus"); int count = store.Items.Count;
             string rows = string.Join("|", All<TextBlock>(w).Select(t => t.Text));
             w.Close(); Settle();
@@ -104,10 +104,10 @@ public class ChecklistUiTests : IClassFixture<HeadlessFixture>
         }, CancellationToken.None);
 
         Assert.StartsWith("Will add: ", r.preview);
-        Assert.Contains("Home", r.preview);
+        Assert.Contains("Work", r.preview);
         Assert.Contains("repeats every month", r.preview);
         Assert.NotNull(r.item);
-        Assert.Equal(ChecklistCategory.Home, r.item!.Category);
+        Assert.Equal(TodoCategory.Work, r.item!.Category);
         Assert.Equal(Repeat.Monthly, r.item.Repeat);
         Assert.Equal(1, r.item.RepeatDay);
         Assert.Equal("2026-12-01", r.item.Due);
@@ -116,7 +116,7 @@ public class ChecklistUiTests : IClassFixture<HeadlessFixture>
         Assert.Equal("Please type what needs doing.", r.empty);
         Assert.Equal("That is already on your list.", r.twice);
         Assert.Equal(1, r.count);
-        Assert.Contains("Pay rent", r.rows);
+        Assert.Contains("Submit the expense report", r.rows);
     }
 
     [Fact]
@@ -126,10 +126,10 @@ public class ChecklistUiTests : IClassFixture<HeadlessFixture>
         {
             ThemeManager.Apply(AppearanceId.K);
             var store = NewStore();
-            var memo = store.Add("Send the status memo", ChecklistCategory.Work, Wed, true, Repeat.None, -1, null, "You", Wed).Item!;
-            var lawn = store.Add("Mow the lawn", ChecklistCategory.Home, Wed.AddDays(3), false, Repeat.None, -1, null, "You", Wed).Item!;
-            var bill = store.Add("Pay the water bill", ChecklistCategory.Home, null, false, Repeat.None, -1, null, "You", Wed).Item!;
-            var w = NewChecklist(store, () => Wed);
+            var memo = store.Add("Send the status memo", TodoCategory.Work, Wed, true, Repeat.None, -1, null, "You", Wed).Item!;
+            var dentist = store.Add("Book the dentist appointment", TodoCategory.Personal, Wed.AddDays(3), false, Repeat.None, -1, null, "You", Wed).Item!;
+            var vehicle = store.Add("Renew the vehicle registration", TodoCategory.Personal, null, false, Repeat.None, -1, null, "You", Wed).Item!;
+            var w = NewMyTodo(store, () => Wed);
 
             // tick
             Named<CheckBox>(w, "Mark finished: Send the status memo").IsChecked = true; Settle();
@@ -138,43 +138,43 @@ public class ChecklistUiTests : IClassFixture<HeadlessFixture>
             string summary = Text(w, "Summary");
 
             // move to tomorrow
-            Click(ByName(w, "Move to tomorrow: Mow the lawn")); Settle();
-            string lawnDue = store.Items.First(i => i.Id == lawn.Id).Due!;
+            Click(ByName(w, "Move to tomorrow: Book the dentist appointment")); Settle();
+            string dentistDue = store.Items.First(i => i.Id == dentist.Id).Due!;
 
             // edit: an unreadable day is refused and explained, a readable one is saved
-            Click(ByName(w, "Edit: Mow the lawn")); Settle();
+            Click(ByName(w, "Edit: Book the dentist appointment")); Settle();
             string? editing = w.EditingId;
-            Named<TextBox>(w, "What needs doing for Mow the lawn").Text = "Mow the front lawn";
-            var when = All<TextBox>(w).First(b => (AutomationProperties.GetName(b) ?? "").StartsWith("When it is due") && AutomationProperties.GetName(b)!.EndsWith("Mow the lawn"));
-            when.Text = "banana"; Settle();
+            Named<TextBox>(w, "What needs doing for Book the dentist appointment").Text = "Book the dentist appointment for December";
+            var when = All<TextBox>(w).First(b => (AutomationProperties.GetName(b) ?? "").StartsWith("When it is due") && AutomationProperties.GetName(b)!.EndsWith("Book the dentist appointment"));
+            when.Text = "not a date"; Settle();
             w.SaveEdit(); Settle();
-            string titleAfterBad = store.Items.First(i => i.Id == lawn.Id).Title;
+            string titleAfterBad = store.Items.First(i => i.Id == dentist.Id).Title;
             bool stillEditing = w.EditingId is not null;
             bool explained = All<TextBlock>(w).Any(t => (t.Text ?? "").Contains("could not read that date"));
             when.Text = "friday"; Settle();
             w.SaveEdit(); Settle();
-            var saved = store.Items.First(i => i.Id == lawn.Id);
+            var saved = store.Items.First(i => i.Id == dentist.Id);
 
             // delete, then Undo
-            Click(ByName(w, "Delete: Pay the water bill")); Settle();
-            bool gone = store.Items.All(i => i.Id != bill.Id);
+            Click(ByName(w, "Delete: Renew the vehicle registration")); Settle();
+            bool gone = store.Items.All(i => i.Id != vehicle.Id);
             var undo = w.FindControl<Button>("UndoBtn")!;
             bool undoShown = undo.IsVisible;
             Click(undo); Settle();
-            bool back = store.Items.Any(i => i.Id == bill.Id);
+            bool back = store.Items.Any(i => i.Id == vehicle.Id);
             w.Close(); Settle();
-            return (memoDone, doneToday, summary, lawnDue, editing, titleAfterBad, stillEditing, explained, saved.Title, saved.Due, w.EditingId, gone, undoShown, back, lawn.Id);
+            return (memoDone, doneToday, summary, dentistDue, editing, titleAfterBad, stillEditing, explained, saved.Title, saved.Due, w.EditingId, gone, undoShown, back, dentist.Id);
         }, CancellationToken.None);
 
         Assert.True(r.memoDone);
         Assert.Equal(1, r.doneToday);
         Assert.Contains("1 of 1 done today", r.summary);
-        Assert.Equal("2026-11-05", r.lawnDue);
+        Assert.Equal("2026-11-05", r.dentistDue);
         Assert.Equal(r.Id, r.editing);
-        Assert.Equal("Mow the lawn", r.titleAfterBad);                     // nothing changed while the date was unreadable
+        Assert.Equal("Book the dentist appointment", r.titleAfterBad);                     // nothing changed while the date was unreadable
         Assert.True(r.stillEditing);
         Assert.True(r.explained);
-        Assert.Equal("Mow the front lawn", r.Title);
+        Assert.Equal("Book the dentist appointment for December", r.Title);
         Assert.Equal("2026-11-06", r.Due);                                 // Friday
         Assert.Null(r.EditingId);
         Assert.True(r.gone);
@@ -190,8 +190,8 @@ public class ChecklistUiTests : IClassFixture<HeadlessFixture>
             ThemeManager.Apply(AppearanceId.K);
             var store = NewStore();
             var day = Wed;
-            var item = store.Add("Check the inbox", ChecklistCategory.Work, day, false, Repeat.Daily, -1, null, "You", day).Item!;
-            var w = NewChecklist(store, () => day);
+            var item = store.Add("Check the inbox", TodoCategory.Work, day, false, Repeat.Daily, -1, null, "You", day).Item!;
+            var w = NewMyTodo(store, () => day);
             Named<CheckBox>(w, "Mark finished: Check the inbox").IsChecked = true; Settle();
             bool doneNow = store.Items.Single().Done;
             day = Wed.AddDays(1);                                           // midnight passes
@@ -215,9 +215,9 @@ public class ChecklistUiTests : IClassFixture<HeadlessFixture>
         {
             ThemeManager.Apply(AppearanceId.K);
             var store = NewStore();
-            store.Add("Submit the IR response for ANDA 216482", ChecklistCategory.Work, Wed, false, Repeat.None, -1, "216482", "Notes", Wed);
+            store.Add("Submit the IR response for ANDA 216482", TodoCategory.Work, Wed, false, Repeat.None, -1, "216482", "Notes", Wed);
             var opened = new List<string>(); var cards = new List<string>();
-            var w = NewChecklist(store, () => Wed, opened, cards);
+            var w = NewMyTodo(store, () => Wed, opened, cards);
             Click(ByName(w, "Open the card for ANDA 216482")); Settle();
             Click(w.FindControl<Button>("NotesBtn")!); Settle();
             string meta = string.Join("|", All<TextBlock>(w).Select(t => t.Text));
@@ -231,12 +231,12 @@ public class ChecklistUiTests : IClassFixture<HeadlessFixture>
     }
 
     [Fact]
-    public async Task An_empty_checklist_says_how_to_start_and_names_the_shortcut()
+    public async Task An_empty_myTodo_says_how_to_start_and_names_the_shortcut()
     {
         var r = await _fx.Session.Dispatch(() =>
         {
             ThemeManager.Apply(AppearanceId.K);
-            var w = NewChecklist(NewStore(), () => Wed);
+            var w = NewMyTodo(NewStore(), () => Wed);
             string summary = Text(w, "Summary");
             bool rollHidden = !w.FindControl<Button>("RollBtn")!.IsVisible;
             w.Close(); Settle();
@@ -248,7 +248,7 @@ public class ChecklistUiTests : IClassFixture<HeadlessFixture>
         Assert.True(r.rollHidden);
     }
 
-    // ---------- Notes to checklist ----------
+    // ---------- Notes to my to-do list ----------
 
     [Fact]
     public async Task Messy_notes_become_suggested_items_that_can_be_changed_and_are_added_only_on_request()
@@ -263,8 +263,8 @@ public class ChecklistUiTests : IClassFixture<HeadlessFixture>
             string label = Text(w, "FoundLabel");
 
             // rename the first suggestion and untick the last
-            Named<TextBox>(w, "What needs doing for Call the plumber about the leak under the sink tomorrow").Text = "Call the plumber about the sink";
-            Named<CheckBox>(w, "Add to my checklist: Groceries: milk, eggs, bread").IsChecked = false; Settle();
+            Named<TextBox>(w, "What needs doing for Confirm the facility inspection date with the team tomorrow ASAP").Text = "Confirm the inspection date with the facility team";
+            Named<CheckBox>(w, "Add to my to-do list: Errands: book the dentist, pick up the dry cleaning").IsChecked = false; Settle();
             int tickedAfter = w.TickedCount;
             string button = w.FindControl<Button>("AddBtn")!.Content as string ?? "";
             Click(w.FindControl<Button>("AddBtn")!); Settle();
@@ -283,13 +283,13 @@ public class ChecklistUiTests : IClassFixture<HeadlessFixture>
         Assert.Equal(3, r.tickedAfter);
         Assert.Equal("Add the 3 ticked items", r.button);
         Assert.Equal(3, r.items.Count);
-        var plumber = r.items.Single(i => i.Title == "Call the plumber about the sink");
-        Assert.Equal(ChecklistCategory.Home, plumber.Category);
-        Assert.True(plumber.High);
-        Assert.Equal("2026-11-05", plumber.Due);
-        Assert.Equal("Notes", plumber.Source);
+        var inspection = r.items.Single(i => i.Title == "Confirm the inspection date with the facility team");
+        Assert.Equal(TodoCategory.Work, inspection.Category);
+        Assert.True(inspection.High);
+        Assert.Equal("2026-11-05", inspection.Due);
+        Assert.Equal("Notes", inspection.Source);
         Assert.Equal("216482", r.items.Single(i => i.Title.StartsWith("Submit the IR response")).Number);
-        Assert.StartsWith("Added 3 items to your checklist", r.status);
+        Assert.StartsWith("Added 3 items to your to-do list", r.status);
         Assert.True(r.undo);
         Assert.Equal(0, r.tickedDone);
     }
@@ -301,9 +301,9 @@ public class ChecklistUiTests : IClassFixture<HeadlessFixture>
         {
             ThemeManager.Apply(AppearanceId.K);
             var store = NewStore();
-            var w = NewNotes(store, "call the plumber\nemail Sam");
-            var when = All<TextBox>(w).First(b => (AutomationProperties.GetName(b) ?? "").StartsWith("When it is due") && AutomationProperties.GetName(b)!.EndsWith("Call the plumber"));
-            when.Text = "someday soon-ish"; Settle();
+            var w = NewNotes(store, "call the applicant\nemail the team lead");
+            var when = All<TextBox>(w).First(b => (AutomationProperties.GetName(b) ?? "").StartsWith("When it is due") && AutomationProperties.GetName(b)!.EndsWith("Call the applicant"));
+            when.Text = "sometime soon"; Settle();
             w.AddTicked(); Settle();
             int stored = store.Items.Count;
             string status = Text(w, "Status");
@@ -329,8 +329,8 @@ public class ChecklistUiTests : IClassFixture<HeadlessFixture>
         {
             ThemeManager.Apply(AppearanceId.K);
             var store = NewStore();
-            store.Add("Keep this one", ChecklistCategory.Other, null, false, Repeat.None, -1, null, "You", Wed);
-            var w = NewNotes(store, "call the plumber tomorrow\nThe weather was lovely and the plumber was quick.\nemail Sam", atOnce: true);
+            store.Add("Keep this one", TodoCategory.Other, null, false, Repeat.None, -1, null, "You", Wed);
+            var w = NewNotes(store, "call the applicant tomorrow\nThe inspection report was clear and complete.\nemail the team lead", atOnce: true);
             int afterAuto = store.Items.Count;
             string status = Text(w, "Status");
             bool undo = w.FindControl<Button>("UndoBtn")!.IsVisible;
@@ -359,7 +359,7 @@ public class ChecklistUiTests : IClassFixture<HeadlessFixture>
             var empty = NewNotes(store, "");
             string emptyNote = Text(empty, "FoundNote"); bool addOff = !empty.FindControl<Button>("AddBtn")!.IsEnabled;
             empty.Close();
-            var remark = NewNotes(store, "The weather was lovely and the plumber was quick.", atOnce: true);
+            var remark = NewNotes(store, "The inspection report was clear and complete.", atOnce: true);
             string status = Text(remark, "Status"); int stored = store.Items.Count; int ticked = remark.TickedCount;
             remark.Close(); Settle();
             return (emptyNote, addOff, status, stored, ticked);
@@ -372,10 +372,10 @@ public class ChecklistUiTests : IClassFixture<HeadlessFixture>
         Assert.Equal(0, r.ticked);
     }
 
-    // ---------- the actions editor knows the checklist shortcut ----------
+    // ---------- the actions editor knows the to-do shortcut ----------
 
     [Fact]
-    public async Task An_action_cannot_take_the_checklist_shortcut_and_says_why()
+    public async Task An_action_cannot_take_the_myTodo_shortcut_and_says_why()
     {
         var r = await _fx.Session.Dispatch(() =>
         {
@@ -394,10 +394,10 @@ public class ChecklistUiTests : IClassFixture<HeadlessFixture>
         }, CancellationToken.None);
 
         Assert.Equal("", r.hotkey);
-        Assert.Contains("My checklist", r.status);
+        Assert.Contains("My to-do list", r.status);
     }
 
-    // ---------- Settings: My checklist ----------
+    // ---------- Settings: My to-do list ----------
 
     [Fact]
     public async Task Settings_lets_the_shortcut_be_changed_cleared_reset_and_refuses_a_clash()
@@ -409,27 +409,27 @@ public class ChecklistUiTests : IClassFixture<HeadlessFixture>
             var settings = new Settings();
             var w = new SettingsWindow(settings, new PromptLibraryService(Path.Combine(Temp.NewDir(), "p.json")), () => { });
             w.Show(); w.ExpandAll(); Settle();
-            var box = Named<TextBox>(w, "My checklist shortcut");
+            var box = Named<TextBox>(w, "My to-do list shortcut");
             string initial = box.Text ?? "";
             box.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.K, KeyModifiers = KeyModifiers.Control | KeyModifiers.Alt }); Settle();
-            string changed = settings.ChecklistHotkey;
+            string changed = settings.MyTodoHotkey;
             // the keys of Select & Peek are refused and nothing changes
             box.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.A, KeyModifiers = KeyModifiers.Control | KeyModifiers.Alt }); Settle();
-            string afterClash = settings.ChecklistHotkey; string clashText = w.FindControl<TextBlock>("ChecklistKeyStatus")!.Text ?? "";
+            string afterClash = settings.MyTodoHotkey; string clashText = w.FindControl<TextBlock>("MyTodoKeyStatus")!.Text ?? "";
             // a single modifier is refused
             box.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.L, KeyModifiers = KeyModifiers.Control }); Settle();
-            string afterWeak = settings.ChecklistHotkey;
-            Click(w.FindControl<Button>("ChecklistKeyClear")!); Settle();
-            string cleared = settings.ChecklistHotkey; string clearedBox = box.Text ?? "";
-            Click(w.FindControl<Button>("ChecklistKeyReset")!); Settle();
-            string reset = settings.ChecklistHotkey;
+            string afterWeak = settings.MyTodoHotkey;
+            Click(w.FindControl<Button>("MyTodoKeyClear")!); Settle();
+            string cleared = settings.MyTodoHotkey; string clearedBox = box.Text ?? "";
+            Click(w.FindControl<Button>("MyTodoKeyReset")!); Settle();
+            string reset = settings.MyTodoHotkey;
             // mode
             var add = All<RadioButton>(w).First(b => (b.Content as string ?? "").StartsWith("Add them at once"));
             add.IsChecked = true; Settle();
-            var mode = settings.ChecklistMode;
-            var bindings = HotkeyService.FromCombos(settings.PeekHotkey, settings.LookupHotkey, settings.DraftHotkey, settings.MyActions, settings.ChecklistHotkey);
+            var mode = settings.MyTodoMode;
+            var bindings = HotkeyService.FromCombos(settings.PeekHotkey, settings.LookupHotkey, settings.DraftHotkey, settings.MyActions, settings.MyTodoHotkey);
             w.Close(); Settle();
-            return (initial, changed, afterClash, clashText, afterWeak, cleared, clearedBox, reset, mode, bindings.Any(b => b.Id == HotkeyService.IdChecklist));
+            return (initial, changed, afterClash, clashText, afterWeak, cleared, clearedBox, reset, mode, bindings.Any(b => b.Id == HotkeyService.IdMyTodo));
         }, CancellationToken.None);
 
         Assert.Equal("Ctrl+Alt+L", r.initial);
@@ -440,7 +440,7 @@ public class ChecklistUiTests : IClassFixture<HeadlessFixture>
         Assert.Equal("", r.cleared);
         Assert.Equal("None", r.clearedBox);
         Assert.Equal("Ctrl+Alt+L", r.reset);
-        Assert.Equal(ChecklistMode.AddAtOnce, r.mode);
+        Assert.Equal(MyTodoMode.AddAtOnce, r.mode);
         Assert.True(r.Item10);
     }
 }

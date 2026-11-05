@@ -47,9 +47,9 @@ public class SettingsAdvisorTests
     public void Whatever_needs_a_look_is_open_with_a_reason_however_many_there_are()
     {
         var s = new Settings { GettingStartedDone = true };
-        var advice = SettingsAdvisor.Advise(s, Facts(new[] { SettingsSection.Start, SettingsSection.Checklist, SettingsSection.Actions }, "your portfolio file could not be read", "Claude did not answer", null, true));
+        var advice = SettingsAdvisor.Advise(s, Facts(new[] { SettingsSection.Start, SettingsSection.MyTodo, SettingsSection.Actions }, "your portfolio file could not be read", "Claude did not answer", null, true));
         var open = advice.Where(a => a.Open).ToList();
-        Assert.Equal(new[] { SettingsSection.Start, SettingsSection.Files, SettingsSection.Checklist, SettingsSection.Actions, SettingsSection.Connections }, open.Select(a => a.Section));
+        Assert.Equal(new[] { SettingsSection.Start, SettingsSection.Files, SettingsSection.MyTodo, SettingsSection.Actions, SettingsSection.Connections }, open.Select(a => a.Section));
         Assert.All(open, a => { Assert.True(a.Attention); Assert.StartsWith("Needs a look: ", a.Reason); });
         Assert.Contains("portfolio file could not be read", open.First(a => a.Section == SettingsSection.Files).Reason);
     }
@@ -67,7 +67,7 @@ public class SettingsAdvisorTests
     [Fact]
     public void The_two_sections_opened_most_often_open_by_themselves_but_a_couple_of_visits_do_not()
     {
-        var s = new Settings { GettingStartedDone = true, SectionUse = new() { ["Look"] = 5, ["Dates"] = 4, ["Connections"] = 9, ["Checklist"] = 2 } };
+        var s = new Settings { GettingStartedDone = true, SectionUse = new() { ["Look"] = 5, ["Dates"] = 4, ["Connections"] = 9, ["MyTodo"] = 2 } };
         var advice = SettingsAdvisor.Advise(s, SettingsFacts.AllWell);
         Assert.Equal(new[] { SettingsSection.Look, SettingsSection.Connections }, advice.Where(a => a.Open).Select(a => a.Section));
         Assert.All(advice.Where(a => a.Open), a => Assert.Equal("You open this often", a.Reason));
@@ -83,7 +83,7 @@ public class SettingsAdvisorTests
     [Fact]
     public void At_most_three_sections_open_for_reasons_other_than_attention()
     {
-        var s = new Settings { SectionUse = new() { ["Look"] = 9, ["Dates"] = 8, ["Checklist"] = 7 } };
+        var s = new Settings { SectionUse = new() { ["Look"] = 9, ["Dates"] = 8, ["MyTodo"] = 7 } };
         var advice = SettingsAdvisor.Advise(s, SettingsFacts.AllWell);
         Assert.Equal(3, advice.Count(a => a.Open && !a.Attention));              // Start + Files (day 1) + the single most used one
         // attention does not count against the limit
@@ -238,17 +238,17 @@ public class AdaptiveSettingsUiTests : IClassFixture<HeadlessFixture>
         {
             ThemeManager.Apply(AppearanceId.K);
             using var home = new EnvScope(AppPaths.HomeEnvVar, Temp.NewDir());
-            var checklist = new HotkeyBinding(HotkeyService.IdChecklist, "My checklist", "Ctrl+Alt+L", 0, 0, "");
+            var todo = new HotkeyBinding(HotkeyService.IdMyTodo, "My to-do list", "Ctrl+Alt+L", 0, 0, "");
             var peek = new HotkeyBinding(HotkeyService.IdPeek, "Select & Peek", "Ctrl+Alt+A", 0, 0, "");
-            var w = NewWindow(new Settings { GettingStartedDone = true }, Hooks(new[] { new HotkeyStatus(peek, true, 0), new HotkeyStatus(checklist, false, 1409) }));
-            var open = w.OpenSections.ToList(); string pill = Text(w, "PillTextChecklist"); string adaptive = Text(w, "AdaptiveText");
+            var w = NewWindow(new Settings { GettingStartedDone = true }, Hooks(new[] { new HotkeyStatus(peek, true, 0), new HotkeyStatus(todo, false, 1409) }));
+            var open = w.OpenSections.ToList(); string pill = Text(w, "PillTextMyTodo"); string adaptive = Text(w, "AdaptiveText");
             w.Close(); Settle();
             return (open, pill, adaptive);
         }, CancellationToken.None);
 
-        Assert.Equal(new[] { SettingsSection.Checklist }, r.open);
+        Assert.Equal(new[] { SettingsSection.MyTodo }, r.open);
         Assert.StartsWith("Needs a look: ", r.pill);
-        Assert.Contains("My checklist", r.adaptive);
+        Assert.Contains("My to-do list", r.adaptive);
     }
 
     [Fact]
@@ -272,7 +272,7 @@ public class AdaptiveSettingsUiTests : IClassFixture<HeadlessFixture>
         }, CancellationToken.None);
 
         Assert.Contains("Look and feel", r.items);
-        Assert.Contains("My checklist", r.items);
+        Assert.Contains("My to-do list", r.items);
         Assert.Contains(r.items, i => i.StartsWith("APPEARANCE"));
         Assert.True(r.closedBefore);
         Assert.True(r.openAfter);

@@ -9,11 +9,11 @@ using AndaCompanion.Services;
 
 namespace AndaCompanion.UI;
 
-public sealed record NotesHooks(ChecklistService Store, Func<DateOnly> Today, Func<string> Shortcut, Action OpenChecklist);
+public sealed record NotesHooks(MyTodoService Store, Func<DateOnly> Today, Func<string> Shortcut, Action OpenMyTodo);
 
 /// <summary>
-/// "Notes to checklist": the person's highlighted or pasted notes are read by simple rules on this PC (no AI, nothing sent anywhere) and turned
-/// into suggested checklist items. Each suggestion shows what was understood, can be changed or unticked, and nothing is added until the person
+/// "Notes to my to-do list": the person's highlighted or pasted notes are read by simple rules on this PC (no AI, nothing sent anywhere) and turned
+/// into suggested to-do items. Each suggestion shows what was understood, can be changed or unticked, and nothing is added until the person
 /// presses Add (unless they chose, in Settings, to add at once; then Undo takes the whole batch back). This is its own window, apart from
 /// the ANDA lookup and the draft check.
 /// </summary>
@@ -41,7 +41,7 @@ public partial class NotesWindow : Window
 
         string text = initialText ?? "";
         bool trimmed = text.Length > NoteParser.MaxInputChars;
-        if (trimmed) text = text[..NoteParser.MaxInputChars];
+        if (trimmed) text = NoteParser.FitToLimit(text);
         NotesBox.Text = text;
         Hint.Text = $"Select your notes anywhere and press {hooks.Shortcut()}, or paste them above. They are read on this PC by simple rules: no AI, nothing is sent anywhere. " +
                     "You can change any suggestion before it is added. Changing the notes above refreshes the suggestions." +
@@ -54,7 +54,7 @@ public partial class NotesWindow : Window
         AllBtn.Click += (_, _) => { foreach (var r in _rows.Where(r => !r.Added)) r.Include.IsChecked = true; };
         NoneBtn.Click += (_, _) => { foreach (var r in _rows.Where(r => !r.Added)) r.Include.IsChecked = false; };
         UndoBtn.Click += (_, _) => Undo();
-        OpenBtn.Click += (_, _) => _hooks.OpenChecklist();
+        OpenBtn.Click += (_, _) => _hooks.OpenMyTodo();
 
         _debounce.Tick += (_, _) => { _debounce.Stop(); Analyse(); };
         NotesBox.TextChanged += (_, _) => { _debounce.Stop(); _debounce.Start(); };
@@ -91,7 +91,7 @@ public partial class NotesWindow : Window
 
         FoundLabel.Text = _rows.Count == 0 ? "SUGGESTED ITEMS" : $"SUGGESTED ITEMS · {_rows.Count}";
         FoundNote.Text = string.IsNullOrWhiteSpace(text) ? "Suggestions appear here as soon as there are notes."
-            : _rows.Count == 0 ? "I did not find anything that looks like a task. You can type one by hand in My checklist."
+            : _rows.Count == 0 ? "I did not find anything that looks like a task. You can type one by hand in My to-do list."
             : _rows.Count >= NoteParser.MaxItems ? $"Showing the first {NoteParser.MaxItems}. Split very long notes to see the rest."
             : "Tick what you want on your list. Change a title, day, repeat or category if the reading is not right.";
         UpdateAddButton();
@@ -102,13 +102,13 @@ public partial class NotesWindow : Window
         var fields = new ItemFields(() => _hooks.Today(), item.Title);
         fields.Load(item.Title, item.Category, item.Due, item.High, item.Repeat);
         var include = new CheckBox { IsChecked = item.Actionable, VerticalAlignment = VerticalAlignment.Top, MinWidth = 24 };
-        AutomationProperties.SetName(include, "Add to my checklist: " + item.Title);
+        AutomationProperties.SetName(include, "Add to my to-do list: " + item.Title);
         include.IsCheckedChanged += (_, _) => UpdateAddButton();
         return new Row
         {
             Include = include, Fields = fields, Source = item,
             Problem = new TextBlock { FontSize = 11.5, Foreground = Res("C.Bad"), TextWrapping = TextWrapping.Wrap, IsVisible = false },
-            AddedMark = new TextBlock { Text = "Added to your checklist", FontSize = 11.5, FontWeight = FontWeight.SemiBold, Foreground = Res("C.Good"), IsVisible = false },
+            AddedMark = new TextBlock { Text = "Added to your to-do list", FontSize = 11.5, FontWeight = FontWeight.SemiBold, Foreground = Res("C.Good"), IsVisible = false },
         };
     }
 
@@ -170,12 +170,12 @@ public partial class NotesWindow : Window
             if (result.Reason is { } reason) { full = reason; break; }
             if (result.Added && result.Item is { } added) ids.Add(added.Id); else already++;
             row.Added = true; row.Include.IsChecked = false; row.Include.IsEnabled = false; row.AddedMark.IsVisible = true;
-            row.AddedMark.Text = result.Added ? "Added to your checklist" : "Already on your checklist";
+            row.AddedMark.Text = result.Added ? "Added to your to-do list" : "Already on your to-do list";
             row.Fields.TitleBox.IsEnabled = row.Fields.CategoryBox.IsEnabled = row.Fields.WhenBox.IsEnabled = row.Fields.RepeatBox.IsEnabled = row.Fields.HighBox.IsEnabled = false;
         }
         _lastAdded = ids;
         UndoBtn.IsVisible = ids.Count > 0;
-        string made = ids.Count == 0 ? "Nothing new was added" : $"Added {ids.Count} {(ids.Count == 1 ? "item" : "items")} to your checklist";
+        string made = ids.Count == 0 ? "Nothing new was added" : $"Added {ids.Count} {(ids.Count == 1 ? "item" : "items")} to your to-do list";
         Status.Text = made + (already > 0 ? $" ({already} already on the list)" : "") + (full is not null ? ". " + full : ".") +
                       (atOnce && ids.Count > 0 ? " This was added at once, as you chose in Settings. Press Undo to take it back." : "");
         UpdateAddButton();
@@ -187,7 +187,7 @@ public partial class NotesWindow : Window
         _lastAdded = new();
         UndoBtn.IsVisible = false;
         // Show the suggestions again, ready to change or add.
-        string keep = $"Removed {removed} {(removed == 1 ? "item" : "items")} from your checklist.";
+        string keep = $"Removed {removed} {(removed == 1 ? "item" : "items")} from your to-do list.";
         Analyse();
         Status.Text = keep;
     }
