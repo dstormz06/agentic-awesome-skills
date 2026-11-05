@@ -24,7 +24,7 @@ public static class ThemeManager
         var r = Application.Current!.Resources;
         void Brush(string key, string hex) => r[key] = new SolidColorBrush(Color.Parse(hex));
 
-        // Card surface carries the transparency preference (30% to 100%; text and status inks stay opaque).
+        // Card surface carries the transparency preference (40% to 100%; text and status inks stay opaque).
         var bg = Color.Parse(palette.Bg);
         double opacity = Settings.NormalizeOpacity(cardOpacity);
         r["C.Bg"] = new SolidColorBrush(new Color((byte)(bg.A * opacity), bg.R, bg.G, bg.B));

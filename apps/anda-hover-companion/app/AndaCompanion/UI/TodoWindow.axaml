@@ -3,7 +3,7 @@
         x:Class="AndaCompanion.UI.TodoWindow"
         SystemDecorations="None" TransparencyLevelHint="Transparent" Background="Transparent"
         SizeToContent="WidthAndHeight" CanResize="False" Topmost="True"
-        ShowInTaskbar="False" WindowStartupLocation="CenterScreen" Title="ANDA Companion (Notula) — To-do list">
+        ShowInTaskbar="False" WindowStartupLocation="CenterScreen" Title="ANDA Companion (Notula) — ANDA to-do list">
 
   <Window.Styles>
     <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource C.Font}"/></Style>
@@ -21,7 +21,7 @@
             BoxShadow="0 18 42 -10 #59000000" Padding="20" Width="640">
       <StackPanel Spacing="10">
         <Grid ColumnDefinitions="*,Auto">
-          <TextBlock FontSize="15" FontWeight="Bold" Foreground="{DynamicResource C.Ink}" Text="To-do list"/>
+          <TextBlock FontSize="15" FontWeight="Bold" Foreground="{DynamicResource C.Ink}" Text="ANDA to-do list"/>
           <Button Grid.Column="1" Name="CloseBtn" Content="Done"/>
         </Grid>
         <TextBlock Name="Summary" Classes="hint"/>

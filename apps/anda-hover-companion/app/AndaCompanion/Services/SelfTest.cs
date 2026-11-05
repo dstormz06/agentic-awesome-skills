@@ -130,7 +130,7 @@ internal static class SelfTest
             new("card-k-healthy", AppearanceId.K, "214990", false, false, 1.0, false),
             new("card-k-peek", AppearanceId.K, "216482", false, true, 1.0, false),
             new("card-k-transparent-88", AppearanceId.K, "216482", false, false, 0.88, false),
-            new("card-k-transparent-30", AppearanceId.K, "216482", false, false, 0.30, false),
+            new("card-k-transparent-40", AppearanceId.K, "216482", false, false, 0.40, false),
             new("card-a", AppearanceId.A, "216482", false, false, 1.0, false),
             new("card-b-expanded", AppearanceId.B, "216482", true, false, 1.0, false),
             new("card-c", AppearanceId.C, "216482", false, false, 1.0, false),
@@ -295,6 +295,28 @@ internal static class SelfTest
             win.Close();
             report.Add(shown ? new("agents-drawer-finding", CheckStatus.Pass, "the card showed the agent's reply as its own words (canned reply, no network)")
                              : new("agents-drawer-finding", CheckStatus.Fail, "the agents drawer did not show the reply"));
+        });
+        await Safe(report, "checklist", async () =>
+        {
+            // Fictional notes and a list file under the report folder; nothing of the real checklist is touched, and nothing is sent anywhere.
+            var day = new DateOnly(2026, 11, 4);
+            string file = Path.Combine(o.OutDir, "home", "checklist-check.json");
+            if (File.Exists(file)) File.Delete(file);
+            var store = new ChecklistService(file);
+            var notes = new NotesWindow(new NotesHooks(store, () => day, () => "Ctrl+Alt+L", () => { }),
+                "Don't forget to call the plumber about the leaking faucet tomorrow!!\nsend the weekly status memo every Friday\n- buy milk, eggs and bread\nFYI the huddle moved to 2pm", false);
+            notes.Show();
+            report.Add(await ShootAsync(notes, "notes-to-checklist", o.OutDir, false));
+            int found = notes.SuggestionCount;
+            notes.AddTicked();
+            notes.Close();
+            var win = new ChecklistWindow(new ChecklistHooks(store, () => day, () => "Ctrl+Alt+L", _ => { }, (_, _) => { }));
+            win.Show();
+            report.Add(await ShootAsync(win, "my-checklist", o.OutDir, false));
+            bool ok = found >= 3 && store.Items.Count >= 3 && win.View.Open == store.Items.Count(i => !i.Done) && store.Items.Any(i => i.Repeat == Repeat.Weekly);
+            win.Close();
+            report.Add(ok ? new("checklist-from-notes", CheckStatus.Pass, $"{found} suggestions were read from messy notes, {store.Items.Count} were added, and the checklist lists them (no AI, no network)")
+                          : new("checklist-from-notes", CheckStatus.Fail, $"found {found}, stored {store.Items.Count}, weekly={store.Items.Any(i => i.Repeat == Repeat.Weekly)}"));
         });
     }
 

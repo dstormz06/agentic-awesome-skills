@@ -1,0 +1,58 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="AndaCompanion.UI.ChecklistWindow"
+        SystemDecorations="None" TransparencyLevelHint="Transparent" Background="Transparent"
+        SizeToContent="WidthAndHeight" CanResize="False" Topmost="True"
+        ShowInTaskbar="False" WindowStartupLocation="CenterScreen" Title="ANDA Companion (Notula) — My checklist">
+
+  <Window.Styles>
+    <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource C.Font}"/></Style>
+    <Style Selector="TextBlock.lbl">
+      <Setter Property="FontSize" Value="9.5"/><Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="LetterSpacing" Value="1.4"/><Setter Property="Foreground" Value="{DynamicResource C.Ink3}"/>
+    </Style>
+    <Style Selector="TextBlock.hint"><Setter Property="FontSize" Value="11.5"/><Setter Property="Foreground" Value="{DynamicResource C.Ink2}"/><Setter Property="TextWrapping" Value="Wrap"/></Style>
+    <Style Selector="Border.rule"><Setter Property="Height" Value="1"/><Setter Property="Background" Value="{DynamicResource C.Hair}"/></Style>
+  </Window.Styles>
+
+  <Panel Margin="26">
+    <Border Background="{DynamicResource C.Bg}" BorderBrush="{DynamicResource C.Line}"
+            BorderThickness="1" CornerRadius="{DynamicResource C.Radius}"
+            BoxShadow="0 18 42 -10 #59000000" Padding="20" Width="660">
+      <StackPanel Spacing="10">
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock FontSize="15" FontWeight="Bold" Foreground="{DynamicResource C.Ink}" Text="My checklist"/>
+          <Button Grid.Column="1" Name="CloseBtn" Content="Done"/>
+        </Grid>
+        <TextBlock Name="Summary" Classes="hint"/>
+        <Grid Name="Bar" Height="6" ColumnDefinitions="*,*" AutomationProperties.Name="Today's progress">
+          <Border Name="BarFill" CornerRadius="3" Background="{DynamicResource C.Accent}"/>
+          <Border Name="BarRest" Grid.Column="1" CornerRadius="3" Background="{DynamicResource C.Hair}"/>
+        </Grid>
+        <TextBlock Name="FocusLine" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink}" TextWrapping="Wrap"/>
+        <Border Classes="rule"/>
+        <Grid ColumnDefinitions="*,8,Auto,8,Auto">
+          <TextBox Name="AddBox" MaxLength="200" Watermark="Type what needs doing, for example: pay rent on the 1st every month" AutomationProperties.Name="New checklist item"/>
+          <Button Grid.Column="2" Name="AddBtn" Classes="primary" Content="Add"/>
+          <Button Grid.Column="4" Name="NotesBtn" Content="Paste notes…"/>
+        </Grid>
+        <TextBlock Name="AddPreview" FontSize="11.5" Foreground="{DynamicResource C.Ink3}" TextWrapping="Wrap"/>
+        <TextBlock Name="AddStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+        <Grid ColumnDefinitions="Auto,8,150,*">
+          <TextBlock VerticalAlignment="Center" Classes="lbl" Text="SHOW"/>
+          <ComboBox Grid.Column="2" Name="FilterBox" HorizontalAlignment="Stretch" AutomationProperties.Name="Show which items"/>
+          <Button Grid.Column="3" Name="UndoBtn" HorizontalAlignment="Right" IsVisible="False" Content="Undo"/>
+        </Grid>
+        <ScrollViewer Name="Body" MaxHeight="380" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+          <StackPanel Name="Rows" Spacing="2"/>
+        </ScrollViewer>
+        <Border Classes="rule"/>
+        <WrapPanel Orientation="Horizontal">
+          <Button Name="RollBtn" Margin="0,0,8,4" Content="Move overdue to today"/>
+          <Button Name="ClearBtn" Margin="0,0,8,4" Content="Clear finished"/>
+        </WrapPanel>
+        <TextBlock Name="Footer" Classes="hint"/>
+      </StackPanel>
+    </Border>
+  </Panel>
+</Window>

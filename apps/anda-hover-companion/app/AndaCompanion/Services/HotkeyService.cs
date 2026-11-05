@@ -47,11 +47,12 @@ public sealed class HotkeyService : IDisposable
     };
 
     /// <summary>Custom actions use ids from here upward: the id is this number plus the action's position in Settings.</summary>
+    public const int IdChecklist = 4;      // the person's checklist shortcut (Settings, My checklist)
     public const int IdActionBase = 100;
 
-    /// <summary>The three bindings with the shortcuts a person chose, then one for each enabled custom action that has a valid, unused shortcut.
+    /// <summary>The three bindings with the shortcuts a person chose, then the checklist shortcut if there is one, then one for each enabled custom action that has a valid, unused shortcut.
     /// An invalid or duplicate choice for the three falls back to its default; for an action it is simply left out.</summary>
-    public static IReadOnlyList<HotkeyBinding> FromCombos(string? peek, string? lookup, string? draft, IReadOnlyList<CustomAction>? actions = null)
+    public static IReadOnlyList<HotkeyBinding> FromCombos(string? peek, string? lookup, string? draft, IReadOnlyList<CustomAction>? actions = null, string? checklist = null)
     {
         var chosen = new[] { (IdPeek, peek), (IdLookup, lookup), (IdDraft, draft) };
         var result = new List<HotkeyBinding>();
@@ -63,6 +64,8 @@ public sealed class HotkeyService : IDisposable
                 result.Add(def with { Combo = norm, Modifiers = mods | ModNoRepeat, VirtualKey = vk });
             else { taken.Add(def.Combo); result.Add(def); }
         }
+        if (!string.IsNullOrWhiteSpace(checklist) && HotkeyParser.TryParse(checklist, out uint cmods, out uint cvk, out string cnorm, out _) && taken.Add(cnorm))
+            result.Add(new HotkeyBinding(IdChecklist, "My checklist", cnorm, cmods | ModNoRepeat, cvk, "Please choose another shortcut for My checklist in Settings, or use the tray icon."));
         if (actions is not null)
             for (int i = 0; i < actions.Count; i++)
             {

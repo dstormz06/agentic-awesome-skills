@@ -46,6 +46,7 @@ public partial class SettingsWindow
 
     private void BuildActionSections()
     {
+        BuildMyChecklist();
         BuildMyActions();
         BuildMyAgents();
         BuildMyTodo();
@@ -55,6 +56,7 @@ public partial class SettingsWindow
 
     private IEnumerable<(string Name, string Hotkey)> ShortcutsInUse(CustomAction? except) =>
         new[] { ("Select & Peek", _settings.PeekHotkey), ("Lookup box", _settings.LookupHotkey), ("Check a draft", _settings.DraftHotkey) }
+            .Concat(string.IsNullOrWhiteSpace(_settings.ChecklistHotkey) ? Array.Empty<(string, string)>() : new[] { ("My checklist", _settings.ChecklistHotkey) })
             .Concat(_settings.MyActions.Where(x => !ReferenceEquals(x, except) && !string.IsNullOrWhiteSpace(x.Hotkey)).Select(x => (x.Name, x.Hotkey)));
 
     private void BuildMyActions()
@@ -196,7 +198,7 @@ public partial class SettingsWindow
             string? p = AgentRules.Validate(a);
             problem.Text = p ?? ""; problem.IsVisible = problem.Text.Length > 0;
         }
-        bool preset = a.Id is AgentRules.AlertHubId or AgentRules.TriagingId;
+        bool preset = AgentRules.IsPreset(a.Id);
 
         var enabled = new CheckBox { IsChecked = a.Enabled, Content = new TextBlock { Text = "On" }, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center };
         enabled.IsCheckedChanged += (_, _) => { if (_loading) return; a.Enabled = enabled.IsChecked == true; Check(); Apply(); };

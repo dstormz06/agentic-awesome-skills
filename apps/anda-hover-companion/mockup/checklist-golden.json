@@ -1,0 +1,1451 @@
+{
+  "version": 1,
+  "today": "2026-11-04",
+  "cases": [
+    {
+      "text": "Don't forget to call the plumber about the leak under the sink tomorrow!! Also email Sam re: the Thursday huddle. Need to submit the IR response for ANDA 216482 by Friday. groceries: milk, eggs, bread",
+      "items": [
+        {
+          "title": "Call the plumber about the leak under the sink tomorrow",
+          "category": 1,
+          "due": "2026-11-05",
+          "high": true,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        },
+        {
+          "title": "Email Sam re: the Thursday huddle",
+          "category": 0,
+          "due": "2026-11-05",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        },
+        {
+          "title": "Submit the IR response for ANDA 216482 by Friday",
+          "category": 0,
+          "due": "2026-11-06",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "216482",
+          "actionable": true
+        },
+        {
+          "title": "Groceries: milk, eggs, bread",
+          "category": 1,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Call the plumber about the leak under the sink tomorrow!! Also email Sam re: the Thursday huddle. Need to submit the IR response for ANDA 216482 by Friday.…",
+        "category": 0,
+        "due": "2026-11-05",
+        "high": true,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "216482",
+        "actionable": true
+      },
+      "due": "2026-11-05"
+    },
+    {
+      "text": "- call the dentist\n* pay the electric bill\n1. email Pat\n2) book the car service\n[ ] order filters\n• water the plants",
+      "items": [
+        {
+          "title": "Call the dentist",
+          "category": 1,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        },
+        {
+          "title": "Pay the electric bill",
+          "category": 1,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        },
+        {
+          "title": "Email Pat",
+          "category": 0,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        },
+        {
+          "title": "Book the car service",
+          "category": 1,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        },
+        {
+          "title": "Order filters",
+          "category": 1,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        },
+        {
+          "title": "Water the plants",
+          "category": 2,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Call the dentist * pay the electric bill 1. email Pat 2) book the car service [ ] order filters • water the plants",
+        "category": 1,
+        "due": "",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": ""
+    },
+    {
+      "text": "Call the plumber and email Sam",
+      "items": [
+        {
+          "title": "Call the plumber",
+          "category": 1,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        },
+        {
+          "title": "Email Sam",
+          "category": 0,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Call the plumber and email Sam",
+        "category": 0,
+        "due": "",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": ""
+    },
+    {
+      "text": "Wash and dry the clothes",
+      "items": [
+        {
+          "title": "Wash and dry the clothes",
+          "category": 2,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Wash and dry the clothes",
+        "category": 2,
+        "due": "",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": ""
+    },
+    {
+      "text": "Review and approve the memo",
+      "items": [
+        {
+          "title": "Review and approve the memo",
+          "category": 0,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Review and approve the memo",
+        "category": 0,
+        "due": "",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": ""
+    },
+    {
+      "text": "Pay rent then email the landlord",
+      "items": [
+        {
+          "title": "Pay rent",
+          "category": 1,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        },
+        {
+          "title": "Email the landlord",
+          "category": 0,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Pay rent then email the landlord",
+        "category": 1,
+        "due": "",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": ""
+    },
+    {
+      "text": "Call Dr. Smith's office. Ask about the 3 p.m. slot today",
+      "items": [
+        {
+          "title": "Call Dr. Smith's office",
+          "category": 0,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        },
+        {
+          "title": "Ask about the 3 p.m. slot today",
+          "category": 2,
+          "due": "2026-11-04",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Call Dr. Smith's office. Ask about the 3 p.m. slot today",
+        "category": 0,
+        "due": "2026-11-04",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": "2026-11-04"
+    },
+    {
+      "text": "Take out the trash every Tuesday",
+      "items": [
+        {
+          "title": "Take out the trash every Tuesday",
+          "category": 1,
+          "due": "2026-11-10",
+          "high": false,
+          "repeat": 3,
+          "repeatDay": 2,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Take out the trash every Tuesday",
+        "category": 1,
+        "due": "2026-11-10",
+        "high": false,
+        "repeat": 3,
+        "repeatDay": 2,
+        "number": "",
+        "actionable": true
+      },
+      "due": "2026-11-10"
+    },
+    {
+      "text": "Check my email daily",
+      "items": [
+        {
+          "title": "Check my email daily",
+          "category": 0,
+          "due": "2026-11-04",
+          "high": false,
+          "repeat": 1,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Check my email daily",
+        "category": 0,
+        "due": "2026-11-04",
+        "high": false,
+        "repeat": 1,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": ""
+    },
+    {
+      "text": "Water the plants every weekday",
+      "items": [
+        {
+          "title": "Water the plants every weekday",
+          "category": 2,
+          "due": "2026-11-04",
+          "high": false,
+          "repeat": 2,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Water the plants every weekday",
+        "category": 2,
+        "due": "2026-11-04",
+        "high": false,
+        "repeat": 2,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": ""
+    },
+    {
+      "text": "Pay rent on the 1st every month",
+      "items": [
+        {
+          "title": "Pay rent on the 1st every month",
+          "category": 1,
+          "due": "2026-12-01",
+          "high": false,
+          "repeat": 4,
+          "repeatDay": 1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Pay rent on the 1st every month",
+        "category": 1,
+        "due": "2026-12-01",
+        "high": false,
+        "repeat": 4,
+        "repeatDay": 1,
+        "number": "",
+        "actionable": true
+      },
+      "due": "2026-12-01"
+    },
+    {
+      "text": "Submit my timesheet weekly",
+      "items": [
+        {
+          "title": "Submit my timesheet weekly",
+          "category": 0,
+          "due": "2026-11-04",
+          "high": false,
+          "repeat": 3,
+          "repeatDay": 3,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Submit my timesheet weekly",
+        "category": 0,
+        "due": "2026-11-04",
+        "high": false,
+        "repeat": 3,
+        "repeatDay": 3,
+        "number": "",
+        "actionable": true
+      },
+      "due": ""
+    },
+    {
+      "text": "URGENT: call the landlord",
+      "items": [
+        {
+          "title": "URGENT: call the landlord",
+          "category": 1,
+          "due": "",
+          "high": true,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "URGENT: call the landlord",
+        "category": 1,
+        "due": "",
+        "high": true,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": ""
+    },
+    {
+      "text": "Send the memo asap",
+      "items": [
+        {
+          "title": "Send the memo asap",
+          "category": 0,
+          "due": "",
+          "high": true,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Send the memo asap",
+        "category": 0,
+        "due": "",
+        "high": true,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": ""
+    },
+    {
+      "text": "Call Sam!!",
+      "items": [
+        {
+          "title": "Call Sam",
+          "category": 2,
+          "due": "",
+          "high": true,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Call Sam",
+        "category": 2,
+        "due": "",
+        "high": true,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": ""
+    },
+    {
+      "text": "Call Sam when you can",
+      "items": [
+        {
+          "title": "Call Sam when you can",
+          "category": 2,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Call Sam when you can",
+        "category": 2,
+        "due": "",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": ""
+    },
+    {
+      "text": "Hi Sam,\nThanks,\nRegards\nFrom: Pat <pat@example.test>\nSubject: huddle\nhttps://example.test/a",
+      "items": [],
+      "one": {
+        "title": "Hi Sam, Thanks, Regards From: Pat <pat@example.test> Subject: huddle https://example.test/a",
+        "category": 0,
+        "due": "",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": false
+      },
+      "due": ""
+    },
+    {
+      "text": "Thanks, please send the report by Friday",
+      "items": [
+        {
+          "title": "Send the report by Friday",
+          "category": 0,
+          "due": "2026-11-06",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Thanks, please send the report by Friday",
+        "category": 0,
+        "due": "2026-11-06",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": "2026-11-06"
+    },
+    {
+      "text": "The plumber was very nice and quick.",
+      "items": [
+        {
+          "title": "The plumber was very nice and quick",
+          "category": 1,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": false
+        }
+      ],
+      "one": {
+        "title": "The plumber was very nice and quick",
+        "category": 1,
+        "due": "",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": false
+      },
+      "due": ""
+    },
+    {
+      "text": "Call Sam\ncall sam\nCALL SAM.",
+      "items": [
+        {
+          "title": "Call Sam",
+          "category": 2,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Call Sam call sam CALL SAM",
+        "category": 2,
+        "due": "",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": ""
+    },
+    {
+      "text": "Finish the report by Friday",
+      "items": [
+        {
+          "title": "Finish the report by Friday",
+          "category": 0,
+          "due": "2026-11-06",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Finish the report by Friday",
+        "category": 0,
+        "due": "2026-11-06",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": "2026-11-06"
+    },
+    {
+      "text": "Finish the report next Friday",
+      "items": [
+        {
+          "title": "Finish the report next Friday",
+          "category": 0,
+          "due": "2026-11-06",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Finish the report next Friday",
+        "category": 0,
+        "due": "2026-11-06",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": "2026-11-06"
+    },
+    {
+      "text": "Finish the report next Wednesday",
+      "items": [
+        {
+          "title": "Finish the report next Wednesday",
+          "category": 0,
+          "due": "2026-11-11",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Finish the report next Wednesday",
+        "category": 0,
+        "due": "2026-11-11",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": "2026-11-11"
+    },
+    {
+      "text": "Finish the report in 2 weeks",
+      "items": [
+        {
+          "title": "Finish the report in 2 weeks",
+          "category": 0,
+          "due": "2026-11-18",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Finish the report in 2 weeks",
+        "category": 0,
+        "due": "2026-11-18",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": "2026-11-18"
+    },
+    {
+      "text": "Finish the report next week",
+      "items": [
+        {
+          "title": "Finish the report next week",
+          "category": 0,
+          "due": "2026-11-09",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Finish the report next week",
+        "category": 0,
+        "due": "2026-11-09",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": "2026-11-09"
+    },
+    {
+      "text": "Finish the report EOW",
+      "items": [
+        {
+          "title": "Finish the report EOW",
+          "category": 0,
+          "due": "2026-11-06",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Finish the report EOW",
+        "category": 0,
+        "due": "2026-11-06",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": "2026-11-06"
+    },
+    {
+      "text": "Finish the report EOM",
+      "items": [
+        {
+          "title": "Finish the report EOM",
+          "category": 0,
+          "due": "2026-11-30",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Finish the report EOM",
+        "category": 0,
+        "due": "2026-11-30",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": "2026-11-30"
+    },
+    {
+      "text": "Finish the report next month",
+      "items": [
+        {
+          "title": "Finish the report next month",
+          "category": 0,
+          "due": "2026-12-01",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Finish the report next month",
+        "category": 0,
+        "due": "2026-12-01",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": "2026-12-01"
+    },
+    {
+      "text": "Finish the report 11/12",
+      "items": [
+        {
+          "title": "Finish the report 11/12",
+          "category": 0,
+          "due": "2026-11-12",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Finish the report 11/12",
+        "category": 0,
+        "due": "2026-11-12",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": "2026-11-12"
+    },
+    {
+      "text": "Finish the report 1/5",
+      "items": [
+        {
+          "title": "Finish the report 1/5",
+          "category": 0,
+          "due": "2027-01-05",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Finish the report 1/5",
+        "category": 0,
+        "due": "2027-01-05",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": "2027-01-05"
+    },
+    {
+      "text": "Finish the report 11/2",
+      "items": [
+        {
+          "title": "Finish the report 11/2",
+          "category": 0,
+          "due": "2026-11-02",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Finish the report 11/2",
+        "category": 0,
+        "due": "2026-11-02",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": "2026-11-02"
+    },
+    {
+      "text": "Finish the report Nov 12, 2026",
+      "items": [
+        {
+          "title": "Finish the report Nov 12, 2026",
+          "category": 0,
+          "due": "2026-11-12",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Finish the report Nov 12, 2026",
+        "category": 0,
+        "due": "2026-11-12",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": "2026-11-12"
+    },
+    {
+      "text": "Finish the report 12 Dec",
+      "items": [
+        {
+          "title": "Finish the report 12 Dec",
+          "category": 0,
+          "due": "2026-12-12",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Finish the report 12 Dec",
+        "category": 0,
+        "due": "2026-12-12",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": "2026-12-12"
+    },
+    {
+      "text": "Finish the report 2026-12-01",
+      "items": [
+        {
+          "title": "Finish the report 2026-12-01",
+          "category": 0,
+          "due": "2026-12-01",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Finish the report 2026-12-01",
+        "category": 0,
+        "due": "2026-12-01",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": "2026-12-01"
+    },
+    {
+      "text": "Finish the report on the 15th",
+      "items": [
+        {
+          "title": "Finish the report on the 15th",
+          "category": 0,
+          "due": "2026-11-15",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Finish the report on the 15th",
+        "category": 0,
+        "due": "2026-11-15",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": "2026-11-15"
+    },
+    {
+      "text": "Finish the report by fri",
+      "items": [
+        {
+          "title": "Finish the report by fri",
+          "category": 0,
+          "due": "2026-11-06",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Finish the report by fri",
+        "category": 0,
+        "due": "2026-11-06",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": "2026-11-06"
+    },
+    {
+      "text": "Finish the report tonight",
+      "items": [
+        {
+          "title": "Finish the report tonight",
+          "category": 0,
+          "due": "2026-11-04",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Finish the report tonight",
+        "category": 0,
+        "due": "2026-11-04",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": "2026-11-04"
+    },
+    {
+      "text": "Add 1/2 cup of sugar",
+      "items": [
+        {
+          "title": "Add 1/2 cup of sugar",
+          "category": 2,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Add 1/2 cup of sugar",
+        "category": 2,
+        "due": "",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": ""
+    },
+    {
+      "text": "He sat down and may need 5 minutes",
+      "items": [
+        {
+          "title": "He sat down and may need 5 minutes",
+          "category": 0,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": false
+        }
+      ],
+      "one": {
+        "title": "He sat down and may need 5 minutes",
+        "category": 0,
+        "due": "",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": false
+      },
+      "due": ""
+    },
+    {
+      "text": "We discussed Friday's meeting",
+      "items": [
+        {
+          "title": "We discussed Friday's meeting",
+          "category": 0,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": false
+        }
+      ],
+      "one": {
+        "title": "We discussed Friday's meeting",
+        "category": 0,
+        "due": "",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": false
+      },
+      "due": ""
+    },
+    {
+      "text": "Version 13/45 is wrong",
+      "items": [
+        {
+          "title": "Version 13/45 is wrong",
+          "category": 2,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": false
+        }
+      ],
+      "one": {
+        "title": "Version 13/45 is wrong",
+        "category": 2,
+        "due": "",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": false
+      },
+      "due": ""
+    },
+    {
+      "text": "Call Sam on 99/99/9999 and 0/0 and 2026-13-45",
+      "items": [
+        {
+          "title": "Call Sam on 99/99/9999 and 0/0 and 2026-13-45",
+          "category": 2,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Call Sam on 99/99/9999 and 0/0 and 2026-13-45",
+        "category": 2,
+        "due": "",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": ""
+    },
+    {
+      "text": "Remember to renew my license every year",
+      "items": [
+        {
+          "title": "Renew my license every year",
+          "category": 2,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Renew my license every year",
+        "category": 2,
+        "due": "",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": ""
+    },
+    {
+      "text": "Need to review ANDA 214990 forecast ASAP and update the status memo",
+      "items": [
+        {
+          "title": "Review ANDA 214990 forecast ASAP",
+          "category": 0,
+          "due": "",
+          "high": true,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "214990",
+          "actionable": true
+        },
+        {
+          "title": "Update the status memo",
+          "category": 0,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Review ANDA 214990 forecast ASAP and update the status memo",
+        "category": 0,
+        "due": "",
+        "high": true,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "214990",
+        "actionable": true
+      },
+      "due": ""
+    },
+    {
+      "text": "Meeting notes: team agreed on timeline. Action: Pat to send the draft labeling. Follow up with the applicant next Monday. Buy milk",
+      "items": [
+        {
+          "title": "Meeting notes: team agreed on timeline",
+          "category": 0,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": false
+        },
+        {
+          "title": "Pat to send the draft labeling",
+          "category": 0,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        },
+        {
+          "title": "Follow up with the applicant next Monday",
+          "category": 0,
+          "due": "2026-11-09",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        },
+        {
+          "title": "Buy milk",
+          "category": 2,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Meeting notes: team agreed on timeline. Action: Pat to send the draft labeling. Follow up with the applicant next Monday. Buy milk",
+        "category": 0,
+        "due": "2026-11-09",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": "2026-11-09"
+    },
+    {
+      "text": "Fix the leaky faucet, clean the garage, and call the vet tomorrow",
+      "items": [
+        {
+          "title": "Fix the leaky faucet",
+          "category": 1,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        },
+        {
+          "title": "Clean the garage",
+          "category": 1,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        },
+        {
+          "title": "Call the vet tomorrow",
+          "category": 1,
+          "due": "2026-11-05",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Fix the leaky faucet, clean the garage, and call the vet tomorrow",
+        "category": 1,
+        "due": "2026-11-05",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": "2026-11-05"
+    },
+    {
+      "text": "clean the gutters this weekend",
+      "items": [
+        {
+          "title": "Clean the gutters this weekend",
+          "category": 1,
+          "due": "2026-11-07",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Clean the gutters this weekend",
+        "category": 1,
+        "due": "2026-11-07",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": "2026-11-07"
+    },
+    {
+      "text": "Buy milk, eggs, bread",
+      "items": [
+        {
+          "title": "Buy milk, eggs, bread",
+          "category": 2,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Buy milk, eggs, bread",
+        "category": 2,
+        "due": "",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": ""
+    },
+    {
+      "text": "Call Sam, please",
+      "items": [
+        {
+          "title": "Call Sam, please",
+          "category": 2,
+          "due": "",
+          "high": false,
+          "repeat": 0,
+          "repeatDay": -1,
+          "number": "",
+          "actionable": true
+        }
+      ],
+      "one": {
+        "title": "Call Sam, please",
+        "category": 2,
+        "due": "",
+        "high": false,
+        "repeat": 0,
+        "repeatDay": -1,
+        "number": "",
+        "actionable": true
+      },
+      "due": ""
+    },
+    {
+      "text": "",
+      "items": [],
+      "one": null,
+      "due": ""
+    },
+    {
+      "text": "   ",
+      "items": [],
+      "one": null,
+      "due": ""
+    }
+  ]
+}

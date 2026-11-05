@@ -142,23 +142,24 @@ public class HeadlessRenderTests : IClassFixture<HeadlessFixture>
         {
             ThemeManager.Apply(AppearanceId.A);
             var win = new SettingsWindow(new Settings(), new PromptLibraryService(Path.Combine(Temp.NewDir(), "p.json")), () => { });
-            win.Show();
+            win.Show(); win.ExpandAll();
             Dispatcher.UIThread.RunJobs();
             var found = new[] { "AppearancePanel", "CompactPanel", "AutoHidePanel", "ConsentPanel", "CaptureCheck", "OpacitySlider", "LensCombo", "TestBtn", "CloseBtn",
                     "EscalateCheck", "LatePanel", "HolidayPanel", "PeekKeyBox", "LookupKeyBox", "DraftKeyBox", "PortfolioBox", "NotesBox", "ReferenceBox", "InstructionsBox", "UsageCheck",
                     "ConnBanner", "MiddleCheck", "ProviderPanel", "MyApiExpander", "ApiEndpoint", "TonePanel", "SignOffBox", "RepliesManage", "ReferenceUrlBox", "ReferenceUpdate", "OutlookOn",
-                    "ActionsPanel", "ActionAdd", "AgentsPanel", "AgentAdd", "TodoAutoCheck", "TodoRefreshPanel", "TodoOpen" }
+                    "ActionsPanel", "ActionAdd", "AgentsPanel", "AgentAdd", "TodoAutoCheck", "TodoRefreshPanel", "TodoOpen",
+                    "ChecklistKeyBox", "ChecklistModePanel", "ChecklistOpen", "AdaptiveCheck", "GettingStarted", "SuggestedBtn" }
                 .Where(n => win.FindControl<Control>(n) is not null).ToList();
             int radios = win.GetVisualDescendants().OfType<RadioButton>().Count();
             win.Close();
             return (found, radios);
         }, CancellationToken.None);
 
-        Assert.Equal(38, names.found.Count);
+        Assert.Equal(44, names.found.Count);
         // nineteen appearances + four auto-hide choices + three consent models + three "late" choices + four holiday-lead choices
-        // + four connection choices + five tones + four middle-click keys + two Outlook clouds + three Outlook message counts + five to-do refresh choices. (The four API-timeout choices sit inside the collapsed
+        // + four connection choices + five tones + four middle-click keys + two Outlook clouds + three Outlook message counts + five to-do refresh choices + two checklist modes. (The four API-timeout choices sit inside the collapsed
         // "My API" expander, whose content is not part of the visual tree until it is opened.)
-        Assert.Equal(19 + 4 + 3 + 3 + 4 + 4 + 5 + 4 + 2 + 3 + 5, names.radios);
+        Assert.Equal(19 + 4 + 3 + 3 + 4 + 4 + 5 + 4 + 2 + 3 + 5 + 2, names.radios);
     }
 
     [Fact]

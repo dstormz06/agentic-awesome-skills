@@ -10,7 +10,8 @@ namespace AndaCompanion.UI;
 /// <summary>What Settings needs to ask the running app, so the window can show live status (shortcut registration, the loaded portfolio).</summary>
 public sealed record SettingsHooks(Func<string> HotkeyStatus, Func<PortfolioRepository?> Portfolio, Func<string> ReferenceStatus,
     Func<string?>? MouseStatus = null, OutlookService? Outlook = null,
-    Action? OpenTodo = null, Action<CustomAction>? RunAction = null, Func<AgentSettings, string?>? AgentProblem = null, Func<int>? ClearFinished = null);
+    Action? OpenTodo = null, Action<CustomAction>? RunAction = null, Func<AgentSettings, string?>? AgentProblem = null, Func<int>? ClearFinished = null,
+    Action? OpenChecklist = null, Action? OpenNotes = null, Func<int>? ClearChecklistFinished = null, Func<IReadOnlyList<HotkeyStatus>>? Hotkeys = null);
 
 public partial class SettingsWindow : Window
 {
@@ -90,7 +91,7 @@ public partial class SettingsWindow : Window
             Apply();
         };
 
-        OpacitySlider.Minimum = Settings.MinCardOpacity * 100;      // the XAML says 30 too; one named value keeps them equal (a test checks)
+        OpacitySlider.Minimum = Settings.MinCardOpacity * 100;      // the XAML says 40 too; one named value keeps them equal (a test checks)
         OpacitySlider.Value = Math.Round(Settings.NormalizeOpacity(_settings.CardOpacity) * 100);
         OpacityLabel.Text = $"{OpacitySlider.Value:0}%";
         OpacitySlider.PropertyChanged += (_, e) =>
@@ -296,17 +297,7 @@ public partial class SettingsWindow : Window
             ConnStatus.Text = ConnectionService.DescribeFor(_settings);
         };
 
-        // ---- go to a section ----
-        var sections = ((StackPanel)Body.Content!).Children.OfType<StackPanel>()
-            .Select(p => (Panel: p, Title: (p.Children.FirstOrDefault() as TextBlock)?.Text))
-            .Where(x => !string.IsNullOrEmpty(x.Title) && x.Panel.Children[0] is TextBlock { Classes: var c } && c.Contains("lbl")).ToList();
-        JumpBox.ItemsSource = sections.Select(x => x.Title).ToList();
-        JumpBox.SelectionChanged += (_, _) =>
-        {
-            if (JumpBox.SelectedIndex < 0) return;
-            sections[JumpBox.SelectedIndex].Panel.BringIntoView();
-            JumpBox.SelectedIndex = -1;
-        };
+        BuildAdaptive();       // sections that arrange themselves, the section jump list and the Getting started card
 
         // ---- back up, restore, reset ----
         BackupSave.Click += async (_, _) =>
@@ -483,22 +474,29 @@ public partial class SettingsWindow : Window
             if (HotkeyCapture.FromKey(e.Key, e.KeyModifiers) is not { } combo) { e.Handled = true; return; }   // a modifier alone: keep waiting
             e.Handled = true;
             if (!HotkeyParser.TryParse(combo, out uint _m, out uint _k, out string normalized, out string error)) { KeyStatus.Text = $"{name}: {error}"; return; }
-            var others = new[]
+            var others = new List<(string, string)>
             {
                 ("Select & Peek", ReferenceEquals(box, PeekKeyBox) ? normalized : _settings.PeekHotkey),
                 ("Lookup box", ReferenceEquals(box, LookupKeyBox) ? normalized : _settings.LookupHotkey),
                 ("Check a draft", ReferenceEquals(box, DraftKeyBox) ? normalized : _settings.DraftHotkey),
             };
-            if (HotkeyParser.ValidateSet(others) is { } clash) { KeyStatus.Text = clash; return; }
+            if (!string.IsNullOrWhiteSpace(_settings.ChecklistHotkey)) others.Add(("My checklist", _settings.ChecklistHotkey));
+            foreach (var a in _settings.MyActions.Where(a => !string.IsNullOrWhiteSpace(a.Hotkey))) others.Add((a.Name, a.Hotkey));
+            if (HotkeyParser.ValidateSet(others.ToArray()) is { } clash) { KeyStatus.Text = clash; return; }
             set(normalized); box.Text = normalized; Apply();
             KeyStatus.Text = $"{name}: {normalized}. Checking with Windows…";
             Avalonia.Threading.DispatcherTimer.RunOnce(() => KeyStatus.Text = _hooks?.HotkeyStatus() ?? $"{name}: {normalized}", TimeSpan.FromMilliseconds(500));
         };
         reset.Click += (_, _) =>
         {
-            set(fallback); box.Text = fallback;
-            if (HotkeyParser.ValidateSet(("Select & Peek", _settings.PeekHotkey), ("Lookup box", _settings.LookupHotkey), ("Check a draft", _settings.DraftHotkey)) is { } clash)
-            { KeyStatus.Text = clash; return; }
+            string before = get();
+            set(fallback);
+            var all = new List<(string, string)> { ("Select & Peek", _settings.PeekHotkey), ("Lookup box", _settings.LookupHotkey), ("Check a draft", _settings.DraftHotkey) };
+            if (!string.IsNullOrWhiteSpace(_settings.ChecklistHotkey)) all.Add(("My checklist", _settings.ChecklistHotkey));
+            foreach (var a in _settings.MyActions.Where(a => !string.IsNullOrWhiteSpace(a.Hotkey))) all.Add((a.Name, a.Hotkey));
+            if (HotkeyParser.ValidateSet(all.ToArray()) is { } clash)
+            { set(before); box.Text = before; KeyStatus.Text = clash; return; }          // refused: keep what was there, not a clashing pair
+            box.Text = fallback;
             Apply();
             Avalonia.Threading.DispatcherTimer.RunOnce(() => KeyStatus.Text = _hooks?.HotkeyStatus() ?? "", TimeSpan.FromMilliseconds(500));
         };
@@ -506,6 +504,7 @@ public partial class SettingsWindow : Window
 
     private void RefreshPortfolioStatus()
     {
+        PaintGettingStarted();
         var repo = _hooks?.Portfolio();
         PortfolioStatus.Text = _settings.PortfolioPath is null ? "No portfolio chosen: the fictional demo records are used." : repo?.Status.Message ?? "";
         ReferenceStatus.Text = _hooks?.ReferenceStatus() ?? "";

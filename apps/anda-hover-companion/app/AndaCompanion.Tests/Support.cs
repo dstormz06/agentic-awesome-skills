@@ -40,3 +40,12 @@ public sealed class EnvScope : IDisposable
 
     public void Dispose() => Environment.SetEnvironmentVariable(_name, _previous);
 }
+
+/// <summary>Saves pictures of windows for a person to look at. Runs only when ANDA_SHOTS_DIR names a folder; elsewhere it is reported as skipped.</summary>
+public sealed class ShotFactAttribute : FactAttribute
+{
+    public ShotFactAttribute()
+    {
+        if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("ANDA_SHOTS_DIR"))) Skip = "Set ANDA_SHOTS_DIR to save pictures of the windows";
+    }
+}

@@ -22,5 +22,6 @@ public static class AppPaths
     public static string PromptsFile => Path.Combine(Root, "prompts.json");
     public static string RepliesFile => Path.Combine(Root, "replies.json");
     public static string TodoFile => Path.Combine(Root, "todo.json");
+    public static string ChecklistFile => Path.Combine(Root, "checklist.json");
     public static string ReferenceDownloadFile => Path.Combine(Root, "drugsfda-downloaded.zip");
 }

@@ -13,7 +13,7 @@ public enum ActionKind
     FillPrompt = 1,
     /// <summary>Fill the prompt, show exactly what would be sent, and send it to the connection chosen in Settings only after a click.</summary>
     AskAi = 2,
-    /// <summary>Run one of the person's registered agents (for example Alert Hub or Triaging Agent) on the selected ANDA.</summary>
+    /// <summary>Run one of the person's registered agents (for example Alert Hub, Patent Analysis or Triaging Agent) on the selected ANDA.</summary>
     RunAgent = 3,
 }
 

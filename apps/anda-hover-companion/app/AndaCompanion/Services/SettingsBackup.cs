@@ -27,7 +27,7 @@ public static class SettingsBackup
     private static readonly JsonSerializerOptions Json = new() { WriteIndented = true };
 
     /// <summary>Settings that are tied to one PC and so are not part of a backup.</summary>
-    private static readonly string[] ThisPcOnly = { nameof(Settings.PortfolioPath), nameof(Settings.PortfolioColumns), nameof(Settings.NotesFolder), nameof(Settings.ReferenceDataPath), nameof(Settings.FirstRunDone) };
+    private static readonly string[] ThisPcOnly = { nameof(Settings.PortfolioPath), nameof(Settings.PortfolioColumns), nameof(Settings.NotesFolder), nameof(Settings.ReferenceDataPath), nameof(Settings.FirstRunDone), nameof(Settings.SectionUse), nameof(Settings.GettingStartedDone) };
 
     public static string Export(Settings settings, PromptLibraryService lenses, QuickReplyService replies, DateTime? now = null)
     {
@@ -86,6 +86,7 @@ public static class SettingsBackup
     public static void Reset(Settings target, PromptLibraryService lenses, QuickReplyService replies)
     {
         CopyFrom(target, SettingsService.Normalize(new Settings()), skip: ThisPcOnly);
+        target.SectionUse = new(); target.GettingStartedDone = false;        // a reset starts the window's learning over, too
         lenses.ReplaceAll(PromptLibraryService.Starters);
         replies.ReplaceAll(QuickReplyService.Starters);
     }

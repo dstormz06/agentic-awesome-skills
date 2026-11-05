@@ -41,14 +41,14 @@ public class Round15UiTests : IClassFixture<HeadlessFixture>
     private static SettingsWindow NewSettings(Settings settings)
     {
         var w = new SettingsWindow(settings, new PromptLibraryService(Path.Combine(Temp.NewDir(), "p.json")), () => { });
-        w.Show(); Settle();
+        w.Show(); w.ExpandAll(); Settle();            // sections start collapsed; these tests look inside all of them
         return w;
     }
 
     // ---------- Settings: group lines and the 30% slider ----------
 
     [Fact]
-    public async Task Settings_has_seven_named_groups_separated_by_lines_and_a_30_to_100_slider()
+    public async Task Settings_has_eight_named_sections_each_with_its_own_line_and_a_40_to_100_slider()
     {
         var r = await _fx.Session.Dispatch(() =>
         {
@@ -57,32 +57,34 @@ public class Round15UiTests : IClassFixture<HeadlessFixture>
             var settings = new Settings();
             var w = NewSettings(settings);
             var groups = All<TextBlock>(w).Where(t => t.Classes.Contains("grp")).Select(t => t.Text!).ToList();
-            int rules = All<Border>(w).Count(b => b.Classes.Contains("rule"));
+            int sections = All<Expander>(w).Count(b => b.Classes.Contains("sec") && b.BorderThickness.Bottom >= 2);
             int hairs = All<Border>(w).Count(b => b.Classes.Contains("hair"));
             var slider = w.FindControl<Slider>("OpacitySlider")!;
             double min = slider.Minimum, max = slider.Maximum;
-            slider.Value = 30; Settle();
-            double at30 = settings.CardOpacity;
+            slider.Value = 40; Settle();
+            double at40 = settings.CardOpacity;
             slider.Value = 65; Settle();
             double at65 = settings.CardOpacity;
-            slider.Value = 5; Settle();                                   // below the range: held at 30
+            slider.Value = 5; Settle();                                   // below the range: held at 40
             double below = settings.CardOpacity;
             var jump = w.FindControl<ComboBox>("JumpBox")!.ItemsSource!.Cast<string>().ToList();
             w.Close(); Settle();
-            return (groups, rules, hairs, min, max, at30, at65, below, jump);
+            return (groups, sections, hairs, min, max, at40, at65, below, jump);
         }, CancellationToken.None);
 
-        Assert.Equal(new[] { "Look and feel", "How it starts", "Dates", "My files and writing", "My actions, agents and to-do list", "AI and connections", "Maintenance" }, r.groups);
-        Assert.Equal(r.groups.Count - 1, r.rules);                         // one strong line before every group but the first
+        Assert.Equal(new[] { "Look and feel", "How it starts", "Dates", "My files and writing", "My checklist", "My actions, agents and ANDA to-do list", "AI and connections", "Maintenance" }, r.groups);
+        Assert.Equal(r.groups.Count, r.sections);                          // every group is a section with a strong line under it
         Assert.True(r.hairs >= 8, $"{r.hairs} fine lines between the settings inside a group");
-        Assert.Equal(30, r.min);
+        Assert.Equal(40, r.min);
         Assert.Equal(100, r.max);
-        Assert.Equal(0.30, r.at30, 3);
+        Assert.Equal(0.40, r.at40, 3);
         Assert.Equal(0.65, r.at65, 3);
-        Assert.Equal(0.30, r.below, 3);
+        Assert.Equal(0.40, r.below, 3);
         Assert.Contains(r.jump, j => j.StartsWith("MY ACTIONS"));
         Assert.Contains(r.jump, j => j.StartsWith("MY AGENTS"));
-        Assert.Contains(r.jump, j => j.StartsWith("MY TO-DO LIST"));
+        Assert.Contains(r.jump, j => j.StartsWith("MY ANDA TO-DO LIST"));
+        Assert.Contains(r.jump, j => j.StartsWith("MY CHECKLIST"));
+        Assert.Contains(r.jump, j => j == "My checklist");                 // the group names are in the list too
     }
 
     // ---------- Settings: my actions ----------
@@ -141,7 +143,7 @@ public class Round15UiTests : IClassFixture<HeadlessFixture>
     }
 
     [Fact]
-    public async Task The_two_preset_agents_can_be_switched_on_but_not_removed()
+    public async Task The_three_preset_agents_can_be_switched_on_but_not_removed()
     {
         var r = await _fx.Session.Dispatch(() =>
         {
@@ -149,16 +151,17 @@ public class Round15UiTests : IClassFixture<HeadlessFixture>
             using var home = new EnvScope(AppPaths.HomeEnvVar, Temp.NewDir());
             var settings = new Settings();
             var w = NewSettings(settings);
-            var removeHub = All<Button>(w).First(b => AutomationProperties.GetName(b) == "Remove the agent Alert Hub");
-            bool removable = removeHub.IsEnabled;
+            bool removable = new[] { "Alert Hub", "Patent Analysis", "Triaging Agent" }
+                .Any(n => All<Button>(w).First(b => AutomationProperties.GetName(b) == "Remove the agent " + n).IsEnabled);
             Click(w.FindControl<Button>("AgentAdd")!); Settle();
             int agents = settings.Agents.Count;
             w.Close(); Settle();
             return (removable, agents, names: settings.Agents.Select(a => a.Name).ToList());
         }, CancellationToken.None);
         Assert.False(r.removable);
-        Assert.Equal(3, r.agents);
+        Assert.Equal(4, r.agents);
         Assert.Contains("Alert Hub", r.names);
+        Assert.Contains("Patent Analysis", r.names);
         Assert.Contains("Triaging Agent", r.names);
     }
 

@@ -10,6 +10,9 @@ public enum ConsentModel
     Whisper,    // hotkey shows a small invite chip; the card opens only if it is clicked
 }
 
+/// <summary>What the checklist shortcut does with highlighted notes.</summary>
+public enum ChecklistMode { Review = 0, AddAtOnce = 1 }
+
 public sealed class Settings
 {
     public AppearanceId Appearance { get; set; } = Appearances.Default;   // K · Graphite Quiet is the product default
@@ -41,6 +44,25 @@ public sealed class Settings
     public string PeekHotkey { get; set; } = "Ctrl+Alt+A";
     public string LookupHotkey { get; set; } = "Ctrl+Alt+Space";
     public string DraftHotkey { get; set; } = "Ctrl+Alt+D";
+
+    // ---- my checklist (Settings, My checklist): a separate feature for anything, with its own shortcut ----
+    public const string DefaultChecklistHotkey = "Ctrl+Alt+L";
+
+    /// <summary>Highlight text, press this, and the notes become suggested checklist items. Empty means no shortcut (the tray menu still works).</summary>
+    public string ChecklistHotkey { get; set; } = DefaultChecklistHotkey;
+
+    /// <summary>What the checklist shortcut does with highlighted notes: show the items first (the default), or add them at once.</summary>
+    public ChecklistMode ChecklistMode { get; set; } = ChecklistMode.Review;
+
+    /// <summary>A saved or restored checklist shortcut, made valid: unreadable becomes the default, one that clashes with another shortcut becomes none.</summary>
+    public static string RepairChecklistHotkey(string? saved, IEnumerable<string> others)
+    {
+        if (saved is not null && saved.Trim().Length == 0) return "";
+        string candidate = HotkeyParser.TryParse(saved, out _, out _, out string norm, out _) ? norm : DefaultChecklistHotkey;
+        foreach (var other in others)
+            if (HotkeyParser.TryParse(other, out _, out _, out string n, out _) && n == candidate) return "";
+        return candidate;
+    }
 
     // ---- my data (Settings, My data): the RPM's own files, read-only and local ----
     public string? PortfolioPath { get; set; }
@@ -103,11 +125,14 @@ public sealed class Settings
     /// <summary>The Edge extension allowed to talk to this app (its 32-letter ID). Defaults to the extension in this repository.</summary>
     public string ExtensionId { get; set; } = NativeHostRegistration.DefaultExtensionId;
 
-    /// <summary>Card surface opacity, from <see cref="MinCardOpacity"/> (30%) to 1.0 (solid). Text always stays opaque.</summary>
-    public double CardOpacity { get; set; } = 1.0;
+    /// <summary>Card surface opacity, from <see cref="MinCardOpacity"/> (40%) to 1.0 (solid). Text always stays opaque.</summary>
+    public double CardOpacity { get; set; } = DefaultCardOpacity;
 
-    /// <summary>The lowest card opacity the slider offers: 30%. A saved or restored value outside 30–100% is brought back into range.</summary>
-    public const double MinCardOpacity = 0.30;
+    /// <summary>The lowest card opacity the slider offers: 40%. A saved or restored value outside 40–100% is brought back into range.</summary>
+    public const double MinCardOpacity = 0.40;
+
+    /// <summary>What a new install, and "Reset all settings", starts with: 92%, so the card sits lightly on the screen. An install that already saved a choice keeps it.</summary>
+    public const double DefaultCardOpacity = 0.92;
 
     /// <summary>Brings any value into 30–100%. A value that is not a number becomes solid (1.0).</summary>
     public static double NormalizeOpacity(double value) => double.IsNaN(value) || double.IsInfinity(value) ? 1.0 : Math.Clamp(value, MinCardOpacity, 1.0);
@@ -126,7 +151,7 @@ public sealed class Settings
     /// <summary>The person's own actions: a prompt, an agent, or a to-do item, each reachable from its own shortcut and the tray menu.</summary>
     public List<CustomAction> MyActions { get; set; } = MyActionRules.Starters();
 
-    /// <summary>Agents the person registered (for example Alert Hub and Triaging Agent). Each is off until it is switched on and set up.</summary>
+    /// <summary>Agents the person registered (for example Alert Hub, Patent Analysis and Triaging Agent). Each is off until it is switched on and set up.</summary>
     public List<AgentSettings> Agents { get; set; } = AgentRules.Presets();
 
     /// <summary>Include items that come from the person's own data (at-risk ANDAs, dates, action items) in the to-do list.</summary>
@@ -137,6 +162,17 @@ public sealed class Settings
     public static readonly IReadOnlyList<int> TodoRefreshChoices = new[] { 0, 15, 30, 60, 300 };
 
     public bool FirstRunDone { get; set; }
+
+    // ---- this window arranges itself (Settings, Maintenance) ----
+
+    /// <summary>Settings open the sections that need a look or that the person opens often, and collapse the rest.</summary>
+    public bool AdaptiveSettings { get; set; } = true;
+
+    /// <summary>The "Getting started" card at the top of Settings is hidden once the person has said they got it.</summary>
+    public bool GettingStartedDone { get; set; }
+
+    /// <summary>How often each Settings section was opened (section name to count). Nothing else is kept: no text and no numbers.</summary>
+    public Dictionary<string, int> SectionUse { get; set; } = new();
 }
 
 public static class SettingsService
@@ -176,9 +212,12 @@ public static class SettingsService
         { loaded.PeekHotkey = "Ctrl+Alt+A"; loaded.LookupHotkey = "Ctrl+Alt+Space"; loaded.DraftHotkey = "Ctrl+Alt+D"; }
         if (!Enum.IsDefined(loaded.Appearance)) loaded.Appearance = Appearances.Default;
         loaded.CardOpacity = Settings.NormalizeOpacity(loaded.CardOpacity);
-        loaded.MyActions = MyActionRules.Normalize(loaded.MyActions, new[] { loaded.PeekHotkey, loaded.LookupHotkey, loaded.DraftHotkey });
+        if (!Enum.IsDefined(loaded.ChecklistMode)) loaded.ChecklistMode = ChecklistMode.Review;
+        loaded.ChecklistHotkey = Settings.RepairChecklistHotkey(loaded.ChecklistHotkey, new[] { loaded.PeekHotkey, loaded.LookupHotkey, loaded.DraftHotkey });
+        loaded.MyActions = MyActionRules.Normalize(loaded.MyActions, new[] { loaded.PeekHotkey, loaded.LookupHotkey, loaded.DraftHotkey, loaded.ChecklistHotkey });
         loaded.Agents = AgentRules.Normalize(loaded.Agents);
         if (!Settings.TodoRefreshChoices.Contains(loaded.TodoRefreshSeconds)) loaded.TodoRefreshSeconds = 30;
+        loaded.SectionUse = SettingsAdvisor.CleanUse(loaded.SectionUse);
         return loaded;
     }
 

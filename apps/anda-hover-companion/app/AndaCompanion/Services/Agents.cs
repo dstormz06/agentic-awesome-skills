@@ -16,7 +16,7 @@ public enum AgentRun
 }
 
 /// <summary>
-/// One agent or service the person registered, for example DPM's Alert Hub or Triaging Agent. It is reached through the same
+/// One agent or service the person registered, for example DPM's Alert Hub, Patent Analysis or Triaging Agent. It is reached through the same
 /// "My API" connection described in Settings: an address, a token header, the NAME of the environment variable that holds the token,
 /// a request body and the place the reply text is. Nothing here is a secret. It does nothing until it is switched on.
 /// </summary>
@@ -43,7 +43,10 @@ public static class AgentRules
 {
     public const int MaxAgents = 8, MaxNameChars = 40, MaxPromptChars = 4000, MaxFindingChars = 2000, MaxItems = 8;
     public static readonly IReadOnlyList<int> CacheChoices = new[] { 0, 5, 15, 60 };
-    public const string AlertHubId = "alert-hub", TriagingId = "triaging-agent";
+    public const string AlertHubId = "alert-hub", PatentId = "patent-analysis", TriagingId = "triaging-agent";
+
+    /// <summary>True for the three agents DPM has tested, which are always listed and cannot be removed (they can be switched off).</summary>
+    public static bool IsPreset(string? id) => id is AlertHubId or PatentId or TriagingId;
 
     /// <summary>The placeholders a request body can carry as {{name}}, beside {{system}}, {{user}}, {{model}} and {{max_tokens}}.</summary>
     public static IReadOnlyList<string> BodyFields => ActionFill.Placeholders.Select(p => p.Name).ToList();
@@ -52,7 +55,7 @@ public static class AgentRules
     public static IReadOnlyDictionary<string, string> DummyFields() => BodyFields.ToDictionary(n => n, _ => "0");
 
     /// <summary>
-    /// The two agents DPM has tested, listed so they can be set up. Their connection details are not known to this app and are not
+    /// The three agents DPM has tested, listed so they can be set up. Their connection details are not known to this app and are not
     /// guessed: each stays "not set up" until an address, and any token variable name, are entered. The prompts are starting points.
     /// </summary>
     public static List<AgentSettings> Presets() => new()
@@ -62,6 +65,12 @@ public static class AgentRules
             Id = AlertHubId, Name = "Alert Hub",
             Prompt = "List any alerts you hold for ANDA {number} ({drug}). One finding per line, each starting with \"- \". If there are none, say so.",
             Api = new CustomApiSettings { Name = "Alert Hub" },
+        },
+        new()
+        {
+            Id = PatentId, Name = "Patent Analysis",
+            Prompt = "Summarize any patent or exclusivity information you hold for ANDA {number} ({drug}). One finding per line, each starting with \"- \". If there is none, say so.",
+            Api = new CustomApiSettings { Name = "Patent Analysis" },
         },
         new()
         {

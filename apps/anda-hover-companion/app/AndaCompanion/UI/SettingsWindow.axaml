@@ -20,6 +20,22 @@
     <Style Selector="TextBlock.grp"><Setter Property="FontSize" Value="13"/><Setter Property="FontWeight" Value="Bold"/><Setter Property="Foreground" Value="{DynamicResource C.Ink}"/><Setter Property="Margin" Value="0,2,0,0"/></Style>
     <Style Selector="Border.rule"><Setter Property="Height" Value="2"/><Setter Property="Background" Value="{DynamicResource C.Line}"/><Setter Property="Margin" Value="0,8,0,0"/></Style>
     <Style Selector="Border.hair"><Setter Property="Height" Value="1"/><Setter Property="Background" Value="{DynamicResource C.Hair}"/></Style>
+    <Style Selector="Expander.sec">
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource C.Line}"/>
+      <Setter Property="BorderThickness" Value="0,0,0,2"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="MinHeight" Value="0"/>
+    </Style>
+    <Style Selector="Expander.sec /template/ ToggleButton#ExpanderHeader">
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+      <Setter Property="Padding" Value="2,10"/>
+    </Style>
+    <Style Selector="Border.pill"><Setter Property="CornerRadius" Value="9"/><Setter Property="Padding" Value="8,2"/><Setter Property="Background" Value="{DynamicResource C.Mark}"/></Style>
+    <Style Selector="TextBlock.pilltext"><Setter Property="FontSize" Value="10.5"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Foreground" Value="{DynamicResource C.Accent}"/></Style>
     <Style Selector="TextBlock.hint"><Setter Property="FontSize" Value="11"/><Setter Property="Foreground" Value="{DynamicResource C.Ink3}"/><Setter Property="TextWrapping" Value="Wrap"/></Style>
   </Window.Styles>
 
@@ -46,316 +62,437 @@
         <!-- Scrolls only when the screen is too short to show every section (small laptops). -->
         <ScrollViewer Name="Body" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Spacing="14" Margin="0,0,2,0">
-
-        <TextBlock Classes="grp" Text="Look and feel"/>
-
-        <StackPanel Spacing="6">
-          <TextBlock Classes="lbl" Text="APPEARANCE · FULL CARD"/>
-          <UniformGrid Name="AppearancePanel" Columns="2"/>
-          <TextBlock Classes="lbl" Margin="0,6,0,0" Text="APPEARANCE · COMPACT BOX"/>
-          <UniformGrid Name="CompactPanel" Columns="2"/>
-          <TextBlock Classes="hint" Text="Compact boxes are small enough to leave an open email readable. They make no AI call; click one (or press Enter) to open its full card. All looks share identical anatomy and meaning — this is preference, never information."/>
-        </StackPanel>
-
-        <Border Classes="hair"/>
-
-        <StackPanel Spacing="6">
-          <TextBlock Classes="lbl" Text="CARD TRANSPARENCY"/>
-          <Grid ColumnDefinitions="*,10,Auto">
-            <Slider Name="OpacitySlider" Minimum="30" Maximum="100" TickFrequency="1" IsSnapToTickEnabled="True"/>
-            <TextBlock Grid.Column="2" Name="OpacityLabel" FontSize="12.5" VerticalAlignment="Center"
-                       Foreground="{DynamicResource C.Ink2}" Width="42" TextAlignment="Right"/>
-          </Grid>
-          <TextBlock Classes="hint" Text="100% is solid; 30% lets what is behind the card show through. Only the card surface becomes translucent. Text and status colors stay fully opaque, but on a busy background they are easier to read at a higher value."/>
-        </StackPanel>
-
-        <Border Classes="hair"/>
-
-        <StackPanel Spacing="6">
-          <TextBlock Classes="lbl" Text="AUTO-HIDE"/>
-          <WrapPanel Name="AutoHidePanel"/>
-          <TextBlock Classes="hint" Text="Hides a card or box after this long with no mouse or key activity. It never hides while your pointer is over it, while it is pinned, or while the drawer is open."/>
-        </StackPanel>
-
-        <Border Classes="rule"/>
-
-        <TextBlock Classes="grp" Text="How it starts"/>
-
-        <StackPanel Spacing="6">
-          <TextBlock Classes="lbl" Text="CONSENT MODEL"/>
-          <StackPanel Name="ConsentPanel" Spacing="2"/>
-        </StackPanel>
-
-        <Border Classes="hair"/>
-
-        <StackPanel Spacing="6">
-          <TextBlock Classes="lbl" Text="URGENT ANDAs"/>
-          <CheckBox Name="EscalateCheck">
-            <TextBlock Text="In whisper mode, open a peek by itself for an urgent or at-risk ANDA" TextWrapping="Wrap"/>
-          </CheckBox>
-          <WrapPanel Name="LatePanel"/>
-          <TextBlock Classes="hint" Text="At risk = forecast this many days after the goal, a serious attention item, or a passed goal date. It still starts only when you select a number and press the shortcut; nothing ever opens on its own. A peek makes no AI call."/>
-        </StackPanel>
-
-        <Border Classes="hair"/>
-
-        <StackPanel Spacing="6">
-          <TextBlock Classes="lbl" Text="SELECT &amp; PEEK"/>
-          <CheckBox Name="CaptureCheck">
-            <TextBlock Text="Read my selection by copying it, then put my clipboard back" TextWrapping="Wrap"/>
-          </CheckBox>
-          <TextBlock Classes="hint" Text="Off: Ctrl+Alt+A opens the lookup box instead and no keystroke is ever sent. Terminals are always skipped, because Ctrl+C there interrupts a running command."/>
-        </StackPanel>
-
-        <Border Classes="hair"/>
-
-        <StackPanel Spacing="6">
-          <TextBlock Classes="lbl" Text="SHORTCUTS · CLICK A BOX, THEN PRESS THE KEYS"/>
-          <Grid ColumnDefinitions="140,*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="6" ColumnSpacing="8">
-            <TextBlock Text="Select &amp; Peek" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}"/>
-            <TextBox Grid.Column="1" Name="PeekKeyBox" IsReadOnly="True" AutomationProperties.Name="Select and Peek shortcut"/>
-            <Button Grid.Column="2" Name="PeekKeyReset" Content="Reset"/>
-            <TextBlock Grid.Row="1" Text="Lookup box" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}"/>
-            <TextBox Grid.Row="1" Grid.Column="1" Name="LookupKeyBox" IsReadOnly="True" AutomationProperties.Name="Lookup shortcut"/>
-            <Button Grid.Row="1" Grid.Column="2" Name="LookupKeyReset" Content="Reset"/>
-            <TextBlock Grid.Row="2" Text="Check a draft" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}"/>
-            <TextBox Grid.Row="2" Grid.Column="1" Name="DraftKeyBox" IsReadOnly="True" AutomationProperties.Name="Check a draft shortcut"/>
-            <Button Grid.Row="2" Grid.Column="2" Name="DraftKeyReset" Content="Reset"/>
-          </Grid>
-          <TextBlock Name="KeyStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
-          <TextBlock Classes="hint" Text="Please use at least two modifiers, one of them Ctrl or Alt, so everyday shortcuts like Ctrl+C keep working. On keyboards where Ctrl+Alt is AltGr, choose Ctrl+Shift instead. Windows reports at once if another program already owns a shortcut."/>
-        </StackPanel>
-
-        <Border Classes="hair"/>
-
-        <StackPanel Spacing="6">
-          <TextBlock Classes="lbl" Text="OTHER WAYS TO START IT"/>
-          <CheckBox Name="MiddleCheck">
-            <TextBlock Text="Middle-click (wheel button) on selected text starts Select &amp; Peek" TextWrapping="Wrap"/>
-          </CheckBox>
-          <StackPanel Orientation="Horizontal" Spacing="4">
-            <TextBlock Text="Hold" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}" Margin="0,0,8,0"/>
-            <WrapPanel Name="MiddleModPanel"/>
-          </StackPanel>
-          <TextBlock Name="MiddleStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
-          <TextBlock Classes="hint" Text="Off by default. It uses a Windows mouse hook that sees only the middle button, never the pointer position or any text, and the click still reaches the program under it. Some security software flags mouse hooks. A plain middle-click scrolls or opens links in many programs, so Ctrl is recommended. The shortcuts above and the tray icon always work."/>
-        </StackPanel>
-
-        <Border Classes="rule"/>
-
-        <TextBlock Classes="grp" Text="Dates"/>
-
-        <StackPanel Spacing="6">
-          <TextBlock Classes="lbl" Text="WEEKEND AND HOLIDAY WARNING"/>
-          <WrapPanel Name="HolidayPanel"/>
-          <TextBlock Classes="hint" Text="Flags a goal or forecast date on a weekend or federal holiday, or this many business days before or after a federal holiday. It shows the nearest business days; it does not decide how a date is handled."/>
-        </StackPanel>
-
-        <Border Classes="rule"/>
-
-        <TextBlock Classes="grp" Text="My files and writing"/>
-
-        <StackPanel Spacing="6">
-          <TextBlock Classes="lbl" Text="MY DATA · YOUR OWN FILES, READ-ONLY, ON THIS PC"/>
-          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-            <TextBox Name="PortfolioBox" IsReadOnly="True" Watermark="Your ANDA portfolio (.xlsx or .csv). Empty = fictional demo data." AutomationProperties.Name="Portfolio file"/>
-            <Button Grid.Column="1" Name="PortfolioChoose" Content="Choose…"/>
-            <Button Grid.Column="2" Name="PortfolioClear" Content="Clear"/>
-          </Grid>
-          <TextBlock Name="PortfolioStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
-          <Expander Name="ColumnsExpander" IsVisible="False" Header="Match my columns">
-            <StackPanel Name="ColumnsPanel" Spacing="4" Margin="0,4,0,0"/>
-          </Expander>
-          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-            <TextBox Name="NotesBox" IsReadOnly="True" Watermark="Folder with your notes (.txt, .md, .docx)" AutomationProperties.Name="Notes folder"/>
-            <Button Grid.Column="1" Name="NotesChoose" Content="Choose…"/>
-            <Button Grid.Column="2" Name="NotesClear" Content="Clear"/>
-          </Grid>
-          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-            <TextBox Name="ReferenceBox" IsReadOnly="True" Watermark="Drugs@FDA data file you downloaded (.zip), for the RLD labeling date" AutomationProperties.Name="Drugs@FDA file"/>
-            <Button Grid.Column="1" Name="ReferenceChoose" Content="Choose…"/>
-            <Button Grid.Column="2" Name="ReferenceClear" Content="Clear"/>
-          </Grid>
-          <TextBlock Name="ReferenceStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
-          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-            <TextBox Name="ReferenceUrlBox" Watermark="Optional: the https address of the Drugs@FDA data file, to update it from FDA" AutomationProperties.Name="Drugs@FDA data file address"/>
-            <Button Grid.Column="1" Name="ReferenceUpdate" Content="Update now"/>
-          </Grid>
-          <TextBlock Name="ReferenceUpdateStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
-          <TextBlock Classes="hint" Text="Update now fetches that one address, only when you press it, and keeps the file only if it really is a Drugs@FDA data file. It needs the network and is the only thing here that does. The address is the file link on FDA's Drugs@FDA data files page; this app does not guess it. The PSG line has no official source connected: it shows a date from a PSG column in your own sheet, or says it is not available."/>
-          <TextBlock Classes="hint" Text="This tool only reads these files and never changes them. Nothing is sent anywhere. It shows only what your sheet contains: a forecast or progress that is not in it stays blank. The PSG date shown is the one in your own sheet; no official PSG source is connected yet."/>
-        </StackPanel>
-
-        <Border Classes="hair"/>
-
-        <StackPanel Spacing="6">
-          <TextBlock Classes="lbl" Text="MY WRITING · TONE, STYLE, SIGN-OFF, QUICK REPLIES"/>
-          <WrapPanel Name="TonePanel"/>
-          <TextBox Name="InstructionsBox" AcceptsReturn="True" TextWrapping="Wrap" Height="76"
-                   Watermark="Your style in your own words. For example: plain words, no jargon, keep it under 120 words."
-                   AutomationProperties.Name="My standing writing instructions"/>
-          <TextBox Name="SignOffBox" Watermark="How you sign off, for example: Thanks, Pat" AutomationProperties.Name="My sign-off"/>
-          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-            <TextBlock Name="RepliesSummary" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
-            <Button Grid.Column="1" Name="RepliesManage" Content="Quick replies…" Foreground="{DynamicResource C.Accent}" Background="{DynamicResource C.Mark}"/>
-          </Grid>
-          <TextBlock Classes="hint" Text="Tone, style and sign-off steer Proofread, Rewrite and Fact-check (only once a model is approved). They can never override the fixed rules: no changed numbers or dates, no invented facts. Quick replies are templates filled from the card (no AI): the Quick replies button on a card copies one with its numbers and dates filled in."/>
-        </StackPanel>
-
-        <Border Classes="rule"/>
-
-        <TextBlock Classes="grp" Text="My actions, agents and to-do list"/>
-
-        <StackPanel Spacing="6">
-          <TextBlock Classes="lbl" Text="MY ACTIONS · YOUR OWN PROMPT, AGENT OR TO-DO ITEM, ON YOUR OWN SHORTCUT"/>
-          <StackPanel Name="ActionsPanel" Spacing="8"/>
-          <WrapPanel>
-            <Button Name="ActionAdd" Content="Add an action" Margin="0,0,8,6"/>
-          </WrapPanel>
-          <TextBlock Name="ActionsStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
-          <TextBlock Classes="hint" Text="Select a number anywhere, then press the shortcut you chose for an action. Add to my to-do list puts it on your list. Fill my prompt shows your own prompt with the card's facts filled in, ready to copy; no AI is called. Ask my AI and Run an agent show exactly what would be sent, and send only after you press Send (unless you turn that off for that one action). Every action is also in the tray menu."/>
-        </StackPanel>
-
-        <Border Classes="hair"/>
-
-        <StackPanel Spacing="6">
-          <TextBlock Classes="lbl" Text="MY AGENTS · ALERT HUB, TRIAGING AGENT AND YOUR OWN"/>
-          <StackPanel Name="AgentsPanel" Spacing="8"/>
-          <WrapPanel>
-            <Button Name="AgentAdd" Content="Add an agent" Margin="0,0,8,6"/>
-          </WrapPanel>
-          <TextBlock Name="AgentsStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
-          <TextBlock Classes="hint" Text="An agent is any service you can reach with an address. Alert Hub and Triaging Agent are listed so they can be set up: this app does not know their addresses or message format and does not guess them, so each stays off until you enter the details your IT team gives you. Nothing is sent for an agent that is off. The token stays in the environment variable you name and is never saved by this app."/>
-          <TextBlock Classes="hint" Text="An agent is asked only when you press Run on a card or use its action, unless you set it to run by itself. By itself means: when a full card opens, or only when the ANDA is at risk. A peek never asks an agent. Its answer appears in the card's drawer as the agent's own words, and nothing joins your to-do list until you press its button."/>
-        </StackPanel>
-
-        <Border Classes="hair"/>
-
-        <StackPanel Spacing="6">
-          <TextBlock Classes="lbl" Text="MY TO-DO LIST · LIVE, FROM YOUR ITEMS AND YOUR DATA"/>
-          <CheckBox Name="TodoAutoCheck">
-            <TextBlock Text="Include items from my data (at-risk ANDAs, weekend and holiday dates, action items)" TextWrapping="Wrap"/>
-          </CheckBox>
-          <StackPanel Orientation="Horizontal" Spacing="4">
-            <TextBlock Text="While the list is open, refresh every" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}" Margin="0,0,8,0"/>
-            <WrapPanel Name="TodoRefreshPanel"/>
-          </StackPanel>
-          <WrapPanel>
-            <Button Name="TodoOpen" Content="Open the to-do list" Margin="0,0,8,6"/>
-            <Button Name="TodoClear" Content="Clear finished items" Margin="0,0,8,6"/>
-          </WrapPanel>
-          <TextBlock Name="TodoStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
-          <TextBlock Classes="hint" Text="The list updates itself only while it is open: at the interval you chose, and at once when you change the list. A changed portfolio file is picked up at the next refresh. When it is closed nothing runs. It is kept in a plain file on this PC (todo.json) that you can read, and is never sent anywhere. Items from your data follow the same rules as the card, so the two cannot disagree; ticking one off keeps it done until the date or the situation changes."/>
-        </StackPanel>
-
-        <Border Classes="rule"/>
-
-        <TextBlock Classes="grp" Text="AI and connections"/>
-
-        <StackPanel Spacing="6">
-          <TextBlock Classes="lbl" Text="COMPANION LENS · PROMPT LIBRARY"/>
-          <Grid ColumnDefinitions="*,8,Auto">
-            <ComboBox Name="LensCombo" HorizontalAlignment="Stretch"/>
-            <Button Grid.Column="2" Name="ManagePromptsBtn" Content="Manage…" Foreground="{DynamicResource C.Accent}" Background="{DynamicResource C.Mark}"/>
-          </Grid>
-          <TextBlock Classes="hint" Text="Your own stored prompt steers the brief's emphasis. Lenses can never override grounding — every claim still cites the record."/>
-        </StackPanel>
-
-        <Border Classes="hair"/>
-
-        <StackPanel Spacing="6">
-          <TextBlock Classes="lbl" Text="CONNECTION · WHICH API, IF ANY"/>
-          <WrapPanel Name="ProviderPanel"/>
-          <Grid ColumnDefinitions="*,8,Auto">
-            <TextBlock Name="ConnStatus" FontSize="12" Foreground="{DynamicResource C.Ink2}"
-                       TextWrapping="Wrap" VerticalAlignment="Center"/>
-            <Button Grid.Column="2" Name="TestBtn" Classes="primary" Content="Test" VerticalAlignment="Top"
-                    ToolTip.Tip="Send one tiny request to prove the channel end to end"/>
-          </Grid>
-          <TextBox Name="ClaudeModelBox" Watermark="Claude model name (default: claude-opus-4-8)" AutomationProperties.Name="Claude model name"/>
-          <Expander Name="MyApiExpander" Header="My API: the address, header and body of my own service">
-            <StackPanel Spacing="5" Margin="0,4,0,0">
-              <TextBox Name="ApiName" Watermark="A name for it, for example Division API" AutomationProperties.Name="My API name"/>
-              <TextBox Name="ApiEndpoint" Watermark="https://… (the address your service gives you)" AutomationProperties.Name="My API address"/>
-              <Grid ColumnDefinitions="*,8,*">
-                <TextBox Name="ApiHeader" Watermark="Header, for example Authorization" AutomationProperties.Name="My API token header"/>
-                <TextBox Grid.Column="2" Name="ApiScheme" Watermark="Before the token, for example Bearer" AutomationProperties.Name="My API token prefix"/>
-              </Grid>
-              <TextBox Name="ApiEnvVar" Watermark="NAME of the environment variable that holds the token (never the token)" AutomationProperties.Name="My API token variable name"/>
-              <TextBox Name="ApiModel" Watermark="Model or agent name, if your service wants one" AutomationProperties.Name="My API model"/>
-              <TextBox Name="ApiTemplate" AcceptsReturn="True" TextWrapping="Wrap" Height="96" FontFamily="{DynamicResource C.NumFont}" FontSize="11.5"
-                       Watermark="Request body (JSON). Placeholders: {{system}} {{user}} {{max_tokens}} {{model}}" AutomationProperties.Name="My API request body"/>
-              <TextBox Name="ApiPath" Watermark="Where the reply text is, for example choices[0].message.content" AutomationProperties.Name="My API reply path"/>
-              <WrapPanel Name="ApiTimeoutPanel"/>
-              <TextBlock Classes="hint" Text="Nothing here is a secret: the token stays in the environment variable you name and is never saved by this app. Only https:// addresses are used (http:// for localhost). The body shown is only an example of one common shape; use the shape your own service documents. A reply that does not have text at the path is reported without showing what came back."/>
-            </StackPanel>
-          </Expander>
-          <TextBlock Classes="hint" Text="Auto uses a key (ANTHROPIC_API_KEY) or Elsa setup from the environment if one exists, and is otherwise offline. Offline never sends anything. The app is fully functional offline. This line is the truth: it says Connected only after a request has really succeeded."/>
-        </StackPanel>
-
-        <Border Classes="hair"/>
-
-        <StackPanel Spacing="6">
-          <TextBlock Classes="lbl" Text="EDGE EXTENSION · OPTIONAL"/>
-          <TextBlock Name="ExtStatus" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
-          <TextBox Name="ExtIdBox" FontSize="12" FontFamily="{DynamicResource C.NumFont}" AutomationProperties.Name="Extension ID"/>
-          <StackPanel Orientation="Horizontal" Spacing="8">
-            <Button Name="ExtConnect" Classes="primary" Content="Connect"/>
-            <Button Name="ExtDisconnect" Content="Disconnect"/>
-          </StackPanel>
-          <TextBlock Classes="hint" Text="Lets the ANDA Companion (Notula) extension in Edge read your data through this app, so both show the same facts. Current user only, no admin rights, and only the extension ID above can use it. The extension also works without this app."/>
-        </StackPanel>
-
-        <Border Classes="hair"/>
-
-        <StackPanel Spacing="6">
-          <TextBlock Classes="lbl" Text="OUTLOOK · OPTIONAL, READ-ONLY"/>
-          <CheckBox Name="OutlookOn">
-            <TextBlock Text="Show recent Outlook mail about the open ANDA" TextWrapping="Wrap"/>
-          </CheckBox>
-          <StackPanel Name="OutlookFields" Spacing="5">
-            <WrapPanel Name="OutlookCloudPanel"/>
-            <TextBox Name="OutlookClientId" Watermark="Application (client) ID your organization gave you" AutomationProperties.Name="Outlook application ID" FontFamily="{DynamicResource C.NumFont}" FontSize="12"/>
-            <TextBox Name="OutlookTenant" Watermark="Directory (tenant): organizations, or your organization's domain" AutomationProperties.Name="Outlook directory"/>
-            <WrapPanel Name="OutlookMaxPanel"/>
-            <TextBlock Name="OutlookStatus" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+        <!-- Day 1: three plain steps, shown until the person hides them. -->
+        <Border Name="GettingStarted" CornerRadius="8" Padding="12" Background="{DynamicResource C.Mark}" BorderBrush="{DynamicResource C.Line}" BorderThickness="1">
+          <StackPanel Spacing="6">
+            <TextBlock Classes="lbl" Text="GETTING STARTED · THREE STEPS, NOTHING TO SET UP FIRST"/>
+            <TextBlock Name="GsStep1" FontSize="12.5" Foreground="{DynamicResource C.Ink}" TextWrapping="Wrap"/>
+            <TextBlock Name="GsStep2" FontSize="12.5" Foreground="{DynamicResource C.Ink}" TextWrapping="Wrap"/>
+            <TextBlock Name="GsStep3" FontSize="12.5" Foreground="{DynamicResource C.Ink}" TextWrapping="Wrap"/>
             <WrapPanel>
-              <Button Name="OutlookSignIn" Classes="primary" Content="Sign in" Margin="0,0,8,6"/>
-              <Button Name="OutlookOpen" Content="Open the sign-in page" Margin="0,0,8,6" IsVisible="False"/>
-              <Button Name="OutlookCopy" Content="Copy code" Margin="0,0,8,6" IsVisible="False"/>
-              <Button Name="OutlookSignOut" Content="Sign out" Margin="0,0,8,6"/>
+              <Button Name="GsFiles" Content="Choose my portfolio file" Margin="0,0,8,6"/>
+              <Button Name="GsChecklist" Content="Open my checklist" Margin="0,0,8,6"/>
+              <Button Name="GsHide" Classes="primary" Content="Got it, hide this" Margin="0,0,8,6"/>
+            </WrapPanel>
+            <TextBlock Classes="hint" Text="Everything else here is optional. The app works as it is. You can show this again under Maintenance."/>
+          </StackPanel>
+        </Border>
+
+        <!-- Settings arrange themselves: sections that need a look, or that are used most, are open; the rest are collapsed. -->
+        <Border Name="AdaptiveBar" CornerRadius="8" Padding="10,8" BorderBrush="{DynamicResource C.Hair}" BorderThickness="1">
+          <StackPanel Spacing="6">
+            <TextBlock Name="AdaptiveText" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+            <WrapPanel>
+              <Button Name="SuggestedBtn" Content="Suggested view" Margin="0,0,8,4"/>
+              <Button Name="ExpandAllBtn" Content="Expand all" Margin="0,0,8,4"/>
+              <Button Name="CollapseAllBtn" Content="Collapse all" Margin="0,0,8,4"/>
             </WrapPanel>
           </StackPanel>
-          <TextBlock Classes="hint" Text="Off by default. When on, an open card can list the latest messages that mention its six-digit number: sender, subject, date and a short preview. It is read-only and searches only for that number."/>
-          <TextBlock Classes="hint" Text="You sign in on Microsoft's own page, so this app never sees your password. The sign-in stays in memory and ends when the app closes. Mail is never saved and never sent to an AI service."/>
-          <TextBlock Classes="hint" Text="Your organization must register an app and allow mail access. Please ask your IT service desk for its Application (client) ID. This part was written from Microsoft's public documentation and tested against a stand-in server only, not against Microsoft."/>
-        </StackPanel>
+        </Border>
 
-        <Border Classes="rule"/>
+        <Expander Name="SecLook" Classes="sec" IsExpanded="False">
+          <Expander.Header>
+            <WrapPanel Orientation="Horizontal">
+              <TextBlock Classes="grp" Text="Look and feel" VerticalAlignment="Center" Margin="0,0,10,0"/>
+              <Border Name="PillLook" Classes="pill" IsVisible="False" VerticalAlignment="Center"><TextBlock Name="PillTextLook" Classes="pilltext"/></Border>
+            </WrapPanel>
+          </Expander.Header>
+          <StackPanel Spacing="14" Margin="0,8,0,12">
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="APPEARANCE · FULL CARD"/>
+              <UniformGrid Name="AppearancePanel" Columns="2"/>
+              <TextBlock Classes="lbl" Margin="0,6,0,0" Text="APPEARANCE · COMPACT BOX"/>
+              <UniformGrid Name="CompactPanel" Columns="2"/>
+              <TextBlock Classes="hint" Text="Compact boxes are small enough to leave an open email readable. They make no AI call; click one (or press Enter) to open its full card. All looks share identical anatomy and meaning — this is preference, never information."/>
+            </StackPanel>
 
-        <TextBlock Classes="grp" Text="Maintenance"/>
+            <Border Classes="hair"/>
 
-        <StackPanel Spacing="6">
-          <TextBlock Classes="lbl" Text="BACK UP, RESTORE, RESET"/>
-          <WrapPanel>
-            <Button Name="BackupSave" Content="Save a backup…" Margin="0,0,8,6"/>
-            <Button Name="BackupRestore" Content="Restore a backup…" Margin="0,0,8,6"/>
-            <Button Name="SettingsReset" Content="Reset all settings…" Margin="0,0,8,6"/>
-          </WrapPanel>
-          <TextBlock Name="BackupStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
-          <TextBlock Classes="hint" Text="A backup holds your settings, lenses and quick replies, so a new PC or a colleague can start from yours. It never holds a secret or a file location."/>
-        </StackPanel>
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="CARD TRANSPARENCY"/>
+              <Grid ColumnDefinitions="*,10,Auto">
+                <Slider Name="OpacitySlider" Minimum="40" Maximum="100" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                <TextBlock Grid.Column="2" Name="OpacityLabel" FontSize="12.5" VerticalAlignment="Center"
+                           Foreground="{DynamicResource C.Ink2}" Width="42" TextAlignment="Right"/>
+              </Grid>
+              <TextBlock Classes="hint" Text="100% is solid; 40% lets what is behind the card show through. Only the card surface becomes translucent. Text and status colors stay fully opaque, but on a busy background they are easier to read at a higher value."/>
+            </StackPanel>
 
-        <Border Classes="hair"/>
+            <Border Classes="hair"/>
 
-        <StackPanel Spacing="6">
-          <TextBlock Classes="lbl" Text="USAGE LOG · FOR THE PILOT SCORECARD"/>
-          <CheckBox Name="UsageCheck">
-            <TextBlock Text="Keep a local log of what I use (date, event, seconds)" TextWrapping="Wrap"/>
-          </CheckBox>
-          <TextBlock Name="UsageHint" Classes="hint" Text="Never records ANDA numbers, drafts or any text. Off by default. It is a plain file you can read, and you share it only if you choose to."/>
-        </StackPanel>
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="AUTO-HIDE"/>
+              <WrapPanel Name="AutoHidePanel"/>
+              <TextBlock Classes="hint" Text="Hides a card or box after this long with no mouse or key activity. It never hides while your pointer is over it, while it is pinned, or while the drawer is open."/>
+            </StackPanel>
+          </StackPanel>
+        </Expander>
+        <Expander Name="SecStart" Classes="sec" IsExpanded="False">
+          <Expander.Header>
+            <WrapPanel Orientation="Horizontal">
+              <TextBlock Classes="grp" Text="How it starts" VerticalAlignment="Center" Margin="0,0,10,0"/>
+              <Border Name="PillStart" Classes="pill" IsVisible="False" VerticalAlignment="Center"><TextBlock Name="PillTextStart" Classes="pilltext"/></Border>
+            </WrapPanel>
+          </Expander.Header>
+          <StackPanel Spacing="14" Margin="0,8,0,12">
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="CONSENT MODEL"/>
+              <StackPanel Name="ConsentPanel" Spacing="2"/>
+            </StackPanel>
 
+            <Border Classes="hair"/>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="URGENT ANDAs"/>
+              <CheckBox Name="EscalateCheck">
+                <TextBlock Text="In whisper mode, open a peek by itself for an urgent or at-risk ANDA" TextWrapping="Wrap"/>
+              </CheckBox>
+              <WrapPanel Name="LatePanel"/>
+              <TextBlock Classes="hint" Text="At risk = forecast this many days after the goal, a serious attention item, or a passed goal date. It still starts only when you select a number and press the shortcut; nothing ever opens on its own. A peek makes no AI call."/>
+            </StackPanel>
+
+            <Border Classes="hair"/>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="SELECT &amp; PEEK"/>
+              <CheckBox Name="CaptureCheck">
+                <TextBlock Text="Read my selection by copying it, then put my clipboard back" TextWrapping="Wrap"/>
+              </CheckBox>
+              <TextBlock Classes="hint" Text="Off: Ctrl+Alt+A opens the lookup box instead and no keystroke is ever sent. Terminals are always skipped, because Ctrl+C there interrupts a running command."/>
+            </StackPanel>
+
+            <Border Classes="hair"/>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="SHORTCUTS · CLICK A BOX, THEN PRESS THE KEYS"/>
+              <Grid ColumnDefinitions="140,*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="6" ColumnSpacing="8">
+                <TextBlock Text="Select &amp; Peek" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}"/>
+                <TextBox Grid.Column="1" Name="PeekKeyBox" IsReadOnly="True" AutomationProperties.Name="Select and Peek shortcut"/>
+                <Button Grid.Column="2" Name="PeekKeyReset" Content="Reset"/>
+                <TextBlock Grid.Row="1" Text="Lookup box" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}"/>
+                <TextBox Grid.Row="1" Grid.Column="1" Name="LookupKeyBox" IsReadOnly="True" AutomationProperties.Name="Lookup shortcut"/>
+                <Button Grid.Row="1" Grid.Column="2" Name="LookupKeyReset" Content="Reset"/>
+                <TextBlock Grid.Row="2" Text="Check a draft" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}"/>
+                <TextBox Grid.Row="2" Grid.Column="1" Name="DraftKeyBox" IsReadOnly="True" AutomationProperties.Name="Check a draft shortcut"/>
+                <Button Grid.Row="2" Grid.Column="2" Name="DraftKeyReset" Content="Reset"/>
+              </Grid>
+              <TextBlock Name="KeyStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+              <TextBlock Classes="hint" Text="Please use at least two modifiers, one of them Ctrl or Alt, so everyday shortcuts like Ctrl+C keep working. On keyboards where Ctrl+Alt is AltGr, choose Ctrl+Shift instead. Windows reports at once if another program already owns a shortcut."/>
+            </StackPanel>
+
+            <Border Classes="hair"/>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="OTHER WAYS TO START IT"/>
+              <CheckBox Name="MiddleCheck">
+                <TextBlock Text="Middle-click (wheel button) on selected text starts Select &amp; Peek" TextWrapping="Wrap"/>
+              </CheckBox>
+              <StackPanel Orientation="Horizontal" Spacing="4">
+                <TextBlock Text="Hold" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}" Margin="0,0,8,0"/>
+                <WrapPanel Name="MiddleModPanel"/>
+              </StackPanel>
+              <TextBlock Name="MiddleStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+              <TextBlock Classes="hint" Text="Off by default. It uses a Windows mouse hook that sees only the middle button, never the pointer position or any text, and the click still reaches the program under it. Some security software flags mouse hooks. A plain middle-click scrolls or opens links in many programs, so Ctrl is recommended. The shortcuts above and the tray icon always work."/>
+            </StackPanel>
+          </StackPanel>
+        </Expander>
+        <Expander Name="SecDates" Classes="sec" IsExpanded="False">
+          <Expander.Header>
+            <WrapPanel Orientation="Horizontal">
+              <TextBlock Classes="grp" Text="Dates" VerticalAlignment="Center" Margin="0,0,10,0"/>
+              <Border Name="PillDates" Classes="pill" IsVisible="False" VerticalAlignment="Center"><TextBlock Name="PillTextDates" Classes="pilltext"/></Border>
+            </WrapPanel>
+          </Expander.Header>
+          <StackPanel Spacing="14" Margin="0,8,0,12">
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="WEEKEND AND HOLIDAY WARNING"/>
+              <WrapPanel Name="HolidayPanel"/>
+              <TextBlock Classes="hint" Text="Flags a goal or forecast date on a weekend or federal holiday, or this many business days before or after a federal holiday. It shows the nearest business days; it does not decide how a date is handled."/>
+            </StackPanel>
+          </StackPanel>
+        </Expander>
+        <Expander Name="SecFiles" Classes="sec" IsExpanded="False">
+          <Expander.Header>
+            <WrapPanel Orientation="Horizontal">
+              <TextBlock Classes="grp" Text="My files and writing" VerticalAlignment="Center" Margin="0,0,10,0"/>
+              <Border Name="PillFiles" Classes="pill" IsVisible="False" VerticalAlignment="Center"><TextBlock Name="PillTextFiles" Classes="pilltext"/></Border>
+            </WrapPanel>
+          </Expander.Header>
+          <StackPanel Spacing="14" Margin="0,8,0,12">
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="MY DATA · YOUR OWN FILES, READ-ONLY, ON THIS PC"/>
+              <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                <TextBox Name="PortfolioBox" IsReadOnly="True" Watermark="Your ANDA portfolio (.xlsx or .csv). Empty = fictional demo data." AutomationProperties.Name="Portfolio file"/>
+                <Button Grid.Column="1" Name="PortfolioChoose" Content="Choose…"/>
+                <Button Grid.Column="2" Name="PortfolioClear" Content="Clear"/>
+              </Grid>
+              <TextBlock Name="PortfolioStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+              <Expander Name="ColumnsExpander" IsVisible="False" Header="Match my columns">
+                <StackPanel Name="ColumnsPanel" Spacing="4" Margin="0,4,0,0"/>
+              </Expander>
+              <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                <TextBox Name="NotesBox" IsReadOnly="True" Watermark="Folder with your notes (.txt, .md, .docx)" AutomationProperties.Name="Notes folder"/>
+                <Button Grid.Column="1" Name="NotesChoose" Content="Choose…"/>
+                <Button Grid.Column="2" Name="NotesClear" Content="Clear"/>
+              </Grid>
+              <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                <TextBox Name="ReferenceBox" IsReadOnly="True" Watermark="Drugs@FDA data file you downloaded (.zip), for the RLD labeling date" AutomationProperties.Name="Drugs@FDA file"/>
+                <Button Grid.Column="1" Name="ReferenceChoose" Content="Choose…"/>
+                <Button Grid.Column="2" Name="ReferenceClear" Content="Clear"/>
+              </Grid>
+              <TextBlock Name="ReferenceStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <TextBox Name="ReferenceUrlBox" Watermark="Optional: the https address of the Drugs@FDA data file, to update it from FDA" AutomationProperties.Name="Drugs@FDA data file address"/>
+                <Button Grid.Column="1" Name="ReferenceUpdate" Content="Update now"/>
+              </Grid>
+              <TextBlock Name="ReferenceUpdateStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+              <TextBlock Classes="hint" Text="Update now fetches that one address, only when you press it, and keeps the file only if it really is a Drugs@FDA data file. It needs the network and is the only thing here that does. The address is the file link on FDA's Drugs@FDA data files page; this app does not guess it. The PSG line has no official source connected: it shows a date from a PSG column in your own sheet, or says it is not available."/>
+              <TextBlock Classes="hint" Text="This tool only reads these files and never changes them. Nothing is sent anywhere. It shows only what your sheet contains: a forecast or progress that is not in it stays blank. The PSG date shown is the one in your own sheet; no official PSG source is connected yet."/>
+            </StackPanel>
+
+            <Border Classes="hair"/>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="MY WRITING · TONE, STYLE, SIGN-OFF, QUICK REPLIES"/>
+              <WrapPanel Name="TonePanel"/>
+              <TextBox Name="InstructionsBox" AcceptsReturn="True" TextWrapping="Wrap" Height="76"
+                       Watermark="Your style in your own words. For example: plain words, no jargon, keep it under 120 words."
+                       AutomationProperties.Name="My standing writing instructions"/>
+              <TextBox Name="SignOffBox" Watermark="How you sign off, for example: Thanks, Pat" AutomationProperties.Name="My sign-off"/>
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <TextBlock Name="RepliesSummary" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+                <Button Grid.Column="1" Name="RepliesManage" Content="Quick replies…" Foreground="{DynamicResource C.Accent}" Background="{DynamicResource C.Mark}"/>
+              </Grid>
+              <TextBlock Classes="hint" Text="Tone, style and sign-off steer Proofread, Rewrite and Fact-check (only once a model is approved). They can never override the fixed rules: no changed numbers or dates, no invented facts. Quick replies are templates filled from the card (no AI): the Quick replies button on a card copies one with its numbers and dates filled in."/>
+            </StackPanel>
+          </StackPanel>
+        </Expander>
+        <Expander Name="SecChecklist" Classes="sec" IsExpanded="False">
+          <Expander.Header>
+            <WrapPanel Orientation="Horizontal">
+              <TextBlock Classes="grp" Text="My checklist" VerticalAlignment="Center" Margin="0,0,10,0"/>
+              <Border Name="PillChecklist" Classes="pill" IsVisible="False" VerticalAlignment="Center"><TextBlock Name="PillTextChecklist" Classes="pilltext"/></Border>
+            </WrapPanel>
+          </Expander.Header>
+          <StackPanel Spacing="14" Margin="0,8,0,12">
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="MY CHECKLIST · A SEPARATE LIST FOR ANYTHING, WORK OR HOME"/>
+              <Grid ColumnDefinitions="140,*,Auto,Auto" ColumnSpacing="8">
+                <TextBlock Text="Notes to checklist" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}"/>
+                <TextBox Grid.Column="1" Name="ChecklistKeyBox" IsReadOnly="True" AutomationProperties.Name="My checklist shortcut"/>
+                <Button Grid.Column="2" Name="ChecklistKeyClear" Content="None"/>
+                <Button Grid.Column="3" Name="ChecklistKeyReset" Content="Reset"/>
+              </Grid>
+              <TextBlock Name="ChecklistKeyStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+              <TextBlock Classes="hint" Text="Click the box, then press the keys. Select messy notes anywhere (an email, a message, a scribbled list), press this shortcut, and they become suggested checklist items. None means no shortcut: the tray menu still opens it."/>
+            </StackPanel>
+
+            <Border Classes="hair"/>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="WHEN I PRESS IT"/>
+              <StackPanel Name="ChecklistModePanel" Spacing="2"/>
+              <TextBlock Classes="hint" Text="Show me the items first lets you untick, change or rename each one before anything is added. Add them at once puts every item that looks like a task on your checklist straight away, with an Undo button for that batch."/>
+            </StackPanel>
+
+            <Border Classes="hair"/>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="OPEN IT · KEEP IT TIDY"/>
+              <WrapPanel>
+                <Button Name="ChecklistOpen" Content="Open my checklist" Margin="0,0,8,6"/>
+                <Button Name="ChecklistNotes" Content="Notes to checklist…" Margin="0,0,8,6"/>
+                <Button Name="ChecklistClear" Content="Clear finished items" Margin="0,0,8,6"/>
+              </WrapPanel>
+              <TextBlock Name="ChecklistStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+              <TextBlock Classes="hint" Text="It is apart from the ANDA to-do list: its own shortcut, its own window and its own file (checklist.json on this PC), and nothing in it comes from your data. Notes are read on this PC by simple rules (no AI, nothing is sent anywhere), and the reading never invents a day: what it did not find stays empty. Items that repeat come back by themselves."/>
+            </StackPanel>
+          </StackPanel>
+        </Expander>
+        <Expander Name="SecActions" Classes="sec" IsExpanded="False">
+          <Expander.Header>
+            <WrapPanel Orientation="Horizontal">
+              <TextBlock Classes="grp" Text="My actions, agents and ANDA to-do list" VerticalAlignment="Center" Margin="0,0,10,0"/>
+              <Border Name="PillActions" Classes="pill" IsVisible="False" VerticalAlignment="Center"><TextBlock Name="PillTextActions" Classes="pilltext"/></Border>
+            </WrapPanel>
+          </Expander.Header>
+          <StackPanel Spacing="14" Margin="0,8,0,12">
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="MY ACTIONS · YOUR OWN PROMPT, AGENT OR TO-DO ITEM, ON YOUR OWN SHORTCUT"/>
+              <StackPanel Name="ActionsPanel" Spacing="8"/>
+              <WrapPanel>
+                <Button Name="ActionAdd" Content="Add an action" Margin="0,0,8,6"/>
+              </WrapPanel>
+              <TextBlock Name="ActionsStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+              <TextBlock Classes="hint" Text="Select a number anywhere, then press the shortcut you chose for an action. Add to my to-do list puts it on your list. Fill my prompt shows your own prompt with the card's facts filled in, ready to copy; no AI is called. Ask my AI and Run an agent show exactly what would be sent, and send only after you press Send (unless you turn that off for that one action). Every action is also in the tray menu."/>
+            </StackPanel>
+
+            <Border Classes="hair"/>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="MY AGENTS · ALERT HUB, PATENT ANALYSIS, TRIAGING AGENT AND YOUR OWN"/>
+              <StackPanel Name="AgentsPanel" Spacing="8"/>
+              <WrapPanel>
+                <Button Name="AgentAdd" Content="Add an agent" Margin="0,0,8,6"/>
+              </WrapPanel>
+              <TextBlock Name="AgentsStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+              <TextBlock Classes="hint" Text="An agent is any service you can reach with an address. Alert Hub, Patent Analysis and Triaging Agent are listed so they can be set up: this app does not know their addresses or message format and does not guess them, so each stays off until you enter the details your IT team gives you. Nothing is sent for an agent that is off. The token stays in the environment variable you name and is never saved by this app."/>
+              <TextBlock Classes="hint" Text="An agent is asked only when you press Run on a card or use its action, unless you set it to run by itself. By itself means: when a full card opens, or only when the ANDA is at risk. A peek never asks an agent. Its answer appears in the card's drawer as the agent's own words, and nothing joins your to-do list until you press its button."/>
+            </StackPanel>
+
+            <Border Classes="hair"/>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="MY ANDA TO-DO LIST · LIVE, FROM YOUR ITEMS AND YOUR DATA"/>
+              <CheckBox Name="TodoAutoCheck">
+                <TextBlock Text="Include items from my data (at-risk ANDAs, weekend and holiday dates, action items)" TextWrapping="Wrap"/>
+              </CheckBox>
+              <StackPanel Orientation="Horizontal" Spacing="4">
+                <TextBlock Text="While the list is open, refresh every" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}" Margin="0,0,8,0"/>
+                <WrapPanel Name="TodoRefreshPanel"/>
+              </StackPanel>
+              <WrapPanel>
+                <Button Name="TodoOpen" Content="Open the ANDA to-do list" Margin="0,0,8,6"/>
+                <Button Name="TodoClear" Content="Clear finished items" Margin="0,0,8,6"/>
+              </WrapPanel>
+              <TextBlock Name="TodoStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+              <TextBlock Classes="hint" Text="The list updates itself only while it is open: at the interval you chose, and at once when you change the list. A changed portfolio file is picked up at the next refresh. When it is closed nothing runs. It is kept in a plain file on this PC (todo.json) that you can read, and is never sent anywhere. Items from your data follow the same rules as the card, so the two cannot disagree; ticking one off keeps it done until the date or the situation changes."/>
+            </StackPanel>
+          </StackPanel>
+        </Expander>
+        <Expander Name="SecConnections" Classes="sec" IsExpanded="False">
+          <Expander.Header>
+            <WrapPanel Orientation="Horizontal">
+              <TextBlock Classes="grp" Text="AI and connections" VerticalAlignment="Center" Margin="0,0,10,0"/>
+              <Border Name="PillConnections" Classes="pill" IsVisible="False" VerticalAlignment="Center"><TextBlock Name="PillTextConnections" Classes="pilltext"/></Border>
+            </WrapPanel>
+          </Expander.Header>
+          <StackPanel Spacing="14" Margin="0,8,0,12">
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="COMPANION LENS · PROMPT LIBRARY"/>
+              <Grid ColumnDefinitions="*,8,Auto">
+                <ComboBox Name="LensCombo" HorizontalAlignment="Stretch"/>
+                <Button Grid.Column="2" Name="ManagePromptsBtn" Content="Manage…" Foreground="{DynamicResource C.Accent}" Background="{DynamicResource C.Mark}"/>
+              </Grid>
+              <TextBlock Classes="hint" Text="Your own stored prompt steers the brief's emphasis. Lenses can never override grounding — every claim still cites the record."/>
+            </StackPanel>
+
+            <Border Classes="hair"/>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="CONNECTION · WHICH API, IF ANY"/>
+              <WrapPanel Name="ProviderPanel"/>
+              <Grid ColumnDefinitions="*,8,Auto">
+                <TextBlock Name="ConnStatus" FontSize="12" Foreground="{DynamicResource C.Ink2}"
+                           TextWrapping="Wrap" VerticalAlignment="Center"/>
+                <Button Grid.Column="2" Name="TestBtn" Classes="primary" Content="Test" VerticalAlignment="Top"
+                        ToolTip.Tip="Send one tiny request to prove the channel end to end"/>
+              </Grid>
+              <TextBox Name="ClaudeModelBox" Watermark="Claude model name (default: claude-opus-4-8)" AutomationProperties.Name="Claude model name"/>
+              <Expander Name="MyApiExpander" Header="My API: the address, header and body of my own service">
+                <StackPanel Spacing="5" Margin="0,4,0,0">
+                  <TextBox Name="ApiName" Watermark="A name for it, for example Division API" AutomationProperties.Name="My API name"/>
+                  <TextBox Name="ApiEndpoint" Watermark="https://… (the address your service gives you)" AutomationProperties.Name="My API address"/>
+                  <Grid ColumnDefinitions="*,8,*">
+                    <TextBox Name="ApiHeader" Watermark="Header, for example Authorization" AutomationProperties.Name="My API token header"/>
+                    <TextBox Grid.Column="2" Name="ApiScheme" Watermark="Before the token, for example Bearer" AutomationProperties.Name="My API token prefix"/>
+                  </Grid>
+                  <TextBox Name="ApiEnvVar" Watermark="NAME of the environment variable that holds the token (never the token)" AutomationProperties.Name="My API token variable name"/>
+                  <TextBox Name="ApiModel" Watermark="Model or agent name, if your service wants one" AutomationProperties.Name="My API model"/>
+                  <TextBox Name="ApiTemplate" AcceptsReturn="True" TextWrapping="Wrap" Height="96" FontFamily="{DynamicResource C.NumFont}" FontSize="11.5"
+                           Watermark="Request body (JSON). Placeholders: {{system}} {{user}} {{max_tokens}} {{model}}" AutomationProperties.Name="My API request body"/>
+                  <TextBox Name="ApiPath" Watermark="Where the reply text is, for example choices[0].message.content" AutomationProperties.Name="My API reply path"/>
+                  <WrapPanel Name="ApiTimeoutPanel"/>
+                  <TextBlock Classes="hint" Text="Nothing here is a secret: the token stays in the environment variable you name and is never saved by this app. Only https:// addresses are used (http:// for localhost). The body shown is only an example of one common shape; use the shape your own service documents. A reply that does not have text at the path is reported without showing what came back."/>
+                </StackPanel>
+              </Expander>
+              <TextBlock Classes="hint" Text="Auto uses a key (ANTHROPIC_API_KEY) or Elsa setup from the environment if one exists, and is otherwise offline. Offline never sends anything. The app is fully functional offline. This line is the truth: it says Connected only after a request has really succeeded."/>
+            </StackPanel>
+
+            <Border Classes="hair"/>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="EDGE EXTENSION · OPTIONAL"/>
+              <TextBlock Name="ExtStatus" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+              <TextBox Name="ExtIdBox" FontSize="12" FontFamily="{DynamicResource C.NumFont}" AutomationProperties.Name="Extension ID"/>
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Name="ExtConnect" Classes="primary" Content="Connect"/>
+                <Button Name="ExtDisconnect" Content="Disconnect"/>
+              </StackPanel>
+              <TextBlock Classes="hint" Text="Lets the ANDA Companion (Notula) extension in Edge read your data through this app, so both show the same facts. Current user only, no admin rights, and only the extension ID above can use it. The extension also works without this app."/>
+            </StackPanel>
+
+            <Border Classes="hair"/>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="OUTLOOK · OPTIONAL, READ-ONLY"/>
+              <CheckBox Name="OutlookOn">
+                <TextBlock Text="Show recent Outlook mail about the open ANDA" TextWrapping="Wrap"/>
+              </CheckBox>
+              <StackPanel Name="OutlookFields" Spacing="5">
+                <WrapPanel Name="OutlookCloudPanel"/>
+                <TextBox Name="OutlookClientId" Watermark="Application (client) ID your organization gave you" AutomationProperties.Name="Outlook application ID" FontFamily="{DynamicResource C.NumFont}" FontSize="12"/>
+                <TextBox Name="OutlookTenant" Watermark="Directory (tenant): organizations, or your organization's domain" AutomationProperties.Name="Outlook directory"/>
+                <WrapPanel Name="OutlookMaxPanel"/>
+                <TextBlock Name="OutlookStatus" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+                <WrapPanel>
+                  <Button Name="OutlookSignIn" Classes="primary" Content="Sign in" Margin="0,0,8,6"/>
+                  <Button Name="OutlookOpen" Content="Open the sign-in page" Margin="0,0,8,6" IsVisible="False"/>
+                  <Button Name="OutlookCopy" Content="Copy code" Margin="0,0,8,6" IsVisible="False"/>
+                  <Button Name="OutlookSignOut" Content="Sign out" Margin="0,0,8,6"/>
+                </WrapPanel>
+              </StackPanel>
+              <TextBlock Classes="hint" Text="Off by default. When on, an open card can list the latest messages that mention its six-digit number: sender, subject, date and a short preview. It is read-only and searches only for that number."/>
+              <TextBlock Classes="hint" Text="You sign in on Microsoft's own page, so this app never sees your password. The sign-in stays in memory and ends when the app closes. Mail is never saved and never sent to an AI service."/>
+              <TextBlock Classes="hint" Text="Your organization must register an app and allow mail access. Please ask your IT service desk for its Application (client) ID. This part was written from Microsoft's public documentation and tested against a stand-in server only, not against Microsoft."/>
+            </StackPanel>
+          </StackPanel>
+        </Expander>
+        <Expander Name="SecMaintenance" Classes="sec" IsExpanded="False">
+          <Expander.Header>
+            <WrapPanel Orientation="Horizontal">
+              <TextBlock Classes="grp" Text="Maintenance" VerticalAlignment="Center" Margin="0,0,10,0"/>
+              <Border Name="PillMaintenance" Classes="pill" IsVisible="False" VerticalAlignment="Center"><TextBlock Name="PillTextMaintenance" Classes="pilltext"/></Border>
+            </WrapPanel>
+          </Expander.Header>
+          <StackPanel Spacing="14" Margin="0,8,0,12">
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="BACK UP, RESTORE, RESET"/>
+              <WrapPanel>
+                <Button Name="BackupSave" Content="Save a backup…" Margin="0,0,8,6"/>
+                <Button Name="BackupRestore" Content="Restore a backup…" Margin="0,0,8,6"/>
+                <Button Name="SettingsReset" Content="Reset all settings…" Margin="0,0,8,6"/>
+              </WrapPanel>
+              <TextBlock Name="BackupStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+              <TextBlock Classes="hint" Text="A backup holds your settings, lenses and quick replies, so a new PC or a colleague can start from yours. It never holds a secret or a file location."/>
+            </StackPanel>
+
+            <Border Classes="hair"/>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="USAGE LOG · FOR THE PILOT SCORECARD"/>
+              <CheckBox Name="UsageCheck">
+                <TextBlock Text="Keep a local log of what I use (date, event, seconds)" TextWrapping="Wrap"/>
+              </CheckBox>
+              <TextBlock Name="UsageHint" Classes="hint" Text="Never records ANDA numbers, drafts or any text. Off by default. It is a plain file you can read, and you share it only if you choose to."/>
+            </StackPanel>
+
+              <Border Classes="hair"/>
+
+              <StackPanel Spacing="6">
+                <TextBlock Classes="lbl" Text="THIS WINDOW · ARRANGES ITSELF"/>
+                <CheckBox Name="AdaptiveCheck">
+                  <TextBlock Text="Open the sections that need a look or that I use most, and collapse the rest" TextWrapping="Wrap"/>
+                </CheckBox>
+                <WrapPanel>
+                  <Button Name="AdaptiveReset" Content="Forget what I use most" Margin="0,0,8,6"/>
+                  <Button Name="GsShow" Content="Show Getting started again" Margin="0,0,8,6"/>
+                </WrapPanel>
+                <TextBlock Name="AdaptiveStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+                <TextBlock Classes="hint" Text="Sections open when something in them needs attention (a shortcut another program owns, a file that cannot be read, a connection that was not tested), when you are just starting, and when you open them often. The only thing kept is a count of how often you open each section, in settings.json on this PC. No text, no ANDA numbers, nothing is sent anywhere. Turn this off and no more counts are kept."/>
+              </StackPanel>
+          </StackPanel>
+        </Expander>
         </StackPanel>
         </ScrollViewer>
       </StackPanel>

@@ -16,24 +16,26 @@ public class Round15Tests
     private static AndaRecord Demo => Repo.Find("216482")!;
     private static CardContext Ctx(DateOnly? today = null) => new(today ?? Today, new BusinessCalendar(), 3, 7);
 
-    // ---------- transparency: 100% down to 30% ----------
+    // ---------- transparency: 100% down to 40% (round 16; it was 30% in round 15) ----------
 
     [Theory]
-    [InlineData(1.0, 1.0)] [InlineData(0.3, 0.3)] [InlineData(0.65, 0.65)]
-    [InlineData(0.29, 0.3)] [InlineData(0.0, 0.3)] [InlineData(-4, 0.3)] [InlineData(7, 1.0)]
+    [InlineData(1.0, 1.0)] [InlineData(0.4, 0.4)] [InlineData(0.65, 0.65)] [InlineData(0.92, 0.92)]
+    [InlineData(0.39, 0.4)] [InlineData(0.3, 0.4)] [InlineData(0.0, 0.4)] [InlineData(-4, 0.4)] [InlineData(7, 1.0)]
     [InlineData(double.NaN, 1.0)] [InlineData(double.PositiveInfinity, 1.0)] [InlineData(double.NegativeInfinity, 1.0)]
-    public void Opacity_is_always_brought_into_30_to_100_percent(double given, double expected) =>
+    public void Opacity_is_always_brought_into_40_to_100_percent(double given, double expected) =>
         Assert.Equal(expected, Settings.NormalizeOpacity(given), 6);
 
     [Fact]
     public void A_saved_or_restored_opacity_outside_the_range_is_repaired()
     {
-        Assert.Equal(0.3, SettingsService.Normalize(new Settings { CardOpacity = 0.05 }).CardOpacity, 6);
+        Assert.Equal(0.4, SettingsService.Normalize(new Settings { CardOpacity = 0.05 }).CardOpacity, 6);
+        Assert.Equal(0.4, SettingsService.Normalize(new Settings { CardOpacity = 0.30 }).CardOpacity, 6);       // a value saved when the floor was 30% is raised to 40%
         Assert.Equal(1.0, SettingsService.Normalize(new Settings { CardOpacity = 3 }).CardOpacity, 6);
-        Assert.Equal(0.3, Settings.MinCardOpacity, 6);
+        Assert.Equal(0.4, Settings.MinCardOpacity, 6);
+        Assert.Equal(0.92, Settings.DefaultCardOpacity, 6);
         string dir = Temp.NewDir(), path = Path.Combine(dir, "s.json");
         File.WriteAllText(path, "{\"CardOpacity\": 0.1}");
-        Assert.Equal(0.3, SettingsService.Load(path).CardOpacity, 6);
+        Assert.Equal(0.4, SettingsService.Load(path).CardOpacity, 6);
     }
 
     // ---------- custom actions ----------
@@ -428,10 +430,10 @@ public class Round15Tests
     }
 
     [Fact]
-    public void Alert_Hub_and_Triaging_Agent_are_listed_but_not_set_up_and_make_no_request()
+    public void The_three_preset_agents_are_listed_but_not_set_up_and_make_no_request()
     {
         var presets = AgentRules.Presets();
-        Assert.Equal(new[] { "Alert Hub", "Triaging Agent" }, presets.Select(p => p.Name));
+        Assert.Equal(new[] { "Alert Hub", "Patent Analysis", "Triaging Agent" }, presets.Select(p => p.Name));
         Assert.All(presets, p => { Assert.False(p.Enabled); Assert.Equal("", p.Api.Endpoint); Assert.Equal(AgentRun.Never, p.AutoRun); });
         var handler = new Handler((_, _) => Json("{}"));
         var svc = new AgentService(() => presets, Env, handler);
@@ -588,8 +590,8 @@ public class Round15Tests
         Assert.Equal(AgentRun.Never, clean[0].AutoRun); Assert.Equal(15, clean[0].CacheMinutes);
         Assert.Equal(AgentRun.Never, clean.Single(a => a.Name == "Auto with selection").AutoRun);
         Assert.Equal(AgentRun.Never, clean.Single(a => a.Name == "Body selection").AutoRun);
-        Assert.Contains(clean, a => a.Id == AgentRules.AlertHubId); Assert.Contains(clean, a => a.Id == AgentRules.TriagingId);
-        Assert.True(AgentRules.Normalize(null).Count == 2);
+        Assert.Contains(clean, a => a.Id == AgentRules.AlertHubId); Assert.Contains(clean, a => a.Id == AgentRules.PatentId); Assert.Contains(clean, a => a.Id == AgentRules.TriagingId);
+        Assert.True(AgentRules.Normalize(null).Count == 3);
         Assert.NotNull(AgentRules.Validate(new AgentSettings { Name = "x", Prompt = "{selection}", AutoRun = AgentRun.OnFullCard }));
         Assert.Null(AgentRules.Validate(new AgentSettings { Name = "x", Prompt = "{selection}", AutoRun = AgentRun.Never }));
     }
@@ -635,7 +637,7 @@ public class Round15Tests
 
         SettingsBackup.Reset(target, lenses, replies);
         Assert.Equal(MyActionRules.Starters().Select(a => a.Name), target.MyActions.Select(a => a.Name));
-        Assert.Equal(new[] { "Alert Hub", "Triaging Agent" }, target.Agents.Select(a => a.Name));
+        Assert.Equal(new[] { "Alert Hub", "Patent Analysis", "Triaging Agent" }, target.Agents.Select(a => a.Name));
         Assert.All(target.Agents, a => Assert.False(a.Enabled));
     }
 
@@ -645,9 +647,9 @@ public class Round15Tests
         string path = Path.Combine(Temp.NewDir(), "s.json");
         File.WriteAllText(path, "{\"Appearance\": 10, \"PeekHotkey\": \"Ctrl+Alt+A\"}");
         var s = SettingsService.Load(path);
-        Assert.Equal(3, s.MyActions.Count); Assert.Equal(2, s.Agents.Count); Assert.True(s.TodoShowFromData); Assert.Equal(30, s.TodoRefreshSeconds);
+        Assert.Equal(3, s.MyActions.Count); Assert.Equal(3, s.Agents.Count); Assert.True(s.TodoShowFromData); Assert.Equal(30, s.TodoRefreshSeconds);
         File.WriteAllText(path, "{\"MyActions\": null, \"Agents\": null, \"TodoRefreshSeconds\": 7}");
         var t = SettingsService.Load(path);
-        Assert.Empty(t.MyActions); Assert.Equal(2, t.Agents.Count); Assert.Equal(30, t.TodoRefreshSeconds);
+        Assert.Empty(t.MyActions); Assert.Equal(3, t.Agents.Count); Assert.Equal(30, t.TodoRefreshSeconds);
     }
 }

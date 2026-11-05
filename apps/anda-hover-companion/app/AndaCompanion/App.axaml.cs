@@ -133,6 +133,7 @@ public partial class App : Application
 
         if (id == HotkeyService.IdLookup) { Dispatcher.UIThread.Post(OpenLookup); return; }
         if (id == HotkeyService.IdDraft) { await OnDraftHotkeyAsync(); return; }
+        if (id == HotkeyService.IdChecklist) { await OnChecklistHotkeyAsync(); return; }
         if (id >= HotkeyService.IdActionBase) { await OnActionHotkeyAsync(id - HotkeyService.IdActionBase); return; }
 
         if (Interlocked.Exchange(ref _captureBusy, 1) == 1) return;
@@ -336,7 +337,8 @@ public partial class App : Application
         if (_settingsWindow is not null) { _settingsWindow.Activate(); return; }
         _settingsWindow = new SettingsWindow(_settings, _prompts, ApplySettings,
             new SettingsHooks(() => HotkeyService.Report(_hotkeys?.Status ?? Array.Empty<HotkeyStatus>()), () => _portfolio, () => _drugsMessage, MouseStatusLine, Outlook,
-                OpenTodo: OpenTodoWindow, RunAction: RunActionFromMenu, AgentProblem: _agents.SetupProblem, ClearFinished: _todo.ClearCompleted), _replies);
+                OpenTodo: OpenTodoWindow, RunAction: RunActionFromMenu, AgentProblem: _agents.SetupProblem, ClearFinished: _todo.ClearCompleted,
+                OpenChecklist: OpenChecklistWindow, OpenNotes: () => OpenNotes(""), ClearChecklistFinished: _checklist.ClearFinished, Hotkeys: () => _hotkeys?.Status ?? Array.Empty<HotkeyStatus>()), _replies);
         _settingsWindow.Closed += (_, _) => _settingsWindow = null;
         _settingsWindow.Show();
     }
@@ -356,9 +358,15 @@ public partial class App : Application
         var watch = new NativeMenuItem("Watch list…");
         watch.Click += (_, _) => OpenWatchList();
         menu.Add(watch);
-        var todo = new NativeMenuItem("To-do list…");
+        var todo = new NativeMenuItem("ANDA to-do list…");
         todo.Click += (_, _) => OpenTodoWindow();
         menu.Add(todo);
+        var checklist = new NativeMenuItem(string.IsNullOrWhiteSpace(_settings.ChecklistHotkey) ? "My checklist…" : $"My checklist…\t{_settings.ChecklistHotkey}");
+        checklist.Click += (_, _) => OpenChecklistWindow();
+        menu.Add(checklist);
+        var notes = new NativeMenuItem("Notes to checklist…");
+        notes.Click += (_, _) => OpenNotes("");
+        menu.Add(notes);
         _actionsMenu = new NativeMenuItem("My actions") { Menu = new NativeMenu() };
         RebuildActionsMenu();
         menu.Add(_actionsMenu);
