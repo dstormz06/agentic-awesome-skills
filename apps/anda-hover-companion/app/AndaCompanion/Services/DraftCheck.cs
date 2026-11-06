@@ -23,7 +23,7 @@ public static class DraftCheck
 {
     private static readonly CultureInfo Inv = CultureInfo.InvariantCulture;
 
-    private static readonly Regex DateMention = new(
+    internal static readonly Regex DateMention = new(
         @"(?<![\d/])(?:(?<mon>Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s+(?<d1>\d{1,2})(?:st|nd|rd|th)?(?:,?\s+(?<y1>\d{4}))?(?!\d)" +
         @"|(?<nm>\d{1,2})/(?<nd>\d{1,2})(?:/(?<ny>\d{4}|\d{2}))?(?![\d/])" +
         @"|(?<iy>\d{4})-(?<im>\d{2})-(?<id>\d{2}))",
@@ -34,7 +34,34 @@ public static class DraftCheck
 
     private static readonly string[] Months = { "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec" };
 
-    private sealed record Mention(int Month, int Day, int? Year, int Index);
+    internal sealed record Mention(int Month, int Day, int? Year, int Index);
+
+    /// <summary>The closing line of every check: what it did not do.</summary>
+    public const string StandardNote =
+        "This compares the draft only with the data this tool has, and only numbers, goal and forecast dates, and on-track or late wording. It does not check other wording and is not the system of record.";
+
+    /// <summary>The goal or forecast dates a draft states for each ANDA, in order, so a draft that contradicts itself can be found. Same reading as <see cref="Check"/>.</summary>
+    internal static IReadOnlyList<(string Subject, string Which, Mention Date)> DateClaims(string? draft)
+    {
+        var claims = new List<(string, string, Mention)>();
+        if (string.IsNullOrWhiteSpace(draft)) return claims;
+        foreach (var paragraph in Regex.Split(draft, @"\r?\n\s*\r?\n"))
+        {
+            string? context = null;
+            foreach (var sentence in Regex.Split(paragraph, @"(?<=[.!?])\s+|\r?\n").Where(x => x.Trim().Length > 0))
+            {
+                var numbers = EntityKinds.Anda.Compiled.Matches(sentence).Select(m => m.Groups[1].Value).Distinct().ToList();
+                string? subject;
+                if (numbers.Count == 1) { subject = numbers[0]; context = subject; }
+                else if (numbers.Count > 1) { subject = null; context = null; }
+                else subject = context;
+                if (subject is null) continue;
+                foreach (Match m in DateMention.Matches(sentence))
+                    if (ToMention(m) is { } mention && Keyword(sentence, m) is { } which) claims.Add((subject, which, mention));
+            }
+        }
+        return claims;
+    }
 
     public static DraftCheckResult Check(string? draft, Func<string, AndaRecord?> lookup)
     {
@@ -105,14 +132,13 @@ public static class DraftCheck
         else if (!ordered.Any(f => f.Kind is DraftFindingKind.Difference or DraftFindingKind.UnknownAnda))
             ordered.Insert(0, new DraftFinding(DraftFindingKind.Ok,
                 $"Checked {numbersChecked} ANDA number{(numbersChecked == 1 ? "" : "s")}, {datesChecked} goal or forecast date{(datesChecked == 1 ? "" : "s")} and {statusChecked} on-track or late statement{(statusChecked == 1 ? "" : "s")}: no differences from the record."));
-        ordered.Add(new DraftFinding(DraftFindingKind.Note,
-            "This compares the draft only with the data this tool has, and only numbers, goal and forecast dates, and on-track or late wording. It does not check other wording and is not the system of record."));
+        ordered.Add(new DraftFinding(DraftFindingKind.Note, StandardNote));
         return new(ordered, numbersChecked, datesChecked, statusChecked);
     }
 
     private static string Trim(string s) { s = s.Trim(); return s.Length <= 90 ? s : s[..87] + "..."; }
 
-    private static string? Keyword(string sentence, Match m)
+    internal static string? Keyword(string sentence, Match m)
     {
         int start = Math.Max(0, m.Index - 50);
         string before = sentence[start..m.Index].ToLowerInvariant();
@@ -126,7 +152,7 @@ public static class DraftCheck
         return null;
     }
 
-    private static Mention? ToMention(Match m)
+    internal static Mention? ToMention(Match m)
     {
         try
         {
@@ -153,6 +179,6 @@ public static class DraftCheck
 
     private static bool Matches(Mention m, DateOnly d) => m.Month == d.Month && m.Day == d.Day && (m.Year is null || m.Year == d.Year);
 
-    private static string Show(Mention m) =>
+    internal static string Show(Mention m) =>
         $"{CultureInfo.InvariantCulture.DateTimeFormat.GetAbbreviatedMonthName(Math.Clamp(m.Month, 1, 12))} {m.Day}" + (m.Year is { } y ? $", {y}" : "");
 }

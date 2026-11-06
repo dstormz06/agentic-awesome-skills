@@ -68,7 +68,7 @@ public partial class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         _settings = SettingsService.Load();
-        ThemeManager.Apply(_settings.Appearance, _settings.CardOpacity);
+        ThemeManager.Apply(Edition.Appearance(_settings), Edition.Opacity(_settings));
         _calendar = BusinessCalendar.FromFile(AppPaths.ClosuresFile);
         UsageLog.Configure(_settings.UsageLog && SelfTestRun is null);
         ApplyData();
@@ -111,8 +111,7 @@ public partial class App : Application
             {
                 _settings.FirstRunDone = true;
                 SettingsService.Save(_settings);
-                OpenSettings();          // 5-minute setup: pick appearance + consent, test connection
-                DemoCard("216482");      // and see the product immediately
+                DemoCard("216482");      // see the product immediately; nothing has to be set up first
             }
         }
 
@@ -133,6 +132,7 @@ public partial class App : Application
 
         if (id == HotkeyService.IdLookup) { Dispatcher.UIThread.Post(OpenLookup); return; }
         if (id == HotkeyService.IdDraft) { await OnDraftHotkeyAsync(); return; }
+        if (id == HotkeyService.IdAsk) { await OnAskHotkeyAsync(); return; }
         if (id == HotkeyService.IdMyTodo) { await OnMyTodoHotkeyAsync(); return; }
         if (id >= HotkeyService.IdActionBase) { await OnActionHotkeyAsync(id - HotkeyService.IdActionBase); return; }
 
@@ -286,7 +286,7 @@ public partial class App : Application
     private ReferenceInfo? ReferenceFor(AndaRecord record) =>
         ReferenceResolver.For(record, _drugs, _drugsMessage, _settings.ReferenceDataPath, _drugsLoading);
 
-    // ---------- check a draft ----------
+    // ---------- review a draft ----------
 
     private async Task OnDraftHotkeyAsync()
     {
@@ -310,7 +310,7 @@ public partial class App : Application
     private void OpenDraft(string text)
     {
         if (_draftWindow is not null) { _draftWindow.Close(); _draftWindow = null; }
-        var win = new DraftWindow(text, _repository.Find, new WritingService(ChatCompleterFactory.CreateReporting(_settings)), _settings, _prompts);
+        var win = new DraftWindow(text, _repository.Find, new WritingService(ChatCompleterFactory.CreateReporting(_settings)), _settings, _prompts, Today, _calendar);
         win.Closed += (_, _) => { if (ReferenceEquals(_draftWindow, win)) _draftWindow = null; };
         _draftWindow = win;
         win.Show();
@@ -352,21 +352,24 @@ public partial class App : Application
         var lookup = _lookupItem = new NativeMenuItem($"Lookup ANDA…\t{_settings.LookupHotkey}");
         lookup.Click += (_, _) => OpenLookup();
         menu.Add(lookup);
-        var draft = _draftItem = new NativeMenuItem($"Check a draft…\t{_settings.DraftHotkey}");
+        var draft = _draftItem = new NativeMenuItem($"Review a draft…\t{_settings.DraftHotkey}");
         draft.Click += (_, _) => OpenDraft("");
         menu.Add(draft);
+        var ask = _askItem = new NativeMenuItem(AskMenuLabel());
+        ask.Click += (_, _) => OpenAsk("");
+        menu.Add(ask);
         var watch = new NativeMenuItem("Watch list…");
         watch.Click += (_, _) => OpenWatchList();
         menu.Add(watch);
         var todo = new NativeMenuItem("ANDA to-do list…");
         todo.Click += (_, _) => OpenTodoWindow();
-        menu.Add(todo);
+        menu.Add(Full(todo));
         var todoItem = _myTodoItem = new NativeMenuItem(MyTodoMenuLabel());
         todoItem.Click += (_, _) => OpenMyTodoWindow();
-        menu.Add(todoItem);
+        menu.Add(Full(todoItem));
         var notes = new NativeMenuItem("Notes to my to-do list…");
         notes.Click += (_, _) => OpenNotes("");
-        menu.Add(notes);
+        menu.Add(Full(notes));
         _actionsMenu = new NativeMenuItem("My actions") { Menu = new NativeMenu() };
         RebuildActionsMenu();
         menu.Add(_actionsMenu);
@@ -379,10 +382,10 @@ public partial class App : Application
         menu.Add(demoHealthy);
         menu.Add(new NativeMenuItemSeparator());
 
-        menu.Add(BuildRadioSubmenu("Appearance", Appearances.All.Select(a => (a.Name, (object)a.Id)),
+        menu.Add(Full(BuildRadioSubmenu("Appearance", Appearances.All.Select(a => (a.Name, (object)a.Id)),
             () => (object)_settings.Appearance,
             value => { _settings.Appearance = (AppearanceId)value; ApplySettings(); },
-            separatorBefore: Appearances.L.Name));
+            separatorBefore: Appearances.L.Name)));
         menu.Add(BuildRadioSubmenu("Auto-hide", AutoHidePolicy.Choices.Select(c => (AutoHidePolicy.Label(c), (object)c)),
             () => (object)_settings.AutoHideSeconds,
             value => { _settings.AutoHideSeconds = (int)value; ApplySettings(); }));
@@ -394,7 +397,7 @@ public partial class App : Application
         var prompts = new NativeMenuItem("Prompt library…");
         prompts.Click += (_, _) =>
             new PromptLibraryWindow(_prompts, _settings, ApplySettings).Show();
-        menu.Add(prompts);
+        menu.Add(Full(prompts));
 
         menu.Add(new NativeMenuItemSeparator());
         menu.Add(_hotkeyLine = new NativeMenuItem(HotkeyStatusLine()) { IsEnabled = false });
@@ -410,8 +413,16 @@ public partial class App : Application
         };
         tray.Clicked += (_, _) => OpenLookup();
         tray.IsVisible = true;
+        ShowToolsInTray();
         return tray;
     }
+
+    private readonly List<NativeMenuItem> _fullOnly = new();
+
+    /// <summary>Marks a tray item as one that only "Show all tools" shows. The focused menu is Lookup, Review a draft, Ask, the watch list and Settings.</summary>
+    private T Full<T>(T item) where T : NativeMenuItem { _fullOnly.Add(item); return item; }
+
+    private void ShowToolsInTray() { foreach (var item in _fullOnly) item.IsVisible = _settings.ShowAllTools; }
 
     /// <summary>One honest line in the tray menu: which hotkeys are live, and which are taken.</summary>
     private string HotkeyStatusLine()
@@ -421,7 +432,7 @@ public partial class App : Application
         return "Hotkeys: " + string.Join("   ", status.Select(h => $"{h.Binding.Combo} {(h.Registered ? "✓" : "✗ in use")}"));
     }
 
-    private NativeMenuItem? _lookupItem, _draftItem, _myTodoItem, _hotkeyLine;
+    private NativeMenuItem? _lookupItem, _draftItem, _askItem, _myTodoItem, _hotkeyLine;
 
     private string MyTodoMenuLabel() => string.IsNullOrWhiteSpace(_settings.MyTodoHotkey) ? "My to-do list…" : $"My to-do list…\t{_settings.MyTodoHotkey}";
 
@@ -429,8 +440,10 @@ public partial class App : Application
     private void RefreshTrayLabels()
     {
         if (_lookupItem is not null) _lookupItem.Header = $"Lookup ANDA…\t{_settings.LookupHotkey}";
-        if (_draftItem is not null) _draftItem.Header = $"Check a draft…\t{_settings.DraftHotkey}";
+        if (_draftItem is not null) _draftItem.Header = $"Review a draft…\t{_settings.DraftHotkey}";
+        if (_askItem is not null) _askItem.Header = AskMenuLabel();
         if (_myTodoItem is not null) _myTodoItem.Header = MyTodoMenuLabel();
+        ShowToolsInTray();
         Avalonia.Threading.DispatcherTimer.RunOnce(() => { if (_hotkeyLine is not null) _hotkeyLine.Header = HotkeyStatusLine(); }, TimeSpan.FromMilliseconds(600));
     }
 
@@ -461,7 +474,7 @@ public partial class App : Application
     private void ApplySettings()
     {
         SettingsService.Save(_settings);
-        ThemeManager.Apply(_settings.Appearance, _settings.CardOpacity);
+        ThemeManager.Apply(Edition.Appearance(_settings), Edition.Opacity(_settings));
         UsageLog.Configure(_settings.UsageLog && SelfTestRun is null);
         _hotkeys?.Reconfigure(HotkeyBindings());
         RefreshTrayLabels();

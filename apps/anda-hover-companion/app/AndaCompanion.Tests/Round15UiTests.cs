@@ -40,6 +40,7 @@ public class Round15UiTests : IClassFixture<HeadlessFixture>
 
     private static SettingsWindow NewSettings(Settings settings)
     {
+        settings.ShowAllTools = true;                  // these tests are about every section
         var w = new SettingsWindow(settings, new PromptLibraryService(Path.Combine(Temp.NewDir(), "p.json")), () => { });
         w.Show(); w.ExpandAll(); Settle();            // sections start collapsed; these tests look inside all of them
         return w;

@@ -55,7 +55,8 @@ public partial class SettingsWindow
     // ---------------- my actions ----------------
 
     private IEnumerable<(string Name, string Hotkey)> ShortcutsInUse(CustomAction? except) =>
-        new[] { ("Select & Peek", _settings.PeekHotkey), ("Lookup box", _settings.LookupHotkey), ("Check a draft", _settings.DraftHotkey) }
+        new[] { ("Select & Peek", _settings.PeekHotkey), ("Lookup box", _settings.LookupHotkey), ("Review a draft", _settings.DraftHotkey) }
+            .Concat(string.IsNullOrWhiteSpace(_settings.AskHotkey) ? Array.Empty<(string, string)>() : new[] { ("Ask about a selection", _settings.AskHotkey) })
             .Concat(string.IsNullOrWhiteSpace(_settings.MyTodoHotkey) ? Array.Empty<(string, string)>() : new[] { ("My to-do list", _settings.MyTodoHotkey) })
             .Concat(_settings.MyActions.Where(x => !ReferenceEquals(x, except) && !string.IsNullOrWhiteSpace(x.Hotkey)).Select(x => (x.Name, x.Hotkey)));
 

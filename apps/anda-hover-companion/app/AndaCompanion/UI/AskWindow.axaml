@@ -1,0 +1,83 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="AndaCompanion.UI.AskWindow"
+        SystemDecorations="None" TransparencyLevelHint="Transparent" Background="Transparent"
+        SizeToContent="WidthAndHeight" CanResize="False" Topmost="True"
+        ShowInTaskbar="False" WindowStartupLocation="CenterScreen" Title="ANDA Companion (Notula) — Ask about a selection">
+
+  <Window.Styles>
+    <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource C.Font}"/></Style>
+    <Style Selector="TextBlock.lbl">
+      <Setter Property="FontSize" Value="9.5"/><Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="LetterSpacing" Value="1.4"/><Setter Property="Foreground" Value="{DynamicResource C.Ink3}"/>
+    </Style>
+    <Style Selector="TextBlock.hint"><Setter Property="FontSize" Value="11.5"/><Setter Property="Foreground" Value="{DynamicResource C.Ink2}"/><Setter Property="TextWrapping" Value="Wrap"/></Style>
+    <Style Selector="TextBox"><Setter Property="FontSize" Value="12.5"/></Style>
+    <Style Selector="Border.rule"><Setter Property="Height" Value="1"/><Setter Property="Background" Value="{DynamicResource C.Hair}"/></Style>
+  </Window.Styles>
+
+  <Panel Margin="26">
+    <Border Background="{DynamicResource C.Bg}" BorderBrush="{DynamicResource C.Line}"
+            BorderThickness="1" CornerRadius="{DynamicResource C.Radius}"
+            BoxShadow="0 18 42 -10 #59000000" Padding="20" Width="640">
+      <StackPanel Spacing="10">
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock FontSize="15" FontWeight="Bold" Foreground="{DynamicResource C.Ink}" Text="Ask about a selection"/>
+          <Button Grid.Column="1" Name="CloseBtn" Content="Close"/>
+        </Grid>
+        <ScrollViewer Name="Body" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Spacing="10" Margin="0,0,2,0">
+
+          <TextBlock Classes="lbl" Text="YOUR SELECTION"/>
+          <TextBox Name="SelectionBox" AcceptsReturn="True" TextWrapping="NoWrap" Height="110" MaxLength="20000"
+                   Watermark="Select text or cells anywhere and press the Ask shortcut. Or paste them here."
+                   AutomationProperties.Name="Your selection"/>
+          <TextBlock Name="ShapeText" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink}" TextWrapping="Wrap"/>
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <TextBlock Name="SuggestText" Classes="hint" VerticalAlignment="Center"/>
+            <Button Grid.Column="1" Name="SuggestBtn" Classes="primary" IsVisible="False"/>
+          </Grid>
+
+          <StackPanel Name="QuickPanel" Spacing="6">
+            <Border Classes="rule"/>
+            <TextBlock Classes="lbl" Text="QUICK CHECKS · ON THIS PC, NO AI"/>
+            <WrapPanel>
+              <Button Name="DescribeBtn" Content="Describe" Margin="0,0,8,6"/>
+              <Button Name="DupBtn" Content="Find duplicates" Margin="0,0,8,6"/>
+              <Button Name="BlankBtn" Content="Find blanks" Margin="0,0,8,6"/>
+              <Button Name="TotalBtn" Content="Totals" Margin="0,0,8,6"/>
+            </WrapPanel>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Button Name="CompareBtn" Content="Compare columns"/>
+              <TextBox Name="ColA" Width="52" Text="1" MaxLength="2" AutomationProperties.Name="First column to compare"/>
+              <TextBlock Text="and" VerticalAlignment="Center" Foreground="{DynamicResource C.Ink2}"/>
+              <TextBox Name="ColB" Width="52" Text="2" MaxLength="2" AutomationProperties.Name="Second column to compare"/>
+            </StackPanel>
+            <TextBox Name="ResultBox" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="64" MaxHeight="200" IsVisible="False"
+                     AutomationProperties.Name="Result of the check"/>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Button Name="CopyResultBtn" Content="Copy the result" IsVisible="False"/>
+            </StackPanel>
+          </StackPanel>
+
+          <Border Classes="rule"/>
+          <TextBlock Classes="lbl" Text="ASK WITH A PROMPT"/>
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <ComboBox Name="PromptBox" HorizontalAlignment="Stretch" PlaceholderText="Choose one of your stored prompts…" AutomationProperties.Name="Stored prompt"/>
+            <Button Grid.Column="1" Name="UsePromptBtn" Content="Use this prompt…"/>
+          </Grid>
+          <TextBox Name="OwnBox" AcceptsReturn="True" TextWrapping="Wrap" Height="58" MaxLength="1000"
+                   Watermark="Or type your own instruction, for example: list anything that looks inconsistent."
+                   AutomationProperties.Name="Your own instruction"/>
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Name="FillOwnBtn" Content="Fill it and show it"/>
+            <Button Name="AskOwnBtn" Content="Ask my AI…"/>
+          </StackPanel>
+          <TextBlock Name="Status" Classes="hint"/>
+          <TextBlock Name="PrivacyNote" Classes="hint"/>
+        </StackPanel>
+        </ScrollViewer>
+      </StackPanel>
+    </Border>
+  </Panel>
+</Window>

@@ -19,7 +19,7 @@ public partial class App
     private IReadOnlyList<HotkeyBinding> HotkeyBindings()
     {
         _boundActions = _settings.MyActions.Select(a => a.Clone()).ToList();
-        return HotkeyService.FromCombos(_settings.PeekHotkey, _settings.LookupHotkey, _settings.DraftHotkey, _boundActions, _settings.MyTodoHotkey);
+        return HotkeyService.FromCombos(_settings.PeekHotkey, _settings.LookupHotkey, _settings.DraftHotkey, _boundActions, _settings.ShowAllTools ? _settings.MyTodoHotkey : null, _settings.AskHotkey);
     }
 
     private string AgentsFingerprint() => System.Text.Json.JsonSerializer.Serialize(_settings.Agents);
@@ -65,9 +65,10 @@ public partial class App
         () => ChatCompleterFactory.CreateReporting(_settings), () => ConnectionStatus.Current.Label);
 
     /// <summary>Works out what the action runs on (a selected ANDA in the data, or a number the person is asked for), then runs it.</summary>
-    private void RunCustomAction(CustomAction action, string? selection, PixelPoint near)
+    /// <param name="withoutRecord">True for a table or list from Ask: it holds many ANDAs, so none is picked as "the" record and {number}, {drug} and the like stay empty.</param>
+    private void RunCustomAction(CustomAction action, string? selection, PixelPoint near, bool withoutRecord = false)
     {
-        switch (Runner.Start(action, selection, _repository.Find))
+        switch (Runner.Start(action, selection, withoutRecord ? _ => null : _repository.Find))
         {
             case StartNotFound missing: ShowNotice(NotFoundMessage(missing.Number), near); break;
             case StartAskForAnda: AskForAnda(action, near); break;

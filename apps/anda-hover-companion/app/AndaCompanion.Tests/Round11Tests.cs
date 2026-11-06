@@ -130,7 +130,7 @@ public class Round11UiTests : IClassFixture<HeadlessFixture>
         {
             ThemeManager.Apply(AppearanceId.K);
             string dir = Temp.NewDir();
-            var s = new Settings { Tone = "Warm", AutoHideSeconds = 40 };
+            var s = new Settings { Tone = "Warm", AutoHideSeconds = 40, ShowAllTools = true };
             var w = new SettingsWindow(s, new PromptLibraryService(Path.Combine(dir, "p.json")), () => { }, replies: new QuickReplyService(Path.Combine(dir, "r.json")));
             w.Show(); Settle();
             var jump = w.FindControl<ComboBox>("JumpBox")!;

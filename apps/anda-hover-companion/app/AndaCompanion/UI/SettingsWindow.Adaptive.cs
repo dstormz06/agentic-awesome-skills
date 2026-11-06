@@ -22,8 +22,11 @@ public partial class SettingsWindow
     private readonly HashSet<SettingsSection> _touched = new();
     private bool _applyingLayout, _useDirty;
 
+    /// <summary>The sections that are shown now (all of them with "Show all tools", otherwise the five of the focused product).</summary>
+    private IReadOnlySet<SettingsSection> Shown => SettingsSections.Visible(_settings.ShowAllTools);
+
     /// <summary>The sections that are open right now, in the order shown.</summary>
-    public IReadOnlyList<SettingsSection> OpenSections => _secs.Where(s => s.Box.IsExpanded).Select(s => s.Id).ToList();
+    public IReadOnlyList<SettingsSection> OpenSections => _secs.Where(s => s.Box.IsVisible && s.Box.IsExpanded).Select(s => s.Id).ToList();
 
     private void BuildAdaptive()
     {
@@ -34,20 +37,10 @@ public partial class SettingsWindow
             sec.Box.AddHandler(InputElement.GotFocusEvent, (_, _) => Touch(sec.Id), RoutingStrategies.Bubble);
         }
 
-        // go to a section: the group names and the labels inside them. Choosing one opens its group first.
-        _jump = new();
-        foreach (var sec in _secs)
-        {
-            _jump.Add(new JumpTarget(SettingsSections.Title(sec.Id), sec, null));
-            if (sec.Box.Content is not StackPanel content) continue;
-            foreach (var panel in content.Children.OfType<StackPanel>())
-                if (panel.Children.FirstOrDefault() is TextBlock { Text: { Length: > 0 } label } first && first.Classes.Contains("lbl"))
-                    _jump.Add(new JumpTarget(label, sec, panel));
-        }
-        JumpBox.ItemsSource = _jump.Select(j => j.Title).ToList();
+        BuildJump();
         JumpBox.SelectionChanged += (_, _) =>
         {
-            if (JumpBox.SelectedIndex < 0) return;
+            if (JumpBox.SelectedIndex < 0 || JumpBox.SelectedIndex >= _jump.Count) return;
             var target = _jump[JumpBox.SelectedIndex];
             JumpBox.SelectedIndex = -1;
             GoTo(target.Section, target.Target);
@@ -69,27 +62,44 @@ public partial class SettingsWindow
             _settings.SectionUse = new(); _touched.Clear(); Apply();
             AdaptiveStatus.Text = "Forgotten. The window will now start from what needs a look.";
         };
-        GsShow.Click += (_, _) => { _settings.GettingStartedDone = false; Apply(); PaintGettingStarted(); AdaptiveStatus.Text = "Getting started is shown at the top again."; ApplySuggested(); };
-        GsHide.Click += (_, _) => { _settings.GettingStartedDone = true; Apply(); PaintGettingStarted(); };
-        GsFiles.Click += (_, _) => GoTo(_secs.First(s => s.Id == SettingsSection.Files), null);
-        GsMyTodo.Click += (_, _) => _hooks?.OpenMyTodo?.Invoke();
-        PaintGettingStarted();
+        AllToolsCheck.IsChecked = _settings.ShowAllTools;
+        AllToolsCheck.IsCheckedChanged += (_, _) =>
+        {
+            if (_loading) return;
+            _settings.ShowAllTools = AllToolsCheck.IsChecked == true; Apply();
+            ApplyEdition(); ApplySuggested();
+        };
+        ApplyEdition();
 
         ApplySuggested();
         Closed += (_, _) => { if (_useDirty) SettingsService.Save(_settings); };
     }
 
-    private void PaintGettingStarted()
+    /// <summary>Shows the sections of the focused product, or all of them, and renames the stored-prompts group to match.</summary>
+    private void ApplyEdition()
     {
-        GettingStarted.IsVisible = !_settings.GettingStartedDone;
-        bool chosen = !string.IsNullOrWhiteSpace(_settings.PortfolioPath);
-        string notesKey = string.IsNullOrWhiteSpace(_settings.MyTodoHotkey) ? "the My to-do list item in the tray menu" : _settings.MyTodoHotkey;
-        GsStep1.Text = $"1. Select an ANDA number in any program (an email, a spreadsheet, a web page), then press {_settings.PeekHotkey}. A small card opens.";
-        GsStep2.Text = chosen
-            ? "2. Done: your portfolio file is chosen, so the cards use your own ANDAs."
-            : "2. Choose your portfolio file under “My files and writing”, so the cards use your own ANDAs. Until then the app shows fictional demo records.";
-        GsStep3.Text = $"3. Select notes anywhere (a chat message, an email, or rough notes) and press {notesKey}. They become to-do items you can tick off.";
-        GsFiles.IsVisible = !chosen;
+        bool all = _settings.ShowAllTools;
+        var shown = Shown;
+        foreach (var sec in _secs) sec.Box.IsVisible = shown.Contains(sec.Id);
+        GrpActions.Text = SettingsSections.Title(SettingsSection.Actions, all);
+        ActionsLabel.Text = all ? "MY ACTIONS · YOUR OWN PROMPT, AGENT OR TO-DO ITEM, ON YOUR OWN SHORTCUT"
+                                : "STORED PROMPTS · USED BY ASK, OR ON A SHORTCUT OF THEIR OWN";
+        AgentsBlock.IsVisible = AgentsRule.IsVisible = TodoBlock.IsVisible = TodoRule.IsVisible = all;
+        BuildJump();
+    }
+
+    private void BuildJump()
+    {
+        _jump = new();
+        foreach (var sec in _secs.Where(x => x.Box.IsVisible))
+        {
+            _jump.Add(new JumpTarget(SettingsSections.Title(sec.Id, _settings.ShowAllTools), sec, null));
+            if (sec.Box.Content is not StackPanel content) continue;
+            foreach (var panel in content.Children.OfType<StackPanel>().Where(p => p.IsVisible))
+                if (panel.Children.FirstOrDefault() is TextBlock { Text: { Length: > 0 } label } first && first.Classes.Contains("lbl"))
+                    _jump.Add(new JumpTarget(label, sec, panel));
+        }
+        JumpBox.ItemsSource = _jump.Select(j => j.Title).ToList();
     }
 
     // ---------- what is open, and why ----------
@@ -115,17 +125,17 @@ public partial class SettingsWindow
         if (actions is null)
             foreach (var action in _settings.MyActions.Where(a => a.Enabled))
                 if (MyActionRules.Validate(action.Clone(), Array.Empty<(string Name, string Hotkey)>()) is not null) { actions = $"the action “{action.Name}” is not ready"; break; }
-        return new SettingsFacts(problems, portfolio, connection, actions, !string.IsNullOrWhiteSpace(_settings.PortfolioPath));
+        return new SettingsFacts(problems, portfolio, connection, actions);
     }
 
     /// <summary>Opens what needs a look, what a new user needs first and what is opened often; collapses the rest; and says why beside each heading.</summary>
     public void ApplySuggested()
     {
-        var advice = SettingsAdvisor.Advise(_settings, CurrentFacts());
+        var advice = SettingsAdvisor.Advise(_settings, CurrentFacts(), Shown);
         _applyingLayout = true;
         try
         {
-            foreach (var sec in _secs)
+            foreach (var sec in _secs.Where(x => x.Box.IsVisible))
             {
                 var a = advice.First(x => x.Section == sec.Id);
                 sec.Box.IsExpanded = a.Open;
@@ -137,7 +147,7 @@ public partial class SettingsWindow
         }
         finally { _applyingLayout = false; }
 
-        var opened = advice.Where(a => a.Open).Select(a => SettingsSections.Title(a.Section)).ToList();
+        var opened = advice.Where(a => a.Open).Select(a => SettingsSections.Title(a.Section, _settings.ShowAllTools)).ToList();
         AdaptiveText.Text = !_settings.AdaptiveSettings
             ? "Sections stay as you leave them. To have the ones you need opened for you, turn on “Open the sections that need a look” under Maintenance."
             : opened.Count == 0
@@ -148,7 +158,7 @@ public partial class SettingsWindow
     public void ExpandAll()
     {
         _applyingLayout = true;
-        try { foreach (var sec in _secs) sec.Box.IsExpanded = true; }
+        try { foreach (var sec in _secs.Where(x => x.Box.IsVisible)) sec.Box.IsExpanded = true; }
         finally { _applyingLayout = false; }
         AdaptiveText.Text = "Every section is open. Use “Suggested view” to go back to what matters now, or “Collapse all” to close them.";
     }
@@ -156,7 +166,7 @@ public partial class SettingsWindow
     public void CollapseAll()
     {
         _applyingLayout = true;
-        try { foreach (var sec in _secs) sec.Box.IsExpanded = false; }
+        try { foreach (var sec in _secs.Where(x => x.Box.IsVisible)) sec.Box.IsExpanded = false; }
         finally { _applyingLayout = false; }
         AdaptiveText.Text = "Every section is collapsed. Click a heading to open one, use “Go to a section” above, or press “Suggested view”.";
     }

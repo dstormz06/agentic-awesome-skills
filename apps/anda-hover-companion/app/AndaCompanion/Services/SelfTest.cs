@@ -318,6 +318,21 @@ internal static class SelfTest
             report.Add(ok ? new("my-todo-from-notes", CheckStatus.Pass, $"{found} suggestions were read from rough notes, {store.Items.Count} were added, and the to-do list lists them (no AI, no network)")
                           : new("my-todo-from-notes", CheckStatus.Fail, $"found {found}, stored {store.Items.Count}, weekly={store.Items.Any(i => i.Repeat == Repeat.Weekly)}"));
         });
+        await Safe(report, "ask", async () =>
+        {
+            // Fictional cells in a text box; nothing is read from a real workbook and nothing is sent anywhere.
+            var calls = new List<string>();
+            var hooks = new AskHooks(() => MyActionRules.Starters(), (a, _) => calls.Add(a.Name), _ => calls.Add("review"), n => calls.Add("lookup " + n));
+            var win = new AskWindow(hooks, "ANDA\tApplicant\tGoal date\n216482\tAcme\tOct 3, 2026\n214990\tBeta\tAug 15, 2026\n216482\tAcme\tOct 3, 2026");
+            win.Show();
+            var kind = win.Shape.Kind;
+            win.FindControl<Button>("SuggestBtn")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            report.Add(await ShootAsync(win, "ask-about-a-selection", o.OutDir, false));
+            bool ok = kind == SelectionKind.Table && win.Result.StartsWith("Found 1 repeated row", StringComparison.Ordinal) && calls.Count == 0;
+            win.Close();
+            report.Add(ok ? new("ask-quick-check", CheckStatus.Pass, "a table of cells was recognised and Find duplicates found the repeated row on this PC; nothing was handed to a prompt, a lookup or an AI")
+                          : new("ask-quick-check", CheckStatus.Fail, $"kind={kind}, calls={calls.Count}"));
+        });
     }
 
     /// <summary>Answers an agent request with a fixed reply, so the self-test never needs a network.</summary>
@@ -561,7 +576,12 @@ internal static class SelfTest
             foreach (var h in hotkeys)
             {
                 ushort vk = (ushort)h.Binding.VirtualKey;
-                TextCaptureService.SendKeys((0x11, false), (0x12, false), (vk, false), (vk, true), (0x12, true), (0x11, true));
+                // press exactly the modifiers this shortcut has (Ctrl+Alt, and Shift for Ask), then the key, then release in reverse
+                var down = new List<(ushort, bool)>(); var up = new List<(ushort, bool)>();
+                if ((h.Binding.Modifiers & HotkeyParser.ModControl) != 0) { down.Add((0x11, false)); up.Insert(0, (0x11, true)); }
+                if ((h.Binding.Modifiers & HotkeyParser.ModAlt) != 0) { down.Add((0x12, false)); up.Insert(0, (0x12, true)); }
+                if ((h.Binding.Modifiers & HotkeyParser.ModShift) != 0) { down.Add((0x10, false)); up.Insert(0, (0x10, true)); }
+                TextCaptureService.SendKeys(down.Concat(new[] { (vk, false), (vk, true) }).Concat(up).ToArray());
                 var done = await Task.WhenAny(seen[h.Binding.Id].Task, Task.Delay(2500));
                 if (done != seen[h.Binding.Id].Task) problems.Add($"{h.Binding.Combo} was injected but never reached the app");
                 await Task.Delay(150);

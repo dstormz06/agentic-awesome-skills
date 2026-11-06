@@ -16,38 +16,44 @@ namespace AndaCompanion.Tests;
 /// <summary>Settings arrange themselves: the rules that choose what opens, and the window that shows it.</summary>
 public class SettingsAdvisorTests
 {
-    private static SettingsFacts Facts(SettingsSection[]? shortcuts = null, string? portfolio = null, string? connection = null, string? actions = null, bool chosen = false) =>
-        new(new HashSet<SettingsSection>(shortcuts ?? Array.Empty<SettingsSection>()), portfolio, connection, actions, chosen);
+    private static SettingsFacts Facts(SettingsSection[]? shortcuts = null, string? portfolio = null, string? connection = null, string? actions = null) =>
+        new(new HashSet<SettingsSection>(shortcuts ?? Array.Empty<SettingsSection>()), portfolio, connection, actions);
 
     private static List<SettingsSection> Open(Settings s, SettingsFacts f) => SettingsAdvisor.Advise(s, f).Where(a => a.Open).Select(a => a.Section).ToList();
 
     [Fact]
-    public void A_new_user_sees_the_two_things_needed_first_and_everything_else_collapsed()
+    public void A_new_user_sees_every_section_collapsed_because_there_is_no_getting_started_step()
     {
         var advice = SettingsAdvisor.Advise(new Settings(), SettingsFacts.AllWell);
         Assert.Equal(8, advice.Count);
-        Assert.Equal(new[] { SettingsSection.Start, SettingsSection.Files }, advice.Where(a => a.Open).Select(a => a.Section));
-        Assert.All(advice.Where(a => a.Open), a => { Assert.False(a.Attention); Assert.StartsWith("Start here", a.Reason); });
-        Assert.All(advice.Where(a => !a.Open), a => Assert.Null(a.Reason));
+        Assert.Empty(advice.Where(a => a.Open));
+        Assert.All(advice, a => { Assert.False(a.Attention); Assert.Null(a.Reason); });
     }
 
     [Fact]
-    public void Once_getting_started_is_hidden_and_all_is_well_every_section_is_collapsed()
+    public void The_focused_product_shows_five_sections_and_a_hidden_one_is_never_opened_or_counted()
     {
-        Assert.Empty(Open(new Settings { GettingStartedDone = true }, SettingsFacts.AllWell));
-    }
+        var shown = SettingsSections.Visible(false);
+        Assert.Equal(new[] { SettingsSection.Start, SettingsSection.Files, SettingsSection.Actions, SettingsSection.Connections, SettingsSection.Maintenance }, shown.OrderBy(x => (int)x));
+        Assert.Equal(8, SettingsSections.Visible(true).Count);
+        Assert.Equal("Ask: my stored prompts", SettingsSections.Title(SettingsSection.Actions, false));
+        Assert.Equal("My actions, agents and ANDA to-do list", SettingsSections.Title(SettingsSection.Actions, true));
 
-    [Fact]
-    public void A_chosen_portfolio_means_the_choose_your_portfolio_hint_goes_away()
-    {
-        Assert.Equal(new[] { SettingsSection.Start }, Open(new Settings(), Facts(chosen: true)));
+        // Look and Dates are used a lot, but they are hidden, so the two slots go to sections that are shown
+        var s = new Settings { SectionUse = new() { ["Look"] = 9, ["Dates"] = 8, ["Connections"] = 4, ["Files"] = 3 } };
+        var advice = SettingsAdvisor.Advise(s, SettingsFacts.AllWell, shown);
+        Assert.Equal(5, advice.Count);
+        Assert.DoesNotContain(advice, a => a.Section is SettingsSection.Look or SettingsSection.Dates or SettingsSection.MyTodo);
+        Assert.Equal(new[] { SettingsSection.Files, SettingsSection.Connections }, advice.Where(a => a.Open).Select(a => a.Section));
+        // with every section shown the busiest two win
+        Assert.Equal(new[] { SettingsSection.Look, SettingsSection.Dates }, Open(s, SettingsFacts.AllWell));
     }
 
     [Fact]
     public void Whatever_needs_a_look_is_open_with_a_reason_however_many_there_are()
     {
-        var s = new Settings { GettingStartedDone = true };
-        var advice = SettingsAdvisor.Advise(s, Facts(new[] { SettingsSection.Start, SettingsSection.MyTodo, SettingsSection.Actions }, "your portfolio file could not be read", "Claude did not answer", null, true));
+        var s = new Settings();
+        var advice = SettingsAdvisor.Advise(s, Facts(new[] { SettingsSection.Start, SettingsSection.MyTodo, SettingsSection.Actions }, "your portfolio file could not be read", "Claude did not answer", null));
         var open = advice.Where(a => a.Open).ToList();
         Assert.Equal(new[] { SettingsSection.Start, SettingsSection.Files, SettingsSection.MyTodo, SettingsSection.Actions, SettingsSection.Connections }, open.Select(a => a.Section));
         Assert.All(open, a => { Assert.True(a.Attention); Assert.StartsWith("Needs a look: ", a.Reason); });
@@ -57,7 +63,7 @@ public class SettingsAdvisorTests
     [Fact]
     public void An_action_or_agent_that_is_not_ready_opens_its_section_unless_its_shortcut_is_the_problem()
     {
-        var s = new Settings { GettingStartedDone = true };
+        var s = new Settings();
         Assert.Equal("Needs a look: the agent “Alert Hub” is switched on but not ready",
             SettingsAdvisor.Advise(s, Facts(actions: "the agent “Alert Hub” is switched on but not ready")).First(a => a.Section == SettingsSection.Actions).Reason);
         Assert.Equal("Needs a look: an action's shortcut is used by another program",
@@ -67,7 +73,7 @@ public class SettingsAdvisorTests
     [Fact]
     public void The_two_sections_opened_most_often_open_by_themselves_but_a_couple_of_visits_do_not()
     {
-        var s = new Settings { GettingStartedDone = true, SectionUse = new() { ["Look"] = 5, ["Dates"] = 4, ["Connections"] = 9, ["MyTodo"] = 2 } };
+        var s = new Settings { SectionUse = new() { ["Look"] = 5, ["Dates"] = 4, ["Connections"] = 9, ["MyTodo"] = 2 } };
         var advice = SettingsAdvisor.Advise(s, SettingsFacts.AllWell);
         Assert.Equal(new[] { SettingsSection.Look, SettingsSection.Connections }, advice.Where(a => a.Open).Select(a => a.Section));
         Assert.All(advice.Where(a => a.Open), a => Assert.Equal("You open this often", a.Reason));
@@ -76,19 +82,19 @@ public class SettingsAdvisorTests
     [Fact]
     public void Maintenance_is_never_opened_by_habit()
     {
-        var s = new Settings { GettingStartedDone = true, SectionUse = new() { ["Maintenance"] = 50 } };
+        var s = new Settings { SectionUse = new() { ["Maintenance"] = 50 } };
         Assert.Empty(Open(s, SettingsFacts.AllWell));
     }
 
     [Fact]
-    public void At_most_three_sections_open_for_reasons_other_than_attention()
+    public void At_most_two_sections_open_for_reasons_other_than_attention()
     {
         var s = new Settings { SectionUse = new() { ["Look"] = 9, ["Dates"] = 8, ["MyTodo"] = 7 } };
         var advice = SettingsAdvisor.Advise(s, SettingsFacts.AllWell);
-        Assert.Equal(3, advice.Count(a => a.Open && !a.Attention));              // Start + Files (day 1) + the single most used one
+        Assert.Equal(2, advice.Count(a => a.Open && !a.Attention));              // the two most used ones, nothing else
         // attention does not count against the limit
         var withAttention = SettingsAdvisor.Advise(s, Facts(new[] { SettingsSection.Actions }, connection: "x did not answer"));
-        Assert.Equal(3, withAttention.Count(a => a.Open && !a.Attention));
+        Assert.Equal(2, withAttention.Count(a => a.Open && !a.Attention));
         Assert.Equal(2, withAttention.Count(a => a.Open && a.Attention));
     }
 
@@ -118,11 +124,11 @@ public class SettingsAdvisorTests
     }
 
     [Fact]
-    public void The_counts_and_the_hidden_getting_started_card_belong_to_this_PC_not_to_a_backup_and_a_reset_forgets_them()
+    public void The_counts_belong_to_this_PC_not_to_a_backup_and_a_reset_forgets_them()
     {
         var dir = Temp.NewDir();
         var lenses = new PromptLibraryService(Path.Combine(dir, "p.json")); var replies = new QuickReplyService(Path.Combine(dir, "r.json"));
-        var source = new Settings { SectionUse = new() { ["Look"] = 7 }, GettingStartedDone = true, AdaptiveSettings = false };
+        var source = new Settings { SectionUse = new() { ["Look"] = 7 }, AdaptiveSettings = false, ShowAllTools = true };
         string json = SettingsBackup.Export(source, lenses, replies);
         Assert.DoesNotContain("SectionUse\": {\n", json.Replace("\r", ""));        // the exported copy holds the default (empty) counts
         var target = new Settings { SectionUse = new() { ["Dates"] = 3 } };
@@ -130,11 +136,10 @@ public class SettingsAdvisorTests
         Assert.True(ok);
         Assert.False(target.AdaptiveSettings);                                       // a preference travels with a backup
         Assert.Equal(3, target.SectionUse["Dates"]);                                 // the counts stay this PC's own
-        Assert.False(target.GettingStartedDone);
-        target.GettingStartedDone = true;
+        Assert.True(target.ShowAllTools);                                            // so does the choice of which tools are shown
         SettingsBackup.Reset(target, lenses, replies);
         Assert.Empty(target.SectionUse);
-        Assert.False(target.GettingStartedDone);
+        Assert.False(target.ShowAllTools);
         Assert.True(target.AdaptiveSettings);
     }
 
@@ -170,7 +175,7 @@ public class AdaptiveSettingsUiTests : IClassFixture<HeadlessFixture>
     private static string Text(Window w, string name) => w.FindControl<TextBlock>(name)!.Text ?? "";
 
     [Fact]
-    public async Task A_new_install_opens_two_sections_with_reasons_shows_getting_started_and_collapses_the_rest()
+    public async Task A_new_install_shows_five_sections_all_collapsed_with_no_getting_started_card()
     {
         var r = await _fx.Session.Dispatch(() =>
         {
@@ -178,57 +183,55 @@ public class AdaptiveSettingsUiTests : IClassFixture<HeadlessFixture>
             using var home = new EnvScope(AppPaths.HomeEnvVar, Temp.NewDir());
             var w = NewWindow(new Settings());
             var open = w.OpenSections.ToList();
-            bool gs = w.FindControl<Border>("GettingStarted")!.IsVisible;
-            string s1 = Text(w, "GsStep1"), s2 = Text(w, "GsStep2"), s3 = Text(w, "GsStep3"), adaptive = Text(w, "AdaptiveText");
-            string pillFiles = Text(w, "PillTextFiles"); bool pillShown = w.FindControl<Border>("PillFiles")!.IsVisible, pillLook = w.FindControl<Border>("PillLook")!.IsVisible;
-            // the collapsed sections have no controls on screen yet; the open ones do
-            bool filesOnScreen = w.GetVisualDescendants().OfType<TextBox>().Any(t => t.Name == "PortfolioBox");
-            bool agentsOnScreen = w.GetVisualDescendants().OfType<Button>().Any(b => b.Name == "AgentAdd");
+            bool card = w.FindControl<Control>("GettingStarted") is not null || w.FindControl<Control>("GsStep1") is not null || w.FindControl<Control>("GsShow") is not null;
+            string adaptive = Text(w, "AdaptiveText");
+            var visible = new[] { "SecLook", "SecStart", "SecDates", "SecFiles", "SecMyTodo", "SecActions", "SecConnections", "SecMaintenance" }
+                .Where(n => w.FindControl<Expander>(n)!.IsVisible).ToList();
+            string actionsTitle = Text(w, "GrpActions");
+            var jump = w.FindControl<ComboBox>("JumpBox")!.ItemsSource!.Cast<string>().ToList();
             w.Close(); Settle();
-            return (open, gs, s1, s2, s3, adaptive, pillFiles, pillShown, pillLook, filesOnScreen, agentsOnScreen);
+            return (open, card, adaptive, visible, actionsTitle, jump);
         }, CancellationToken.None);
 
-        Assert.Equal(new[] { SettingsSection.Start, SettingsSection.Files }, r.open);
-        Assert.True(r.gs);
-        Assert.Contains("Ctrl+Alt+A", r.s1);
-        Assert.Contains("fictional demo records", r.s2);
-        Assert.Contains("Ctrl+Alt+L", r.s3);
-        Assert.Contains("Opened for you: How it starts, My files and writing", r.adaptive);
-        Assert.Equal("Start here: choose your portfolio", r.pillFiles);
-        Assert.True(r.pillShown);
-        Assert.False(r.pillLook);
-        Assert.True(r.filesOnScreen);
-        Assert.False(r.agentsOnScreen);
+        Assert.Empty(r.open);
+        Assert.False(r.card);
+        Assert.Contains("Everything is in order", r.adaptive);
+        Assert.Equal(new[] { "SecStart", "SecFiles", "SecActions", "SecConnections", "SecMaintenance" }, r.visible);
+        Assert.Equal("Ask: my stored prompts", r.actionsTitle);
+        Assert.Contains("Ask: my stored prompts", r.jump);
+        Assert.DoesNotContain("Look and feel", r.jump);
+        Assert.DoesNotContain("My to-do list", r.jump);
     }
 
     [Fact]
-    public async Task Hiding_getting_started_is_remembered_and_the_next_window_opens_fully_collapsed()
+    public async Task Show_all_tools_brings_back_the_hidden_sections_is_saved_and_changes_nothing_else()
     {
         var r = await _fx.Session.Dispatch(() =>
         {
             ThemeManager.Apply(AppearanceId.K);
             using var home = new EnvScope(AppPaths.HomeEnvVar, Temp.NewDir());
-            var s = new Settings();
+            var s = new Settings { CardOpacity = 0.6, Appearance = AppearanceId.C };
             var w = NewWindow(s);
-            Click(w.FindControl<Button>("GsHide")!); Settle();
-            bool hidden = !w.FindControl<Border>("GettingStarted")!.IsVisible; bool saved = s.GettingStartedDone;
+            w.ExpandAll(); Settle();
+            bool agentsBefore = w.GetVisualDescendants().OfType<Button>().Any(b => b.Name == "AgentAdd" && b.IsEffectivelyVisible);
+            w.FindControl<CheckBox>("AllToolsCheck")!.IsChecked = true; Settle();
+            bool saved = s.ShowAllTools;
+            w.ExpandAll(); Settle();
+            int visible = new[] { "SecLook", "SecStart", "SecDates", "SecFiles", "SecMyTodo", "SecActions", "SecConnections", "SecMaintenance" }
+                .Count(n => w.FindControl<Expander>(n)!.IsVisible);
+            bool agentsAfter = w.GetVisualDescendants().OfType<Button>().Any(b => b.Name == "AgentAdd" && b.IsEffectivelyVisible);
+            string title = Text(w, "GrpActions");
             w.Close(); Settle();
-            var again = NewWindow(s);
-            var open = again.OpenSections.ToList(); string text = Text(again, "AdaptiveText");
-            // show it again from Maintenance
-            again.ExpandAll(); Settle();
-            Click(again.FindControl<Button>("GsShow")!); Settle();
-            bool back = again.FindControl<Border>("GettingStarted")!.IsVisible; var openBack = again.OpenSections.ToList();
-            again.Close(); Settle();
-            return (hidden, saved, open, text, back, openBack);
+            return (agentsBefore, saved, visible, agentsAfter, title, s.CardOpacity, s.Appearance);
         }, CancellationToken.None);
 
-        Assert.True(r.hidden);
+        Assert.False(r.agentsBefore);
         Assert.True(r.saved);
-        Assert.Empty(r.open);
-        Assert.Contains("Everything is in order", r.text);
-        Assert.True(r.back);
-        Assert.Equal(new[] { SettingsSection.Start, SettingsSection.Files }, r.openBack);
+        Assert.Equal(8, r.visible);
+        Assert.True(r.agentsAfter);
+        Assert.Equal("My actions, agents and ANDA to-do list", r.title);
+        Assert.Equal(0.6, r.CardOpacity, 3);            // the look and transparency that were chosen were kept all along
+        Assert.Equal(AppearanceId.C, r.Appearance);
     }
 
     [Fact]
@@ -240,7 +243,7 @@ public class AdaptiveSettingsUiTests : IClassFixture<HeadlessFixture>
             using var home = new EnvScope(AppPaths.HomeEnvVar, Temp.NewDir());
             var todo = new HotkeyBinding(HotkeyService.IdMyTodo, "My to-do list", "Ctrl+Alt+L", 0, 0, "");
             var peek = new HotkeyBinding(HotkeyService.IdPeek, "Select & Peek", "Ctrl+Alt+A", 0, 0, "");
-            var w = NewWindow(new Settings { GettingStartedDone = true }, Hooks(new[] { new HotkeyStatus(peek, true, 0), new HotkeyStatus(todo, false, 1409) }));
+            var w = NewWindow(new Settings { ShowAllTools = true }, Hooks(new[] { new HotkeyStatus(peek, true, 0), new HotkeyStatus(todo, false, 1409) }));
             var open = w.OpenSections.ToList(); string pill = Text(w, "PillTextMyTodo"); string adaptive = Text(w, "AdaptiveText");
             w.Close(); Settle();
             return (open, pill, adaptive);
@@ -258,7 +261,7 @@ public class AdaptiveSettingsUiTests : IClassFixture<HeadlessFixture>
         {
             ThemeManager.Apply(AppearanceId.K);
             using var home = new EnvScope(AppPaths.HomeEnvVar, Temp.NewDir());
-            var w = NewWindow(new Settings { GettingStartedDone = true });
+            var w = NewWindow(new Settings { ShowAllTools = true });
             var jump = w.FindControl<ComboBox>("JumpBox")!;
             var items = jump.ItemsSource!.Cast<string>().ToList();
             bool closedBefore = !w.OpenSections.Contains(SettingsSection.Actions);
@@ -287,13 +290,12 @@ public class AdaptiveSettingsUiTests : IClassFixture<HeadlessFixture>
         {
             ThemeManager.Apply(AppearanceId.K);
             using var home = new EnvScope(AppPaths.HomeEnvVar, Temp.NewDir());
-            var s = new Settings { GettingStartedDone = true };
+            var s = new Settings { ShowAllTools = true };
             var w = NewWindow(s);
             Click(w.FindControl<Button>("ExpandAllBtn")!); Settle();
             int all = w.OpenSections.Count;
             Click(w.FindControl<Button>("CollapseAllBtn")!); Settle();
             int none = w.OpenSections.Count;
-            s.GettingStartedDone = false;
             Click(w.FindControl<Button>("SuggestedBtn")!); Settle();
             var suggested = w.OpenSections.ToList();
             int counted = s.SectionUse.Count;
@@ -303,7 +305,7 @@ public class AdaptiveSettingsUiTests : IClassFixture<HeadlessFixture>
 
         Assert.Equal(8, r.all);
         Assert.Equal(0, r.none);
-        Assert.Equal(new[] { SettingsSection.Start, SettingsSection.Files }, r.suggested);
+        Assert.Empty(r.suggested);                                                   // all is well, so the suggested view opens nothing
         Assert.Equal(0, r.counted);
     }
 
@@ -315,7 +317,7 @@ public class AdaptiveSettingsUiTests : IClassFixture<HeadlessFixture>
             ThemeManager.Apply(AppearanceId.K);
             string dir = Temp.NewDir();
             using var home = new EnvScope(AppPaths.HomeEnvVar, dir);
-            var s = new Settings { GettingStartedDone = true };
+            var s = new Settings { ShowAllTools = true };
             int AfterVisit()
             {
                 var w = NewWindow(s);
@@ -368,7 +370,7 @@ public class AdaptiveSettingsUiTests : IClassFixture<HeadlessFixture>
         Assert.Empty(r.open);
         Assert.Contains("stay as you leave them", r.text);
         Assert.Equal(0, r.counted);
-        Assert.Equal(new[] { SettingsSection.Start, SettingsSection.Files }, r.after);
+        Assert.Empty(r.after);
         Assert.True(r.AdaptiveSettings);
     }
 
@@ -379,7 +381,7 @@ public class AdaptiveSettingsUiTests : IClassFixture<HeadlessFixture>
         {
             ThemeManager.Apply(AppearanceId.K);
             using var home = new EnvScope(AppPaths.HomeEnvVar, Temp.NewDir());
-            var s = new Settings { GettingStartedDone = true };
+            var s = new Settings { ShowAllTools = true };
             var w = NewWindow(s);
             var calm = w.OpenSections.ToList(); w.Close(); Settle();
 
@@ -406,21 +408,18 @@ public class AdaptiveSettingsUiTests : IClassFixture<HeadlessFixture>
     }
 
     [Fact]
-    public async Task Choosing_a_portfolio_updates_the_getting_started_card_and_a_unreadable_one_opens_its_section()
+    public async Task A_chosen_portfolio_needs_no_hint_and_nothing_opens_by_itself()
     {
         var r = await _fx.Session.Dispatch(() =>
         {
             ThemeManager.Apply(AppearanceId.K);
             using var home = new EnvScope(AppPaths.HomeEnvVar, Temp.NewDir());
             var chosen = NewWindow(new Settings { PortfolioPath = Path.Combine(Temp.NewDir(), "missing.xlsx") });
-            string step2 = Text(chosen, "GsStep2"); bool button = chosen.FindControl<Button>("GsFiles")!.IsVisible;
             var open = chosen.OpenSections.ToList();
             chosen.Close(); Settle();
-            return (step2, button, open);
+            return open;
         }, CancellationToken.None);
 
-        Assert.StartsWith("2. Done: your portfolio file is chosen", r.step2);
-        Assert.False(r.button);
-        Assert.Equal(new[] { SettingsSection.Start }, r.open);             // chosen, so no "choose your portfolio"; nothing else to show without a hook that reports a problem
+        Assert.Empty(r);
     }
 }

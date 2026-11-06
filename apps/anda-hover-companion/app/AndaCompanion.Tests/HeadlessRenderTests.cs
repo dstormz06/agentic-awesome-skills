@@ -27,6 +27,9 @@ public sealed class HeadlessFixture : IDisposable
 {
     // One Avalonia session for the whole test run. Starting and stopping a session per test class raced on Avalonia's
     // static font manager ("fonts:SystemFonts") now and then, so the session is shared and ends with the process.
+    // Because it is shared, a UI test that throws inside Dispatch before it closes its windows leaves them open for the
+    // next test, and every later UI test can then fail with that same unrelated font-resource error. If a whole run of
+    // UI tests fails with "fonts:SystemFonts", look for the first test that failed, not at the font.
     private static readonly Lazy<HeadlessUnitTestSession> Shared = new(() => HeadlessUnitTestSession.StartNew(typeof(TestApp)));
     public HeadlessUnitTestSession Session => Shared.Value;
     public void Dispose() { }
@@ -141,14 +144,14 @@ public class HeadlessRenderTests : IClassFixture<HeadlessFixture>
         var names = await _fx.Session.Dispatch(() =>
         {
             ThemeManager.Apply(AppearanceId.A);
-            var win = new SettingsWindow(new Settings(), new PromptLibraryService(Path.Combine(Temp.NewDir(), "p.json")), () => { });
+            var win = new SettingsWindow(new Settings { ShowAllTools = true }, new PromptLibraryService(Path.Combine(Temp.NewDir(), "p.json")), () => { });
             win.Show(); win.ExpandAll();
             Dispatcher.UIThread.RunJobs();
             var found = new[] { "AppearancePanel", "CompactPanel", "AutoHidePanel", "ConsentPanel", "CaptureCheck", "OpacitySlider", "LensCombo", "TestBtn", "CloseBtn",
                     "EscalateCheck", "LatePanel", "HolidayPanel", "PeekKeyBox", "LookupKeyBox", "DraftKeyBox", "PortfolioBox", "NotesBox", "ReferenceBox", "InstructionsBox", "UsageCheck",
                     "ConnBanner", "MiddleCheck", "ProviderPanel", "MyApiExpander", "ApiEndpoint", "TonePanel", "SignOffBox", "RepliesManage", "ReferenceUrlBox", "ReferenceUpdate", "OutlookOn",
                     "ActionsPanel", "ActionAdd", "AgentsPanel", "AgentAdd", "TodoAutoCheck", "TodoRefreshPanel", "TodoOpen",
-                    "MyTodoKeyBox", "MyTodoModePanel", "MyTodoOpen", "AdaptiveCheck", "GettingStarted", "SuggestedBtn" }
+                    "MyTodoKeyBox", "MyTodoModePanel", "MyTodoOpen", "AdaptiveCheck", "AllToolsCheck", "SuggestedBtn" }
                 .Where(n => win.FindControl<Control>(n) is not null).ToList();
             int radios = win.GetVisualDescendants().OfType<RadioButton>().Count();
             win.Close();
@@ -165,7 +168,7 @@ public class HeadlessRenderTests : IClassFixture<HeadlessFixture>
     [Fact]
     public async Task Capture_checkbox_writes_through_to_settings()
     {
-        var settings = new Settings { CaptureViaCopy = true };
+        var settings = new Settings { CaptureViaCopy = true, ShowAllTools = true };
         await _fx.Session.Dispatch(() =>
         {
             ThemeManager.Apply(AppearanceId.A);

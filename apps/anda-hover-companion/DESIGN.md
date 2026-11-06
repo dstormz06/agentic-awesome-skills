@@ -393,8 +393,8 @@ All looks are light-only (§5).
 
 **`app/`** contains the working v0: a .NET 8 / Avalonia tray application with all nineteen
 looks (K default; four of them compact boxes) selectable from the tray menu, auto-hide, all three consent models
-(Whisper default, with the urgent-peek rule), three rebindable global hotkeys (`Ctrl+Alt+A` Select & Peek,
-`Ctrl+Alt+Space` lookup, `Ctrl+Alt+D` check a draft), the weekend and federal-holiday WATCH line, the draft
+(Whisper default, with the urgent-peek rule), four rebindable global hotkeys (`Ctrl+Alt+A` Select & Peek,
+`Ctrl+Alt+Space` lookup, `Ctrl+Alt+D` review a draft, `Ctrl+Alt+Shift+P` ask about a selection), the weekend and federal-holiday WATCH line, the draft
 check and the writing actions (Proofread / Rewrite / Fact-check, preview before send, Copy only), reading
 the person's own Excel or CSV portfolio and notes folder, one RLD-labeling date from a downloaded Drugs@FDA
 file, an optional usage log, the
@@ -438,6 +438,25 @@ nothing until the person presses Add (or, by their own choice, adds at once with
 one moves on instead of piling up. *Settings* became eight collapsible sections: everything is collapsed except what needs a look, what a new user needs
 first and up to two sections opened often, each with a one-line reason; Expand all, Collapse all and Suggested view are always there, and a Getting
 started card with three plain steps stays until it is hidden. Nothing moves while the person works.
+
+## 11a. The focused edition (round 17), and the design rules it follows
+
+The division's supervisor asked that the product stay focused for leadership: **ANDA lookup** and **reviewing a draft first**. Leadership mostly does not keep their own Excel portfolio of ANDAs, so a feature that
+needs one cannot be the opening act. The product therefore opens with three things and hides the rest behind *Settings, Maintenance, Show all tools* (nothing is deleted, and choices come back):
+
+1. **Lookup**: select a number, press the key, read the card (goal against forecast, what needs attention, WATCH, PSG and RLD dates).
+2. **Review a draft**: checks a message against the record, then against itself and the calendar, with no AI and no network, and says what it checked and what it did not.
+3. **Ask about a selection**: select text or cells, see what it looks like, run a fixed-rule quick check on the PC or a prompt of the person's own, which is shown before anything is sent.
+
+Rules taken from Apple's published human-interface guidance (clarity, deference, depth; progressive disclosure; one clear action; plain labels), applied on Windows without imitating Apple's look:
+
+- **One primary action per window.** Ask suggests a single button for what was selected; the rest waits under quick checks and prompts.
+- **Answer first.** A review begins with one line (what was checked, and whether anything needs a second look); detail follows.
+- **Fewer choices up front.** Five Settings groups instead of eight; one solid look; no transparency or appearance picker until asked for. Hidden is not removed.
+- **Nothing happens by itself.** A suggestion is only ever a button. Quick checks run when pressed. Nothing is sent without a preview and a press of Send.
+- **No teaching screens.** There is no *Getting started* card and no step list; the first run is the tool.
+
+What this does **not** prove: whether a real person finds it lighter. That is a hypothesis to time with testers, with and without the hidden tools.
 
 ## 12. Engagement roadmap — seven features that make it the daily habit
 

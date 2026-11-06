@@ -3,7 +3,7 @@
         x:Class="AndaCompanion.UI.DraftWindow"
         SystemDecorations="None" TransparencyLevelHint="Transparent" Background="Transparent"
         SizeToContent="WidthAndHeight" CanResize="False" Topmost="True"
-        ShowInTaskbar="False" WindowStartupLocation="CenterScreen" Title="ANDA Companion (Notula) — Check a draft">
+        ShowInTaskbar="False" WindowStartupLocation="CenterScreen" Title="ANDA Companion (Notula) — Review a draft">
 
   <Window.Styles>
     <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource C.Font}"/></Style>
@@ -21,7 +21,7 @@
             BoxShadow="0 18 42 -10 #59000000" Padding="20" Width="580">
       <StackPanel Spacing="10">
         <Grid ColumnDefinitions="*,Auto">
-          <TextBlock FontSize="15" FontWeight="Bold" Foreground="{DynamicResource C.Ink}" Text="Check a draft"/>
+          <TextBlock FontSize="15" FontWeight="Bold" Foreground="{DynamicResource C.Ink}" Text="Review a draft"/>
           <Button Grid.Column="1" Name="CloseBtn" Classes="primary" Content="Done"/>
         </Grid>
         <ScrollViewer Name="Body" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">

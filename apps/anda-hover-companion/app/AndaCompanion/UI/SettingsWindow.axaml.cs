@@ -393,7 +393,8 @@ public partial class SettingsWindow : Window
         // shortcuts: click a box, press the keys
         BindKey(PeekKeyBox, PeekKeyReset, "Select & Peek", () => _settings.PeekHotkey, v => _settings.PeekHotkey = v, "Ctrl+Alt+A");
         BindKey(LookupKeyBox, LookupKeyReset, "Lookup box", () => _settings.LookupHotkey, v => _settings.LookupHotkey = v, "Ctrl+Alt+Space");
-        BindKey(DraftKeyBox, DraftKeyReset, "Check a draft", () => _settings.DraftHotkey, v => _settings.DraftHotkey = v, "Ctrl+Alt+D");
+        BindKey(DraftKeyBox, DraftKeyReset, "Review a draft", () => _settings.DraftHotkey, v => _settings.DraftHotkey = v, "Ctrl+Alt+D");
+        BindKey(AskKeyBox, AskKeyReset, "Ask about a selection", () => _settings.AskHotkey, v => _settings.AskHotkey = v, Settings.DefaultAskHotkey);
         KeyStatus.Text = _hooks?.HotkeyStatus() ?? "";
 
         // my data
@@ -478,8 +479,10 @@ public partial class SettingsWindow : Window
             {
                 ("Select & Peek", ReferenceEquals(box, PeekKeyBox) ? normalized : _settings.PeekHotkey),
                 ("Lookup box", ReferenceEquals(box, LookupKeyBox) ? normalized : _settings.LookupHotkey),
-                ("Check a draft", ReferenceEquals(box, DraftKeyBox) ? normalized : _settings.DraftHotkey),
+                ("Review a draft", ReferenceEquals(box, DraftKeyBox) ? normalized : _settings.DraftHotkey),
             };
+            string askNow = ReferenceEquals(box, AskKeyBox) ? normalized : _settings.AskHotkey;
+            if (!string.IsNullOrWhiteSpace(askNow)) others.Add(("Ask about a selection", askNow));
             if (!string.IsNullOrWhiteSpace(_settings.MyTodoHotkey)) others.Add(("My to-do list", _settings.MyTodoHotkey));
             foreach (var a in _settings.MyActions.Where(a => !string.IsNullOrWhiteSpace(a.Hotkey))) others.Add((a.Name, a.Hotkey));
             if (HotkeyParser.ValidateSet(others.ToArray()) is { } clash) { KeyStatus.Text = clash; return; }
@@ -491,7 +494,8 @@ public partial class SettingsWindow : Window
         {
             string before = get();
             set(fallback);
-            var all = new List<(string, string)> { ("Select & Peek", _settings.PeekHotkey), ("Lookup box", _settings.LookupHotkey), ("Check a draft", _settings.DraftHotkey) };
+            var all = new List<(string, string)> { ("Select & Peek", _settings.PeekHotkey), ("Lookup box", _settings.LookupHotkey), ("Review a draft", _settings.DraftHotkey) };
+            if (!string.IsNullOrWhiteSpace(_settings.AskHotkey)) all.Add(("Ask about a selection", _settings.AskHotkey));
             if (!string.IsNullOrWhiteSpace(_settings.MyTodoHotkey)) all.Add(("My to-do list", _settings.MyTodoHotkey));
             foreach (var a in _settings.MyActions.Where(a => !string.IsNullOrWhiteSpace(a.Hotkey))) all.Add((a.Name, a.Hotkey));
             if (HotkeyParser.ValidateSet(all.ToArray()) is { } clash)
@@ -504,7 +508,6 @@ public partial class SettingsWindow : Window
 
     private void RefreshPortfolioStatus()
     {
-        PaintGettingStarted();
         var repo = _hooks?.Portfolio();
         PortfolioStatus.Text = _settings.PortfolioPath is null ? "No portfolio chosen: the fictional demo records are used." : repo?.Status.Message ?? "";
         ReferenceStatus.Text = _hooks?.ReferenceStatus() ?? "";

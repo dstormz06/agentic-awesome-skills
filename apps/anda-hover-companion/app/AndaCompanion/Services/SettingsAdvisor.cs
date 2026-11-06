@@ -19,13 +19,24 @@ public static class SettingsSections
 
     public static string Key(SettingsSection s) => All.First(x => x.Id == s).Key;
     public static string Title(SettingsSection s) => All.First(x => x.Id == s).Title;
+
+    /// <summary>
+    /// The focused product shows five groups; the rest (appearance, dates, My to-do list and the agents) appear only when "Show all tools" is on.
+    /// The Actions group stays, because it holds the stored prompts that Ask uses, but under a shorter name.
+    /// </summary>
+    public static IReadOnlySet<SettingsSection> Visible(bool showAllTools) => showAllTools
+        ? All.Select(x => x.Id).ToHashSet()
+        : new HashSet<SettingsSection> { SettingsSection.Start, SettingsSection.Files, SettingsSection.Actions, SettingsSection.Connections, SettingsSection.Maintenance };
+
+    public static string Title(SettingsSection s, bool showAllTools) =>
+        s == SettingsSection.Actions && !showAllTools ? "Ask: my stored prompts" : Title(s);
 }
 
 /// <summary>What is true right now that the Settings window should draw attention to. Each entry is a plain sentence, or null if all is well.</summary>
 public sealed record SettingsFacts(
-    IReadOnlySet<SettingsSection> ShortcutProblems, string? PortfolioProblem, string? ConnectionProblem, string? ActionsProblem, bool PortfolioChosen)
+    IReadOnlySet<SettingsSection> ShortcutProblems, string? PortfolioProblem, string? ConnectionProblem, string? ActionsProblem)
 {
-    public static readonly SettingsFacts AllWell = new(new HashSet<SettingsSection>(), null, null, null, false);
+    public static readonly SettingsFacts AllWell = new(new HashSet<SettingsSection>(), null, null, null);
 }
 
 /// <summary>How one section starts: open or collapsed, and the short reason shown beside its heading.</summary>
@@ -33,16 +44,17 @@ public sealed record SectionAdvice(SettingsSection Section, bool Open, bool Atte
 
 /// <summary>
 /// Settings arrange themselves. Everything is collapsed except what is needed most, in this order of importance:
-/// 1) a section with something that needs a look (always open, however many there are), 2) when the person is just starting, the two things a
-/// new user needs first, 3) up to two sections the person opens often. At most three sections are opened for reasons 2 and 3 together, so the window stays short.
+/// 1) a section with something that needs a look (always open, however many there are), 2) up to two sections the person opens often.
 /// It is a fixed set of rules, not a model, and every opened section says why. The only thing remembered is a count of how often each section was opened.
+/// There is no "getting started" step: the app works as it is, so nothing is opened just because the person is new.
 /// </summary>
 public static class SettingsAdvisor
 {
-    public const int MaxSuggested = 3, MinUsesToSuggest = 3, MaxUsesKept = 1000;
+    public const int MaxSuggested = 2, MinUsesToSuggest = 3, MaxUsesKept = 1000;
 
-    public static IReadOnlyList<SectionAdvice> Advise(Settings settings, SettingsFacts facts)
+    public static IReadOnlyList<SectionAdvice> Advise(Settings settings, SettingsFacts facts, IReadOnlySet<SettingsSection>? visible = null)
     {
+        bool Shown(SettingsSection x) => visible is null || visible.Contains(x);
         var open = new Dictionary<SettingsSection, (bool Attention, string Reason)>();
         if (settings.AdaptiveSettings)
         {
@@ -54,18 +66,11 @@ public static class SettingsAdvisor
             if (facts.PortfolioProblem is { } pp) open[SettingsSection.Files] = (true, "Needs a look: " + pp);
             if (facts.ConnectionProblem is { } cp) open[SettingsSection.Connections] = (true, "Needs a look: " + cp);
 
-            // 2. just starting
+            // 2. opened often
             int extra = 0;
-            if (!settings.GettingStartedDone)
-            {
-                if (!open.ContainsKey(SettingsSection.Files) && !facts.PortfolioChosen) { open[SettingsSection.Files] = (false, "Start here: choose your portfolio"); extra++; }
-                if (!open.ContainsKey(SettingsSection.Start)) { open[SettingsSection.Start] = (false, "Start here: your shortcuts"); extra++; }
-            }
-
-            // 3. opened often
             foreach (var used in settings.SectionUse
                          .Select(kv => (Section: SettingsSections.All.FirstOrDefault(x => x.Key == kv.Key), Count: kv.Value))
-                         .Where(x => x.Section.Key is not null && x.Count >= MinUsesToSuggest && x.Section.Id != SettingsSection.Maintenance)
+                         .Where(x => x.Section.Key is not null && Shown(x.Section.Id) && x.Count >= MinUsesToSuggest && x.Section.Id != SettingsSection.Maintenance)
                          .OrderByDescending(x => x.Count).ThenBy(x => (int)x.Section.Id).Take(2))
             {
                 if (open.ContainsKey(used.Section.Id) || extra >= MaxSuggested) continue;
@@ -73,7 +78,7 @@ public static class SettingsAdvisor
                 extra++;
             }
         }
-        return SettingsSections.All.Select(x => open.TryGetValue(x.Id, out var o) ? new SectionAdvice(x.Id, true, o.Attention, o.Reason) : new SectionAdvice(x.Id, false, false, null)).ToList();
+        return SettingsSections.All.Where(x => Shown(x.Id)).Select(x => open.TryGetValue(x.Id, out var o) ? new SectionAdvice(x.Id, true, o.Attention, o.Reason) : new SectionAdvice(x.Id, false, false, null)).ToList();
     }
 
     /// <summary>Only known sections, with sensible counts. Used for a saved file and a restored backup alike.</summary>

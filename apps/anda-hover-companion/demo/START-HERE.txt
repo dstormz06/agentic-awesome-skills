@@ -20,31 +20,37 @@ TRY IT
      A new install shows a small invite that you click. An at-risk ANDA such as 216482
      opens a small peek by itself (Settings can turn that off). Click "Full brief" to
      see the whole card, including the WATCH line about weekend and holiday dates.
-  2. Select any text and press Ctrl+Alt+D. It checks a draft against the record.
-     No AI is used and nothing leaves the computer.
+  2. Select any text and press Ctrl+Alt+D. It reviews a draft against the record and against itself
+     (dates, weekdays, holidays, repeated words, a placeholder left in). No AI is used and nothing
+     leaves the computer.
   3. Press Ctrl+Alt+Space from anywhere and type a number.
-  4. Open the tray icon's Watch list: every ANDA with something worth a look, worst first.
-  5. Read the card's PSG and RLD LABEL lines (a date, or a brief reason there is none) and
+  4. In Notepad, select the spreadsheet cells near the bottom of the memo and press Ctrl+Alt+Shift+P (Ask).
+     It says what you selected and suggests one button. Quick checks (duplicates, blanks, totals, compare
+     two columns) run on this PC with no AI. A prompt of your own is filled in and shown to you first.
+  5. Open the tray icon's Watch list: every ANDA with something worth a look, worst first.
+  6. Read the card's PSG and RLD LABEL lines (a date, or a brief reason there is none) and
      the pill that says whether an API is connected. Offline is the default.
-  6. Press the Quick replies button (or R) on a card to copy one of your own templates, filled in.
+  7. Press the Quick replies button (or R) on a card to copy one of your own templates, filled in.
 
 MAKE IT YOURS (tray icon, then Settings)
-  Settings opens on what needs a look (and, on the first day, your shortcuts and your portfolio
-  file) and keeps the other sections collapsed; click a heading to open one, or use "Expand all".
-  A "Go to" list at the top jumps to any section. Nothing here needs a rebuild.
-  - Appearance: 19 looks (K is the default; L to O are small boxes that stay out of the way
+  The app opens focused: Lookup, Review a draft and Ask. Settings opens on what needs a look and keeps
+  the other sections collapsed; click a heading to open one, or use "Expand all". A "Go to" list at the
+  top jumps to any section. Nothing here needs a rebuild.
+  Tick Maintenance, "Show all tools" to also see the two to-do lists, agents, the looks and dates. Nothing
+  is deleted, and what you chose comes back. Items below marked (all tools) appear only then.
+  - (all tools) Appearance: 19 looks (K is the default; L to O are small boxes that stay out of the way
     of an email), auto-hide (10 seconds to start), transparency (40 to 100 percent, starting at 92), how a card opens.
   - Shortcuts: your own keys, with a live note on any that another program already uses.
     An optional middle-click is off by default.
   - My data: your Excel or CSV portfolio, notes folder and Drugs@FDA file. They are only read.
   - My writing: tone, style, sign-off and quick replies.
-  - My actions: your own prompt, AI request or agent request on a shortcut you choose, or a
-    to-do item. Anything that goes to an AI or an agent shows you the exact text first.
-  - My agents: Alert Hub, Patent Analysis and Triaging Agent are listed but switched off, because
+  - Ask: my stored prompts (called My actions when all tools are shown): your own prompt or AI request, used by
+    Ask or on a shortcut you choose. Anything that goes to an AI or an agent shows you the exact text first.
+  - (all tools) My agents: Alert Hub, Patent Analysis and Triaging Agent are listed but switched off, because
     their addresses are not known here. Your IT team supplies them. Your own agents work the same way.
-  - ANDA to-do list: the tray icon's "ANDA to-do list..." shows your items and what your data says
+  - (all tools) ANDA to-do list: the tray icon's "ANDA to-do list..." shows your items and what your data says
     needs a look. It updates itself only while it is open.
-  - My to-do list: a separate list for your daily workload (ANDA related or not). Select rough notes anywhere and
+  - (all tools) My to-do list: a separate list for your daily workload (ANDA related or not). Select rough notes anywhere and
     press Ctrl+Alt+L (or choose another shortcut here): they become suggested items that you can
     change before you press Add. They are read by simple rules on this PC, with no AI.
   - Connection: Auto, Offline, Claude (with its model name) or your own API. The banner says

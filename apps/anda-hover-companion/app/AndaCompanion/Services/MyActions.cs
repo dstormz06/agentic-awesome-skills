@@ -87,7 +87,7 @@ public static class MyActionRules
 
     /// <summary>
     /// Brings a saved or restored list back into range: valid names, kinds and due days, templates within the limit, and a shortcut only
-    /// where it is valid and not already taken (by Select &amp; Peek, Lookup, Check a draft, or an earlier action). A bad value is repaired,
+    /// where it is valid and not already taken (by Select &amp; Peek, Lookup, Review a draft, or an earlier action). A bad value is repaired,
     /// never fatal.
     /// </summary>
     public static List<CustomAction> Normalize(IEnumerable<CustomAction>? actions, IEnumerable<string>? reservedHotkeys = null)

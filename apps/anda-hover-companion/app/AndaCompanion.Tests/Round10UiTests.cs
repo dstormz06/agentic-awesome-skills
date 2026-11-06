@@ -85,7 +85,7 @@ public class Round10UiTests : IClassFixture<HeadlessFixture>
         {
             ThemeManager.Apply(AppearanceId.K);
             ConnectionStatus.Configure(null);
-            var s = new Settings();
+            var s = new Settings { ShowAllTools = true };
             var w = new SettingsWindow(s, new PromptLibraryService(Path.Combine(Temp.NewDir(), "p.json")), () => { }, replies: new QuickReplyService(Path.Combine(Temp.NewDir(), "r.json")));
             w.Show(); Settle();
             T Find<T>(string n) where T : Control => w.FindControl<T>(n)!;

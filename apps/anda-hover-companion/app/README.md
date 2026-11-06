@@ -29,15 +29,14 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   Auto-hide (Off / 10 / 20 / 40 s, default 10), Consent model (**Whisper invite is the default** for
   new installs; an install that already saved a choice keeps it), **urgent items** (in whisper mode an
   at-risk or late ANDA opens a peek by itself), the weekend/holiday window, **My data**,
-  **standing instructions** for the writing actions, **three rebindable shortcuts**, an optional
+  **standing instructions** for the writing actions, **four rebindable shortcuts** (Select & Peek, Lookup, Review a draft, Ask), an optional
   **usage log** (off by default), **card transparency slider** (40–100%, starting at 92%; text always stays opaque),
   companion lens picker, and the **connection panel** (Auto, Offline, Claude with its model name, or My API) with one-click Test.
-  A **Go to** list at the top jumps to any section (and opens it). Settings is eight collapsible sections, each with a strong line under it: *Look and feel*, *How it
-  starts*, *Dates*, *My files and writing*, *My to-do list*, *My actions, agents and ANDA to-do list*, *AI and connections*, *Maintenance*. **They arrange
+  A **Go to** list at the top jumps to any section (and opens it). With **Show all tools** on, Settings is eight collapsible sections, each with a strong line under it: *Look and feel*, *How it
+  starts*, *Dates*, *My files and writing*, *My to-do list*, *My actions, agents and ANDA to-do list*, *AI and connections*, *Maintenance*. The **focused edition, which is the default**, shows five: *How it starts*, *My files and writing*, *Ask: my stored prompts*, *AI and connections* and *Maintenance*. **They arrange
   themselves:** when Settings opens, everything is collapsed except what needs a look (a shortcut Windows did not register, a portfolio file that could not be
   read, an AI connection that was never tested, an agent or action that is not ready), what a new user needs first (shortcuts, portfolio) and up to two sections
-  opened three or more times; each open section says why. *Suggested view*, *Expand all* and *Collapse all* are always there, and a **Getting started**
-  card with three plain steps stays until hidden. Only a count per section is kept (`settings.json`; no text), can be forgotten, and stops when the
+  opened three or more times; each open section says why. *Suggested view*, *Expand all* and *Collapse all* are always there. Only a count per section is kept (`settings.json`; no text), can be forgotten, and stops when the
   arranging is switched off. `Services/SettingsAdvisor.cs`, `UI/SettingsWindow.Adaptive.cs`.
 - **My actions** — your own prompt, AI request, agent request or to-do item, started by a keyboard shortcut you choose (or from the tray menu's
   *My actions*). Four kinds: *Add to my to-do list*; *Fill my prompt and show it* (no AI is called; copy the text); *Ask my AI* (shows exactly what
@@ -80,7 +79,7 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   starters). Lenses are guidance, never authority — grounding rules always outrank
   them (see ../SECURITY.md).
 - **Global hotkeys** — `Ctrl+Alt+A`: peek at the current text selection (Select & Peek);
-  `Ctrl+Alt+Space`: lookup window; `Ctrl+Alt+D`: check the selected draft. All three are
+  `Ctrl+Alt+Space`: lookup window; `Ctrl+Alt+D`: review the selected draft; `Ctrl+Alt+Shift+P`: ask about a selection. All four are
   **rebindable in Settings** (at least two modifiers including Ctrl or Alt; letters, digits, F1–F12 or
   Space; never the Windows key; no two the same). The hotkey is always the consent act: a card opens
   only after your own selection and shortcut. Registration is **checked**: if another program owns a
@@ -100,10 +99,29 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   It states what the data shows and says "this tool does not decide": it never claims how GDUFA treats
   such a date. Closures declared by executive order or a funding lapse are not predictable: add them
   to `closures.txt` in the data folder (`2025-12-24 Executive order closing`).
-- **Check a draft** — `Ctrl+Alt+D` or tray → *Check a draft…* opens a window with the selected text
+- **Review a draft** — `Ctrl+Alt+D` or tray → *Review a draft…* opens a window with the selected text
   and checks it **at once, with no AI and no network**: the ANDA numbers it names, any goal or forecast
-  date it gives, and on-track or late wording, against the record. It lists differences and says
-  exactly what it checked and did not. `Services/DraftCheck.cs`.
+  date it gives, and on-track or late wording, against the record; then the draft against itself and the
+  calendar (a weekday that does not belong to its date, a deadline on a weekend, a federal holiday or in the
+  past, two different goal dates for one ANDA, a placeholder left in, a word typed twice, an ANDA number with
+  the wrong number of digits). It lists differences and says exactly what it checked and did not: a clean
+  result means none of those checks found a problem, not that the draft is correct. Spelling, grammar and
+  other wording need an approved AI connection (Proofread, Rewrite, Fact-check, each with a preview before
+  anything is sent). `Services/DraftCheck.cs`, `Services/DraftReview.cs`.
+- **Ask about a selection** — select text or spreadsheet cells anywhere and press `Ctrl+Alt+Shift+P` (or tray → *Ask about a selection…*). The
+  window shows what was selected, says in words what it looks like (one ANDA number, a table of rows and columns, a list, text) and offers **one
+  suggested button** that fits (*Find duplicates*, *Look it up* or *Review as a draft*); nothing runs until a button is pressed. **Quick checks run on this PC
+  with fixed rules, with no AI and nothing sent:** *Describe*, *Find duplicates*, *Find blanks*, *Totals* and *Compare two columns*. Each says what it found and how
+  much it looked at, and a result can be copied. Below that, any of your **stored prompts** (Settings, *Ask: my stored prompts*) or an **instruction typed
+  there** is filled in with the selection and **shown in a window first**; an *Ask my AI* prompt is sent only if you press Send on that preview, and only to
+  the connection set up in Settings. A prompt without `{selection}` gets the selection added at the end. A table or list holds many ANDAs, so none is
+  picked as "the" record and details such as `{number}` stay empty (the window says so). The selection is read the way Select & Peek reads it (a copy,
+  then your clipboard is put back; nothing in terminals) and is never kept. Limits: cells are read from the tab-separated text that Excel puts on the
+  clipboard, up to 20,000 characters, 1,000 rows and 30 columns; **not tried against real Excel**. `Services/SelectionHelpers.cs`, `UI/AskWindow.*`, `App.Ask.cs`.
+- **The focused edition** — the product opens with what the supervisor asked for: **ANDA lookup** and **reviewing a draft**, plus **Ask**. Hidden until
+  *Settings, Maintenance, Show all tools* is ticked: the two to-do lists (and their shortcut), agents, the appearance picker (the card is solid, in the
+  default look), the dates section and the transparency slider. Nothing is deleted, and what was chosen comes back when all tools are shown. There is no
+  *Getting started* card and the demo has no checklist of steps. `Edition` in `Services/SettingsService.cs`.
 - **Writing actions (Proofread, Rewrite, Fact-check)** — buttons in the draft window, **off until an
   approved model is connected**. Each shows a **preview of the exact text that will be sent** (your draft,
   the matching records for Fact-check, your standing instructions and chosen lens) and sends nothing
@@ -285,7 +303,8 @@ AndaCompanion/
   UI/AutoHide.cs        the auto-hide rule (pure) and its timer
   UI/ChipWindow.*       whisper invite + invalid-number notice
   UI/LookupWindow.*     Ctrl+Alt+Space lookup
-  UI/DraftWindow.*      Ctrl+Alt+D draft check and the writing actions (preview before send, Copy only)
+  UI/DraftWindow.*      Ctrl+Alt+D review a draft and the writing actions (preview before send, Copy only)
+  UI/AskWindow.*        Ctrl+Alt+Shift+P ask about a selection: quick checks, stored prompts, an instruction typed there (App.Ask.cs opens it)
   UI/SettingsWindow.*   appearance, consent, urgent rule, shortcuts and other ways to start it, My data, My writing, connection and My API, Outlook, backup, usage log
   UI/QuickRepliesWindow.* the person's own quick replies (templates filled from the card)
   UI/HotkeyCapture.cs   press-a-shortcut box used by the shortcut settings

@@ -42,17 +42,18 @@ public sealed class HotkeyService : IDisposable
             ModControl | ModAlt | ModNoRepeat, 0x41, "Please choose another shortcut in Settings, or use the tray icon."),
         new HotkeyBinding(IdLookup, "Lookup", "Ctrl+Alt+Space",
             ModControl | ModAlt | ModNoRepeat, 0x20, "Please choose another shortcut in Settings, or use the tray icon."),
-        new HotkeyBinding(IdDraft, "Check a draft", "Ctrl+Alt+D",
+        new HotkeyBinding(IdDraft, "Review a draft", "Ctrl+Alt+D",
             ModControl | ModAlt | ModNoRepeat, 0x44, "Please choose another shortcut in Settings, or use the tray icon."),
     };
 
     /// <summary>Custom actions use ids from here upward: the id is this number plus the action's position in Settings.</summary>
     public const int IdMyTodo = 4;      // the person's to-do shortcut (Settings, My to-do list)
+    public const int IdAsk = 5;         // Ctrl+Alt+Shift+P → Ask about the current selection
     public const int IdActionBase = 100;
 
     /// <summary>The three bindings with the shortcuts a person chose, then the to-do shortcut if there is one, then one for each enabled custom action that has a valid, unused shortcut.
     /// An invalid or duplicate choice for the three falls back to its default; for an action it is simply left out.</summary>
-    public static IReadOnlyList<HotkeyBinding> FromCombos(string? peek, string? lookup, string? draft, IReadOnlyList<CustomAction>? actions = null, string? todo = null)
+    public static IReadOnlyList<HotkeyBinding> FromCombos(string? peek, string? lookup, string? draft, IReadOnlyList<CustomAction>? actions = null, string? todo = null, string? ask = null)
     {
         var chosen = new[] { (IdPeek, peek), (IdLookup, lookup), (IdDraft, draft) };
         var result = new List<HotkeyBinding>();
@@ -64,6 +65,8 @@ public sealed class HotkeyService : IDisposable
                 result.Add(def with { Combo = norm, Modifiers = mods | ModNoRepeat, VirtualKey = vk });
             else { taken.Add(def.Combo); result.Add(def); }
         }
+        if (!string.IsNullOrWhiteSpace(ask) && HotkeyParser.TryParse(ask, out uint amods, out uint avk, out string anorm, out _) && taken.Add(anorm))
+            result.Add(new HotkeyBinding(IdAsk, "Ask about a selection", anorm, amods | ModNoRepeat, avk, "Please choose another shortcut for Ask in Settings, or use the tray icon."));
         if (!string.IsNullOrWhiteSpace(todo) && HotkeyParser.TryParse(todo, out uint cmods, out uint cvk, out string cnorm, out _) && taken.Add(cnorm))
             result.Add(new HotkeyBinding(IdMyTodo, "My to-do list", cnorm, cmods | ModNoRepeat, cvk, "Please choose another shortcut for My to-do list in Settings, or use the tray icon."));
         if (actions is not null)

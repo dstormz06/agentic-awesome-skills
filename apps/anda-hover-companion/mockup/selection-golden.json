@@ -1,0 +1,713 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "text": "ANDA\tApplicant\tGoal date\tAmount\n216482\tAcme\tOct 3, 2026\t$1,200.50\n214990\tBeta\tAug 15, 2026\t$800\n216482\tAcme\tOct 3, 2026\t$1,200.50\n\tGamma\tNov 2, 2026\t",
+      "shape": {
+        "kind": "table",
+        "rows": 5,
+        "columns": 4,
+        "label": "A table of 5 rows and 4 columns.",
+        "suggestion": "Try “Find duplicates”, “Compare two columns”, “Find blanks” or “Totals”."
+      },
+      "describe": [
+        "A table of 5 rows and 4 columns.",
+        "The first row looks like headings: “ANDA”, “Applicant”, “Goal date”, “Amount”.",
+        "2 blank cells."
+      ],
+      "duplicates": [
+        "Found 1 repeated row and 4 repeated values in 4 columns.",
+        "Row 4 repeats row 2: 216482 | Acme | Oct 3, 2026 | $1,200.50",
+        "Column 1 (ANDA): “216482” appears 2 times (rows 2, 4).",
+        "Column 2 (Applicant): “Acme” appears 2 times (rows 2, 4).",
+        "Column 3 (Goal date): “Oct 3, 2026” appears 2 times (rows 2, 4).",
+        "Column 4 (Amount): “$1,200.50” appears 2 times (rows 2, 4).",
+        "Looked at 4 rows (not counting the headings). Upper and lower case count as the same, and blank cells are ignored."
+      ],
+      "compare": [
+        "In both column 1 (ANDA) and column 2 (Applicant): 0 values.",
+        "Only in column 1 (ANDA): 2: “216482”, “214990”.",
+        "Only in column 2 (Applicant): 3: “Acme”, “Beta”, “Gamma”.",
+        "Blank cells are ignored, upper and lower case count as the same, and each value is counted once."
+      ],
+      "compare23": [
+        "In both column 2 (Applicant) and column 3 (Goal date): 0 values.",
+        "Only in column 2 (Applicant): 3: “Acme”, “Beta”, “Gamma”.",
+        "Only in column 3 (Goal date): 3: “Oct 3, 2026”, “Aug 15, 2026”, “Nov 2, 2026”.",
+        "Blank cells are ignored, upper and lower case count as the same, and each value is counted once."
+      ],
+      "blanks": [
+        "2 blank cells in 1 row.",
+        "Row 5 has 2 blank cells (column 1, 4)."
+      ],
+      "totals": [
+        "Column 1 (ANDA): looks like identifiers (3 numbers of 5 or more digits), so it is not totalled.",
+        "Column 4 (Amount): 3 numbers, total 3201, smallest 800, largest 1200.5, average 1067.",
+        "Numbers may have a $ sign, commas or a % sign. Percent signs are removed, not converted."
+      ]
+    },
+    {
+      "text": "Our list\tTheir list\n216482\t216482\n214990\t999999\n123456\t214990",
+      "shape": {
+        "kind": "table",
+        "rows": 4,
+        "columns": 2,
+        "label": "A table of 4 rows and 2 columns.",
+        "suggestion": "Try “Find duplicates”, “Compare two columns”, “Find blanks” or “Totals”."
+      },
+      "describe": [
+        "A table of 4 rows and 2 columns.",
+        "The first row looks like headings: “Our list”, “Their list”.",
+        "No blank cells."
+      ],
+      "duplicates": [
+        "No repeated rows and no repeated values.",
+        "Looked at 3 rows (not counting the headings). Upper and lower case count as the same, and blank cells are ignored."
+      ],
+      "compare": [
+        "In both column 1 (Our list) and column 2 (Their list): 2 values.",
+        "Only in column 1 (Our list): 1: “123456”.",
+        "Only in column 2 (Their list): 1: “999999”.",
+        "Blank cells are ignored, upper and lower case count as the same, and each value is counted once."
+      ],
+      "compare23": [
+        "Please choose two different columns between 1 and 2."
+      ],
+      "blanks": [
+        "No blank cells."
+      ],
+      "totals": [
+        "Column 1 (Our list): looks like identifiers (3 numbers of 5 or more digits), so it is not totalled.",
+        "Column 2 (Their list): looks like identifiers (3 numbers of 5 or more digits), so it is not totalled.",
+        "Numbers may have a $ sign, commas or a % sign. Percent signs are removed, not converted."
+      ]
+    },
+    {
+      "text": "a\tb\nc\td",
+      "shape": {
+        "kind": "table",
+        "rows": 2,
+        "columns": 2,
+        "label": "A table of 2 rows and 2 columns.",
+        "suggestion": "Try “Find duplicates”, “Compare two columns”, “Find blanks” or “Totals”."
+      },
+      "describe": [
+        "A table of 2 rows and 2 columns.",
+        "The first row looks like headings: “a”, “b”.",
+        "No blank cells."
+      ],
+      "duplicates": [
+        "No repeated rows and no repeated values.",
+        "Looked at 1 row (not counting the headings). Upper and lower case count as the same, and blank cells are ignored."
+      ],
+      "compare": [
+        "In both column 1 (a) and column 2 (b): 0 values.",
+        "Only in column 1 (a): 1: “c”.",
+        "Only in column 2 (b): 1: “d”.",
+        "Blank cells are ignored, upper and lower case count as the same, and each value is counted once."
+      ],
+      "compare23": [
+        "Please choose two different columns between 1 and 2."
+      ],
+      "blanks": [
+        "No blank cells."
+      ],
+      "totals": [
+        "No column holds mostly numbers, so there is nothing to total."
+      ]
+    },
+    {
+      "text": "x\ny\nX",
+      "shape": {
+        "kind": "list",
+        "rows": 3,
+        "columns": 1,
+        "label": "A list of 3 lines.",
+        "suggestion": "Try “Find duplicates”, or ask a stored prompt about it."
+      },
+      "describe": [
+        "A list of 3 lines.",
+        "No blank cells."
+      ],
+      "duplicates": [
+        "Found 1 repeated row and 1 repeated value in 1 column.",
+        "Row 3 repeats row 1: X",
+        "Looked at 3 rows. Upper and lower case count as the same, and blank cells are ignored."
+      ],
+      "compare": [
+        "Comparing needs a table: select at least two columns of cells."
+      ],
+      "compare23": [
+        "Comparing needs a table: select at least two columns of cells."
+      ],
+      "blanks": [
+        "No blank cells."
+      ],
+      "totals": [
+        "No column holds mostly numbers, so there is nothing to total."
+      ]
+    },
+    {
+      "text": "a\nb\nc",
+      "shape": {
+        "kind": "list",
+        "rows": 3,
+        "columns": 1,
+        "label": "A list of 3 lines.",
+        "suggestion": "Try “Find duplicates”, or ask a stored prompt about it."
+      },
+      "describe": [
+        "A list of 3 lines.",
+        "No blank cells."
+      ],
+      "duplicates": [
+        "No repeated rows and no repeated values.",
+        "Looked at 3 rows. Upper and lower case count as the same, and blank cells are ignored."
+      ],
+      "compare": [
+        "Comparing needs a table: select at least two columns of cells."
+      ],
+      "compare23": [
+        "Comparing needs a table: select at least two columns of cells."
+      ],
+      "blanks": [
+        "No blank cells."
+      ],
+      "totals": [
+        "No column holds mostly numbers, so there is nothing to total."
+      ]
+    },
+    {
+      "text": "ANDA 216482",
+      "shape": {
+        "kind": "anda",
+        "rows": 1,
+        "columns": 1,
+        "label": "An ANDA number: 216482.",
+        "suggestion": "Use Lookup for its card, or ask a stored prompt about it."
+      },
+      "describe": [
+        "An ANDA number: 216482."
+      ],
+      "duplicates": [
+        "There is nothing to compare: select cells or a list with more than one line."
+      ],
+      "compare": [
+        "Comparing needs a table: select at least two columns of cells."
+      ],
+      "compare23": [
+        "Comparing needs a table: select at least two columns of cells."
+      ],
+      "blanks": [
+        "There are no cells to look at: select cells or a list with more than one line."
+      ],
+      "totals": [
+        "There are no numbers to total: select cells or a list with more than one line."
+      ]
+    },
+    {
+      "text": "216482",
+      "shape": {
+        "kind": "anda",
+        "rows": 1,
+        "columns": 1,
+        "label": "An ANDA number: 216482.",
+        "suggestion": "Use Lookup for its card, or ask a stored prompt about it."
+      },
+      "describe": [
+        "An ANDA number: 216482."
+      ],
+      "duplicates": [
+        "There is nothing to compare: select cells or a list with more than one line."
+      ],
+      "compare": [
+        "Comparing needs a table: select at least two columns of cells."
+      ],
+      "compare23": [
+        "Comparing needs a table: select at least two columns of cells."
+      ],
+      "blanks": [
+        "There are no cells to look at: select cells or a list with more than one line."
+      ],
+      "totals": [
+        "There are no numbers to total: select cells or a list with more than one line."
+      ]
+    },
+    {
+      "text": "Please reply by Nov 10 about the labeling.",
+      "shape": {
+        "kind": "text",
+        "rows": 1,
+        "columns": 1,
+        "label": "Text of 42 characters.",
+        "suggestion": "Use “Review a draft” to check it, or ask a stored prompt about it."
+      },
+      "describe": [
+        "Text of 42 characters."
+      ],
+      "duplicates": [
+        "There is nothing to compare: select cells or a list with more than one line."
+      ],
+      "compare": [
+        "Comparing needs a table: select at least two columns of cells."
+      ],
+      "compare23": [
+        "Comparing needs a table: select at least two columns of cells."
+      ],
+      "blanks": [
+        "There are no cells to look at: select cells or a list with more than one line."
+      ],
+      "totals": [
+        "There are no numbers to total: select cells or a list with more than one line."
+      ]
+    },
+    {
+      "text": "one line of ordinary text",
+      "shape": {
+        "kind": "text",
+        "rows": 1,
+        "columns": 1,
+        "label": "Text of 25 characters.",
+        "suggestion": "Ask a stored prompt about it, or use “Review a draft” to check it."
+      },
+      "describe": [
+        "Text of 25 characters."
+      ],
+      "duplicates": [
+        "There is nothing to compare: select cells or a list with more than one line."
+      ],
+      "compare": [
+        "Comparing needs a table: select at least two columns of cells."
+      ],
+      "compare23": [
+        "Comparing needs a table: select at least two columns of cells."
+      ],
+      "blanks": [
+        "There are no cells to look at: select cells or a list with more than one line."
+      ],
+      "totals": [
+        "There are no numbers to total: select cells or a list with more than one line."
+      ]
+    },
+    {
+      "text": "  \n ",
+      "shape": {
+        "kind": "empty",
+        "rows": 0,
+        "columns": 0,
+        "label": "Nothing is selected.",
+        "suggestion": "Select text or cells and press the shortcut again, or paste them above."
+      },
+      "describe": [
+        "Nothing is selected."
+      ],
+      "duplicates": [
+        "There is nothing to compare: select cells or a list with more than one line."
+      ],
+      "compare": [
+        "Comparing needs a table: select at least two columns of cells."
+      ],
+      "compare23": [
+        "Comparing needs a table: select at least two columns of cells."
+      ],
+      "blanks": [
+        "There are no cells to look at: select cells or a list with more than one line."
+      ],
+      "totals": [
+        "There are no numbers to total: select cells or a list with more than one line."
+      ]
+    },
+    {
+      "text": "",
+      "shape": {
+        "kind": "empty",
+        "rows": 0,
+        "columns": 0,
+        "label": "Nothing is selected.",
+        "suggestion": "Select text or cells and press the shortcut again, or paste them above."
+      },
+      "describe": [
+        "Nothing is selected."
+      ],
+      "duplicates": [
+        "There is nothing to compare: select cells or a list with more than one line."
+      ],
+      "compare": [
+        "Comparing needs a table: select at least two columns of cells."
+      ],
+      "compare23": [
+        "Comparing needs a table: select at least two columns of cells."
+      ],
+      "blanks": [
+        "There are no cells to look at: select cells or a list with more than one line."
+      ],
+      "totals": [
+        "There are no numbers to total: select cells or a list with more than one line."
+      ]
+    },
+    {
+      "text": "Item\tCost\nx\t10\ny\t20.5\nz\tn/a\nw\t(none)",
+      "shape": {
+        "kind": "table",
+        "rows": 5,
+        "columns": 2,
+        "label": "A table of 5 rows and 2 columns.",
+        "suggestion": "Try “Find duplicates”, “Compare two columns”, “Find blanks” or “Totals”."
+      },
+      "describe": [
+        "A table of 5 rows and 2 columns.",
+        "The first row looks like headings: “Item”, “Cost”.",
+        "No blank cells."
+      ],
+      "duplicates": [
+        "No repeated rows and no repeated values.",
+        "Looked at 4 rows (not counting the headings). Upper and lower case count as the same, and blank cells are ignored."
+      ],
+      "compare": [
+        "In both column 1 (Item) and column 2 (Cost): 0 values.",
+        "Only in column 1 (Item): 4: “x”, “y”, “z”, “w”.",
+        "Only in column 2 (Cost): 4: “10”, “20.5”, “n/a”, “(none)”.",
+        "Blank cells are ignored, upper and lower case count as the same, and each value is counted once."
+      ],
+      "compare23": [
+        "Please choose two different columns between 1 and 2."
+      ],
+      "blanks": [
+        "No blank cells."
+      ],
+      "totals": [
+        "No column holds mostly numbers, so there is nothing to total."
+      ]
+    },
+    {
+      "text": "Item\tCost\nx\t10\ny\t20.5\na\t5\nb\t5\nc\t5\nz\tn/a",
+      "shape": {
+        "kind": "table",
+        "rows": 7,
+        "columns": 2,
+        "label": "A table of 7 rows and 2 columns.",
+        "suggestion": "Try “Find duplicates”, “Compare two columns”, “Find blanks” or “Totals”."
+      },
+      "describe": [
+        "A table of 7 rows and 2 columns.",
+        "The first row looks like headings: “Item”, “Cost”.",
+        "No blank cells."
+      ],
+      "duplicates": [
+        "Found 0 repeated rows and 1 repeated value in 1 column.",
+        "Column 2 (Cost): “5” appears 3 times (rows 4, 5, 6).",
+        "Looked at 6 rows (not counting the headings). Upper and lower case count as the same, and blank cells are ignored."
+      ],
+      "compare": [
+        "In both column 1 (Item) and column 2 (Cost): 0 values.",
+        "Only in column 1 (Item): 6: “x”, “y”, “a”, “b”, “c”, “z”.",
+        "Only in column 2 (Cost): 4: “10”, “20.5”, “5”, “n/a”.",
+        "Blank cells are ignored, upper and lower case count as the same, and each value is counted once."
+      ],
+      "compare23": [
+        "Please choose two different columns between 1 and 2."
+      ],
+      "blanks": [
+        "No blank cells."
+      ],
+      "totals": [
+        "Column 2 (Cost): 5 numbers, total 45.5, smallest 5, largest 20.5, average 9.1 (1 other entry was not a number and left out).",
+        "Numbers may have a $ sign, commas or a % sign. Percent signs are removed, not converted."
+      ]
+    },
+    {
+      "text": "A\tB\r\n\"x\ty\"\t\"say \"\"hi\"\"\"\r\n1\t2\r\n\r\n",
+      "shape": {
+        "kind": "table",
+        "rows": 3,
+        "columns": 2,
+        "label": "A table of 3 rows and 2 columns.",
+        "suggestion": "Try “Find duplicates”, “Compare two columns”, “Find blanks” or “Totals”."
+      },
+      "describe": [
+        "A table of 3 rows and 2 columns.",
+        "The first row looks like headings: “A”, “B”.",
+        "No blank cells."
+      ],
+      "duplicates": [
+        "No repeated rows and no repeated values.",
+        "Looked at 2 rows (not counting the headings). Upper and lower case count as the same, and blank cells are ignored."
+      ],
+      "compare": [
+        "In both column 1 (A) and column 2 (B): 0 values.",
+        "Only in column 1 (A): 2: “x\ty”, “1”.",
+        "Only in column 2 (B): 2: “say \"hi\"”, “2”.",
+        "Blank cells are ignored, upper and lower case count as the same, and each value is counted once."
+      ],
+      "compare23": [
+        "Please choose two different columns between 1 and 2."
+      ],
+      "blanks": [
+        "No blank cells."
+      ],
+      "totals": [
+        "No column holds mostly numbers, so there is nothing to total."
+      ]
+    },
+    {
+      "text": "a\t\tc\n1\t2\t3\n1\t2\t3",
+      "shape": {
+        "kind": "table",
+        "rows": 3,
+        "columns": 3,
+        "label": "A table of 3 rows and 3 columns.",
+        "suggestion": "Try “Find duplicates”, “Compare two columns”, “Find blanks” or “Totals”."
+      },
+      "describe": [
+        "A table of 3 rows and 3 columns.",
+        "1 blank cell."
+      ],
+      "duplicates": [
+        "Found 1 repeated row and 3 repeated values in 3 columns.",
+        "Row 3 repeats row 2: 1 | 2 | 3",
+        "Column 1: “1” appears 2 times (rows 2, 3).",
+        "Column 2: “2” appears 2 times (rows 2, 3).",
+        "Column 3: “3” appears 2 times (rows 2, 3).",
+        "Looked at 3 rows. Upper and lower case count as the same, and blank cells are ignored."
+      ],
+      "compare": [
+        "In both column 1 and column 2: 0 values.",
+        "Only in column 1: 2: “a”, “1”.",
+        "Only in column 2: 1: “2”.",
+        "Blank cells are ignored, upper and lower case count as the same, and each value is counted once."
+      ],
+      "compare23": [
+        "In both column 2 and column 3: 0 values.",
+        "Only in column 2: 1: “2”.",
+        "Only in column 3: 2: “c”, “3”.",
+        "Blank cells are ignored, upper and lower case count as the same, and each value is counted once."
+      ],
+      "blanks": [
+        "1 blank cell in 1 row.",
+        "Row 1 has 1 blank cell (column 2)."
+      ],
+      "totals": [
+        "Column 2: 2 numbers, total 4, smallest 2, largest 2, average 2.",
+        "Numbers may have a $ sign, commas or a % sign. Percent signs are removed, not converted."
+      ]
+    },
+    {
+      "text": "Name\tScore\tPct\nAna\t90\t50%\nBo\t75\t25%\nCy\t\t10%",
+      "shape": {
+        "kind": "table",
+        "rows": 4,
+        "columns": 3,
+        "label": "A table of 4 rows and 3 columns.",
+        "suggestion": "Try “Find duplicates”, “Compare two columns”, “Find blanks” or “Totals”."
+      },
+      "describe": [
+        "A table of 4 rows and 3 columns.",
+        "The first row looks like headings: “Name”, “Score”, “Pct”.",
+        "1 blank cell."
+      ],
+      "duplicates": [
+        "No repeated rows and no repeated values.",
+        "Looked at 3 rows (not counting the headings). Upper and lower case count as the same, and blank cells are ignored."
+      ],
+      "compare": [
+        "In both column 1 (Name) and column 2 (Score): 0 values.",
+        "Only in column 1 (Name): 3: “Ana”, “Bo”, “Cy”.",
+        "Only in column 2 (Score): 2: “90”, “75”.",
+        "Blank cells are ignored, upper and lower case count as the same, and each value is counted once."
+      ],
+      "compare23": [
+        "In both column 2 (Score) and column 3 (Pct): 0 values.",
+        "Only in column 2 (Score): 2: “90”, “75”.",
+        "Only in column 3 (Pct): 3: “50%”, “25%”, “10%”.",
+        "Blank cells are ignored, upper and lower case count as the same, and each value is counted once."
+      ],
+      "blanks": [
+        "1 blank cell in 1 row.",
+        "Row 4 has 1 blank cell (column 2)."
+      ],
+      "totals": [
+        "Column 2 (Score): 2 numbers, total 165, smallest 75, largest 90, average 82.5.",
+        "Column 3 (Pct): 3 numbers, total 85, smallest 10, largest 50, average 28.3333.",
+        "Numbers may have a $ sign, commas or a % sign. Percent signs are removed, not converted."
+      ]
+    },
+    {
+      "text": "216482\tAcme\n214990\tBeta\n216482\tacme\n999999\t",
+      "shape": {
+        "kind": "table",
+        "rows": 4,
+        "columns": 2,
+        "label": "A table of 4 rows and 2 columns.",
+        "suggestion": "Try “Find duplicates”, “Compare two columns”, “Find blanks” or “Totals”."
+      },
+      "describe": [
+        "A table of 4 rows and 2 columns.",
+        "1 blank cell."
+      ],
+      "duplicates": [
+        "Found 1 repeated row and 2 repeated values in 2 columns.",
+        "Row 3 repeats row 1: 216482 | acme",
+        "Column 1: “216482” appears 2 times (rows 1, 3).",
+        "Column 2: “Acme” appears 2 times (rows 1, 3).",
+        "Looked at 4 rows. Upper and lower case count as the same, and blank cells are ignored."
+      ],
+      "compare": [
+        "In both column 1 and column 2: 0 values.",
+        "Only in column 1: 3: “216482”, “214990”, “999999”.",
+        "Only in column 2: 2: “Acme”, “Beta”.",
+        "Blank cells are ignored, upper and lower case count as the same, and each value is counted once."
+      ],
+      "compare23": [
+        "Please choose two different columns between 1 and 2."
+      ],
+      "blanks": [
+        "1 blank cell in 1 row.",
+        "Row 4 has 1 blank cell (column 2)."
+      ],
+      "totals": [
+        "Column 1: looks like identifiers (4 numbers of 5 or more digits), so it is not totalled.",
+        "Numbers may have a $ sign, commas or a % sign. Percent signs are removed, not converted."
+      ]
+    },
+    {
+      "text": "Heading one\tHeading two\nONE\tone\none\tONE",
+      "shape": {
+        "kind": "table",
+        "rows": 3,
+        "columns": 2,
+        "label": "A table of 3 rows and 2 columns.",
+        "suggestion": "Try “Find duplicates”, “Compare two columns”, “Find blanks” or “Totals”."
+      },
+      "describe": [
+        "A table of 3 rows and 2 columns.",
+        "The first row looks like headings: “Heading one”, “Heading two”.",
+        "No blank cells."
+      ],
+      "duplicates": [
+        "Found 1 repeated row and 2 repeated values in 2 columns.",
+        "Row 3 repeats row 2: one | ONE",
+        "Column 1 (Heading one): “ONE” appears 2 times (rows 2, 3).",
+        "Column 2 (Heading two): “one” appears 2 times (rows 2, 3).",
+        "Looked at 2 rows (not counting the headings). Upper and lower case count as the same, and blank cells are ignored."
+      ],
+      "compare": [
+        "In both column 1 (Heading one) and column 2 (Heading two): 1 value.",
+        "Only in column 1 (Heading one): 0.",
+        "Only in column 2 (Heading two): 0.",
+        "Blank cells are ignored, upper and lower case count as the same, and each value is counted once."
+      ],
+      "compare23": [
+        "Please choose two different columns between 1 and 2."
+      ],
+      "blanks": [
+        "No blank cells."
+      ],
+      "totals": [
+        "No column holds mostly numbers, so there is nothing to total."
+      ]
+    },
+    {
+      "text": "-5\t1\n5\t1\n0\t-0",
+      "shape": {
+        "kind": "table",
+        "rows": 3,
+        "columns": 2,
+        "label": "A table of 3 rows and 2 columns.",
+        "suggestion": "Try “Find duplicates”, “Compare two columns”, “Find blanks” or “Totals”."
+      },
+      "describe": [
+        "A table of 3 rows and 2 columns.",
+        "No blank cells."
+      ],
+      "duplicates": [
+        "Found 0 repeated rows and 1 repeated value in 1 column.",
+        "Column 2: “1” appears 2 times (rows 1, 2).",
+        "Looked at 3 rows. Upper and lower case count as the same, and blank cells are ignored."
+      ],
+      "compare": [
+        "In both column 1 and column 2: 0 values.",
+        "Only in column 1: 3: “-5”, “5”, “0”.",
+        "Only in column 2: 2: “1”, “-0”.",
+        "Blank cells are ignored, upper and lower case count as the same, and each value is counted once."
+      ],
+      "compare23": [
+        "Please choose two different columns between 1 and 2."
+      ],
+      "blanks": [
+        "No blank cells."
+      ],
+      "totals": [
+        "Column 1: 3 numbers, total 0, smallest -5, largest 5, average 0.",
+        "Column 2: 3 numbers, total 2, smallest 0, largest 1, average 0.6667.",
+        "Numbers may have a $ sign, commas or a % sign. Percent signs are removed, not converted."
+      ]
+    },
+    {
+      "text": "$1,000\t2.5\n$2,000\t3.5\n1,500\t",
+      "shape": {
+        "kind": "table",
+        "rows": 3,
+        "columns": 2,
+        "label": "A table of 3 rows and 2 columns.",
+        "suggestion": "Try “Find duplicates”, “Compare two columns”, “Find blanks” or “Totals”."
+      },
+      "describe": [
+        "A table of 3 rows and 2 columns.",
+        "1 blank cell."
+      ],
+      "duplicates": [
+        "No repeated rows and no repeated values.",
+        "Looked at 3 rows. Upper and lower case count as the same, and blank cells are ignored."
+      ],
+      "compare": [
+        "In both column 1 and column 2: 0 values.",
+        "Only in column 1: 3: “$1,000”, “$2,000”, “1,500”.",
+        "Only in column 2: 2: “2.5”, “3.5”.",
+        "Blank cells are ignored, upper and lower case count as the same, and each value is counted once."
+      ],
+      "compare23": [
+        "Please choose two different columns between 1 and 2."
+      ],
+      "blanks": [
+        "1 blank cell in 1 row.",
+        "Row 3 has 1 blank cell (column 2)."
+      ],
+      "totals": [
+        "Column 1: 3 numbers, total 4500, smallest 1000, largest 2000, average 1500.",
+        "Column 2: 2 numbers, total 6, smallest 2.5, largest 3.5, average 3.",
+        "Numbers may have a $ sign, commas or a % sign. Percent signs are removed, not converted."
+      ]
+    },
+    {
+      "text": "only\nlines\nwith one cell\nonly",
+      "shape": {
+        "kind": "list",
+        "rows": 4,
+        "columns": 1,
+        "label": "A list of 4 lines.",
+        "suggestion": "Try “Find duplicates”, or ask a stored prompt about it."
+      },
+      "describe": [
+        "A list of 4 lines.",
+        "No blank cells."
+      ],
+      "duplicates": [
+        "Found 1 repeated row and 1 repeated value in 1 column.",
+        "Row 4 repeats row 1: only",
+        "Looked at 4 rows. Upper and lower case count as the same, and blank cells are ignored."
+      ],
+      "compare": [
+        "Comparing needs a table: select at least two columns of cells."
+      ],
+      "compare23": [
+        "Comparing needs a table: select at least two columns of cells."
+      ],
+      "blanks": [
+        "No blank cells."
+      ],
+      "totals": [
+        "No column holds mostly numbers, so there is nothing to total."
+      ]
+    }
+  ]
+}

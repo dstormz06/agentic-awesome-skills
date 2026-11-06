@@ -2,7 +2,8 @@
 
 A prototype for FDA DPM review project managers (RPMs). Select an ANDA number anywhere and a small card shows the goal date
 against the forecast, what needs attention, a WATCH line (weekends, federal holidays, passed goals), the PSG and RLD dates, and
-a status line to copy. It can also check a draft message against the record.
+a status line to copy. It can also review a draft message against the record, and answer a question about any selected text or spreadsheet cells
+(quick checks run on your PC; a prompt of your own is shown to you first and sent only if you press Send).
 
 It comes in two parts that work alone or together:
 

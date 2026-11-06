@@ -381,7 +381,7 @@ public class MyTodoUiTests : IClassFixture<HeadlessFixture>
         {
             ThemeManager.Apply(AppearanceId.K);
             using var home = new EnvScope(AppPaths.HomeEnvVar, Temp.NewDir());
-            var settings = new Settings();
+            var settings = new Settings { ShowAllTools = true };
             var w = new SettingsWindow(settings, new PromptLibraryService(Path.Combine(Temp.NewDir(), "p.json")), () => { });
             w.Show(); w.ExpandAll(); Settle();
             Click(w.FindControl<Button>("ActionAdd")!); Settle();
@@ -406,7 +406,7 @@ public class MyTodoUiTests : IClassFixture<HeadlessFixture>
         {
             ThemeManager.Apply(AppearanceId.K);
             using var home = new EnvScope(AppPaths.HomeEnvVar, Temp.NewDir());
-            var settings = new Settings();
+            var settings = new Settings { ShowAllTools = true };
             var w = new SettingsWindow(settings, new PromptLibraryService(Path.Combine(Temp.NewDir(), "p.json")), () => { });
             w.Show(); w.ExpandAll(); Settle();
             var box = Named<TextBox>(w, "My to-do list shortcut");

@@ -30,5 +30,13 @@ Draft reply (not sent). Select this paragraph and press Ctrl+Alt+D:
 
 Hi all, quick status. ANDA 216482 is on track, with a goal date of Oct 10, 2026 and a forecast of Oct 17, 2026. ANDA 214990 is running late. ANDA 123456 needs a call.
 
+Cells copied from a spreadsheet (fictional). Select the rows below and press Ctrl+Alt+Shift+P:
+
+ANDA	Applicant	Goal date	Forecast
+216482	Fictional Pharma A	Oct 10, 2026	Oct 17, 2026
+214990	Fictional Pharma B	Aug 15, 2026	Aug 15, 2026
+216482	Fictional Pharma A	Oct 10, 2026	Oct 17, 2026
+123456	Fictional Pharma C	Nov 2, 2026	
+
 Thanks,
 Demo author

@@ -62,22 +62,6 @@
         <!-- Scrolls only when the screen is too short to show every section (small laptops). -->
         <ScrollViewer Name="Body" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Spacing="14" Margin="0,0,2,0">
-        <!-- Day 1: three plain steps, shown until the person hides them. -->
-        <Border Name="GettingStarted" CornerRadius="8" Padding="12" Background="{DynamicResource C.Mark}" BorderBrush="{DynamicResource C.Line}" BorderThickness="1">
-          <StackPanel Spacing="6">
-            <TextBlock Classes="lbl" Text="GETTING STARTED · THREE STEPS, NOTHING TO SET UP FIRST"/>
-            <TextBlock Name="GsStep1" FontSize="12.5" Foreground="{DynamicResource C.Ink}" TextWrapping="Wrap"/>
-            <TextBlock Name="GsStep2" FontSize="12.5" Foreground="{DynamicResource C.Ink}" TextWrapping="Wrap"/>
-            <TextBlock Name="GsStep3" FontSize="12.5" Foreground="{DynamicResource C.Ink}" TextWrapping="Wrap"/>
-            <WrapPanel>
-              <Button Name="GsFiles" Content="Choose my portfolio file" Margin="0,0,8,6"/>
-              <Button Name="GsMyTodo" Content="Open my to-do list" Margin="0,0,8,6"/>
-              <Button Name="GsHide" Classes="primary" Content="Got it, hide this" Margin="0,0,8,6"/>
-            </WrapPanel>
-            <TextBlock Classes="hint" Text="Everything else here is optional. The app works as it is. You can show this again under Maintenance."/>
-          </StackPanel>
-        </Border>
-
         <!-- Settings arrange themselves: sections that need a look, or that are used most, are open; the rest are collapsed. -->
         <Border Name="AdaptiveBar" CornerRadius="8" Padding="10,8" BorderBrush="{DynamicResource C.Hair}" BorderThickness="1">
           <StackPanel Spacing="6">
@@ -165,16 +149,19 @@
 
             <StackPanel Spacing="6">
               <TextBlock Classes="lbl" Text="SHORTCUTS · CLICK A BOX, THEN PRESS THE KEYS"/>
-              <Grid ColumnDefinitions="140,*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="6" ColumnSpacing="8">
+              <Grid ColumnDefinitions="140,*,Auto" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="6" ColumnSpacing="8">
                 <TextBlock Text="Select &amp; Peek" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}"/>
                 <TextBox Grid.Column="1" Name="PeekKeyBox" IsReadOnly="True" AutomationProperties.Name="Select and Peek shortcut"/>
                 <Button Grid.Column="2" Name="PeekKeyReset" Content="Reset"/>
                 <TextBlock Grid.Row="1" Text="Lookup box" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}"/>
                 <TextBox Grid.Row="1" Grid.Column="1" Name="LookupKeyBox" IsReadOnly="True" AutomationProperties.Name="Lookup shortcut"/>
                 <Button Grid.Row="1" Grid.Column="2" Name="LookupKeyReset" Content="Reset"/>
-                <TextBlock Grid.Row="2" Text="Check a draft" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}"/>
-                <TextBox Grid.Row="2" Grid.Column="1" Name="DraftKeyBox" IsReadOnly="True" AutomationProperties.Name="Check a draft shortcut"/>
+                <TextBlock Grid.Row="2" Text="Review a draft" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}"/>
+                <TextBox Grid.Row="2" Grid.Column="1" Name="DraftKeyBox" IsReadOnly="True" AutomationProperties.Name="Review a draft shortcut"/>
                 <Button Grid.Row="2" Grid.Column="2" Name="DraftKeyReset" Content="Reset"/>
+                <TextBlock Grid.Row="3" Text="Ask about a selection" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}"/>
+                <TextBox Grid.Row="3" Grid.Column="1" Name="AskKeyBox" IsReadOnly="True" AutomationProperties.Name="Ask about a selection shortcut"/>
+                <Button Grid.Row="3" Grid.Column="2" Name="AskKeyReset" Content="Reset"/>
               </Grid>
               <TextBlock Name="KeyStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
               <TextBlock Classes="hint" Text="Please use at least two modifiers, one of them Ctrl or Alt, so everyday shortcuts like Ctrl+C keep working. On keyboards where Ctrl+Alt is AltGr, choose Ctrl+Shift instead. Windows reports at once if another program already owns a shortcut."/>
@@ -312,13 +299,13 @@
         <Expander Name="SecActions" Classes="sec" IsExpanded="False">
           <Expander.Header>
             <WrapPanel Orientation="Horizontal">
-              <TextBlock Classes="grp" Text="My actions, agents and ANDA to-do list" VerticalAlignment="Center" Margin="0,0,10,0"/>
+              <TextBlock Name="GrpActions" Classes="grp" Text="My actions, agents and ANDA to-do list" VerticalAlignment="Center" Margin="0,0,10,0"/>
               <Border Name="PillActions" Classes="pill" IsVisible="False" VerticalAlignment="Center"><TextBlock Name="PillTextActions" Classes="pilltext"/></Border>
             </WrapPanel>
           </Expander.Header>
           <StackPanel Spacing="14" Margin="0,8,0,12">
             <StackPanel Spacing="6">
-              <TextBlock Classes="lbl" Text="MY ACTIONS · YOUR OWN PROMPT, AGENT OR TO-DO ITEM, ON YOUR OWN SHORTCUT"/>
+              <TextBlock Name="ActionsLabel" Classes="lbl" Text="MY ACTIONS · YOUR OWN PROMPT, AGENT OR TO-DO ITEM, ON YOUR OWN SHORTCUT"/>
               <StackPanel Name="ActionsPanel" Spacing="8"/>
               <WrapPanel>
                 <Button Name="ActionAdd" Content="Add an action" Margin="0,0,8,6"/>
@@ -327,9 +314,9 @@
               <TextBlock Classes="hint" Text="Select a number anywhere, then press the shortcut you chose for an action. Add to my to-do list puts it on your list. Fill my prompt shows your own prompt with the card's facts filled in, ready to copy; no AI is called. Ask my AI and Run an agent show exactly what would be sent, and send only after you press Send (unless you turn that off for that one action). Every action is also in the tray menu."/>
             </StackPanel>
 
-            <Border Classes="hair"/>
+            <Border Name="AgentsRule" Classes="hair"/>
 
-            <StackPanel Spacing="6">
+            <StackPanel Name="AgentsBlock" Spacing="6">
               <TextBlock Classes="lbl" Text="MY AGENTS · ALERT HUB, PATENT ANALYSIS, TRIAGING AGENT AND YOUR OWN"/>
               <StackPanel Name="AgentsPanel" Spacing="8"/>
               <WrapPanel>
@@ -340,9 +327,9 @@
               <TextBlock Classes="hint" Text="An agent is asked only when you press Run on a card or use its action, unless you set it to run by itself. By itself means: when a full card opens, or only when the ANDA is at risk. A peek never asks an agent. Its answer appears in the card's drawer as the agent's own words, and nothing joins your to-do list until you press its button."/>
             </StackPanel>
 
-            <Border Classes="hair"/>
+            <Border Name="TodoRule" Classes="hair"/>
 
-            <StackPanel Spacing="6">
+            <StackPanel Name="TodoBlock" Spacing="6">
               <TextBlock Classes="lbl" Text="MY ANDA TO-DO LIST · LIVE, FROM YOUR ITEMS AND YOUR DATA"/>
               <CheckBox Name="TodoAutoCheck">
                 <TextBlock Text="Include items from my data (at-risk ANDAs, weekend and holiday dates, action items)" TextWrapping="Wrap"/>
@@ -480,13 +467,22 @@
               <Border Classes="hair"/>
 
               <StackPanel Spacing="6">
+                <TextBlock Classes="lbl" Text="WHICH TOOLS ARE SHOWN"/>
+                <CheckBox Name="AllToolsCheck">
+                  <TextBlock Text="Show all tools (the two to-do lists, agents, appearance and dates)" TextWrapping="Wrap"/>
+                </CheckBox>
+                <TextBlock Name="AllToolsHint" Classes="hint" Text="Off keeps the app to three things: look up an ANDA, review a draft and ask about a selection. Turning it on loses nothing and changes no data."/>
+              </StackPanel>
+
+              <Border Classes="hair"/>
+
+              <StackPanel Spacing="6">
                 <TextBlock Classes="lbl" Text="THIS WINDOW · ARRANGES ITSELF"/>
                 <CheckBox Name="AdaptiveCheck">
                   <TextBlock Text="Open the sections that need a look or that I use most, and collapse the rest" TextWrapping="Wrap"/>
                 </CheckBox>
                 <WrapPanel>
                   <Button Name="AdaptiveReset" Content="Forget what I use most" Margin="0,0,8,6"/>
-                  <Button Name="GsShow" Content="Show Getting started again" Margin="0,0,8,6"/>
                 </WrapPanel>
                 <TextBlock Name="AdaptiveStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
                 <TextBlock Classes="hint" Text="Sections open when something in them needs attention (a shortcut another program owns, a file that cannot be read, a connection that was not tested), when you are just starting, and when you open them often. The only thing kept is a count of how often you open each section, in settings.json on this PC. No text, no ANDA numbers, nothing is sent anywhere. Turn this off and no more counts are kept."/>

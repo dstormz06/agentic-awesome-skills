@@ -9,7 +9,7 @@ using AndaCompanion.Services;
 namespace AndaCompanion.UI;
 
 /// <summary>
-/// "Check a draft": the draft check (deterministic, no AI) runs as soon as there is text; Proofread, Rewrite and Fact-check use an
+/// "Review a draft": the review (deterministic, no AI) runs as soon as there is text; Proofread, Rewrite and Fact-check use an
 /// approved AI platform if one is connected, after showing exactly what would be sent. A result is only ever copied by the person;
 /// nothing is replaced in their email.
 /// </summary>
@@ -23,9 +23,14 @@ public partial class DraftWindow : Window
     private WritingRequest? _pending;
     private CancellationTokenSource? _cts;
 
-    public DraftWindow(string draft, Func<string, AndaRecord?> lookup, WritingService writing, Settings settings, PromptLibraryService prompts)
+    private readonly Func<DateOnly> _today;
+    private readonly BusinessCalendar _calendar;
+
+    public DraftWindow(string draft, Func<string, AndaRecord?> lookup, WritingService writing, Settings settings, PromptLibraryService prompts,
+        Func<DateOnly>? today = null, BusinessCalendar? calendar = null)
     {
         _lookup = lookup; _writing = writing; _settings = settings; _prompts = prompts;
+        _today = today ?? (() => DateOnly.FromDateTime(DateTime.Now)); _calendar = calendar ?? new BusinessCalendar();
         InitializeComponent();
 
         DraftBox.Text = draft;
@@ -62,7 +67,7 @@ public partial class DraftWindow : Window
     /// <summary>Runs the deterministic check and lists exactly what was and was not checked.</summary>
     public DraftCheckResult RunCheck()
     {
-        var result = DraftCheck.Check(DraftBox.Text, _lookup);
+        var result = DraftReview.Check(DraftBox.Text, _lookup, _today(), _calendar);
         FindingsPanel.Children.Clear();
         foreach (var f in result.Findings)
         {

@@ -45,6 +45,24 @@ public sealed class Settings
     public string LookupHotkey { get; set; } = "Ctrl+Alt+Space";
     public string DraftHotkey { get; set; } = "Ctrl+Alt+D";
 
+    // ---- ask about a selection: select text or cells, press this, choose a stored prompt or a quick check ----
+    // Three modifiers on purpose: Word, Outlook and Excel use many Ctrl+Alt+letter shortcuts (Ctrl+Alt+M is Word's New comment, Ctrl+Alt+D its Insert endnote), and a
+    // shortcut this app registers is taken from them. Ctrl+Alt+Shift+letter is far less used. It can be changed or removed under Settings.
+    public const string DefaultAskHotkey = "Ctrl+Alt+Shift+P";
+
+    /// <summary>Select text or cells, press this, and Ask opens on the selection. Empty means no shortcut (the tray menu still works).</summary>
+    public string AskHotkey { get; set; } = DefaultAskHotkey;
+
+    /// <summary>A saved or restored Ask shortcut, made valid: unreadable becomes the default, one that clashes with another shortcut becomes none.</summary>
+    public static string RepairAskHotkey(string? saved, IEnumerable<string> others)
+    {
+        if (saved is not null && saved.Trim().Length == 0) return "";
+        string candidate = HotkeyParser.TryParse(saved, out _, out _, out string norm, out _) ? norm : DefaultAskHotkey;
+        foreach (var other in others)
+            if (HotkeyParser.TryParse(other, out _, out _, out string n, out _) && n == candidate) return "";
+        return candidate;
+    }
+
     // ---- my to-do list (Settings, My to-do list): a separate feature for anything, with its own shortcut ----
     public const string DefaultMyTodoHotkey = "Ctrl+Alt+L";
 
@@ -168,11 +186,24 @@ public sealed class Settings
     /// <summary>Settings open the sections that need a look or that the person opens often, and collapse the rest.</summary>
     public bool AdaptiveSettings { get; set; } = true;
 
-    /// <summary>The "Getting started" card at the top of Settings is hidden once the person has said they got it.</summary>
-    public bool GettingStartedDone { get; set; }
+    /// <summary>
+    /// The product is focused on three things (look up an ANDA, review a draft, ask about a selection). Everything else (the two to-do lists,
+    /// agents, the other looks) stays out of sight until this is switched on under Maintenance. Off by default; nothing is lost by leaving it off.
+    /// </summary>
+    public bool ShowAllTools { get; set; }
 
     /// <summary>How often each Settings section was opened (section name to count). Nothing else is kept: no text and no numbers.</summary>
     public Dictionary<string, int> SectionUse { get; set; } = new();
+}
+
+/// <summary>
+/// What the focused product shows. With "Show all tools" off the card is always drawn solid and in the default look, and the shortcut for
+/// My to-do list is not taken from other programs; the chosen look and transparency are kept and come back when all tools are shown.
+/// </summary>
+public static class Edition
+{
+    public static AppearanceId Appearance(Settings s) => s.ShowAllTools ? s.Appearance : Appearances.Default;
+    public static double Opacity(Settings s) => s.ShowAllTools ? s.CardOpacity : 1.0;
 }
 
 public static class SettingsService
@@ -208,13 +239,14 @@ public static class SettingsService
         loaded.CustomApi.RequestTemplate = string.IsNullOrWhiteSpace(loaded.CustomApi.RequestTemplate) ? CustomApiSettings.ExampleTemplate : loaded.CustomApi.RequestTemplate;
         if (!Enum.IsDefined(loaded.Provider)) loaded.Provider = ProviderChoice.Auto;
         if (!Settings.MiddleClickModifiers.Contains(loaded.MiddleClickModifier ?? "")) loaded.MiddleClickModifier = "Ctrl";
-        if (HotkeyParser.ValidateSet(("Select & Peek", loaded.PeekHotkey), ("Lookup", loaded.LookupHotkey), ("Check a draft", loaded.DraftHotkey)) is not null)
+        if (HotkeyParser.ValidateSet(("Select & Peek", loaded.PeekHotkey), ("Lookup", loaded.LookupHotkey), ("Review a draft", loaded.DraftHotkey)) is not null)
         { loaded.PeekHotkey = "Ctrl+Alt+A"; loaded.LookupHotkey = "Ctrl+Alt+Space"; loaded.DraftHotkey = "Ctrl+Alt+D"; }
         if (!Enum.IsDefined(loaded.Appearance)) loaded.Appearance = Appearances.Default;
         loaded.CardOpacity = Settings.NormalizeOpacity(loaded.CardOpacity);
         if (!Enum.IsDefined(loaded.MyTodoMode)) loaded.MyTodoMode = MyTodoMode.Review;
-        loaded.MyTodoHotkey = Settings.RepairMyTodoHotkey(loaded.MyTodoHotkey, new[] { loaded.PeekHotkey, loaded.LookupHotkey, loaded.DraftHotkey });
-        loaded.MyActions = MyActionRules.Normalize(loaded.MyActions, new[] { loaded.PeekHotkey, loaded.LookupHotkey, loaded.DraftHotkey, loaded.MyTodoHotkey });
+        loaded.AskHotkey = Settings.RepairAskHotkey(loaded.AskHotkey, new[] { loaded.PeekHotkey, loaded.LookupHotkey, loaded.DraftHotkey });
+        loaded.MyTodoHotkey = Settings.RepairMyTodoHotkey(loaded.MyTodoHotkey, new[] { loaded.PeekHotkey, loaded.LookupHotkey, loaded.DraftHotkey, loaded.AskHotkey });
+        loaded.MyActions = MyActionRules.Normalize(loaded.MyActions, new[] { loaded.PeekHotkey, loaded.LookupHotkey, loaded.DraftHotkey, loaded.AskHotkey, loaded.MyTodoHotkey });
         loaded.Agents = AgentRules.Normalize(loaded.Agents);
         if (!Settings.TodoRefreshChoices.Contains(loaded.TodoRefreshSeconds)) loaded.TodoRefreshSeconds = 30;
         loaded.SectionUse = SettingsAdvisor.CleanUse(loaded.SectionUse);

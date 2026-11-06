@@ -665,7 +665,12 @@ details.myapi input,details.myapi textarea{margin:0 0 6px}
 
 /* ===================== round 16: my to-do list, notes to my to-do list, settings that arrange themselves ===================== */
 #card.sheet{background-color:var(--c-bg)}      /* a bottom sheet over its dimmed backdrop is always solid; transparency belongs to the floating card on a desktop */
-#mytodo,#notes{z-index:52}
+body:not(.all-tools) .full-only{display:none !important}
+#mytodo,#notes,#ask{z-index:52}
+#ask{width:640px;padding:18px 20px;left:calc(50% - 320px);top:44px;max-height:calc(100% - var(--tb-h) - 60px);overflow:auto}
+#ask textarea{min-height:60px;resize:vertical}
+#ask #asText{white-space:pre;font-family:ui-monospace,Consolas,monospace;font-size:12px;min-height:96px}
+#ask .acts{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
 #mytodo{width:660px;padding:18px 20px;left:calc(50% - 330px);top:36px;max-height:calc(100% - var(--tb-h) - 52px);overflow:auto}
 #notes{width:660px;padding:18px 20px;left:calc(50% - 330px);top:52px;max-height:calc(100% - var(--tb-h) - 68px);overflow:auto}
 #notes textarea{min-height:110px;resize:vertical}
@@ -760,7 +765,14 @@ Thanks,
 Demo author
 
 --- Draft reply (not sent) ---
-<span class="pick" data-pick="DRAFT">Hi all, quick status. ANDA 216482 is on track, with a goal date of Oct 10, 2026 and a forecast of Oct 17, 2026. ANDA 214990 is running late. ANDA 123456 needs a call.</span></div>
+<span class="pick" data-pick="DRAFT">Hi all, quick status. ANDA 216482 is on track, with a goal date of Oct 10, 2026 and a forecast of Oct 17, 2026. ANDA 214990 is running late. ANDA 123456 needs a call.</span>
+
+--- Cells copied from a spreadsheet (demo; Ctrl+Alt+Shift+P asks about them) ---
+<span class="pick" data-pick="TABLE" style="white-space:pre;font-family:ui-monospace,Consolas,monospace;font-size:12px">ANDA	Applicant	Goal date	Forecast
+216482	Fictional Pharma A	Oct 10, 2026	Oct 17, 2026
+214990	Fictional Pharma B	Aug 15, 2026	Aug 15, 2026
+216482	Fictional Pharma A	Oct 10, 2026	Oct 17, 2026
+123456	Fictional Pharma C	Nov 2, 2026	</span></div>
     </section>
 
     <section class="win" id="chat" data-app="chat" aria-label="Chat window, Teams-style">
@@ -803,21 +815,9 @@ C:\work&gt; </div>
 
   <!-- ===== guide ===== -->
   <section class="win" id="guide" aria-label="Demo guide">
-    <div class="bar"><span class="ttl">Try it in ten steps</span></div>
+    <div class="bar"><span class="ttl">Demo controls</span></div>
     <div class="body">
-      <p class="sub">Please select a number in any window and press a shortcut. By default you will see a small invite, and an at-risk ANDA opens a peek by itself. Weekend and holiday goal dates are flagged.</p>
-      <ol id="steps">
-        <li data-step="pin"><i>✓</i><span>Click <b>^</b> in the tray, then <b>Pin</b> the icon.</span></li>
-        <li data-step="peek"><i>✓</i><span>Select <b>216482</b> (at risk), press <span data-kbd="peek"></span>: a peek opens by itself.</span></li>
-        <li data-step="invite"><i>✓</i><span>Select <b>214990</b>, press the hotkey: a small invite. Click it.</span></li>
-        <li data-step="watch"><i>✓</i><span>On the card, read <b>WATCH</b>: the goal date is on a weekend.</span></li>
-        <li data-step="look"><i>✓</i><span><span data-kbd="look"></span>, type <b>214990</b>.</span></li>
-        <li data-step="look2"><i>✓</i><span>Select <b>NDA 021234</b>, press the hotkey. No guess.</span></li>
-        <li data-step="look3"><i>✓</i><span>Turn on <b>Terminal</b> below, select its number: paused.</span></li>
-        <li data-step="draft"><i>✓</i><span>Select the <b>draft reply</b> in Mail, press <span data-kbd="draft"></span>.</span></li>
-        <li data-step="list"><i>✓</i><span>In <b>Chat</b>, select <b>your own notes</b>, press <span data-kbd="list"></span>: they become to-do items.</span></li>
-        <li data-step="ctx"><i>✓</i><span>In the <b>Browser</b> window, select <b>216482</b> and <b>right-click</b>: the Edge extension's menu.</span></li>
-      </ol>
+      <p class="sub">Select a number or a draft in any window, then press its shortcut. No data leaves this page.</p>
       <div class="lbl">APPS TO TEST</div>
       <div id="appPick" role="group" aria-label="Which simulated apps to show"></div>
       <div class="lbl">SELECT FOR ME</div>
@@ -828,6 +828,7 @@ C:\work&gt; </div>
         <button class="btn" type="button" data-pickbtn="12345">12345</button>
         <button class="btn" type="button" data-pickbtn="DRAFT">draft reply</button>
         <button class="btn" type="button" data-pickbtn="NOTES">rough notes</button>
+        <button class="btn" type="button" data-pickbtn="TABLE">spreadsheet cells</button>
         <button class="btn" type="button" data-pickbtn="TERM" id="pickTerm" hidden>in Terminal</button>
       </div>
       <div class="lbl">PRESS A HOTKEY</div>
@@ -835,21 +836,22 @@ C:\work&gt; </div>
         <button class="btn key" type="button" id="keyPeek" aria-label="Press Control Alt A">Ctrl+Alt+A</button>
         <button class="btn key" type="button" id="keyLook" aria-label="Press Control Alt Space">Ctrl+Alt+Space</button>
         <button class="btn key" type="button" id="keyDraft" aria-label="Press Control Alt D">Ctrl+Alt+D</button>
-        <button class="btn key" type="button" id="keyList" aria-label="Press Control Alt L">Ctrl+Alt+L</button>
+        <button class="btn key" type="button" id="keyAsk" aria-label="Press Control Alt Shift P">Ctrl+Alt+Shift+P</button>
+        <button class="btn key full-only" type="button" id="keyList" aria-label="Press Control Alt L">Ctrl+Alt+L</button>
         <button class="btn" type="button" id="trayMenuBtn">Tray menu</button>
         <button class="btn" type="button" id="openSettingsBtn">Settings</button>
-        <button class="btn" type="button" id="openTodoBtn">ANDA to-do list</button>
-        <button class="btn" type="button" id="openMyTodoBtn">My to-do list</button>
+        <button class="btn full-only" type="button" id="openTodoBtn">ANDA to-do list</button>
+        <button class="btn full-only" type="button" id="openMyTodoBtn">My to-do list</button>
       </div>
-      <div class="lbl">MY ACTIONS · THEIR SHORTCUTS</div>
+      <div class="lbl">STORED PROMPTS · THEIR SHORTCUTS</div>
       <div class="row" id="actKeys" aria-label="Press one of your own shortcuts"></div>
       <div class="lbl">WHAT IF…</div>
       <label class="sw"><input type="checkbox" id="swConflict"> Another program already owns <span data-key="peek"></span></label>
       <label class="sw"><input type="checkbox" id="swConflictLook"> Another program already owns <span data-key="look"></span></label>
-      <label class="sw"><input type="checkbox" id="swConflictList"> Another program already owns <span data-key="list"></span></label>
+      <label class="sw full-only"><input type="checkbox" id="swConflictList"> Another program already owns <span data-key="list"></span></label>
       <label class="sw"><input type="checkbox" id="swToday"> Pretend today is Oct 1, 2026 (goal dates get close)</label>
       <label class="sw"><input type="checkbox" id="swAi"> Claude access is approved (sample brief)</label>
-      <label class="sw"><input type="checkbox" id="swAgentFail"> An agent cannot be reached (rehearse a failure)</label>
+      <label class="sw full-only"><input type="checkbox" id="swAgentFail"> An agent cannot be reached (rehearse a failure)</label>
       <p class="fine">Simulated here: the desktop, look-alike app windows (no logos, no real products), the hotkey and clipboard hand-off, the sample brief. No data leaves this page.</p>
     </div>
   </section>
@@ -896,19 +898,6 @@ C:\work&gt; </div>
     <div class="hdr"><h2>Settings</h2><button class="pill" id="setDone" type="button">Done</button></div>
     <div class="connbar" id="setBanner" role="status"><i></i><div><b id="setBannerLabel"></b><span id="setBannerText"></span></div></div>
     <div style="display:flex;align-items:center;gap:10px;margin:0 0 6px"><span style="color:var(--c-ink2);font-size:12.5px;flex:none;white-space:nowrap">Go to</span><select id="setJump" aria-label="Go to a section of Settings" style="width:auto;max-width:100%;min-width:0;flex:1 1 auto"></select></div>
-    <!-- Day 1: three plain steps, shown until the person hides them. -->
-    <div id="gs" role="region" aria-label="Getting started">
-      <div class="lbl" style="margin-top:0">GETTING STARTED · THREE STEPS, NOTHING TO SET UP FIRST</div>
-      <p class="st" id="gsStep1"></p>
-      <p class="st" id="gsStep2"></p>
-      <p class="st" id="gsStep3"></p>
-      <div class="acts">
-        <button class="pill quiet" id="gsFiles" type="button">Choose my portfolio file</button>
-        <button class="pill quiet" id="gsMyTodo" type="button">Open my to-do list</button>
-        <button class="pill" id="gsHide" type="button">Got it, hide this</button>
-      </div>
-      <p class="hint">Everything else here is optional. The app works as it is. You can show this again under Maintenance.</p>
-    </div>
     <!-- Settings arrange themselves: sections that need a look, or that are used most, are open; the rest are collapsed. -->
     <div id="adaptBar">
       <p id="adaptText"></p>
@@ -946,7 +935,8 @@ C:\work&gt; </div>
     <div class="sim-note">If a shortcut does nothing here, your computer or another program probably uses it before this page can see it (many apps claim a global shortcut). Pick another below, or use the on-screen buttons or the tray icon, which always work.</div>
     <div class="krow"><span>Select &amp; Peek</span><input type="text" id="keyBoxPeek" readonly aria-label="Select and Peek shortcut"><button class="pill quiet" type="button" data-keyreset="peek">Reset</button></div>
     <div class="krow"><span>Lookup box</span><input type="text" id="keyBoxLook" readonly aria-label="Lookup shortcut"><button class="pill quiet" type="button" data-keyreset="look">Reset</button></div>
-    <div class="krow"><span>Check a draft</span><input type="text" id="keyBoxDraft" readonly aria-label="Check a draft shortcut"><button class="pill quiet" type="button" data-keyreset="draft">Reset</button></div>
+    <div class="krow"><span>Review a draft</span><input type="text" id="keyBoxDraft" readonly aria-label="Review a draft shortcut"><button class="pill quiet" type="button" data-keyreset="draft">Reset</button></div>
+    <div class="krow"><span>Ask about a selection</span><input type="text" id="keyBoxAsk" readonly aria-label="Ask about a selection shortcut"><button class="pill quiet" type="button" data-keyreset="ask">Reset</button></div>
     <div class="keystatus" id="keyStatus" role="status"></div>
     <p class="hint">Please use at least two modifiers, one of them Ctrl or Alt, so everyday shortcuts like Ctrl+C keep working. On keyboards where Ctrl+Alt is AltGr, choose Ctrl+Shift instead. Never the Windows key.</p>
     <hr class="hair">
@@ -1002,12 +992,13 @@ C:\work&gt; </div>
     </div></details>
     <details class="sec" id="secActions"><summary><h3 class="grp">My actions, agents and ANDA to-do list</h3><span class="pillnote" id="pillActions" hidden></span></summary>
     <div class="secbody">
-    <div class="lbl">MY ACTIONS · YOUR OWN PROMPT, AGENT OR TO-DO ITEM, ON YOUR OWN SHORTCUT</div>
+    <div class="lbl" id="actionsLabel">MY ACTIONS · YOUR OWN PROMPT, AGENT OR TO-DO ITEM, ON YOUR OWN SHORTCUT</div>
     <div class="sim-note">Simulated here. Nothing is sent from this page: an AI or agent reply below is a labelled stand-in, never a real answer.</div>
     <div id="actList"></div>
     <div class="wrap"><button class="pill quiet" id="actAdd" type="button">Add an action</button></div>
     <div class="keystatus" id="actStatus" role="status"></div>
     <p class="hint">Select a number anywhere, then press the shortcut you chose for an action. Add to my to-do list puts it on your list. Fill my prompt shows your own prompt with the card's facts filled in, ready to copy; no AI is called. Ask my AI and Run an agent show exactly what would be sent, and send only after you press Send (unless you turn that off for that one action). Every action is also in the tray menu.</p>
+    <div id="agentsBlock">
     <hr class="hair">
     <div class="lbl">MY AGENTS · ALERT HUB, PATENT ANALYSIS, TRIAGING AGENT AND YOUR OWN</div>
     <div id="agList"></div>
@@ -1015,6 +1006,8 @@ C:\work&gt; </div>
     <div class="keystatus" id="agStatus" role="status"></div>
     <p class="hint">An agent is any service you can reach with an address. Alert Hub, Patent Analysis and Triaging Agent are listed so they can be set up: this app does not know their addresses or message format and does not guess them, so each stays off until you enter the details your IT team gives you. Nothing is sent for an agent that is off. The token stays in the environment variable you name and is never saved by this app.</p>
     <p class="hint">An agent is asked only when you press Run on a card or use its action, unless you set it to run by itself. By itself means: when a full card opens, or only when the ANDA is at risk. A peek never asks an agent. Its answer appears in the card's drawer as the agent's own words, and nothing joins your to-do list until you press its button.</p>
+    </div>
+    <div id="todoBlock">
     <hr class="hair">
     <div class="lbl">MY ANDA TO-DO LIST · LIVE, FROM YOUR ITEMS AND YOUR DATA</div>
     <label class="opt"><input type="checkbox" id="todoAuto" checked> Include items from my data (at-risk ANDAs, weekend and holiday dates, action items)</label>
@@ -1025,6 +1018,7 @@ C:\work&gt; </div>
     </div>
     <div class="keystatus" id="todoStatus" role="status"></div>
     <p class="hint">The list updates itself only while it is open: at the interval you chose, and at once when you change the list. A changed portfolio file is picked up at the next refresh. When it is closed nothing runs. In the Windows app it is kept in a plain file on this PC (todo.json) that you can read, and is never sent anywhere; here it lives only in this page's memory. Items from your data follow the same rules as the card, so the two cannot disagree; ticking one off keeps it done until the date or the situation changes.</p>
+    </div>
     </div></details>
     <details class="sec" id="secConnections"><summary><h3 class="grp">AI and connections</h3><span class="pillnote" id="pillConnections" hidden></span></summary>
     <div class="secbody">
@@ -1084,11 +1078,14 @@ C:\work&gt; </div>
     <p class="hint">A backup holds your settings, lenses and quick replies, so a new PC or a colleague can start from yours. It never holds a secret or a file location. In this simulation your browser may block the file download; the text box above gives the same backup, so it can be copied and pasted back. The Windows app asks where to save a file.</p>
   
     <hr class="hair">
+    <div class="lbl">WHICH TOOLS ARE SHOWN</div>
+    <label class="opt"><input type="checkbox" id="allTools"> Show all tools (the two to-do lists, agents, appearance and dates)</label>
+    <p class="hint">Off keeps the app to three things: look up an ANDA, review a draft and ask about a selection. Turning it on loses nothing and changes no data.</p>
+    <hr class="hair">
     <div class="lbl">THIS WINDOW · ARRANGES ITSELF</div>
     <label class="opt"><input type="checkbox" id="adaptCheck" checked> Open the sections that need a look or that I use most, and collapse the rest</label>
     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">
       <button class="pill quiet" id="adaptReset" type="button">Forget what I use most</button>
-      <button class="pill quiet" id="gsShow" type="button">Show Getting started again</button>
     </div>
     <div class="keystatus" id="adaptStatus" role="status"></div>
     <p class="hint">Sections open when something in them needs attention (a shortcut another program owns, a file that cannot be read, a connection that was not tested), when you are just starting, and when you open them often. The only thing kept is a count of how often you open each section (in the Windows app, in settings.json on this PC; in this simulation, only on this page). No text, no ANDA numbers, nothing is sent anywhere. Turn this off and no more counts are kept.</p>
@@ -1113,8 +1110,8 @@ C:\work&gt; </div>
   </div>
 
   <!-- ===== draft check ===== -->
-  <div class="app-win" id="draft" role="dialog" aria-label="Check a draft">
-    <div class="hdr"><h2>Check a draft</h2><button class="pill" id="drDone" type="button">Done</button></div>
+  <div class="app-win" id="draft" role="dialog" aria-label="Review a draft">
+    <div class="hdr"><h2>Review a draft</h2><button class="pill" id="drDone" type="button">Done</button></div>
     <textarea id="drText" aria-label="Draft text" placeholder="Paste or type an email or chat draft"></textarea>
     <div class="acts">
       <button class="pill" id="drCheck" type="button">Check against the record</button>
@@ -1207,6 +1204,30 @@ C:\work&gt; </div>
     <p class="hint" id="ntStatus" role="status" hidden></p>
     <hr class="hair">
     <div class="acts"><button class="pill quiet" id="ntOpenList" type="button">Open my to-do list</button></div>
+  </div>
+
+  <!-- ===== ask about a selection ===== -->
+  <div class="app-win" id="ask" role="dialog" aria-label="Ask about a selection">
+    <div class="hdr"><h2>Ask about a selection</h2><button class="pill" id="asClose" type="button">Close</button></div>
+    <div class="lbl">YOUR SELECTION</div>
+    <textarea id="asText" maxlength="20000" rows="5" wrap="off" aria-label="Your selection" placeholder="Select text or cells anywhere and press the Ask shortcut. Or paste them here."></textarea>
+    <p id="asShape" style="margin:8px 0 0;font-size:12.5px;font-weight:650"></p>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:4px"><p class="hint" id="asSuggest" style="flex:1;margin:0"></p><button class="pill" id="asSuggestBtn" type="button" hidden></button></div>
+    <div id="asQuick">
+      <hr class="hair">
+      <div class="lbl">QUICK CHECKS · ON THIS PC, NO AI</div>
+      <div class="acts"><button class="pill quiet" id="asDescribe" type="button">Describe</button><button class="pill quiet" id="asDup" type="button">Find duplicates</button><button class="pill quiet" id="asBlank" type="button">Find blanks</button><button class="pill quiet" id="asTotal" type="button">Totals</button></div>
+      <div class="acts" style="align-items:center"><button class="pill quiet" id="asCompare" type="button">Compare columns</button><input type="text" id="asColA" value="1" maxlength="2" style="width:52px" aria-label="First column to compare"><span style="color:var(--c-ink2)">and</span><input type="text" id="asColB" value="2" maxlength="2" style="width:52px" aria-label="Second column to compare"></div>
+      <textarea id="asResult" readonly rows="4" aria-label="Result of the check" hidden style="margin-top:8px"></textarea>
+      <div class="acts"><button class="pill quiet" id="asCopy" type="button" hidden>Copy the result</button></div>
+    </div>
+    <hr class="hair">
+    <div class="lbl">ASK WITH A PROMPT</div>
+    <div style="display:flex;gap:8px"><select id="asPrompt" aria-label="Stored prompt" style="flex:1"></select><button class="pill quiet" id="asUse" type="button">Use this prompt…</button></div>
+    <textarea id="asOwn" rows="2" maxlength="1000" aria-label="Your own instruction" placeholder="Or type your own instruction, for example: list anything that looks inconsistent." style="margin-top:8px"></textarea>
+    <div class="acts"><button class="pill quiet" id="asFillOwn" type="button">Fill it and show it</button><button class="pill quiet" id="asAskOwn" type="button">Ask my AI…</button></div>
+    <p class="hint" id="asStatus" role="status" hidden></p>
+    <p class="hint">Quick checks run on this PC. A prompt is filled in and shown to you first. Nothing is sent unless you press “Ask my AI…” and then Send on the preview, and only to the connection set up in Settings.</p>
   </div>
 
   <!-- ===== watch list and page scan ===== -->
@@ -1526,22 +1547,156 @@ function draftCheck(draft){
   else if(!ordered.some(f => f.kind === "diff" || f.kind === "unknown"))
     ordered.unshift({ kind:"ok", text:`Checked ${numbers} ANDA number${numbers === 1 ? "" : "s"}, ${dates} goal or forecast date${dates === 1 ? "" : "s"} and ${status} on-track or late statement${status === 1 ? "" : "s"}: no differences from the record.` });
   ordered.push({ kind:"note", text:"This compares the draft only with the data this tool has, and only numbers, goal and forecast dates, and on-track or late wording. It does not check other wording and is not the system of record." });
-  return { findings:ordered };
+  return { findings:ordered, numbers, dates, status };
+}
+/* ---- Services/DraftReview.cs: "Review a draft", the part that needs no AI. The record check above, then the draft against itself and the calendar.
+   A clean result means none of these checks found a problem, never that the draft is correct. Kept equal to the app's by mockup/review-golden.json. ---- */
+const RV_MONTHS = "Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?";
+const RV_WD = "(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|Mon|Tues?|Wed|Thu(?:rs?)?|Fri|Sat|Sun)";
+const RV_WD_OK = w => /^(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)$/i.test(w) || /^(?:Mon|Tues?|Wed|Thu(?:rs?)?|Fri|Sat|Sun)$/.test(w);
+const RV_MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const RV_DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const RV_WEEKDAY_DATE = () => new RegExp("(?<![A-Za-z])(" + RV_WD + ")\\.?,?\\s+(?:the\\s+)?(?:(" + RV_MONTHS + ")\\.?\\s+([0-9]{1,2})(?:st|nd|rd|th)?|([0-9]{1,2})/([0-9]{1,2}))(?:,?\\s+|/)?([0-9]{4})?(?![0-9])", "gi");
+const RV_DEADLINE = () => new RegExp("\\b(by|before|due|no later than|until|deadline(?: is| of)?|on or before)\\s+(?:" + RV_WD + "\\.?,?\\s+)?(?:(" + RV_MONTHS + ")\\.?\\s+([0-9]{1,2})(?:st|nd|rd|th)?|([0-9]{1,2})/([0-9]{1,2}))(?:,?\\s+|/)?([0-9]{4})?(?![0-9])", "gi");
+const RV_PLACEHOLDER = () => /\[(?:TBD|TBC|TODO|XX+|INSERT[^\]\r\n]{0,40}|NAME|DATE|PLACEHOLDER)\]|\bTBD\b|\bTBC\b|\bXXX+\b|\?\?\?+|<<[^>\r\n]{1,40}>>|\{\{[^}\r\n]{1,40}\}\}|lorem ipsum/gi;
+const RV_RECEIPT = "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record.";
+const RV_STANDARD = "This compares the draft only with the data this tool has, and only numbers, goal and forecast dates, and on-track or late wording. It does not check other wording and is not the system of record.";
+const rvSquash = t => { const x = t.trim().replace(/\s/g, " ").replace(/ {2,}/g, " "); return x.length <= 60 ? x : x.slice(0, 57) + "..."; };
+const rvDim = (y, m) => new Date(Date.UTC(y, m, 0)).getUTCDate();
+const rvPlural = n => n === 1 ? "" : "s";
+const rvJoin = parts => parts.length === 1 ? parts[0] : parts.slice(0, -1).join(", ") + " and " + parts[parts.length - 1];
+function rvDate(m){      /* m: [all, wd|cue, mon, d1, nm, nd, y] */
+  let month, day;
+  if(m[2]){ month = MONTHS.indexOf(m[2].slice(0, 3).toLowerCase()) + 1; day = +m[3]; }
+  else if(m[4]){ month = +m[4]; day = +m[5]; }
+  else return null;
+  if(!(month >= 1 && month <= 12 && day >= 1 && day <= 31)) return null;
+  return { month, day, year:m[6] ? +m[6] : null };
+}
+function draftReview(draft, todayT){
+  const base = draftCheck(draft);
+  if(!draft || !draft.trim()) return base;
+  const diffs = [], notes = [];
+  const today = new Date(todayT);
+  let weekdays = 0, deadlines = 0;
+  /* weekdays */
+  { const seen = new Set(); const re = RV_WEEKDAY_DATE(); let m;
+    while((m = re.exec(draft))){
+      if(!RV_WD_OK(m[1])) continue;
+      const d = rvDate(m); if(!d) continue;
+      const said = RV_DAY_NAMES.findIndex(n => n.slice(0, 3).toLowerCase() === m[1].slice(0, 3).toLowerCase()), shown = rvSquash(m[0]);
+      if(seen.has(shown.toLowerCase())) continue; seen.add(shown.toLowerCase());
+      if(d.year !== null){
+        if(d.year < 1900 || d.year > 2200) continue;
+        if(d.day > rvDim(d.year, d.month)){ diffs.push({ kind:"diff", text:`“${shown}”: ${RV_MONTH_NAMES[d.month - 1]} ${d.day}, ${d.year} is not a real date.` }); continue; }
+        weekdays++;
+        const actual = dowOf(ymd(d.year, d.month, d.day));
+        if(actual !== said) diffs.push({ kind:"diff", text:`The draft says “${shown}”, but ${RV_MONTH_NAMES[d.month - 1]} ${d.day}, ${d.year} is a ${RV_DAY_NAMES[actual]}.` });
+      } else {
+        const ty = today.getUTCFullYear(), cands = [];
+        for(const cy of [ty - 1, ty, ty + 1]) if(d.day <= rvDim(cy, d.month)) cands.push(ymd(cy, d.month, d.day));
+        if(d.day > rvDim(2000, d.month)){ diffs.push({ kind:"diff", text:`“${shown}”: ${RV_MONTH_NAMES[d.month - 1]} ${d.day} is not a real date.` }); continue; }
+        if(!cands.length) continue;                       /* February 29 in years that have none: it cannot be judged */
+        weekdays++;
+        if(cands.some(c => dowOf(c) === said)) continue;
+        const near = cands.slice().sort((a, b) => Math.abs(a - todayT) - Math.abs(b - todayT))[0];
+        notes.push({ kind:"note", text:`“${shown}”: in ${new Date(near).getUTCFullYear()}, ${RV_MONTH_NAMES[d.month - 1]} ${d.day} is a ${RV_DAY_NAMES[dowOf(near)]}, not a ${RV_DAY_NAMES[said]}. Please check the day or the date.` });
+      }
+    } }
+  /* deadlines */
+  { const seen = new Set(); const re = RV_DEADLINE(); let m;
+    while((m = re.exec(draft))){
+      const d = rvDate(m); if(!d) continue;
+      let t; const cue = rvSquash(m[0]);
+      if(d.year !== null){
+        if(d.year < 1900 || d.year > 2200) continue;
+        if(d.day > rvDim(d.year, d.month)){ if(!seen.has(cue.toLowerCase())){ seen.add(cue.toLowerCase()); diffs.push({ kind:"diff", text:`“${cue}”: ${RV_MONTH_NAMES[d.month - 1]} ${d.day}, ${d.year} is not a real date.` }); } continue; }
+        t = ymd(d.year, d.month, d.day);
+      } else {
+        const ty = today.getUTCFullYear();
+        if(d.day > rvDim(2000, d.month)){ if(!seen.has(cue.toLowerCase())){ seen.add(cue.toLowerCase()); diffs.push({ kind:"diff", text:`“${cue}”: ${RV_MONTH_NAMES[d.month - 1]} ${d.day} is not a real date.` }); } continue; }
+        if(d.day > rvDim(ty, d.month)) continue;          /* February 29 in a year that has none: it cannot be judged */
+        t = ymd(ty, d.month, d.day);
+        if(todayT - t > 30 * DAY && d.day <= rvDim(ty + 1, d.month)) t = ymd(ty + 1, d.month, d.day);
+      }
+      const shown = rvSquash(m[0]); if(seen.has(shown.toLowerCase())) continue; seen.add(shown.toLowerCase());
+      deadlines++;
+      const when = longDate(t), kind = kindOf(t);
+      if(kind === "holiday") notes.push({ kind:"note", text:`“${shown}” is ${holidayOn(t).name} (${when}), a federal holiday.` });
+      else if(kind === "weekend") notes.push({ kind:"note", text:`“${shown}” is a ${RV_DAY_NAMES[dowOf(t)]} (${when}), not a business day.` });
+      else if(t < todayT) notes.push({ kind:"note", text:`“${shown}” is in the past (${when}; today is ${longDate(todayT)}).` });
+    } }
+  /* the draft against itself: two different goal or forecast dates for one ANDA */
+  { const claims = new Map();
+    for(const paragraph of draft.split(/\r?\n\s*\r?\n/)){
+      let context = null;
+      for(const sentence of paragraph.replace(/([.!?])\s+/g, "$1\u0000").split(/\u0000|\r?\n/).filter(x => x.trim())){
+        const nums = andaNumbers(sentence); let subject;
+        if(nums.length === 1){ subject = nums[0]; context = subject; } else if(nums.length > 1){ subject = null; context = null; } else subject = context;
+        if(!subject) continue;
+        DATE_RE.lastIndex = 0; let m;
+        while((m = DATE_RE.exec(sentence))){
+          if(m.index > 0 && /[\d\/]/.test(sentence[m.index - 1])) continue;
+          const mt = dateMention(m); if(!mt) continue;
+          const which = keywordFor(sentence, mt); if(!which) continue;
+          const key = subject + "\u0001" + which; if(!claims.has(key)) claims.set(key, []); claims.get(key).push(mt);
+        }
+      }
+    }
+    for(const [key, list] of claims){
+      const distinct = [];
+      for(const mt of list) if(!distinct.some(d => d.mon === mt.mon && d.day === mt.day && (d.year === null || mt.year === null || d.year === mt.year))) distinct.push(mt);
+      if(distinct.length >= 2){ const [subject, which] = key.split("\u0001"); diffs.push({ kind:"diff", text:`The draft gives ${distinct.length} different ${which} dates for ANDA ${subject}: ${distinct.slice(0, 3).map(showMention).join(" and ")}.` }); }
+    } }
+  /* placeholders, repeated words, short ANDA numbers */
+  { const seen = new Set(); const re = RV_PLACEHOLDER(); let m;
+    while((m = re.exec(draft))){
+      if(/^(?:tbd|tbc|xxx+)$/i.test(m[0]) && m[0] !== m[0].toUpperCase()) continue;
+      const k = m[0].toLowerCase(); if(seen.has(k)) continue; seen.add(k);
+      if(seen.size <= 5) diffs.push({ kind:"diff", text:`A placeholder is still in the draft: “${rvSquash(m[0])}”.` });
+    } }
+  { let reported = 0; const seen = new Set(); const re = /(?<![A-Za-z'])([A-Za-z]{2,})\s+\1(?![A-Za-z'])/gi; let m;
+    while((m = re.exec(draft))){
+      const w = m[1].toLowerCase();
+      if(w === "that" || w === "had" || seen.has(w)) continue; seen.add(w);
+      if(++reported > 3) break;
+      notes.push({ kind:"note", text:`The word “${w}” appears twice in a row: “${rvSquash(m[0])}”.` });
+    } }
+  { const seen = new Set(); const re = /\bANDA\s*(?:No\.?|#|number)?\s*([0-9]{4,5}|[0-9]{7,})(?![0-9])/gi; let m;
+    while((m = re.exec(draft))){
+      if(seen.has(m[1])) continue; seen.add(m[1]);
+      if(seen.size <= 3) notes.push({ kind:"note", text:`“${rvSquash(m[0])}” has ${m[1].length} digits; an ANDA number has 6. Please check it.` });
+    } }
+  const findings = [];
+  findings.push(...base.findings.filter(f => f.kind === "diff" || f.kind === "unknown"), ...diffs, ...notes, ...base.findings.filter(f => f.kind === "note" && f.text !== RV_STANDARD));
+  if(!findings.some(f => f.kind === "diff" || f.kind === "unknown")){
+    const parts = [];
+    if(base.numbers > 0) parts.push(`${base.numbers} ANDA number${rvPlural(base.numbers)}`);
+    if(base.dates > 0) parts.push(`${base.dates} goal or forecast date${rvPlural(base.dates)} against the record`);
+    if(base.status > 0) parts.push(`${base.status} on-track or late statement${rvPlural(base.status)}`);
+    if(weekdays > 0) parts.push(`${weekdays} weekday${rvPlural(weekdays)} against ${weekdays === 1 ? "its date" : "their dates"}`);
+    if(deadlines > 0) parts.push(`${deadlines} deadline${rvPlural(deadlines)} against the calendar`);
+    parts.push("the draft for leftover placeholders, repeated words and short ANDA numbers");
+    const verdict = notes.length === 0 ? "nothing found that needs a second look" : `no differences, but please read the note${rvPlural(notes.length)} below`;
+    findings.unshift({ kind:"ok", text:"Checked " + rvJoin(parts) + ": " + verdict + "." });
+  }
+  findings.push({ kind:"note", text:RV_RECEIPT });
+  return { findings, numbers:base.numbers, dates:base.dates + weekdays + deadlines, status:base.status };
 }
 const noticeLifetime = text => Math.min(8, Math.max(2.5, 1.2 + text.length / 14)) * 1000;
 
 /* ---------------- state ---------------- */
 let keyVia = null;
 const state = { dir:"k", look:"k", form:"full", autoHide:10, mode:"whisper", escalate:true, lead:3, pretend:false, capture:true, op:92, lens:null, pinned:false, running:true, ai:false,
-  keys:{ peek:"Ctrl+Alt+A", look:"Ctrl+Alt+Space", draft:"Ctrl+Alt+D", list:"Ctrl+Alt+L" }, taken:{ peek:false, look:false, draft:false, list:false },
-  adaptive:true, gsDone:false, sectionUse:{}, clMode:0,
+  keys:{ peek:"Ctrl+Alt+A", look:"Ctrl+Alt+Space", draft:"Ctrl+Alt+D", ask:"Ctrl+Alt+Shift+P", list:"Ctrl+Alt+L" }, taken:{ peek:false, look:false, draft:false, ask:false, list:false },
+  adaptive:true, allTools:location.hash === "#all", sectionUse:{}, clMode:0,
   middle:false, middleMod:"Ctrl", provider:"auto", tone:"", style:"", signoff:"", claudeModel:"claude-opus-4-8",
   outlook:{ on:false, cloud:"com", client:"", tenant:"organizations", max:5, step:"out", msg:"" },
   data:{ portfolio:null, notes:null, ref:null },
   myApi:{ name:"My API", endpoint:"", header:"Authorization", scheme:"Bearer", env:"", model:"", template:"", path:"choices[0].message.content" },
   replies:null };
 const steps = {};
-const APP_WINS = ["lookup", "plib", "settings", "draft", "wlist", "replies", "actwin", "todo", "mytodo", "notes"];
+const APP_WINS = ["lookup", "plib", "settings", "draft", "wlist", "replies", "actwin", "todo", "mytodo", "notes", "ask"];
 let current = null, pinnedCard = false, focusedWin = "mail", lastSel = null, deselecting = false;
 let pointer = { x: Math.round(innerWidth * 0.4), y: Math.round(innerHeight * 0.4) };
 let chipTimer = null, streamTimer = null, keysTimer = null, chipAccept = null;
@@ -1859,6 +2014,13 @@ function hotkey(kind, source){
     showKeys(kind, t ? "Copied your selection, put your clipboard back ✓" : "");
     openDraft(t); return;
   }
+  if(kind === "ask"){
+    if(!state.capture){ showKeys(kind); openAsk(""); return; }
+    if(focusedWin === "term"){ showKeys(kind); showNotice("Paused in terminals. Please paste what you selected.", anchor); openAsk(""); return; }
+    const sel3 = getSelection().toString().trim() ? getSelection().toString() : (lastSel ? lastSel.text : "");
+    showKeys(kind, sel3 ? "Copied your selection, put your clipboard back ✓" : "");
+    openAsk(sel3); return;
+  }
   if(kind === "list"){
     if(focusedWin === "term"){ showKeys(kind); showNotice("Paused in terminals. Please paste your notes.", anchor); openNotes(""); return; }
     const sel2 = getSelection().toString().trim() ? getSelection().toString() : (lastSel ? lastSel.text : "");
@@ -1887,7 +2049,7 @@ document.addEventListener("keydown", e => {
   if(e.target && e.target.dataset && e.target.dataset.keycapture) return;      /* a box that is capturing a new shortcut */
   const combo = comboFromEvent(e);
   if(combo){
-    const kind = Object.keys(state.keys).find(k => state.keys[k] === combo);
+    const kind = Object.keys(state.keys).find(k => state.keys[k] === combo && (k !== "list" || state.allTools));
     if(kind){ e.preventDefault(); hotkey(kind, "keyboard"); return; }
     const act = state.actions.find(a => a.enabled && a.hotkey && a.hotkey === combo);
     if(act){ e.preventDefault(); actionHotkey(act, "keyboard"); return; }
@@ -1910,10 +2072,284 @@ document.addEventListener("keydown", e => {
 $("keyPeek").addEventListener("click", () => hotkey("peek", "button"));
 $("keyLook").addEventListener("click", () => hotkey("look", "button"));
 $("keyDraft").addEventListener("click", () => hotkey("draft", "button"));
+$("keyAsk").addEventListener("click", () => hotkey("ask", "button"));
 $("keyList").addEventListener("click", () => hotkey("list", "button"));
 $("openMyTodoBtn").addEventListener("click", () => openMyTodo());
 document.querySelectorAll("[data-pickbtn]").forEach(b => b.addEventListener("click", () => pick(b.dataset.pickbtn)));
 document.querySelectorAll(".apps .pick").forEach(el => el.addEventListener("dblclick", () => { lastSel = { text:el.textContent, win:winOf(el), x:el.getBoundingClientRect().right, y:el.getBoundingClientRect().bottom }; }));
+
+/* ---------------- Ask about a selection: a port of Services/SelectionHelpers.cs and UI/AskWindow.axaml.cs ----------------
+   Quick checks on selected text or spreadsheet cells, done with fixed rules on this PC: no AI, nothing sent, the same answer every time.
+   Cells copied from Excel arrive as tab-separated text. The strings below are identical to the app's; mockup/selection-golden.json holds the shared cases. */
+const SH_MAX_CHARS = 20000, SH_MAX_ROWS = 1000, SH_MAX_COLS = 30, SH_MAX_LINES = 12;
+function shRows(text){
+  let t = String(text == null ? "" : text).replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  if(t.length > SH_MAX_CHARS) t = t.slice(0, SH_MAX_CHARS);
+  let rows = [], cells = [], cell = "", i = 0;
+  const endCell = () => { cells.push(cell.trim()); cell = ""; };
+  const endRow = () => { endCell(); rows.push(cells.slice(0, SH_MAX_COLS)); cells = []; };
+  while(i < t.length && rows.length < SH_MAX_ROWS){
+    const c = t[i];
+    if(c === '"' && cell.length === 0){
+      let j = i + 1, q = "", closed = false;
+      while(j < t.length){
+        if(t[j] === '"'){ if(j + 1 < t.length && t[j + 1] === '"'){ q += '"'; j += 2; continue; } closed = true; j++; break; }
+        q += t[j]; j++;
+      }
+      if(closed && (j >= t.length || t[j] === "\t" || t[j] === "\n")){ cell += q; i = j; continue; }
+      cell += '"'; i++; continue;
+    }
+    if(c === "\t"){ endCell(); i++; continue; }
+    if(c === "\n"){ endRow(); i++; continue; }
+    cell += c; i++;
+  }
+  if(rows.length < SH_MAX_ROWS && (cell.length > 0 || cells.length > 0)) endRow();
+  while(rows.length > 0 && rows[rows.length - 1].every(x => x.length === 0)) rows.pop();
+  return rows;
+}
+const SH_DRAFTLIKE = /\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+[0-9]{1,2}\b/i;
+function shClassify(text){
+  const trimmed = String(text == null ? "" : text).trim();
+  if(trimmed.length === 0) return { kind:"empty", rows:0, columns:0, label:"Nothing is selected.", suggestion:"Select text or cells and press the shortcut again, or paste them above." };
+  const rows = shRows(text), columns = rows.length === 0 ? 0 : Math.max(...rows.map(r => r.length)), wide = rows.filter(r => r.length >= 2).length;
+  if(rows.length >= 2 && columns >= 2 && wide >= 2)
+    return { kind:"table", rows:rows.length, columns, label:`A table of ${rows.length} rows and ${columns} columns.`, suggestion:"Try “Find duplicates”, “Compare two columns”, “Find blanks” or “Totals”." };
+  const number = extractNumber(trimmed);
+  if(rows.length === 1 && trimmed.length <= 60 && number)
+    return { kind:"anda", rows:1, columns:1, label:`An ANDA number: ${number}.`, suggestion:"Use Lookup for its card, or ask a stored prompt about it." };
+  if(rows.length >= 2)
+    return { kind:"list", rows:rows.length, columns:1, label:`A list of ${rows.length} lines.`, suggestion:"Try “Find duplicates”, or ask a stored prompt about it." };
+  const draftLike = !!number || SH_DRAFTLIKE.test(trimmed);
+  return { kind:"text", rows:1, columns:1, label:`Text of ${trimmed.length.toLocaleString("en-US")} characters.`,
+    suggestion:draftLike ? "Use “Review a draft” to check it, or ask a stored prompt about it." : "Ask a stored prompt about it, or use “Review a draft” to check it." };
+}
+function shIsNumber(s){
+  let t = String(s).trim().split("$").join("").split(",").join("");
+  if(t.endsWith("%")) t = t.slice(0, -1);
+  if(t.length === 0) return null;
+  let k = 0; if(t[0] === "-" || t[0] === "+") k = 1;
+  let digits = false, dot = false;
+  for(; k < t.length; k++){
+    const c = t[k];
+    if(c >= "0" && c <= "9") digits = true;
+    else if(c === "." && !dot) dot = true;
+    else return null;
+  }
+  if(!digits) return null;
+  const v = parseFloat(t);
+  return Number.isFinite(v) ? { v } : null;
+}
+const shHasHeader = rows => rows.length >= 2 && rows[0].length >= 2 && rows[0].every(c => c.length > 0 && !shIsNumber(c)) && new Set(rows[0].map(c => c.toLowerCase())).size === rows[0].length;
+const shHeading = (rows, header, col) => header && col < rows[0].length ? ` (${rows[0][col]})` : "";
+const shShort = s => s.length <= 40 ? s : s.slice(0, 37) + "...";
+const shPlural = (n, one, many) => n === 1 ? one : many;
+function shExamples(items, max = 6){
+  const shown = items.slice(0, max).map(x => "“" + shShort(x) + "”").join(", ");
+  return items.length > max ? shown + ` and ${items.length - max} more` : shown;
+}
+function shNum(d){
+  const r = Math.sign(d) * (Math.round(Math.abs(d) * 10000) / 10000);
+  const s = r.toFixed(4).replace(/\.?0+$/, "");
+  return s === "-0" || s === "" ? "0" : s;
+}
+function shDescribe(text){
+  const shape = shClassify(text), lines = [shape.label];
+  if(shape.kind === "empty" || shape.kind === "anda" || shape.kind === "text") return lines;
+  const rows = shRows(text), header = shHasHeader(rows);
+  if(header) lines.push("The first row looks like headings: " + rows[0].map(c => "“" + shShort(c) + "”").join(", ") + ".");
+  const blank = rows.slice(header ? 1 : 0).reduce((n, r) => n + r.filter(c => c.length === 0).length, 0);
+  lines.push(blank === 0 ? "No blank cells." : `${blank} blank ${shPlural(blank, "cell", "cells")}.`);
+  return lines;
+}
+function shFindDuplicates(text){
+  const shape = shClassify(text);
+  if(shape.kind === "empty" || shape.kind === "anda" || shape.kind === "text") return ["There is nothing to compare: select cells or a list with more than one line."];
+  const rows = shRows(text), header = shHasHeader(rows), start = header ? 1 : 0, lines = [];
+  let repeatedRows = 0; const firstSeen = new Map();
+  for(let r = start; r < rows.length; r++){
+    if(rows[r].every(c => c.length === 0)) continue;
+    const key = rows[r].join("\t").toLowerCase();
+    if(firstSeen.has(key)){
+      repeatedRows++;
+      if(lines.length < SH_MAX_LINES) lines.push(`Row ${r + 1} repeats row ${firstSeen.get(key) + 1}: ${rows[r].map(shShort).join(" | ")}`);
+    } else firstSeen.set(key, r);
+  }
+  let repeatedValues = 0, columnsWithRepeats = 0;
+  const columns = Math.max(...rows.map(r => r.length));
+  for(let c = 0; c < columns; c++){
+    const seen = new Map(), order = [];
+    for(let r = start; r < rows.length; r++){
+      const v = c < rows[r].length ? rows[r][c] : "";
+      if(v.length === 0) continue;
+      const key = v.toLowerCase();
+      if(!seen.has(key)){ seen.set(key, []); order.push(key); }
+      seen.get(key).push(r + 1);
+    }
+    const dups = order.filter(k => seen.get(k).length >= 2);
+    if(dups.length === 0) continue;
+    columnsWithRepeats++; repeatedValues += dups.length;
+    if(columns >= 2 && rows.length >= 2)
+      for(const k of dups.slice(0, 3))
+        if(lines.length < SH_MAX_LINES * 2) {
+          const where = seen.get(k);
+          lines.push(`Column ${c + 1}${shHeading(rows, header, c)}: “${shShort(rows[where[0] - 1][c])}” appears ${where.length} times (rows ${where.slice(0, 6).join(", ")}${where.length > 6 ? ", …" : ""}).`);
+        }
+  }
+  const summary = repeatedRows === 0 && repeatedValues === 0
+    ? "No repeated rows and no repeated values."
+    : `Found ${repeatedRows} repeated ${shPlural(repeatedRows, "row", "rows")} and ${repeatedValues} repeated ${shPlural(repeatedValues, "value", "values")} in ${columnsWithRepeats} ${shPlural(columnsWithRepeats, "column", "columns")}.`;
+  lines.unshift(summary);
+  const looked = rows.length - start;
+  lines.push(`Looked at ${looked} ${shPlural(looked, "row", "rows")}${header ? " (not counting the headings)" : ""}. Upper and lower case count as the same, and blank cells are ignored.`);
+  return lines;
+}
+function shCompareColumns(text, a = 1, b = 2){
+  const shape = shClassify(text);
+  if(shape.kind !== "table") return ["Comparing needs a table: select at least two columns of cells."];
+  const rows = shRows(text), columns = Math.max(...rows.map(r => r.length));
+  if(a < 1 || b < 1 || a > columns || b > columns || a === b) return [`Please choose two different columns between 1 and ${columns}.`];
+  const header = shHasHeader(rows), start = header ? 1 : 0;
+  const column = c => rows.slice(start).map(r => c - 1 < r.length ? r[c - 1] : "").filter(v => v.length > 0);
+  const colA = column(a), colB = column(b);
+  const setA = new Set(colA.map(v => v.toLowerCase())), setB = new Set(colB.map(v => v.toLowerCase()));
+  const distinct = col => { const seen = new Set(); return col.filter(v => { const k = v.toLowerCase(); if(seen.has(k)) return false; seen.add(k); return true; }); };
+  const both = distinct(colA).filter(v => setB.has(v.toLowerCase())), onlyA = distinct(colA).filter(v => !setB.has(v.toLowerCase())), onlyB = distinct(colB).filter(v => !setA.has(v.toLowerCase()));
+  const nameA = `column ${a}${shHeading(rows, header, a - 1)}`, nameB = `column ${b}${shHeading(rows, header, b - 1)}`;
+  return [
+    `In both ${nameA} and ${nameB}: ${both.length} ${shPlural(both.length, "value", "values")}.`,
+    `Only in ${nameA}: ${onlyA.length}` + (onlyA.length > 0 ? ": " + shExamples(onlyA) + "." : "."),
+    `Only in ${nameB}: ${onlyB.length}` + (onlyB.length > 0 ? ": " + shExamples(onlyB) + "." : "."),
+    "Blank cells are ignored, upper and lower case count as the same, and each value is counted once.",
+  ];
+}
+function shFindBlanks(text){
+  const shape = shClassify(text);
+  if(shape.kind !== "table" && shape.kind !== "list") return ["There are no cells to look at: select cells or a list with more than one line."];
+  const rows = shRows(text), header = shHasHeader(rows), start = header ? 1 : 0, columns = Math.max(...rows.map(r => r.length)), lines = [];
+  let total = 0, rowsWith = 0;
+  for(let r = start; r < rows.length; r++){
+    const missing = [];
+    for(let c = 0; c < columns; c++) if((c < rows[r].length ? rows[r][c] : "").length === 0) missing.push(c + 1);
+    if(missing.length === 0) continue;
+    total += missing.length; rowsWith++;
+    if(lines.length < SH_MAX_LINES) lines.push(`Row ${r + 1} has ${missing.length} blank ${shPlural(missing.length, "cell", "cells")} (column ${missing.slice(0, 8).join(", ")}${missing.length > 8 ? ", …" : ""}).`);
+  }
+  lines.unshift(total === 0 ? "No blank cells." : `${total} blank ${shPlural(total, "cell", "cells")} in ${rowsWith} ${shPlural(rowsWith, "row", "rows")}.`);
+  return lines;
+}
+function shTotals(text){
+  const shape = shClassify(text);
+  if(shape.kind !== "table" && shape.kind !== "list") return ["There are no numbers to total: select cells or a list with more than one line."];
+  const rows = shRows(text), header = shHasHeader(rows), start = header ? 1 : 0, columns = Math.max(...rows.map(r => r.length)), lines = [];
+  for(let c = 0; c < columns; c++){
+    const values = []; let nonBlank = 0;
+    for(let r = start; r < rows.length; r++){
+      const v = c < rows[r].length ? rows[r][c] : "";
+      if(v.length === 0) continue;
+      nonBlank++;
+      const n = shIsNumber(v); if(n) values.push(n.v);
+    }
+    if(values.length === 0 || values.length * 5 < nonBlank * 4) continue;
+    const raw = [];
+    for(let r = start; r < rows.length; r++){ const v = c < rows[r].length ? rows[r][c] : ""; if(shIsNumber(v)) raw.push(v); }
+    if(raw.every(v => v.length >= 5 && /^[0-9]+$/.test(v))){
+      lines.push(`Column ${c + 1}${shHeading(rows, header, c)}: looks like identifiers (${values.length} ${shPlural(values.length, "number", "numbers")} of 5 or more digits), so it is not totalled.`);
+      continue;
+    }
+    const sum = values.reduce((x, y) => x + y, 0);
+    lines.push(`Column ${c + 1}${shHeading(rows, header, c)}: ${values.length} ${shPlural(values.length, "number", "numbers")}, total ${shNum(sum)}, smallest ${shNum(Math.min(...values))}, largest ${shNum(Math.max(...values))}, average ${shNum(sum / values.length)}` +
+      (nonBlank > values.length ? ` (${nonBlank - values.length} other ${shPlural(nonBlank - values.length, "entry was not a number", "entries were not numbers")} and left out).` : "."));
+    if(lines.length >= SH_MAX_LINES) break;
+  }
+  if(lines.length === 0) return ["No column holds mostly numbers, so there is nothing to total."];
+  lines.push("Numbers may have a $ sign, commas or a % sign. Percent signs are removed, not converted.");
+  return lines;
+}
+
+/* the window: the selection, what it looks like, one suggested button, quick checks, stored prompts, an instruction typed here */
+let asSuggested = null, asTimer = null, asPrompts = [];
+function openAsk(text){
+  closeMenus(); markStep("ask");
+  let t = String(text == null ? "" : text); if(t.length > SH_MAX_CHARS) t = t.slice(0, SH_MAX_CHARS);
+  $("asText").value = t; $("asOwn").value = ""; $("asColA").value = "1"; $("asColB").value = "2";
+  asPrompts = state.actions.filter(a => a.enabled && (a.kind === 1 || a.kind === 2));
+  const sel = $("asPrompt"); sel.replaceChildren();
+  if(asPrompts.length === 0){ sel.append(h("option", { text:"No stored prompts yet. Add one under Settings.", value:"" })); sel.disabled = true; $("asUse").disabled = true; }
+  else { sel.append(h("option", { text:"Choose one of your stored prompts…", value:"" })); asPrompts.forEach((a, i) => sel.append(h("option", { text:`${a.name} · ${a.kind === 2 ? "ask my AI" : "fill and show"}`, value:String(i) }))); sel.disabled = false; $("asUse").disabled = false; }
+  showApp("ask"); $("ask").style.zIndex = "52"; askAnalyse();
+  setTimeout(() => { if(!$("asText").value.trim()) $("asText").focus(); }, 30);
+}
+function askShow(lines){
+  $("asResult").value = lines.join("\n"); $("asResult").hidden = false; $("asCopy").hidden = false; $("asQuick").hidden = false;
+}
+function askAnalyse(){
+  clearTimeout(asTimer);
+  const text = $("asText").value, shape = shClassify(text);
+  $("asShape").textContent = shape.label; $("asSuggest").textContent = shape.suggestion;
+  $("asResult").hidden = true; $("asCopy").hidden = true; $("asResult").value = "";
+  const data = shape.kind === "table" || shape.kind === "list";
+  $("asQuick").hidden = !data;
+  $("asCompare").disabled = $("asColA").disabled = $("asColB").disabled = shape.kind !== "table";
+  const btn = $("asSuggestBtn");
+  if(data){ btn.textContent = "Find duplicates"; asSuggested = () => askShow(shFindDuplicates($("asText").value)); }
+  else if(shape.kind === "anda"){ const n = extractNumber(text); btn.textContent = "Look it up"; asSuggested = () => { if(n) askLookup(n); }; }
+  else if(shape.kind === "text"){ btn.textContent = "Review as a draft"; asSuggested = () => askReview($("asText").value); }
+  else asSuggested = null;
+  btn.hidden = !asSuggested; $("asStatus").hidden = true; $("asStatus").textContent = "";
+}
+function askStatus(t){ $("asStatus").textContent = t; $("asStatus").hidden = !t; }
+function askLookup(number){
+  const anchor = { ...pointer };
+  if(!DATA[number]){ showNotice(`${number} is not in the available records.`, anchor); return; }
+  openCard(number, { anchor });
+}
+function askReview(text){ openDraft(text); $("draft").style.zIndex = "52"; $("ask").style.zIndex = "51"; }
+/* the prompt with the selection in it: as it is when it has {selection}, otherwise the selection is added at the end; null when that is too long */
+function askWithSelection(template){
+  let t = template || "";
+  if(!t.includes("{selection}")) t += "\n\nSelected text:\n{selection}";
+  return t.length > ACT_TEXT_MAX ? null : t;
+}
+const askUsesRecordDetails = template => [...(template || "").matchAll(/\{([A-Za-z_]+)\}/g)].some(m => m[1] !== "selection" && m[1] !== "today");
+function askRunPrompt(action){
+  const text = $("asText").value;
+  if(!text.trim()){ askStatus("Please select or paste something first."); return; }
+  askStatus(action.kind === 2 ? "A window with exactly what would be sent is open. Nothing has been sent." : "Your prompt is filled in and shown in a new window. Nothing was sent.");
+  const k = shClassify(text).kind, many = k === "table" || k === "list";
+  if(many && askUsesRecordDetails(action.template)) $("asStatus").textContent += " A table holds many ANDAs, so details of one ANDA, such as {number}, are left empty.";
+  runCustomAction({ ...action }, text, { ...pointer }, many);
+  $("actwin").style.zIndex = "52"; $("ask").style.zIndex = "51";
+}
+function askRunOwn(kind){
+  const own = $("asOwn").value.trim();
+  if(!own){ askStatus("Please type your instruction first."); return; }
+  const template = askWithSelection(own);
+  if(template === null){ askStatus("That instruction is too long."); return; }
+  const unknown = unknownPlaceholders(template); if(unknown.length > 0){ askStatus(`“{${unknown[0]}}” is not something Ask can fill in. Please remove it.`); return; }
+  askRunPrompt({ name:"Ask about a selection", kind, template, enabled:true, hotkey:"", due:2, agentId:"", direct:false });
+}
+$("asClose").addEventListener("click", () => closeApp("ask"));
+$("asText").addEventListener("input", () => { clearTimeout(asTimer); asTimer = setTimeout(askAnalyse, 250); });
+$("asSuggestBtn").addEventListener("click", () => { if(asSuggested) asSuggested(); });
+$("asDescribe").addEventListener("click", () => askShow(shDescribe($("asText").value)));
+$("asDup").addEventListener("click", () => askShow(shFindDuplicates($("asText").value)));
+$("asBlank").addEventListener("click", () => askShow(shFindBlanks($("asText").value)));
+$("asTotal").addEventListener("click", () => askShow(shTotals($("asText").value)));
+$("asCompare").addEventListener("click", () => {
+  const a = /^\s*[+-]?\d+\s*$/.test($("asColA").value) ? parseInt($("asColA").value, 10) : NaN, b = /^\s*[+-]?\d+\s*$/.test($("asColB").value) ? parseInt($("asColB").value, 10) : NaN;
+  if(isNaN(a) || isNaN(b)){ askShow(["Please type two column numbers, for example 1 and 2."]); return; }
+  askShow(shCompareColumns($("asText").value, a, b));
+});
+$("asCopy").addEventListener("click", () => { const t = $("asResult").value; if(t && navigator.clipboard) navigator.clipboard.writeText(t).catch(() => {}); if(t) askStatus("Copied."); });
+$("asUse").addEventListener("click", () => {
+  const i = $("asPrompt").value === "" ? -1 : +$("asPrompt").value;
+  if(i < 0 || i >= asPrompts.length){ askStatus("Please choose a stored prompt first."); return; }
+  const template = askWithSelection(asPrompts[i].template);
+  if(template === null){ askStatus("That stored prompt is too long to add your selection to."); return; }
+  askRunPrompt({ ...asPrompts[i], template });
+});
+$("asFillOwn").addEventListener("click", () => askRunOwn(1));
+$("asAskOwn").addEventListener("click", () => askRunOwn(2));
 
 /* ---------------- lookup ---------------- */
 let lookupAnchor = null;
@@ -1938,7 +2374,7 @@ $("lookupIn").addEventListener("keydown", e => { if(e.key === "Enter") submitLoo
 /* ---------------- draft check window (port of UI/DraftWindow: checks as soon as it opens; AI actions stay off until a model is approved) ---------------- */
 const SAMPLE_DRAFT = "Hi all, quick status. ANDA 216482 is on track, with a goal date of Oct 10, 2026 and a forecast of Oct 17, 2026. ANDA 214990 is running late. ANDA 123456 needs a call.";
 function runDraftCheck(){
-  const r = draftCheck($("drText").value);
+  const r = draftReview($("drText").value, demoToday());
   $("drOut").innerHTML = r.findings.map(f => `<div class="find ${f.kind === "diff" || f.kind === "unknown" ? "diff" : f.kind}">${f.text.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</div>`).join("");
 }
 function openDraft(text){
@@ -2044,8 +2480,9 @@ $("plClose").addEventListener("click", () => closeApp("plib"));
 
 /* settings */
 function applyLook(id){
-  const [, , tokens, form] = LOOKS.find(l => l[0] === id);
-  state.look = id; state.dir = tokens; state.form = form; root.dataset.dir = tokens;
+  const [, , tokens, form0] = LOOKS.find(l => l[0] === id);
+  const form = state.allTools ? form0 : "full";           /* the focused product always shows the full card, in the default look */
+  state.look = id; state.dir = tokens; state.form = form; root.dataset.dir = state.allTools ? tokens : "k";
   /* a compact box that is open follows the change in place */
   if(compactId){ if(form === "full"){ const c = compactId; closeCompact(); openCard(c, { anchor:{ x:compact.offsetLeft, y:compact.offsetTop }, forceFull:true }); } else showCompact(compactId, { x:compact.offsetLeft - 10, y:compact.offsetTop - 14 }); }
   else if(form !== "full" && current){ const c = current, a = { x:card.offsetLeft, y:card.offsetTop }; showCompact(c, a); }
@@ -2074,7 +2511,7 @@ function applyLook(id){
   [0, 2, 3, 5].forEach(n => { const o = document.createElement("option"); o.value = n; o.textContent = n === 0 ? "0 (only weekends and holidays)" : String(n); if(n === state.lead) o.selected = true; $("setLead").appendChild(o); });
   $("setLead").addEventListener("change", e => { state.lead = +e.target.value; if(current && card.style.display === "block") fill(current); });
   $("setOp").addEventListener("input", e => {
-    state.op = +e.target.value; $("setOpV").textContent = state.op + "%"; root.style.setProperty("--op", state.op + "%");
+    state.op = +e.target.value; $("setOpV").textContent = state.op + "%"; root.style.setProperty("--op", (state.allTools ? state.op : 100) + "%");
   });
   $("setLens").addEventListener("change", e => { state.lens = e.target.selectedIndex <= 0 ? null : e.target.value; });
   $("setManage").addEventListener("click", () => { showApp("plib"); renderPrompts(0); });
@@ -2111,7 +2548,7 @@ $("plDel").addEventListener("click", () => { if(prompts[plIndex]){ prompts.splic
 const menu = $("menu"), flyout = $("flyout");
 const menuOpen = () => menu.style.display === "block";
 function closeMenus(){ menu.style.display = "none"; flyout.style.display = "none"; $("replyMenu").style.display = "none"; $("chev").setAttribute("aria-expanded", "false"); }
-function hotkeyLine(){ const t = state.taken, k = state.keys; return `Hotkeys: ${k.peek} ${t.peek ? "✗ in use" : "✓"}   ${k.look} ${t.look ? "✗ in use" : "✓"}   ${k.draft} ${t.draft ? "✗ in use" : "✓"}` + (k.list ? `   ${k.list} ${t.list ? "✗ in use" : "✓"}` : ""); }
+function hotkeyLine(){ const t = state.taken, k = state.keys; return `Hotkeys: ${k.peek} ${t.peek ? "✗ in use" : "✓"}   ${k.look} ${t.look ? "✗ in use" : "✓"}   ${k.draft} ${t.draft ? "✗ in use" : "✓"}` + (k.ask ? `   ${k.ask} ${t.ask ? "✗ in use" : "✓"}` : "") + (k.list ? `   ${k.list} ${t.list ? "✗ in use" : "✓"}` : ""); }
 function openMenu(){
   if(!state.running) return;
   flyout.style.display = "none";
@@ -2127,11 +2564,12 @@ function openMenu(){
   };
   menu.append(
     item("Lookup ANDA…", state.keys.look, () => openLookup(pointer)),
-    item("Check a draft…", state.keys.draft, () => openDraft("")),
+    item("Review a draft…", state.keys.draft, () => openDraft("")),
+    item("Ask about a selection…", state.keys.ask || "", () => openAsk("")),
     item("Watch list…", "", () => openWatchList()),
-    item("ANDA to-do list…", "", () => openTodo()),
+    ...(state.allTools ? [item("ANDA to-do list…", "", () => openTodo()),
     item("My to-do list…", state.keys.list || "", () => openMyTodo()),
-    item("Notes to my to-do list…", "", () => openNotes("")),
+    item("Notes to my to-do list…", "", () => openNotes(""))] : []),
     item("Demo: at-risk card", "", () => openCard("216482", { anchor:trayAnchor() })),
     item("Demo: healthy card", "", () => openCard("214990", { anchor:trayAnchor() })),
     document.createElement("hr"));
@@ -2149,9 +2587,9 @@ function openMenu(){
   if(!acts.length) maBox.append(item("No actions yet. Add one in Settings.", "", null, { disabled:true }));
   acts.forEach(a => maBox.append(item(a.name, a.hotkey || "", () => runActionFromMenu(a))));
   ma.addEventListener("click", () => { maBox.hidden = !maBox.hidden; });
-  menu.append(ma, maBox, ap, subBox, ah, ahBox,
+  menu.append(...(state.allTools ? [ma, maBox, ap, subBox] : []), ah, ahBox,
     item("Settings…", "", () => showApp("settings")),
-    item("Prompt library…", "", () => { showApp("plib"); renderPrompts(0); }),
+    ...(state.allTools ? [item("Prompt library…", "", () => { showApp("plib"); renderPrompts(0); })] : []),
     item("Quick replies…", "", () => { showApp("replies"); renderReplies(0); }),
     document.createElement("hr"),
     item(hotkeyLine(), "", null, { disabled:true }),
@@ -2202,8 +2640,8 @@ function launch(){
 }
 
 /* ---------------- round 10: shortcuts, middle-click, my data, my writing, my API, connection ---------------- */
-const KEYKINDS = [["peek", "Select & Peek", "keyBoxPeek"], ["look", "Lookup box", "keyBoxLook"], ["draft", "Check a draft", "keyBoxDraft"], ["list", "My to-do list", "keyBoxList"]];
-const KEY_DEFAULT = { peek:"Ctrl+Alt+A", look:"Ctrl+Alt+Space", draft:"Ctrl+Alt+D", list:"Ctrl+Alt+L" };
+const KEYKINDS = [["peek", "Select & Peek", "keyBoxPeek"], ["look", "Lookup box", "keyBoxLook"], ["draft", "Review a draft", "keyBoxDraft"], ["ask", "Ask about a selection", "keyBoxAsk"], ["list", "My to-do list", "keyBoxList"]];
+const KEY_DEFAULT = { peek:"Ctrl+Alt+A", look:"Ctrl+Alt+Space", draft:"Ctrl+Alt+D", ask:"Ctrl+Alt+Shift+P", list:"Ctrl+Alt+L" };
 function keyName(e){
   const c = e.code || "";
   if(/^Key[A-Z]$/.test(c)) return c.slice(3);
@@ -2243,12 +2681,13 @@ function keyReport(){
 }
 function paintKeys(){
   $("keyPeek").textContent = state.keys.peek; $("keyLook").textContent = state.keys.look; $("keyDraft").textContent = state.keys.draft;
+  $("keyAsk").textContent = state.keys.ask || "Ask (no shortcut)"; $("keyAsk").setAttribute("aria-label", state.keys.ask ? "Press " + state.keys.ask.replace(/\+/g, " ") : "Ask about a selection has no shortcut. Press to try the window.");
   $("keyList").textContent = state.keys.list || "My to-do list (no shortcut)"; $("keyList").setAttribute("aria-label", state.keys.list ? "Press " + state.keys.list.replace(/\+/g, " ") : "My to-do list has no shortcut. Press to try the notes window.");
   $("keyPeek").setAttribute("aria-label", "Press " + state.keys.peek.replace(/\+/g, " ")); $("keyLook").setAttribute("aria-label", "Press " + state.keys.look.replace(/\+/g, " ")); $("keyDraft").setAttribute("aria-label", "Press " + state.keys.draft.replace(/\+/g, " "));
   document.querySelectorAll("[data-key]").forEach(el => { el.textContent = state.keys[el.dataset.key] || "the tray menu"; });
   document.querySelectorAll("[data-kbd]").forEach(el => { el.innerHTML = state.keys[el.dataset.kbd] ? kbdHTML(state.keys[el.dataset.kbd]) : "the tray menu"; });
   KEYKINDS.forEach(([k, , id]) => { $(id).value = state.keys[k] || "None"; });
-  $("keyStatus").textContent = keyReport(); paintGettingStarted();
+  $("keyStatus").textContent = keyReport();
 }
 (function buildShortcuts(){
   KEYKINDS.forEach(([kind, name, id]) => {
@@ -2661,7 +3100,8 @@ let agentCache = {}, agentFailed = {}, agentBusy = {}, lookupHandler = null;
 
 /* ---- rules (MyActionRules, AgentRules) ---- */
 function shortcutsInUse(except){
-  return [["Select & Peek", state.keys.peek], ["Lookup box", state.keys.look], ["Check a draft", state.keys.draft]]
+  return [["Select & Peek", state.keys.peek], ["Lookup box", state.keys.look], ["Review a draft", state.keys.draft]]
+    .concat(state.keys.ask ? [["Ask about a selection", state.keys.ask]] : [])
     .concat(state.keys.list ? [["My to-do list", state.keys.list]] : [])
     .concat(state.actions.filter(x => x !== except && x.hotkey).map(x => [x.name, x.hotkey]));
 }
@@ -3012,8 +3452,8 @@ const shorten = t => t.length <= 60 ? t : t.slice(0, 57).trimEnd() + "…";
 const aiReady = () => connInfo().cls === "set";
 function addLines(lines, number, source){ let n = 0; lines.forEach(l => { if(todoAdd(l, number, null, null, source).added) n++; }); return n; }
 function askForAnda(a, anchor){ openLookup(anchor, number => executeAction(a, number, number, "", anchor)); }
-function runCustomAction(a, selection, anchor){
-  const clean = cleanSelection(selection), number = extractNumber(clean), known = number && DATA[number] ? number : null;
+function runCustomAction(a, selection, anchor, withoutRecord){
+  const clean = cleanSelection(selection), number = extractNumber(clean), known = !withoutRecord && number && DATA[number] ? number : null;   /* withoutRecord: a table or list from Ask holds many ANDAs, so none is picked as "the" record */
   if(!known && (clean.length === 0 || a.kind === 3)){
     if(number){ showNotice(`${number} is not in the available records.`, anchor); return; }
     askForAnda(a, anchor); return;
@@ -3962,7 +4402,11 @@ $("ntOpenList").addEventListener("click", () => openMyTodo());
 
 /* ---- Settings arrange themselves (SettingsAdvisor, SettingsWindow.Adaptive) ---- */
 const SECS = [["look", "Look and feel"], ["start", "How it starts"], ["dates", "Dates"], ["files", "My files and writing"], ["myTodo", "My to-do list"], ["actions", "My actions, agents and ANDA to-do list"], ["connections", "AI and connections"], ["maintenance", "Maintenance"]];
-const SEC_USE_MIN = 3, SEC_USE_MAX = 1000, SEC_SUGGEST_MAX = 3;
+const SEC_USE_MIN = 3, SEC_USE_MAX = 1000, SEC_SUGGEST_MAX = 2;
+/* the focused product shows five sections; the rest appear with "Show all tools" */
+const FOCUS_SECS = ["start", "files", "actions", "connections", "maintenance"];
+const secShown = k => state.allTools || FOCUS_SECS.includes(k);
+const secTitle = (k, name) => k === "actions" && !state.allTools ? "Ask: my stored prompts" : name;
 const cap1 = k => k[0].toUpperCase() + k.slice(1);
 let secTouched = new Set();
 function settingsFacts(){
@@ -3974,10 +4418,10 @@ function settingsFacts(){
   let actions = null;
   for(const a of state.agents) if(a.enabled && agentSetupProblem(a)){ actions = `the agent “${a.name}” is switched on but not ready`; break; }
   if(!actions) for(const a of state.actions) if(a.enabled && validateAction(a, [])){ actions = `the action “${a.name}” is not ready`; break; }
-  return { problems, portfolio:null, connection, actions, chosen:!!state.data.portfolio };
+  return { problems, portfolio:null, connection, actions };
 }
-/* Everything is collapsed except what is needed most: 1) a section with something that needs a look (always open, however many), 2) when just starting, what a new user needs first,
-   3) up to two sections the person opens often. At most three sections are opened for reasons 2 and 3 together. */
+/* Everything is collapsed except what is needed most: 1) a section with something that needs a look (always open, however many), 2) up to two sections the person opens often.
+   There is no "getting started" step: the app works as it is. A hidden section is never opened or counted. */
 function adviseSettings(){
   const f = settingsFacts(), open = new Map();
   if(state.adaptive){
@@ -3987,15 +4431,11 @@ function adviseSettings(){
     if(f.portfolio) open.set("files", [true, "Needs a look: " + f.portfolio]);
     if(f.connection) open.set("connections", [true, "Needs a look: " + f.connection]);
     let extra = 0;
-    if(!state.gsDone){
-      if(!open.has("files") && !f.chosen){ open.set("files", [false, "Start here: choose your portfolio"]); extra++; }
-      if(!open.has("start")){ open.set("start", [false, "Start here: your shortcuts"]); extra++; }
-    }
-    Object.entries(state.sectionUse).filter(([k, n]) => SECS.some(s => s[0] === k) && k !== "maintenance" && n >= SEC_USE_MIN)
+    Object.entries(state.sectionUse).filter(([k, n]) => SECS.some(s => s[0] === k) && secShown(k) && k !== "maintenance" && n >= SEC_USE_MIN)
       .sort((a, b) => b[1] - a[1] || SECS.findIndex(s => s[0] === a[0]) - SECS.findIndex(s => s[0] === b[0])).slice(0, 2)
       .forEach(([k]) => { if(!open.has(k) && extra < SEC_SUGGEST_MAX){ open.set(k, [false, "You open this often"]); extra++; } });
   }
-  return SECS.map(([k]) => open.has(k) ? { id:k, open:true, attention:open.get(k)[0], reason:open.get(k)[1] } : { id:k, open:false, attention:false, reason:null });
+  return SECS.filter(([k]) => secShown(k)).map(([k]) => open.has(k) ? { id:k, open:true, attention:open.get(k)[0], reason:open.get(k)[1] } : { id:k, open:false, attention:false, reason:null });
 }
 function applySuggested(){
   const advice = adviseSettings();
@@ -4003,12 +4443,12 @@ function applySuggested(){
     const d = $("sec" + cap1(a.id)), p = $("pill" + cap1(a.id));
     d.open = a.open; p.hidden = !a.reason; p.textContent = a.reason || ""; p.classList.toggle("attn", a.attention);
   });
-  const opened = advice.filter(a => a.open).map(a => SECS.find(s => s[0] === a.id)[1]);
+  const opened = advice.filter(a => a.open).map(a => secTitle(a.id, SECS.find(s => s[0] === a.id)[1]));
   $("adaptText").textContent = !state.adaptive ? "Sections stay as you leave them. To have the ones you need opened for you, turn on “Open the sections that need a look” under Maintenance."
     : opened.length === 0 ? "Everything is in order, so every section is collapsed. Click a heading to open it, or use “Go to” above."
     : `Opened for you: ${opened.join(", ")}. The other sections are collapsed; click a heading to open one.`;
 }
-const secSetAll = open => SECS.forEach(([k]) => { $("sec" + cap1(k)).open = open; });
+const secSetAll = open => SECS.filter(([k]) => secShown(k)).forEach(([k]) => { $("sec" + cap1(k)).open = open; });
 /* counts one opening of a section, once per time Settings is open; only a count is kept, and nothing if arranging is off */
 function secTouch(k){
   if(!state.adaptive || secTouched.has(k)) return;
@@ -4016,16 +4456,21 @@ function secTouch(k){
   const use = state.sectionUse; use[k] = Math.min(SEC_USE_MAX, (use[k] || 0) + 1);
   if(Object.values(use).reduce((a, b) => a + b, 0) > 120) Object.keys(use).forEach(x => { use[x] = Math.ceil(use[x] / 2); });
 }
-function paintGettingStarted(){
-  const chosen = !!state.data.portfolio;
-  $("gs").hidden = state.gsDone;
-  $("gsStep1").textContent = `1. Select an ANDA number in any program (an email, a spreadsheet, a web page), then press ${state.keys.peek}. A small card opens.`;
-  $("gsStep2").textContent = chosen ? "2. Done: your portfolio file is chosen, so the cards use your own ANDAs."
-    : "2. Choose your portfolio file under “My files and writing”, so the cards use your own ANDAs. Until then the app shows fictional demo records.";
-  $("gsStep3").textContent = `3. Select notes anywhere (a chat message, an email, or rough notes) and press ${state.keys.list || "the My to-do list item in the tray menu"}. They become to-do items you can tick off.`;
-  $("gsFiles").hidden = chosen;
+/* the focused product: five sections, the card always solid and in the default look, no shortcut taken for My to-do list */
+function applyEdition(){
+  const all = state.allTools;
+  document.body.classList.toggle("all-tools", all);
+  SECS.forEach(([k, name]) => { const d = $("sec" + cap1(k)); d.hidden = !secShown(k); const h = d.querySelector("h3.grp"); if(h) h.textContent = secTitle(k, name); });
+  ["agentsBlock", "todoBlock"].forEach(id => { const e = $(id); if(e) e.hidden = !all; });
+  $("actionsLabel").textContent = all ? "MY ACTIONS · YOUR OWN PROMPT, AGENT OR TO-DO ITEM, ON YOUR OWN SHORTCUT" : "STORED PROMPTS · USED BY ASK, OR ON A SHORTCUT OF THEIR OWN";
+  $("allTools").checked = all;
+  const look = LOOKS.find(l => l[0] === state.look) || LOOKS.find(l => l[0] === "k");
+  root.dataset.dir = all ? look[2] : "k";
+  root.style.setProperty("--op", (all ? state.op : 100) + "%");
+  if(typeof rebuildJump === "function") rebuildJump();
+  paintKeys();
 }
-function onSettingsOpen(){ secTouched = new Set(); paintGettingStarted(); applySuggested(); }
+function onSettingsOpen(){ secTouched = new Set(); applyEdition(); applySuggested(); }
 (function buildAdaptiveSettings(){
   SECS.forEach(([k]) => {
     const d = $("sec" + cap1(k));
@@ -4037,10 +4482,7 @@ function onSettingsOpen(){ secTouched = new Set(); paintGettingStarted(); applyS
   $("adaptCollapse").addEventListener("click", () => { secSetAll(false); $("adaptText").textContent = "Every section is collapsed. Click a heading to open one, use “Go to” above, or press “Suggested view”."; });
   $("adaptCheck").addEventListener("change", e => { state.adaptive = e.target.checked; applySuggested(); });
   $("adaptReset").addEventListener("click", () => { state.sectionUse = {}; secTouched.clear(); $("adaptStatus").textContent = "Forgotten. The window will now start from what needs a look."; });
-  $("gsShow").addEventListener("click", () => { state.gsDone = false; paintGettingStarted(); $("adaptStatus").textContent = "Getting started is shown at the top again."; applySuggested(); });
-  $("gsHide").addEventListener("click", () => { state.gsDone = true; paintGettingStarted(); });
-  $("gsFiles").addEventListener("click", () => { const d = $("secFiles"); if(!d.open){ secTouch("files"); d.open = true; } d.scrollIntoView({ block:"start" }); });
-  $("gsMyTodo").addEventListener("click", openMyTodo);
+  $("allTools").addEventListener("change", e => { state.allTools = e.target.checked; applyEdition(); applySuggested(); if(menuOpen()) closeMenus(); });
 })();
 
 /* backup, restore, reset: what the Windows app does, for the choices on this page. File locations and the what-if switches are not part of it. */
@@ -4053,9 +4495,9 @@ function snapSettings(){
     myApi:{ name:m.name, endpoint:m.endpoint, header:m.header, scheme:m.scheme, env:m.env, model:m.model, template:m.template, path:m.path },
     outlook:{ enabled:o.on, cloud:o.cloud, clientId:o.client, tenant:o.tenant, maxItems:o.max }, lens:s.lens,
     actions:JSON.parse(JSON.stringify(s.actions)), agents:JSON.parse(JSON.stringify(s.agents)), todoShowFromData:s.todoAuto, todoRefreshSeconds:s.todoRefresh,
-    myTodoMode:s.clMode, adaptive:s.adaptive };   /* the counts of opened sections and the hidden Getting started card belong to this PC: they are not in a backup */
+    myTodoMode:s.clMode, adaptive:s.adaptive, allTools:s.allTools };   /* the counts of opened sections belong to this PC: they are not in a backup */
 }
-const DEFAULT_SETTINGS = snapSettings(), DEFAULT_PROMPTS = prompts.map(p => [...p]), DEFAULT_REPLIES = state.replies.map(r => ({ ...r }));
+const DEFAULT_SETTINGS = { ...snapSettings(), allTools:false }, DEFAULT_PROMPTS = prompts.map(p => [...p]), DEFAULT_REPLIES = state.replies.map(r => ({ ...r }));
 const oneOf = (v, list, fallback) => list.includes(v) ? v : fallback;
 const str = (v, max, fallback) => typeof v === "string" ? v.slice(0, max) : fallback;
 function applySettings(x){
@@ -4067,12 +4509,15 @@ function applySettings(x){
   const k = x.keys || {}, three = { peek:str(k.peek, 40, ""), look:str(k.look, 40, ""), draft:str(k.draft, 40, "") };
   const okThree = ["peek", "look", "draft"].every(kind => three[kind] && !validateCombo(three[kind])) && !findDup({ ...three, list:"" });
   const base = okThree ? three : { peek:d.keys.peek, look:d.keys.look, draft:d.keys.draft };
-  /* the to-do shortcut: unreadable becomes the default, one that clashes with another becomes none, an empty one means none */
+  /* the Ask shortcut (RepairAskHotkey) and the to-do shortcut: unreadable becomes the default, one that clashes with another becomes none, an empty one means none */
+  let ask = typeof k.ask === "string" ? str(k.ask, 40, "") : d.keys.ask;
+  if(ask && validateCombo(ask)) ask = d.keys.ask;
+  if(ask && [base.peek, base.look, base.draft].includes(ask)) ask = "";
   let list = typeof k.list === "string" ? str(k.list, 40, "") : d.keys.list;
   if(list && validateCombo(list)) list = d.keys.list;
-  if(list && [base.peek, base.look, base.draft].includes(list)) list = "";
-  s.keys = { ...base, list };
-  s.clMode = oneOf(x.myTodoMode, [0, 1], 0); s.adaptive = typeof x.adaptive === "boolean" ? x.adaptive : true;
+  if(list && [base.peek, base.look, base.draft, ask].includes(list)) list = "";
+  s.keys = { ...base, ask, list };
+  s.clMode = oneOf(x.myTodoMode, [0, 1], 0); s.adaptive = typeof x.adaptive === "boolean" ? x.adaptive : true; s.allTools = typeof x.allTools === "boolean" ? x.allTools : false;
   s.actions = x.actions === undefined ? starterActions() : normActions(x.actions, Object.values(s.keys));
   s.agents = normAgents(x.agents); clearAgentCache();
   s.todoAuto = typeof x.todoShowFromData === "boolean" ? x.todoShowFromData : d.todoShowFromData;
@@ -4094,10 +4539,10 @@ function applySettings(x){
 function syncSettingsUI(){
   const s = state, check = (name, value) => document.querySelectorAll(`input[name=${name}]`).forEach(r => { r.checked = r.value === String(value); });
   check("look", s.look); check("autohide", s.autoHide); check("consent", s.mode); check("tone", s.tone); check("provider", s.provider); check("midmod", s.middleMod); check("todorefresh", s.todoRefresh);
-  check("clmode", s.clMode); $("adaptCheck").checked = s.adaptive; paintGettingStarted();
+  check("clmode", s.clMode); $("adaptCheck").checked = s.adaptive; applyEdition();
   $("todoAuto").checked = s.todoAuto; renderActions(); renderAgents(); if(isOpen("todo")){ tdApplyTimer(); tdReload(true); }
   $("setUrgent").checked = s.escalate; $("setLead").value = String(s.lead); $("setCapture").checked = s.capture;
-  $("setOp").value = s.op; $("setOpV").textContent = s.op + "%"; root.style.setProperty("--op", s.op + "%");
+  $("setOp").value = s.op; $("setOpV").textContent = s.op + "%"; root.style.setProperty("--op", (s.allTools ? s.op : 100) + "%");
   $("setMiddle").checked = s.middle; $("setStyle").value = s.style; $("setSignoff").value = s.signoff; $("claudeModel").value = s.claudeModel;
   Object.entries({ apiName:"name", apiEndpoint:"endpoint", apiHeader:"header", apiScheme:"scheme", apiEnv:"env", apiModel:"model", apiTemplate:"template", apiPath:"path" })
     .forEach(([id, key]) => { $(id).value = s.myApi[key]; });
@@ -4159,26 +4604,33 @@ $("bkReset").addEventListener("click", () => {
   }
   clearTimeout(resetTimer); b.dataset.armed = ""; b.textContent = "Reset all settings…";
   prompts.splice(0, prompts.length, ...DEFAULT_PROMPTS.map(p => [...p])); state.replies = DEFAULT_REPLIES.map(r => ({ ...r }));
-  applySettings(DEFAULT_SETTINGS); state.sectionUse = {}; state.gsDone = false; paintGettingStarted();
+  applySettings(DEFAULT_SETTINGS); state.sectionUse = {}; applyEdition();
   $("bkStatus").textContent = "Everything is back to what a new install starts with. File locations on this PC were kept."; $("bkStatus").style.color = "var(--c-ink2)";
 });
 
 /* go to a section: the group names and the labels inside them; choosing one opens its group first */
-(function buildJump(){
-  const entries = [], sel = $("setJump");
+let jumpEntries = [];
+function rebuildJump(){
+  const sel = $("setJump"); jumpEntries = [];
   document.querySelectorAll("#settings details.sec").forEach(d => {
+    if(d.hidden) return;
     const k = d.id.slice(3).toLowerCase();
-    entries.push({ title:d.querySelector("h3.grp").textContent, box:d, key:k, target:d });
-    d.querySelectorAll(".lbl").forEach(l => entries.push({ title:l.textContent, box:d, key:k, target:l }));
+    jumpEntries.push({ title:d.querySelector("h3.grp").textContent, box:d, key:k, target:d });
+    d.querySelectorAll(".lbl").forEach(l => { if(!l.closest("[hidden]")) jumpEntries.push({ title:l.textContent, box:d, key:k, target:l }); });
   });
-  sel.innerHTML = `<option value="-1">Choose a section…</option>` + entries.map((e, i) => `<option value="${i}">${e.title.replace(/</g, "&lt;")}</option>`).join("");
+  sel.innerHTML = `<option value="-1">Choose a section…</option>` + jumpEntries.map((e, i) => `<option value="${i}">${e.title.replace(/</g, "&lt;")}</option>`).join("");
+}
+(function buildJump(){
+  const sel = $("setJump");
+  rebuildJump();
   sel.addEventListener("change", () => {
     const i = +sel.value; sel.value = "-1"; if(i < 0) return;
-    const e = entries[i]; if(!e.box.open){ secTouch(e.key); e.box.open = true; }
+    const e = jumpEntries[i]; if(!e) return; if(!e.box.open){ secTouch(e.key); e.box.open = true; }
     e.target.scrollIntoView({ block:"start" });
   });
 })();
 syncSettingsUI();
+applyEdition();
 
 /* ---------------- what-if switches ---------------- */
 function setTaken(kind, on){

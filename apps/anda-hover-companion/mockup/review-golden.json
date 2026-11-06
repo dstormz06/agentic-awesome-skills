@@ -1,0 +1,942 @@
+{
+  "version": 1,
+  "today": "2026-11-04",
+  "cases": [
+    {
+      "draft": "The call is on Friday, November 6, 2026.",
+      "numbers": 0,
+      "dates": 1,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked 1 weekday against its date and the draft for leftover placeholders, repeated words and short ANDA numbers: nothing found that needs a second look."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "The call is on Friday, November 7, 2026.",
+      "numbers": 0,
+      "dates": 1,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "diff",
+          "text": "The draft says “Friday, November 7, 2026”, but November 7, 2026 is a Saturday."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "Fri Nov 6, 2026",
+      "numbers": 0,
+      "dates": 1,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked 1 weekday against its date and the draft for leftover placeholders, repeated words and short ANDA numbers: nothing found that needs a second look."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "Friday, 11/6/2026",
+      "numbers": 0,
+      "dates": 1,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked 1 weekday against its date and the draft for leftover placeholders, repeated words and short ANDA numbers: nothing found that needs a second look."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "Friday, 11/7/2026",
+      "numbers": 0,
+      "dates": 1,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "diff",
+          "text": "The draft says “Friday, 11/7/2026”, but November 7, 2026 is a Saturday."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "See you Friday, Nov 7.",
+      "numbers": 0,
+      "dates": 1,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked 1 weekday against its date and the draft for leftover placeholders, repeated words and short ANDA numbers: nothing found that needs a second look."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "See you Monday, Nov 7.",
+      "numbers": 0,
+      "dates": 1,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked 1 weekday against its date and the draft for leftover placeholders, repeated words and short ANDA numbers: no differences, but please read the note below."
+        },
+        {
+          "kind": "note",
+          "text": "“Monday, Nov 7”: in 2026, November 7 is a Saturday, not a Monday. Please check the day or the date."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "Friday, Feb 30, 2026 works.",
+      "numbers": 0,
+      "dates": 0,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "diff",
+          "text": "“Friday, Feb 30, 2026”: February 30, 2026 is not a real date."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "Friday, Feb 30 works.",
+      "numbers": 0,
+      "dates": 0,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "diff",
+          "text": "“Friday, Feb 30”: February 30 is not a real date."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "Sat Nov 7, 2026 and Sun Nov 8, 2026 and Mon Nov 9, 2026",
+      "numbers": 0,
+      "dates": 3,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked 3 weekdays against their dates and the draft for leftover placeholders, repeated words and short ANDA numbers: nothing found that needs a second look."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "Please respond by Nov 8, 2026.",
+      "numbers": 0,
+      "dates": 1,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked 1 deadline against the calendar and the draft for leftover placeholders, repeated words and short ANDA numbers: no differences, but please read the note below."
+        },
+        {
+          "kind": "note",
+          "text": "“by Nov 8, 2026” is a Sunday (Nov 8, 2026), not a business day."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "Please respond by Nov 11, 2026.",
+      "numbers": 0,
+      "dates": 1,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked 1 deadline against the calendar and the draft for leftover placeholders, repeated words and short ANDA numbers: no differences, but please read the note below."
+        },
+        {
+          "kind": "note",
+          "text": "“by Nov 11, 2026” is Veterans Day (Nov 11, 2026), a federal holiday."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "Please respond by Oct 20, 2026.",
+      "numbers": 0,
+      "dates": 1,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked 1 deadline against the calendar and the draft for leftover placeholders, repeated words and short ANDA numbers: no differences, but please read the note below."
+        },
+        {
+          "kind": "note",
+          "text": "“by Oct 20, 2026” is in the past (Oct 20, 2026; today is Nov 4, 2026)."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "Please respond by Nov 10, 2026.",
+      "numbers": 0,
+      "dates": 1,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked 1 deadline against the calendar and the draft for leftover placeholders, repeated words and short ANDA numbers: nothing found that needs a second look."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "Please respond by Nov 10.",
+      "numbers": 0,
+      "dates": 1,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked 1 deadline against the calendar and the draft for leftover placeholders, repeated words and short ANDA numbers: nothing found that needs a second look."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "no later than 12/24/2026 and before Dec 25 and due Friday, Nov 6",
+      "numbers": 0,
+      "dates": 4,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked 1 weekday against its date, 3 deadlines against the calendar and the draft for leftover placeholders, repeated words and short ANDA numbers: no differences, but please read the note below."
+        },
+        {
+          "kind": "note",
+          "text": "“before Dec 25” is Christmas Day (Dec 25, 2026), a federal holiday."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "We spoke on Nov 8, 2026 about the labeling.",
+      "numbers": 0,
+      "dates": 0,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked the draft for leftover placeholders, repeated words and short ANDA numbers: nothing found that needs a second look."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "ANDA 999999 has a goal date of Aug 15, 2026. Update: the goal date for ANDA 999999 is Aug 18, 2026.",
+      "numbers": 1,
+      "dates": 0,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "unknown",
+          "text": "ANDA 999999 is not in your data, so nothing about it could be checked. Check the number."
+        },
+        {
+          "kind": "diff",
+          "text": "The draft gives 2 different goal dates for ANDA 999999: Aug 15, 2026 and Aug 18, 2026."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "ANDA 999999 has a goal date of Aug 15. Again: the goal date for ANDA 999999 is Aug 15, 2026.",
+      "numbers": 1,
+      "dates": 0,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "unknown",
+          "text": "ANDA 999999 is not in your data, so nothing about it could be checked. Check the number."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "Dear [NAME], the review of ANDA 216482 is TBD. TBD again, and [TBD].",
+      "numbers": 1,
+      "dates": 0,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "diff",
+          "text": "A placeholder is still in the draft: “[NAME]”."
+        },
+        {
+          "kind": "diff",
+          "text": "A placeholder is still in the draft: “TBD”."
+        },
+        {
+          "kind": "diff",
+          "text": "A placeholder is still in the draft: “[TBD]”."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "The letter is to be delivered.",
+      "numbers": 0,
+      "dates": 0,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked the draft for leftover placeholders, repeated words and short ANDA numbers: nothing found that needs a second look."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "tbd and xx and XXX and ??? and <<insert>> and {{date}} and Lorem Ipsum",
+      "numbers": 0,
+      "dates": 0,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "diff",
+          "text": "A placeholder is still in the draft: “XXX”."
+        },
+        {
+          "kind": "diff",
+          "text": "A placeholder is still in the draft: “???”."
+        },
+        {
+          "kind": "diff",
+          "text": "A placeholder is still in the draft: “<<insert>>”."
+        },
+        {
+          "kind": "diff",
+          "text": "A placeholder is still in the draft: “{{date}}”."
+        },
+        {
+          "kind": "diff",
+          "text": "A placeholder is still in the draft: “Lorem Ipsum”."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "Please see the the attached memo.",
+      "numbers": 0,
+      "dates": 0,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked the draft for leftover placeholders, repeated words and short ANDA numbers: no differences, but please read the note below."
+        },
+        {
+          "kind": "note",
+          "text": "The word “the” appears twice in a row: “the the”."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "I know that that is right, and she had had enough.",
+      "numbers": 0,
+      "dates": 0,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked the draft for leftover placeholders, repeated words and short ANDA numbers: nothing found that needs a second look."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "It was a very very good result.",
+      "numbers": 0,
+      "dates": 0,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked the draft for leftover placeholders, repeated words and short ANDA numbers: no differences, but please read the note below."
+        },
+        {
+          "kind": "note",
+          "text": "The word “very” appears twice in a row: “very very”."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "Please check ANDA 21648 again.",
+      "numbers": 0,
+      "dates": 0,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked the draft for leftover placeholders, repeated words and short ANDA numbers: no differences, but please read the note below."
+        },
+        {
+          "kind": "note",
+          "text": "“ANDA 21648” has 5 digits; an ANDA number has 6. Please check it."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "Please check ANDA No. 2164821 again.",
+      "numbers": 0,
+      "dates": 0,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked the draft for leftover placeholders, repeated words and short ANDA numbers: no differences, but please read the note below."
+        },
+        {
+          "kind": "note",
+          "text": "“ANDA No. 2164821” has 7 digits; an ANDA number has 6. Please check it."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "Please check ANDA 216482 again.",
+      "numbers": 1,
+      "dates": 0,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked 1 ANDA number and the draft for leftover placeholders, repeated words and short ANDA numbers: nothing found that needs a second look."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "ANDA 216482 has a goal date of Oct 5. Reply by Friday, November 7, 2026.",
+      "numbers": 1,
+      "dates": 3,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "diff",
+          "text": "ANDA 216482: the draft gives the goal date as Oct 5, but the record says Oct 3, 2026."
+        },
+        {
+          "kind": "diff",
+          "text": "The draft says “Friday, November 7, 2026”, but November 7, 2026 is a Saturday."
+        },
+        {
+          "kind": "note",
+          "text": "“by Friday, November 7, 2026” is a Saturday (Nov 7, 2026), not a business day."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "ANDA 216482: the goal date is Oct 3, 2026 and the forecast is Oct 17, 2026. We are running late. Please reply by Friday, November 6, 2026.",
+      "numbers": 1,
+      "dates": 4,
+      "status": 1,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked 1 ANDA number, 2 goal or forecast dates against the record, 1 on-track or late statement, 1 weekday against its date, 1 deadline against the calendar and the draft for leftover placeholders, repeated words and short ANDA numbers: nothing found that needs a second look."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "ANDA 214990 is on track, forecast Aug 6, goal Aug 15.",
+      "numbers": 1,
+      "dates": 2,
+      "status": 1,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked 1 ANDA number, 2 goal or forecast dates against the record, 1 on-track or late statement and the draft for leftover placeholders, repeated words and short ANDA numbers: nothing found that needs a second look."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "ANDA 214990 is running late.",
+      "numbers": 1,
+      "dates": 0,
+      "status": 1,
+      "findings": [
+        {
+          "kind": "diff",
+          "text": "ANDA 214990: the draft sounds late or at risk, but the record's forecast is 9 d ahead of goal."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "Hello. Thanks for the update.",
+      "numbers": 0,
+      "dates": 0,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked the draft for leftover placeholders, repeated words and short ANDA numbers: nothing found that needs a second look."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "  ",
+      "numbers": 0,
+      "dates": 0,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "note",
+          "text": "Nothing to check yet. Please paste or type a draft."
+        }
+      ]
+    },
+    {
+      "draft": "",
+      "numbers": 0,
+      "dates": 0,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "note",
+          "text": "Nothing to check yet. Please paste or type a draft."
+        }
+      ]
+    },
+    {
+      "draft": "ANDA 216482 and ANDA 214990 both look fine by Friday, Nov 6.",
+      "numbers": 2,
+      "dates": 2,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked 2 ANDA numbers, 1 weekday against its date, 1 deadline against the calendar and the draft for leftover placeholders, repeated words and short ANDA numbers: nothing found that needs a second look."
+        },
+        {
+          "kind": "note",
+          "text": "One sentence names several ANDAs, so its dates and wording were not checked: \"ANDA 216482 and ANDA 214990 both look fine by Friday, Nov 6.\""
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "ANDA 123456 goal date Aug 1.",
+      "numbers": 1,
+      "dates": 0,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "unknown",
+          "text": "ANDA 123456 is not in your data, so nothing about it could be checked. Check the number."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "Monday, Nov 9, 2026 and Monday, Nov 9, 2026 and Monday, Nov 9, 2026",
+      "numbers": 0,
+      "dates": 1,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked 1 weekday against its date and the draft for leftover placeholders, repeated words and short ANDA numbers: nothing found that needs a second look."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "by Nov 31",
+      "numbers": 0,
+      "dates": 0,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "diff",
+          "text": "“by Nov 31”: November 31 is not a real date."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "due Feb 29, 2026",
+      "numbers": 0,
+      "dates": 0,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "diff",
+          "text": "“due Feb 29, 2026”: February 29, 2026 is not a real date."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "Friday, Feb 29 is the leap day",
+      "numbers": 0,
+      "dates": 0,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked the draft for leftover placeholders, repeated words and short ANDA numbers: nothing found that needs a second look."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "by Feb 29",
+      "numbers": 0,
+      "dates": 0,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked the draft for leftover placeholders, repeated words and short ANDA numbers: nothing found that needs a second look."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "Friday, Nov 31",
+      "numbers": 0,
+      "dates": 0,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "diff",
+          "text": "“Friday, Nov 31”: November 31 is not a real date."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "Friday, 13/45/2026",
+      "numbers": 0,
+      "dates": 0,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked the draft for leftover placeholders, repeated words and short ANDA numbers: nothing found that needs a second look."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "Friday, ٣/٤/٢٠٢٦ and by ３/４/２０２٧",
+      "numbers": 0,
+      "dates": 0,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked the draft for leftover placeholders, repeated words and short ANDA numbers: nothing found that needs a second look."
+        },
+        {
+          "kind": "note",
+          "text": "No ANDA numbers found in the draft, so nothing was checked against a record."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    },
+    {
+      "draft": "The meeting is Thursday, Nov 5. Reply by Friday, Nov 6. The goal date for ANDA 216482 is Oct 3, then Oct 3, 2026.",
+      "numbers": 1,
+      "dates": 5,
+      "status": 0,
+      "findings": [
+        {
+          "kind": "ok",
+          "text": "Checked 1 ANDA number, 2 goal or forecast dates against the record, 2 weekdays against their dates, 1 deadline against the calendar and the draft for leftover placeholders, repeated words and short ANDA numbers: nothing found that needs a second look."
+        },
+        {
+          "kind": "note",
+          "text": "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record."
+        }
+      ]
+    }
+  ]
+}

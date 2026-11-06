@@ -42,13 +42,12 @@ public class Round16Tests
         node["Settings"]!["MyTodoHotkey"] = "Ctrl+Alt+A";
         node["Settings"]!["MyTodoMode"] = 9;
         node["Settings"]!["SectionUse"] = new System.Text.Json.Nodes.JsonObject { ["Look"] = 9999, ["<b>x</b>"] = 3 };
-        var target = new Settings { SectionUse = new() { ["Dates"] = 2 }, GettingStartedDone = true };
+        var target = new Settings { SectionUse = new() { ["Dates"] = 2 } };
         var (ok, _) = SettingsBackup.Import(node.ToJsonString(), target, lenses, replies);
         Assert.True(ok);
         Assert.Equal("", target.MyTodoHotkey);                  // it clashed with Select & Peek
         Assert.Equal(MyTodoMode.Review, target.MyTodoMode);
         Assert.Equal(new[] { "Dates" }, target.SectionUse.Keys);   // a file from another PC cannot plant or change what this PC learned
-        Assert.True(target.GettingStartedDone);
     }
 
     [Fact]
@@ -74,13 +73,13 @@ public class Round16Tests
     public void The_saved_settings_file_round_trips_the_new_fields()
     {
         string path = Path.Combine(Temp.NewDir(), "settings.json");
-        var s = new Settings { MyTodoHotkey = "Ctrl+Alt+K", MyTodoMode = MyTodoMode.AddAtOnce, AdaptiveSettings = false, GettingStartedDone = true, SectionUse = new() { ["Files"] = 4 }, CardOpacity = 0.55 };
+        var s = new Settings { MyTodoHotkey = "Ctrl+Alt+K", MyTodoMode = MyTodoMode.AddAtOnce, AdaptiveSettings = false, ShowAllTools = true, SectionUse = new() { ["Files"] = 4 }, CardOpacity = 0.55 };
         SettingsService.Save(s, path);
         var back = SettingsService.Load(path);
         Assert.Equal("Ctrl+Alt+K", back.MyTodoHotkey);
         Assert.Equal(MyTodoMode.AddAtOnce, back.MyTodoMode);
         Assert.False(back.AdaptiveSettings);
-        Assert.True(back.GettingStartedDone);
+        Assert.True(back.ShowAllTools);
         Assert.Equal(4, back.SectionUse["Files"]);
         Assert.Equal(0.55, back.CardOpacity, 3);
         // an older file with none of the new fields gets the defaults
@@ -89,7 +88,7 @@ public class Round16Tests
         Assert.Equal("Ctrl+Alt+L", old.MyTodoHotkey);
         Assert.Equal(0.92, old.CardOpacity, 3);
         Assert.True(old.AdaptiveSettings);
-        Assert.False(old.GettingStartedDone);
+        Assert.False(old.ShowAllTools);
         Assert.Empty(old.SectionUse);
     }
 
