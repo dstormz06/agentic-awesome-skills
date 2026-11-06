@@ -723,7 +723,7 @@ What the adversarial review found before any code was written, and how each was 
 
 Local results on this code: C# **933 passed, 11 skipped, 0 failed**; extension unit **31 passed**, and the standalone browser run **all pass**; simulation: this round's suite 24, **101 checks**, and suite 25 (axe-core 4.10.2), **18 scans, no violations**; the older suites, with the expectations that this round changes updated (default look K to T, 19 to 22 looks, 15 to 18 cards in the lab): suites 2 to 22 all pass (for example 41, 13, 68, 26, 38, 15, 65, 56, 39, 24, 254, 12, 144, 133 and 94 checks), the combination matrix passes **1,090 of 1,090**, the in-frame check **152 of 152**, the axe scans of earlier rounds report no violations, and the two parity scripts still match the app's fixtures (**46 of 46 review cases; 21 selection cases, 0 field mismatches**); `npm run validate` and `npm run security:docs` pass; `node tools/wording-check.mjs` reports **0 findings in 132 files**.
 
-CI: commit **`4958f13`** was pushed; the result of its Windows run is recorded below when it has finished.
+CI: commit **`4958f13`** (run 32): Linux and Windows jobs green. The Windows self-test is **63 PASS, 0 WARN, 0 FAIL, 1 SKIP** (the live Claude connection, by design), including the tray-icon check with the new Loupe icon, `hotkeys-delivered` with all four shortcuts and the renders of every window. The self-test renders the Windows app, which still uses the earlier design apart from the icon, so it says nothing about the simulation's new card. The later commit that adds this entry changes only documents.
 
 | Claim | Evidence | Limit |
 |---|---|---|
