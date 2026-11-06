@@ -73,6 +73,35 @@ public class AskTests : IClassFixture<HeadlessFixture>
     }
 
     [Fact]
+    public async Task A_late_change_notice_for_the_same_text_does_not_wipe_a_result_that_was_just_shown()
+    {
+        // On a real Windows machine the text box can announce a change after the window is shown, even though the text is the same.
+        // The result of a quick check must survive that (the Windows self-test found it: the result was gone 250 ms later).
+        var r = await _fx.Session.Dispatch(async () =>
+        {
+            var (w, _) = Open(Table);
+            Click(w.FindControl<Button>("SuggestBtn")!); Settle();
+            string before = w.Result;
+            var box = w.FindControl<TextBox>("SelectionBox")!;
+            box.RaiseEvent(new TextChangedEventArgs(TextBox.TextChangedEvent));
+            await Task.Delay(500); Settle(); Settle();
+            string after = w.Result;
+            // a real edit still re-reads the selection and clears the old result
+            box.Text = "ANDA 216482";
+            box.RaiseEvent(new TextChangedEventArgs(TextBox.TextChangedEvent));       // what typing does
+            await Task.Delay(500); Settle(); Settle();
+            var res = (before, after, w.Result, Text(w, "ShapeText"));
+            w.Close(); Settle();
+            return res;
+        }, CancellationToken.None);
+
+        Assert.StartsWith("Found 1 repeated row", r.before);
+        Assert.Equal(r.before, r.after);
+        Assert.Equal("", r.Item3);
+        Assert.Equal("An ANDA number: 216482.", r.Item4);
+    }
+
+    [Fact]
     public async Task Compare_columns_reads_the_two_numbers_and_explains_a_bad_pair()
     {
         var r = await _fx.Session.Dispatch(() =>

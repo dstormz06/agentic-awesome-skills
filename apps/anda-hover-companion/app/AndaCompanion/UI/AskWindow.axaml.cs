@@ -22,6 +22,7 @@ public partial class AskWindow : Window
     private readonly DispatcherTimer _debounce = new() { Interval = TimeSpan.FromMilliseconds(250) };
     private List<CustomAction> _prompts = new();
     private Action? _suggested;
+    private string _analysedText = "";      // the text the window last read; a change notice for the same text is not a change
 
     public AskWindow(AskHooks hooks, string initialText)
     {
@@ -43,8 +44,10 @@ public partial class AskWindow : Window
 
         CloseBtn.Click += (_, _) => Close();
         KeyDown += (_, e) => { if (e.Key == Key.Escape) Close(); };
-        SelectionBox.TextChanged += (_, _) => { _debounce.Stop(); _debounce.Start(); };
-        _debounce.Tick += (_, _) => { _debounce.Stop(); Analyse(); };
+        // The text box can announce a change after the window is shown even though the text is the same (seen on a real Windows machine).
+        // Reading the selection again then would wipe a result the person has just asked for, so only a real change starts the pause.
+        SelectionBox.TextChanged += (_, _) => { if ((SelectionBox.Text ?? "") == _analysedText) return; _debounce.Stop(); _debounce.Start(); };
+        _debounce.Tick += (_, _) => { _debounce.Stop(); if ((SelectionBox.Text ?? "") != _analysedText) Analyse(); };
         SuggestBtn.Click += (_, _) => _suggested?.Invoke();
         DescribeBtn.Click += (_, _) => Show(SelectionHelpers.Describe(SelectionBox.Text));
         DupBtn.Click += (_, _) => Show(SelectionHelpers.FindDuplicates(SelectionBox.Text));
@@ -91,6 +94,7 @@ public partial class AskWindow : Window
     public void Analyse()
     {
         _debounce.Stop();
+        _analysedText = SelectionBox.Text ?? "";
         var shape = Shape = SelectionHelpers.Classify(SelectionBox.Text);
         ShapeText.Text = shape.Label;
         SuggestText.Text = shape.Suggestion;

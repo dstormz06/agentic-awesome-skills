@@ -327,6 +327,7 @@ internal static class SelfTest
             win.Show();
             var kind = win.Shape.Kind;
             win.FindControl<Button>("SuggestBtn")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            await Task.Delay(600);          // past the window's 250 ms pause: a result that is wiped by a late change notice must show up here
             report.Add(await ShootAsync(win, "ask-about-a-selection", o.OutDir, false));
             bool ok = kind == SelectionKind.Table && win.Result.StartsWith("Found 1 repeated row", StringComparison.Ordinal) && calls.Count == 0;
             win.Close();
