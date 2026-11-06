@@ -4,7 +4,7 @@ using System.Text.Json;
 
 namespace AndaCompanion.Services;
 
-/// <summary>Which connection the app uses for generated text. <c>Auto</c> keeps the earlier behaviour (the environment decides).</summary>
+/// <summary>Which connection the app uses for generated text. <c>Auto</c> keeps the earlier behavior (the environment decides).</summary>
 public enum ProviderChoice { Auto, Offline, Claude, MyApi }
 
 /// <summary>

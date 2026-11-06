@@ -281,7 +281,7 @@ public sealed class AgentService
                 ? new(agent.Id, agent.Name, record.Number, AgentState.Failed, "", Array.Empty<string>(), _now(), $"{agent.Name} returned nothing.")
                 : new(agent.Id, agent.Name, record.Number, AgentState.Done, text, TodoSuggestions.Parse(text, AgentRules.MaxItems), _now(), $"From {agent.Name}. Verify before acting.");
         }
-        catch (OperationCanceledException) { result = Failed(agent, record, "Cancelled."); }
+        catch (OperationCanceledException) { result = Failed(agent, record, "Canceled."); }
         catch (ElsaException ex) { result = Failed(agent, record, ex.Message); }
         catch (HttpRequestException) { result = Failed(agent, record, $"{agent.Name} could not be reached. Please check the address and your network."); }
         catch (Exception ex) { result = Failed(agent, record, $"{agent.Name} did not answer ({ex.GetType().Name})."); }

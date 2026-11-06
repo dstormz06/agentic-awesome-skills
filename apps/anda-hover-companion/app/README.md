@@ -3,6 +3,10 @@
 A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
 **All bundled data is fictional.** Not an FDA product; a concept prototype.
 
+> **Round 18 status.** This app has the new **Loupe** icon (the program, the tray and the extension). The new default card, the two new looks, One Bar,
+> Today, recent and kept ANDAs, spacing and text size are built **only in the browser simulation** (`../mockup/windows-simulation.html`) and are not in this app yet. They are
+> ported after the owner has reviewed the simulation. Until then this app opens with K · Graphite Quiet, as described below. See `../DESIGN.md` §11b.
+
 ## Quick setup (under 5 minutes)
 
 **No .NET needed:** every green run of the *ANDA Companion (Windows)* workflow publishes
@@ -21,7 +25,7 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
 
 ## What works today
 
-- **Tray app** — quiet icon, no notifications. Menu: lookup, demo cards, quick
+- **Tray app** — the Loupe icon (an indigo plate, a white ring and an amber center), no notifications. Menu: lookup, demo cards, quick
   Appearance switch, **Settings…**, **Prompt library…**. All persisted to
   `%AppData%\AndaCompanion\settings.json`.
 - **Settings window** — Appearance (nineteen looks, **light-only by product decision**; **K ·
@@ -120,8 +124,7 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   clipboard, up to 20,000 characters, 1,000 rows and 30 columns; **not tried against real Excel**. `Services/SelectionHelpers.cs`, `UI/AskWindow.*`, `App.Ask.cs`.
 - **The focused edition** — the product opens with what the supervisor asked for: **ANDA lookup** and **reviewing a draft**, plus **Ask**. Hidden until
   *Settings, Maintenance, Show all tools* is ticked: the two to-do lists (and their shortcut), agents, the appearance picker (the card is solid, in the
-  default look), the dates section and the transparency slider. Nothing is deleted, and what was chosen comes back when all tools are shown. There is no
-  *Getting started* card and the demo has no checklist of steps. `Edition` in `Services/SettingsService.cs`.
+  default look), the dates section and the transparency slider. Nothing is deleted, and what was chosen comes back when all tools are shown. There is no *Getting started* card, and the demo has no list of steps. `Edition` in `Services/SettingsService.cs`.
 - **Writing actions (Proofread, Rewrite, Fact-check)** — buttons in the draft window, **off until an
   approved model is connected**. Each shows a **preview of the exact text that will be sent** (your draft,
   the matching records for Fact-check, your standing instructions and chosen lens) and sends nothing
@@ -134,10 +137,10 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   estimate. Hard limits on file size, rows and columns; no macros, formulas or external links are
   read. `Services/Portfolio/`. Tested on generated sample files, **not on a real RPM workbook**.
 - **Reference dates (RLD labeling, PSG)** — the card **always shows two lines**, PSG and RLD LABEL: a date with where it came from, or a brief
-  reason there is none ("not available: …"). The fictional demo records carry made-up dates labelled "fictional demo date". **RLD labeling** is the
+  reason there is none ("not available: …"). The fictional demo records carry made-up dates labeled "fictional demo date". **RLD labeling** is the
   most recent labeling approval date in a Drugs@FDA data file *you* download and point to, **or fetch with Update now** from an https address you paste
   (only when you press it, kept only if it reads as a real Drugs@FDA file; this build does not know or guess FDA's address).
-  **PSG** is shown only if your own sheet has a PSG date column, labelled "from your sheet, not an
+  **PSG** is shown only if your own sheet has a PSG date column, labeled "from your sheet, not an
   official source". No official PSG source is connected, so there is no live PSG date. If a lookup fails it says "not available" and
   never guesses. **The Drugs@FDA file layout the parser expects has not been checked against a real
   download** (FDA's sites were not reachable from the build environment), so treat RLD as unverified
@@ -210,7 +213,7 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
 
 - **Placement** — cards, notices and invites are placed from their measured size: below-right of
   the cursor, flipped at an edge, clamped to the work area. A card taller than the screen scrolls.
-- **Recognizer** — six digits, optionally prefixed `ANDA`. A number labelled NDA, BLA, IND, DMF, MF
+- **Recognizer** — six digits, optionally prefixed `ANDA`. A number labeled NDA, BLA, IND, DMF, MF
   or NDC is refused, because those are also six digits and showing the wrong card is worse than none.
   This holds even when the digits follow the label with no space (`NDA No123456`). Only ASCII digits 0 to 9
   count, so a full-width or other non-ASCII digit string is never read as a number. The extension and the browser

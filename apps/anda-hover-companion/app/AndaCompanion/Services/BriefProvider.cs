@@ -53,7 +53,7 @@ public static class ChatCompleterFactory
     public static IChatCompleter? Create(Func<string, string?>? env = null, IElsaMapping? mapping = null, Settings? settings = null)
     {
         env ??= Environment.GetEnvironmentVariable;
-        // The person's choice in Settings wins over the environment. Auto (the default) keeps the earlier behaviour.
+        // The person's choice in Settings wins over the environment. Auto (the default) keeps the earlier behavior.
         switch (settings?.Provider)
         {
             case ProviderChoice.Offline: return null;

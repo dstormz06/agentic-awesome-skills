@@ -183,7 +183,7 @@ public sealed class OutlookService : IDisposable
         {
             // Only the sign-in that is still current reports it; Sign out and a newer Sign in say their own piece.
             bool current; lock (_gate) current = ReferenceEquals(_signIn, cts) && _snapshot.State == OutlookState.SigningIn;
-            if (current) Set(new(OutlookState.SignedOut, "Sign-in cancelled."));
+            if (current) Set(new(OutlookState.SignedOut, "Sign-in canceled."));
         }
         catch (Exception ex) when (ex is HttpRequestException or JsonException or KeyNotFoundException or InvalidOperationException)
         {

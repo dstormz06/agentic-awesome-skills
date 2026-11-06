@@ -111,13 +111,13 @@ public sealed class ProgressControl : Control
                 {
                     // P: a half dial opening upward, the value inside it.
                     double thick = 9, rad = Math.Min(w / 2, h) - thick / 2 - 1;
-                    var centre = new Point(w / 2, h - thick / 2 - 1);
+                    var dialMiddle = new Point(w / 2, h - thick / 2 - 1);
                     void Arc(IBrush brush, double fraction)
                     {
                         if (fraction <= 0) return;
                         double sweep = Math.PI * Math.Clamp(fraction, 0, 1);
-                        var start = new Point(centre.X - rad, centre.Y);
-                        var end = new Point(centre.X - rad * Math.Cos(sweep), centre.Y - rad * Math.Sin(sweep));
+                        var start = new Point(dialMiddle.X - rad, dialMiddle.Y);
+                        var end = new Point(dialMiddle.X - rad * Math.Cos(sweep), dialMiddle.Y - rad * Math.Sin(sweep));
                         var g = new StreamGeometry();
                         using (var c = g.Open())
                         {
@@ -144,7 +144,7 @@ public sealed class ProgressControl : Control
 
             case ProgressVariant.Line:
                 {
-                    // K: a 2 px line with a dot at the value — colour-free, reads on any projector.
+                    // K: a 2 px line with a dot at the value — color-free, reads on any projector.
                     double y = h / 2;
                     ctx.DrawRectangle(track, null, new RoundedRect(new Rect(0, y - 1, w, 2), 1));
                     double x = Math.Clamp(w * pct, 0, w);

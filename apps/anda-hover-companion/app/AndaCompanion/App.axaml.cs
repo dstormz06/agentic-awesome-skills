@@ -529,17 +529,24 @@ public partial class App : Application
         }
     }
 
-    /// <summary>Tray glyph drawn at runtime — no asset pipeline needed.</summary>
-    private static Bitmap RenderTrayBitmap()
+    /// <summary>The Loupe icon for the tray. <paramref name="needsLook"/> adds the small amber dot (the picture is ready; it is not switched on until the new design is ported). If the picture cannot be read, a plain drawn tile is used so the tray never has no icon.</summary>
+    private static Bitmap RenderTrayBitmap(bool needsLook = false)
     {
-        var rtb = new RenderTargetBitmap(new PixelSize(32, 32), new Vector(96, 96));
-        using (var ctx = rtb.CreateDrawingContext())
+        try
         {
-            // A fixed federal blue (USWDS primary), not the look's accent: with K the accent is graphite, which
-            // would make a dark tile on a dark Windows taskbar. The glyph must read in both taskbar modes.
-            ctx.DrawRectangle(new SolidColorBrush(Color.Parse("#005EA2")), null, new RoundedRect(new Rect(2, 2, 28, 28), 8));
-            ctx.DrawEllipse(Brushes.White, null, new Point(16, 16), 5, 5);
+            using var stream = Avalonia.Platform.AssetLoader.Open(new Uri(needsLook ? "avares://AndaCompanion/Assets/tray-32-alert.png" : "avares://AndaCompanion/Assets/tray-32.png"));
+            return new Bitmap(stream);
         }
-        return rtb;
+        catch (Exception)
+        {
+            var rtb = new RenderTargetBitmap(new PixelSize(32, 32), new Vector(96, 96));
+            using (var ctx = rtb.CreateDrawingContext())
+            {
+                // A fixed indigo tile with a white ring, so the glyph reads on a light and on a dark Windows taskbar.
+                ctx.DrawRectangle(new SolidColorBrush(Color.Parse("#3A3F8F")), null, new RoundedRect(new Rect(2, 2, 28, 28), 8));
+                ctx.DrawEllipse(null, new Pen(Brushes.White, 3), new Point(14, 14), 7, 7);
+            }
+            return rtb;
+        }
     }
 }

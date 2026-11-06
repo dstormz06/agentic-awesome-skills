@@ -1,4 +1,4 @@
-// The same rule as the app's Data/EntityKinds.cs: six digits, optionally prefixed "ANDA", but never a number that is labelled as
+// The same rule as the app's Data/EntityKinds.cs: six digits, optionally prefixed "ANDA", but never a number that is labeled as
 // another kind of application (NDA, BLA, IND, DMF, MF, NDC). Showing the wrong application's card is worse than showing none.
 const ANDA = /(?:ANDA[-\s#]?)?(?<!\d)(?<!\b(?:NDA|BLA|IND|DMF|NDC|MF)(?:[-\s#:.]|No(?![A-Za-z])|Number(?![A-Za-z]))*)(\d{6})(?!\d)/gi;
 

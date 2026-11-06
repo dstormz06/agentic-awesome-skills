@@ -104,7 +104,7 @@ public class WritingActionsTests
         var elsa = await new WritingService(new Throws(new ElsaException("Elsa answered 429 Too Many Requests."))).RunAsync(req);
         Assert.Contains("429", elsa.Message);
         var cancelled = await new WritingService(new Throws(new OperationCanceledException())).RunAsync(req);
-        Assert.Contains("Cancelled", cancelled.Message);
+        Assert.Contains("Canceled", cancelled.Message);
         var empty = await new WritingService(new Fake((_, _) => "   ")).RunAsync(req);
         Assert.False(empty.Ok);
     }
@@ -185,7 +185,7 @@ public class DrugsAtFdaFileTests
     public void A_file_with_an_unrecognised_layout_is_not_checked_and_never_guessed()
     {
         Assert.Null(DrugsAtFdaFile.TryLoad(Zip("Foo\tBar\n1\t2\n", S, C), out var msg));
-        Assert.Contains("layout this version does not recognise", msg);
+        Assert.Contains("layout this version does not recognize", msg);
         string notDrugs = Path.Combine(Temp.NewDir(), "x.zip");
         using (var z = ZipFile.Open(notDrugs, ZipArchiveMode.Create)) z.CreateEntry("hello.txt");
         Assert.Null(DrugsAtFdaFile.TryLoad(notDrugs, out msg));

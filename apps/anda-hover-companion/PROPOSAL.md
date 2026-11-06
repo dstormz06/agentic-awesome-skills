@@ -12,11 +12,11 @@ agency-approved platform (Elsa first), and only after that platform's own approv
 Edge). A small card shows the goal date against the forecast, the one item that needs attention, a WATCH line when a
 date falls on a weekend or federal holiday, what lands next, and two reference dates (PSG and RLD labeling). One click
 copies a status sentence for the email or tracker reply. Everything on the card comes from the record; nothing is
-generated. An optional AI-written brief is labelled "generated, verify before acting" and stays off until approved.
+generated. An optional AI-written brief is labeled "generated, verify before acting" and stays off until approved.
 
 **Yours to adjust, with no rebuild.** Shortcuts, files, connection, writing style and look are all set in the app's
 Settings: your own keys; your Excel or CSV portfolio, notes folder and Drugs@FDA file; Offline, Claude (with its model
-name) or your own API described in a form; tone, sign-off and quick replies; nineteen looks. Settings can be backed up,
+name) or your own API described in a form; tone, sign-off and quick replies; a choice of looks, with a calm one-answer-first card as the default. Settings can be backed up,
 restored and reset. A backup holds no secret and no file path, and a restore never switches on a connection that sends data away.
 You can also write your own **actions** (a prompt, an AI request or an agent request on a shortcut you choose), keep an **ANDA to-do list** that
 includes what your data says needs a look, keep a separate **My to-do list** for the rest of your daily workload, ANDA related or not (highlight rough notes and press its shortcut:

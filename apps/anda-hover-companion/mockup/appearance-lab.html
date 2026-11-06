@@ -262,7 +262,7 @@ h2.sec{font-size:13px;letter-spacing:.12em;font-weight:700;color:var(--ink3);mar
 .card[data-look="j"]{border-top:3px solid #c99a1d}
 .card[data-look="j"] .seal{border:1px solid var(--c-good);background:transparent}
 .card[data-look="j"] .chip{border-radius:6px}
-/* K: monochrome. Colour is reserved for status. */
+/* K: monochrome. Color is reserved for status. */
 .card[data-look="k"] .seal{background:transparent;border:1px solid #c9c9c9;color:var(--c-ink2)}
 .card[data-look="k"] .cdate{font-size:15px}
 .card[data-look="k"] .chip{border:none;border-bottom:1px solid var(--c-line);border-radius:0;padding:6px 2px;min-height:30px}
@@ -271,13 +271,32 @@ h2.sec{font-size:13px;letter-spacing:.12em;font-weight:700;color:var(--ink3);mar
 .card[data-look="k"] .attn{background:transparent;border:1px solid var(--c-warn);border-radius:6px}
 @media (max-width:480px){.tile{padding:10px}.stage{padding:8px}.card{--rail:74px}.card[data-look="i"]{--rail:84px}.slot{padding-left:13px;padding-right:13px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---- round 18: T Pocket Plain (the default), U Calendar Ribbon, V Glass Sheet ---- */
+.card[data-look="t"],.card[data-look="u"],.card[data-look="v"]{--c-bg:#ffffff;--c-ink:#1d2329;--c-ink2:#46505a;--c-ink3:#58616b;--c-hair:#eceef1;--c-line:#dde1e6;--c-accent:#3f4a56;--c-good:#1a6b43;--c-good-bg:#e6f1ea;--c-warn:#8a5800;--c-warn-bg:#faf1dc;--c-track:#e6e8eb;--c-fill:#6a7683;--c-radius:12px;--c-shadow:0 18px 40px -14px rgba(20,24,28,.26),0 3px 9px rgba(20,24,28,.08)}
+.card[data-look="v"]{--c-ink2:#3c444d;--c-ink3:#4a525b;--c-radius:16px;background-color:color-mix(in srgb,#fff 86%,transparent);background-image:linear-gradient(165deg,rgba(255,255,255,.65),rgba(255,255,255,0) 38%);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5)}
+.card[data-look="t"] .seal,.card[data-look="u"] .seal,.card[data-look="v"] .seal{background:transparent;border:1px solid #cfd3d8;color:var(--c-ink2)}
+.card[data-look="t"] .attn,.card[data-look="u"] .attn,.card[data-look="v"] .attn{border:none;border-radius:10px}
+.card[data-look="t"] .chips .chip:first-child,.card[data-look="u"] .chips .chip:first-child,.card[data-look="v"] .chips .chip:first-child{flex:1 1 100%;justify-content:center;background:var(--c-accent);border-color:var(--c-accent);color:#fff;font-weight:650;border-radius:10px;min-height:42px;margin-bottom:4px}
+.card[data-look="t"] .chips .chip:not(:first-child),.card[data-look="u"] .chips .chip:not(:first-child),.card[data-look="v"] .chips .chip:not(:first-child){border:none;background:none;padding:4px 2px;min-height:28px}
+.hero5{padding:6px 18px 14px}
+.hero5 .hl{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.hero5 .hl b{font-size:46px;line-height:1;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.hero5 .hl span{font-size:16px;font-weight:600}
+.hero5.late .hl b{color:var(--c-warn)}.hero5.good .hl b{color:var(--c-good)}
+.hero5 .hs{font-size:12.5px;color:var(--c-ink2);margin-top:8px}
+.ribbon5{padding:0 18px 12px}
+.ribbon5 .cap{font-size:9.5px;font-weight:800;letter-spacing:.13em;color:var(--c-ink3);margin-bottom:2px}
+.ribbon5 svg{display:block;width:100%;height:auto}
+.ribbon5 svg text{font-weight:500;font-size:9.5px;font-family:var(--c-font,sans-serif);fill:var(--c-ink3)}
+.ribbon5 .rt{font-size:12px;color:var(--c-ink2);margin-top:4px}
 </style>
 </head>
 <body>
 <div class="wrap" role="main">
   <p class="eyebrow">ALL DATA FICTIONAL · LIGHT ONLY</p>
   <h1>Appearance Lab</h1>
-  <p class="lede">All nineteen looks are options in the app, and K is the default. Fifteen full cards, then four compact boxes that stay out of the way of an open email. None draws a grid, hatching or texture. Anatomy and meaning never change between looks: only the surface, type, and the shape of the progress marker do.</p>
+  <p class="lede">All 22 looks are options. T, Pocket Plain, is the new default; U and V are new beside it, and K, the earlier default, stays. Eighteen full cards, then four compact boxes that stay out of the way of an open email. None draws a grid, hatching or texture. Anatomy and meaning never change between looks: only the surface, type, and the shape of the progress marker do.</p>
 
   <div class="bar" role="toolbar" aria-label="Controls">
     <div class="seg" role="group" aria-label="Record shown">
@@ -286,6 +305,8 @@ h2.sec{font-size:13px;letter-spacing:.12em;font-weight:700;color:var(--ink3);mar
     </div>
   </div>
   
+  <h2 class="sec">FULL CARD · T TO V · NEW: THE DEFAULT, A CALENDAR RIBBON AND A GLASS SHEET</h2>
+  <section class="grid" id="gridPocket"></section>
   <h2 class="sec">FULL CARD · A TO E</h2>
   <section class="grid" id="gridCur"></section>
   <h2 class="sec">FULL CARD · F TO K</h2>
@@ -313,6 +334,9 @@ const DATA = {
     brief:"Related precedent: ANDA 216482 — same applicant, same facility. Forecast drivers and assumptions: expand → Forecast & assumptions.", sisters:1, notes:2 }
 };
 const LOOKS = [
+  { id:"t", grp:"pocket", layout:"pocket", def:true, name:"T · Pocket Plain", tag:"One answer first: how many days later or earlier than the goal. Then the facts, and one main action, Copy status, pinned at the bottom.", prog:"bar", sw:["#ffffff","#3f4a56","#8a5800"] },
+  { id:"u", grp:"pocket", layout:"ribbon", name:"U · Calendar Ribbon", tag:"The same answer, plus the weeks around the goal and forecast drawn out: weekends, a federal holiday and the gap.", prog:"bar", sw:["#ffffff","#3f4a56","#c98a14"] },
+  { id:"v", grp:"pocket", layout:"glass", name:"V · Glass Sheet", tag:"The same layout on a frosted sheet. It stays readable: the sheet is at least 86% opaque, and solid when the system asks for less transparency.", prog:"bar", sw:["#eef2f6","#3f4a56","#8a5800"] },
   { id:"a", cur:true, name:"A · Quiet Fluent", tag:"Native Windows calm. White surface, steel-blue accent, a thin bar.", prog:"bar", sw:["#fff","#3d6fa5","#177245"] },
   { id:"b", cur:true, name:"B · Docket Ledger", tag:"Typeset federal docket. Warm paper, archival green, serif title, stamp seal, milestone ticks.", prog:"ticks", sw:["#fbf8f2","#23573f","#211d15"] },
   { id:"c", cur:true, name:"C · Signal", tag:"Light steel panel. Federal blue, mono numerals, a progress ring.", prog:"ring", sw:["#f7fafd","#005ea2","#177245"] },
@@ -326,8 +350,8 @@ const LOOKS = [
   { id:"p", grp:"bronze", layout:"gauge", name:"P · Bronze Gauge", tag:"A half dial carries the progress. Soft round corners and pill-shaped warnings on the bronze palette.", prog:"gauge", sw:["#f8f2e6","#7a5a2e","#9c7539"] },
   { id:"q", grp:"bronze", layout:"folder", name:"Q · Bronze Folder", tag:"A case-file folder: the number on a bronze tab, a plain edge and a thin line for progress.", prog:"line", sw:["#fbf8f1","#7a5a2e","#e9e2d3"] },
   { id:"r", grp:"bronze", layout:"rail", name:"R · Bronze Rail", tag:"A tinted column carries the days to goal in large figures; the detail reads down the right. Squarer corners.", prog:"bar", sw:["#f6efe2","#7a5a2e","#8f4a00"] },
-  { id:"s", grp:"bronze", layout:"tag", name:"S · Bronze Tag", tag:"An ID tag: a centred head, goal and forecast in two columns, and a plain bar for progress.", prog:"bar", sw:["#f6efe2","#7a5a2e","#9c7539"] },
-  { id:"k", cur:false, def:true, name:"K · Graphite Quiet", tag:"Monochrome. Colour appears only where status needs it. Best on a projector. The default.", prog:"line", sw:["#fdfdfd","#56626e","#8a5800"] }
+  { id:"s", grp:"bronze", layout:"tag", name:"S · Bronze Tag", tag:"An ID tag: a centered head, goal and forecast in two columns, and a plain bar for progress.", prog:"bar", sw:["#f6efe2","#7a5a2e","#9c7539"] },
+  { id:"k", cur:false, name:"K · Graphite Quiet", tag:"Monochrome. Color appears only where status needs it. Best on a projector. The default before round 18.", prog:"line", sw:["#fdfdfd","#56626e","#8a5800"] }
 ];
 const COMPACT = [
   { id:"l", form:"strip", tokens:"k", name:"L · Graphite Strip", tag:"One glance: number, goal, forecast, a status edge. About 340 × 63–81 px.", sw:["#fdfdfd","#56626e","#8a5800"] },
@@ -367,6 +391,29 @@ function ringHTML(d){
 function gaugeHTML(d){
   return `<div class="p-gauge" aria-hidden="true"><svg viewBox="0 0 112 62"><path class="tr" pathLength="100" d="M10 56 A46 46 0 0 1 102 56"/><path class="fg" pathLength="100" d="M10 56 A46 46 0 0 1 102 56" stroke-dasharray="${d.pct} 100"/></svg><span>${d.pct}%</span></div>`;
 }
+/* the calendar ribbon, as in the simulation: weekends shaded, a federal holiday marked, the gap drawn; a sentence says the same */
+const RIBBON_DATES = { "216482": [[2026,10,3],[2026,10,17]], "214990": [[2026,8,15],[2026,8,6]] };
+const HOLIDAYS = { "2026-09-07":"Labor Day", "2026-10-12":"Columbus Day", "2026-11-11":"Veterans Day" };
+function ribbonHTML(id, d){
+  const DAY = 864e5, ymd = (y, m, dd) => Date.UTC(y, m - 1, dd), dow = t => new Date(t).getUTCDay(), iso = t => new Date(t).toISOString().slice(0, 10);
+  const nice = t => new Date(t).toLocaleDateString("en-US", { weekday:"short", month:"short", day:"numeric", timeZone:"UTC" }).replace(",", "");
+  const [g, f] = RIBBON_DATES[id].map(a => ymd(...a)), lo = Math.min(g, f), hi = Math.max(g, f);
+  let start = lo - 7 * DAY; start -= ((dow(start) + 6) % 7) * DAY;
+  const weeks = Math.min(16, Math.max(4, Math.ceil((hi + 7 * DAY - start) / (7 * DAY)))), N = weeks * 7, dw = 300 / N, x = t => (Math.round((t - start) / DAY) + .5) * dw;
+  const tag = t => dow(t) === 0 || dow(t) === 6 ? " (a weekend day)" : HOLIDAYS[iso(t)] ? ` (${HOLIDAYS[iso(t)]})` : "";
+  const gap = Math.round(Math.abs(f - g) / DAY), said = `Goal ${nice(g)}${tag(g)}; forecast ${nice(f)}${tag(f)}; ${gap} day${gap === 1 ? "" : "s"} apart.`;
+  let out = '<rect x="0" y="30" width="300" height="14" rx="3" fill="#eef0f2"/>', labels = "";
+  for (let i = 0; i < N; i++) {
+    const t = start + i * DAY;
+    if (dow(t) === 0 || dow(t) === 6) out += `<rect x="${(i * dw).toFixed(2)}" y="30" width="${dw.toFixed(2)}" height="14" fill="#d3d8de"/>`;
+    else if (HOLIDAYS[iso(t)]) { out += `<rect x="${(i * dw).toFixed(2)}" y="30" width="${dw.toFixed(2)}" height="14" fill="#c4b4e0"/>`; labels += `<text x="${Math.min(262, Math.max(38, (i + .5) * dw)).toFixed(1)}" y="66" text-anchor="middle">${HOLIDAYS[iso(t)]}</text>`; }
+  }
+  const gx = x(g), fx = x(f), tone = d.late ? "#c98a14" : "#2f8a5b", dark = d.late ? "#8a5800" : "#1a6b43";
+  out += `<rect x="${Math.min(gx, fx).toFixed(1)}" y="35" width="${Math.abs(fx - gx).toFixed(1)}" height="4" rx="2" fill="${tone}"/><polygon points="${gx.toFixed(1)},25 ${(gx + 7.5).toFixed(1)},36.5 ${gx.toFixed(1)},48 ${(gx - 7.5).toFixed(1)},36.5" fill="#fff" stroke="#1d2329" stroke-width="2"/><circle cx="${fx.toFixed(1)}" cy="36.5" r="7" fill="${dark}"/>`;
+  const near = Math.abs(gx - fx) < 78, ga = near ? (gx <= fx ? "end" : "start") : "middle", fa = near ? (gx <= fx ? "start" : "end") : "middle";
+  const ends = `<text x="0" y="77">${nice(start).replace(/^\w+ /, "")}</text><text x="300" y="77" text-anchor="end">${nice(start + (N - 1) * DAY).replace(/^\w+ /, "")}</text>`;
+  return `<div class="slot ribbon5"><div class="cap">GOAL AND FORECAST ON THE CALENDAR</div><svg viewBox="0 0 300 78" role="img" aria-label="Calendar ribbon. ${said}">${out}<text x="${gx.toFixed(1)}" y="16" text-anchor="${ga}">Goal</text><text x="${fx.toFixed(1)}" y="16" text-anchor="${fa}">Forecast</text>${labels}${ends}</svg><div class="rt">${said}</div></div>`;
+}
 function card(look, id){
   const d = DATA[id], ring = look.prog === "ring", gauge = look.prog === "gauge", dial = ring || gauge, lay = look.layout || "";
   const spine = d.late ? "#8a5800" : "#1b7a4b", tone = d.late ? "warn" : "good";
@@ -377,7 +424,11 @@ function card(look, id){
   const goal = (days, pct) => `<div class="crow"><span class="lblx">GOAL</span><span class="cdate">${d.goal}</span>${days ? `<span class="cdays">${d.days}</span>` : ""}${pct ? `<span class="cpct">${d.pct}%</span>` : ""}</div>`;
   const fcst = (delta) => `<div class="crow"><span class="lblx">FORECAST</span><span class="cdate">${d.fc}</span>${delta ? `<span class="fdelta ${tone}">${d.fdelta}</span>` : ""}</div>`;
   let clockAndAttn;
-  if (lay === "rail") {
+  if (lay === "pocket" || lay === "ribbon" || lay === "glass") {
+    const n = Math.abs(d.delta);
+    const heroHTML = `<div class="slot hero5 ${d.late ? "late" : "good"}"><div class="hl"><b>${n}</b><span>day${n === 1 ? "" : "s"} ${d.delta > 0 ? "later than" : "ahead of"} the goal</span></div><div class="hs">Goal ${d.goal} · Forecast ${d.fc} · ${d.conf}</div></div>`;
+    clockAndAttn = heroHTML + (lay === "ribbon" ? ribbonHTML(id, d) : "") + attn;
+  } else if (lay === "rail") {
     const days = Math.abs(d.daysTo);
     clockAndAttn = `<div class="split"><div class="lft"><b>${days}</b><span class="cap">${d.daysTo < 0 ? "DAYS PAST GOAL" : "DAYS TO GOAL"}</span><span class="rd ${d.late ? "" : "good"}">${d.fdelta}</span><span class="rc">${d.conf}</span></div>
       <div class="rgt"><div class="slot clock">${goal(false, true)}${progress(look, d)}${fcst(false)}</div>${attn}</div></div>`;
@@ -411,7 +462,7 @@ function compactBox(c, id){
   return `<div class="cbx ${c.form}${d.late ? " late" : ""}" data-look="${c.tokens}" aria-label="Compact box ${c.name} for ANDA ${id}">${inner}</div>`;
 }
 function render(){
-  for (const [gridId, grp] of [["gridCur", "cur"], ["gridNew", "new"], ["gridBronze", "bronze"]]){
+  for (const [gridId, grp] of [["gridPocket", "pocket"], ["gridCur", "cur"], ["gridNew", "new"], ["gridBronze", "bronze"]]){
     document.getElementById(gridId).innerHTML = LOOKS.filter(l => (l.grp || (l.cur ? "cur" : "new")) === grp).map(l => `
       <div class="tile" data-id="${l.id}">
         <div class="thead"><div><div class="nm">${l.name}${l.def ? '<span class="badge new">DEFAULT</span>' : ""}</div><div class="tg">${l.tag}</div></div>

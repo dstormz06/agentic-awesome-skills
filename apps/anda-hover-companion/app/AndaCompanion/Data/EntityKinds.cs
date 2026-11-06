@@ -21,7 +21,7 @@ public static class EntityKinds
 {
     /// <summary>
     /// Six digits, optionally prefixed "ANDA" — the default domain. A bare six-digit number is
-    /// accepted (people select just the number), BUT a number that is explicitly labelled as
+    /// accepted (people select just the number), BUT a number that is explicitly labeled as
     /// another kind of application or file — NDA, BLA, IND, DMF, MF, NDC — is rejected: NDA and
     /// DMF numbers are also six digits and can coincide with a real ANDA number, and showing the
     /// wrong application's card is worse than showing none.

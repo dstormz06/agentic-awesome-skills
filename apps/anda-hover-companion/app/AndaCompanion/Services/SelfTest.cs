@@ -121,7 +121,7 @@ internal static class SelfTest
     private static async Task RenderAllAsync(SelfTestOptions o, IAndaRepository repo, Report report)
     {
         var briefs = new OfflineBriefService();
-        // K is the default look, so it gets the full set; every other full look and every compact form gets
+        // K is the default look until the new design is ported, so it gets the full set; every other full look and every compact form gets
         // at least one shot, alternating the at-risk and healthy records so both states are exercised.
         var shots = new CardShot[]
         {
@@ -331,7 +331,7 @@ internal static class SelfTest
             report.Add(await ShootAsync(win, "ask-about-a-selection", o.OutDir, false));
             bool ok = kind == SelectionKind.Table && win.Result.StartsWith("Found 1 repeated row", StringComparison.Ordinal) && calls.Count == 0;
             win.Close();
-            report.Add(ok ? new("ask-quick-check", CheckStatus.Pass, "a table of cells was recognised and Find duplicates found the repeated row on this PC; nothing was handed to a prompt, a lookup or an AI")
+            report.Add(ok ? new("ask-quick-check", CheckStatus.Pass, "a table of cells was recognized and Find duplicates found the repeated row on this PC; nothing was handed to a prompt, a lookup or an AI")
                           : new("ask-quick-check", CheckStatus.Fail, $"kind={kind}, calls={calls.Count}"));
         });
     }

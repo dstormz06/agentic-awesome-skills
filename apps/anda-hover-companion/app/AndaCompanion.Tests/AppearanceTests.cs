@@ -176,7 +176,7 @@ public class AppearanceTests
     public void Accents_and_fills_are_never_near_black()
     {
         // "Don't make anything too dark" (product owner, 2026-11-02). Text must stay dark enough to read, so this
-        // applies to the colours used for buttons, checkboxes, progress marks and fills, not to the text inks.
+        // applies to the colors used for buttons, checkboxes, progress marks and fills, not to the text inks.
         foreach (var a in Appearances.All)
         {
             Assert.True(Luminance(a.Palette.Accent) >= 0.05, $"{a.Id} accent {a.Palette.Accent} is too dark ({Luminance(a.Palette.Accent):0.000})");

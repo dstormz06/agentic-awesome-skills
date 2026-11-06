@@ -177,11 +177,12 @@ a deep link to the record in the system of record.
 
 ## 5. Visual language
 
-**Appearance is a preference, never information.** The card ships with **nineteen
-selectable looks** (Windows app: Settings → Appearance): fifteen full cards (A–K and P–S) and four
-compact boxes (L–O). **No look draws a grid, hatching, texture or other pattern behind its content**
-(the owner's decision, 2026-11-03). **K · Graphite Quiet is the default** (changed from A on 2026-11-02 by the
-product owner); the rest are user options. All full looks share identical anatomy, slot
+**Appearance is a preference, never information.** The Windows app ships with **nineteen selectable looks** today
+(Settings → Appearance): fifteen full cards (A–K and P–S) and four compact boxes (L–O). **Round 18 adds three more, T to V,
+in the simulation and the lab: 22 looks in all, 18 full cards and four compact boxes.** **No look draws a grid, hatching, texture or
+other pattern behind its content** (the owner's decision, 2026-11-03). **In the Windows app, K · Graphite Quiet is still the default**
+(changed from A on 2026-11-02 by the product owner). **In the simulation and the lab the default is T · Pocket Plain**, chosen by the
+owner on 2026-11-06; the Windows app takes it when the new design is ported (§11b). All full looks share identical anatomy, slot
 order, status semantics, and interactions — switching appearance never moves, adds,
 or removes information:
 
@@ -197,7 +198,7 @@ or removes information:
 | H | Sage Clinical | Soft sage band, generous radii and spacing; the calmest | Ten dots |
 | I | Indigo Dossier | A formal case file — double rule, serif name and labels | Five-step stepper |
 | J | Cobalt Timeline | Gold top rule; goal against forecast drawn on one runway, so the gap is the picture | Timeline |
-| **K** | **Graphite Quiet** *(default)* | Monochrome in soft slate (accent `#56626E`, not near-black) — colour appears only where status needs it; outlined attention, text-only chips; quiet in a meeting, sharp on a projector | Line with a dot |
+| **K** | **Graphite Quiet** *(app default until the port)* | Monochrome in soft slate (accent `#56626E`, not near-black) — color appears only where status needs it; outlined attention, text-only chips; quiet in a meeting, sharp on a projector | Line with a dot |
 | L | Graphite Strip | Compact (about 340 × 63–81 px): number, goal, forecast, status edge | — |
 | M | Fluent Tile | Compact (about 196 × 123–145 px): the forecast gap in large type, one attention line | — |
 | N | Bronze Ticket | Compact (about 300 × 64–68 px): a slim ticket with a stub | — |
@@ -205,7 +206,10 @@ or removes information:
 | P | Bronze Gauge | Bronze palette; soft round corners, pill-shaped warnings, a header wash | Half dial |
 | Q | Bronze Folder | Bronze palette on warm paper; the number on a bronze tab, a plain edge, underlined chips | Line with a dot |
 | R | Bronze Rail | Bronze palette; a tinted column carries the days to goal in large figures, the detail reads down the right | Solid square bar |
-| S | Bronze Tag | Bronze palette; an ID-tag head (a small slot, centred), goal and forecast in two columns | Thin bar |
+| S | Bronze Tag | Bronze palette; an ID-tag head (a small slot, centered), goal and forecast in two columns | Thin bar |
+| T | Pocket Plain | *Round 18; simulation and lab only; the default there.* White card, soft slate ink, one amber accent. One answer first: how many days later or earlier than the goal, with its confidence and source; then the facts; one main action, **Copy status**, pinned at the bottom | Thin bar |
+| U | Calendar Ribbon | *Round 18; simulation and lab only.* The same answer, with the weeks around the goal and the forecast drawn out: weekends, a federal holiday and the gap. Always has a written twin of the ribbon for screen readers and for the copy | Thin bar |
+| V | Glass Sheet | *Round 18; simulation and lab only.* The same layout on a frosted sheet. At least 86% opaque, and solid when Windows asks for less transparency | Thin bar |
 
 **Compact boxes (L–O).** They exist so the tool never blankets the email being read or
 written. A compact box borrows a full look's palette (K, A, F, G respectively), shows only
@@ -370,13 +374,13 @@ The original single-card design studio (`mockup/anda-card.html`, five looks) was
 duplicated what the two files below do better, and kept the old A-default and five-look picture alive. It stays in git
 history. Open these in any browser, desktop or phone, with fictional data:
 
-- **`mockup/appearance-lab.html`** — a comparison wall of all **nineteen looks** (the §5 table) rendering the same
+- **`mockup/appearance-lab.html`** — a comparison wall of all **22 looks** (the §5 table) rendering the same
   record side by side, with the at-risk and on-track records switchable, and the four compact boxes shown over an open
   email. It is the quickest way to compare looks and the source of each look's palette and structure.
 - **`extension/`** — the Edge/Chromium extension (see its README): the same card, draft check and watch rules in the browser, reached by the right-click
   menu, three shortcuts or the toolbar button, standalone or through the app's native-messaging host. It is not a mockup: it loads in a browser engine
   and is tested end to end there, including against the real host process. The simulation below shows its right-click menu in the Browser window.
-- **`mockup/windows-simulation.html`** — a Windows 11 desktop in the browser (default **K**) that ports the app's
+- **`mockup/windows-simulation.html`** — a Windows 11 desktop in the browser (default **T**) that ports the app's
   logic: the recognizer, the placement rule, the three consent models (§2, **whisper default with the urgent-peek
   rule**), the offline brief, auto-hide, the compact boxes (a click or the hotkey again expands them), the **WATCH
   line with the federal-holiday calendar** (OPM dates, 3-business-day window) and the **draft check** (`Ctrl+Alt+D`).
@@ -457,6 +461,85 @@ Rules taken from Apple's published human-interface guidance (clarity, deference,
 - **No teaching screens.** There is no *Getting started* card and no step list; the first run is the tool.
 
 What this does **not** prove: whether a real person finds it lighter. That is a hypothesis to time with testers, with and without the hidden tools.
+
+## 11b. The round 18 design: a calmer card, built for the daily habit (simulation first)
+
+**Order of work, agreed with the owner:** the design is built and published in the simulation first. The owner reviews it. Only then is it
+ported to the Windows app (§11b, "What is and is not in the Windows app"). Nothing below is claimed for the Windows app until that port is done and
+its CI run is green.
+
+**Why.** The first look had many options and many equal-weight lines. A project manager who opens it fifty times a day wants the
+answer, one next action, and nothing to learn. The rules are taken from Apple's published human-interface guidance (clarity, deference,
+one primary action, answer first, progressive disclosure) and applied on Windows without any Apple type, symbols or marks.
+
+**The owner's decisions (2026-11-06).**
+
+- The new default is **T · Pocket Plain**. **U · Calendar Ribbon** and **V · Glass Sheet** are selectable looks. The 19 earlier looks stay
+  under *Show all tools* and are not changed. All looks are light only.
+- The icon is **Loupe**: an indigo plate, a white ring and an amber center. A small amber dot on the tray icon means *urgent* (below).
+- **One Bar** is an option for the lookup window (*Settings, Look and feel*, with *Show all tools* on); **Today** is a small window in the tray menu, also under *Show all tools*. Neither is in the focused edition.
+- *Comfortable* or *Compact* spacing, and *Standard*, *Larger* or *Largest* text, are in *Settings, How it starts*. They change this app's
+  windows only.
+- Recent ANDAs and *Keep in my list* are saved on the PC, with a *Clear recents* button and an off switch.
+
+**The default card (T).**
+
+1. **The answer first.** One large figure says how many days later or earlier than the goal the forecast falls. The goal, the forecast and the
+   forecast's confidence sit on the line beneath it, so the figure is never shown alone and cannot read as more certain than it is.
+2. **One main action.** *Copy status* is pinned at the bottom of the card and Enter triggers it. Everything else is a quiet, secondary
+   control.
+3. **Everything else is one step away.** The facts (goal, forecast, WATCH, PSG, RLD) read below the answer. The drawer and the other
+   tools are unchanged.
+4. **Calendar Ribbon (U)** draws the weeks around the goal and the forecast, with weekends and the federal holiday marked and the gap shaded. It
+   is a picture, so it has a written twin: the same facts in one sentence, which is also what a screen reader is given. When the two dates are
+   more than fourteen weeks apart the ribbon is left out and the sentence stands alone. It is tested across a year end, because a ribbon that is wrong in the last week of December is worse than none.
+5. **Glass Sheet (V)** is the only look that is translucent. The sheet is never less than 86% opaque; its label and body text keep their contrast (4.5:1 and 7:1) even over a black window at that
+   floor, measured in the browser; and it is solid when the system asks for reduced transparency.
+
+**One Bar (lookup window option).** One field. Type a number to see the record; with text selected it offers *Review* and *Ask* as rows.
+**Every suggestion is a row you press. Nothing opens by itself.** Arrow keys move, Enter opens, Escape closes. It suggests only what its fixed
+rules recognize: it never calls a model to decide what you meant.
+
+**Today (tray menu, under *Show all tools*).** A small two-pane window. The left pane lists what needs a look (the same urgency and WATCH rules
+as the card and the watch list), then the ANDAs kept in my list, then recent ones. The right pane shows the chosen one with *Copy status*. It reads
+your data when you open it; nothing runs while it is closed. **Limit:** for someone with no portfolio file it shows only recents and kept ANDAs,
+so it is of little use to leadership and is therefore not in the focused edition.
+
+**Recent ANDAs and *Keep in my list*.** The last eight six-digit numbers looked up are remembered on this PC, so the lookup window offers them at once. Up to five can
+be kept with *Keep in my list* on the card. Only six-digit numbers are stored (no notes, no drafts, no selection text), in the app's settings file
+on the PC, and never sent anywhere. *Clear recents* empties them; switching *Remember* off clears them and stops the saving. Kept ANDAs are part of a
+settings backup; recents are not, because they are the PC's own history. This changes the older statement that the app keeps nothing: see `SECURITY.md`.
+
+**The tray icon and the amber dot.** The Loupe reads on a light and on a dark taskbar because the plate has a faint inner edge. The dot appears when
+any known ANDA is **urgent**: its forecast is seven or more days after the goal, or a WATCH flag is serious. It is deliberately *not* "something needs a look", because
+a dot that is almost always on is ignored. **The dot changes only when the app reads data** (for example when a portfolio file is loaded or a card is
+opened). There is no background polling.
+
+**Writing standard.** US English, sentence case, no exclamation marks, no casual words, one set of terms:
+
+| Term | Means | Do not write |
+|---|---|---|
+| ANDA number | The six digits, with or without the word ANDA | application number, ID |
+| Goal date | The official date of the goal | target, deadline |
+| Forecast | The tool's projected action date | prediction, estimate |
+| Gap | Days later (+) or earlier (-) than the goal | slippage, variance |
+| Urgent | Forecast seven or more days after the goal, or a serious WATCH flag | critical, alert |
+| WATCH | The line of weekends, holidays, passed goals and similar | warnings |
+| Review | Checks a draft against the record and against itself | check, QA |
+| Ask | Answers a question about the selection | chat |
+| Quick check | A fixed rule that runs on this PC, with no model | AI check |
+| Keep in my list | Saves an ANDA in the person's short list | favorite, bookmark, star |
+
+`tools/wording-check.mjs` reads every window, message, document and the simulation, and lists anything that breaks these rules. Run it with `node tools/wording-check.mjs`.
+
+**What is and is not in the Windows app today.** *In the app:* the Loupe icon (the executable, the tray, the extension's icons), US
+spellings in the app's messages. *Only in the simulation and the lab:* the T, U and V looks as the default, One Bar, Today, recents and
+*Keep in my list*, spacing and text size, and the tray dot. *Next step, after the owner's review:* port these to the app, restyle the
+extension card, and run the Windows CI self-test, which renders each window and presses real keys.
+
+**What this does not prove.** Whether a real RPM finds it better. Only the trial sheet in `demo/TRIAL-SHEET.md` can show that: five everyday tasks, timed against the
+earlier design, by people who use the real application every day. Real Windows rendering (fonts, scaling, the taskbar) can only be checked in the CI renders
+and on a real PC.
 
 ## 12. Engagement roadmap — seven features that make it the daily habit
 

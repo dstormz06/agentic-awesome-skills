@@ -74,7 +74,7 @@ public static class ConnectionStatus
     public static void Configure(IChatCompleter? completer) => Reset(completer?.ProviderName);
 }
 
-/// <summary>Wraps a completer so every real request updates <see cref="ConnectionStatus"/>. Adds no behaviour of its own.</summary>
+/// <summary>Wraps a completer so every real request updates <see cref="ConnectionStatus"/>. Adds no behavior of its own.</summary>
 public sealed class ReportingChatCompleter(IChatCompleter inner) : IChatCompleter
 {
     public string ProviderName => inner.ProviderName;

@@ -31,8 +31,8 @@ public enum SealStyle { Default, Quiet, Tinted }
 public sealed record Structure
 {
     public string? HeaderTint { get; init; }            // tinted identity band (F, H)
-    public bool StatusSpine { get; init; }              // 5 px left edge coloured by status (G)
-    public string? TopRule { get; init; }               // coloured rule across the top (I, J)
+    public bool StatusSpine { get; init; }              // 5 px left edge colored by status (G)
+    public string? TopRule { get; init; }               // colored rule across the top (I, J)
     public double TopRuleHeight { get; init; }
     public bool TopRuleDouble { get; init; }            // two hairlines instead of one band (I)
     public AttentionShape Attention { get; init; } = AttentionShape.Tint;
@@ -215,7 +215,7 @@ public static class Appearances
 
     public static readonly Appearance K = new(
         AppearanceId.K, "K · Graphite Quiet",
-        "Monochrome in soft slate. Colour appears only where status needs it. Quiet in a meeting, sharp on a projector. The default.",
+        "Monochrome in soft slate. Color appears only where status needs it. Quiet in a meeting, sharp on a projector. The default.",
         new("#FDFDFD", "#2A2E33", "#4A4E53", "#5C6167", "#ECECEC", "#DEDEDE",
             "#56626E", "#48535E", "#1A6B43", "#E6F1EA", "#8A5800", "#FAF1DC",
             "#A33636", "#F9E9E9", "#E6E6E6", "#6E7A86", "#1A56626E"),
@@ -280,7 +280,7 @@ public static class Appearances
 
     public static readonly Appearance S = new(
         AppearanceId.S, "S · Bronze Tag",
-        "An ID tag: a centred head, goal and forecast in two columns, and a plain bar for progress.",
+        "An ID tag: a centered head, goal and forecast in two columns, and a plain bar for progress.",
         Bronze, Radius: 18, Progress: ProgressVariant.Bar,
         BodyFont: Sans, NumFont: Sans, DrugFont: Sans,
         DrugItalic: false, StampSeal: false, MonoLabels: false)

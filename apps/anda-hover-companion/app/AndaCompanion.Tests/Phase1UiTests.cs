@@ -157,7 +157,7 @@ public class Phase1UiTests : IClassFixture<HeadlessFixture>
                 return res;
             }
             var known = Read(rec, r => new ReferenceInfo(DrugsAtFdaFile.PsgOf(r), "not available: needs the active ingredient and dosage form in your sheet"));
-            var demo = Read(Repo.Find("216482")!, null);                                   // the fictional demo record: made-up dates, labelled as such
+            var demo = Read(Repo.Find("216482")!, null);                                   // the fictional demo record: made-up dates, labeled as such
             var real = Read(Repo.Find("216482")! with { Demo = false }, null);              // real data, nothing set up: two brief reasons
             return (known, demo, real);
         }, CancellationToken.None);

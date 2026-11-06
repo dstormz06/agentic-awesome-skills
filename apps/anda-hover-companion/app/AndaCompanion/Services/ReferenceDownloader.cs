@@ -51,7 +51,7 @@ public static class ReferenceDownloader
             var loaded = DrugsAtFdaFile.TryLoad(destination, out string ok)!;
             return (true, "Updated. " + ok);
         }
-        catch (OperationCanceledException) { return (false, "Cancelled. Your earlier file is unchanged."); }
+        catch (OperationCanceledException) { return (false, "Canceled. Your earlier file is unchanged."); }
         catch (Exception ex) when (ex is HttpRequestException or IOException or UnauthorizedAccessException or TaskCanceledException)
         {
             return (false, $"Could not fetch the file ({ex.GetType().Name}). Your earlier file is unchanged.");

@@ -297,7 +297,7 @@ public partial class SettingsWindow : Window
             ConnStatus.Text = ConnectionService.DescribeFor(_settings);
         };
 
-        BuildAdaptive();       // sections that arrange themselves, the section jump list and the Getting started card
+        BuildAdaptive();       // sections that arrange themselves, and the section jump list
 
         // ---- back up, restore, reset ----
         BackupSave.Click += async (_, _) =>

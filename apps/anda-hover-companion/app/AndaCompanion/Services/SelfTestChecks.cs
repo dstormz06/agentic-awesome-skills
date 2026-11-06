@@ -254,7 +254,7 @@ internal static class SelfTestChecks
                     problems.Add($"{number}: bad status line '{line}'");
                 var brief = new OfflineBriefService().GetBriefAsync(r).GetAwaiter().GetResult();
                 if (string.IsNullOrWhiteSpace(brief.Text) || brief.Generated)
-                    problems.Add($"{number}: offline brief empty or mislabelled as generated");
+                    problems.Add($"{number}: offline brief empty or mislabeled as generated");
             }
             if (repo.Find("999999") is not null) problems.Add("unknown number should not resolve");
 

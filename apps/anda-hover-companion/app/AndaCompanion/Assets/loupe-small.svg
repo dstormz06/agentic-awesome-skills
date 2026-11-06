@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <title>ANDA Companion (Notula): Loupe, for 16 to 24 px</title>
+  <rect x="1" y="1" width="62" height="62" rx="15" fill="#3a3f8f"/>
+  <circle cx="27" cy="27" r="14.5" fill="none" stroke="#fff" stroke-width="8"/>
+  <line x1="38.5" y1="38.5" x2="53" y2="53" stroke="#fff" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="27" cy="27" r="6.5" fill="#f2a93b"/>
+</svg>

@@ -50,7 +50,7 @@ public class RecognizerTests
         Assert.Null(AndaValidator.Extract(text));
 
     [Theory]
-    [InlineData("NDA 021234 and ANDA 216482", "216482")]      // the labelled one is skipped, the real one found
+    [InlineData("NDA 021234 and ANDA 216482", "216482")]      // the labeled one is skipped, the real one found
     [InlineData("ANDA 021234", "021234")]                      // old-style ANDA numbers still work
     [InlineData("IND 123456; 214990", "214990")]
     public void Labels_only_exclude_the_number_they_label(string text, string expected) =>

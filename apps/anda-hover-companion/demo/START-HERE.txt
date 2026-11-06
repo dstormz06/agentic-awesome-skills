@@ -59,6 +59,11 @@ MAKE IT YOURS (tray icon, then Settings)
   - Back up, restore or reset your settings.
   - Tray icon, then Prompt library: add your own lens.
 
+ROUND 18 (CALMER DESIGN)
+  The new card, One Bar, Today and recent ANDAs are shown in the browser simulation only. This
+  build has the new Loupe icon; its cards still use the earlier default look until the design is
+  ported. TRIAL-SHEET.md lists five everyday tasks for judging whether the new design helps.
+
 IF SOMETHING DOES NOT WORK
   - Nothing appears when you press Ctrl+Alt+A: another program may own that combination.
     The tray menu shows which shortcuts are live. Ctrl+Alt+Space and the tray icon always work.

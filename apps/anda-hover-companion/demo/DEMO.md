@@ -8,6 +8,9 @@ Thank you for trying it. Fictional data only. A concept prototype, not an FDA pr
 > Until then, use the **browser simulation** or the deck on a device you are allowed to use. The Windows build is
 > for a personal or approved device, with fictional data only.
 
+> **New in round 18.** The calmer design (a card that leads with one answer and one main action, the Loupe icon, One Bar, Today, recent ANDAs) is shown in the **browser
+> simulation** only. This Windows build has the new icon; its cards still use the earlier default look until the design is ported. To judge the new design for daily use, follow `TRIAL-SHEET.md`.
+
 ## Pick a path
 
 | Path | What you need | Use it when |
@@ -26,7 +29,7 @@ desktop, and says so on screen. The shortcut, clipboard and file pickers are sim
 3. Double-click **Start-Demo.bat**. Windows may say "Windows protected your PC", because the build is not code-signed.
    That is expected. If your organization allows it, choose **More info**, then **Run anyway**.
 4. Find the tray icon near the clock. Windows 11 hides new icons under **^**, so drag it onto the taskbar.
-5. Right-click the icon. The last grey line of the menu says which shortcuts are live. All four should show a tick.
+5. Right-click the icon. The last gray line of the menu says which shortcuts are live. All four should show a tick.
 6. Optional, 1 minute: run `AndaCompanion.exe --selftest report` in a Command Prompt in the folder, then open
    `report\report.md`. Please do not touch the keyboard or mouse while it runs.
 
@@ -37,7 +40,7 @@ desktop, and says so on screen. The shortcut, clipboard and file pickers are sim
 | 0:00 | In the memo, double-click **216482** and press **Ctrl+Alt+A**. | "I select a number in any window and press a key. This ANDA is at risk, so a small peek opens by itself. It still started from my own selection and key." Click **Full brief**. |
 | 0:30 | Point at the clock block. | "The forecast is the headline: goal Oct 3, forecast Oct 17, 14 days late, moderate confidence. These numbers come from the data layer. The AI never writes a date." |
 | 1:00 | Point at NEEDS YOU, LATEST, AHEAD, then WATCH. | "What needs me, what just happened, and what lands on me next. The goal date is a Saturday, so it shows the Friday and Monday either side. It never says how a goal-date rule applies. That stays my call." |
-| 1:30 | Point at PSG and RLD LABEL, then the grey pill and the brief label. | "Two reference dates, always: a date and where it came from, or why there is none. The pill says no API is connected, and it says Connected only after a real request has succeeded. The brief is labelled OFFLINE: assembled from the record, no model." |
+| 1:30 | Point at PSG and RLD LABEL, then the gray pill and the brief label. | "Two reference dates, always: a date and where it came from, or why there is none. The pill says no API is connected, and it says Connected only after a real request has succeeded. The brief is labeled OFFLINE: assembled from the record, no model." |
 | 1:50 | Click **Copy status** and paste it into the memo. | "The sentence I retype a dozen times a week, in one click." |
 | 2:15 | Select **NDA 021234** and press Ctrl+Alt+A. | "The same six digits but a different application type. It declines to guess and opens the lookup box. A wrong card is worse than none." |
 | 2:45 | Copy any text, open a card, then paste. | "It read my selection by copying it, then put my clipboard back exactly as it was." |

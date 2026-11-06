@@ -91,7 +91,7 @@ public sealed class WritingService(IChatCompleter? completer)
                 ? new(false, "", "The AI returned nothing. Your draft is untouched.")
                 : new(true, text, "generated — verify before sending");
         }
-        catch (OperationCanceledException) { return new(false, "", "Cancelled. Your draft is untouched."); }
+        catch (OperationCanceledException) { return new(false, "", "Canceled. Your draft is untouched."); }
         catch (ElsaException ex) { return new(false, "", ex.Message + " Your draft is untouched."); }
         catch (Exception ex) { return new(false, "", $"The AI request failed ({ex.GetType().Name}). Your draft is untouched."); }
     }

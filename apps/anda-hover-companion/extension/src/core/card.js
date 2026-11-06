@@ -31,7 +31,7 @@ export const NO_RLD = 'not available: no Drugs@FDA file chosen (app: Settings, M
 const DEMO_DATES = { '216482': ['2026-01-14', '2026-03-03'], '214990': ['2025-11-20', '2026-03-03'] };
 const demoText = (r, i) => (r.demo && DEMO_DATES[r.number] ? `${fmtLong(parseIso(DEMO_DATES[r.number][i]))} · fictional demo date` : null);
 
-/** The PSG line: a date the person keeps in their own sheet, labelled as theirs, or the fictional demo date. No official PSG source is connected. */
+/** The PSG line: a date the person keeps in their own sheet, labeled as theirs, or the fictional demo date. No official PSG source is connected. */
 export function psgText(r) {
   const p = parseIso(r.psgDateFromSheet);
   return p === null ? null : `${fmtLong(p)} · from your sheet, not an official source`;

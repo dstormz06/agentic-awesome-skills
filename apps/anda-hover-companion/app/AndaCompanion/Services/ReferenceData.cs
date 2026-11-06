@@ -53,7 +53,7 @@ public sealed class DrugsAtFdaFile
             string[] needS = { "ApplNo", "SubmissionClassCodeID", "SubmissionStatus", "SubmissionStatusDate" };
             string[] needC = { "SubmissionClassCodeID", "SubmissionClassCodeDescription" };
             if (!products.Has(needP) || !submissions.Has(needS) || !classes.Has(needC))
-            { message = "The Drugs@FDA file has a layout this version does not recognise, so reference dates were not checked."; return null; }
+            { message = "The Drugs@FDA file has a layout this version does not recognize, so reference dates were not checked."; return null; }
 
             var file = new DrugsAtFdaFile(DateOnly.FromDateTime(info.LastWriteTime), info.Name);
             foreach (var r in products.Rows)

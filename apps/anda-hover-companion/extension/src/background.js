@@ -57,7 +57,7 @@ async function peek(tab, menuText) {
     const settings = await service.effectiveSettings();
     if (!text.trim()) return send(tabId, { type: 'anda:notice', text: 'Please select an ANDA number first, then use the shortcut or right-click.', autoHideSeconds: settings.autoHideSeconds });
     if (extractNumber(text) === null)
-      return send(tabId, { type: 'anda:notice', text: 'No ANDA number in the selection (a number labelled NDA, BLA, IND, DMF or MF is not treated as an ANDA). Please use the toolbar button to type one.', anchor, autoHideSeconds: settings.autoHideSeconds });
+      return send(tabId, { type: 'anda:notice', text: 'No ANDA number in the selection (a number labeled NDA, BLA, IND, DMF or MF is not treated as an ANDA). Please use the toolbar button to type one.', anchor, autoHideSeconds: settings.autoHideSeconds });
     const r = await service.lookup(text);
     if (!r.ok) return send(tabId, { type: 'anda:notice', text: r.message, anchor, autoHideSeconds: settings.autoHideSeconds });
     return send(tabId, { type: 'anda:show', step: r.step, card: r.card, anchor, reason: r.step === 'peek' && r.card.urgency.isUrgent ? r.card.urgency.reason : null, autoHideSeconds: r.settings.autoHideSeconds });
@@ -74,7 +74,7 @@ async function checkDraft(tab, menuText) {
     if (!text.trim()) return send(tabId, { type: 'anda:notice', text: 'Please select some text, or click into the message you are writing, then try again.', autoHideSeconds: settings.autoHideSeconds });
     const r = await service.draft(text);
     if (!r.ok) return send(tabId, { type: 'anda:notice', text: r.message, autoHideSeconds: settings.autoHideSeconds });
-    return send(tabId, { type: 'anda:panel', kind: 'draft', title: 'Check a draft', result: r.result, note: `Checked ${text.length.toLocaleString()} characters from ${menuText ? 'your selection' : d.from}. Nothing was sent anywhere.`, autoHideSeconds: settings.autoHideSeconds });
+    return send(tabId, { type: 'anda:panel', kind: 'draft', title: 'Check a draft', result: r.result, note: `Checked ${text.length.toLocaleString()} characters from ${menuText ? 'your selection' : d.from}. Nothing was sent anywhere.`, autoHideSeconds: settings.autoHideSeconds }); // wording-ok: the extension's record-only check keeps this label
   });
 }
 

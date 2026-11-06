@@ -122,7 +122,7 @@ public static IElsaMapping Current { get; } = new FdaElsaMapping();    // was: n
 | "Connection failed: HttpRequestException …" | The network path is blocked or the host is wrong. | Check the URL, the proxy and the VPN. |
 
 Until the mapping exists the app behaves exactly as it does with no AI at all: the deterministic offline
-brief, clearly labelled, with every fact still coming from the record.
+brief, clearly labeled, with every fact still coming from the record.
 
 ## What the tests already protect
 
@@ -130,7 +130,7 @@ brief, clearly labelled, with every fact still coming from the record.
 prove, with a fake HTTP handler and no network: every configuration state resolves to a plain message;
 plain `http://` is refused; the token never appears in any message or in a printed settings object; an
 error status becomes a short exception without the response body; a failing Elsa degrades to the offline
-brief; a working one produces a brief labelled as generated; the Test button explains each state. When
+brief; a working one produces a brief labeled as generated; the Test button explains each state. When
 you fill in the mapping these tests keep guarding everything around it. Add one test of your own that
 feeds `ReadReply` a sample of Elsa's real reply.
 

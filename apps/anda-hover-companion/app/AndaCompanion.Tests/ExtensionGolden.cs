@@ -11,7 +11,7 @@ namespace AndaCompanion.Tests;
 /// <summary>
 /// The Edge extension has its own JavaScript copy of the rules, so it can work with no app installed. This fixture is the
 /// contract between the two: the app writes what it produces for a fixed set of inputs, the extension's tests must reproduce
-/// it exactly, and this test fails if the app's behaviour changes without the fixture being regenerated
+/// it exactly, and this test fails if the app's behavior changes without the fixture being regenerated
 /// (set ANDA_WRITE_GOLDEN=1 and run this test, then commit the changed files).
 /// </summary>
 internal static class GoldenFixture

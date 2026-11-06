@@ -205,7 +205,7 @@ const PAGE = `<!doctype html><meta charset="utf-8"><title>Huddle prep</title><bo
   h.ok((await popup.locator('.card').innerText()).includes('Metformin HCl ER Tablets, 500 mg'), 'popup: look up a number');
   {
     const t0 = (await popup.locator('.card').innerText()).replace(/\s+/g, ' ');
-    h.ok(t0.includes('PSG Jan 14, 2026 · fictional demo date') && t0.includes('RLD LABEL Mar 3, 2026 · fictional demo date'), 'card: always two reference lines, here the fictional demo dates, labelled as fictional');
+    h.ok(t0.includes('PSG Jan 14, 2026 · fictional demo date') && t0.includes('RLD LABEL Mar 3, 2026 · fictional demo date'), 'card: always two reference lines, here the fictional demo dates, labeled as fictional');
   }
   await popup.fill('#num', '999999'); await popup.keyboard.press('Enter');
   await popup.locator('#lookMsg').waitFor({ state: 'visible' });

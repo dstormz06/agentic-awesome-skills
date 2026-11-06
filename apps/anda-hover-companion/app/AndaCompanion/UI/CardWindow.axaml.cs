@@ -262,7 +262,7 @@ public partial class CardWindow : Window
         BriefPanel.Margin = new Thickness(h, v, h, v + 2);
         ChipsWrap.Margin = new Thickness(h, v, h, v + 2);
 
-        // Spine (left, coloured per record in Show) and top rule
+        // Spine (left, colored per record in Show) and top rule
         Spine.IsVisible = look.StatusSpine;
         double top = 0;
         if (look.TopRule is { } rule)
@@ -362,7 +362,7 @@ public partial class CardWindow : Window
             }
             case CardLayout.Tag:
             {
-                // An ID tag: a small slot with the tools beside it, a centred head, goal and forecast in two columns.
+                // An ID tag: a small slot with the tools beside it, a centered head, goal and forecast in two columns.
                 var slot = new Border { Width = 54, Height = 11, CornerRadius = new CornerRadius(99), BorderThickness = new Thickness(1.5), BorderBrush = (IBrush)res["C.Accent"]!, Background = (IBrush)res["C.Mark"]!, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center };
                 var top = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto,*"), Margin = new Thickness(0, -6, 0, 2) };
                 Detach(ToolsPanel);
