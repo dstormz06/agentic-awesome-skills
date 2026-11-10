@@ -759,6 +759,48 @@ Not changed on purpose, and still the owner's decision: the **global shortcuts t
 
 Nobody has used the new design for a working day, and the trial sheet has not been run. The Windows app does not have the new card yet, so nothing in this round about the card, the looks, One Bar, Today, recents, spacing or text size is a claim about the app; it is a claim about the simulation and the lab. Real Windows rendering (fonts, display scaling, the taskbar, the translucent sheet) can only be judged from the CI renders and on a real PC. The Loupe icon was judged on a contact sheet, not on a taskbar. The wording check finds words that break the standard; it cannot tell whether a sentence is clear. Apple's guidance was used as principles; no Apple type, symbols or marks are used. The automatic and proactive dataset idea was a written walk-through only and is **not built**; it needs the owner's answers.
 
+## Round 18b: a fresh-eyes break test before a live presentation to a director
+
+The owner was to present on the day and a director would test the product live, on a Windows laptop, in Edge and Chrome, with no internet. The instruction was: save the working version first; have a fresh agent with no context from the session try to break it the way the director would; fix what it finds; make the user-facing text polite, precise and professional; ask before republishing anything live; and report what was tested, what broke, what was fixed and what is still untested.
+
+**Saved first.** The working version was committed and pushed as `006e820` (Windows run 32 green), with frozen copies of the simulation and the lab kept as the known-good version. The live page (v16) was not touched by this round.
+
+**The test.** The first attempt by the fresh agent failed before it tested anything (an API rate limit), so nothing is claimed from it. It was resumed later and ran for about 28 minutes, using 64 tool calls to run scripts against the simulation and the lab in Playwright Chromium with Windows-style Edge and Chrome user agents. It did not edit the repository. Its report listed **no P0 and five P1** defects, 19 P2 or P3 defects and 24 wording suggestions, and said what it could not test.
+
+What it tested (its own account, partly checked by re-running its repros here): zero external requests, zero failed loads and zero console errors in direct mode across about 40 sessions; a hosted-page sandbox (an iframe without `allow-same-origin`, where storage and the clipboard are blocked); the clipboard granted, denied and missing; keyboard-only use of every window; seven viewport sizes with and without `#all`; axe-core on ten states (0 violations); Windows High Contrast, reduced motion and reduced transparency emulation; 270 window open and close cycles, 648 hostile text fills and a six-minute soak with no growth in memory or in the number of page elements; the lab at five sizes; every date and day count recomputed independently.
+
+Local results on this code: C# **933 passed, 11 skipped, 0 failed**; extension unit **31 passed** and the standalone browser run **all pass**; simulation: the new suite 26, **49 checks** (one or more per finding above), and every earlier suite passes after its expectations were updated on purpose (41, 13, 68, 26, 38, 15, 65, 56, 39, 24, 254, 12, 144, 133, 94 and 101 checks), the combination matrix **1,090 of 1,090**, the in-frame check **152 of 152**, the review and selection parity scripts still identical to the app's regenerated fixtures (**46 of 46** and **21 cases, 0 field mismatches**), and all four accessibility scans with no violations; `node tools/wording-check.mjs` reports **0 findings in 132 files**. The page was also looked at again in screenshots at 1366 by 768 (cold page, default card, a look that shows day counts, the tray menu with all tools shown).
+
+CI: commits **`892f16c`** and **`45a1b7e`** were pushed; their Windows run is recorded in the line below when it has finished.
+
+### Defects found and fixed in round 18b
+
+| # | Finding | Found by | Disposition |
+|---|---|---|---|
+| R120 | **The sample day counts were one too high** (80, 31 and "due in 6 days" against an extract date of Jul 16, when they are 79, 30 and 5); the Watch rule used the right arithmetic, so the page disagreed with itself. The same numbers were in the Windows app's sample records, the extension's copy and the shared golden file | The fresh agent (D1) | Corrected in all of them and in the tests; in the simulation the counts are now computed from the demo date |
+| R121 | **"Pretend today is Oct 1" made the card contradict itself** (the card kept "80 days" while its WATCH line said "in 2 days"; the to-do list showed one overdue fact twice) | The fresh agent (D2) | Day counts and the attention line follow the pretend date; a fact is never listed twice in the to-do list, in the simulation and in the app (`Todo.cs`) |
+| R122 | **"Copied" was shown when nothing was copied** (Quick replies, Ask, Backup, Outlook code) whenever the clipboard was refused, which is the normal state of a page hosted in a sandbox | The fresh agent (D3) | One helper, `writeClipboard`, falls back to the older copy command, and every "Copied" waits for its result; a refusal shows the text in a polite notice |
+| R123 | **The shortcut boxes in Settings trapped the keyboard** (Tab, Shift+Tab, Escape and Enter were all swallowed) | The fresh agent (D4) | Tab and Shift+Tab move on and Escape leaves the box; a second Escape closes Settings |
+| R124 | **With all tools shown, the tray menu ran off the top of a 1366 by 768 screen** and could not be scrolled | The fresh agent (D5) | It now stays on screen, scrolls, takes focus on opening and answers the arrow keys |
+| R125 | The page logged two console errors per copy when a host blocks the clipboard by permissions policy | The fresh agent (D14) | The policy is checked before the clipboard is called |
+| R126 | The translucent card let text from the windows behind it show through; Windows High Contrast kept it translucent and hid the selected state of the app toggles; reduced transparency was honored for one look only | The fresh agent (D6, D7) | The card blurs its background; reduced transparency makes every look solid; High Contrast uses system colors and a visible selected state |
+| R127 | The whisper invite disappeared after 3 seconds, too short to click during a demonstration | The fresh agent (D8) | 6 seconds, in the simulation and in the app (`ChipWindow`) |
+| R128 | The basic tray menu and Settings said the My to-do list shortcut was active when it does nothing there; the Lookup header ignored a rebound shortcut; the to-do footer showed the computer's clock against the frozen taskbar clock; Ask cut a long paste without saying so; adding `#all` to an open page did nothing; the four Reset buttons shared one name | The fresh agent (D9 to D13, D21) | Each corrected, with a check |
+| R129 | **Wording**: the Review sentence "the record's forecast is +14 d vs goal" is now "14 days later than the goal" (simulation, app and extension, identical); "Check the number." is "Please check the number."; the unknown-ANDA notice, the lookup messages for NDA numbers and for digits with spaces, the banner, the Auto-connection hint, the basic-mode hint, the Reset message, the demo menu names, the relaunch notice, the lab heading and footer text and one grammar slip ("1 needs a look now") were rewritten | The fresh agent (section C) | Fixed; the two fixture files that the app writes were regenerated |
+| R130 | Older suites expected the previous wording, counts and timing | The first full run | Updated on purpose; no other expectation changed |
+
+### Reported by the fresh agent and not changed
+
+- **At 1024 by 768 (a common projector size) the windows stack in one column** and the first screen shows only the Demo controls. A layout change this close to a presentation was judged riskier than the fault; use a wider screen or the browser's zoom out.
+- The Demo controls panel and the Mail window are cut mid-line at 1366 by 768 (they scroll inside themselves); hint text is 11 px at standard size; the One Bar suggestion icons are plain text glyphs; a 600 by 300 window puts the bottom-sheet card partly off screen.
+- The words "hotkey" and "shortcut" are both used; older suites assert some of them, so the rename was left for a later pass.
+- Suspected only: a long press on a real Windows touch screen, which was exercised here only with synthesized touch. The Mail sample spreadsheet disagrees with the record on purpose, so that Review and Ask have something to find; a director comparing windows may ask.
+- The short form "+14 d vs goal" is kept on the card and in the status line that is copied into email; it is compact and shared with the extension's tests.
+
+### What round 18b does not prove
+
+Real Edge and real Chrome on Windows were not available: Chromium on Linux with Windows user agents and viewports is the same rendering engine, not the same program. The real Segoe UI fonts were not installed, so text widths on the director's laptop are not known; the chip row on the card, the Copy status button and the Settings shortcut rows are the places to look. A real touch screen, a real projector or television, a screen reader and an operating-system High Contrast theme were not used. Whether another Windows program has taken a shortcut such as `Ctrl+Alt+Space` on that laptop cannot be predicted; the tray menu and the on-screen buttons always work. Nothing persists across a reload by design.
+
 ## Still open
 
 GDUFA III tier table (needs the commitment-letter text and the dual-source rule); a real-keyboard check of rebound shortcuts on
