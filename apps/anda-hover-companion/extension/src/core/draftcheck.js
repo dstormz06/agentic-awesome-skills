@@ -9,6 +9,15 @@ const DATE_RE = new RegExp(
   '(?<![\\d/])(?:(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\\.?\\s+(\\d{1,2})(?:st|nd|rd|th)?(?:,?\\s+(\\d{4}))?(?!\\d)' +
   '|(\\d{1,2})/(\\d{1,2})(?:/(\\d{4}|\\d{2}))?(?![\\d/])' +
   '|(\\d{4})-(\\d{2})-(\\d{2}))', 'gi');
+/** "▲ +14 d vs goal" becomes "14 days later than the goal" for a sentence; the card keeps the short form. */
+function plainDelta(delta) {
+  const t = String(delta).replace('▲', '').replace('▼', '').trim();
+  let m = /^\+(\d+) d vs goal$/.exec(t);
+  if (m) { const n = Number(m[1]); return `${n} day${n === 1 ? '' : 's'} later than the goal`; }
+  m = /^(\d+) d ahead of goal$/.exec(t);
+  if (m) { const n = Number(m[1]); return `${n} day${n === 1 ? '' : 's'} ahead of the goal`; }
+  return t === 'on goal' ? 'on the goal date' : t;
+}
 const ON_TRACK = /\b(on track|on schedule|ahead of (?:the )?(?:goal|schedule)|ahead of goal)\b/i;
 const LATE = /\b(running late|behind schedule|behind|delayed|at risk|slipping|slipped|past (?:the )?goal|will miss|going to miss)\b/i;
 const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
@@ -70,7 +79,7 @@ export function checkDraft(draft, lookup) {
         if (!seenNumbers.has(n)) { seenNumbers.add(n); numbersChecked++; }
         if (lookup(n) === null && !reportedUnknown.has(n)) {
           reportedUnknown.add(n);
-          add('unknown', `ANDA ${n} is not in your data, so nothing about it could be checked. Check the number.`);
+          add('unknown', `ANDA ${n} is not in your data, so nothing about it could be checked. Please check the number.`);
         }
       }
 
@@ -100,7 +109,7 @@ export function checkDraft(draft, lookup) {
 
       if (hasForecast(record)) {
         const claimsOnTrack = ON_TRACK.test(sentence), claimsLate = LATE.test(sentence);
-        const delta = record.forecastDelta.replace('▲', '').replace('▼', '').trim();
+        const delta = plainDelta(record.forecastDelta);
         if (claimsOnTrack) statusChecked++;
         if (claimsLate) statusChecked++;
         if (claimsOnTrack && record.forecastLate) add('diff', `ANDA ${subject}: the draft sounds on track, but the record's forecast is ${delta}.`);

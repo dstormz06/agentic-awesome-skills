@@ -91,7 +91,7 @@ public partial class TodoWindow : Window
         string signature = string.Join("\n", _view.Rows.Select(r => $"{r.Key}|{r.Done}|{r.Priority}|{r.Title}|{r.SnoozedUntil}")) + $"#{_view.Open}";
         Summary.Text = _view.Rows.Count == 0
             ? "Nothing on your list, and nothing in your data needs a look."
-            : $"{_view.Open} open · {_view.Now} need a look now" + (_view.Snoozed > 0 ? $" · {_view.Snoozed} snoozed" : "") + (_view.Auto > 0 ? $" · {_view.Auto} from your data" : "");
+            : $"{_view.Open} open · {_view.Now} {(_view.Now == 1 ? "needs" : "need")} a look now" + (_view.Snoozed > 0 ? $" · {_view.Snoozed} snoozed" : "") + (_view.Auto > 0 ? $" · {_view.Auto} from your data" : "");
         Footer.Text = $"Updated {_view.BuiltAt:h:mm:ss tt}. {_hooks.SourceNote()} Items from your data follow the same rules as the card and the watch list; they say what the data shows and decide nothing. Click a number to open its card.";
         if (!force && signature == _signature) return;
         _signature = signature;

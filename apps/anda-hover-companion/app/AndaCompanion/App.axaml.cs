@@ -374,9 +374,9 @@ public partial class App : Application
         RebuildActionsMenu();
         menu.Add(_actionsMenu);
 
-        var demoRisk = new NativeMenuItem("Demo: at-risk card");
+        var demoRisk = new NativeMenuItem("Demo: ANDA at risk");
         demoRisk.Click += (_, _) => DemoCard("216482");
-        var demoHealthy = new NativeMenuItem("Demo: healthy card");
+        var demoHealthy = new NativeMenuItem("Demo: ANDA on track");
         demoHealthy.Click += (_, _) => DemoCard("214990");
         menu.Add(demoRisk);
         menu.Add(demoHealthy);

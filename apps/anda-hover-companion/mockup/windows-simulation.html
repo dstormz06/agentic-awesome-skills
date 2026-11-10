@@ -230,7 +230,7 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 #flyout .it:hover{background:#eef2f6}
 #flyout small{display:block;color:var(--ink3);font-size:11.5px;line-height:1.35;margin:6px 4px 0}
 #flyout .pin{margin:6px 0 0;width:100%}
-#menu{width:288px;padding:6px;right:max(10px,env(safe-area-inset-right,0px));bottom:calc(var(--tb-h) + 8px + env(safe-area-inset-bottom,0px))}
+#menu{width:288px;padding:6px;right:max(10px,env(safe-area-inset-right,0px));bottom:calc(var(--tb-h) + 8px + env(safe-area-inset-bottom,0px));max-height:calc(100vh - var(--tb-h) - 24px - env(safe-area-inset-bottom,0px));max-height:calc(100dvh - var(--tb-h) - 24px - env(safe-area-inset-bottom,0px));overflow-y:auto;overscroll-behavior:contain}
 #menu button{display:flex;width:100%;align-items:center;gap:8px;border:none;background:none;text-align:left;padding:8px 10px;border-radius:6px;font-size:13px;min-height:34px}
 #menu button:hover:not(:disabled){background:#eaf0f7}
 #menu button:disabled{color:var(--ink3);cursor:default}
@@ -316,6 +316,14 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
   font-family:var(--c-font);font-size:calc(14px*var(--ts));line-height:1.5;animation:cardin .18s cubic-bezier(.2,.9,.3,1);
 }
 #card.pinned{outline:2px solid var(--c-accent);outline-offset:-1px}
+/* A translucent card blurs what is behind it, so the text stays readable. Reduced transparency makes every look solid. */
+#card,#compact{-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+@media (prefers-reduced-transparency:reduce){#card,#compact{--op:100% !important;-webkit-backdrop-filter:none;backdrop-filter:none}}
+/* Windows High Contrast: system colors for every surface, and a visible selected state for the app toggles */
+@media (forced-colors:active){
+  #card,#compact,#chip,.app-win,.pop,#keys{background-color:Canvas !important;color:CanvasText !important;border:1px solid CanvasText !important}
+  #appPick button[aria-pressed="true"]{forced-color-adjust:none;background:Highlight;color:HighlightText;border-color:Highlight}
+}
 @keyframes cardin{from{opacity:0;transform:translateY(6px) scale(.985)}to{opacity:1;transform:none}}
 .slot{padding:calc(11px*var(--sp)) 16px;border-top:1px solid var(--c-hair)}
 .slot:first-of-type{border-top:none}
@@ -818,7 +826,7 @@ details.sec>summary h3.grp{padding:0;margin:0}
 <body>
 <div class="desk" id="desk" role="main">
   <div class="banner" role="note">
-    <h1>Browser simulation</h1><span class="long">of the ANDA Companion (Notula) Windows app ·</span><span class="short">fictional data · not an FDA product</span>
+    <h1>Browser simulation</h1><span class="long">of the ANDA Companion (Notula) Windows app.</span><span class="short">Fictional data. Not an FDA product.</span>
     <span class="sp"></span>
     <button id="resetBtn" type="button" aria-label="Reset the simulation">Reset</button>
   </div>
@@ -935,7 +943,7 @@ C:\work&gt; </div>
       <label class="sw"><input type="checkbox" id="swConflictLook"> Another program already owns <span data-key="look"></span></label>
       <label class="sw full-only"><input type="checkbox" id="swConflictList"> Another program already owns <span data-key="list"></span></label>
       <label class="sw"><input type="checkbox" id="swToday"> Pretend today is Oct 1, 2026 (goal dates get close)</label>
-      <label class="sw"><input type="checkbox" id="swAi"> Claude access is approved (sample brief)</label>
+      <label class="sw"><input type="checkbox" id="swAi"> An approved AI model is connected (sample brief)</label>
       <label class="sw full-only"><input type="checkbox" id="swAgentFail"> An agent cannot be reached (rehearse a failure)</label>
       <p class="fine">Simulated here: the desktop, look-alike app windows (no logos, no real products), the hotkey and clipboard hand-off, the sample brief. No data leaves this page.</p>
     </div>
@@ -973,7 +981,7 @@ C:\work&gt; </div>
 
   <!-- ===== lookup ===== -->
   <div class="app-win" id="lookup" role="dialog" aria-label="Lookup ANDA">
-    <div class="lbl" style="margin-top:0">LOOKUP · CTRL+ALT+SPACE</div>
+    <div class="lbl" id="lookupHead" style="margin-top:0">LOOKUP · CTRL+ALT+SPACE</div>
     <div class="r"><input type="text" id="lookupIn" placeholder="ANDA number, e.g. 216482" inputmode="numeric" autocomplete="off" aria-label="ANDA number"><button class="pill" id="lookupGo" type="button">Go</button></div>
     <div class="err" id="lookupErr" role="alert">Please enter a six-digit ANDA number.</div>
     <div class="lk-sug" id="lkSug" role="listbox" aria-label="What to open"></div>
@@ -1015,7 +1023,7 @@ C:\work&gt; </div>
     <div class="secbody">
     <div class="lbl">CONSENT MODEL</div>
     <div id="setConsent"></div>
-    <label class="opt"><input type="checkbox" id="setUrgent" checked> Open a peek by itself for an at-risk or late ANDA (whisper mode only)</label>
+    <label class="opt"><input type="checkbox" id="setUrgent" checked> Show a short card by itself for an ANDA that is at risk or late (only when the invite is the first step)</label>
     <p class="hint">Still starts only from your own selection and shortcut. A peek makes no AI call. Off: the invite always waits for your click.</p>
     <hr class="hair">
     <div class="lbl">SELECT &amp; PEEK</div>
@@ -1029,12 +1037,12 @@ C:\work&gt; </div>
     <div class="krow"><span>Review a draft</span><input type="text" id="keyBoxDraft" readonly aria-label="Review a draft shortcut"><button class="pill quiet" type="button" data-keyreset="draft">Reset</button></div>
     <div class="krow"><span>Ask about a selection</span><input type="text" id="keyBoxAsk" readonly aria-label="Ask about a selection shortcut"><button class="pill quiet" type="button" data-keyreset="ask">Reset</button></div>
     <div class="keystatus" id="keyStatus" role="status"></div>
-    <p class="hint">Please use at least two modifiers, one of them Ctrl or Alt, so everyday shortcuts like Ctrl+C keep working. On keyboards where Ctrl+Alt is AltGr, choose Ctrl+Shift instead. Never the Windows key.</p>
+    <p class="hint">Click a box and press the new shortcut; Tab or Escape leaves the box without changing it. Please use at least two modifiers, one of them Ctrl or Alt, so everyday shortcuts like Ctrl+C keep working. On keyboards where Ctrl+Alt is AltGr, choose Ctrl+Shift instead. Never the Windows key.</p>
     <hr class="hair">
     <div class="lbl">DISPLAY · TEXT SIZE AND SPACING</div>
     <div class="wrap" role="radiogroup" aria-label="Text size"><label class="opt"><input type="radio" name="ts" value="standard" checked> Standard text</label><label class="opt"><input type="radio" name="ts" value="large"> Larger text</label><label class="opt"><input type="radio" name="ts" value="xl"> Largest text</label></div>
     <div class="wrap" role="radiogroup" aria-label="Spacing"><label class="opt"><input type="radio" name="density" value="comfortable" checked> Comfortable spacing</label><label class="opt"><input type="radio" name="density" value="compact"> Compact spacing</label></div>
-    <p class="hint">Applies to the card and to this app's windows. It does not change other programs.</p>
+    <p class="hint">Text size applies to the card and to this app's windows; spacing applies to the card. Neither changes other programs.</p>
     <hr class="hair">
     <div class="lbl">RECENT ANDAS</div>
     <label class="opt"><input type="checkbox" id="setRecents" checked> Remember the last eight ANDAs I looked up, on this PC</label>
@@ -1125,7 +1133,7 @@ C:\work&gt; </div>
     <div class="secbody">
     <div class="lbl">COMPANION LENS · PROMPT LIBRARY</div>
     <div style="display:flex;gap:8px"><select id="setLens" aria-label="Companion lens"></select><button class="pill quiet" id="setManage" type="button">Manage…</button></div>
-    <p class="hint">Your own stored prompt steers the brief's emphasis. A lens can never override grounding.</p>
+    <p class="hint">Your own stored prompt steers the brief's emphasis. A lens can never override the facts taken from the record.</p>
     <hr class="hair">
     <div class="lbl">CONNECTION · WHICH API, IF ANY</div>
     <div class="wrap" id="setProvider"></div>
@@ -1141,7 +1149,7 @@ C:\work&gt; </div>
       <input type="text" id="apiPath" placeholder="Where the reply text is, for example choices[0].message.content" aria-label="My API reply path">
       <p class="hint">Nothing here is a secret: the token stays in the environment variable you name and is never saved by the app. Only https:// addresses are used (http:// for localhost). The body shown is only an example of one common shape; use the shape your own service documents. A reply that does not have text at the path is reported without showing what came back. In this simulation the form is checked but nothing is ever sent.</p>
     </details>
-    <p class="hint">Auto uses a key (ANTHROPIC_API_KEY) or Elsa setup from the environment if one exists, and is otherwise offline. Offline never sends anything. The app is fully functional offline. The banner at the top says Connected only after a request has really succeeded; this page can never make one, so it never says Connected.</p>
+    <p class="hint">Auto uses an AI access key (ANTHROPIC_API_KEY) or the agency AI service (Elsa) set up on this PC, if one exists, and is otherwise offline. Offline never sends anything, and the app is fully functional offline. The banner at the top says Connected only after a request has succeeded. This page cannot make requests, so it never shows Connected.</p>
     <hr class="hair">
     <div class="lbl">OUTLOOK · OPTIONAL, READ-ONLY</div>
     <div class="sim-note">Rehearsal only. This page never contacts Microsoft and has no mailbox. Sign in shows the steps with a made-up code, and the card shows made-up messages.</div>
@@ -1181,7 +1189,7 @@ C:\work&gt; </div>
     <hr class="hair">
     <div class="lbl">WHICH TOOLS ARE SHOWN</div>
     <label class="opt"><input type="checkbox" id="allTools"> Show all tools (the two to-do lists, agents, appearance and dates)</label>
-    <p class="hint">Off keeps the app to three things: look up an ANDA, review a draft and ask about a selection. Turning it on loses nothing and changes no data.</p>
+    <p class="hint">Off shows the three main tools: look up an ANDA, review a draft and ask about a selection. A few small extras, such as the Watch list and Quick replies, stay in the tray menu. Turning this on loses nothing and changes no data.</p>
     <hr class="hair">
     <div class="lbl">THIS WINDOW · ARRANGES ITSELF</div>
     <label class="opt"><input type="checkbox" id="adaptCheck" checked> Open the sections that need a look or that I use most, and collapse the rest</label>
@@ -1452,9 +1460,9 @@ root.dataset.dir = "t";
 const DATA = {
   "216482": {
     drug:"Metformin HCl ER Tablets, 500 mg", meta:"Meridian Pharmaceuticals (fictional) · Cycle 2",
-    goal:"Oct 3, 2026", goalD:[2026,10,3], fcD:[2026,10,17], days:"· 80 days", daysTo:80, delta:14, pct:62,
+    goal:"Oct 3, 2026", goalD:[2026,10,3], fcD:[2026,10,17], days:"· 79 days", daysTo:79, delta:14, pct:62,
     fc:"Oct 17, 2026", fdelta:"▲ +14 d vs goal", late:true, fconf:"moderate confidence",
-    attn:"IR response due in 6 days — Biopharmaceutics",
+    attn:"IR response due in 5 days — Biopharmaceutics", attnWhat:"IR response", attnTeam:"Biopharmaceutics", attnDue:[2026,7,21],
     latest:"Amendment (minor) received Jun 30 — under review",
     asOf:"data as of Jul 16, 07:12 · extract #412 (fictional)",
     ahead:"Thu huddle — status requested on this ANDA + sister 214990 (memo, Jul 14)",
@@ -1466,7 +1474,7 @@ const DATA = {
   },
   "214990": {
     drug:"Metformin HCl ER Tablets, 750 mg", meta:"Meridian Pharmaceuticals (fictional) · Cycle 3",
-    goal:"Aug 15, 2026", goalD:[2026,8,15], fcD:[2026,8,6], days:"· 31 days", daysTo:31, delta:-9, pct:88,
+    goal:"Aug 15, 2026", goalD:[2026,8,15], fcD:[2026,8,6], days:"· 30 days", daysTo:30, delta:-9, pct:88,
     fc:"Aug 6, 2026", fdelta:"▼ 9 d ahead of goal", late:false, fconf:"high confidence",
     attn:null,
     latest:"Facility IR resolved — closed Jul 2",
@@ -1568,6 +1576,35 @@ function evaluateDate(t, lead){
 const SEV = { info:0, warn:1, bad:2 };
 const RANK = { "goal-passed":0, "goal-soon":1, "goal-date-calendar":2, "forecast-date-calendar":3, "no-goal-date":6 };
 const demoToday = () => state.pretend ? ymd(2026, 10, 1) : ymd(2026, 7, 16);   /* demo records are frozen at their extract date unless the tester moves the clock */
+/* Copies text and resolves only when the browser really accepted it. Hosted pages often forbid the clipboard API, so the older copy command is the fallback.
+   Every "Copied" message in this page waits for this promise: a refusal is always reported, never hidden. */
+function writeClipboard(text){
+  const legacy = () => {
+    try{
+      const sel = getSelection(), kept = []; for(let i = 0; i < sel.rangeCount; i++) kept.push(sel.getRangeAt(i));
+      const prev = document.activeElement, t = document.createElement("textarea");
+      t.value = text; t.setAttribute("readonly", ""); t.setAttribute("aria-hidden", "true"); t.style.cssText = "position:fixed;left:-9999px;top:0;opacity:0";
+      document.body.appendChild(t); t.select();
+      const ok = document.execCommand("copy");
+      t.remove(); sel.removeAllRanges(); kept.forEach(r => sel.addRange(r)); if(prev && prev.focus) prev.focus({ preventScroll:true });
+      return ok ? Promise.resolve() : Promise.reject(new Error("refused"));
+    }catch(e){ return Promise.reject(e); }
+  };
+  let allowed = true;
+  try{ const pp = document.permissionsPolicy || document.featurePolicy; if(pp && pp.allowsFeature) allowed = pp.allowsFeature("clipboard-write"); }catch(e){ allowed = true; }
+  if(allowed && navigator.clipboard && navigator.clipboard.writeText){
+    try{ return navigator.clipboard.writeText(text).catch(legacy); }catch(e){ return legacy(); }
+  }
+  return legacy();
+}
+/* The day counts are measured from the same date the WATCH rules use (the extract date, or the pretend date), so the card never disagrees with its own WATCH line. */
+const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+Object.values(DATA).forEach(d => {
+  Object.defineProperty(d, "daysTo", { get(){ return Math.round((ymd(...d.goalD) - demoToday()) / DAY); }, enumerable:true, configurable:true });
+  Object.defineProperty(d, "days", { get(){ const n = d.daysTo; return n >= 0 ? `· ${plural(n, "day")}` : `· passed ${plural(-n, "day")} ago`; }, enumerable:true, configurable:true });
+  if(d.attnDue) Object.defineProperty(d, "attn", { get(){ const n = Math.round((ymd(...d.attnDue) - demoToday()) / DAY);
+    return `${d.attnWhat} ${n > 0 ? "due in " + plural(n, "day") : n === 0 ? "due today" : "was due " + plural(-n, "day") + " ago"} — ${d.attnTeam}`; }, enumerable:true, configurable:true });
+});
 function watchFlags(id){
   const d = DATA[id], today = demoToday(), flags = [], src = "Fictional demo data";
   const rule = (code, what, t) => {
@@ -1594,6 +1631,15 @@ function firstStep(id){
 
 /* ---- Services/DraftCheck.cs: compares numbers, goal/forecast dates and on-track/late wording with the record. No model, no network. ---- */
 const MONTHS = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
+/* "▲ +14 d vs goal" becomes "14 days later than the goal" for a sentence; the card keeps the short form. */
+function plainDelta(delta){
+  const t = String(delta).replace("▲", "").replace("▼", "").trim();
+  let m = /^\+(\d+) d vs goal$/.exec(t);
+  if(m){ const n = Number(m[1]); return `${n} day${n === 1 ? "" : "s"} later than the goal`; }
+  m = /^(\d+) d ahead of goal$/.exec(t);
+  if(m){ const n = Number(m[1]); return `${n} day${n === 1 ? "" : "s"} ahead of the goal`; }
+  return t === "on goal" ? "on the goal date" : t;
+}
 const ON_TRACK = /\b(on track|on schedule|ahead of (?:the )?(?:goal|schedule)|ahead of goal)\b/i;
 const LATE_RE = /\b(running late|behind schedule|behind|delayed|at risk|slipping|slipped|past (?:the )?goal|will miss|going to miss)\b/i;
 const DATE_RE = /(?:(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s+(\d{1,2})(?:st|nd|rd|th)?(?:,?\s+(\d{4}))?(?!\d)|(\d{1,2})\/(\d{1,2})(?:\/(\d{4}|\d{2}))?(?![\d\/])|(\d{4})-(\d{2})-(\d{2}))/gi;
@@ -1632,7 +1678,7 @@ function draftCheck(draft){
       const nums = andaNumbers(sentence);
       for(const n of nums){
         if(!seenN.has(n)){ seenN.add(n); numbers++; }
-        if(!DATA[n] && !unknownSeen.has(n)){ unknownSeen.add(n); add("unknown", `ANDA ${n} is not in your data, so nothing about it could be checked. Check the number.`); }
+        if(!DATA[n] && !unknownSeen.has(n)){ unknownSeen.add(n); add("unknown", `ANDA ${n} is not in your data, so nothing about it could be checked. Please check the number.`); }
       }
       let subject;
       if(nums.length === 1){ subject = nums[0]; context = subject; }
@@ -1650,7 +1696,7 @@ function draftCheck(draft){
         const same = mt.mon === actual[1] && mt.day === actual[2] && (mt.year === null || mt.year === actual[0]);
         if(!same) add("diff", `ANDA ${subject}: the draft gives the ${which} date as ${showMention(mt)}, but the record says ${longDate(ymd(...actual))}.`);
       }
-      const claimsOn = ON_TRACK.test(sentence), claimsLate = LATE_RE.test(sentence), delta = rec.fdelta.replace("▲", "").replace("▼", "").trim();
+      const claimsOn = ON_TRACK.test(sentence), claimsLate = LATE_RE.test(sentence), delta = plainDelta(rec.fdelta);
       if(claimsOn) status++; if(claimsLate) status++;
       if(claimsOn && rec.late) add("diff", `ANDA ${subject}: the draft sounds on track, but the record's forecast is ${delta}.`);
       if(claimsLate && !rec.late) add("diff", `ANDA ${subject}: the draft sounds late or at risk, but the record's forecast is ${delta}.`);
@@ -2061,8 +2107,7 @@ function copyStatus(){
   if(!current) return;
   const text = statusLine(current), btn = $("chipCopy");
   const done = () => { btn.textContent = "Copied ✓"; setTimeout(() => btn.textContent = "Copy status", 1200); };
-  (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text) : Promise.reject())
-    .then(done, () => showNotice("Your browser blocked copying, so here is the status line: " + text, anchorForCard()));
+  writeClipboard(text).then(done, () => showNotice("Your browser did not allow copying, so here is the status line: " + text, anchorForCard()));
 }
 const anchorForCard = () => ({ x: card.offsetLeft + 12, y: card.offsetTop + card.offsetHeight - 40 });
 
@@ -2082,7 +2127,7 @@ function showInvite(label, anchor, accept){
   hideChip();
   $("chipTxt").textContent = label; $("chipDot").hidden = false; $("chipGo").hidden = false; chipAccept = accept;
   showChipAt(anchor || pointer);
-  fadeChipAfter(3000);
+  fadeChipAfter(6000);
 }
 function fadeChipAfter(ms){
   clearTimeout(chipTimer);
@@ -2189,7 +2234,7 @@ function hotkey(kind, source){
   showKeys(kind, sel ? "Copied your selection, read it, put your clipboard back ✓" : "");
   const number = sel ? extractNumber(sel.text) : null;
   if(!number){ if(sel) markStep("look2"); openLookup(anchor); return; }
-  if(!DATA[number]){ showNotice(`${number} is not in the available records.`, anchor); return; }
+  if(!DATA[number]){ showNotice(`ANDA ${number} is not in your data.`, anchor); return; }
   markStep("peek");
   if(compactId === number && compact.style.display === "block"){ expandCompact(); return; }   /* compact boxes never take focus: the hotkey again is the keyboard way in */
   /* Two-stage consent: the hotkey is stage one. In whisper mode an urgent ANDA skips the invite and opens a peek (no AI call). */
@@ -2220,7 +2265,7 @@ document.addEventListener("keydown", e => {
   else if(k === "r" && !e.ctrlKey) openReplies();
   else if(e.key === " " && document.activeElement === card){ e.preventDefault(); setPin(!pinnedCard); }
   else if(e.key === "Enter" && document.activeElement === card){ e.preventDefault(); copyStatus(); }
-  else if(k === "c" && !e.ctrlKey && current && navigator.clipboard) navigator.clipboard.writeText($("c-ai").textContent).catch(() => {});
+  else if(k === "c" && !e.ctrlKey && current) writeClipboard($("c-ai").textContent).catch(() => {});
 });
 $("keyPeek").addEventListener("click", () => hotkey("peek", "button"));
 $("keyLook").addEventListener("click", () => hotkey("look", "button"));
@@ -2453,7 +2498,7 @@ function askAnalyse(){
 function askStatus(t){ $("asStatus").textContent = t; $("asStatus").hidden = !t; }
 function askLookup(number){
   const anchor = { ...pointer };
-  if(!DATA[number]){ showNotice(`${number} is not in the available records.`, anchor); return; }
+  if(!DATA[number]){ showNotice(`ANDA ${number} is not in your data.`, anchor); return; }
   openCard(number, { anchor });
 }
 function askReview(text){ openDraft(text); $("draft").style.zIndex = "52"; $("ask").style.zIndex = "51"; }
@@ -2493,7 +2538,12 @@ $("asCompare").addEventListener("click", () => {
   if(isNaN(a) || isNaN(b)){ askShow(["Please type two column numbers, for example 1 and 2."]); return; }
   askShow(shCompareColumns($("asText").value, a, b));
 });
-$("asCopy").addEventListener("click", () => { const t = $("asResult").value; if(t && navigator.clipboard) navigator.clipboard.writeText(t).catch(() => {}); if(t) askStatus("Copied."); });
+$("asText").addEventListener("paste", e => {   /* the text box keeps only its first 20,000 characters: say so instead of cutting silently */
+  const cd = e.clipboardData, ta = e.target; if(!cd) return;
+  const incoming = cd.getData("text"), room = ta.maxLength - (ta.value.length - (ta.selectionEnd - ta.selectionStart));
+  if(incoming.length > room) askStatus(`Your text is longer than ${ta.maxLength.toLocaleString("en-US")} characters, so only the first ${ta.maxLength.toLocaleString("en-US")} were kept.`);
+});
+$("asCopy").addEventListener("click", () => { const t = $("asResult").value; if(t) writeClipboard(t).then(() => askStatus("Copied."), () => askStatus("Your browser did not allow copying. Please select the text and press Ctrl+C.")); });
 $("asUse").addEventListener("click", () => {
   const i = $("asPrompt").value === "" ? -1 : +$("asPrompt").value;
   if(i < 0 || i >= asPrompts.length){ askStatus("Please choose a stored prompt first."); return; }
@@ -2562,7 +2612,7 @@ function paintLookup(){
   const sug = $("lkSug"); sug.replaceChildren();
   if(!lkBar()) return;
   const raw = $("lookupIn").value.trim(), n = extractNumber(raw), sel = selectionText(), rows = [];
-  if(n) rows.push({ ic:"6", t:DATA[n] ? `ANDA ${n} · ${DATA[n].drug}` : `ANDA ${n}`, s:DATA[n] ? heroSentence(n) : "Not in the available records", go:() => submitLookup() });
+  if(n) rows.push({ ic:"6", t:DATA[n] ? `ANDA ${n} · ${DATA[n].drug}` : `ANDA ${n}`, s:DATA[n] ? heroSentence(n) : "Not in your data", go:() => submitLookup() });
   const typedText = raw && !n ? raw : "", draftText = typedText || sel;
   rows.push({ ic:"¶", t:typedText ? "Review what you typed as a draft" : sel ? "Review the selected text as a draft" : "Review a draft", s:"Checks it against the record, with no AI", go:() => { closeApp("lookup"); openDraft(draftText); } });
   const kind = sel ? shClassify(sel).kind : "empty";
@@ -2612,7 +2662,7 @@ function paintTodayMain(){
   const fl = watchFlags(id); if(fl.length) m.append(h("div", { class:"hint", text:"Watch: " + fl[0].text }));
   const copy = h("button", { type:"button", class:"pill", text:"Copy status" }), open = h("button", { type:"button", class:"pill quiet", text:"Open the card" });
   copy.addEventListener("click", () => {
-    (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(statusLine(id)) : Promise.reject()).then(() => { copy.textContent = "Copied ✓"; setTimeout(() => { copy.textContent = "Copy status"; }, 1200); }, () => showNotice("Your browser blocked copying, so here is the status line: " + statusLine(id), pointer));
+    writeClipboard(statusLine(id)).then(() => { copy.textContent = "Copied ✓"; setTimeout(() => { copy.textContent = "Copy status"; }, 1200); }, () => showNotice("Your browser did not allow copying, so here is the status line: " + statusLine(id), pointer));
   });
   open.addEventListener("click", () => openCard(id, { anchor:{ x:Math.max(12, innerWidth - 420), y:80 } }));
   m.append(h("div", { class:"acts" }, copy, open));
@@ -2630,10 +2680,15 @@ function openLookup(anchor, handler){
 }
 function submitLookup(){
   const n = extractNumber($("lookupIn").value);
-  if(!n){ $("lookupErr").style.display = "block"; return; }
+  if(!n){
+    const raw = $("lookupIn").value.trim();
+    $("lookupErr").textContent = /^(NDA|BLA|IND|DMF|MF|NDC)\b/i.test(raw) ? "NDA, BLA, IND and similar numbers are not ANDA numbers. Please enter a six-digit ANDA number."
+      : /^\d{3}[\s-]\d{3}$/.test(raw) ? "Please enter the six digits without spaces or dashes." : "Please enter a six-digit ANDA number.";
+    $("lookupErr").style.display = "block"; return;
+  }
   const onNumber = lookupHandler; lookupHandler = null;
   closeApp("lookup");
-  if(!DATA[n]){ showNotice(`${n} is not in the available records.`, lookupAnchor); return; }
+  if(!DATA[n]){ showNotice(`ANDA ${n} is not in your data.`, lookupAnchor); return; }
   if(onNumber){ onNumber(n); return; }
   markStep("look");
   openCard(n, { mini: state.mode === "peek", anchor: lookupAnchor });
@@ -2706,7 +2761,7 @@ function closeCtx(){ ctxmenu.style.display = "none"; }
 function extensionPeek(text, anchor){
   const number = extractNumber(text);
   if(!number){ showNotice("No ANDA number in the selection (a number labeled NDA, BLA, IND, DMF or MF is not treated as an ANDA).", anchor); return; }
-  if(!DATA[number]){ showNotice(`${number} is not in the available records.`, anchor); return; }
+  if(!DATA[number]){ showNotice(`ANDA ${number} is not in your data.`, anchor); return; }
   const step = firstStep(number);
   if(step === "invite") showInvite(`ANDA ${number}`, anchor, () => openCard(number, { anchor }));
   else openCard(number, { mini:step === "peek", anchor });
@@ -2725,7 +2780,7 @@ $("webBody").addEventListener("contextmenu", e => {
   const short = sel.length > 22 ? sel.slice(0, 22) + "…" : sel;
   ctxmenu.replaceChildren();
   const add = (label, fn, o = {}) => { const b = document.createElement("button"); b.type = "button"; b.setAttribute("role", "menuitem"); b.textContent = label; if(o.ext) b.className = "ext"; if(o.off) b.disabled = true; b.addEventListener("click", () => { closeCtx(); markStep("ctx"); fn(); }); ctxmenu.append(b); };
-  add("Copy", () => { if(navigator.clipboard) navigator.clipboard.writeText(sel).catch(() => {}); }, { off:!sel });
+  add("Copy", () => { writeClipboard(sel).catch(() => {}); }, { off:!sel });
   ctxmenu.append(document.createElement("hr"));
   if(sel){
     add(`ANDA Companion (Notula): peek at “${short}”`, () => extensionPeek(sel, anchor), { ext:true });
@@ -2826,7 +2881,16 @@ $("plDel").addEventListener("click", () => { if(prompts[plIndex]){ prompts.splic
 const menu = $("menu"), flyout = $("flyout");
 const menuOpen = () => menu.style.display === "block";
 function closeMenus(){ menu.style.display = "none"; flyout.style.display = "none"; $("replyMenu").style.display = "none"; $("chev").setAttribute("aria-expanded", "false"); }
-function hotkeyLine(){ const t = state.taken, k = state.keys; return `Hotkeys: ${k.peek} ${t.peek ? "✗ in use" : "✓"}   ${k.look} ${t.look ? "✗ in use" : "✓"}   ${k.draft} ${t.draft ? "✗ in use" : "✓"}` + (k.ask ? `   ${k.ask} ${t.ask ? "✗ in use" : "✓"}` : "") + (k.list ? `   ${k.list} ${t.list ? "✗ in use" : "✓"}` : ""); }
+function hotkeyLine(){ const t = state.taken, k = state.keys; return `Hotkeys: ${k.peek} ${t.peek ? "✗ in use" : "✓"}   ${k.look} ${t.look ? "✗ in use" : "✓"}   ${k.draft} ${t.draft ? "✗ in use" : "✓"}` + (k.ask ? `   ${k.ask} ${t.ask ? "✗ in use" : "✓"}` : "") + (k.list && state.allTools ? `   ${k.list} ${t.list ? "✗ in use" : "✓"}` : ""); }
+menu.addEventListener("keydown", e => {   /* arrow keys move through the tray menu, as in Windows */
+  if(!["ArrowDown", "ArrowUp", "Home", "End"].includes(e.key)) return;
+  const items = [...menu.querySelectorAll("button:not(:disabled)")].filter(b => b.offsetParent !== null);
+  if(!items.length) return;
+  e.preventDefault(); e.stopPropagation();
+  let i = items.indexOf(document.activeElement);
+  i = e.key === "Home" ? 0 : e.key === "End" ? items.length - 1 : (i + (e.key === "ArrowDown" ? 1 : -1) + items.length) % items.length;
+  items[i].focus();
+});
 function openMenu(){
   if(!state.running) return;
   flyout.style.display = "none";
@@ -2849,8 +2913,8 @@ function openMenu(){
     item("ANDA to-do list…", "", () => openTodo()),
     item("My to-do list…", state.keys.list || "", () => openMyTodo()),
     item("Notes to my to-do list…", "", () => openNotes(""))] : []),
-    item("Demo: at-risk card", "", () => openCard("216482", { anchor:trayAnchor() })),
-    item("Demo: healthy card", "", () => openCard("214990", { anchor:trayAnchor() })),
+    item("Demo: ANDA at risk", "", () => openCard("216482", { anchor:trayAnchor() })),
+    item("Demo: ANDA on track", "", () => openCard("214990", { anchor:trayAnchor() })),
     document.createElement("hr"));
   const ap = item("Appearance", "▸", null, { keep:true });
   const subBox = document.createElement("div"); subBox.className = "sub"; subBox.hidden = true;
@@ -2875,6 +2939,7 @@ function openMenu(){
     item("Connection: " + connInfo().label, "", null, { disabled:true }),
     item("Exit", "", exitApp));
   menu.style.display = "block";
+  const first = menu.querySelector("button:not(:disabled)"); if(first) first.focus({ preventScroll:true });   /* so the arrow keys work at once */
 }
 const trayAnchor = () => { const r = ($("appIcon").classList.contains("pinned") ? $("appIcon") : $("chev")).getBoundingClientRect(); return { x:r.left, y:r.top - 8 }; };
 $("chev").addEventListener("click", e => {
@@ -2905,17 +2970,18 @@ document.addEventListener("pointerdown", e => {
     closeCard();
 }, true);
 
+addEventListener("hashchange", () => { const on = location.hash === "#all"; if(on !== state.allTools){ state.allTools = on; applyEdition(); } });
 function exitApp(){
   state.running = false; closeCard(); hideChip(); closeCtx(); APP_WINS.forEach(closeApp);
   $("appIcon").style.display = "none"; $("deskIcon").classList.add("attn");
   showKeys("look", "The app has exited. Double-click Start-Demo.bat on the desktop to start it again.");
 }
-$("deskIcon").addEventListener("dblclick", launch);
+$("deskIcon").addEventListener("dblclick", () => { if(state.running) showNotice("The app is already running. Click the ^ arrow near the clock to find its icon.", { x:innerWidth - 300, y:innerHeight - 140 }); else launch(); });
 $("deskIcon").addEventListener("click", e => { if(e.detail === 0 || coarse.matches) launch(); });
 function launch(){
   if(state.running) return;
   state.running = true; $("appIcon").style.display = ""; $("deskIcon").classList.remove("attn");
-  showNotice("ANDA Companion (Notula) started. Look for its icon near the clock.", { x:innerWidth - 300, y:innerHeight - 140 });
+  showNotice("Started. Click the ^ arrow near the clock to find the icon.", { x:innerWidth - 300, y:innerHeight - 140 });
 }
 
 /* ---------------- round 10: shortcuts, middle-click, my data, my writing, my API, connection ---------------- */
@@ -2954,11 +3020,12 @@ function findDup(keys){
 const escHTML = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const kbdHTML = combo => combo.split("+").map(p => `<kbd>${escHTML(p)}</kbd>`).join("+");
 function keyReport(){
-  return KEYKINDS.map(([k, name]) => !state.keys[k] ? `– ${name}: no shortcut (the tray menu still opens it)` : state.taken[k]
+  return KEYKINDS.filter(([k]) => k !== "list" || state.allTools).map(([k, name]) => !state.keys[k] ? `– ${name}: no shortcut (the tray menu still opens it)` : state.taken[k]
     ? `✗ ${name}: ${state.keys[k]} is already used by another program (many apps claim a global shortcut). Choose a different one above; the tray icon always works.`
     : `✓ ${name}: ${state.keys[k]} is active`).concat((state.actions || []).filter(a => a.enabled && a.hotkey).map(a => `✓ ${a.name}: ${a.hotkey} is active`)).join("\n");
 }
 function paintKeys(){
+  $("lookupHead").textContent = "LOOKUP" + (state.keys.look ? " · " + state.keys.look.toUpperCase() : "");
   $("keyPeek").textContent = state.keys.peek; $("keyLook").textContent = state.keys.look; $("keyDraft").textContent = state.keys.draft;
   $("keyAsk").textContent = state.keys.ask || "Ask (no shortcut)"; $("keyAsk").setAttribute("aria-label", state.keys.ask ? "Press " + state.keys.ask.replace(/\+/g, " ") : "Ask about a selection has no shortcut. Press to try the window.");
   $("keyList").textContent = state.keys.list || "My to-do list (no shortcut)"; $("keyList").setAttribute("aria-label", state.keys.list ? "Press " + state.keys.list.replace(/\+/g, " ") : "My to-do list has no shortcut. Press to try the notes window.");
@@ -2968,10 +3035,18 @@ function paintKeys(){
   KEYKINDS.forEach(([k, , id]) => { $(id).value = state.keys[k] || "None"; });
   $("keyStatus").textContent = keyReport();
 }
+/* A shortcut box must never hold the keyboard hostage: Tab and Shift+Tab move on, and Escape leaves the box (a second Escape closes the window). None of these can be a shortcut anyway. */
+const captureExit = (e, box) => {
+  const bare = !e.ctrlKey && !e.altKey && !e.metaKey;
+  if(e.key === "Tab" && bare) return true;
+  if(e.key === "Escape" && bare && !e.shiftKey){ e.stopPropagation(); box.blur(); return true; }
+  return false;
+};
 (function buildShortcuts(){
   KEYKINDS.forEach(([kind, name, id]) => {
     const box = $(id); box.dataset.keycapture = "1";
     box.addEventListener("keydown", e => {
+      if(captureExit(e, box)) return;
       if(["Control", "Alt", "Shift", "Meta"].includes(e.key)) return;               /* a modifier alone: keep waiting */
       e.preventDefault(); e.stopPropagation();
       const combo = comboFromEvent(e);
@@ -2985,6 +3060,8 @@ function paintKeys(){
       state.keys = next; paintKeys(); renderActions(); if(kind === "list") out.textContent = `${name}: ${combo} is active.`;
     });
   });
+  document.querySelectorAll("[data-keyreset]").forEach(b => b.setAttribute("aria-label", "Reset the " + (KEYKINDS.find(k => k[0] === b.dataset.keyreset) || ["", "shortcut"])[1] + " shortcut to its default"));
+  document.querySelectorAll("[data-keyclear]").forEach(b => b.setAttribute("aria-label", "Remove the " + (KEYKINDS.find(k => k[0] === b.dataset.keyclear) || ["", "shortcut"])[1] + " shortcut"));
   document.querySelectorAll("[data-keyreset]").forEach(b => b.addEventListener("click", () => {
     const kind = b.dataset.keyreset, next = { ...state.keys, [kind]: KEY_DEFAULT[kind] }, dup = findDup(next), out = $(kind === "list" ? "listKeyStatus" : "keyStatus");
     if(dup){ out.textContent = dup; return; }
@@ -3045,7 +3122,7 @@ function connInfo(){
   const mine = state.provider === "myapi" ? validateMyApi(state.myApi) : null;
   const setUp = state.provider === "claude" || (state.provider === "myapi" && mine === null);
   const name = state.provider === "myapi" ? (state.myApi.name || "My API") : "Claude";
-  if(state.ai) return { cls:"set", label:"SIMULATED CONNECTION · sample text, not a real API", text:"The “Claude access is approved” switch is a what-if. This page never contacts any API, so nothing here is really connected." };
+  if(state.ai) return { cls:"set", label:"SIMULATED CONNECTION · sample text, not a real API", text:"The “An approved AI model is connected” switch is a what-if. This page never contacts any API, so nothing here is really connected." };
   if(setUp) return { cls:"set", label:`${name.toUpperCase()} · set up, not tested`, text:`${name} is set up, but no request has been made, so it is not known to work. (In this simulation Test sends nothing.)` };
   return { cls:"", label:"OFFLINE · no API connected", text:"Not connected to any API. Briefs are assembled from the record on this page and nothing is sent anywhere." };
 }
@@ -3062,7 +3139,7 @@ function connStatusText(){
     case "offline": return "Offline is chosen. Nothing is ever sent.";
     case "claude": return `Claude is chosen (model ${state.claudeModel}). In the real app this needs ANTHROPIC_API_KEY on the PC; this page cannot check it.`;
     case "myapi": return validateMyApi(m) || `${m.name || "My API"} configured · ${hostOf(m.endpoint)}. (Simulation: the environment variable is not checked here.)`;
-    default: return "Auto uses a key or Elsa setup from the environment if one exists, and is otherwise offline.";
+    default: return "Auto uses an AI access key or the agency AI service set up on this PC, if one exists, and is otherwise offline.";
   }
 }
 const hostOf = u => { try{ return new URL(u).hostname; }catch(e){ return ""; } };
@@ -3178,9 +3255,11 @@ function openReplies(){
     const b = document.createElement("button"); b.type = "button"; b.setAttribute("role", "menuitem"); b.textContent = r.name;
     b.addEventListener("click", () => {
       const text = fillReply(r.text, current);
-      if(navigator.clipboard) navigator.clipboard.writeText(text).catch(() => {});
-      m.style.display = "none"; $("chipReplies").textContent = "Copied ✓"; $("chipReplies").dataset.last = text;
-      setTimeout(() => { $("chipReplies").textContent = "Quick replies ▾"; }, 1200);
+      m.style.display = "none";
+      writeClipboard(text).then(() => {
+        $("chipReplies").textContent = "Copied ✓"; $("chipReplies").dataset.last = text;
+        setTimeout(() => { $("chipReplies").textContent = "Quick replies ▾"; }, 1200);
+      }, () => showNotice("Your browser did not allow copying, so here is the reply: " + text, anchorForCard()));
     });
     m.appendChild(b);
   });
@@ -3302,8 +3381,8 @@ $("olSignOut").addEventListener("click", () => {
   clearTimeout(olTimer); state.outlook.step = "out"; state.outlook.msg = "Signed out. Nothing from Outlook is kept."; paintOutlook();
 });
 $("olCopy").addEventListener("click", () => {
-  if(navigator.clipboard) navigator.clipboard.writeText(OL_CODE).catch(() => {});
-  $("olCopy").textContent = "Copied ✓"; setTimeout(() => { $("olCopy").textContent = "Copy code"; }, 1400);
+  writeClipboard(OL_CODE).then(() => { $("olCopy").textContent = "Copied ✓"; }, () => { $("olCopy").textContent = "Not copied: please type the code"; })
+    .finally(() => setTimeout(() => { $("olCopy").textContent = "Copy code"; }, 2400));
 });
 /* made-up messages, so the drawer can be seen. Real mail is read on the person's own PC and is never part of this page. */
 function fakeMail(id){
@@ -3510,6 +3589,7 @@ function autoRowsFor(id){
   const make = (key, title, detail, due, sev, source) => ({ key, auto:true, title, detail, number:id, due, sev, priority:priorityOf(sev, due, today), done:false, snoozedUntil:null, source, itemId:null });
   if(isUrgent(id)) rows.push(make(`${id}|urgent|${dKey(goal)}|${dKey(fc)}`, `ANDA ${id}: at risk. ${urgentReason(id)}`, "From your data: a forecast well after the goal, a serious action item, or a passed goal date.", goal, "bad", "Your data"));
   watchFlags(id).filter(f => f.sev !== "info").forEach(f => {
+    if(isUrgent(id) && f.text === urgentReason(id)) return;   /* the at-risk row already says this: never list one fact twice */
     const date = f.code === "goal-passed" || f.code === "goal-soon" || f.code === "goal-date-calendar" ? goal : f.code === "forecast-date-calendar" ? fc : null;
     const due = f.code === "goal-passed" ? today : (f.code === "goal-soon" || f.code === "goal-date-calendar" || f.code === "forecast-date-calendar") ? date : null;
     rows.push(make(`${id}|${f.code}|${dKey(date)}`, `ANDA ${id}: ${f.text}`, f.why, due, f.sev, f.src));
@@ -3565,8 +3645,8 @@ function tdReload(force){
   const v = tdView = todoView();
   const sig = v.rows.map(r => `${r.key}|${r.done}|${r.priority}|${r.title}|${r.snoozedUntil}`).join("\n") + "#" + v.open;
   $("tdSummary").textContent = v.rows.length === 0 ? "Nothing on your list, and nothing in your data needs a look."
-    : `${v.open} open · ${v.now} need a look now` + (v.snoozed > 0 ? ` · ${v.snoozed} snoozed` : "") + (v.auto > 0 ? ` · ${v.auto} from your data` : "");
-  $("tdFooter").textContent = `Updated ${v.builtAt.toLocaleTimeString("en-US", { hour:"numeric", minute:"2-digit", second:"2-digit" })}. ${state.data.portfolio ? "Using my-portfolio.xlsx (simulated)." : "Using the fictional demo records."} Items from your data follow the same rules as the card and the watch list; they say what the data shows and decide nothing. Click a number to open its card.`;
+    : `${v.open} open · ${v.now} ${v.now === 1 ? "needs" : "need"} a look now` + (v.snoozed > 0 ? ` · ${v.snoozed} snoozed` : "") + (v.auto > 0 ? ` · ${v.auto} from your data` : "");
+  $("tdFooter").textContent = `Updated when this window opened. ${state.data.portfolio ? "Using my-portfolio.xlsx (simulated)." : "Using the fictional demo records."} Items from your data follow the same rules as the card and the watch list; they say what the data shows and decide nothing. Click a number to open its card.`;
   if(!force && sig === tdSig) return;
   tdSig = sig; tdDraw(v);
 }
@@ -3668,7 +3748,7 @@ function awAddTicked(){
 }
 function copyText(text, btn, label){
   const done = () => { btn.textContent = "Copied ✓"; setTimeout(() => { btn.textContent = label; }, 1400); };
-  (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text) : Promise.reject()).then(done, () => { $("awStatus").textContent = "The clipboard is not available. Please select the text and press Ctrl+C."; });
+  writeClipboard(text).then(done, () => { $("awStatus").textContent = "Your browser did not allow copying. Please select the text and press Ctrl+C."; });
 }
 $("awClose").addEventListener("click", () => closeApp("actwin"));
 $("awSend").addEventListener("click", awSend);
@@ -3734,7 +3814,7 @@ function askForAnda(a, anchor){ openLookup(anchor, number => executeAction(a, nu
 function runCustomAction(a, selection, anchor, withoutRecord){
   const clean = cleanSelection(selection), number = extractNumber(clean), known = !withoutRecord && number && DATA[number] ? number : null;   /* withoutRecord: a table or list from Ask holds many ANDAs, so none is picked as "the" record */
   if(!known && (clean.length === 0 || a.kind === 3)){
-    if(number){ showNotice(`${number} is not in the available records.`, anchor); return; }
+    if(number){ showNotice(`ANDA ${number} is not in your data.`, anchor); return; }
     askForAnda(a, anchor); return;
   }
   executeAction(a, known, number, clean, anchor);
@@ -3887,6 +3967,7 @@ function actionEditor(a){
   } else if(a.kind === 3) extra = agentSelect(a);
   keyBox.dataset.keycapture = "1";
   keyBox.addEventListener("keydown", e => {
+    if(captureExit(e, keyBox)) return;
     if(["Control", "Alt", "Shift", "Meta"].includes(e.key)) return;
     e.preventDefault(); e.stopPropagation();
     const combo = comboFromEvent(e);
@@ -4868,8 +4949,8 @@ function showImport(text){
 }
 $("bkRestoreText").addEventListener("click", () => showImport($("bkText").value));
 $("bkCopy").addEventListener("click", () => {
-  if(navigator.clipboard) navigator.clipboard.writeText($("bkText").value).catch(() => {});
-  $("bkCopy").textContent = "Copied ✓"; setTimeout(() => { $("bkCopy").textContent = "Copy"; }, 1400);
+  writeClipboard($("bkText").value).then(() => { $("bkCopy").textContent = "Copied ✓"; }, () => { $("bkText").select(); $("bkCopy").textContent = "Not copied: press Ctrl+C"; })
+    .finally(() => setTimeout(() => { $("bkCopy").textContent = "Copy"; }, 2400));
 });
 $("bkFile").addEventListener("change", async e => {
   const f = e.target.files && e.target.files[0]; e.target.value = "";
@@ -4887,7 +4968,7 @@ $("bkReset").addEventListener("click", () => {
   clearTimeout(resetTimer); b.dataset.armed = ""; b.textContent = "Reset all settings…";
   prompts.splice(0, prompts.length, ...DEFAULT_PROMPTS.map(p => [...p])); state.replies = DEFAULT_REPLIES.map(r => ({ ...r }));
   applySettings(DEFAULT_SETTINGS); state.sectionUse = {}; state.recents = []; applyEdition();
-  $("bkStatus").textContent = "Everything is back to what a new install starts with. File locations on this PC were kept."; $("bkStatus").style.color = "var(--c-ink2)";
+  $("bkStatus").textContent = "All settings are back to their defaults. File locations on this PC were kept."; $("bkStatus").style.color = "var(--c-ink2)";
 });
 
 /* go to a section: the group names and the labels inside them; choosing one opens its group first */

@@ -16,7 +16,7 @@ public class StatusLineTests
         Assert.Contains("62% through review", line);
         Assert.Contains("goal Oct 3, 2026", line);
         Assert.Contains("forecast Oct 17, 2026 (+14 d vs goal, moderate confidence)", line);
-        Assert.Contains("needs action: IR response due in 6 days", line);
+        Assert.Contains("needs action: IR response due in 5 days", line);
         Assert.EndsWith(".", line);
     }
 

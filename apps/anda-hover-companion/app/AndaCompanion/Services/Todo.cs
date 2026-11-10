@@ -313,13 +313,15 @@ public static class TodoBuilder
         TodoRow Make(string key, string title, string? detail, DateOnly? due, string sev, string source) =>
             new(key, true, title, detail, n, due, sev, PriorityOf(sev, due, effective), false, null, source, null);
 
-        if (UrgencyPolicy.IsUrgent(r, today, ctx.Calendar, ctx.UrgentLateDays))
+        string? urgentReason = UrgencyPolicy.IsUrgent(r, today, ctx.Calendar, ctx.UrgentLateDays) ? UrgencyPolicy.Reason(r, today, ctx.Calendar, ctx.UrgentLateDays) : null;
+        if (urgentReason is not null)
             yield return Make($"{n}|urgent|{D(r.GoalDateValue)}|{D(r.ForecastDateValue)}",
-                $"ANDA {n}: at risk. {UrgencyPolicy.Reason(r, today, ctx.Calendar, ctx.UrgentLateDays)}",
+                $"ANDA {n}: at risk. {urgentReason}",
                 "From your data: a forecast well after the goal, a serious action item, or a passed goal date.", r.GoalDateValue, "bad", "Your data");
 
         foreach (var f in WatchRules.Evaluate(r, today, ctx.Calendar, new WatchSettings(HolidayLeadBusinessDays: ctx.HolidayLeadDays)).Where(f => f.Severity != WatchSeverity.Info))
         {
+            if (urgentReason is not null && f.Text == urgentReason) continue;   // the at-risk row already says this: never list one fact twice
             DateOnly? date = f.Code switch
             {
                 "goal-passed" or "goal-soon" or "goal-date-calendar" => r.GoalDateValue,

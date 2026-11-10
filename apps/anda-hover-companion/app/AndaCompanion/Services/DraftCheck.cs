@@ -29,6 +29,17 @@ public static class DraftCheck
         @"|(?<iy>\d{4})-(?<im>\d{2})-(?<id>\d{2}))",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
+    /// <summary>"▲ +14 d vs goal" becomes "14 days later than the goal" for a sentence; the card keeps the short form.</summary>
+    internal static string PlainDelta(string delta)
+    {
+        string t = delta.Replace("▲", "").Replace("▼", "").Trim();
+        var later = Regex.Match(t, @"^\+(\d+) d vs goal$");
+        if (later.Success) { int n = int.Parse(later.Groups[1].Value); return $"{n} day{(n == 1 ? "" : "s")} later than the goal"; }
+        var ahead = Regex.Match(t, @"^(\d+) d ahead of goal$");
+        if (ahead.Success) { int n = int.Parse(ahead.Groups[1].Value); return $"{n} day{(n == 1 ? "" : "s")} ahead of the goal"; }
+        return t == "on goal" ? "on the goal date" : t;
+    }
+
     private static readonly Regex OnTrack = new(@"\b(on track|on schedule|ahead of (?:the )?(?:goal|schedule)|ahead of goal)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex Late = new(@"\b(running late|behind schedule|behind|delayed|at risk|slipping|slipped|past (?:the )?goal|will miss|going to miss)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
@@ -85,7 +96,7 @@ public static class DraftCheck
                 {
                     if (seenNumbers.Add(n)) numbersChecked++;
                     if (lookup(n) is null && reportedUnknown.Add(n))
-                        Add(DraftFindingKind.UnknownAnda, $"ANDA {n} is not in your data, so nothing about it could be checked. Check the number.");
+                        Add(DraftFindingKind.UnknownAnda, $"ANDA {n} is not in your data, so nothing about it could be checked. Please check the number.");
                 }
 
                 string? subject;
@@ -119,9 +130,9 @@ public static class DraftCheck
                     if (claimsOnTrack) statusChecked++;
                     if (claimsLate) statusChecked++;
                     if (claimsOnTrack && record.ForecastLate)
-                        Add(DraftFindingKind.Difference, $"ANDA {subject}: the draft sounds on track, but the record's forecast is {record.ForecastDelta.Replace("▲", "").Replace("▼", "").Trim()}.");
+                        Add(DraftFindingKind.Difference, $"ANDA {subject}: the draft sounds on track, but the record's forecast is {PlainDelta(record.ForecastDelta)}.");
                     if (claimsLate && !record.ForecastLate)
-                        Add(DraftFindingKind.Difference, $"ANDA {subject}: the draft sounds late or at risk, but the record's forecast is {record.ForecastDelta.Replace("▲", "").Replace("▼", "").Trim()}.");
+                        Add(DraftFindingKind.Difference, $"ANDA {subject}: the draft sounds late or at risk, but the record's forecast is {PlainDelta(record.ForecastDelta)}.");
                 }
             }
         }

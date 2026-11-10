@@ -6,8 +6,8 @@ export const DEMO_RECORDS = [
     "drug": "Metformin HCl ER Tablets, 500 mg",
     "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
     "goalDate": "Oct 3, 2026",
-    "goalDays": "\u00B7 80 days",
-    "daysToGoal": 80,
+    "goalDays": "\u00B7 79 days",
+    "daysToGoal": 79,
     "forecastDeltaDays": 14,
     "progressPct": 62,
     "forecastDate": "Oct 17, 2026",
@@ -16,7 +16,7 @@ export const DEMO_RECORDS = [
     "forecastConfidence": "moderate confidence",
     "attention": {
       "level": "warn",
-      "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+      "text": "IR response due in 5 days \u2014 Biopharmaceutics"
     },
     "latest": "Amendment (minor) received Jun 30 \u2014 under review",
     "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -71,8 +71,8 @@ export const DEMO_RECORDS = [
     "drug": "Metformin HCl ER Tablets, 750 mg",
     "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 3",
     "goalDate": "Aug 15, 2026",
-    "goalDays": "\u00B7 31 days",
-    "daysToGoal": 31,
+    "goalDays": "\u00B7 30 days",
+    "daysToGoal": 30,
     "forecastDeltaDays": -9,
     "progressPct": 88,
     "forecastDate": "Aug 6, 2026",

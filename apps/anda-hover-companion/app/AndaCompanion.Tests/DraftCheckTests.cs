@@ -64,7 +64,7 @@ public class DraftCheckTests
     public void On_track_wording_against_a_late_forecast_is_a_difference_and_the_reverse()
     {
         var late = Run("ANDA 216482 is on track.");
-        Assert.Contains(late.Findings, f => f.Kind == DraftFindingKind.Difference && f.Text.Contains("sounds on track") && f.Text.Contains("+14 d vs goal"));
+        Assert.Contains(late.Findings, f => f.Kind == DraftFindingKind.Difference && f.Text.Contains("sounds on track") && f.Text.Contains("14 days later than the goal"));
         var ahead = Run("ANDA 214990 is running late.");
         Assert.Contains(ahead.Findings, f => f.Kind == DraftFindingKind.Difference && f.Text.Contains("sounds late"));
         Assert.False(Run("ANDA 214990 is on track.").HasDifferences);

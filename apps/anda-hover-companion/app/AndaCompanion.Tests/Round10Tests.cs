@@ -247,7 +247,7 @@ public class QuickReplyTests
         string text = QuickReplyFill.Fill("ANDA {number} ({drug}) from {applicant}, {cycle}: goal {goal}, forecast {forecast} ({delta}). {attention} Next: {next}. As of {today}.", Rec, Today);
         Assert.Contains("ANDA 216482 (Metformin HCl ER Tablets, 500 mg) from Meridian Pharmaceuticals (fictional), Cycle 2", text);
         Assert.Contains("goal Oct 3, 2026, forecast Oct 17, 2026 (+14 d vs goal)", text);
-        Assert.Contains("IR response due in 6 days", text);
+        Assert.Contains("IR response due in 5 days", text);
         Assert.Contains("As of Nov 2, 2026.", text);
         Assert.Equal(StatusLine.Build(Rec), QuickReplyFill.Fill("{status}", Rec, Today));
     }

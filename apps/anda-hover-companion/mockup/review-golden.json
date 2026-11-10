@@ -370,7 +370,7 @@
       "findings": [
         {
           "kind": "unknown",
-          "text": "ANDA 999999 is not in your data, so nothing about it could be checked. Check the number."
+          "text": "ANDA 999999 is not in your data, so nothing about it could be checked. Please check the number."
         },
         {
           "kind": "diff",
@@ -390,7 +390,7 @@
       "findings": [
         {
           "kind": "unknown",
-          "text": "ANDA 999999 is not in your data, so nothing about it could be checked. Check the number."
+          "text": "ANDA 999999 is not in your data, so nothing about it could be checked. Please check the number."
         },
         {
           "kind": "note",
@@ -674,7 +674,7 @@
       "findings": [
         {
           "kind": "diff",
-          "text": "ANDA 214990: the draft sounds late or at risk, but the record's forecast is 9 d ahead of goal."
+          "text": "ANDA 214990: the draft sounds late or at risk, but the record's forecast is 9 days ahead of the goal."
         },
         {
           "kind": "note",
@@ -754,7 +754,7 @@
       "findings": [
         {
           "kind": "unknown",
-          "text": "ANDA 123456 is not in your data, so nothing about it could be checked. Check the number."
+          "text": "ANDA 123456 is not in your data, so nothing about it could be checked. Please check the number."
         },
         {
           "kind": "note",

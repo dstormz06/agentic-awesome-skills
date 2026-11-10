@@ -34,7 +34,7 @@ public class BriefServiceTests
         var b = await offline.GetBriefAsync(AtRisk);
         Assert.False(a.Generated);
         Assert.Equal(a.Text, b.Text);
-        Assert.Contains("IR response due in 6 days", a.Text);
+        Assert.Contains("IR response due in 5 days", a.Text);
         Assert.Contains("214990", a.Text);                       // the sister precedent
     }
 
@@ -121,7 +121,7 @@ public class BriefServiceTests
         var completer = new FakeCompleter { Reply = () => throw new HttpRequestException("network down") };
         var brief = await new GeneratedBriefService(completer, new OfflineBriefService()).GetBriefAsync(AtRisk);
         Assert.False(brief.Generated);
-        Assert.Contains("IR response due in 6 days", brief.Text);
+        Assert.Contains("IR response due in 5 days", brief.Text);
     }
 
     [Theory]

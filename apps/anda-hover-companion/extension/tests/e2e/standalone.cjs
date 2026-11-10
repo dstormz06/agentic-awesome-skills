@@ -49,13 +49,13 @@ const PAGE = `<!doctype html><meta charset="utf-8"><title>Huddle prep</title><bo
   h.ok(t.includes('Opened because: Forecast is 14 days after the goal'), 'the peek says what made it open');
   await page.getByRole('button', { name: 'Full brief ↓' }).click();
   t = await text(card());
-  h.ok(t.includes('NEEDS YOU') && t.includes('IR response due in 6 days') && t.includes('Goal date falls on a weekend: Sat Oct 3'), 'Full brief shows needs-you and the weekend flag');
+  h.ok(t.includes('NEEDS YOU') && t.includes('IR response due in 5 days') && t.includes('Goal date falls on a weekend: Sat Oct 3'), 'Full brief shows needs-you and the weekend flag');
   h.ok(t.includes('(+1 more in the drawer)'), 'and points to the second flag');
   await page.locator('button', { hasText: 'Copy status' }).click();
   await page.locator('button', { hasText: /Copied|Copy blocked/ }).first().waitFor({ timeout: 3000 });
   h.ok((await text(page.locator('button', { hasText: /Copied|Copy blocked/ }))).includes('Copied ✓'), 'Copy status says Copied');
   const copied = await page.evaluate(() => navigator.clipboard.readText().catch(() => null));
-  h.ok(copied === 'ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (+14 d vs goal, moderate confidence); needs action: IR response due in 6 days — Biopharmaceutics.', 'the clipboard holds the status sentence: ' + copied);
+  h.ok(copied === 'ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (+14 d vs goal, moderate confidence); needs action: IR response due in 5 days — Biopharmaceutics.', 'the clipboard holds the status sentence: ' + copied);
   await page.keyboard.press('Escape');
 
   // ---- what is not an ANDA is not guessed ----

@@ -2123,8 +2123,8 @@
       "drug": "Metformin HCl ER Tablets, 500 mg",
       "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
       "goalDate": "Oct 3, 2026",
-      "goalDays": "\u00B7 80 days",
-      "daysToGoal": 80,
+      "goalDays": "\u00B7 79 days",
+      "daysToGoal": 79,
       "forecastDeltaDays": 14,
       "progressPct": 62,
       "forecastDate": "Oct 17, 2026",
@@ -2133,7 +2133,7 @@
       "forecastConfidence": "moderate confidence",
       "attention": {
         "level": "warn",
-        "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+        "text": "IR response due in 5 days \u2014 Biopharmaceutics"
       },
       "latest": "Amendment (minor) received Jun 30 \u2014 under review",
       "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -2188,8 +2188,8 @@
       "drug": "Metformin HCl ER Tablets, 750 mg",
       "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 3",
       "goalDate": "Aug 15, 2026",
-      "goalDays": "\u00B7 31 days",
-      "daysToGoal": 31,
+      "goalDays": "\u00B7 30 days",
+      "daysToGoal": 30,
       "forecastDeltaDays": -9,
       "progressPct": 88,
       "forecastDate": "Aug 6, 2026",
@@ -2239,8 +2239,8 @@
         "drug": "Metformin HCl ER Tablets, 500 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "forecastDeltaDays": 14,
         "progressPct": 62,
         "forecastDate": "Oct 17, 2026",
@@ -2249,7 +2249,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -2312,8 +2312,8 @@
         "source": "Fictional demo data",
         "demo": true,
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "progress": 62,
         "forecastDate": "Oct 17, 2026",
         "forecastDelta": "\u25B2 \u002B14 d vs goal",
@@ -2323,7 +2323,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
@@ -2383,10 +2383,10 @@
         ],
         "brief": {
           "tag": "OFFLINE BRIEF",
-          "text": "Open now: IR response due in 6 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
+          "text": "Open now: IR response due in 5 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
           "generated": false
         },
-        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 6 days \u2014 Biopharmaceutics.",
+        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 5 days \u2014 Biopharmaceutics.",
         "urgency": {
           "isUrgent": true,
           "reason": "Forecast is 14 days after the goal"
@@ -2401,8 +2401,8 @@
         "drug": "Metformin HCl ER Tablets, 500 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "forecastDeltaDays": 14,
         "progressPct": 62,
         "forecastDate": "Oct 17, 2026",
@@ -2411,7 +2411,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -2474,8 +2474,8 @@
         "source": "Fictional demo data",
         "demo": true,
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "progress": 62,
         "forecastDate": "Oct 17, 2026",
         "forecastDelta": "\u25B2 \u002B14 d vs goal",
@@ -2485,7 +2485,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
@@ -2545,10 +2545,10 @@
         ],
         "brief": {
           "tag": "OFFLINE BRIEF",
-          "text": "Open now: IR response due in 6 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
+          "text": "Open now: IR response due in 5 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
           "generated": false
         },
-        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 6 days \u2014 Biopharmaceutics.",
+        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 5 days \u2014 Biopharmaceutics.",
         "urgency": {
           "isUrgent": true,
           "reason": "Forecast is 14 days after the goal"
@@ -2563,8 +2563,8 @@
         "drug": "Metformin HCl ER Tablets, 500 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "forecastDeltaDays": 14,
         "progressPct": 62,
         "forecastDate": "Oct 17, 2026",
@@ -2573,7 +2573,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -2636,8 +2636,8 @@
         "source": "Fictional demo data",
         "demo": true,
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "progress": 62,
         "forecastDate": "Oct 17, 2026",
         "forecastDelta": "\u25B2 \u002B14 d vs goal",
@@ -2647,7 +2647,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
@@ -2707,10 +2707,10 @@
         ],
         "brief": {
           "tag": "OFFLINE BRIEF",
-          "text": "Open now: IR response due in 6 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
+          "text": "Open now: IR response due in 5 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
           "generated": false
         },
-        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 6 days \u2014 Biopharmaceutics.",
+        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 5 days \u2014 Biopharmaceutics.",
         "urgency": {
           "isUrgent": true,
           "reason": "Forecast is 14 days after the goal"
@@ -2725,8 +2725,8 @@
         "drug": "Metformin HCl ER Tablets, 750 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 3",
         "goalDate": "Aug 15, 2026",
-        "goalDays": "\u00B7 31 days",
-        "daysToGoal": 31,
+        "goalDays": "\u00B7 30 days",
+        "daysToGoal": 30,
         "forecastDeltaDays": -9,
         "progressPct": 88,
         "forecastDate": "Aug 6, 2026",
@@ -2780,8 +2780,8 @@
         "source": "Fictional demo data",
         "demo": true,
         "goalDate": "Aug 15, 2026",
-        "goalDays": "\u00B7 31 days",
-        "daysToGoal": 31,
+        "goalDays": "\u00B7 30 days",
+        "daysToGoal": 30,
         "progress": 88,
         "forecastDate": "Aug 6, 2026",
         "forecastDelta": "\u25BC 9 d ahead of goal",
@@ -2844,8 +2844,8 @@
         "drug": "Metformin HCl ER Tablets, 750 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 3",
         "goalDate": "Aug 15, 2026",
-        "goalDays": "\u00B7 31 days",
-        "daysToGoal": 31,
+        "goalDays": "\u00B7 30 days",
+        "daysToGoal": 30,
         "forecastDeltaDays": -9,
         "progressPct": 88,
         "forecastDate": "Aug 6, 2026",
@@ -2899,8 +2899,8 @@
         "source": "Fictional demo data",
         "demo": true,
         "goalDate": "Aug 15, 2026",
-        "goalDays": "\u00B7 31 days",
-        "daysToGoal": 31,
+        "goalDays": "\u00B7 30 days",
+        "daysToGoal": 30,
         "progress": 88,
         "forecastDate": "Aug 6, 2026",
         "forecastDelta": "\u25BC 9 d ahead of goal",
@@ -2963,8 +2963,8 @@
         "drug": "Metformin HCl ER Tablets, 750 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 3",
         "goalDate": "Aug 15, 2026",
-        "goalDays": "\u00B7 31 days",
-        "daysToGoal": 31,
+        "goalDays": "\u00B7 30 days",
+        "daysToGoal": 30,
         "forecastDeltaDays": -9,
         "progressPct": 88,
         "forecastDate": "Aug 6, 2026",
@@ -3018,8 +3018,8 @@
         "source": "Fictional demo data",
         "demo": true,
         "goalDate": "Aug 15, 2026",
-        "goalDays": "\u00B7 31 days",
-        "daysToGoal": 31,
+        "goalDays": "\u00B7 30 days",
+        "daysToGoal": 30,
         "progress": 88,
         "forecastDate": "Aug 6, 2026",
         "forecastDelta": "\u25BC 9 d ahead of goal",
@@ -3082,8 +3082,8 @@
         "drug": "Metformin HCl ER Tablets, 500 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "forecastDeltaDays": 14,
         "progressPct": 62,
         "forecastDate": "Oct 17, 2026",
@@ -3092,7 +3092,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -3155,8 +3155,8 @@
         "source": "Fictional demo data",
         "demo": true,
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "progress": 62,
         "forecastDate": "Oct 17, 2026",
         "forecastDelta": "\u25B2 \u002B14 d vs goal",
@@ -3166,7 +3166,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
@@ -3211,10 +3211,10 @@
         ],
         "brief": {
           "tag": "OFFLINE BRIEF",
-          "text": "Open now: IR response due in 6 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
+          "text": "Open now: IR response due in 5 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
           "generated": false
         },
-        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 6 days \u2014 Biopharmaceutics.",
+        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 5 days \u2014 Biopharmaceutics.",
         "urgency": {
           "isUrgent": true,
           "reason": "Forecast is 14 days after the goal"
@@ -3229,8 +3229,8 @@
         "drug": "Metformin HCl ER Tablets, 500 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "forecastDeltaDays": 14,
         "progressPct": 62,
         "forecastDate": "Oct 17, 2026",
@@ -3239,7 +3239,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -3302,8 +3302,8 @@
         "source": "Fictional demo data",
         "demo": true,
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "progress": 62,
         "forecastDate": "Oct 17, 2026",
         "forecastDelta": "\u25B2 \u002B14 d vs goal",
@@ -3313,7 +3313,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
@@ -3358,10 +3358,10 @@
         ],
         "brief": {
           "tag": "OFFLINE BRIEF",
-          "text": "Open now: IR response due in 6 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
+          "text": "Open now: IR response due in 5 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
           "generated": false
         },
-        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 6 days \u2014 Biopharmaceutics.",
+        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 5 days \u2014 Biopharmaceutics.",
         "urgency": {
           "isUrgent": true,
           "reason": "Forecast is 14 days after the goal"
@@ -3376,8 +3376,8 @@
         "drug": "Metformin HCl ER Tablets, 500 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "forecastDeltaDays": 14,
         "progressPct": 62,
         "forecastDate": "Oct 17, 2026",
@@ -3386,7 +3386,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -3449,8 +3449,8 @@
         "source": "Fictional demo data",
         "demo": true,
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "progress": 62,
         "forecastDate": "Oct 17, 2026",
         "forecastDelta": "\u25B2 \u002B14 d vs goal",
@@ -3460,7 +3460,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
@@ -3505,10 +3505,10 @@
         ],
         "brief": {
           "tag": "OFFLINE BRIEF",
-          "text": "Open now: IR response due in 6 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
+          "text": "Open now: IR response due in 5 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
           "generated": false
         },
-        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 6 days \u2014 Biopharmaceutics.",
+        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 5 days \u2014 Biopharmaceutics.",
         "urgency": {
           "isUrgent": true,
           "reason": "Forecast is 14 days after the goal"
@@ -3523,8 +3523,8 @@
         "drug": "Metformin HCl ER Tablets, 500 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "forecastDeltaDays": 14,
         "progressPct": 62,
         "forecastDate": "Oct 17, 2026",
@@ -3533,7 +3533,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -3596,8 +3596,8 @@
         "source": "Your portfolio: Test.xlsx",
         "demo": false,
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "progress": 62,
         "forecastDate": "Oct 17, 2026",
         "forecastDelta": "\u25B2 \u002B14 d vs goal",
@@ -3607,7 +3607,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
@@ -3667,10 +3667,10 @@
         ],
         "brief": {
           "tag": "OFFLINE BRIEF",
-          "text": "Open now: IR response due in 6 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
+          "text": "Open now: IR response due in 5 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
           "generated": false
         },
-        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 6 days \u2014 Biopharmaceutics.",
+        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 5 days \u2014 Biopharmaceutics.",
         "urgency": {
           "isUrgent": true,
           "reason": "Forecast is 14 days after the goal"
@@ -3685,8 +3685,8 @@
         "drug": "Metformin HCl ER Tablets, 500 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "forecastDeltaDays": 14,
         "progressPct": 62,
         "forecastDate": "Oct 17, 2026",
@@ -3695,7 +3695,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -3758,8 +3758,8 @@
         "source": "Your portfolio: Test.xlsx",
         "demo": false,
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "progress": 62,
         "forecastDate": "Oct 17, 2026",
         "forecastDelta": "\u25B2 \u002B14 d vs goal",
@@ -3769,7 +3769,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
@@ -3814,10 +3814,10 @@
         ],
         "brief": {
           "tag": "OFFLINE BRIEF",
-          "text": "Open now: IR response due in 6 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
+          "text": "Open now: IR response due in 5 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
           "generated": false
         },
-        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 6 days \u2014 Biopharmaceutics.",
+        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 5 days \u2014 Biopharmaceutics.",
         "urgency": {
           "isUrgent": true,
           "reason": "Forecast is 14 days after the goal"
@@ -3832,8 +3832,8 @@
         "drug": "Metformin HCl ER Tablets, 500 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "forecastDeltaDays": 14,
         "progressPct": 62,
         "forecastDate": "Oct 17, 2026",
@@ -3842,7 +3842,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -3905,8 +3905,8 @@
         "source": "Your portfolio: Test.xlsx",
         "demo": false,
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "progress": 62,
         "forecastDate": "Oct 17, 2026",
         "forecastDelta": "\u25B2 \u002B14 d vs goal",
@@ -3916,7 +3916,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
@@ -3976,10 +3976,10 @@
         ],
         "brief": {
           "tag": "OFFLINE BRIEF",
-          "text": "Open now: IR response due in 6 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
+          "text": "Open now: IR response due in 5 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
           "generated": false
         },
-        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 6 days \u2014 Biopharmaceutics.",
+        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 5 days \u2014 Biopharmaceutics.",
         "urgency": {
           "isUrgent": true,
           "reason": "Forecast is 14 days after the goal"
@@ -3994,8 +3994,8 @@
         "drug": "Metformin HCl ER Tablets, 500 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "forecastDeltaDays": 14,
         "progressPct": 62,
         "forecastDate": "Oct 17, 2026",
@@ -4004,7 +4004,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -4067,8 +4067,8 @@
         "source": "Your portfolio: Test.xlsx",
         "demo": false,
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "progress": 62,
         "forecastDate": "Oct 17, 2026",
         "forecastDelta": "\u25B2 \u002B14 d vs goal",
@@ -4078,7 +4078,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
@@ -4138,10 +4138,10 @@
         ],
         "brief": {
           "tag": "OFFLINE BRIEF",
-          "text": "Open now: IR response due in 6 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
+          "text": "Open now: IR response due in 5 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
           "generated": false
         },
-        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 6 days \u2014 Biopharmaceutics.",
+        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 5 days \u2014 Biopharmaceutics.",
         "urgency": {
           "isUrgent": true,
           "reason": "Forecast is 14 days after the goal"
@@ -4156,8 +4156,8 @@
         "drug": "Metformin HCl ER Tablets, 500 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "forecastDeltaDays": 14,
         "progressPct": 62,
         "forecastDate": "Oct 17, 2026",
@@ -4166,7 +4166,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -4229,8 +4229,8 @@
         "source": "Your portfolio: Test.xlsx",
         "demo": false,
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "progress": 62,
         "forecastDate": "Oct 17, 2026",
         "forecastDelta": "\u25B2 \u002B14 d vs goal",
@@ -4240,7 +4240,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
@@ -4293,10 +4293,10 @@
         ],
         "brief": {
           "tag": "OFFLINE BRIEF",
-          "text": "Open now: IR response due in 6 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
+          "text": "Open now: IR response due in 5 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
           "generated": false
         },
-        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 6 days \u2014 Biopharmaceutics.",
+        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 5 days \u2014 Biopharmaceutics.",
         "urgency": {
           "isUrgent": true,
           "reason": "Forecast is 14 days after the goal"
@@ -4311,8 +4311,8 @@
         "drug": "Metformin HCl ER Tablets, 500 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "forecastDeltaDays": 14,
         "progressPct": 62,
         "forecastDate": "Oct 17, 2026",
@@ -4321,7 +4321,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -4384,8 +4384,8 @@
         "source": "Your portfolio: Test.xlsx",
         "demo": false,
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "progress": 62,
         "forecastDate": "Oct 17, 2026",
         "forecastDelta": "\u25B2 \u002B14 d vs goal",
@@ -4395,7 +4395,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
@@ -4448,10 +4448,10 @@
         ],
         "brief": {
           "tag": "OFFLINE BRIEF",
-          "text": "Open now: IR response due in 6 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
+          "text": "Open now: IR response due in 5 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
           "generated": false
         },
-        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 6 days \u2014 Biopharmaceutics.",
+        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 5 days \u2014 Biopharmaceutics.",
         "urgency": {
           "isUrgent": true,
           "reason": "Forecast is 14 days after the goal"
@@ -4466,8 +4466,8 @@
         "drug": "Metformin HCl ER Tablets, 500 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "forecastDeltaDays": 14,
         "progressPct": 62,
         "forecastDate": "Oct 17, 2026",
@@ -4476,7 +4476,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -4539,8 +4539,8 @@
         "source": "Your portfolio: Test.xlsx",
         "demo": false,
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "progress": 62,
         "forecastDate": "Oct 17, 2026",
         "forecastDelta": "\u25B2 \u002B14 d vs goal",
@@ -4550,7 +4550,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
@@ -4610,10 +4610,10 @@
         ],
         "brief": {
           "tag": "OFFLINE BRIEF",
-          "text": "Open now: IR response due in 6 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
+          "text": "Open now: IR response due in 5 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
           "generated": false
         },
-        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 6 days \u2014 Biopharmaceutics.",
+        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 5 days \u2014 Biopharmaceutics.",
         "urgency": {
           "isUrgent": true,
           "reason": "Forecast is 14 days after the goal"
@@ -4628,8 +4628,8 @@
         "drug": "Metformin HCl ER Tablets, 500 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "forecastDeltaDays": 14,
         "progressPct": 62,
         "forecastDate": "Oct 17, 2026",
@@ -4638,7 +4638,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -4701,8 +4701,8 @@
         "source": "Your portfolio: Test.xlsx",
         "demo": false,
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "progress": 62,
         "forecastDate": "Oct 17, 2026",
         "forecastDelta": "\u25B2 \u002B14 d vs goal",
@@ -4712,7 +4712,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
@@ -4757,10 +4757,10 @@
         ],
         "brief": {
           "tag": "OFFLINE BRIEF",
-          "text": "Open now: IR response due in 6 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
+          "text": "Open now: IR response due in 5 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
           "generated": false
         },
-        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 6 days \u2014 Biopharmaceutics.",
+        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 5 days \u2014 Biopharmaceutics.",
         "urgency": {
           "isUrgent": true,
           "reason": "Forecast is 14 days after the goal"
@@ -4775,8 +4775,8 @@
         "drug": "Metformin HCl ER Tablets, 500 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "forecastDeltaDays": 14,
         "progressPct": 62,
         "forecastDate": "Oct 17, 2026",
@@ -4785,7 +4785,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -4848,8 +4848,8 @@
         "source": "Your portfolio: Test.xlsx",
         "demo": false,
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "progress": 62,
         "forecastDate": "Oct 17, 2026",
         "forecastDelta": "\u25B2 \u002B14 d vs goal",
@@ -4859,7 +4859,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
@@ -4919,10 +4919,10 @@
         ],
         "brief": {
           "tag": "OFFLINE BRIEF",
-          "text": "Open now: IR response due in 6 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
+          "text": "Open now: IR response due in 5 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
           "generated": false
         },
-        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 6 days \u2014 Biopharmaceutics.",
+        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 5 days \u2014 Biopharmaceutics.",
         "urgency": {
           "isUrgent": true,
           "reason": "Forecast is 14 days after the goal"
@@ -4937,8 +4937,8 @@
         "drug": "Metformin HCl ER Tablets, 500 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "forecastDeltaDays": 14,
         "progressPct": 62,
         "forecastDate": "Oct 17, 2026",
@@ -4947,7 +4947,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -5010,8 +5010,8 @@
         "source": "Your portfolio: Test.xlsx",
         "demo": false,
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "progress": 62,
         "forecastDate": "Oct 17, 2026",
         "forecastDelta": "\u25B2 \u002B14 d vs goal",
@@ -5021,7 +5021,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
@@ -5081,10 +5081,10 @@
         ],
         "brief": {
           "tag": "OFFLINE BRIEF",
-          "text": "Open now: IR response due in 6 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
+          "text": "Open now: IR response due in 5 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
           "generated": false
         },
-        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 6 days \u2014 Biopharmaceutics.",
+        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 5 days \u2014 Biopharmaceutics.",
         "urgency": {
           "isUrgent": true,
           "reason": "Forecast is 14 days after the goal"
@@ -5099,8 +5099,8 @@
         "drug": "Metformin HCl ER Tablets, 500 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "forecastDeltaDays": 14,
         "progressPct": 62,
         "forecastDate": "Oct 17, 2026",
@@ -5109,7 +5109,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -5172,8 +5172,8 @@
         "source": "Your portfolio: Test.xlsx",
         "demo": false,
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "progress": 62,
         "forecastDate": "Oct 17, 2026",
         "forecastDelta": "\u25B2 \u002B14 d vs goal",
@@ -5183,7 +5183,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
@@ -5236,10 +5236,10 @@
         ],
         "brief": {
           "tag": "OFFLINE BRIEF",
-          "text": "Open now: IR response due in 6 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
+          "text": "Open now: IR response due in 5 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
           "generated": false
         },
-        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 6 days \u2014 Biopharmaceutics.",
+        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 5 days \u2014 Biopharmaceutics.",
         "urgency": {
           "isUrgent": true,
           "reason": "Forecast is 14 days after the goal"
@@ -5254,8 +5254,8 @@
         "drug": "Metformin HCl ER Tablets, 500 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "forecastDeltaDays": 14,
         "progressPct": 62,
         "forecastDate": "Oct 17, 2026",
@@ -5264,7 +5264,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -5327,8 +5327,8 @@
         "source": "Your portfolio: Test.xlsx",
         "demo": false,
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "progress": 62,
         "forecastDate": "Oct 17, 2026",
         "forecastDelta": "\u25B2 \u002B14 d vs goal",
@@ -5338,7 +5338,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
@@ -5405,10 +5405,10 @@
         ],
         "brief": {
           "tag": "OFFLINE BRIEF",
-          "text": "Open now: IR response due in 6 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
+          "text": "Open now: IR response due in 5 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
           "generated": false
         },
-        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 6 days \u2014 Biopharmaceutics.",
+        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 5 days \u2014 Biopharmaceutics.",
         "urgency": {
           "isUrgent": true,
           "reason": "Forecast is 14 days after the goal"
@@ -5423,8 +5423,8 @@
         "drug": "Metformin HCl ER Tablets, 500 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "forecastDeltaDays": 14,
         "progressPct": 62,
         "forecastDate": "Oct 17, 2026",
@@ -5433,7 +5433,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -5496,8 +5496,8 @@
         "source": "Your portfolio: Test.xlsx",
         "demo": false,
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "progress": 62,
         "forecastDate": "Oct 17, 2026",
         "forecastDelta": "\u25B2 \u002B14 d vs goal",
@@ -5507,7 +5507,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
@@ -5560,10 +5560,10 @@
         ],
         "brief": {
           "tag": "OFFLINE BRIEF",
-          "text": "Open now: IR response due in 6 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
+          "text": "Open now: IR response due in 5 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
           "generated": false
         },
-        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 6 days \u2014 Biopharmaceutics.",
+        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 5 days \u2014 Biopharmaceutics.",
         "urgency": {
           "isUrgent": true,
           "reason": "Forecast is 14 days after the goal"
@@ -5578,8 +5578,8 @@
         "drug": "Metformin HCl ER Tablets, 500 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "forecastDeltaDays": 14,
         "progressPct": 62,
         "forecastDate": "Oct 17, 2026",
@@ -5588,7 +5588,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -5651,8 +5651,8 @@
         "source": "Your portfolio: Test.xlsx",
         "demo": false,
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "progress": 62,
         "forecastDate": "Oct 17, 2026",
         "forecastDelta": "\u25B2 \u002B14 d vs goal",
@@ -5662,7 +5662,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
@@ -5715,10 +5715,10 @@
         ],
         "brief": {
           "tag": "OFFLINE BRIEF",
-          "text": "Open now: IR response due in 6 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
+          "text": "Open now: IR response due in 5 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
           "generated": false
         },
-        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 6 days \u2014 Biopharmaceutics.",
+        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 5 days \u2014 Biopharmaceutics.",
         "urgency": {
           "isUrgent": true,
           "reason": "Forecast is 14 days after the goal"
@@ -5733,8 +5733,8 @@
         "drug": "Metformin HCl ER Tablets, 500 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "forecastDeltaDays": 14,
         "progressPct": 62,
         "forecastDate": "Oct 17, 2026",
@@ -5743,7 +5743,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -5806,8 +5806,8 @@
         "source": "Your portfolio: Test.xlsx",
         "demo": false,
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "progress": 62,
         "forecastDate": "Oct 17, 2026",
         "forecastDelta": "\u25B2 \u002B14 d vs goal",
@@ -5817,7 +5817,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
@@ -5870,10 +5870,10 @@
         ],
         "brief": {
           "tag": "OFFLINE BRIEF",
-          "text": "Open now: IR response due in 6 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
+          "text": "Open now: IR response due in 5 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
           "generated": false
         },
-        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 6 days \u2014 Biopharmaceutics.",
+        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 5 days \u2014 Biopharmaceutics.",
         "urgency": {
           "isUrgent": true,
           "reason": "Forecast is 14 days after the goal"
@@ -5888,8 +5888,8 @@
         "drug": "Metformin HCl ER Tablets, 500 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "forecastDeltaDays": 14,
         "progressPct": 62,
         "forecastDate": "Oct 17, 2026",
@@ -5898,7 +5898,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -5961,8 +5961,8 @@
         "source": "Your portfolio: Test.xlsx",
         "demo": false,
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "progress": 62,
         "forecastDate": "Oct 17, 2026",
         "forecastDelta": "\u25B2 \u002B14 d vs goal",
@@ -5972,7 +5972,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
@@ -6025,10 +6025,10 @@
         ],
         "brief": {
           "tag": "OFFLINE BRIEF",
-          "text": "Open now: IR response due in 6 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
+          "text": "Open now: IR response due in 5 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
           "generated": false
         },
-        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 6 days \u2014 Biopharmaceutics.",
+        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 5 days \u2014 Biopharmaceutics.",
         "urgency": {
           "isUrgent": true,
           "reason": "Forecast is 14 days after the goal"
@@ -6043,8 +6043,8 @@
         "drug": "Metformin HCl ER Tablets, 500 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "forecastDeltaDays": 14,
         "progressPct": 62,
         "forecastDate": "Oct 17, 2026",
@@ -6053,7 +6053,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -6116,8 +6116,8 @@
         "source": "Your portfolio: Test.xlsx",
         "demo": false,
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "progress": 62,
         "forecastDate": "Oct 17, 2026",
         "forecastDelta": "\u25B2 \u002B14 d vs goal",
@@ -6127,7 +6127,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
@@ -6172,10 +6172,10 @@
         ],
         "brief": {
           "tag": "OFFLINE BRIEF",
-          "text": "Open now: IR response due in 6 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
+          "text": "Open now: IR response due in 5 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
           "generated": false
         },
-        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 6 days \u2014 Biopharmaceutics.",
+        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 5 days \u2014 Biopharmaceutics.",
         "urgency": {
           "isUrgent": true,
           "reason": "Forecast is 14 days after the goal"
@@ -6190,8 +6190,8 @@
         "drug": "Metformin HCl ER Tablets, 500 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "forecastDeltaDays": 14,
         "progressPct": 62,
         "forecastDate": "Oct 17, 2026",
@@ -6200,7 +6200,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -6263,8 +6263,8 @@
         "source": "Your portfolio: Test.xlsx",
         "demo": false,
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "progress": 62,
         "forecastDate": "Oct 17, 2026",
         "forecastDelta": "\u25B2 \u002B14 d vs goal",
@@ -6274,7 +6274,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "ahead": "Thu huddle \u2014 status requested on this ANDA \u002B sister 214990 (memo, Jul 14)",
@@ -6334,10 +6334,10 @@
         ],
         "brief": {
           "tag": "OFFLINE BRIEF",
-          "text": "Open now: IR response due in 6 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
+          "text": "Open now: IR response due in 5 days \u2014 Biopharmaceutics. Related precedent: ANDA 214990 \u2014 Metformin HCl ER Tablets, 750 mg \u2014 same applicant, same facility. Forecast drivers and assumptions: expand \u2192 Forecast \u0026 assumptions.",
           "generated": false
         },
-        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 6 days \u2014 Biopharmaceutics.",
+        "statusLine": "ANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026; forecast Oct 17, 2026 (\u002B14 d vs goal, moderate confidence); needs action: IR response due in 5 days \u2014 Biopharmaceutics.",
         "urgency": {
           "isUrgent": true,
           "reason": "Forecast is 14 days after the goal"
@@ -6353,8 +6353,8 @@
         "drug": "Metformin HCl ER Tablets, 500 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 2",
         "goalDate": "Oct 3, 2026",
-        "goalDays": "\u00B7 80 days",
-        "daysToGoal": 80,
+        "goalDays": "\u00B7 79 days",
+        "daysToGoal": 79,
         "forecastDeltaDays": 14,
         "progressPct": 62,
         "forecastDate": "Oct 17, 2026",
@@ -6363,7 +6363,7 @@
         "forecastConfidence": "moderate confidence",
         "attention": {
           "level": "warn",
-          "text": "IR response due in 6 days \u2014 Biopharmaceutics"
+          "text": "IR response due in 5 days \u2014 Biopharmaceutics"
         },
         "latest": "Amendment (minor) received Jun 30 \u2014 under review",
         "dataAsOf": "data as of Jul 16, 07:12 \u00B7 extract #412 (fictional)",
@@ -6418,8 +6418,8 @@
         "drug": "Metformin HCl ER Tablets, 750 mg",
         "meta": "Meridian Pharmaceuticals (fictional) \u00B7 Cycle 3",
         "goalDate": "Aug 15, 2026",
-        "goalDays": "\u00B7 31 days",
-        "daysToGoal": 31,
+        "goalDays": "\u00B7 30 days",
+        "daysToGoal": 30,
         "forecastDeltaDays": -9,
         "progressPct": 88,
         "forecastDate": "Aug 6, 2026",
@@ -6502,15 +6502,15 @@
         },
         {
           "kind": "diff",
-          "text": "ANDA 216482: the draft sounds on track, but the record\u0027s forecast is \u002B14 d vs goal."
+          "text": "ANDA 216482: the draft sounds on track, but the record\u0027s forecast is 14 days later than the goal."
         },
         {
           "kind": "diff",
-          "text": "ANDA 214990: the draft sounds late or at risk, but the record\u0027s forecast is 9 d ahead of goal."
+          "text": "ANDA 214990: the draft sounds late or at risk, but the record\u0027s forecast is 9 days ahead of the goal."
         },
         {
           "kind": "unknown",
-          "text": "ANDA 123456 is not in your data, so nothing about it could be checked. Check the number."
+          "text": "ANDA 123456 is not in your data, so nothing about it could be checked. Please check the number."
         },
         {
           "kind": "note",
@@ -6682,11 +6682,11 @@
       "findings": [
         {
           "kind": "unknown",
-          "text": "ANDA 999999 is not in your data, so nothing about it could be checked. Check the number."
+          "text": "ANDA 999999 is not in your data, so nothing about it could be checked. Please check the number."
         },
         {
           "kind": "unknown",
-          "text": "ANDA 888888 is not in your data, so nothing about it could be checked. Check the number."
+          "text": "ANDA 888888 is not in your data, so nothing about it could be checked. Please check the number."
         },
         {
           "kind": "note",

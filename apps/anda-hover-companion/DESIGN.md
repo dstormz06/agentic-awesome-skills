@@ -109,10 +109,10 @@ becomes recognition, not scanning:
 │ Metformin HCl ER Tablets, 500 mg             │
 │ Meridian Pharmaceuticals · Cycle 2           │
 ├──────────────────────────────────────────────┤
-│ GOAL      Oct 3, 2026 · 80 days  ▓▓▓▓▓░░ 62% │  ← the commitment: one date, one thin bar
+│ GOAL      Oct 3, 2026 · 79 days  ▓▓▓▓▓░░ 62% │  ← the commitment: one date, one thin bar
 │ FORECAST  Oct 17 · ▲ +14 d vs goal · moderate│  ← THE headline: the true forecast + delta
 ├──────────────────────────────────────────────┤
-│ ⚠ Needs you · IR response due in 6 days      │  ← ONE line, only if something needs attention
+│ ⚠ Needs you · IR response due in 5 days      │  ← ONE line, only if something needs attention
 ├──────────────────────────────────────────────┤
 │ Latest: Amendment (minor) received Jun 30    │  ← most recent event, one line
 ├──────────────────────────────────────────────┤

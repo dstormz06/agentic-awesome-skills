@@ -29,7 +29,7 @@ public partial class ChipWindow : Window
         ChipText.Text = label;
         GoText.IsVisible = true;
         Pill.PointerPressed += (_, _) => { Close(); onAccept(); };
-        Open(near, TimeSpan.FromSeconds(3));
+        Open(near, TimeSpan.FromSeconds(6));
     }
 
     public void ShowNotice(string label, PixelPoint near)

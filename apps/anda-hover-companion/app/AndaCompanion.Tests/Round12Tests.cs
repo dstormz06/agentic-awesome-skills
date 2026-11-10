@@ -92,7 +92,7 @@ public class Round12Tests : IClassFixture<HeadlessFixture>
     public async Task Rail_carries_the_days_to_goal_in_a_tinted_column()
     {
         var t = await Inspect(AppearanceId.R, Texts);
-        Assert.Contains("80", t);
+        Assert.Contains("79", t);
         Assert.Contains("DAYS TO GOAL", t);
     }
 
