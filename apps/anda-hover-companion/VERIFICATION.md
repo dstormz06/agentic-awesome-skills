@@ -771,7 +771,7 @@ What it tested (its own account, partly checked by re-running its repros here): 
 
 Local results on this code: C# **933 passed, 11 skipped, 0 failed**; extension unit **31 passed** and the standalone browser run **all pass**; simulation: the new suite 26, **49 checks** (one or more per finding above), and every earlier suite passes after its expectations were updated on purpose (41, 13, 68, 26, 38, 15, 65, 56, 39, 24, 254, 12, 144, 133, 94 and 101 checks), the combination matrix **1,090 of 1,090**, the in-frame check **152 of 152**, the review and selection parity scripts still identical to the app's regenerated fixtures (**46 of 46** and **21 cases, 0 field mismatches**), and all four accessibility scans with no violations; `node tools/wording-check.mjs` reports **0 findings in 132 files**. The page was also looked at again in screenshots at 1366 by 768 (cold page, default card, a look that shows day counts, the tray menu with all tools shown).
 
-CI: commits **`892f16c`** and **`45a1b7e`** were pushed; their Windows run is recorded in the line below when it has finished.
+CI: commit **`892f16c`** (run 33): Linux and Windows jobs green, including the build, all tests, the extension check and the Windows self-test step (which fails the job on any failure; the report's counts were not read for this run). The two later commits change only the simulation's clock and this document, and did not start a run.
 
 ### Defects found and fixed in round 18b
 
