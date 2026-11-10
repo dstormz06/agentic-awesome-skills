@@ -963,7 +963,7 @@ C:\work&gt; </div>
       <button id="appIcon" type="button" aria-label="ANDA Companion (Notula) tray icon. Click for lookup, right-click or long-press for the menu."><span class="glyph"></span></button>
       <button type="button" tabindex="-1" aria-hidden="true" class="hide-narrow"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 6.5a9 9 0 0112 0M4 9a6 6 0 018 0M6.2 11.4a3 3 0 013.6 0" stroke="#454b53" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="13" r=".9" fill="#454b53"/></svg></button>
       <button type="button" tabindex="-1" aria-hidden="true" class="hide-narrow"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2.5 6h2.5L8.5 3v10L5 10H2.5z" fill="#454b53"/><path d="M11 5.5a3.5 3.5 0 010 5" stroke="#454b53" stroke-width="1.4" stroke-linecap="round"/></svg></button>
-      <div class="clock" aria-label="Clock, simulated"><div>10:42 AM</div><div>7/16/2026</div></div>
+      <div class="clock" aria-label="Clock, simulated"><div id="simClockTime">10:42 AM</div><div>7/16/2026</div></div>
     </div>
   </div>
 
@@ -1598,6 +1598,13 @@ function writeClipboard(text){
   return legacy();
 }
 /* The day counts are measured from the same date the WATCH rules use (the extract date, or the pretend date), so the card never disagrees with its own WATCH line. */
+/* The simulated clock starts at 10:42 AM on the extract date and then runs, so the taskbar, the to-do footer and every "updated" label tell the same time. */
+const SIM_START = Date.now();
+function simClock(withSeconds){
+  const t = 10 * 3600 + 42 * 60 + Math.floor((Date.now() - SIM_START) / 1000), h = Math.floor(t / 3600) % 24, m = Math.floor(t / 60) % 60, sec = t % 60;
+  return `${(h + 11) % 12 + 1}:${String(m).padStart(2, "0")}${withSeconds ? ":" + String(sec).padStart(2, "0") : ""} ${h >= 12 ? "PM" : "AM"}`;
+}
+setInterval(() => { const el = document.getElementById("simClockTime"); if(el) el.textContent = simClock(false); }, 10000);
 const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
 Object.values(DATA).forEach(d => {
   Object.defineProperty(d, "daysTo", { get(){ return Math.round((ymd(...d.goalD) - demoToday()) / DAY); }, enumerable:true, configurable:true });
@@ -3646,7 +3653,7 @@ function tdReload(force){
   const sig = v.rows.map(r => `${r.key}|${r.done}|${r.priority}|${r.title}|${r.snoozedUntil}`).join("\n") + "#" + v.open;
   $("tdSummary").textContent = v.rows.length === 0 ? "Nothing on your list, and nothing in your data needs a look."
     : `${v.open} open · ${v.now} ${v.now === 1 ? "needs" : "need"} a look now` + (v.snoozed > 0 ? ` · ${v.snoozed} snoozed` : "") + (v.auto > 0 ? ` · ${v.auto} from your data` : "");
-  $("tdFooter").textContent = `Updated when this window opened. ${state.data.portfolio ? "Using my-portfolio.xlsx (simulated)." : "Using the fictional demo records."} Items from your data follow the same rules as the card and the watch list; they say what the data shows and decide nothing. Click a number to open its card.`;
+  $("tdFooter").textContent = `Updated ${simClock(true)}. ${state.data.portfolio ? "Using my-portfolio.xlsx (simulated)." : "Using the fictional demo records."} Items from your data follow the same rules as the card and the watch list; they say what the data shows and decide nothing. Click a number to open its card.`;
   if(!force && sig === tdSig) return;
   tdSig = sig; tdDraw(v);
 }
