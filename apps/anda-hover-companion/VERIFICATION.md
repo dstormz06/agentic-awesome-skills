@@ -1013,11 +1013,55 @@ CI: run 41 on `963a441` is green on Windows (build, every test including the Win
 
 No RPM or director has used it. "Graphite Gauge" is a reading of two words; the owner may have meant something else. The Windows app has the tray rule and picture only: **it still opens in T · Pocket Plain and has none of rounds 20 to 22 beyond that and the 90% start.** The app's "due today" depends on the words in the sheet's action item. Nothing in the app yet reads a risk, safety or service mark, and nothing may read mail in the background without a decision by the owner and IT. The tray picture was checked as pixels, not seen in a real Windows notification area, where icons are drawn at 16 to 24 px.
 
+## Round 23: eight looks in both programs, a number on the tray icon, a choice of when it is counted, and three proposals for the default
+
+The owner answered the four questions of round 22: (1) W is what was meant, "but I prefer the visual/line graph from appearance U's 'GOAL AND FORECAST ON THE CALENDAR' … add either a brief visual or clear auto adaptive text colors and styles to indicate 'days until' the actual GDUFA Goal Date? Show me 3 new appearances first"; (2) the app may count at midnight, "can the user has at least two choices in settings for this too? And can you replace the dot to number 2 or 3 if there are more than 1 alert?"; (3) the large icon should lose its amber center too; (4) port to the app, and "cut down to only top 8 appearances for both app and simulation". Also: "for all the presentations and pitch decks, ensure the tones and writing must always be professional brief, polite, and precise".
+
+What was done:
+
+1. **Three proposals, shown and not switched on** (Appearance Lab, with pictures sent to the owner): X · Graphite Calendar, Y · Graphite Runway, Z · Graphite Countdown. Each is W with U's calendar and a "days to the goal date" indicator that changes at 30 days, at 7 days, on the day and after it, in words as well as in color.
+2. **A number on the tray icon** (simulation and app): a dot for one thing, the number for two to nine, "9+" beyond.
+3. **A choice of when the icon is counted again** (simulation and app): only when the app is used; also once a day just after midnight (default); also every hour.
+4. **The Loupe without amber at every size** (app icon, extension icons, simulation).
+5. **Eight looks in both programs**: W (default), V, U, T, K, P, L, O. **W, V and U are new to the Windows app**, which now opens in W.
+6. **The pitch deck's wording** was tightened and its figures brought up to date.
+
+Not done, and said so: none of X, Y, Z is the default yet (the owner chooses); which eight looks to keep was the builder's proposal, acted on; the app does not draw the blur of the glass looks; notes, Enter-adds-a-note, Open ANDA page, the proofreading rules, card details, notices, One Bar and Today are still simulation only.
+
+Local results on this code: C# **1,032 passed, 13 skipped, 0 failed** (1,036 with the picture test switched on); extension unit **31 passed**; simulation: this round's suite 32, **58 checks**, and every earlier suite after the updates listed under R181 (**34 suite files in all, none with a failure, each run against the final page**); `node tools/wording-check.mjs` reports **0 findings in 135 files**.
+
+CI: run 42 on `2a9a7f9` is green on Windows (build, every test including the Windows-only ones, the extension's rules against the app's output, the single-file program, the app's own self-test, which now also draws W, V and U, and the demo bundle) and on Linux.
+
+| Claim | Evidence | Limit |
+|---|---|---|
+| **Three proposals keep U's calendar and the same actions, and say the days to the goal date at five levels** (quiet, amber, amber on a tint, solid amber on the day, solid red after it), each in words | Suite 32 (L1 to L8, with an accessibility scan, contrast included, at every level) | **Lab only: a drawing with fixed dates.** The thresholds (30 and 7 days) are a proposal. None is in the simulation or the app |
+| **Eight looks are offered, the same and in the same order in both programs**; a retired or unknown look changes nothing; a backup or a saved setting that names one falls back to the default | Suite 32 (E1 to E8); C# `The_app_offers_the_same_eight_looks_in_the_same_order_as_the_simulation`, which reads the simulation's list, and `A_saved_look_that_is_no_longer_offered_falls_back…` (all 23) | Which eight is a proposal. The retired looks' styles are still in the page, unused |
+| **W, V and U in the app**: W shows the half dial beside the answer and says it in words; U draws the weeks from a Monday, names a holiday, and writes the same sentence as the simulation; no dial or calendar without the data | C# `Round23Tests` (the dial, the calendar, the window of weeks, the three looks); pictures of the app's cards were looked at; the Windows self-test draws them | **The blur is not drawn in the app.** Seen as headless pictures, not on a real Windows desktop |
+| **A dot for one thing, the number for two to nine, 9+ beyond**, on both copies of the simulation's icon; the tooltip and the spoken label give the true count | Suite 32 (N1 to N13); C# `The_tray_picture_follows_the_count`, `Every_tray_picture_exists_and_a_number_is_larger_than_the_dot` (reads the pixels) | The number is about 7 px high at tray size. **Not seen in a real Windows notification area** |
+| **Three choices for when the icon is counted again**, the same words in both programs; a bad value falls back to once a day; at midnight the simulation counts for two of the three and not for "only when I use the app"; "every hour" picks up a change at the next hour | Suite 32 (C1 to C10, the browser's clock run across midnight and across an hour); C# `The_scheduled_count_is_never_once_after_midnight_or_every_hour` (including a day when US clocks change and a new year), `The_count_setting_has_three_choices…`, `Settings_offers_the_three_choices…` | **The app's timer itself was not run across a real midnight**: its arithmetic is tested, and the timer is one line that calls it |
+| **No copy of the Loupe carries amber at rest** | Suite 32 (N14); C# `The_Loupe_carries_no_amber_at_any_size` | |
+
+### Defects caught in round 23
+
+| # | Finding | Found by | Disposition |
+|---|---|---|---|
+| R175 | In proposal Y the words "Today" and "Goal" ran into each other when the goal date was close | A picture of the 5-day state | "Today" moves above the line when less than a fifth of the clock is left |
+| R176 | In proposal X the answer broke onto two lines beside a wide count | The same picture | The count is a fixed 96 px, the width of W's dial |
+| R177 | The dates under the calendar had their descenders cut (the picture was 2 px too short), in the Lab and in the simulation | A picture of the proposals | The picture is 80 units high in both |
+| R178 | The app's self-test saved and reloaded a retired look, which would have reported a failure on Windows | Reading the self-test after the cut | It uses an offered look; its default check names W |
+| R179 | The first pictures of the app's new looks were taken during the card's entrance animation and came out dark | Looking at them | The picture test waits for the animation |
+| R180 | A test loop moved to the new looks expected the classic card's rows on answer-first cards | The full run | The loop covers the classic looks; suite 24 covers the others |
+| R181 | Older suites and C# tests expected 23 looks, the old default in the app, the old Lab layout and retired looks by name | The full run | Updated on purpose; checks of retired looks removed |
+
+### What round 23 does not prove
+
+No RPM or director has used it. The choice among X, Y and Z, and the thresholds, are the owner's. The eight looks kept are a reading of "top 8". The app's W, V and U and its numbered tray pictures were seen only as pictures made without a screen: **nobody has seen them on a real Windows desktop**, and the app's glass has no blur. The scheduled count is the app's first timed read of the portfolio file; it was approved by the owner, not by IT. The app still trails the simulation on notes, the proofreader and the rest of rounds 18 to 22.
+
 ## Still open
 
 GDUFA III tier table (needs the commitment-letter text and the dual-source rule); a real-keyboard check of rebound shortcuts on
 non-US layouts (rebinding is built); UI Automation capture; code signing; the live Claude call; **the live Elsa call (the two
 translations in `ElsaMapping.cs`, once the API is available)**; a 508 pass with a screen reader; a real-email-client
-check that compact boxes do not disturb typing; a real-mouse hover check for auto-hide on Windows; **Alert Hub, Patent Analysis and Triaging Agent details from DPM IT and a first real call to each**; a delivered-keystroke check of a person's own shortcut on Windows; a shared supervisor list (needs an approved place). **From rounds 18 to 22: the port of the simulation's design to the Windows app and the extension** (the looks U, V and W, notes on the card, Enter adds a note, Open ANDA page, the proofreading rules, the recall row, card details, notices and news, the one question, text size and spacing, recents, One Bar, Today); a decision on whether the app may recount the tray dot once at midnight; a Flag column and a mail rule for the tray dot in the app; the tray picture seen in a real Windows notification area.
+check that compact boxes do not disturb typing; a real-mouse hover check for auto-hide on Windows; **Alert Hub, Patent Analysis and Triaging Agent details from DPM IT and a first real call to each**; a delivered-keystroke check of a person's own shortcut on Windows; a shared supervisor list (needs an approved place). **From rounds 18 to 22: the port of the simulation's design to the Windows app and the extension** (notes on the card, Enter adds a note, Open ANDA page, the proofreading rules, the recall row, card details, notices and news, the one question, text size and spacing, recents, One Bar, Today); the owner's choice among the proposals X, Y and Z; the blur of the glass looks on a real Windows desktop; a Flag column and a mail rule for the tray dot in the app; the tray picture seen in a real Windows notification area.
 `npm run test` for the whole repository stops in this authoring environment at an unrelated test that needs a
 newer `git` (`--ref-format=reftable`); `npm run validate` and `npm run security:docs` pass.
