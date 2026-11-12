@@ -333,7 +333,7 @@ details.retired>summary{cursor:pointer;font-size:13px;letter-spacing:.12em;font-
 <div class="wrap" role="main">
   <p class="eyebrow">ALL DATA FICTIONAL · LIGHT ONLY</p>
   <h1>Appearance Lab</h1>
-  <p class="lede">Eight looks are offered, in the app and in the simulation: six full cards and two compact boxes that stay out of the way of an open email. W (Graphite Gauge) is the default. Three proposals for a new default come first, for the owner to choose from; the fifteen looks retired in round 23 are folded at the end. The designs differ only in surface, type and progress marker; the information is identical.</p>
+  <p class="lede">Eight looks are offered, in the app and in the simulation: six full cards and two compact boxes that stay out of the way of an open email. X (Graphite Calendar) is the default: the owner chose it from three proposals in round 24. The sixteen looks that are no longer offered are folded at the end. The designs differ only in surface, type and progress marker; the information is identical.</p>
 
   <div class="bar" role="toolbar" aria-label="Controls">
     <div class="seg" role="group" aria-label="Record shown">
@@ -342,9 +342,9 @@ details.retired>summary{cursor:pointer;font-size:13px;letter-spacing:.12em;font-
     </div>
   </div>
   
-  <h2 class="sec" id="propHead">PROPOSED FOR THE DEFAULT · X, Y, Z · NOT IN THE APP OR THE SIMULATION YET</h2>
-  <p class="note5">Each proposal is W with the calendar from U, and each says how many days are left to the goal date. The indicator changes with the distance: more than 30 days is quiet; 30 days or fewer is amber; 7 days or fewer is amber on a tint, in heavier type; the day itself and a date that has passed are solid. The words say the same, so the color is never the only signal. Use the second control to see each state; it changes the indicator only, not the dates on the card.</p>
-  <div class="bar" role="toolbar" aria-label="Days until the goal date, for the proposals">
+  <h2 class="sec">THE SIX FULL CARDS OFFERED</h2>
+  <p class="note5">X says how many days are left to the goal date, and the indicator changes with the distance: more than 30 days is quiet; 30 days or fewer is amber; 7 days or fewer is amber on a tint, in heavier type; the day itself and a date that has passed are solid. The words say the same, so the color is never the only signal. Use the second control to see each state on X; it changes the indicator only, not the dates on the card.</p>
+  <div class="bar" role="toolbar" aria-label="Days until the goal date, for look X">
     <div class="seg" role="group" aria-label="Days until the goal date">
       <button type="button" data-days="rec" aria-pressed="true">As recorded</button>
       <button type="button" data-days="21" aria-pressed="false">21 days</button>
@@ -353,14 +353,13 @@ details.retired>summary{cursor:pointer;font-size:13px;letter-spacing:.12em;font-
       <button type="button" data-days="-3" aria-pressed="false">Passed 3 days ago</button>
     </div>
   </div>
-  <section class="grid" id="gridProp"></section>
-  <h2 class="sec">THE SIX FULL CARDS OFFERED</h2>
   <section class="grid" id="gridOffered"></section>
   <h2 class="sec">THE TWO COMPACT BOXES OFFERED · SHOWN OVER AN OPEN EMAIL</h2>
   <section class="grid" id="gridCompact"></section>
-  <details class="retired" id="retired"><summary>RETIRED IN ROUND 23 · FIFTEEN LOOKS NO LONGER OFFERED</summary>
+  <details class="retired" id="retired"><summary>NO LONGER OFFERED · SIXTEEN LOOKS, AND THE TWO PROPOSALS NOT CHOSEN</summary>
     <section class="grid" id="gridRetired"></section>
     <section class="grid" id="gridRetiredCompact" style="margin-top:18px"></section>
+    <section class="grid" id="gridNotChosen" style="margin-top:18px"></section>
   </details>
 
   <p class="foot">Compact boxes never take keyboard focus, make no AI call, and open their sibling look's full card on a click or when the shortcut is pressed again. The runway in J is drawn from the days to goal and the forecast delta, both on the card. All colors are original to this prototype.</p>
@@ -381,7 +380,7 @@ const DATA = {
     brief:"Related precedent: ANDA 216482 — same applicant, same facility. Forecast drivers and assumptions: expand → Forecast & assumptions.", sisters:1, notes:2 }
 };
 const LOOKS = [
-  { id:"w", grp:"pocket", layout:"gauge5", def:true, name:"W · Graphite Gauge", tag:"The default. The glass sheet in quiet graphite, with a gauge beside the answer that shows how much of the review clock has run. The same actions stay at the bottom: one main action, then the small ones.", prog:"bar", sw:["#fdfdfd","#56626e","#8a5800"] },
+  { id:"w", grp:"pocket", layout:"gauge5", name:"W · Graphite Gauge", tag:"The default of rounds 22 and 23. The glass sheet in quiet graphite, with a gauge beside the answer that shows how much of the review clock has run. The same actions stay at the bottom: one main action, then the small ones.", prog:"bar", sw:["#fdfdfd","#56626e","#8a5800"] },
   { id:"v", grp:"pocket", layout:"glass", name:"V · Glass Sheet", tag:"The default of rounds 20 and 21. One answer first, on a frosted sheet: how many days later or earlier than the goal, then the facts, and one main action pinned at the bottom. The sheet follows the transparency setting (90% to start), blurs what is behind it, and is solid when the system asks for less transparency.", prog:"bar", sw:["#eef2f6","#3f4a56","#8a5800"] },
   { id:"t", grp:"pocket", layout:"pocket", name:"T · Pocket Plain", tag:"The same layout on a plain white card, with no blur. The default of round 18.", prog:"bar", sw:["#ffffff","#3f4a56","#8a5800"] },
   { id:"u", grp:"pocket", layout:"ribbon", name:"U · Calendar Ribbon", tag:"The same answer, plus the weeks around the goal and forecast drawn out: weekends, a federal holiday and the gap.", prog:"bar", sw:["#ffffff","#3f4a56","#c98a14"] },
@@ -463,11 +462,11 @@ function ribbonHTML(id, d){
   return `<div class="slot ribbon5"><div class="cap">GOAL AND FORECAST ON THE CALENDAR</div><svg viewBox="0 0 300 80" role="img" aria-label="Calendar ribbon. ${said}">${out}<text x="${gx.toFixed(1)}" y="16" text-anchor="${ga}">Goal</text><text x="${fx.toFixed(1)}" y="16" text-anchor="${fa}">Forecast</text>${labels}${ends}</svg><div class="rt">${said}</div></div>`;
 }
 /* ---- round 23: the three proposals ---- */
-const OFFERED = ["w", "v", "u", "t", "k", "p"], OFFERED_COMPACT = ["l", "o"];
+const OFFERED = ["x", "v", "u", "t", "k", "p"], OFFERED_COMPACT = ["l", "o"];     /* X took W's place in round 24 */
 const PROPOSALS = [
-  { id:"x", name:"X · Graphite Calendar", tag:"W with the gauge replaced by a count of the days to the goal date, and the calendar under the answer. The smallest change from today's default.", sw:["#fdfdfd","#56626e","#8a5800"] },
-  { id:"y", name:"Y · Graphite Runway", tag:"The answer, then one line for the review clock: how much has run, where today is, and the days left. The calendar follows. Two pictures, no gauge.", sw:["#fdfdfd","#6e7a86","#c98a14"] },
-  { id:"z", name:"Z · Graphite Countdown", tag:"Leads with the days to the goal date. The forecast gap becomes the second line. This changes what the card says first.", sw:["#fdfdfd","#56626e","#a33636"] }
+  { id:"x", def:true, name:"X · Graphite Calendar", tag:"The default. One answer first, on the graphite sheet; beside it, the days to the goal date, in a style that follows the distance; under it, the calendar. The same actions stay at the bottom.", sw:["#fdfdfd","#56626e","#8a5800"] },
+  { id:"y", name:"Y · Graphite Runway", tag:"Proposed in round 23 and not chosen. The answer, then one line for the review clock: how much has run, where today is, and the days left. The calendar follows. Two pictures, no gauge.", sw:["#fdfdfd","#6e7a86","#c98a14"] },
+  { id:"z", name:"Z · Graphite Countdown", tag:"Proposed in round 23 and not chosen. Leads with the days to the goal date. The forecast gap becomes the second line. This changes what the card says first.", sw:["#fdfdfd","#56626e","#a33636"] }
 ];
 let days = "rec";
 const daysTo = id => days === "rec" ? DATA[id].daysTo : +days;
@@ -491,7 +490,7 @@ function proposalCard(pr, id){
   const attn = d.attn ? `<div class="slot"><div class="attn warn"><span class="k">⚠ NEEDS YOU</span><span><b>${d.attn.split(" — ")[0]}</b> — ${d.attn.split(" — ")[1]}</span></div></div>` : "";
   const gapLine = `<div class="hl"><b>${m}</b><span>day${m === 1 ? "" : "s"} ${d.delta > 0 ? "later than" : "ahead of"} the goal</span></div><div class="hs">Goal ${d.goal} · Forecast ${d.fc} · ${d.conf}</div>`;
   let top;
-  if (pr.id === "x") top = `<div class="slot hero5 ${d.late ? "late" : "good"}">${gapLine}<div class="cd5 lv-${lv}" role="img" aria-label="${cdWords(n)}"><b${n === 0 ? ' class="w"' : ""}>${n === 0 ? "Today" : Math.abs(n)}</b><span>${n > 0 ? "DAYS TO GOAL" : n === 0 ? "IS THE GOAL DATE" : "DAYS PAST GOAL"}</span></div></div>${ribbonHTML(id, d)}`;
+  if (pr.id === "x") top = `<div class="slot hero5 ${d.late ? "late" : "good"}">${gapLine}<div class="cd5 lv-${lv}" role="img" aria-label="${cdWords(n)}"><b${n === 0 ? ' class="w"' : ""}>${n === 0 ? "Today" : Math.abs(n)}</b><span>${n > 0 ? (n === 1 ? "DAY TO GOAL" : "DAYS TO GOAL") : n === 0 ? "IS THE GOAL DATE" : (n === -1 ? "DAY PAST GOAL" : "DAYS PAST GOAL")}</span></div></div>${ribbonHTML(id, d)}`;
   else if (pr.id === "y") top = `<div class="slot hero5 ${d.late ? "late" : "good"}" style="display:block">${gapLine}</div>${clockLineHTML(id, d)}${ribbonHTML(id, d)}`;
   else top = `<div class="slot hero5 lv-${lv}${lv === "calm" || lv === "near" ? "" : " boxed"}"><div class="hl"><b>${n === 0 ? "Today" : Math.abs(n)}</b><span>${n > 0 ? `day${n === 1 ? "" : "s"} to the goal date` : n === 0 ? "is the goal date" : `day${n === -1 ? "" : "s"} past the goal date`}</span></div>
       <div class="hs"><span class="fpill ${d.late ? "late" : "good"}">Forecast ${plural(m, "day")} ${d.delta > 0 ? "later" : "earlier"}</span>Goal ${d.goal} · Forecast ${d.fc} · ${d.conf}</div></div>${ribbonHTML(id, d)}`;
@@ -563,13 +562,14 @@ function render(){
         <span class="sw" aria-hidden="true">${c.sw.map(x => `<i style="background:${x}"></i>`).join("")}</span></div>
       <div class="mailstage"><div class="mailmock" aria-hidden="true"><b>To:</b> Review team · <b>Subject:</b> Thursday huddle prep<div class="ln" style="width:92%"></div><div class="ln" style="width:78%"></div><div class="ln" style="width:85%"></div></div>${compactBox(c, rec)}</div>
     </div>`;
-  document.getElementById("gridProp").innerHTML = PROPOSALS.map(pr => `
+  const proposalTile = (pr, badge) => `
       <div class="tile" data-id="${pr.id}">
-        <div class="thead"><div><div class="nm">${pr.name}<span class="badge cur">PROPOSAL</span></div><div class="tg">${pr.tag}</div></div>
+        <div class="thead"><div><div class="nm">${pr.name}${badge}</div><div class="tg">${pr.tag}</div></div>
           <span class="sw" aria-hidden="true">${pr.sw.map(c => `<i style="background:${c}"></i>`).join("")}</span></div>
         <div class="stage">${proposalCard(pr, rec)}</div>
-      </div>`).join("");
-  document.getElementById("gridOffered").innerHTML = OFFERED.map(id => fullTile(LOOKS.find(l => l.id === id))).join("");
+      </div>`;
+  document.getElementById("gridOffered").innerHTML = OFFERED.map(id => id === "x" ? proposalTile(PROPOSALS[0], '<span class="badge new">DEFAULT</span>') : fullTile(LOOKS.find(l => l.id === id))).join("");
+  document.getElementById("gridNotChosen").innerHTML = PROPOSALS.slice(1).map(pr => proposalTile(pr, '<span class="badge cur">NOT CHOSEN</span>')).join("");
   document.getElementById("gridCompact").innerHTML = OFFERED_COMPACT.map(id => compactTile(COMPACT.find(c => c.id === id))).join("");
   document.getElementById("gridRetired").innerHTML = LOOKS.filter(l => !OFFERED.includes(l.id)).map(fullTile).join("");
   document.getElementById("gridRetiredCompact").innerHTML = COMPACT.filter(c => !OFFERED_COMPACT.includes(c.id)).map(compactTile).join("");

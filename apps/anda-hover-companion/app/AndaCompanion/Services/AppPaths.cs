@@ -5,7 +5,7 @@ namespace AndaCompanion.Services;
 /// ANDA_COMPANION_HOME environment variable relocates everything, which gives
 /// three things for free: a portable mode that never touches AppData (the demo
 /// bundle's launcher uses it), isolated test runs, and a clean story for IT —
-/// the app writes exactly two JSON files, and you choose the folder.
+/// the app writes only inside this one folder, and you choose the folder.
 /// </summary>
 public static class AppPaths
 {
@@ -23,5 +23,6 @@ public static class AppPaths
     public static string RepliesFile => Path.Combine(Root, "replies.json");
     public static string TodoFile => Path.Combine(Root, "todo.json");
     public static string MyTodoFile => Path.Combine(Root, "mytodo.json");
+    public static string QuickNotesFile => Path.Combine(Root, "quick-notes.json");
     public static string ReferenceDownloadFile => Path.Combine(Root, "drugsfda-downloaded.zip");
 }

@@ -246,6 +246,23 @@
           <!-- expanded drawer -->
           <StackPanel Name="Drawer" IsVisible="False">
             <Border Height="1" Background="{DynamicResource C.Hair}"/>
+            <!-- My notes (round 24): the person's own quick notes for this ANDA, kept by the app in its own folder. First in the drawer, so Enter shows the box with the newest notes right below it. -->
+            <Expander Name="MyNotesExpander" Margin="8,2,8,0"><Expander.Header><TextBlock Name="MyNotesHeader" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink2}" Text="My notes"/></Expander.Header>
+              <StackPanel Margin="12,0,12,8" Spacing="6">
+                <TextBox Name="QuickNoteBox" AcceptsReturn="True" TextWrapping="Wrap" MaxLength="500" MinHeight="54" MaxHeight="120" FontSize="12.5"
+                         Watermark="Type a note for this ANDA. Ctrl+Enter saves it." AutomationProperties.Name="A new note for this ANDA"/>
+                <WrapPanel>
+                  <Button Name="QuickNoteSave" Classes="chip" Margin="0,0,7,4" Content="Save note" ToolTip.Tip="Save this note (Ctrl+Enter)"/>
+                  <Button Name="QuickNoteCancel" Classes="chip" Margin="0,0,7,4" Content="Cancel" IsVisible="False"/>
+                  <Button Name="QuickNoteUndo" Classes="chip" Margin="0,0,7,4" Content="Undo" IsVisible="False"/>
+                  <TextBlock Name="QuickNoteCount" FontSize="11" VerticalAlignment="Center" Margin="0,0,8,4" Foreground="{DynamicResource C.Ink3}" Text="0 / 500"/>
+                </WrapPanel>
+                <TextBlock Name="QuickNoteMsg" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap" IsVisible="False" AutomationProperties.LiveSetting="Polite"/>
+                <StackPanel Name="QuickNotesList" Spacing="8"/>
+                <TextBlock FontSize="11" Foreground="{DynamicResource C.Ink3}" TextWrapping="Wrap"
+                           Text="Kept on this PC, in the app's own folder. Text only, 500 characters. Never sent anywhere, and your sheet and your notes folder are not changed."/>
+              </StackPanel>
+            </Expander>
             <Expander Name="WatchExpander" Margin="8,2,8,0" IsVisible="False"><Expander.Header><TextBlock Name="WatchHeader" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink2}" Text="Watch list"/></Expander.Header>
               <StackPanel Name="WatchPanel" Margin="12,0,12,8"/>
             </Expander>
@@ -281,9 +298,13 @@
                       AutomationProperties.Name="Copy a quick reply"/>
               <Button Name="SisterChip" Classes="chip" Margin="0,0,7,7"/>
               <Button Name="NotesChip" Classes="chip" Margin="0,0,7,7"/>
-              <Button Name="OpenChip" Classes="chip" Foreground="{DynamicResource C.Accent}" Content="Open in system of record ↗"
-                      AutomationProperties.Name="Open this ANDA in the system of record"/>
+              <Button Name="OpenChip" Classes="chip" Foreground="{DynamicResource C.Accent}" Content="Open ANDA page ↗"
+                      ToolTip.Tip="Open this ANDA's page in your browser. The address is set in Settings, My files and writing."
+                      AutomationProperties.Name="Open this ANDA's page in the browser"/>
             </WrapPanel>
+            <TextBlock Name="ChipMsg" IsVisible="False" Margin="16,-6,16,8" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
+            <TextBlock Name="ActHint" Margin="16,-6,16,10" FontSize="11" Foreground="{DynamicResource C.Ink3}" TextWrapping="Wrap"
+                       Text="Enter adds a note · S or Copy status copies the status line"/>
           </StackPanel>
 
           <!-- mini-mode CTA (consent model ③: Peek → Full) -->

@@ -248,6 +248,15 @@
             <Border Classes="hair"/>
 
             <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="ANDA PAGE · WHAT THE CARD'S “OPEN ANDA PAGE” BUTTON OPENS"/>
+              <TextBox Name="AndaPageBox" MaxLength="300" Watermark="https://your-system/anda/{anda}" AutomationProperties.Name="ANDA page address"/>
+              <TextBlock Name="AndaPageStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
+              <TextBlock Classes="hint" Text="Write {anda} where the six-digit number goes. Only an address that starts with https:// is opened, in your default browser, and only the number is put into it. Nothing else about the ANDA is sent." TextWrapping="Wrap"/>
+            </StackPanel>
+
+            <Border Classes="hair"/>
+
+            <StackPanel Spacing="6">
               <TextBlock Classes="lbl" Text="MY WRITING · TONE, STYLE, SIGN-OFF, QUICK REPLIES"/>
               <WrapPanel Name="TonePanel"/>
               <TextBox Name="InstructionsBox" AcceptsReturn="True" TextWrapping="Wrap" Height="76"

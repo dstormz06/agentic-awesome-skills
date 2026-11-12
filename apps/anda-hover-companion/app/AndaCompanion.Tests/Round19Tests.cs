@@ -44,10 +44,10 @@ public class Round19Tests : IClassFixture<HeadlessFixture>
     [Fact]
     public void T_is_appended_and_the_default_look_applies_in_both_editions()
     {
-        Assert.Equal(AppearanceId.W, Appearances.Default);      // W replaced T as the default in round 23; T is still offered
+        Assert.Equal(AppearanceId.X, Appearances.Default);      // X is the default since round 24; T is still offered
         Assert.Equal(CardLayout.Pocket, Appearances.T.Look.Layout);
         Assert.False(Appearances.T.IsCompact);
-        Assert.Equal(AppearanceId.W, Edition.Appearance(new Settings()));                                              // nothing chosen: the default look
+        Assert.Equal(AppearanceId.X, Edition.Appearance(new Settings()));                                              // nothing chosen: the default look
         Assert.Equal(AppearanceId.K, Edition.Appearance(new Settings { ShowAllTools = true, Appearance = AppearanceId.K }));   // someone who chose K keeps K
         Assert.Equal(AppearanceId.K, Edition.Appearance(new Settings { Appearance = AppearanceId.K }));                        // in the focused edition too
     }
@@ -86,23 +86,26 @@ public class Round19Tests : IClassFixture<HeadlessFixture>
     }
 
     [Fact]
-    public async Task Copy_status_is_the_one_filled_action_outside_the_scrolling_part()
+    public async Task One_main_action_stays_outside_the_scrolling_part_and_since_round_24_it_is_Add_a_note()
     {
         var r = await Inspect(Late, false, w =>
         {
-            var copy = w.FindControl<Button>("CopyChip")!;
+            var main = w.FindControl<Button>("NotesChip")!;
             var body = w.FindControl<ScrollViewer>("Body")!;
-            bool insideScroll = copy.GetVisualAncestors().Contains(body);
-            var others = new[] { "RepliesChip", "SisterChip", "NotesChip", "OpenChip" }.Select(n => w.FindControl<Button>(n)!).ToList();
-            return (insideScroll, Fill: ((ISolidColorBrush)copy.Background!).Color, copy.MinHeight, copy.IsEffectivelyVisible,
-                    PlainOthers: others.All(b => b.BorderThickness == new Thickness(0)), Label: string.Join(" ", copy.GetVisualDescendants().OfType<TextBlock>().Select(t => t.Text)));
+            bool insideScroll = main.GetVisualAncestors().Contains(body);
+            var others = new[] { "CopyChip", "RepliesChip", "SisterChip", "OpenChip" }.Select(n => w.FindControl<Button>(n)!).ToList();
+            return (insideScroll, Fill: ((ISolidColorBrush)main.Background!), main.MinHeight, main.IsEffectivelyVisible, Wide: main.Bounds.Width,
+                    PlainOthers: others.All(b => b.BorderThickness == new Thickness(0)), Label: string.Join(" ", main.GetVisualDescendants().OfType<TextBlock>().Select(t => t.Text)),
+                    Copy: (string)w.FindControl<Button>("CopyChip")!.Content!);
         });
         Assert.False(r.insideScroll);                                             // it stays put while the facts scroll
-        Assert.Equal(Color.Parse(Appearances.T.Palette.Accent), r.Fill);
-        Assert.True(r.MinHeight >= 44);                                           // a comfortable target
-        Assert.True(r.IsEffectivelyVisible);
+        Assert.Equal(Color.Parse(Appearances.T.Palette.Accent), r.Fill.Color);    // the look's accent ...
+        Assert.InRange(r.Fill.Opacity, 0.10, 0.14);                               // ... as a tint, not a solid block (round 21 in the simulation)
+        Assert.InRange(r.MinHeight, 34, 40);                                      // slimmer than the 44 px of round 19
+        Assert.True(r.IsEffectivelyVisible && r.Wide > 300);
         Assert.True(r.PlainOthers);
-        Assert.Equal("Copy status Enter", r.Label);
+        Assert.Equal("Add a note · 3 notes Enter", r.Label);
+        Assert.Equal("Copy status", r.Copy);                                      // still there, as a small button
     }
 
     [Fact]
@@ -118,7 +121,7 @@ public class Round19Tests : IClassFixture<HeadlessFixture>
             dock.MaxHeight = 420;                       // a very short screen
             Settle(); Settle();
             return (limited, DockH: dock.Bounds.Height, ChipsH: chips.Bounds.Height, BodyH: body.Bounds.Height, Scrolls: body.Extent.Height > body.Viewport.Height + 1,
-                    CopyVisible: w.FindControl<Button>("CopyChip")!.IsEffectivelyVisible, ChipsBottom: chips.Bounds.Bottom);
+                    CopyVisible: w.FindControl<Button>("NotesChip")!.IsEffectivelyVisible, ChipsBottom: chips.Bounds.Bottom);
         });
         Assert.True(r.limited);
         Assert.True(r.DockH <= 420.5, $"the card is {r.DockH} high");
@@ -128,14 +131,17 @@ public class Round19Tests : IClassFixture<HeadlessFixture>
     }
 
     [Fact]
-    public async Task Enter_copies_the_status_line_and_says_so()
+    public async Task S_copies_the_status_line_and_says_so_and_Enter_no_longer_does()
     {
-        var label = await Inspect(Late, false, w =>
+        var r = await Inspect(Late, false, w =>
         {
             w.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.Enter }); Settle();
-            return string.Join(" ", w.FindControl<Button>("CopyChip")!.GetVisualDescendants().OfType<TextBlock>().Select(t => t.Text));
+            string afterEnter = (string)w.FindControl<Button>("CopyChip")!.Content!;
+            w.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.S }); Settle();
+            return (afterEnter, afterS: (string)w.FindControl<Button>("CopyChip")!.Content!);
         });
-        Assert.StartsWith("Copied ✓", label);
+        Assert.Equal("Copy status", r.afterEnter);        // Enter goes to a new note since round 24 (see Round24NotesTests)
+        Assert.Equal("Copied ✓", r.afterS);
     }
 
     [Fact]

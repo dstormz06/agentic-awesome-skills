@@ -485,8 +485,8 @@ one primary action, answer first, progressive disclosure) and applied on Windows
 
 1. **The answer first.** One large figure says how many days later or earlier than the goal the forecast falls. The goal, the forecast and the
    forecast's confidence sit on the line beneath it, so the figure is never shown alone and cannot read as more certain than it is.
-2. **One main action.** *Copy status* is pinned at the bottom of the card and Enter triggers it. Everything else is a quiet, secondary
-   control.
+2. **One main action.** It is pinned at the bottom of the card and Enter triggers it. Everything else is a quiet, secondary
+   control. *(Copy status in rounds 18 to 20; Add a note since round 21 in the simulation and round 24 in the app, with Copy status as a small button and the S key.)*
 3. **Everything else is one step away.** The facts (goal, forecast, WATCH, PSG, RLD) read below the answer. The drawer and the other
    tools are unchanged.
 4. **Calendar Ribbon (U)** draws the weeks around the goal and the forecast, with weekends and the federal holiday marked and the gap shaded. It
@@ -735,7 +735,7 @@ showed through the glass (the area is 97% solid).
 ## 11g. Round 23: eight looks in both, a number on the tray icon, a choice of when it is counted, and three proposals for the default
 
 **Eight looks, the same in the app and the simulation.** The owner: "cut down to only top 8 appearances for both app and simulation". The eight are the six full
-cards **W · Graphite Gauge** (default), **V · Glass Sheet**, **U · Calendar Ribbon**, **T · Pocket Plain**, **K · Graphite Quiet**, **P · Bronze Gauge**, and the two
+cards **W · Graphite Gauge** (default in round 23; X took its place in round 24, §11h), **V · Glass Sheet**, **U · Calendar Ribbon**, **T · Pocket Plain**, **K · Graphite Quiet**, **P · Bronze Gauge**, and the two
 compact boxes **L · Graphite Strip** and **O · Teal Badge**. *Why these:* the four answer-first looks the owner chose or asked for in rounds 18 to 22; K, the calm
 classic layout that projects well; P, the bronze the owner liked, with the dial W took from it; and one wide and one very small compact box. The choice is a
 proposal that was acted on: the list is one line in each program, so a swap is small. A setting or a backup that names a retired look falls back to the default.
@@ -766,6 +766,40 @@ calendar, and each says how many days are left to the goal date:
 The indicator follows the distance, **in words as well as in color**: more than 30 days, quiet; 30 days or fewer, amber; 7 days or fewer, amber on a tint in
 heavier type; the day itself, solid amber ("The goal date is today"); after it, solid red ("The goal date passed 3 days ago"). The thresholds are a proposal.
 The Lab has a control that shows each state.
+
+## 11h. Round 24: X is the default in both programs, and notes come to the Windows app
+
+**The owner chose X · Graphite Calendar.** It took W's place in the eight and is the default in the simulation, the Appearance Lab and the Windows app: one answer
+first (the forecast against the goal); beside it the days to the goal date; under it the calendar from U; the same actions at the bottom. W is still defined and
+no longer offered; a setting or backup that names it opens in X. The two proposals that were not chosen (Y and Z) are folded at the end of the Lab.
+
+**The days to the goal date** follow one rule in both programs, held as 20 shared cases in `mockup/countdown-golden.json`: more than 30 days, quiet; 30 or
+fewer, amber ink and edge; 7 or fewer, amber on a tint in heavier type; the day itself, solid amber with the words "The goal date is today"; after it, solid
+red with "The goal date passed N days ago". The figure and its caption change with it ("79 / DAYS TO GOAL", "Today / IS THE GOAL DATE", "3 / DAYS PAST GOAL"),
+and a screen reader hears the sentence. Without a goal date in the data there is no count: never an estimate. The small card keeps the count and leaves the
+calendar out.
+
+**Notes in the Windows app** (the largest piece of the simulation the app lacked). On every full card:
+- **Enter, N or the button goes straight to a new note**: the drawer opens at *My notes* with the cursor in the box. On the small card the full card opens first.
+- **Ctrl+Enter saves.** A plain Enter in the box is a new line. Escape leaves the box; a second Escape closes the card, so a half-typed note is not thrown away
+  by one keystroke. **A key typed in the box belongs to the box**: S does not copy the status and E does not fold the drawer.
+- A note can be changed, deleted (with Undo) and copied. The newest is first. The button counts project notes and the person's own together.
+- **Copy status** is the first small button and the S key. One line under the buttons says so.
+- The rules are the simulation's: text only, 500 characters, 50 notes for one ANDA, a six-digit number as the key.
+
+**Where a note lives.** In one file, `quick-notes.json`, in the app's own folder (`%AppData%\AndaCompanion`, or the folder the launcher names). It is written
+to a temporary file and moved into place, so a crash cannot leave half a file. A file that cannot be read is set aside under another name, never overwritten,
+and the card says so. The portfolio sheet and the notes folder are still only read. A note is never sent anywhere: not to an AI, not in a notice; and it is not
+in the settings backup. **This is the first content of the person's own that the app writes to disk**; `SECURITY.md` records it, with the question for IT that
+it raises.
+
+**Open ANDA page** in the app hands one address to the default browser. The address is set in *Settings, My files and writing*, with `{anda}` where the number
+goes; only `https`, no user name or password, at most 300 characters; only six digits are put into it; it is checked each time the button is pressed. With no
+address, or a bad one, nothing is opened and the card says why. After the page opens the card steps aside unless it is pinned. The button used to read *Open
+in system of record* and did nothing.
+
+**Still only in the simulation:** Proofread and Fact-check with their recall row, card details with Copy, notices near the clock and division news, the one
+question before sending, text size and spacing, recent and kept ANDAs, One Bar and Today, and the blur behind the glass looks.
 
 ## 12. Engagement roadmap — seven features that make it the daily habit
 

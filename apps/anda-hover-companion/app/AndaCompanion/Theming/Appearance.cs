@@ -3,13 +3,13 @@ using Avalonia.Media;
 namespace AndaCompanion.Theming;
 
 /// <summary>
-/// Twenty-three looks are defined; <b>eight are offered</b> since round 23 (see <see cref="Appearances.Offered"/>): the full cards W, V, U, T,
-/// K and P and the compact boxes L and O. W · Graphite Gauge is the product default (T was from round 19, K before it). The other fifteen
+/// Twenty-four looks are defined; <b>eight are offered</b> (see <see cref="Appearances.Offered"/>): the full cards X, V, U, T,
+/// K and P and the compact boxes L and O. X · Graphite Calendar is the product default since round 24 (W was in round 23, T from round 19, K before it). The other sixteen
 /// keep their definitions, because a compact box borrows a sibling's palette and the self-test still draws them, but nothing lists them and a
 /// saved setting that names one falls back to the default. Saved settings store the numeric value, so new members are only ever appended.
 /// No look draws a pattern, texture or grid behind its content.
 /// </summary>
-public enum AppearanceId { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W }
+public enum AppearanceId { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X }
 
 public enum ProgressVariant { Bar, Ticks, Ring, Solid, Capsule, Line, Dots, Step, Timeline, Gauge }
 
@@ -54,6 +54,7 @@ public sealed record Structure
     public string? RailWash { get; init; }              // Rail: the tinted column that carries the days
     public bool Ribbon { get; init; }                   // Pocket: the weeks around the goal and the forecast, drawn under the answer (U)
     public bool HeroGauge { get; init; }                // Pocket: a half dial beside the answer shows how much of the review clock has run (W)
+    public bool HeroCount { get; init; }                // Pocket: beside the answer, the days to the goal date, in a style that follows the distance (X)
     public bool Glass { get; init; }                    // Pocket: the sheet of V and W. In this app it follows the transparency setting like every card; the blur of the simulation is not drawn (see DESIGN 11g)
 }
 
@@ -349,6 +350,18 @@ public static class Appearances
         Look = T.Look with { Glass = true, HeroGauge = true },
     };
 
+    /// <summary>
+    /// The default since round 24: the owner's choice of three proposals. W's sheet and colors; beside the answer the days to the goal date
+    /// instead of the dial; under it the calendar of U.
+    /// </summary>
+    public static readonly Appearance X = W with
+    {
+        Id = AppearanceId.X, Name = "X · Graphite Calendar",
+        Tagline = "The default. One answer first; beside it the days to the goal date, in a style that follows the distance; under it the calendar.",
+        Progress = ProgressVariant.Bar,
+        Look = W.Look with { HeroGauge = false, HeroCount = true, Ribbon = true },
+    };
+
     // ---- Compact forms: small boxes that stay out of the way of an open email. They borrow a sibling's
     // palette, make no AI call, and expand into that sibling's full card on click (or the E key). ----
 
@@ -380,16 +393,16 @@ public static class Appearances
         Form = CardForm.Badge, ExpandsAs = AppearanceId.G,
     };
 
-    public static readonly IReadOnlyList<Appearance> All = new[] { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W };
+    public static readonly IReadOnlyList<Appearance> All = new[] { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X };
 
-    /// <summary>The eight looks a person can choose, in the order they are listed (round 23, by direction of the product owner):
-    /// six full cards, then two compact boxes. The same eight, in the same order, as the browser simulation.</summary>
-    public static readonly IReadOnlyList<Appearance> Offered = new[] { W, V, U, T, K, P, L, O };
+    /// <summary>The eight looks a person can choose, in the order they are listed (by direction of the product owner: eight in round 23;
+    /// X took W's place in round 24): six full cards, then two compact boxes. The same eight, in the same order, as the browser simulation.</summary>
+    public static readonly IReadOnlyList<Appearance> Offered = new[] { X, V, U, T, K, P, L, O };
 
     public static bool IsOffered(AppearanceId id) => Offered.Any(a => a.Id == id);
 
-    /// <summary>The product default, by direction of the product owner (K replaced A on 2026-11-02; T replaced K, and W replaced T, on 2026-11-12).</summary>
-    public static readonly AppearanceId Default = AppearanceId.W;
+    /// <summary>The product default, by direction of the product owner (K replaced A on 2026-11-02; T replaced K, W replaced T, and X replaced W, on 2026-11-12).</summary>
+    public static readonly AppearanceId Default = AppearanceId.X;
 
     public static Appearance Get(AppearanceId id) => All.First(a => a.Id == id);
 }

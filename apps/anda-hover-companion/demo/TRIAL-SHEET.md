@@ -14,7 +14,7 @@ Please do not explain the screen unless they are stuck for a full minute (write 
 | # | Task | Earlier way | New way | Done when | Time, earlier | Time, new | Wrong turns / notes |
 |---|---|---|---|---|---|---|---|
 | 1 | Find out how late or early ANDA 216482 is against its goal | Card in K | Card in T (Pocket Plain) | They say the number of days and "later" or "earlier" | | | |
-| 2 | Copy a status line for ANDA 216482 and paste it into the sample email | The *Copy status* chip in K | *Copy status* in T, or Enter | The sentence is in the email | | | |
+| 2 | Copy a status line for ANDA 216482 and paste it into the sample email | The *Copy status* chip in K | *Copy status* on the card, or the S key | The sentence is in the email | | | |
 | 3 | Open ANDA 214990, which was looked up a minute ago | Type the number in the lookup box | Press its chip under *Recent* | The card for 214990 is open | | | |
 | 4 | Find which ANDAs need a look today | Tray menu, *Watch list* | Tray menu, *Today…* (needs `#all`) | They name the ones marked urgent or with a WATCH line | | | |
 | 5 | Make the text larger, then switch back | Not possible in the earlier design (skip, write "none") | Settings, How it starts, *Larger text*, then *Standard text* | The text size changed and returned | | | |

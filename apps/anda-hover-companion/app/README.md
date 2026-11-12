@@ -3,12 +3,13 @@
 A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
 **All bundled data is fictional.** Not an FDA product; a concept prototype.
 
-> **Not in this app yet (built in the browser simulation in rounds 20 to 22, for review first):** quick notes typed on the card, Enter to add a note, Proofread and
+> **Not in this app yet (built in the browser simulation in rounds 20 to 22, for review first):** Proofread and
 > Fact-check that work with no AI, and the notes and open items shown for recall under a review. The card's starting transparency is 90% here too.
 >
-> **What this app has of the newer design.** The **Loupe** icon, with no amber at any size; **eight looks, the same as the simulation** (W, V, U, T, K, P and the compact boxes L and O), with
-> **W · Graphite Gauge** as the default (one answer first with a gauge beside it, then the facts, and one main action, Copy status, which Enter
-> triggers). W and V follow the transparency setting; the blur of the simulation is not drawn here. A tray icon that shows a dot for one thing, the number for two to nine and “9+” beyond, with a
+> **What this app has of the newer design.** The **Loupe** icon, with no amber at any size; **eight looks, the same as the simulation** (X, V, U, T, K, P and the compact boxes L and O), with
+> **X · Graphite Calendar** as the default since round 24 (one answer first; beside it the days to the goal date, in a style that follows the distance; under it the calendar). **Quick notes on the card**
+> (round 24): Enter or N goes straight to a new note, Ctrl+Enter saves it, and the notes are kept in `quick-notes.json` in the app's own folder; *Copy status* is a small button and the S key; **Open ANDA page** opens an `https` address set in Settings, My files and writing.
+> X and V follow the transparency setting; the blur of the simulation is not drawn here. A tray icon that shows a dot for one thing, the number for two to nine and “9+” beyond, with a
 > setting for when it is counted again (only when the app is used, also once just after midnight, or also every hour); an amber dot on the tray icon **only while something needs the person today** (an action item that says it is due today or overdue, or a goal date that is today or has passed; never for a sample record). At rest the tray icon carries no amber at all (round 22); the short number forms (**N210793 is an NDA and is refused; A210793 is read as ANDA 210793**); and
 > the default shortcuts **Ctrl+Alt+Shift+R** (Review a draft) and **Ctrl+Alt+Shift+L** (My to-do list), which replaced Ctrl+Alt+D and Ctrl+Alt+L because Word uses those. A shortcut
 > you already saved is kept. **Not in this app yet, only in the browser simulation** (`../mockup/windows-simulation.html`): One Bar, Today, recent and kept ANDAs,
@@ -35,8 +36,8 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
 - **Tray app** — the Loupe icon (an indigo plate and a white ring; amber appears only as the dot or the number), no notifications. Menu: lookup, demo cards, quick
   Appearance switch, **Settings…**, **Prompt library…**. All persisted to
   `%AppData%\AndaCompanion\settings.json`.
-- **Settings window** — Appearance (eight looks since round 23, **light-only by product decision**; **W ·
-  Graphite Gauge is the default**, T · Pocket Plain was before it): six full cards (W, V, U, T, K, P, none with a pattern behind it) and two **compact boxes** (L, O). A setting saved with a retired look falls back to the default.
+- **Settings window** — Appearance (eight looks since round 23, **light-only by product decision**; **X ·
+  Graphite Calendar is the default**, W · Graphite Gauge and T · Pocket Plain were before it): six full cards (X, V, U, T, K, P, none with a pattern behind it) and two **compact boxes** (L, O). A setting saved with a retired look falls back to the default.
   When the tray icon is counted again (three choices),
   Auto-hide (Off / 10 / 20 / 40 s, default 10), Consent model (**Whisper invite is the default** for
   new installs; an install that already saved a choice keeps it), **urgent items** (in whisper mode an

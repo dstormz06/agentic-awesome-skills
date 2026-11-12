@@ -64,6 +64,15 @@ public partial class CardWindow : Window
     /// screenshot paths turn this off so a stolen focus cannot close a card mid-render.</summary>
     public bool CloseWhenDeactivated { get; set; } = true;
 
+    /// <summary>The person's own quick notes (round 24). Null in windows that have no store (some tests): the box then says so.</summary>
+    public QuickNotesService? QuickNotes { get; set; }
+
+    /// <summary>The address "Open ANDA page" opens, as set in Settings, with {anda} where the number goes.</summary>
+    public Func<string>? AndaPageTemplate { get; set; }
+
+    /// <summary>Hands an https address to the default browser. Tests replace it; nothing else in the card opens anything.</summary>
+    public Action<string> OpenUrl { get; set; } = url => System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true });
+
     public CardWindow(ICompanionBriefService briefs, Func<string, AndaRecord?> lookup)
     {
         _briefs = briefs;
@@ -81,6 +90,19 @@ public partial class CardWindow : Window
         ExpBtn.Click += (_, _) => ToggleExpand();
         MoreBtn.Click += (_, _) => ExpandFromMini();
         SisterChip.Click += (_, _) => OpenFirstSister();
+        NotesChip.Click += (_, _) => OpenNotes();
+        OpenChip.Click += (_, _) => OpenAndaPage();
+        QuickNoteSave.Click += (_, _) => SaveQuickNote();
+        QuickNoteCancel.Click += (_, _) => StopEditingNote("");
+        QuickNoteUndo.Click += (_, _) => UndoDeleteNote();
+        // The note box takes Enter for a new line, so its two card keys are caught on the way down: Ctrl+Enter saves, and Escape leaves the
+        // box without closing the card (a second Escape closes it).
+        QuickNoteBox.AddHandler(KeyDownEvent, (_, e) =>
+        {
+            if (e.Key == Key.Enter && e.KeyModifiers.HasFlag(KeyModifiers.Control)) { SaveQuickNote(); e.Handled = true; }
+            else if (e.Key == Key.Escape) { Root.Focus(); Focus(); e.Handled = true; }
+        }, Avalonia.Interactivity.RoutingStrategies.Tunnel);
+        QuickNoteBox.PropertyChanged += (_, e) => { if (e.Property == TextBox.TextProperty) QuickNoteCount.Text = $"{(QuickNoteBox.Text ?? "").Length} / {QuickNotesService.MaxLength}"; };
         Deactivated += (_, _) => { if (!_pinned && CloseWhenDeactivated) Close(); };
         KeyDown += OnKey;
         ApplyAppearanceStructure();
@@ -122,6 +144,7 @@ public partial class CardWindow : Window
     private void OnKey(object? sender, KeyEventArgs e)
     {
         _autoHide.Touch();
+        if (e.Source is TextBox) return;     // a key typed into a box belongs to that box (the note box handles its own two keys)
         switch (e.Key)
         {
             case Key.Escape: Close(); break;
@@ -130,7 +153,8 @@ public partial class CardWindow : Window
             case Key.C when _record is not null && BriefText.Text is { Length: > 0 } text:
                 Clipboard?.SetTextAsync(text); break;
             case Key.S: CopyStatusLine(); break;
-            case Key.Enter when Pocket && !_mini: CopyStatusLine(); e.Handled = true; break;   // the one main action of the default card
+            case Key.Enter: OpenNotes(); e.Handled = true; break;   // the main action since round 24: straight to a new note (it was Copy status)
+            case Key.N: OpenNotes(); e.Handled = true; break;
             case Key.R: OpenReplies(); break;
         }
     }
@@ -203,9 +227,122 @@ public partial class CardWindow : Window
         if (_record is null) return;
         Clipboard?.SetTextAsync(Services.StatusLine.Build(_record));
         UsageLog.Record("copy_status", (DateTime.Now - _shownAt).TotalSeconds);
-        if (_copyLabel is not null) _copyLabel.Text = "Copied ✓"; else CopyChip.Content = "Copied ✓";
-        Avalonia.Threading.DispatcherTimer.RunOnce(
-            () => { if (_copyLabel is not null) _copyLabel.Text = "Copy status"; else CopyChip.Content = "Copy status"; }, TimeSpan.FromSeconds(1.2));
+        CopyChip.Content = "Copied ✓";
+        Avalonia.Threading.DispatcherTimer.RunOnce(() => CopyChip.Content = "Copy status", TimeSpan.FromSeconds(1.2));
+    }
+
+    // ---------------------------------------------------------------- my notes (round 24)
+
+    private string? _editingNoteId;
+    private (string Number, int At, QuickNote Note)? _lastDeleted;
+
+    public static string NoteButtonLabel(int notes) => "Add a note" + (notes > 0 ? $" · {notes} note{(notes == 1 ? "" : "s")}" : "");
+
+    private int NoteCount(AndaRecord record) => record.Notes.Count + (QuickNotes?.Count(record.Number) ?? 0);
+
+    private void PaintNotesButton()
+    {
+        if (_record is null) return;
+        string label = NoteButtonLabel(NoteCount(_record));
+        if (_notesLabel is not null) _notesLabel.Text = label; else NotesChip.Content = label;
+        AutomationProperties.SetName(NotesChip, label.Replace(" · ", ", ") + ". Opens the notes with a box for a new one.");
+    }
+
+    /// <summary>Enter, N or the button: the full card, its drawer and "My notes" open, and the cursor is in the box.</summary>
+    private void OpenNotes()
+    {
+        if (_record is null) return;
+        if (_mini) ExpandFromMini();
+        if (!Drawer.IsVisible) ToggleExpand();
+        MyNotesExpander.IsExpanded = true;
+        PaintQuickNotes(); PaintNotesButton();
+        Dispatcher.UIThread.Post(() => { QuickNoteBox.Focus(); MyNotesExpander.BringIntoView(); }, DispatcherPriority.Loaded);
+    }
+
+    private void SayNote(string text) { QuickNoteMsg.Text = text; QuickNoteMsg.IsVisible = text.Length > 0; }
+
+    private void SaveQuickNote()
+    {
+        if (_record is null) return;
+        if (QuickNotes is null) { SayNote("Notes cannot be kept in this window."); return; }
+        var (ok, message) = _editingNoteId is { } id ? QuickNotes.Edit(_record.Number, id, QuickNoteBox.Text) : QuickNotes.Add(_record.Number, QuickNoteBox.Text);
+        if (ok) StopEditingNote(message); else SayNote(message);
+        if (ok) { QuickNoteUndo.IsVisible = false; _lastDeleted = null; PaintQuickNotes(); PaintNotesButton(); }
+        QuickNoteBox.Focus();
+    }
+
+    private void StopEditingNote(string message)
+    {
+        _editingNoteId = null;
+        QuickNoteBox.Text = "";
+        QuickNoteSave.Content = "Save note"; QuickNoteCancel.IsVisible = false;
+        SayNote(message);
+    }
+
+    private void UndoDeleteNote()
+    {
+        if (_lastDeleted is not { } d || QuickNotes is null) return;
+        bool back = QuickNotes.Restore(d.Number, d.At, d.Note);
+        _lastDeleted = null; QuickNoteUndo.IsVisible = false;
+        SayNote(back ? "Note restored." : "The note could not be restored.");
+        PaintQuickNotes(); PaintNotesButton();
+    }
+
+    private void PaintQuickNotes()
+    {
+        QuickNotesList.Children.Clear();
+        if (_record is null) return;
+        var notes = QuickNotes?.For(_record.Number) ?? Array.Empty<QuickNote>();
+        MyNotesHeader.Text = notes.Count == 0 ? "My notes" : $"My notes · {notes.Count}";
+        if (QuickNotes?.Problem is { } problem && !QuickNoteMsg.IsVisible) SayNote(problem);
+        foreach (var note in notes)
+        {
+            var text = new TextBlock { Text = note.Text, FontSize = 12.5, Foreground = Ink2(), TextWrapping = TextWrapping.Wrap };
+            var when = new TextBlock { Text = note.When.ToString("MMM d, h:mm tt", System.Globalization.CultureInfo.InvariantCulture), FontSize = 11, Foreground = Ink3(), VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center, Margin = new Thickness(0, 0, 10, 0) };
+            Button Small(string label, string name, Action act)
+            {
+                var b = new Button { Content = label, FontSize = 11, Padding = new Thickness(4, 1), MinHeight = 24, Background = Brushes.Transparent, BorderThickness = new Thickness(0), Foreground = Ink2(), Margin = new Thickness(0, 0, 8, 0) };
+                AutomationProperties.SetName(b, name);
+                b.Click += (_, _) => act();
+                return b;
+            }
+            var row = new WrapPanel();
+            row.Children.Add(when);
+            row.Children.Add(Small("Edit", "Edit this note", () =>
+            {
+                _editingNoteId = note.Id; QuickNoteBox.Text = note.Text; QuickNoteBox.CaretIndex = note.Text.Length;
+                QuickNoteSave.Content = "Save change"; QuickNoteCancel.IsVisible = true; SayNote("Changing a note. Save change keeps it; Cancel leaves it as it was."); QuickNoteBox.Focus();
+            }));
+            row.Children.Add(Small("Delete", "Delete this note", () =>
+            {
+                if (QuickNotes?.Delete(_record.Number, note.Id) is { } gone)
+                {
+                    _lastDeleted = (_record.Number, gone.At, gone.Note); QuickNoteUndo.IsVisible = true;
+                    if (_editingNoteId == note.Id) StopEditingNote("");
+                    SayNote("Note deleted. Undo puts it back.");
+                    PaintQuickNotes(); PaintNotesButton();
+                }
+            }));
+            row.Children.Add(Small("Copy", "Copy this note", () => { Clipboard?.SetTextAsync(note.Text); SayNote("Note copied."); }));
+            var item = new StackPanel { Spacing = 2 };
+            item.Children.Add(text); item.Children.Add(row);
+            QuickNotesList.Children.Add(item);
+        }
+    }
+
+    // ---------------------------------------------------------------- open the ANDA's page (round 24)
+
+    private void SayChip(string text) { ChipMsg.Text = text; ChipMsg.IsVisible = text.Length > 0; }
+
+    private void OpenAndaPage()
+    {
+        if (_record is null) return;
+        var (url, why) = AndaPage.Build(_record.Number, AndaPageTemplate?.Invoke());
+        if (url is null) { SayChip(why ?? ""); return; }
+        try { OpenUrl(url); }
+        catch (Exception ex) { SayChip("The page could not be opened: " + ex.Message); return; }
+        UsageLog.Record("open_anda_page", (DateTime.Now - _shownAt).TotalSeconds);
+        if (!_pinned) Close();        // the card steps aside for the page it opened, unless it is pinned
     }
 
     private void OpenFirstSister()
@@ -317,9 +454,12 @@ public partial class CardWindow : Window
     private string _pctSuffix = "";
     // Pocket (T): the answer first, and Copy status kept at the bottom of the card.
     private StackPanel? _hero;
-    private TextBlock? _heroNumber, _heroUnit, _heroSub, _copyLabel;
+    private TextBlock? _heroNumber, _heroUnit, _heroSub, _notesLabel;
     // W: a half dial beside the answer. U: the calendar ribbon under it, with its sentence.
     private StackPanel? _heroGaugeBox, _ribbonSlot;
+    // X: the days to the goal date beside the answer.
+    private Border? _heroCount;
+    private TextBlock? _heroCountFigure, _heroCountCaption;
     private ProgressControl? _heroGauge;
     private CalendarRibbon? _ribbon;
     private TextBlock? _ribbonText;
@@ -358,6 +498,19 @@ public partial class CardWindow : Window
                     grid.Children.Add(answer); grid.Children.Add(_heroGaugeBox);
                     _hero.Children.Add(grid);
                 }
+                else if (look.HeroCount)
+                {
+                    // X: the answer on the left; on the right the days to the goal date. Its ink, fill and edge follow the distance (see GoalCountdown).
+                    _heroCountFigure = new TextBlock { FontSize = 24, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center };
+                    _heroCountCaption = new TextBlock { FontSize = 9, FontWeight = FontWeight.ExtraBold, LetterSpacing = 0.45, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center, Margin = new Thickness(0, 2, 0, 0) };
+                    var stack = new StackPanel(); stack.Children.Add(_heroCountFigure); stack.Children.Add(_heroCountCaption);
+                    _heroCount = new Border { Name = "HeroCount", Width = 96, CornerRadius = new CornerRadius(12), BorderThickness = new Thickness(1.5), Padding = new Thickness(4, 7, 4, 7), Margin = new Thickness(14, 0, 0, 0), VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center, Child = stack };
+                    var answer = new StackPanel(); answer.Children.Add(line); answer.Children.Add(_heroSub);
+                    var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto") };
+                    Grid.SetColumn(_heroCount, 1);
+                    grid.Children.Add(answer); grid.Children.Add(_heroCount);
+                    _hero.Children.Add(grid);
+                }
                 else { _hero.Children.Add(line); _hero.Children.Add(_heroSub); }
                 if (look.Ribbon)
                 {
@@ -373,25 +526,27 @@ public partial class CardWindow : Window
                 if (_ribbonSlot is not null) Slots.Children.Insert(Slots.Children.IndexOf(ClockPanel), _ribbonSlot);
                 HeaderBand.Padding = new Thickness(h, v + 4, h, 6);
 
-                // One main action: Copy status is filled, as wide as the card, and stays at the bottom while the rest scrolls. Enter triggers it.
-                Detach(CopyChip);
-                _copyLabel = new TextBlock { Text = "Copy status", FontWeight = FontWeight.SemiBold, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center };
+                // One main action, as wide as the card, kept at the bottom while the rest scrolls: Add a note (round 24; it was Copy status).
+                // It is tinted, not filled, and Enter triggers it. Copy status is the first of the small buttons, and the S key.
+                Detach(NotesChip);
+                _notesLabel = new TextBlock { Text = "Add a note", FontWeight = FontWeight.SemiBold, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center, Foreground = (IBrush)res["C.Ink"]! };
                 var keycap = new Border
                 {
-                    BorderBrush = Brushes.White, BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(4), Padding = new Thickness(5, 1), Margin = new Thickness(10, 0, 0, 0), Opacity = 0.85,
+                    BorderBrush = (IBrush)res["C.Ink3"]!, BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(4), Padding = new Thickness(5, 1), Margin = new Thickness(10, 0, 0, 0),
                     VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                    Child = new TextBlock { Text = "Enter", FontSize = 10.5, Foreground = Brushes.White },
+                    Child = new TextBlock { Text = "Enter", FontSize = 10.5, Foreground = (IBrush)res["C.Ink2"]! },
                 };
                 var label = new StackPanel { Orientation = Avalonia.Layout.Orientation.Horizontal, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center };
-                label.Children.Add(_copyLabel); label.Children.Add(keycap);
-                CopyChip.Content = label;
-                CopyChip.Classes.Add("filled");
-                CopyChip.Background = (IBrush)res["C.Accent"]!; CopyChip.BorderBrush = (IBrush)res["C.Accent"]!; CopyChip.Foreground = Brushes.White;
-                CopyChip.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch; CopyChip.HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Center;
-                CopyChip.MinHeight = 44; CopyChip.CornerRadius = new CornerRadius(10); CopyChip.Margin = new Thickness(h, v - 2, h, 0);
-                ToolTip.SetTip(CopyChip, "Copy a formatted status sentence for emails and trackers (Enter or S)");
-                ChipsSlot.Children.Insert(1, CopyChip);
-                foreach (var chip in new[] { RepliesChip, SisterChip, NotesChip, OpenChip })
+                label.Children.Add(_notesLabel); label.Children.Add(keycap);
+                NotesChip.Content = label;
+                NotesChip.Classes.Add("filled");
+                var accent = ((ISolidColorBrush)res["C.Accent"]!).Color;
+                NotesChip.Background = new SolidColorBrush(accent, 0.12); NotesChip.BorderBrush = new SolidColorBrush(accent, 0.34); NotesChip.BorderThickness = new Thickness(1); NotesChip.Foreground = (IBrush)res["C.Ink"]!;
+                NotesChip.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch; NotesChip.HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Center;
+                NotesChip.MinHeight = 36; NotesChip.CornerRadius = new CornerRadius(10); NotesChip.Margin = new Thickness(h, v - 2, h, 0);
+                ToolTip.SetTip(NotesChip, "Add a note for this ANDA (Enter)");
+                ChipsSlot.Children.Insert(1, NotesChip);
+                foreach (var chip in new[] { CopyChip, RepliesChip, SisterChip, OpenChip })
                 { chip.BorderThickness = new Thickness(0); chip.Background = Brushes.Transparent; chip.Padding = new Thickness(2, 3); chip.MinHeight = 28; chip.Margin = new Thickness(0, 0, 14, 0); }
                 Detach(ChipsSlot);
                 var host = (Panel)Body.Parent!;
@@ -527,6 +682,25 @@ public partial class CardWindow : Window
                 _heroGauge.Value = Math.Max(0, record.ProgressPct);
                 Avalonia.Automation.AutomationProperties.SetName(_heroGauge, $"{Math.Max(0, record.ProgressPct)} percent of the review clock has run");
             }
+            if (_heroCount is not null && _heroCountFigure is not null && _heroCountCaption is not null)
+            {
+                _heroCount.IsVisible = record.DaysToGoal is not null;     // no goal date in the data: no count, never an estimate
+                if (record.DaysToGoal is { } days)
+                {
+                    var res2 = Application.Current!.Resources;
+                    var (ink, fill, edge, heavy) = GoalCountdown.Style(GoalCountdown.LevelOf(days), ((ISolidColorBrush)res2["C.Ink"]!).Color.ToString(), ((ISolidColorBrush)res2["C.Line"]!).Color.ToString());
+                    var inkBrush = new SolidColorBrush(Color.Parse(ink));
+                    _heroCount.Background = fill is null ? Brushes.Transparent : new SolidColorBrush(Color.Parse(fill));
+                    _heroCount.BorderBrush = new SolidColorBrush(Color.Parse(edge));
+                    _heroCountFigure.Text = GoalCountdown.Figure(days);
+                    _heroCountFigure.FontSize = days == 0 ? 17 : 24;
+                    _heroCountFigure.FontWeight = heavy ? FontWeight.ExtraBold : FontWeight.SemiBold;
+                    _heroCountFigure.Foreground = inkBrush;
+                    _heroCountCaption.Text = GoalCountdown.Caption(days);
+                    _heroCountCaption.Foreground = inkBrush;
+                    Avalonia.Automation.AutomationProperties.SetName(_heroCount, GoalCountdown.Words(days));
+                }
+            }
             if (_ribbonSlot is not null && _ribbon is not null && _ribbonText is not null)
             {
                 bool both = gap && !mini && record.GoalDateValue is not null && record.ForecastDateValue is not null;
@@ -633,8 +807,9 @@ public partial class CardWindow : Window
         SisterChip.Content = $"Sister ANDA · {record.Sisters.Count}";
         SisterChip.IsVisible = record.Sisters.Count > 0;
         AutomationProperties.SetName(SisterChip, $"Open sister application, {record.Sisters.Count} related");
-        NotesChip.Content = $"Notes · {record.Notes.Count}";
-        AutomationProperties.SetName(NotesChip, $"Recent project notes, {record.Notes.Count} entries");
+        PaintNotesButton();
+        PaintQuickNotes();
+        SayChip(""); SayNote(""); _editingNoteId = null; _lastDeleted = null; QuickNoteUndo.IsVisible = false; QuickNoteCancel.IsVisible = false; QuickNoteSave.Content = "Save note"; QuickNoteBox.Text = "";
 
         SetMiniVisibility();
         if (!IsVisible)

@@ -276,6 +276,18 @@ public partial class SettingsWindow : Window
             rb.IsCheckedChanged += (_, _) => { if (!_loading && rb.IsChecked == true) { _settings.Tone = tone; Apply(); } };
             TonePanel.Children.Add(rb);
         }
+        // The address the card's "Open ANDA page" button opens. It is kept as written and checked again each time the button is pressed.
+        void PaintAndaPage() => AndaPageStatus.Text = string.IsNullOrWhiteSpace(AndaPageBox.Text) ? "No address yet. The button on the card will say so."
+            : AndaPage.Check(AndaPageBox.Text) ?? "This address can be opened. Example: " + AndaPage.Build("123456", AndaPageBox.Text).Url;
+        AndaPageBox.Text = _settings.AndaPageUrl;
+        PaintAndaPage();
+        AndaPageBox.PropertyChanged += (_, e) => { if (e.Property == TextBox.TextProperty) PaintAndaPage(); };
+        AndaPageBox.LostFocus += (_, _) =>
+        {
+            string typed = (AndaPageBox.Text ?? "").Trim();
+            if (_loading || typed == _settings.AndaPageUrl) return;
+            _settings.AndaPageUrl = typed.Length > AndaPage.MaxLength ? typed[..AndaPage.MaxLength] : typed; Apply();
+        };
         SignOffBox.Text = _settings.SignOff;
         SignOffBox.LostFocus += (_, _) =>
         {

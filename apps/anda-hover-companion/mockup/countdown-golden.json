@@ -1,0 +1,145 @@
+{
+  "about": "The days-to-goal indicator of look X. The simulation and the Windows app must give the same level, words, figure and caption for each number of days. Generated from the simulation; do not edit by hand.",
+  "cases": [
+    {
+      "days": -4000,
+      "level": "passed",
+      "words": "The goal date passed 4000 days ago",
+      "figure": "4000",
+      "caption": "DAYS PAST GOAL"
+    },
+    {
+      "days": -400,
+      "level": "passed",
+      "words": "The goal date passed 400 days ago",
+      "figure": "400",
+      "caption": "DAYS PAST GOAL"
+    },
+    {
+      "days": -31,
+      "level": "passed",
+      "words": "The goal date passed 31 days ago",
+      "figure": "31",
+      "caption": "DAYS PAST GOAL"
+    },
+    {
+      "days": -8,
+      "level": "passed",
+      "words": "The goal date passed 8 days ago",
+      "figure": "8",
+      "caption": "DAYS PAST GOAL"
+    },
+    {
+      "days": -3,
+      "level": "passed",
+      "words": "The goal date passed 3 days ago",
+      "figure": "3",
+      "caption": "DAYS PAST GOAL"
+    },
+    {
+      "days": -2,
+      "level": "passed",
+      "words": "The goal date passed 2 days ago",
+      "figure": "2",
+      "caption": "DAYS PAST GOAL"
+    },
+    {
+      "days": -1,
+      "level": "passed",
+      "words": "The goal date passed 1 day ago",
+      "figure": "1",
+      "caption": "DAY PAST GOAL"
+    },
+    {
+      "days": 0,
+      "level": "today",
+      "words": "The goal date is today",
+      "figure": "Today",
+      "caption": "IS THE GOAL DATE"
+    },
+    {
+      "days": 1,
+      "level": "soon",
+      "words": "1 day to the goal date",
+      "figure": "1",
+      "caption": "DAY TO GOAL"
+    },
+    {
+      "days": 2,
+      "level": "soon",
+      "words": "2 days to the goal date",
+      "figure": "2",
+      "caption": "DAYS TO GOAL"
+    },
+    {
+      "days": 6,
+      "level": "soon",
+      "words": "6 days to the goal date",
+      "figure": "6",
+      "caption": "DAYS TO GOAL"
+    },
+    {
+      "days": 7,
+      "level": "soon",
+      "words": "7 days to the goal date",
+      "figure": "7",
+      "caption": "DAYS TO GOAL"
+    },
+    {
+      "days": 8,
+      "level": "near",
+      "words": "8 days to the goal date",
+      "figure": "8",
+      "caption": "DAYS TO GOAL"
+    },
+    {
+      "days": 21,
+      "level": "near",
+      "words": "21 days to the goal date",
+      "figure": "21",
+      "caption": "DAYS TO GOAL"
+    },
+    {
+      "days": 29,
+      "level": "near",
+      "words": "29 days to the goal date",
+      "figure": "29",
+      "caption": "DAYS TO GOAL"
+    },
+    {
+      "days": 30,
+      "level": "near",
+      "words": "30 days to the goal date",
+      "figure": "30",
+      "caption": "DAYS TO GOAL"
+    },
+    {
+      "days": 31,
+      "level": "calm",
+      "words": "31 days to the goal date",
+      "figure": "31",
+      "caption": "DAYS TO GOAL"
+    },
+    {
+      "days": 79,
+      "level": "calm",
+      "words": "79 days to the goal date",
+      "figure": "79",
+      "caption": "DAYS TO GOAL"
+    },
+    {
+      "days": 365,
+      "level": "calm",
+      "words": "365 days to the goal date",
+      "figure": "365",
+      "caption": "DAYS TO GOAL"
+    },
+    {
+      "days": 4000,
+      "level": "calm",
+      "words": "4000 days to the goal date",
+      "figure": "4000",
+      "caption": "DAYS TO GOAL"
+    }
+  ]
+}

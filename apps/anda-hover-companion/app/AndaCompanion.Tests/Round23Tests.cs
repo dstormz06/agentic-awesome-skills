@@ -68,7 +68,7 @@ public class Round23Tests : IClassFixture<HeadlessFixture>
         foreach (var a in Appearances.All)
         {
             File.WriteAllText(path, $"{{ \"Appearance\": {(int)a.Id} }}");
-            Assert.Equal(Appearances.IsOffered(a.Id) ? a.Id : AppearanceId.W, SettingsService.Load(path).Appearance);
+            Assert.Equal(Appearances.IsOffered(a.Id) ? a.Id : Appearances.Default, SettingsService.Load(path).Appearance);
         }
     }
 
@@ -86,7 +86,7 @@ public class Round23Tests : IClassFixture<HeadlessFixture>
     }
 
     [Fact]
-    public async Task The_default_card_shows_the_gauge_beside_the_answer_and_says_it_in_words()
+    public async Task Look_W_shows_the_gauge_beside_the_answer_and_says_it_in_words()
     {
         var r = await Inspect(Late, false, AppearanceId.W, w =>
         {

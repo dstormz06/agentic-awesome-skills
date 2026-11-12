@@ -49,6 +49,7 @@ public partial class App : Application
     private (AndaRecord Record, PixelPoint Near, bool Mini)? _lastCard;
 
     private readonly TodoService _todo = new();
+    private readonly QuickNotesService _quickNotes = new();     // the person's own notes on the card: one file in the app's folder
     private readonly AgentService _agents;
     private volatile IReadOnlyList<CustomAction> _boundActions = Array.Empty<CustomAction>();
     private string _agentsFingerprint = "";
@@ -241,6 +242,7 @@ public partial class App : Application
             Today = Today, Reference = ReferenceFor, QuickReplies = () => _replies.Replies,
             Outlook = Outlook,
             Agents = _agents, AtRisk = IsAtRisk, AddTodos = AddAgentTodos,
+            QuickNotes = _quickNotes, AndaPageTemplate = () => _settings.AndaPageUrl,
         };
         card.Closed += (_, _) => { if (ReferenceEquals(_card, card)) _card = null; };
         _card = card;

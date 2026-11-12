@@ -15,7 +15,7 @@ public enum MyTodoMode { Review = 0, AddAtOnce = 1 }
 
 public sealed class Settings
 {
-    public AppearanceId Appearance { get; set; } = Appearances.Default;   // W · Graphite Gauge is the product default
+    public AppearanceId Appearance { get; set; } = Appearances.Default;   // X · Graphite Calendar is the product default
 
     /// <summary>
     /// Hide a card or compact box after this many idle seconds (0 = never). Pointer over it, a pinned card and an
@@ -37,6 +37,8 @@ public sealed class Settings
     public int UrgentLateDays { get; set; } = UrgencyPolicy.DefaultLateDays;
     /// <summary>When the tray icon is counted again on a schedule: "use", "daily" or "hourly" (see TrayRecount). Round 23.</summary>
     public string TrayRecount { get; set; } = Services.TrayRecount.Daily;
+    /// <summary>The address the card's "Open ANDA page" button opens, with {anda} where the number goes. Empty until the person sets it; checked each time the button is pressed (see AndaPage). Round 24.</summary>
+    public string AndaPageUrl { get; set; } = "";
 
     /// <summary>Warn about a goal date within this many business days before or after a federal holiday (0 turns it off).</summary>
     public int HolidayLeadDays { get; set; } = 3;
@@ -232,6 +234,7 @@ public static class SettingsService
         loaded.AutoHideSeconds = UI.AutoHidePolicy.Normalize(loaded.AutoHideSeconds);
         loaded.UrgentLateDays = UrgencyPolicy.Normalize(loaded.UrgentLateDays);
         loaded.TrayRecount = Services.TrayRecount.Normalize(loaded.TrayRecount);
+        loaded.AndaPageUrl = (loaded.AndaPageUrl ?? "").Trim(); if (loaded.AndaPageUrl.Length > AndaPage.MaxLength) loaded.AndaPageUrl = loaded.AndaPageUrl[..AndaPage.MaxLength];
         if (!Settings.HolidayLeadChoices.Contains(loaded.HolidayLeadDays)) loaded.HolidayLeadDays = 3;
         if (!NativeHostRegistration.IsValidExtensionId(loaded.ExtensionId)) loaded.ExtensionId = NativeHostRegistration.DefaultExtensionId;
         loaded.PortfolioColumns ??= new();

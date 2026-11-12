@@ -8,7 +8,7 @@ Thank you for trying it. Fictional data only. A concept prototype, not an FDA pr
 > Until then, use the **browser simulation** or the deck on a device you are allowed to use. The Windows build is
 > for a personal or approved device, with fictional data only.
 
-> **What this Windows build has of the newer design.** The Loupe icon, eight looks with **W · Graphite Gauge** as the default (one answer with a gauge beside it, and one main action: Copy status, or Enter), a dot or a number on
+> **What this Windows build has of the newer design.** The Loupe icon, eight looks with **X · Graphite Calendar** as the default (one answer, the days to the goal date beside it, the calendar under it, and one main action: Add a note, or Enter; S copies the status line), a dot or a number on
 > the tray icon only while something in your own sheet needs you today (the sample data never lights it), and the shortcuts **Ctrl+Alt+Shift+R** (Review a draft) and **Ctrl+Alt+Shift+L** (My to-do list). One Bar, Today, recent ANDAs, card details
 > with Copy, notices near the clock and the one question before sending are shown in the **browser simulation** only. To judge the design for daily use, follow `TRIAL-SHEET.md`.
 
@@ -45,7 +45,7 @@ desktop, and says so on screen. The shortcut, clipboard and file pickers are sim
 | 1:50 | Click **Copy status** and paste it into the memo. | "The sentence I retype a dozen times a week, in one click." |
 | 2:15 | Select **NDA 021234** and press Ctrl+Alt+A. | "The same six digits but a different application type. It declines to guess and opens the lookup box. A wrong card is worse than none." |
 | 2:45 | Copy any text, open a card, then paste. | "It read my selection by copying it, then put my clipboard back exactly as it was." |
-| 3:15 | *Optional.* Tray, then Settings, **Look and feel**. Pick **L · Graphite Strip**, select a number and press Ctrl+Alt+A. Click the strip to open the full card. Switch back to **W**. | "Eight looks. The small boxes stay out of the way of an open email, make no AI call and never take the keyboard. A card hides itself after 10 seconds idle, but never while I am reading it." |
+| 3:15 | *Optional.* Tray, then Settings, **Look and feel**. Pick **L · Graphite Strip**, select a number and press Ctrl+Alt+A. Click the strip to open the full card. Switch back to **X**. | "Eight looks. The small boxes stay out of the way of an open email, make no AI call and never take the keyboard. A card hides itself after 10 seconds idle, but never while I am reading it." |
 | 3:45 | Select the draft reply in the memo and press **Ctrl+Alt+Shift+R**. | "It checks my draft against the record, with no AI: a wrong goal date, 'on track' against a late forecast, a number it does not know. It says what it checked and what it did not." (The memo has a draft with three deliberate mistakes.) |
 | 3:55 | Select the **spreadsheet cells** in the memo and press **Ctrl+Alt+Shift+P**. Press the suggested **Find duplicates**, then **Compare columns**. | "I select cells and ask a question about them. These checks run on my PC with fixed rules: no AI, nothing sent. A prompt of my own is filled in and shown to me first, and goes out only if I press Send. It cannot tell me what a repeat means. That stays mine." |
 | 4:00 | Tray, then **Watch list**. | "Every ANDA in my data with something worth a look, worst first. Nothing runs in the background." |
