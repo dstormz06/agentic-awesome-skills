@@ -227,9 +227,9 @@ test.
 **Nothing too dark (product owner, 2026-11-02).** Beyond the light-only rule, no accent or progress fill may be near-black (a test enforces a minimum luminance on every look's accent and fill), and every progress fill must stay at least 3:1 against its track. Text inks stay dark enough for AA contrast; that is legibility, not decoration.
 
 **Light-only, by product decision.** All dark variants are retired (C was redesigned
-from dark glass into a light steel panel). A per-user **transparency slider** (40–100%, **starting at 92%**,
+from dark glass into a light steel panel). A per-user **transparency slider** (40–100%, **starting at 90%** since round 20; 92% before,
 card surface only — text and status inks always stay opaque) provides the "sits
-lightly on my screen" quality dark themes used to serve. At the starting 92% every full look keeps its text at AA over a light
+lightly on my screen" quality dark themes used to serve. At the starting value (checked again at 90%) every full look keeps its text at AA over a light
 backdrop, and the default look K does so even over a black window (4.96:1); looks A to E and G fall below 4.5:1 over a black window (lowest
 3.85:1), and every look does at 80% over black. That is why the hint says to raise the value over a dark or busy background.
 
@@ -473,7 +473,7 @@ one primary action, answer first, progressive disclosure) and applied on Windows
 
 **The owner's decisions (2026-11-06).**
 
-- The new default is **T · Pocket Plain**. **U · Calendar Ribbon** and **V · Glass Sheet** are selectable looks. The 19 earlier looks are not changed.
+- The default of round 18 was **T · Pocket Plain**, with **U · Calendar Ribbon** and **V · Glass Sheet** beside it. In round 20 the owner made **V · Glass Sheet the default** (§11d); the Windows app still opens in T until V is ported. The 19 earlier looks are not changed.
   Every look can be chosen in *Settings, Look and feel* and in the tray menu, with or without *Show all tools* (round 19). All looks are light only.
 - The icon is **Loupe**: an indigo plate, a white ring and an amber center. A small amber dot on the tray icon means *urgent* (below).
 - **One Bar** is an option for the lookup window (*Settings, Look and feel*, in both editions since round 19); **Today** is a small window in the tray menu under *Show all tools*, and is not in the focused edition.
@@ -598,12 +598,56 @@ read a selection in another program or open a card at the pointer; Power BI suit
 **The looks stay in reach, and the Go to list reads like a list (simulation and app).** Round 17 hid *Look and feel* behind *Show all tools* and drew the card solid in the
 default look. The owner went looking for the looks and could not find them, so the rule was wrong for the person it was written for: **every look, the compact boxes and the
 transparency slider are in Settings in both editions, the tray menu keeps its *Appearance* list, and what a person chooses applies at once.** *Show all tools* now governs
-tools only (the two to-do lists, agents, dates). A new install still opens in T · Pocket Plain at the 92% the owner chose in round 16. The **Go to** list showed the small
+tools only (the two to-do lists, agents, dates). A new install still opened in T · Pocket Plain at the 92% the owner chose in round 16 (round 20 changed both: §11d). The **Go to** list showed the small
 capital labels as they are drawn on the page, which made a column of capitals; it now shows them in sentence case, keeping abbreviations and names (ANDA, API, PC, Drugs@FDA,
 Alert Hub, Select & Peek). The labels on the page are unchanged.
 
 **What round 19 does not prove.** That a notice near the clock helps more than it interrupts; three a day is a guess. That the Word document is a workable way to run division
 news: nobody has written one. That the chosen shortcuts are free on a real FDA laptop. Nothing in this section has been used by a real RPM.
+
+## 11d. Round 20: glass by default, notes you can write, a proofreader that works with no AI (simulation first)
+
+The owner's requests of 2026-11-12, in the owner's words: the default appearance "should use the glass design"; transparency "from 40 percent to 100 percent but the default
+should be 90 percent"; "make sure all of the features and sub features/functions of the proofread mode/tool will work flawlessly … you can actually proofread and also factcheck and
+also cross references/leveraging the user's ANDA portfolio or the user's personal notes"; show "the user's most recent and relevant notes +/- relevant to-do list items at the bottom
+row and as auto collapsed"; "the user can create personal notes or quick notes of the particular ANDA"; and make the simulation "actually look like windows 11". The name stays
+**Notula**.
+
+**Glass by default, at 90% (simulation and lab; the transparency start also in the app).** V · Glass Sheet is the default look and the first in the list. The sheet used to be
+fixed at 86%; it now **follows the transparency setting**, which runs 40 to 100% and starts at **90%** for every look. Glass blurs what is behind it, and the action area at
+the bottom blurs the facts that scroll under it, so no text shows through the buttons. A system that asks for less transparency gets a solid card. The Windows app's start is
+90% too; **its default look is still T · Pocket Plain**, because the blur behind a rounded card has to be seen on a Windows desktop before it becomes a default there.
+
+**Quick notes on the card (simulation; not yet in the app).** The *Notes* button and the **N** key open the card fully, show the notes and put the pointer in a box: *Add a
+quick note for ANDA 216482*. Ctrl+Enter or *Save note* saves it. A person's own notes are listed above the project notes of the record, newest first, each with Copy; their own
+also have Edit and Delete, with Undo. Decisions, and why: (1) **the app keeps quick notes in its own file on the PC; the sheet and the notes folder stay read-only**, as they
+always were; (2) a note is **text, never markup**, at most 500 characters, at most 50 per ANDA; (3) **a note is never sent anywhere, never shown in a notice near the clock and
+not put in the settings backup** (a backup is a file people send to each other); (4) what was typed and not saved is kept if the card closes; the first Escape leaves the box and
+the second closes the card; (5) while the pointer is in the box, the card's one-letter shortcuts are just letters.
+
+**Proofread and Fact-check that work with no AI (simulation; not yet in the app or the extension).** The Review window had three buttons that were switched off until a model is
+approved. Now **Proofread** and **Fact-check** work at once, by fixed rules on the PC, and *Check everything* runs both; the AI versions stay beside them, still off.
+- **Proofreading** is a short, stated list: about 120 common slips of spelling (US English); **names in the person's own data** that are one slip away (“Metfromin” against the
+  drug of the ANDA the draft names); *ANDA* and *FDA* in capitals, “an ANDA”, a lone “i”; a space before a mark or missing after one; doubled marks and spaces; a sentence that
+  starts with a small letter; brackets and quotation marks that do not close; two date styles; a very long sentence. Every change that needs no guessing can be copied as a
+  **corrected draft** or applied to the box in the window. **The app never types into the email.** The section says it is not a full spelling or grammar check.
+- **Fact-check** is the earlier review (numbers, goal and forecast dates, on-track or late wording, weekdays, deadlines) plus three more facts from the sheet: the **strength**,
+  the **review cycle** and the **due date of the open action item**. A date in the draft that also stands in one of the person's notes is traced to that note. A strength is
+  compared only in the sentence that names the ANDA, because the next sentence often speaks of a sister product (the demo email does exactly that).
+- **For recall, at the bottom and closed:** one row for each ANDA of the person's data that the draft names (three at most), with the count of notes and open items. Opened, it
+  shows the notes the draft touches first (a shared date or word), then the newest, four at most, then the open items of the record and of both to-do lists, and *Open the card*.
+- The shared review result is unchanged, so the app, the extension and the simulation still agree on the shared cases; the new parts are a layer that will be ported with its own
+  shared cases.
+
+**A desktop that looks like Windows 11 (simulation only).** A wallpaper drawn in the page (three to choose from: light blue, dark blue, plain), a centered taskbar with a search
+box, a line under the open app and weather at the left, rounded windows with caption buttons, Mail in the manner of the new Outlook, Chat in the manner of Teams, a browser with
+a tab and an address pill, and a dark terminal. **Everything is drawn here from shapes: no logo, no image file and no artwork of any company or of the agency is used**, the
+window titles still say "Outlook-style", "Teams-style" and "Edge-style", and the banner still says the page is a simulation with fictional data and is not an FDA product. The
+added pieces are decoration, hidden from screen readers; the text people select and every control are where they were.
+
+**What round 20 does not prove.** That glass reads well on a real Windows desktop, a projector or a television. That the proofreading list catches what an RPM actually
+mistypes: it is a first list, and it will miss most grammar. That three extra facts are the right three. That anyone wants notes in a tool that also reads a notes folder.
+Nothing in this section has been used by a real RPM, and none of it except the 90% start is in the Windows app.
 
 ## 12. Engagement roadmap — seven features that make it the daily habit
 

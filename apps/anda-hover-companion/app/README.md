@@ -3,6 +3,9 @@
 A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
 **All bundled data is fictional.** Not an FDA product; a concept prototype.
 
+> **Not in this app yet (built in the browser simulation in round 20, for review first):** V · Glass Sheet as the default look, quick notes typed on the card, Proofread and
+> Fact-check that work with no AI, and the notes and open items shown for recall under a review. The card's starting transparency is 90% here too.
+>
 > **What this app has of the newer design.** The **Loupe** icon; the default card **T · Pocket Plain** (one answer first, then the facts, and one main action, Copy status, which Enter
 > triggers); an amber dot on the tray icon while any ANDA in the data is urgent; the short number forms (**N210793 is an NDA and is refused; A210793 is read as ANDA 210793**); and
 > the default shortcuts **Ctrl+Alt+Shift+R** (Review a draft) and **Ctrl+Alt+Shift+L** (My to-do list), which replaced Ctrl+Alt+D and Ctrl+Alt+L because Word uses those. A shortcut
@@ -36,7 +39,7 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   new installs; an install that already saved a choice keeps it), **urgent items** (in whisper mode an
   at-risk or late ANDA opens a peek by itself), the weekend/holiday window, **My data**,
   **standing instructions** for the writing actions, **four rebindable shortcuts** (Select & Peek, Lookup, Review a draft, Ask), an optional
-  **usage log** (off by default), **card transparency slider** (40–100%, starting at 92%; text always stays opaque),
+  **usage log** (off by default), **card transparency slider** (40–100%, starting at 90% since round 20, 92% before; text always stays opaque),
   companion lens picker, and the **connection panel** (Auto, Offline, Claude with its model name, or My API) with one-click Test.
   A **Go to** list at the top jumps to any section (and opens it); its names are in sentence case, with abbreviations such as ANDA and API kept (`SettingsSections.SentenceCase`). With **Show all tools** on, Settings is eight collapsible sections, each with a strong line under it: *Look and feel*, *How it
   starts*, *Dates*, *My files and writing*, *My to-do list*, *My actions, agents and ANDA to-do list*, *AI and connections*, *Maintenance*. The **focused edition, which is the default**, shows six: *Look and feel* (back since round 19, with every look and the transparency slider), *How it starts*, *My files and writing*, *Ask: my stored prompts*, *AI and connections* and *Maintenance*. **They arrange

@@ -18,8 +18,10 @@ It comes in two parts that work alone or together:
 **Where the newer design stands (rounds 18 and 19).** New work is built and published first in the browser simulation, for the owner to review, and ported to the Windows app
 afterwards. **In the Windows app today:** the Loupe icon, the default card **T · Pocket Plain** (one answer first, one main action), the tray icon's amber dot for an urgent ANDA, the
 N and A number prefixes (N210793 is an NDA and is refused; A210793 is read as ANDA 210793) and the new default shortcuts. **Only in the simulation so far:** the looks U and V, One Bar,
-Today, recent and kept ANDAs, spacing and text size (round 18), and card details with Copy, notices near the clock with division news, and one question before sending (round 19).
-`DESIGN.md` §11b and §11c describe them; `demo/TRIAL-SHEET.md` is the five-task way to judge whether the design helps in daily use.
+Today, recent and kept ANDAs, spacing and text size (round 18), card details with Copy, notices near the clock with division news, and one question before sending (round 19), and,
+from round 20, **V · Glass Sheet as the default look**, quick notes typed on the card, Proofread and Fact-check that work with no AI, the notes and open items shown for recall under
+a review, and a desktop that looks like Windows 11. The card's starting transparency is 90% in both (it was 92%).
+`DESIGN.md` §11b, §11c and §11d describe them; `demo/TRIAL-SHEET.md` is the five-task way to judge whether the design helps in daily use.
 
 All data in the demos is fictional. This is a prototype, not an FDA product. It has not been used by a real RPM, on real data, in Edge
 itself, or on a managed FDA computer. Please read `VERIFICATION.md` for what has and has not been proven.

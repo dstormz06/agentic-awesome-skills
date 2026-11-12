@@ -86,7 +86,7 @@ public class Round16Tests
         File.WriteAllText(path, "{\"FirstRunDone\":true}");
         var old = SettingsService.Load(path);
         Assert.Equal("Ctrl+Alt+Shift+L", old.MyTodoHotkey);
-        Assert.Equal(0.92, old.CardOpacity, 3);
+        Assert.Equal(0.90, old.CardOpacity, 3);
         Assert.True(old.AdaptiveSettings);
         Assert.False(old.ShowAllTools);
         Assert.Empty(old.SectionUse);
@@ -114,7 +114,7 @@ public class Round16Tests
     }
 
     [Fact]
-    public void The_default_look_keeps_its_text_at_AA_at_the_92_percent_start_even_over_a_black_window()
+    public void The_default_look_keeps_its_text_at_AA_at_the_starting_transparency_even_over_a_black_window()
     {
         var p = Appearances.Get(Appearances.Default).Palette;
         string surface = Over(p.Bg, Settings.DefaultCardOpacity, "#000000");
@@ -123,7 +123,7 @@ public class Round16Tests
     }
 
     [Fact]
-    public void Every_full_look_keeps_its_text_at_AA_at_the_92_percent_start_over_a_light_backdrop()
+    public void Every_full_look_keeps_its_text_at_AA_at_the_starting_transparency_over_a_light_backdrop()
     {
         foreach (var look in Appearances.All.Where(a => !a.IsCompact))
         {
@@ -135,11 +135,11 @@ public class Round16Tests
     }
 
     [Fact]
-    public void The_range_and_start_of_the_transparency_slider_are_40_to_100_and_92()
+    public void The_range_and_start_of_the_transparency_slider_are_40_to_100_and_90()
     {
         Assert.Equal(0.40, Settings.MinCardOpacity);
-        Assert.Equal(0.92, Settings.DefaultCardOpacity);
-        Assert.Equal(0.92, new Settings().CardOpacity);
+        Assert.Equal(0.90, Settings.DefaultCardOpacity);
+        Assert.Equal(0.90, new Settings().CardOpacity);
         Assert.Equal(1.0, Settings.NormalizeOpacity(double.NaN));
         Assert.Equal(0.40, Settings.NormalizeOpacity(0.0));
         Assert.Equal(1.0, Settings.NormalizeOpacity(7));

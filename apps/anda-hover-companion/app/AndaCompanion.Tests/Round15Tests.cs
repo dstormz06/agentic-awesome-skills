@@ -32,7 +32,7 @@ public class Round15Tests
         Assert.Equal(0.4, SettingsService.Normalize(new Settings { CardOpacity = 0.30 }).CardOpacity, 6);       // a value saved when the floor was 30% is raised to 40%
         Assert.Equal(1.0, SettingsService.Normalize(new Settings { CardOpacity = 3 }).CardOpacity, 6);
         Assert.Equal(0.4, Settings.MinCardOpacity, 6);
-        Assert.Equal(0.92, Settings.DefaultCardOpacity, 6);
+        Assert.Equal(0.90, Settings.DefaultCardOpacity, 6);
         string dir = Temp.NewDir(), path = Path.Combine(dir, "s.json");
         File.WriteAllText(path, "{\"CardOpacity\": 0.1}");
         Assert.Equal(0.4, SettingsService.Load(path).CardOpacity, 6);

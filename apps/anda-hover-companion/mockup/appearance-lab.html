@@ -272,9 +272,9 @@ h2.sec{font-size:13px;letter-spacing:.12em;font-weight:700;color:var(--ink3);mar
 @media (max-width:480px){.tile{padding:10px}.stage{padding:8px}.card{--rail:74px}.card[data-look="i"]{--rail:84px}.slot{padding-left:13px;padding-right:13px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
-/* ---- round 18: T Pocket Plain (the default), U Calendar Ribbon, V Glass Sheet ---- */
+/* ---- round 18: T Pocket Plain, U Calendar Ribbon, V Glass Sheet (the default since round 20) ---- */
 .card[data-look="t"],.card[data-look="u"],.card[data-look="v"]{--c-bg:#ffffff;--c-ink:#1d2329;--c-ink2:#46505a;--c-ink3:#58616b;--c-hair:#eceef1;--c-line:#dde1e6;--c-accent:#3f4a56;--c-good:#1a6b43;--c-good-bg:#e6f1ea;--c-warn:#8a5800;--c-warn-bg:#faf1dc;--c-track:#e6e8eb;--c-fill:#6a7683;--c-radius:12px;--c-shadow:0 18px 40px -14px rgba(20,24,28,.26),0 3px 9px rgba(20,24,28,.08)}
-.card[data-look="v"]{--c-ink2:#3c444d;--c-ink3:#4a525b;--c-radius:16px;background-color:color-mix(in srgb,#fff 86%,transparent);background-image:linear-gradient(165deg,rgba(255,255,255,.65),rgba(255,255,255,0) 38%);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5)}
+.card[data-look="v"]{--c-ink2:#3c444d;--c-ink3:#4a525b;--c-radius:16px;background-color:color-mix(in srgb,#fff 90%,transparent);background-image:linear-gradient(165deg,rgba(255,255,255,.65),rgba(255,255,255,0) 38%);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5)}
 .card[data-look="t"] .seal,.card[data-look="u"] .seal,.card[data-look="v"] .seal{background:transparent;border:1px solid #cfd3d8;color:var(--c-ink2)}
 .card[data-look="t"] .attn,.card[data-look="u"] .attn,.card[data-look="v"] .attn{border:none;border-radius:10px}
 .card[data-look="t"] .chips .chip:first-child,.card[data-look="u"] .chips .chip:first-child,.card[data-look="v"] .chips .chip:first-child{flex:1 1 100%;justify-content:center;background:var(--c-accent);border-color:var(--c-accent);color:#fff;font-weight:650;border-radius:10px;min-height:42px;margin-bottom:4px}
@@ -296,7 +296,7 @@ h2.sec{font-size:13px;letter-spacing:.12em;font-weight:700;color:var(--ink3);mar
 <div class="wrap" role="main">
   <p class="eyebrow">ALL DATA FICTIONAL · LIGHT ONLY</p>
   <h1>Appearance Lab</h1>
-  <p class="lede">Twenty-two card designs for the same facts. T (Pocket Plain) is the default. Eighteen are full cards and four are compact boxes that stay out of the way of an open email. The designs differ only in surface, type and progress marker; the information is identical.</p>
+  <p class="lede">Twenty-two card designs for the same facts. V (Glass Sheet) is the default. Eighteen are full cards and four are compact boxes that stay out of the way of an open email. The designs differ only in surface, type and progress marker; the information is identical.</p>
 
   <div class="bar" role="toolbar" aria-label="Controls">
     <div class="seg" role="group" aria-label="Record shown">
@@ -334,9 +334,9 @@ const DATA = {
     brief:"Related precedent: ANDA 216482 — same applicant, same facility. Forecast drivers and assumptions: expand → Forecast & assumptions.", sisters:1, notes:2 }
 };
 const LOOKS = [
-  { id:"t", grp:"pocket", layout:"pocket", def:true, name:"T · Pocket Plain", tag:"One answer first: how many days later or earlier than the goal. Then the facts, and one main action, Copy status, pinned at the bottom.", prog:"bar", sw:["#ffffff","#3f4a56","#8a5800"] },
+  { id:"v", grp:"pocket", layout:"glass", def:true, name:"V · Glass Sheet", tag:"One answer first, on a frosted sheet: how many days later or earlier than the goal, then the facts, and one main action pinned at the bottom. The sheet follows the transparency setting (90% to start), blurs what is behind it, and is solid when the system asks for less transparency.", prog:"bar", sw:["#eef2f6","#3f4a56","#8a5800"] },
+  { id:"t", grp:"pocket", layout:"pocket", name:"T · Pocket Plain", tag:"The same layout on a plain white card, with no blur. The default of round 18.", prog:"bar", sw:["#ffffff","#3f4a56","#8a5800"] },
   { id:"u", grp:"pocket", layout:"ribbon", name:"U · Calendar Ribbon", tag:"The same answer, plus the weeks around the goal and forecast drawn out: weekends, a federal holiday and the gap.", prog:"bar", sw:["#ffffff","#3f4a56","#c98a14"] },
-  { id:"v", grp:"pocket", layout:"glass", name:"V · Glass Sheet", tag:"The same layout on a frosted sheet. It stays readable: the sheet is at least 86% opaque, and solid when the system asks for less transparency.", prog:"bar", sw:["#eef2f6","#3f4a56","#8a5800"] },
   { id:"a", cur:true, name:"A · Quiet Fluent", tag:"Native Windows calm. White surface, steel-blue accent, a thin bar.", prog:"bar", sw:["#fff","#3d6fa5","#177245"] },
   { id:"b", cur:true, name:"B · Docket Ledger", tag:"Typeset federal docket. Warm paper, archival green, serif title, stamp seal, milestone ticks.", prog:"ticks", sw:["#fbf8f2","#23573f","#211d15"] },
   { id:"c", cur:true, name:"C · Signal", tag:"Light steel panel. Federal blue, mono numerals, a progress ring.", prog:"ring", sw:["#f7fafd","#005ea2","#177245"] },

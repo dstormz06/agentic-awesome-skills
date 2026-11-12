@@ -150,8 +150,8 @@ public sealed class Settings
     /// <summary>The lowest card opacity the slider offers: 40%. A saved or restored value outside 40–100% is brought back into range.</summary>
     public const double MinCardOpacity = 0.40;
 
-    /// <summary>What a new install, and "Reset all settings", starts with: 92%, so the card sits lightly on the screen. An install that already saved a choice keeps it.</summary>
-    public const double DefaultCardOpacity = 0.92;
+    /// <summary>What a new install, and "Reset all settings", starts with: 90% (the owner's number since round 20; it was 92%), so the card sits lightly on the screen. An install that already saved a choice keeps it.</summary>
+    public const double DefaultCardOpacity = 0.90;
 
     /// <summary>Brings any value into 40–100%. A value that is not a number becomes solid (1.0).</summary>
     public static double NormalizeOpacity(double value) => double.IsNaN(value) || double.IsInfinity(value) ? 1.0 : Math.Clamp(value, MinCardOpacity, 1.0);

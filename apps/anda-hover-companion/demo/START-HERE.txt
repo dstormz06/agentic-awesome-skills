@@ -40,7 +40,7 @@ MAKE IT YOURS (tray icon, then Settings)
   always under "Look and feel". Nothing is deleted, and what you chose comes back. Items below
   marked (all tools) appear only then.
   - Appearance: 20 looks (T is the default; L to O are small boxes that stay out of the way
-    of an email), auto-hide (10 seconds to start), transparency (40 to 100 percent, starting at 92), how a card opens.
+    of an email), auto-hide (10 seconds to start), transparency (40 to 100 percent, starting at 90), how a card opens.
   - Shortcuts: your own keys, with a live note on any that another program already uses.
     An optional middle-click is off by default.
   - My data: your Excel or CSV portfolio, notes folder and Drugs@FDA file. They are only read.

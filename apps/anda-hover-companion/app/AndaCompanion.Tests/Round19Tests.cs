@@ -253,7 +253,7 @@ public class Round19Tests : IClassFixture<HeadlessFixture>
         Directory.CreateDirectory(dir);
         foreach (var (name, rec, mini) in new[] { ("r19-card-t-late", Late, false), ("r19-card-t-early", Early, false), ("r19-card-t-peek", Late, true) })
             await Inspect(rec, mini, w => { Settle(); Settle(); w.CaptureRenderedFrame()?.Save(Path.Combine(dir, name + ".png")); return 0; });
-        // the starting transparency (92%), which the focused edition now uses too
+        // the starting transparency (90% since round 20), which the focused edition now uses too
         await Inspect(Late, false, w => { Settle(); Settle(); w.CaptureRenderedFrame()?.Save(Path.Combine(dir, "r19-card-t-late-92.png")); return 0; }, AppearanceId.T, Settings.DefaultCardOpacity);
         await Inspect(Late, false, w => { Settle(); Settle(); w.CaptureRenderedFrame()?.Save(Path.Combine(dir, "r19-card-k-late-92.png")); return 0; }, AppearanceId.K, Settings.DefaultCardOpacity);
     }

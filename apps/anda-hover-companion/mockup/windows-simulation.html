@@ -19,10 +19,10 @@
   --ok:#177245; --bad:#a33636;
   --shadow-win:0 18px 40px -14px rgba(20,30,45,.30),0 2px 8px rgba(20,30,45,.10);
   --tb-h:48px; --banner-h:34px;
-  --op:92%;
+  --op:90%;
 }
 
-/* ---- card tokens: eighteen light full-card looks (T is the default; K was the default before round 18); L–O are compact boxes that borrow a sibling's tokens ---- */
+/* ---- card tokens: eighteen light full-card looks (V is the default since round 20; T was from round 18, K before that); L–O are compact boxes that borrow a sibling's tokens ---- */
 :root[data-dir="a"]{
   --c-bg:#ffffff; --c-ink:#1a1d21; --c-ink2:#5c6370; --c-ink3:#70757c;
   --c-hair:#eceae6; --c-line:#e2e0db; --c-accent:#3d6fa5; --c-accent2:#2d5a8c;
@@ -291,6 +291,37 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 #draft .find.ok{background:var(--c-good-bg);color:var(--c-good)}
 #draft .find.note{background:var(--c-mark);color:var(--c-ink2)}
 #draft .pill:disabled{opacity:.55}
+#drFactWrap,#drProofWrap{margin-top:10px}
+/* the facts from the sheet and the notes are read before the closing line that says what was not checked */
+#drFactWrap:not([hidden]){display:flex;flex-direction:column}
+#drOut,#drFacts{display:contents}
+#draft .find.receipt{order:9}
+/* round 20: Proofread and Fact-check that work with no AI; notes and open items for recall, closed, at the bottom */
+#draft .acts .pill[aria-pressed="true"]{background:var(--c-accent);border-color:var(--c-accent);color:#fff}
+#draft .acts .pill[aria-pressed="false"]{background:var(--c-mark);color:var(--c-accent)}
+#draft .find.fix{background:var(--c-mark);color:var(--c-ink)}
+#draft .prfoot{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}
+#draft .prfoot .pill{min-height:30px;padding:4px 12px;font-size:calc(12px*var(--ts))}
+#draft .prfoot span{font-size:calc(11.5px*var(--ts));color:var(--c-ink3);flex:1 1 180px}
+#draft .prfine{font-size:calc(11px*var(--ts));line-height:1.35;color:var(--c-ink3);margin:6px 0 0}
+#drRecall{margin-top:10px}
+#drRecall .lbl{margin-bottom:4px}
+#drRecall details{border:1px solid var(--c-line);border-radius:8px;margin-top:6px;background:#fff}
+#drRecall summary{cursor:pointer;padding:8px 10px;font-size:calc(12.5px*var(--ts));font-weight:650;color:var(--c-ink);list-style-position:inside}
+#drRecall summary span{font-weight:400;color:var(--c-ink2)}
+#drRecall .rc{padding:0 10px 10px}
+#drRecall .rsub{font-size:calc(9.5px*var(--ts));font-weight:800;letter-spacing:.12em;color:var(--c-ink3);margin:8px 0 2px}
+#drRecall .rn{padding:6px 0;border-top:1px solid var(--c-hair);font-size:calc(12px*var(--ts));line-height:1.4}
+#drRecall .rn:first-of-type{border-top:none}
+#drRecall .rn .who{font-size:calc(11px*var(--ts));color:var(--c-ink3)}
+#drRecall .rn .who b{color:var(--c-accent);font-weight:650}
+#drRecall .rn .txt{white-space:pre-wrap;overflow-wrap:anywhere;color:var(--c-ink)}
+#drRecall .ri{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-top:1px solid var(--c-hair);font-size:calc(12px*var(--ts))}
+#drRecall .ri:first-of-type{border-top:none}
+#drRecall .ri .due{color:var(--c-ink3);white-space:nowrap}
+#drRecall .ri .due.warn{color:var(--c-warn);font-weight:650}
+#drRecall .rfoot{display:flex;gap:8px;margin-top:8px}
+#drRecall .rfoot .pill{min-height:30px;padding:4px 12px;font-size:calc(12px*var(--ts))}
 .watch .wtxt.warn{color:var(--c-warn)}.watch .wtxt.bad{color:var(--c-bad)}
 .watch .more{color:var(--c-ink3)}
 #ext .wf{padding:6px 0;border-top:1px solid var(--c-hair)}#ext .wf:first-child{border-top:none}
@@ -434,6 +465,23 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 .rowi .due.warn{color:var(--c-warn);font-weight:650}
 .notei{padding:7px 0;border-top:1px solid var(--c-hair)}.notei:first-child{border-top:none}
 .notei .who{font-size:calc(11px*var(--ts));color:var(--c-ink3);margin-bottom:1px}
+/* round 20: quick notes on the card. A person's own notes about one ANDA, typed here and kept on this PC. */
+.notei .txt{white-space:pre-wrap;overflow-wrap:anywhere}
+.notei.mine .who::after{content:" · quick note";color:var(--c-accent)}
+.notei .nact{display:flex;gap:6px;margin-top:4px}
+.qn{padding:2px 0 8px;border-bottom:1px solid var(--c-hair);margin-bottom:2px}
+.qn label{display:block;font-size:calc(11.5px*var(--ts));font-weight:650;color:var(--c-ink2);margin-bottom:4px}
+.qn textarea,.notei textarea{display:block;width:100%;box-sizing:border-box;min-height:52px;resize:vertical;border:1px solid var(--c-line);border-radius:8px;padding:7px 9px;background:#fff;color:var(--c-ink);
+  font:inherit;font-size:calc(12.5px*var(--ts));line-height:1.4}
+.qn textarea:focus,.notei textarea:focus{outline:2px solid var(--c-accent);outline-offset:1px}
+.qn .qnrow{display:flex;align-items:center;gap:8px;margin-top:6px;min-height:28px}
+.qn .qnrow #qnMsg{flex:1;min-width:0;font-size:calc(11.5px*var(--ts));color:var(--c-good)}
+.qn .qnrow #qnMsg.bad{color:var(--c-bad)}
+.qn .qnrow #qnCount{font-size:calc(11px*var(--ts));color:var(--c-ink3);font-variant-numeric:tabular-nums}
+.qn .fine{font-size:calc(11px*var(--ts));line-height:1.35;color:var(--c-ink3);margin:6px 0 0}
+.qn .cp,.notei .cp{border:1px solid var(--c-line);background:none;color:var(--c-ink2);border-radius:6px;font-family:inherit;font-size:calc(11px*var(--ts));padding:2px 8px;min-height:26px}
+.qn .cp.go{background:var(--c-accent);border-color:var(--c-accent);color:#fff;font-weight:650;padding:3px 12px}
+.qn .cp:disabled{opacity:.55}
 .sister{color:var(--c-accent);cursor:pointer;border-bottom:1.5px solid var(--c-accent)}
 .chips{display:flex;gap:7px;flex-wrap:wrap}
 .chip{font-size:calc(12px*var(--ts));padding:8px 13px;border-radius:99px;min-height:36px;border:1px solid var(--c-line);background:none;color:var(--c-ink2);font-family:inherit}
@@ -767,7 +815,7 @@ details.sec>summary h3.grp{padding:0;margin:0}
 @media (max-width:1040px){#mytodo .cladd{grid-template-columns:1fr}.ced{margin-left:0}}
 @media (max-width:600px){#clRows .cr{grid-template-columns:30px 1fr}#clRows .cr .btns{grid-column:2;justify-content:flex-start}}
 
-/* ===================== round 18: Pocket Plain (the new default look), Calendar Ribbon, Glass Sheet; display settings ===================== */
+/* ===================== round 18: Pocket Plain, Calendar Ribbon, Glass Sheet (the default look since round 20); display settings ===================== */
 :root{--ts:1;--sp:1}
 :root[data-density="compact"]{--sp:.72}
 :root[data-ts="large"]{--ts:1.15}
@@ -801,12 +849,15 @@ details.sec>summary h3.grp{padding:0;margin:0}
 .ribbon5 svg text{font:500 9.5px var(--c-font);fill:var(--c-ink3)}
 .ribbon5 .rt{font-size:calc(12px*var(--ts));color:var(--c-ink2);margin-top:4px}
 #card.mini .ribbon5{display:none}
-:root[data-dir="v"] #card{background-color:color-mix(in srgb,var(--c-bg) 86%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);border-color:rgba(255,255,255,.7)}
+:root[data-dir="v"] #card{background-color:color-mix(in srgb,var(--c-bg) var(--op),transparent);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);border-color:rgba(255,255,255,.7)}
 @media (prefers-reduced-transparency: reduce){:root[data-dir="v"] #card{background-color:var(--c-bg);-webkit-backdrop-filter:none;backdrop-filter:none}}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){:root[data-dir="v"] #card{background-color:var(--c-bg)}}
 
 :root[data-dir="t"] .chips-slot,:root[data-dir="u"] .chips-slot,:root[data-dir="v"] .chips-slot{position:sticky;bottom:0;z-index:3;background:var(--c-bg);padding-top:calc(10px*var(--sp));padding-bottom:calc(10px*var(--sp))}
-:root[data-dir="v"] .chips-slot{background:color-mix(in srgb,var(--c-bg) 92%,transparent)}
+/* the facts scroll under the action area: on glass they are blurred away there, so nothing readable shows through the buttons */
+:root[data-dir="v"] .chips-slot{background:color-mix(in srgb,var(--c-bg) 90%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){:root[data-dir="v"] .chips-slot{background:var(--c-bg)}}
+@media (prefers-reduced-transparency: reduce){:root[data-dir="v"] .chips-slot{background:var(--c-bg);-webkit-backdrop-filter:none;backdrop-filter:none}}
 :root[data-dir="t"] .chips,:root[data-dir="u"] .chips,:root[data-dir="v"] .chips{gap:0 14px}
 :root[data-dir="t"] #chipCopy,:root[data-dir="u"] #chipCopy,:root[data-dir="v"] #chipCopy{margin-bottom:4px}
 :root[data-dir="t"] .chip:not(#chipCopy),:root[data-dir="u"] .chip:not(#chipCopy),:root[data-dir="v"] .chip:not(#chipCopy){font-size:calc(12px*var(--ts));min-height:28px;padding:3px 2px}
@@ -850,16 +901,150 @@ details.sec>summary h3.grp{padding:0;margin:0}
 .td-main .acts{display:flex;gap:8px;flex-wrap:wrap}
 .td-empty{color:var(--c-ink3);padding:20px 4px}
 @media (max-width:640px){.td-grid{grid-template-columns:1fr}#today{width:auto}}
+
+/* ===================== round 20: the desktop looks like Windows 11 =====================
+   Drawn here from scratch: the wallpaper is an original drawing, the app windows are look-alikes, and there is no logo or product artwork of any company.
+   Everything added is decoration (hidden from screen readers); the text people select and every control keep their places. */
+.desk{background:none;--w-bg1:#dcecfb;--w-bg2:#a9cdf2;--w-p0:#0b4fb3;--w-p1:#1f7ae0;--w-p2:#5fb0f5;--w-p3:#bfe0fb;--w-edge:rgba(255,255,255,.55);--desk-ink:#12202e;--desk-halo:rgba(255,255,255,.75)}
+.desk[data-wall="dusk"]{--w-bg1:#0c1c3a;--w-bg2:#071226;--w-p0:#06266b;--w-p1:#0f4fc2;--w-p2:#2b7de9;--w-p3:#123a7a;--w-edge:rgba(160,200,255,.28);--desk-ink:#ffffff;--desk-halo:rgba(0,0,0,.65)}
+.desk[data-wall="slate"]{--w-bg1:#3d6c97;--w-bg2:#1f456b;--desk-ink:#ffffff;--desk-halo:rgba(0,0,0,.6)}
+.desk[data-wall="slate"] .wall .bloom{display:none}
+/* The drawing is the first thing in the desktop and sits at the back. The desktop must not become a layer of its own: the card, the notices and the menus
+   are outside it and have to stay in one order with the windows inside it. */
+.wall{position:absolute;inset:0;width:100%;height:100%;z-index:0;display:block}
+body{background:#cfe3f6}
+.icon{color:var(--desk-ink);text-shadow:0 0 3px var(--desk-halo),0 1px 2px var(--desk-halo);font-size:12px}
+.icon:hover{background:rgba(255,255,255,.28)}
+.icon.deco{pointer-events:none;user-select:none;-webkit-user-select:none}
+#deskIcon{top:140px}
+/* the card itself has the keyboard focus when it opens: the ring is in the look's own color, not the simulation's blue */
+#card:focus-visible{outline:2px solid color-mix(in srgb,var(--c-accent) 50%,transparent);outline-offset:2px;border-radius:var(--c-radius)}
+#wallPick button[aria-pressed="true"]{background:var(--sim);border-color:var(--sim);color:#fff;font-weight:600}
+
+/* windows: Windows 11 corners, a soft shadow, caption buttons the right size */
+.win{border-radius:8px;border-color:rgba(20,30,45,.18);box-shadow:0 22px 46px -14px rgba(8,20,40,.42),0 2px 10px rgba(8,20,40,.14)}
+.win:not(.active){box-shadow:0 12px 28px -14px rgba(8,20,40,.34),0 1px 6px rgba(8,20,40,.10)}
+.win .bar{height:34px;padding:0 0 0 12px;background:#eef2f6;gap:10px}
+.win.active .bar{background:#e6edf5}
+.win .bar .ctl{gap:0;align-self:stretch}
+.win .bar .ctl i{width:40px;height:auto;border-radius:0;font-size:11px;color:inherit;opacity:.85}
+.win .bar .ctl i:last-child{border-top-right-radius:7px}
+.win .bar .ttl{flex:0 1 auto}
+.win .bar .ctl{margin-left:auto}
+.win .bar .srch{flex:1 1 40px;max-width:220px;min-width:0;height:22px;line-height:22px;border-radius:5px;padding:0 10px;font-size:11.5px;background:rgba(255,255,255,.94);color:#44505c;white-space:nowrap;overflow:hidden}
+.win .bar{container-type:inline-size}
+@container (max-width:430px){.win .bar .srch{display:none}}
+.win .tabs{display:flex;align-items:flex-end;gap:4px;padding:6px 8px 0;background:#e3e8ee;user-select:none;-webkit-user-select:none}
+.win .tabs .tab{display:flex;align-items:center;gap:8px;background:#fff;border:none;border-radius:8px 8px 0 0;padding:6px 10px 7px 11px;font-size:12px;color:var(--ink);max-width:230px;white-space:nowrap}
+.win .tabs .tab i{width:14px;height:14px;border-radius:4px;background:linear-gradient(135deg,#2bb673,#1a8fd6);flex:none;font-style:normal}
+.win .tabs .tab b{font-weight:400;font-size:10px;color:var(--ink3);margin-left:6px}
+.win .tabs .plus{padding:5px 9px 8px;font-size:15px;line-height:1;color:var(--ink2)}
+
+/* Mail, in the manner of the new Outlook: a blue title bar with search, a slim app rail, a filled New mail button */
+#mail .bar,#mail.active .bar{background:#0f6cbd;color:#fff;border-bottom-color:#0c5ea6}
+#mail .rail,#chat .rail{position:absolute;left:0;top:35px;bottom:0;width:44px;display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:8px;background:#f3f5f8;border-right:1px solid var(--win-line);color:#4d5863}
+#mail .rail i,#chat .rail i{width:34px;height:34px;border-radius:7px;display:grid;place-items:center;font-style:normal;position:relative}
+#mail .rail i.on{color:#0f6cbd;background:#fff;box-shadow:0 1px 2px rgba(20,30,45,.12)}
+#mail .rail i.on::before,#chat .rail i.on::before{content:"";position:absolute;left:-5px;top:9px;bottom:9px;width:3px;border-radius:3px;background:currentColor}
+#mail .rib,#mail .hdr,#mail .body{margin-left:44px}
+#mail .rib{background:#fff;padding:7px 12px;gap:4px;align-items:center}
+#mail .rib span{background:none;border:none;padding:5px 10px;color:var(--ink2)}
+#mail .rib span.new{background:#0f6cbd;color:#fff;font-weight:600;border-radius:6px;padding:6px 14px;margin-right:6px}
+#mail .hdr{padding:12px 18px 10px}
+#mail .hdr .subj{font-size:16px;margin-bottom:8px}
+#mail .hdr .from{display:flex;align-items:center;gap:10px}
+#mail .hdr .from .av{width:32px;height:32px;border-radius:50%;background:#cfe1f6;color:#0c4f8f;display:grid;place-items:center;font-size:11.5px;font-weight:700;flex:none}
+#mail .hdr .from b{color:var(--ink);font-weight:650}
+#mail .hdr .from .when{margin-left:auto;white-space:nowrap;font-size:12px;color:var(--ink3)}
+
+/* Chat, in the manner of Teams: an indigo title bar, the app rail, a header with tabs, bubbles, a message box */
+#chat .bar,#chat.active .bar{background:#5b5fc7;color:#fff;border-bottom-color:#4f52b2}
+#chat .rail{background:#ebebf3}
+#chat .rail i.on{color:#4f52b2}
+#chat .chd,#chat .body,#chat .cmp{margin-left:44px}
+#chat .chd{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--win-line);font-size:12.5px;color:var(--ink2);background:#fff;user-select:none;-webkit-user-select:none}
+#chat .chd .grp b{width:26px;height:26px;border-radius:50%;background:#dcdff5;color:#3d3f8f;display:grid;place-items:center;font-size:10.5px}
+#chat .chd .nm{font-weight:650;color:var(--ink);font-size:13.5px;margin-right:6px}
+#chat .chd .tab{padding:5px 2px;border-bottom:2px solid transparent}
+#chat .chd .tab.on{color:#4f52b2;font-weight:650;border-bottom-color:#4f52b2}
+#chat .body{background:#f5f5f8}
+#chat .bub{background:#fff;box-shadow:0 1px 2px rgba(20,30,45,.08);border-radius:6px}
+#chat .msg.me .bub{background:#e8ebfa}
+#chat .msg.me>div{display:flex;flex-direction:column;align-items:flex-end;min-width:0}
+#chat .msg.me .bub{max-width:100%}
+#chat .av{background:#dcdff5;color:#3d3f8f}
+#chat .cmp{display:flex;align-items:center;gap:8px;margin:0 12px 10px 56px;padding:8px 12px;border:1px solid var(--win-line);border-bottom:2px solid #5b5fc7;border-radius:6px;background:#fff;font-size:12.5px;color:var(--ink3);user-select:none;-webkit-user-select:none}
+#chat .cmp span{flex:1}#chat .cmp i{font-style:normal;color:#5b5fc7}
+
+/* Browser, in the manner of Edge: a tab in the title area, round toolbar buttons, an address pill with a lock */
+#web .bar{border-bottom:none;background:#e3e8ee}
+#web.active .bar{background:#dde4ec}
+#web .addr{align-items:center;gap:4px;padding:6px 10px;background:#fff}
+#web .addr .nav{width:28px;height:28px;border-radius:6px;display:grid;place-items:center;font-size:14px;color:var(--ink2);flex:none}
+#web .addr .nav.off{color:#b3bac2}
+#web .addr .url{display:flex;align-items:center;gap:8px;background:#f1f3f5;border-radius:99px;padding:6px 14px;font-size:12px;color:var(--ink2);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#web .addr .url i{width:9px;height:11px;border:1.5px solid #5f666e;border-radius:2px;border-top-left-radius:5px;border-top-right-radius:5px;flex:none;box-sizing:border-box}
+#web .addr .me{width:24px;height:24px;border-radius:50%;background:#cfe1f6;color:#0c4f8f;display:grid;place-items:center;font-size:9.5px;font-weight:700;flex:none;margin-left:2px}
+
+/* Terminal, in the manner of Windows Terminal: dark, with a tab */
+#term .bar,#term.active .bar{background:#1f1f1f;color:#e6e6e6;border-bottom-color:#1f1f1f}
+#term .tabs{background:#1f1f1f;padding-top:0}
+#term .tabs .tab{background:#0c0c0c;color:#e6e6e6}
+#term .tabs .tab i{background:none;width:auto;height:auto;font:600 10.5px/1 ui-monospace,Consolas,monospace;color:#7cc3ff}
+#term .tabs .tab b,#term .tabs .plus{color:#b8b8b8}
+#term .body{background:#0c0c0c;color:#d6d6d6}
+#term .body ::selection{background:#264f78;color:#fff}
+
+/* taskbar: centered icons, a search box, a line under the open app, weather at the left */
+#taskbar{background:rgba(238,243,249,.82);border-top:1px solid rgba(255,255,255,.55);-webkit-backdrop-filter:blur(24px) saturate(1.6);backdrop-filter:blur(24px) saturate(1.6)}
+.desk[data-wall="dusk"] #taskbar,.desk[data-wall="slate"] #taskbar{background:rgba(236,241,247,.9)}
+#taskbar .mid{gap:4px;align-items:center}
+#taskbar .app{position:relative;width:42px;height:42px;border-radius:6px}
+#taskbar .app:hover{background:rgba(255,255,255,.75)}
+#taskbar .app.on{background:rgba(255,255,255,.85);box-shadow:0 0 0 1px rgba(20,30,45,.06)}
+#taskbar .app[data-app-icon]::after{content:"";position:absolute;left:50%;bottom:2px;width:6px;height:3px;margin-left:-3px;border-radius:2px;background:#8a949f}
+#taskbar .app.on::after{width:16px;margin-left:-8px;background:var(--sim)}
+#taskbar .find{display:flex;align-items:center;gap:8px;height:34px;width:190px;padding:0 14px;margin:0 4px;border-radius:99px;background:rgba(255,255,255,.78);border:1px solid rgba(20,30,45,.08);font-size:12.5px;color:var(--ink2)}
+#taskbar .wx{display:flex;align-items:center;gap:8px;padding:0 8px;font-size:11.5px;line-height:1.15;color:var(--ink)}
+#taskbar .wx span{display:grid}#taskbar .wx small{color:var(--ink2);font-size:11px}
+#taskbar .tray button{border-radius:6px}
+@media (max-width:1240px){#taskbar .find{width:42px;padding:0;justify-content:center;font-size:0;gap:0}}
+@media (max-width:1040px){
+  .icon.deco,#mail .rail,#chat .rail,#taskbar .wx,#taskbar .find,.win .bar .srch{display:none}
+  #deskIcon{top:auto}
+  #mail .rib,#mail .hdr,#mail .body,#chat .chd,#chat .body{margin-left:0}
+  #chat .cmp{margin-left:12px}
+  .wall{position:fixed;z-index:-1}
+}
+@media (forced-colors: active){.wall{display:none}}
 </style>
 </head>
 <body>
-<div class="desk" id="desk" role="main">
+<div class="desk" id="desk" role="main" data-wall="bloom">
   <div class="banner" role="note">
     <h1>Browser simulation</h1><span class="long">of the ANDA Companion (Notula) Windows app.</span><span class="short">Fictional data. Not an FDA product.</span>
     <span class="sp"></span>
     <button id="resetBtn" type="button" aria-label="Reset the simulation">Reset</button>
   </div>
 
+  <svg class="wall" aria-hidden="true" focusable="false" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="wg0" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--w-bg1)"/><stop offset="1" style="stop-color:var(--w-bg2)"/></linearGradient>
+      <linearGradient id="wg1" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="-400"><stop offset="0" style="stop-color:var(--w-p2)"/><stop offset="1" style="stop-color:var(--w-p3)"/></linearGradient>
+      <linearGradient id="wg2" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="-400"><stop offset="0" style="stop-color:var(--w-p1)"/><stop offset="1" style="stop-color:var(--w-p2)"/></linearGradient>
+      <linearGradient id="wg3" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="-400"><stop offset="0" style="stop-color:var(--w-p0)"/><stop offset="1" style="stop-color:var(--w-p1)"/></linearGradient>
+    </defs>
+    <rect width="1600" height="900" fill="url(#wg0)"/>
+    <g class="bloom" transform="translate(800 500)"><g opacity=".55"><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(9) scale(1.62)" fill="url(#wg1)"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(39) scale(1.62)" fill="url(#wg1)"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(69) scale(1.62)" fill="url(#wg1)"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(99) scale(1.62)" fill="url(#wg1)"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(129) scale(1.62)" fill="url(#wg1)"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(159) scale(1.62)" fill="url(#wg1)"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(189) scale(1.62)" fill="url(#wg1)"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(219) scale(1.62)" fill="url(#wg1)"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(249) scale(1.62)" fill="url(#wg1)"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(279) scale(1.62)" fill="url(#wg1)"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(309) scale(1.62)" fill="url(#wg1)"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(339) scale(1.62)" fill="url(#wg1)"/></g><g opacity=".8"><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(24) scale(1.18)" fill="url(#wg2)" stroke="var(--w-edge)" stroke-width=".9"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(54) scale(1.18)" fill="url(#wg2)" stroke="var(--w-edge)" stroke-width=".9"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(84) scale(1.18)" fill="url(#wg2)" stroke="var(--w-edge)" stroke-width=".9"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(114) scale(1.18)" fill="url(#wg2)" stroke="var(--w-edge)" stroke-width=".9"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(144) scale(1.18)" fill="url(#wg2)" stroke="var(--w-edge)" stroke-width=".9"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(174) scale(1.18)" fill="url(#wg2)" stroke="var(--w-edge)" stroke-width=".9"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(204) scale(1.18)" fill="url(#wg2)" stroke="var(--w-edge)" stroke-width=".9"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(234) scale(1.18)" fill="url(#wg2)" stroke="var(--w-edge)" stroke-width=".9"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(264) scale(1.18)" fill="url(#wg2)" stroke="var(--w-edge)" stroke-width=".9"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(294) scale(1.18)" fill="url(#wg2)" stroke="var(--w-edge)" stroke-width=".9"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(324) scale(1.18)" fill="url(#wg2)" stroke="var(--w-edge)" stroke-width=".9"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(354) scale(1.18)" fill="url(#wg2)" stroke="var(--w-edge)" stroke-width=".9"/></g><g><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(0) scale(.72)" fill="url(#wg3)" stroke="var(--w-edge)" stroke-width="1.2"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(36) scale(.72)" fill="url(#wg3)" stroke="var(--w-edge)" stroke-width="1.2"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(72) scale(.72)" fill="url(#wg3)" stroke="var(--w-edge)" stroke-width="1.2"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(108) scale(.72)" fill="url(#wg3)" stroke="var(--w-edge)" stroke-width="1.2"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(144) scale(.72)" fill="url(#wg3)" stroke="var(--w-edge)" stroke-width="1.2"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(180) scale(.72)" fill="url(#wg3)" stroke="var(--w-edge)" stroke-width="1.2"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(216) scale(.72)" fill="url(#wg3)" stroke="var(--w-edge)" stroke-width="1.2"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(252) scale(.72)" fill="url(#wg3)" stroke="var(--w-edge)" stroke-width="1.2"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(288) scale(.72)" fill="url(#wg3)" stroke="var(--w-edge)" stroke-width="1.2"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(324) scale(.72)" fill="url(#wg3)" stroke="var(--w-edge)" stroke-width="1.2"/></g></g>
+  </svg>
+  <div class="icon deco" aria-hidden="true" style="top:52px">
+    <svg width="38" height="38" viewBox="0 0 38 38" fill="none"><path d="M11 12h16l-1.6 20a2 2 0 01-2 1.8h-8.8a2 2 0 01-2-1.8z" fill="#eef4fa" stroke="#6f7f90" stroke-width="1.4"/><path d="M8.5 12h21M15 8h8l1 4H14z" stroke="#6f7f90" stroke-width="1.4" stroke-linejoin="round" fill="#dfe9f3"/><path d="M16.5 18l5 5.5m0-5.5l-5 5.5" stroke="#3b82c4" stroke-width="1.5" stroke-linecap="round"/></svg>
+    Recycle Bin
+  </div>
+  <div class="icon deco" aria-hidden="true" style="top:232px">
+    <svg width="38" height="38" viewBox="0 0 38 38" fill="none"><rect x="7" y="4" width="24" height="30" rx="3" fill="#fff" stroke="#7c8a97" stroke-width="1.4"/><rect x="4" y="13" width="16" height="13" rx="2.5" fill="#1f7a4d"/><path d="M8.5 16.5l7 6m0-6l-7 6" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><path d="M23 12h5M23 17h5M23 22h5M23 27h5" stroke="#9aa6b1" stroke-width="1.4" stroke-linecap="round"/></svg>
+    ANDA portfolio (demo).xlsx
+  </div>
   <button class="icon" id="deskIcon" type="button" aria-label="Start-Demo.bat. Launches the app.">
     <svg width="38" height="38" viewBox="0 0 38 38" fill="none"><rect x="6" y="3" width="26" height="32" rx="3" fill="#fff" stroke="#8a929b" stroke-width="1.5"/><path d="M11 12h16M11 17h16M11 22h10" stroke="#8a929b" stroke-width="1.5" stroke-linecap="round"/><circle cx="27" cy="27" r="6" fill="#3a3f8f"/><path d="M25 27l2 2 3-4" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
     Start-Demo.bat
@@ -868,10 +1053,11 @@ details.sec>summary h3.grp{padding:0;margin:0}
   <!-- ===== simulated apps: look-alike layouts with fictional content (no logos, no real products) ===== -->
   <div class="apps" id="apps" data-count="3">
     <section class="win active first" id="mail" data-app="mail" aria-label="Mail window, Outlook-style">
-      <div class="bar"><span class="ttl">Inbox · Mail (Outlook-style)</span><span class="ctl" aria-hidden="true"><i>–</i><i>▢</i><i>✕</i></span></div>
-      <div class="rib" aria-hidden="true"><span>New mail</span><span>Reply</span><span>Reply all</span><span>Forward</span></div>
+      <div class="bar"><span class="ttl">Inbox · Mail (Outlook-style)</span><span class="srch" aria-hidden="true">Search</span><span class="ctl" aria-hidden="true"><i>–</i><i>▢</i><i>✕</i></span></div>
+      <div class="rail" aria-hidden="true"><i class="on"><svg viewBox="0 0 20 20" width="18" height="18" fill="none"><rect x="2.5" y="4.5" width="15" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 6.5l6.5 4.5 6.5-4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></i><i><svg viewBox="0 0 20 20" width="18" height="18" fill="none"><rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M3 8h14M7 2.5v3M13 2.5v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></i><i><svg viewBox="0 0 20 20" width="18" height="18" fill="none"><circle cx="10" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M4 16.5c.6-3 2.9-4.5 6-4.5s5.400 1.500 6 4.500" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></i><i><svg viewBox="0 0 20 20" width="18" height="18" fill="none"><path d="M4 10.500l4 4 8-9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></i></div>
+      <div class="rib" aria-hidden="true"><span class="new">New mail</span><span>Reply</span><span>Reply all</span><span>Forward</span></div>
       <div class="hdr"><div class="subj">Thursday huddle prep - Meridian Pharmaceuticals (fictional)</div>
-        <div>From: Demo author (demo) &nbsp;·&nbsp; To: Review team (demo)</div><div>Wed 7/15/2026 4:12 PM</div></div>
+        <div class="from"><span class="av" aria-hidden="true">DA</span><div><div><b>Demo author (demo)</b></div><div>To: Review team (demo)</div></div><div class="when">Wed 7/15/2026 4:12 PM</div></div></div>
       <div class="body" id="mailBody" tabindex="0"><span class="tag">FICTIONAL DEMO DATA · NOT AN FDA DOCUMENT</span>
 Team,
 
@@ -887,7 +1073,7 @@ Thanks,
 Demo author
 
 --- Draft reply (not sent) ---
-<span class="pick" data-pick="DRAFT">Hi all, quick status. ANDA 216482 is on track, with a goal date of Oct 10, 2026 and a forecast of Oct 17, 2026. ANDA 214990 is running late. ANDA 123456 needs a call.</span>
+<span class="pick" data-pick="DRAFT">Hi all, quick status. ANDA 216482 is on track, with a goal date of Oct 10, 2026 and a forecast of Oct 17, 2026. ANDA 214990 is running late. ANDA 123456 needs a call. The IR responce for ANDA 216482 (750 mg, cycle 3) is due Jul 28.</span>
 
 --- Cells copied from a spreadsheet (demo; Ctrl+Alt+Shift+P asks about them) ---
 <span class="pick" data-pick="TABLE" style="white-space:pre;font-family:ui-monospace,Consolas,monospace;font-size:12px">ANDA	Applicant	Goal date	Forecast
@@ -898,19 +1084,22 @@ Demo author
     </section>
 
     <section class="win" id="chat" data-app="chat" aria-label="Chat window, Teams-style">
-      <div class="bar"><span class="ttl">Huddle chat · Chat (Teams-style)</span><span class="ctl" aria-hidden="true"><i>–</i><i>▢</i><i>✕</i></span></div>
+      <div class="bar"><span class="ttl">Huddle chat · Chat (Teams-style)</span><span class="srch" aria-hidden="true">Search</span><span class="ctl" aria-hidden="true"><i>–</i><i>▢</i><i>✕</i></span></div>
+      <div class="rail" aria-hidden="true"><i><svg viewBox="0 0 20 20" width="18" height="18" fill="none"><path d="M10 3a4.500 4.500 0 00-4.500 4.500v3L4 13.500h12l-1.500-3v-3A4.500 4.500 0 0010 3zM8.300 16a1.800 1.800 0 003.400 0" stroke="currentColor" stroke-width="1.500" stroke-linejoin="round" stroke-linecap="round"/></svg></i><i class="on"><svg viewBox="0 0 20 20" width="18" height="18" fill="none"><path d="M4 4.500h12a1.500 1.500 0 011.500 1.500v6.500A1.500 1.500 0 0116 14h-6l-3.500 3v-3H4a1.500 1.500 0 01-1.500-1.500V6A1.500 1.500 0 014 4.500z" stroke="currentColor" stroke-width="1.500" stroke-linejoin="round"/></svg></i><i><svg viewBox="0 0 20 20" width="18" height="18" fill="none"><circle cx="7" cy="7.500" r="2.500" stroke="currentColor" stroke-width="1.500"/><circle cx="14" cy="8" r="2" stroke="currentColor" stroke-width="1.500"/><path d="M2.500 16c.4-2.500 2.100-3.800 4.500-3.800s4.100 1.300 4.500 3.800M13 12.300c2.400-.2 4 1 4.500 3.300" stroke="currentColor" stroke-width="1.500" stroke-linecap="round"/></svg></i><i><svg viewBox="0 0 20 20" width="18" height="18" fill="none"><rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" stroke-width="1.500"/><path d="M3 8h14M7 2.500v3M13 2.500v3" stroke="currentColor" stroke-width="1.500" stroke-linecap="round"/></svg></i></div>
+      <div class="chd" aria-hidden="true"><span class="grp"><b>HC</b></span><span class="nm">Huddle chat</span><span class="tab on">Chat</span><span class="tab">Files</span></div>
       <div class="body" id="chatBody" tabindex="0"><span class="tag">FICTIONAL PEOPLE AND DATA</span>
         <div class="msg"><span class="av" aria-hidden="true">A</span><div><div class="who">Colleague A (demo)</div><div class="bub">Can someone confirm where <span class="pick" data-pick="216482">216482</span> stands against its goal date? Leadership asked.</div></div></div>
         <div class="msg"><span class="av" aria-hidden="true">B</span><div><div class="who">Colleague B (demo)</div><div class="bub">Last I looked it was around 62%. The sister application is <span class="pick" data-pick="214990">214990</span>.</div></div></div>
         <div class="msg me"><span class="av" aria-hidden="true">Me</span><div><div class="who">You</div><div class="bub">Checking now.</div></div></div>
         <div class="msg me"><span class="av" aria-hidden="true">Me</span><div><div class="who">You · notes to self</div><div class="bub"><span class="pick" data-pick="NOTES">Don't forget to confirm the facility inspection date with the team tomorrow ASAP. Also email the team lead re: the Thursday huddle. Need to submit the IR response for ANDA 216482 by Friday. Send the weekly status update to my supervisor every Friday. The inspection report was very clear and complete.</span></div></div></div>
       </div>
+      <div class="cmp" aria-hidden="true"><span>Type a message</span><i>➤</i></div>
     </section>
 
     <section class="win" id="web" data-app="web" aria-label="Browser window, Edge-style">
       <div class="bar"><span class="ttl">Browser (Edge-style)</span><span class="ctl" aria-hidden="true"><i>–</i><i>▢</i><i>✕</i></span></div>
-      <div class="tabs" aria-hidden="true"><span>My portfolio (demo)</span></div>
-      <div class="addr" aria-hidden="true"><span>‹ ›</span><span class="url">tracker.example/portfolio</span></div>
+      <div class="tabs" aria-hidden="true"><span class="tab"><i></i>My portfolio (demo)<b>✕</b></span><span class="plus">+</span></div>
+      <div class="addr" aria-hidden="true"><span class="nav">←</span><span class="nav off">→</span><span class="nav">⟳</span><span class="url"><i></i>https://tracker.example/portfolio</span><span class="nav">☆</span><span class="me">Me</span></div>
       <div class="body" id="webBody" tabindex="0"><span class="tag">FICTIONAL PAGE · NOT A REAL SITE</span>
         <h2>My portfolio</h2>
         <table><thead><tr><th>ANDA</th><th>DRUG</th><th>GOAL</th><th>MY NOTE</th></tr></thead><tbody>
@@ -929,9 +1118,10 @@ Demo author
 
     <section class="win" id="term" data-app="term" aria-label="Terminal window" hidden>
       <div class="bar"><span class="ttl">Terminal</span><span class="ctl" aria-hidden="true"><i>–</i><i>▢</i><i>✕</i></span></div>
-      <div class="body" id="termBody" tabindex="0">C:\work&gt; echo ANDA 216482
+      <div class="tabs" aria-hidden="true"><span class="tab"><i>›_</i>PowerShell (look-alike)<b>✕</b></span><span class="plus">+</span></div>
+      <div class="body" id="termBody" tabindex="0">PS C:\work&gt; echo ANDA 216482
 <span class="pick" data-pick="TERM">ANDA 216482</span>
-C:\work&gt; </div>
+PS C:\work&gt; </div>
     </section>
   </div>
 
@@ -942,6 +1132,12 @@ C:\work&gt; </div>
       <p class="sub">Select a number or a draft in any window, then press its shortcut. No data leaves this page.</p>
       <div class="lbl">APPS TO TEST</div>
       <div id="appPick" role="group" aria-label="Which simulated apps to show"></div>
+      <div class="lbl">DESKTOP BACKGROUND</div>
+      <div id="wallPick" class="row" role="group" aria-label="Desktop background">
+        <button class="btn" type="button" data-wall="bloom" aria-pressed="true">Light blue</button>
+        <button class="btn" type="button" data-wall="dusk" aria-pressed="false">Dark blue</button>
+        <button class="btn" type="button" data-wall="slate" aria-pressed="false">Plain</button>
+      </div>
       <div class="lbl">SELECT FOR ME</div>
       <div class="row" id="pickRow">
         <button class="btn" type="button" data-pickbtn="216482">216482</button>
@@ -981,12 +1177,15 @@ C:\work&gt; </div>
 
   <!-- ===== taskbar + tray ===== -->
   <div id="taskbar">
+    <div class="wx hide-narrow" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="9" cy="9" r="4" fill="#f5b83d"/><path d="M7.500 17.500h8a3.200 3.200 0 000-6.400 4.400 4.400 0 00-8.300 1.200A2.700 2.700 0 007.500 17.500z" fill="#fff" stroke="#9fb3c8" stroke-width="1"/></svg><span><b>72°F</b><small>Sunny</small></span></div>
     <div class="mid" aria-hidden="true">
-      <button class="app" tabindex="-1"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" fill="#6f8fb5"/><rect x="12" y="3" width="7" height="7" rx="1.5" fill="#8fb39a"/><rect x="3" y="12" width="7" height="7" rx="1.5" fill="#d1a86a"/><rect x="12" y="12" width="7" height="7" rx="1.5" fill="#b78a8a"/></svg></button>
-      <button class="app on" data-app-icon="mail" tabindex="-1"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="5" width="16" height="12" rx="2" fill="#fff" stroke="#7c858f" stroke-width="1.4"/><path d="M4 7l7 5 7-5" stroke="#7c858f" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-      <button class="app" data-app-icon="chat" tabindex="-1"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 5h14a1.5 1.5 0 011.5 1.5v7A1.5 1.5 0 0118 15h-7l-4 3.5V15H4a1.5 1.5 0 01-1.5-1.5v-7A1.5 1.5 0 014 5z" fill="#fff" stroke="#7c858f" stroke-width="1.4" stroke-linejoin="round"/></svg></button>
-      <button class="app" data-app-icon="web" tabindex="-1"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="7.5" fill="#fff" stroke="#7c858f" stroke-width="1.4"/><path d="M3.5 11h15M11 3.5c2.2 2.2 3 4.6 3 7.5s-.8 5.3-3 7.5c-2.2-2.2-3-4.6-3-7.5s.8-5.3 3-7.5z" stroke="#7c858f" stroke-width="1.2" fill="none"/></svg></button>
-      <button class="app" data-app-icon="term" tabindex="-1"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="4" width="16" height="14" rx="2" fill="#3b4048"/><path d="M6 9l3 2-3 2M11 14h5" stroke="#e8eaed" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button class="app start" tabindex="-1"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2.500" y="2.500" width="8" height="8" rx="1.300" fill="#58b0f5"/><rect x="11.500" y="2.500" width="8" height="8" rx="1.300" fill="#3a97ea"/><rect x="2.500" y="11.500" width="8" height="8" rx="1.300" fill="#2a84dc"/><rect x="11.500" y="11.500" width="8" height="8" rx="1.300" fill="#1a6fc9"/></svg></button>
+      <span class="find"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.500" stroke="currentColor" stroke-width="1.500"/><path d="M10.500 10.500L14 14" stroke="currentColor" stroke-width="1.500" stroke-linecap="round"/></svg>Search</span>
+      <button class="app" tabindex="-1"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 7.500A1.500 1.500 0 014.500 6h5l1.800 2H19.500A1.500 1.500 0 0121 9.500V18a1.500 1.500 0 01-1.500 1.500h-15A1.500 1.500 0 013 18z" fill="#f2b632"/><path d="M3 10.500h18V18a1.500 1.500 0 01-1.500 1.500h-15A1.500 1.500 0 013 18z" fill="#fbd35a"/></svg></button>
+      <button class="app on" data-app-icon="mail" tabindex="-1"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="2.500" y="4" width="19" height="16" rx="3.500" fill="#1672c9"/><rect x="5.500" y="8" width="13" height="8.500" rx="1.300" fill="#fff"/><path d="M6 8.800l6 4.200 6-4.200" stroke="#1672c9" stroke-width="1.300" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button class="app" data-app-icon="chat" tabindex="-1"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="2.500" y="3.500" width="19" height="17" rx="4" fill="#5b5fc7"/><path d="M7 8h10a1 1 0 011 1v5a1 1 0 01-1 1h-4.500L10 17.500V15H7a1 1 0 01-1-1V9a1 1 0 011-1z" fill="#fff"/></svg></button>
+      <button class="app" data-app-icon="web" tabindex="-1"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="tbw" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2bb673"/><stop offset=".55" stop-color="#1a8fd6"/><stop offset="1" stop-color="#1257b8"/></linearGradient></defs><circle cx="12" cy="12" r="9.500" fill="url(#tbw)"/><path d="M5 13.500c2.500-5 8.500-6.500 12.500-2.500-3-1-6 .300-7 3.200-.8 2.300.4 4.500 2.300 5.300" stroke="#fff" stroke-width="1.600" fill="none" stroke-linecap="round"/></svg></button>
+      <button class="app" data-app-icon="term" tabindex="-1"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="2.500" y="4" width="19" height="16" rx="3" fill="#2b2f36"/><path d="M6.500 9.500l3.500 2.500-3.500 2.500M12 15.500h5" stroke="#e8eaed" stroke-width="1.500" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
     <div class="tray">
       <button id="chev" type="button" aria-label="Show hidden icons" aria-expanded="false"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 9l4-4 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -1038,8 +1237,8 @@ C:\work&gt; </div>
     <p class="hint">Compact boxes are small enough to leave an open email readable. They make no AI call and never take keyboard focus: click one, or press the hotkey again on the same number, to open its full card. All looks share identical anatomy and meaning. This is preference, never information.</p>
     <hr class="hair">
     <div class="lbl">CARD TRANSPARENCY</div>
-    <div style="display:flex;align-items:center;gap:10px"><input type="range" id="setOp" min="40" max="100" step="1" value="92" aria-label="Card transparency"><span id="setOpV" style="width:42px;text-align:right">92%</span></div>
-    <p class="hint">100% is solid; 40% lets what is behind the card show through. The card starts at 92%. Only the card surface becomes translucent (a bottom sheet on a phone is always solid). Text and status colors stay fully opaque, but on a busy background they are easier to read at a higher value.</p>
+    <div style="display:flex;align-items:center;gap:10px"><input type="range" id="setOp" min="40" max="100" step="1" value="90" aria-label="Card transparency"><span id="setOpV" style="width:42px;text-align:right">90%</span></div>
+    <p class="hint">100% is solid; 40% lets what is behind the card show through. The card starts at 90%. Only the card surface becomes translucent (a bottom sheet on a phone is always solid). Text and status colors stay fully opaque, but on a busy background they are easier to read at a higher value.</p>
     <hr class="hair">
     <div class="lbl">LOOKUP WINDOW</div>
     <div class="wrap" role="radiogroup" aria-label="Lookup window"><label class="opt"><input type="radio" name="lkstyle" value="box" checked> Box: a number and Go</label><label class="opt"><input type="radio" name="lkstyle" value="bar"> One Bar: also offers Review and Ask</label></div>
@@ -1264,20 +1463,31 @@ C:\work&gt; </div>
   <div class="app-win" id="draft" role="dialog" aria-label="Review a draft">
     <div class="hdr"><h2>Review a draft</h2><button class="pill" id="drDone" type="button">Done</button></div>
     <textarea id="drText" aria-label="Draft text" placeholder="Paste or type an email or chat draft"></textarea>
-    <div class="acts">
-      <button class="pill" id="drCheck" type="button">Check against the record</button>
+    <div class="acts" role="group" aria-label="What to check">
+      <button class="pill" id="drCheck" type="button" aria-pressed="true">Check everything</button>
+      <button class="pill quiet" id="drProofBtn" type="button" aria-pressed="false">Proofread</button>
+      <button class="pill quiet" id="drFactBtn" type="button" aria-pressed="false">Fact-check</button>
       <button class="pill quiet" id="drSample" type="button">Use the sample draft</button>
     </div>
+    <p class="hint" id="drLocalHint">All three run on this PC by fixed rules. No AI is used and nothing is sent.</p>
     <div class="lbl">AI ACTIONS · NEED AN APPROVED MODEL</div>
     <div class="acts" style="margin-top:0">
-      <button class="pill quiet" type="button" data-ai="Proofread" disabled>Proofread</button>
       <button class="pill quiet" type="button" data-ai="Rewrite" disabled>Rewrite</button>
-      <button class="pill quiet" type="button" data-ai="Fact-check" disabled>Fact-check</button>
+      <button class="pill quiet" type="button" data-ai="Proofread" disabled>Proofread with AI</button>
+      <button class="pill quiet" type="button" data-ai="Fact-check" disabled>Fact-check with AI</button>
     </div>
     <p class="hint" id="drAiHint">Off until a model is approved and connected. When on, a preview shows the exact text first, nothing is sent until you press Send, and the result is Copy only: the app never pastes or sends for you.</p>
-    <div class="lbl">RESULT</div>
-    <div id="drOut" aria-live="polite"></div>
+    <div id="drFactWrap">
+      <div class="lbl" id="drFactLbl">FACT CHECK · YOUR DATA, YOUR NOTES AND THE CALENDAR</div>
+      <div id="drOut" aria-live="polite"></div>
+      <div id="drFacts" aria-live="polite"></div>
+    </div>
+    <div id="drProofWrap">
+      <div class="lbl" id="drProofLbl">PROOFREADING · FIXED RULES, NO AI</div>
+      <div id="drProof" aria-live="polite"></div>
+    </div>
     <div id="drSend" aria-live="polite"></div>
+    <div id="drRecall"></div>
   </div>
 
   <!-- ===== my action (prompt, AI or agent) ===== -->
@@ -1481,7 +1691,14 @@ C:\work&gt; </div>
     <details id="x-details-d" open><summary>Applicant and project <span id="x-details-n" style="font-weight:400;color:var(--c-ink3)"></span></summary><div class="cnt"><div id="x-details"></div><div class="dfoot"><button class="cp" id="x-details-all" type="button">Copy all</button><span id="x-details-src"></span><span id="x-details-status" role="status"></span></div></div></details>
     <details id="x-watch-d"><summary>Watch list <span id="x-watch-n" style="font-weight:400;color:var(--c-ink3)"></span></summary><div class="cnt" id="x-watch"></div></details>
     <details><summary>Pending &amp; urgent items <span id="x-pending-n" style="font-weight:400;color:var(--c-ink3)"></span></summary><div class="cnt" id="x-pending"></div></details>
-    <details><summary>Recent project notes</summary><div class="cnt" id="x-notes"></div></details>
+    <details id="x-notes-d"><summary>My notes and project notes <span id="x-notes-n" style="font-weight:400;color:var(--c-ink3)"></span></summary><div class="cnt">
+      <div class="qn">
+        <label for="qnText" id="qnLabel">Add a quick note</label>
+        <textarea id="qnText" rows="2" maxlength="500" placeholder="Type a note, then press Ctrl+Enter or Save note"></textarea>
+        <div class="qnrow"><button class="cp go" id="qnSave" type="button" disabled>Save note</button><span id="qnMsg" role="status"></span><span id="qnCount">0/500</span></div>
+        <p class="fine">Kept on this PC, in the app's own notes file. Your sheet and your notes folder are never changed, and a note is never sent anywhere.</p>
+      </div>
+      <div id="x-notes"></div></div></details>
     <details id="x-mail-d" hidden><summary>Recent Outlook mail <span id="x-mail-n" style="font-weight:400;color:var(--c-ink3)"></span></summary><div class="cnt" id="x-mail"></div></details>
     <details id="x-agents-d" hidden><summary><span id="x-agents-t">Agent findings</span></summary><div class="cnt" id="x-agents"></div></details>
     <details><summary>Forecast &amp; assumptions</summary><div class="cnt" id="x-forecast"></div></details>
@@ -1496,7 +1713,7 @@ C:\work&gt; </div>
     <button class="chip link" id="chipOpen" type="button">Open in system of record ↗</button>
   </div></div>
   <button id="moreBtn" type="button">Full brief ↓</button>
-  <div class="kbdbar"><span>Esc close</span><span>Enter copy status</span><span>E expand</span><span>Space pin</span><span>R quick replies</span></div>
+  <div class="kbdbar"><span>Esc close</span><span>Enter copy status</span><span>E expand</span><span>Space pin</span><span>R quick replies</span><span>N note</span></div>
 </div>
 
 <script>
@@ -1510,7 +1727,7 @@ document.documentElement.lang = document.documentElement.lang || "en";   /* the 
    ============================================================ */
 const $ = id => document.getElementById(id);
 const root = document.documentElement;
-root.dataset.dir = "t";
+root.dataset.dir = "v";
 
 /* ---------------- fictional data (same records as the Windows app's mock repository) ---------------- */
 const DATA = {
@@ -1920,12 +2137,12 @@ const noticeLifetime = text => Math.min(8, Math.max(2.5, 1.2 + text.length / 14)
 
 /* ---------------- state ---------------- */
 let keyVia = null;
-const state = { dir:"t", look:"t", form:"full", autoHide:10, mode:"whisper", escalate:true, lead:3, pretend:false, capture:true, op:92, lens:null, pinned:false, running:true, ai:false,
+const state = { dir:"v", look:"v", form:"full", autoHide:10, mode:"whisper", escalate:true, lead:3, pretend:false, capture:true, op:90, lens:null, pinned:false, running:true, ai:false,
   keys:{ peek:"Ctrl+Alt+A", look:"Ctrl+Alt+Space", draft:"Ctrl+Alt+Shift+R", ask:"Ctrl+Alt+Shift+P", list:"Ctrl+Alt+Shift+L" }, taken:{ peek:false, look:false, draft:false, ask:false, list:false },
   adaptive:true, allTools:location.hash === "#all", sectionUse:{}, clMode:0,
   middle:false, middleMod:"Ctrl", provider:"auto", tone:"", style:"", signoff:"", claudeModel:"claude-opus-4-8",
   outlook:{ on:false, cloud:"com", client:"", tenant:"organizations", max:5, step:"out", msg:"" },
-  data:{ portfolio:null, notes:null, ref:null },
+  data:{ portfolio:null, notes:null, ref:null }, quickNotes:{},
   myApi:{ name:"My API", endpoint:"", header:"Authorization", scheme:"Bearer", env:"", model:"", template:"", path:"choices[0].message.content" },
   replies:null,
   density:"comfortable", ts:"standard", lookupStyle:"box", recentsOn:true, recents:[], pins:[],
@@ -2099,8 +2316,209 @@ function syncRound19(){
   document.querySelectorAll("#setFields input").forEach(c => { c.checked = state.cardFields.includes(c.dataset.field); });
 }
 
+/* ===================== round 20: Proofread and Fact-check that work with no AI, and notes for recall =====================
+   Everything here is a fixed rule that runs on this PC. Nothing is sent, and nothing is decided for the person: each item says what was seen and where.
+   The shared review result (draftReview) is unchanged, so the Windows app, the extension and this page still agree on the shared cases. */
+const PR_WORDS = { recieve:"receive", recieved:"received", recieving:"receiving", recived:"received", reciept:"receipt", seperate:"separate", seperately:"separately", definately:"definitely", definate:"definite",
+  occured:"occurred", occuring:"occurring", occurence:"occurrence", occurance:"occurrence", accomodate:"accommodate", acommodate:"accommodate", acheive:"achieve", adress:"address", agressive:"aggressive",
+  apparant:"apparent", begining:"beginning", beleive:"believe", calender:"calendar", collegue:"colleague", comittee:"committee", commitee:"committee", concensus:"consensus", embarass:"embarrass",
+  enviroment:"environment", existance:"existence", foward:"forward", fowarded:"forwarded", goverment:"government", gaurantee:"guarantee", immediatly:"immediately", independant:"independent", liason:"liaison",
+  maintainance:"maintenance", managment:"management", neccessary:"necessary", necesary:"necessary", noticable:"noticeable", occassion:"occasion", occassionally:"occasionally", persistant:"persistent",
+  posession:"possession", priviledge:"privilege", publically:"publicly", reccomend:"recommend", recomend:"recommend", reccommend:"recommend", refered:"referred", refering:"referring", relevent:"relevant",
+  resistence:"resistance", responsability:"responsibility", succesful:"successful", successfull:"successful", sucessful:"successful", supercede:"supersede", tommorow:"tomorrow", tommorrow:"tomorrow",
+  tomorow:"tomorrow", truely:"truly", untill:"until", wich:"which", wierd:"weird", writting:"writing", teh:"the", adn:"and", taht:"that", thier:"their", aknowledge:"acknowledge", acknowlege:"acknowledge",
+  ammend:"amend", ammendment:"amendment", ammendments:"amendments", amendmant:"amendment", aplicant:"applicant", applicent:"applicant", aplication:"application", submision:"submission", submited:"submitted",
+  submiting:"submitting", responce:"response", reponse:"response", resposne:"response", labelling:"labeling", labelled:"labeled", deficency:"deficiency", defficiency:"deficiency", deficiences:"deficiencies",   // wording-ok (the left side of each pair is the slip that is looked for)
+  facilty:"facility", faciltiy:"facility", inspecton:"inspection", bioequivalance:"bioequivalence", disolution:"dissolution", dissolusion:"dissolution", pharmacuetical:"pharmaceutical",
+  pharmaceutcal:"pharmaceutical", pharmacutical:"pharmaceutical", regulatroy:"regulatory", regualtory:"regulatory", shedule:"schedule", schedual:"schedule", forcast:"forecast", aproval:"approval",
+  approvel:"approval", completly:"completely", confirmaton:"confirmation", extention:"extension", informaton:"information", infomation:"information", requst:"request", reqeust:"request", updtae:"update",
+  comunicate:"communicate", comunication:"communication", correspondance:"correspondence", discrepency:"discrepancy", guidence:"guidance", prefered:"preferred", proceedure:"procedure", reveiw:"review",
+  reveiwed:"reviewed", reveiwer:"reviewer", sumary:"summary", transfered:"transferred", attatched:"attached", attachement:"attachment", availible:"available", avaliable:"available", bussiness:"business",
+  busines:"business", expidite:"expedite", expediate:"expedite", priorty:"priority", specifc:"specific", strenght:"strength", wether:"whether", thier:"their", recieveing:"receiving", alot:"a lot" };
+const PR_ABBR = new Set(["e.g", "i.e", "etc", "vs", "no", "dr", "mr", "ms", "mrs", "approx", "inc", "ltd", "co", "st", "jr", "sr", "fig", "ref", "est", "dept", "attn", "cc", "u.s", "a.m", "p.m"]);
+const PR_GENERIC = new Set(["tablets", "tablet", "capsules", "capsule", "injection", "solution", "extended", "release", "fictional", "pharmaceuticals", "pharmaceutical", "regulatory", "agents"]);
+const PR_MAX = 14;
+const prCase = (like, word) => like === like.toUpperCase() && like.length > 1 ? word.toUpperCase() : /^[A-Z]/.test(like) ? word[0].toUpperCase() + word.slice(1) : word;
+function prDistance(a, b){      /* edits to turn one word into the other; swapping two neighbors counts as one */
+  const m = a.length, n = b.length; if(Math.abs(m - n) > 2) return 3;
+  const d = Array.from({ length:m + 1 }, (_, i) => [i, ...new Array(n).fill(0)]); for(let j = 1; j <= n; j++) d[0][j] = j;
+  for(let i = 1; i <= m; i++) for(let j = 1; j <= n; j++){
+    d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    if(i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+  }
+  return d[m][n];
+}
+function knownIdsIn(text){      /* the ANDAs of the person's data that the text names, in the order they first appear */
+  const out = [];
+  for(const id of andaNumbers(text || "")) if(DATA[id] && !out.includes(id)) out.push(id);
+  return out;
+}
+function prNames(ids){          /* names worth protecting from a slip of the fingers: the drug and the applicant of each ANDA the draft names */
+  const names = new Map();
+  for(const id of ids){
+    const d = DATA[id], words = `${d.drug} ${d.details ? d.details.short || "" : ""} ${d.details ? d.details.established || "" : ""} ${d.meta}`.match(/[A-Za-z]{6,}/g) || [];
+    for(const w of words){ const k = w.toLowerCase(); if(!PR_GENERIC.has(k) && !names.has(k)) names.set(k, { word:w, id }); }
+  }
+  return names;
+}
+function proofread(draft){
+  const items = [], text = draft || "";
+  if(!text.trim()) return { items, corrected:text, fixes:0, total:0 };
+  const add = (msg, start, end, to, alsoInFacts) => items.push({ text:msg, start, end, to:to === undefined ? null : to, alsoInFacts:!!alsoInFacts });
+  const squash = t => rvSquash(t);
+  let m;
+  /* 1. words from a short list of common slips, and names that are one slip away from a name in the person's data */
+  const names = prNames(knownIdsIn(text)), seenWord = new Set();
+  { const re = /[A-Za-z][A-Za-z']*/g;
+    while((m = re.exec(text))){
+      const w = m[0], k = w.toLowerCase();
+      if(seenWord.has(k)) continue;
+      if(Object.prototype.hasOwnProperty.call(PR_WORDS, k)){ seenWord.add(k); const to = prCase(w, PR_WORDS[k]); add(`“${w}” is usually spelled “${to}”.`, m.index, m.index + w.length, to); continue; }
+      if(k.length >= 6 && !names.has(k) && !PR_GENERIC.has(k)){
+        for(const [nk, n] of names){
+          if(nk === k + "s" || k === nk + "s") continue;
+          const dist = prDistance(k, nk);
+          if(dist === 1 || (dist === 2 && nk.length >= 10)){ seenWord.add(k); const to = prCase(w, n.word.toLowerCase() === nk && /^[a-z]/.test(n.word) ? nk : n.word);
+            add(`“${w}” looks like “${to}”, a name in your data for ANDA ${n.id}.`, m.index, m.index + w.length, to); break; }
+        }
+      }
+    } }
+  /* 2. ANDA written in lower case before a number, and "a ANDA" */
+  { const re = /\b(anda)(?=\s*(?:no\.?|#|number)?\s*[0-9])/gi; let n = 0;
+    while((m = re.exec(text))) if(m[1] !== "ANDA" && ++n <= 2) add(`“${m[1]}” is written “ANDA”.`, m.index, m.index + 4, "ANDA"); }
+  { const re = /\b([Aa]) (?=ANDA\b)/g; if((m = re.exec(text))) add("“a ANDA” reads “an ANDA”.", m.index, m.index + 1, m[1] === "A" ? "An" : "an"); }
+  { const re = /(?<![A-Za-z'’.@-])i(?![A-Za-z'’.@-])(?!\.e)/g; let n = 0;
+    while((m = re.exec(text))) if(++n === 1) add("“i” on its own is written “I”.", m.index, m.index + 1, "I"); else if(n <= 20) add("", m.index, m.index + 1, "I"); }
+  { const re = /(?<![.@\w-])(fda|Fda)(?![.\w-])/g; if((m = re.exec(text))) add(`“${m[1]}” is written “FDA”.`, m.index, m.index + 3, "FDA"); }
+  /* 3. spacing and punctuation */
+  { const re = /([A-Za-z0-9)\]”"]) +([,;:!?]|\.(?![.\d]))(?=\s|$|[A-Za-z])/g; let n = 0, first = null;
+    while((m = re.exec(text))){ n++; if(!first) first = m;
+      const glued = /[A-Za-z]/.test(text[m.index + m[0].length] || "");       /* "216482 .It": the mark moves back, and the space goes after it */
+      if(n <= 6) add(null, m.index + 1, m.index + m[0].length, m[2] + (glued ? " " : "")); }
+    if(first){ const it = items.filter(i => i.text === null); it.forEach((i, k) => { i.text = k === 0 ? `${n === 1 ? "A space comes" : n + " spaces come"} before a punctuation mark, for example “${squash(first[0])}”.` : ""; }); } }
+  { const re = /([a-z])([,;])([A-Za-z0-9])/g; let n = 0;
+    while((m = re.exec(text))) if(++n <= 3) add(`A space is missing after “${m[2]}” in “${squash(text.slice(Math.max(0, m.index - 8), m.index + 10))}”.`, m.index + 2, m.index + 2, " "); }
+  { const re = /([a-z]{2})\.([A-Z][a-z])/g; let n = 0;
+    while((m = re.exec(text))){ if(/[@/\\]/.test(text.slice(Math.max(0, m.index - 30), m.index))) continue; if(++n <= 3) add(`A space is missing after the period in “${squash(text.slice(Math.max(0, m.index - 8), m.index + 12))}”.`, m.index + 3, m.index + 3, " "); } }
+  { const re = /(?<=\S)  +(?=\S)/g; let n = 0; const spots = [];
+    while((m = re.exec(text))){ if(text.lastIndexOf("\n", m.index) >= 0 && /\t/.test(text.slice(text.lastIndexOf("\n", m.index), m.index))) continue; n++; spots.push(m); }
+    spots.slice(0, 40).forEach((sp, k) => add(k === 0 ? `${n === 1 ? "One place has" : n + " places have"} two or more spaces in a row.` : "", sp.index, sp.index + sp[0].length, " ")); }
+  { const re = /([,;:!?])\1+|(?<!\.)\.\.(?!\.)/g; let n = 0;
+    while((m = re.exec(text))) if(++n <= 2) add(`A punctuation mark is doubled: “${squash(text.slice(Math.max(0, m.index - 10), m.index + 6))}”.`, m.index, m.index + m[0].length, m[0][0]); }
+  /* 4. a sentence that starts with a small letter */
+  { const re = /(^|[.!?]["”)]?\s+)([a-z])([A-Za-z']*)/g; let n = 0;
+    while((m = re.exec(text))){
+      const at = m.index + m[1].length, word = m[2] + m[3];
+      if(/^[a-z][A-Z]/.test(word)) continue;                                    /* eCTD, iOS */
+      if(m[1]){ const before = text.slice(Math.max(0, m.index - 12), m.index + 1), prev = /([A-Za-z.]+)\.$/.exec(before);
+        if(/[0-9]\.$/.test(before) || (prev && (PR_ABBR.has(prev[1].toLowerCase()) || prev[1].length === 1))) continue; }
+      if(++n <= 3) add(`A sentence starts with a small letter: “${squash(text.slice(at, at + 28))}”.`, at, at + 1, m[2].toUpperCase());
+    } }
+  /* 5. brackets and quotation marks that do not close */
+  { const count = ch => text.split(ch).length - 1;
+    if(count("(") !== count(")")) add(`The draft has ${count("(")} opening and ${count(")")} closing parentheses.`);
+    if(count("“") !== count("”")) add(`The draft has ${count("“")} opening and ${count("”")} closing quotation marks.`);
+    else if(count('"') % 2 === 1) add("A quotation mark is opened and not closed."); }
+  /* 6. dates written two ways, and very long sentences */
+  { DATE_RE.lastIndex = 0; let named = null, numeric = null;
+    while((m = DATE_RE.exec(text))){ if(m.index > 0 && /[\d\/]/.test(text[m.index - 1])) continue; if(!dateMention(m)) continue; if(m[1]) named = named || m[0]; else if(m[4] && m[6]) numeric = numeric || m[0]; }
+    if(named && numeric) add(`Dates are written in two ways (“${named}” and “${numeric}”). One style reads more easily.`); }
+  { let n = 0;
+    for(const sentence of text.replace(/([.!?])\s+/g, "$1\u0000").split(/\u0000|\r?\n/)){
+      const words = sentence.trim().split(/\s+/).filter(Boolean).length;
+      if(words > 45 && !/\t/.test(sentence) && ++n <= 2) add(`A sentence has ${words} words: “${squash(sentence)}”. Two sentences may read more easily.`);
+    } }
+  /* 7. what Review already reports as facts (a repeated word, a leftover placeholder): listed here too when Proofread is used alone */
+  { const seen = new Set(), re = /(?<![A-Za-z'])([A-Za-z]{2,})\s+\1(?![A-Za-z'])/gi; let n = 0;
+    while((m = re.exec(text))){ const w = m[1].toLowerCase(); if(w === "that" || w === "had" || seen.has(w)) continue; seen.add(w); if(++n > 3) break;
+      add(`The word “${w}” appears twice in a row: “${squash(m[0])}”.`, m.index + m[1].length, m.index + m[0].length, "", true); } }
+  { const seen = new Set(), re = RV_PLACEHOLDER(); let n = 0;
+    while((m = re.exec(text))){ if(/^(?:tbd|tbc|xxx+)$/i.test(m[0]) && m[0] !== m[0].toUpperCase()) continue; const k = m[0].toLowerCase(); if(seen.has(k)) continue; seen.add(k);
+      if(++n <= 5) add(`A placeholder is still in the draft: “${squash(m[0])}”.`, undefined, undefined, undefined, true); } }
+  /* the corrected text: every change that can be made without guessing, applied from the end so positions stay right; overlapping changes are skipped */
+  const fixes = items.filter(i => i.to !== null && i.start !== undefined).sort((a, b) => b.start - a.start);
+  let corrected = text, floor = Infinity, applied = 0;
+  for(const f of fixes){ if(f.end > floor) continue; corrected = corrected.slice(0, f.start) + f.to + corrected.slice(f.end); floor = f.start; applied++; }
+  const shown = items.filter(i => i.text);
+  return { items:shown.slice(0, PR_MAX), more:Math.max(0, shown.length - PR_MAX), corrected, fixes:applied, total:shown.length };
+}
+
+/* More facts from the person's own sheet and notes: strength, review cycle, the date of the open action item, and dates that also appear in a note. */
+const FX_ORD = { first:1, second:2, third:3, fourth:4, fifth:5, "1st":1, "2nd":2, "3rd":3, "4th":4, "5th":5 };
+function factExtras(draft){
+  const out = { diffs:[], notes:[], checked:{ strength:0, cycle:0, due:0 }, ids:knownIdsIn(draft) };
+  if(!draft || !draft.trim()) return out;
+  const noteHits = new Set();
+  for(const paragraph of draft.split(/\r?\n\s*\r?\n/)){
+    let context = null;
+    for(const sentence of paragraph.replace(/([.!?])\s+/g, "$1\u0000").split(/\u0000|\r?\n/).filter(x => x.trim())){
+      if(/\t/.test(sentence)) continue;                                           /* rows copied from a spreadsheet are for Ask, not for this */
+      const nums = andaNumbers(sentence); let subject;
+      if(nums.length === 1){ subject = nums[0]; context = subject; } else if(nums.length > 1){ subject = null; context = null; } else subject = context;
+      const d = subject && DATA[subject]; if(!d) continue;
+      let m;
+      /* strength */
+      { const mine = (`${d.drug} ${d.details ? d.details.established || "" : ""}`.match(/\d+(?:\.\d+)?\s?(?:mg|mcg)\b/gi) || []).map(x => x.replace(/\s/g, "").toLowerCase());
+        const said = (sentence.match(/\d+(?:\.\d+)?\s?(?:mg|mcg)\b/gi) || []).map(x => x.replace(/\s/g, "").toLowerCase());
+        if(mine.length && said.length && nums.length === 1){ out.checked.strength++;
+          if(!said.some(x => mine.includes(x)) && !out.diffs.some(x => x.key === "s" + subject)) out.diffs.push({ key:"s" + subject, kind:"diff",
+            text:`ANDA ${subject}: the draft says ${said[0].replace(/(mg|mcg)$/, " $1")}, but your data says ${d.drug}.` }); } }
+      /* review cycle */
+      { const mine = +((/Cycle (\d)/.exec(d.meta) || [])[1] || 0);
+        const c = /\bcycle\s*(?:no\.?\s*)?(\d)\b/i.exec(sentence) || /\b(first|second|third|fourth|fifth|1st|2nd|3rd|4th|5th)[- ]cycle\b/i.exec(sentence);
+        if(mine && c){ const said = +c[1] || FX_ORD[c[1].toLowerCase()]; out.checked.cycle++;
+          if(said !== mine && !out.diffs.some(x => x.key === "c" + subject)) out.diffs.push({ key:"c" + subject, kind:"diff", text:`ANDA ${subject}: the draft says cycle ${said}, but your data says cycle ${mine}.` }); } }
+      /* dates: the open action item of the record, and dates that also stand in a note */
+      const mentions = []; DATE_RE.lastIndex = 0;
+      while((m = DATE_RE.exec(sentence))){ if(m.index > 0 && /[\d\/]/.test(sentence[m.index - 1])) continue; const mt = dateMention(m); if(mt) mentions.push({ mt, raw:m[0], which:keywordFor(sentence, mt) }); }
+      if(d.attnDue && /\bdue\b/i.test(sentence)){
+        const plain = mentions.filter(x => !x.which);
+        if(plain.length){ out.checked.due++;
+          const [y, mo, da] = d.attnDue, hit = plain.some(x => x.mt.mon === mo && x.mt.day === da && (x.mt.year === null || x.mt.year === y));
+          if(!hit && !out.diffs.some(x => x.key === "d" + subject)) out.diffs.push({ key:"d" + subject, kind:"diff",
+            text:`ANDA ${subject}: the draft gives a due date of ${showMention(plain[0].mt)}, but your data says the ${d.attnWhat || "open item"} is due ${longDate(ymd(y, mo, da))}.` }); }
+      }
+      for(const x of mentions){
+        for(const n of notesFor(subject)){
+          DATE_RE.lastIndex = 0; let nm, found = false;
+          while((nm = DATE_RE.exec(n.text))){ const nt = dateMention(nm); if(nt && nt.mon === x.mt.mon && nt.day === x.mt.day){ found = true; break; } }
+          const key = subject + "|" + x.mt.mon + "/" + x.mt.day + "|" + n.who;
+          if(found && !noteHits.has(key) && noteHits.size < 3){ noteHits.add(key);
+            out.notes.push({ kind:"note", text:`“${rvSquash(x.raw)}” is also in your note of ${n.who.replace(/^.*· /, "")} on ANDA ${subject}: “${cut(n.text, 110)}”` }); }
+        }
+      }
+    }
+  }
+  return out;
+}
+function factExtrasSummary(x){
+  const parts = [];
+  if(x.checked.strength) parts.push(`${x.checked.strength} strength${rvPlural(x.checked.strength)}`);
+  if(x.checked.cycle) parts.push(`${x.checked.cycle} review cycle${rvPlural(x.checked.cycle)}`);
+  if(x.checked.due) parts.push(`${x.checked.due} due date${rvPlural(x.checked.due)}`);
+  return parts.length && !x.diffs.length ? `Also checked ${rvJoin(parts)} against your sheet: no difference.` : null;
+}
+
+/* For recall: a person's most recent and most relevant notes and open items for each ANDA the draft names. Shown closed, at the bottom. */
+const RC_STOP = new Set(["that", "this", "with", "from", "have", "will", "were", "been", "they", "their", "there", "about", "would", "could", "should", "which", "where", "when", "what", "your", "anda", "status", "please", "thanks", "team", "also", "into", "than", "then", "them", "some", "same", "date", "next", "week"]);
+const rcWords = t => new Set((String(t).toLowerCase().match(/[a-z]{4,}/g) || []).filter(w => !RC_STOP.has(w)));
+const rcDates = t => { const out = []; let m; DATE_RE.lastIndex = 0; while((m = DATE_RE.exec(String(t)))){ if(m.index > 0 && /[\d\/]/.test(t[m.index - 1])) continue; const mt = dateMention(m); if(mt) out.push(showMention({ mon:mt.mon, day:mt.day, year:null })); } return out; };
+function recallFor(draft){
+  const words = rcWords(draft), dates = new Set(rcDates(draft));
+  return knownIdsIn(draft).slice(0, 3).map(id => {
+    const d = DATA[id];
+    const notes = notesFor(id).map(n => { const shared = [...new Set(rcDates(n.text).filter(d => dates.has(d))), ...[...rcWords(n.text)].filter(w => words.has(w))]; return { ...n, shared }; })
+      .sort((a, b) => (b.shared.length > 0) - (a.shared.length > 0) || b.t - a.t);
+    const items = [...d.pending.map(([title, due, urgent]) => ({ title, due, urgent:!!urgent, source:"your data" })),
+      ...todoStore.items.filter(i => !i.done && i.number === id).map(i => ({ title:i.title, due:i.due ? "due " + longDate(Date.parse(i.due + "T00:00:00Z")) : "", urgent:false, source:"ANDA to-do list" })),
+      ...clStore.items.filter(i => !i.done && i.title.includes(id)).map(i => ({ title:i.title, due:"", urgent:false, source:"My to-do list" }))];
+    const latest = notes.slice().sort((a, b) => b.t - a.t)[0];
+    return { id, drug:d.drug, notes, items, latest:latest ? latest.who.replace(/^.*· /, "") : null };
+  });
+}
+
 /* ---- one question before sending ---- */
-function beforeSend(text, review){
+function beforeSend(text, review, extra){
   if(!text || !text.trim()) return null;
   const f = review.findings, q = t => ({ gap:true, text:t });
   const diff = f.find(x => x.kind === "diff"), unknown = f.find(x => x.kind === "unknown");
@@ -2112,13 +2530,14 @@ function beforeSend(text, review){
     return q("Is this difference intended? " + diff.text);
   }
   if(unknown && (m = /^ANDA (\d{6}) /.exec(unknown.text))) return q(`Is ${m[1]} the right ANDA number? It is not in your data.`);
+  if(extra && extra.diffs.length) return q("Is this difference intended? " + extra.diffs[0].text);
   const self = f.find(x => x.kind === "note" && /Please check|not a business day|a federal holiday|is in the past|appears twice/.test(x.text));
   if(self) return q("Is this intended? " + self.text);
   if(/\b(attached|attachment|attachments|attaching|enclosed)\b/i.test(text)) return q("Is the file attached? The draft mentions an attachment, and this tool cannot see attachments.");
   return { gap:false, text:"No open gaps." };
 }
-function paintBeforeSend(text, review){
-  const box = $("drSend"), b = beforeSend(text, review); box.replaceChildren(); if(!b) return;
+function paintBeforeSend(text, review, extra){
+  const box = $("drSend"), b = beforeSend(text, review, extra); box.replaceChildren(); if(!b) return;
   const w = document.createElement("div"); w.className = "bsend" + (b.gap ? " gap" : "");
   const k = document.createElement("div"); k.className = "k"; k.textContent = "ONE QUESTION BEFORE YOU SEND";
   const qq = document.createElement("div"); qq.className = "q"; qq.textContent = b.text;
@@ -2135,7 +2554,7 @@ const card = $("card"), scrim = $("scrim"), chip = $("chip");
 const RING_C = 2 * Math.PI * 21;
 
 /* [id, name, token set it uses, form]. L–O are compact boxes that borrow a sibling's tokens and expand into its full card. */
-const LOOKS = [["t","T · Pocket Plain","t","full"],["u","U · Calendar Ribbon","u","full"],["v","V · Glass Sheet","v","full"],["a","A · Quiet Fluent","a","full"],["b","B · Docket Ledger","b","full"],["c","C · Signal","c","full"],["d","D · Draft","d","full"],["e","E · Instrument","e","full"],
+const LOOKS = [["v","V · Glass Sheet","v","full"],["t","T · Pocket Plain","t","full"],["u","U · Calendar Ribbon","u","full"],["a","A · Quiet Fluent","a","full"],["b","B · Docket Ledger","b","full"],["c","C · Signal","c","full"],["d","D · Draft","d","full"],["e","E · Instrument","e","full"],
   ["f","F · Agency Bronze","f","full"],["g","G · Harbor Teal","g","full"],["h","H · Sage Clinical","h","full"],["i","I · Indigo Dossier","i","full"],["j","J · Cobalt Timeline","j","full"],["k","K · Graphite Quiet","k","full"],
   ["l","L · Graphite Strip","k","strip"],["m","M · Fluent Tile","a","tile"],["n","N · Bronze Ticket","f","ticket"],["o","O · Teal Badge","g","badge"],
   ["p","P · Bronze Gauge","p","full"],["q","Q · Bronze Folder","q","full"],["r","R · Bronze Rail","r","full"],["s","S · Bronze Tag","s","full"]];
@@ -2211,6 +2630,110 @@ function armAutoHide(el, exempt, hide){
 }
 document.addEventListener("keydown", () => { autoTouch = performance.now(); }, true);
 
+/* the desktop background of the simulation: a choice for the person showing it, not a setting of the app */
+document.querySelectorAll("#wallPick [data-wall]").forEach(b => b.addEventListener("click", () => {
+  $("desk").dataset.wall = b.dataset.wall;
+  document.querySelectorAll("#wallPick [data-wall]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+}));
+
+/* ---------------- quick notes (round 20): a person's own notes about one ANDA, typed on the card ----------------
+   They are kept by the app on this PC (here: in this page until it is reloaded). The sheet and the notes folder are only ever read.
+   A note is shown as text, never as markup, and is never sent anywhere; a notice near the clock never shows one. */
+const QN_MAX = 500, QN_PER_ANDA = 50, QN_MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+let qnSeq = 0, qnUndo = null, qnUndoTimer = null, qnEditing = null;
+const qnDrafts = {};
+const qnClean = t => String(t == null ? "" : t).replace(/\r\n?/g, "\n").replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, "").replace(/\n{3,}/g, "\n\n").trim().slice(0, QN_MAX);
+function noteTime(who){     /* "You · Jul 8" gives the day in the demo year; a label with no date sorts last */
+  const m = /([A-Z][a-z]{2}) (\d{1,2})(?:,|\b)/.exec(who || ""), i = m ? QN_MON.indexOf(m[1]) : -1;
+  return i < 0 ? 0 : Date.UTC(2026, i, +m[2]);
+}
+function notesFor(id){      /* a person's quick notes and the project notes of the record, newest first */
+  const d = DATA[id]; if(!d) return [];
+  const mine = (state.quickNotes[id] || []).map(n => ({ who:"You · " + n.when, text:n.text, mine:true, id:n.id, t:n.t }));
+  const project = d.notes.map(([who, text], i) => ({ who, text, mine:false, t:noteTime(who) - i }));
+  return [...mine, ...project].sort((a, b) => b.t - a.t);
+}
+function addQuickNote(id, text){
+  const clean = qnClean(text);
+  if(!DATA[id]) return [false, "Open an ANDA first."];
+  if(!clean) return [false, "Type a note first."];
+  const list = state.quickNotes[id] || (state.quickNotes[id] = []);
+  if(list.length >= QN_PER_ANDA) return [false, `This ANDA already has ${QN_PER_ANDA} quick notes. Delete one to add another.`];
+  const day = new Date(demoToday());
+  list.push({ id:"q" + (++qnSeq), text:clean, when:`${QN_MON[day.getUTCMonth()]} ${day.getUTCDate()}, ${simClock(false)}`, t:demoToday() + 43200000 + qnSeq });
+  return [true, "Note saved."];
+}
+function editQuickNote(id, noteId, text){
+  const n = (state.quickNotes[id] || []).find(x => x.id === noteId), clean = qnClean(text);
+  if(!n) return [false, "That note is no longer here."];
+  if(!clean) return [false, "A note cannot be empty. Use Delete to remove it."];
+  n.text = clean; return [true, "Note changed."];
+}
+function deleteQuickNote(id, noteId){
+  const list = state.quickNotes[id] || [], i = list.findIndex(x => x.id === noteId);
+  if(i < 0) return null;
+  const [gone] = list.splice(i, 1); return { id, at:i, note:gone };
+}
+function qnSay(text, bad){ const m = $("qnMsg"); m.replaceChildren(text); m.classList.toggle("bad", !!bad); }
+function paintNotes(id){
+  const list = notesFor(id), box = $("x-notes");
+  $("x-notes-n").textContent = "· " + list.length;
+  $("chipNotes").textContent = "Notes · " + list.length;
+  $("qnLabel").textContent = "Add a quick note for ANDA " + id;
+  const ta = $("qnText"); ta.value = qnDrafts[id] || ""; qnSync();
+  box.replaceChildren(...(list.length ? list.map(n => {
+    const row = h("div", { class:"notei" + (n.mine ? " mine" : "") }, h("div", { class:"who", text:n.who }));
+    if(n.mine && qnEditing === n.id){
+      const e = h("textarea", { rows:"2", maxlength:String(QN_MAX), aria:"Change this note", value:n.text });
+      const save = () => { const [ok, msg] = editQuickNote(id, n.id, e.value); if(ok) qnEditing = null; paintNotes(id); qnSay(msg, !ok); };
+      e.addEventListener("keydown", ev => { if(ev.key === "Enter" && (ev.ctrlKey || ev.metaKey)){ ev.preventDefault(); save(); } else if(ev.key === "Escape"){ ev.preventDefault(); ev.stopPropagation(); qnEditing = null; paintNotes(id); } });
+      row.append(e, h("div", { class:"nact" }, h("button", { class:"cp", type:"button", text:"Save change", onclick:save }), h("button", { class:"cp", type:"button", text:"Cancel", onclick:() => { qnEditing = null; paintNotes(id); } })));
+      setTimeout(() => { e.focus(); e.setSelectionRange(e.value.length, e.value.length); }, 0);
+      return row;
+    }
+    row.append(h("div", { class:"txt", text:n.text }));
+    const copy = h("button", { class:"cp", type:"button", text:"Copy", aria:"Copy the note of " + n.who.replace("You · ", "") });
+    copy.addEventListener("click", () => writeClipboard(n.text).then(() => { copy.textContent = "Copied ✓"; setTimeout(() => { copy.textContent = "Copy"; }, 1200); },
+      () => showNotice("Your browser did not allow copying, so here is the note: " + cut(n.text, 300), anchorForCard())));
+    const acts = h("div", { class:"nact" }, copy);
+    if(n.mine){
+      acts.append(h("button", { class:"cp", type:"button", text:"Edit", onclick:() => { qnEditing = n.id; paintNotes(id); } }),
+        h("button", { class:"cp", type:"button", text:"Delete", onclick:() => {
+          const gone = deleteQuickNote(id, n.id); if(!gone) return;
+          qnUndo = gone; clearTimeout(qnUndoTimer); paintNotes(id);
+          const undo = h("button", { class:"cp", type:"button", text:"Undo", onclick:() => {
+            if(!qnUndo) return; (state.quickNotes[qnUndo.id] || (state.quickNotes[qnUndo.id] = [])).splice(qnUndo.at, 0, qnUndo.note); const back = qnUndo.id; qnUndo = null; clearTimeout(qnUndoTimer);
+            if(current === back) paintNotes(back); qnSay("Note restored."); } });
+          $("qnMsg").replaceChildren("Note deleted. ", undo); $("qnMsg").classList.remove("bad");
+          qnUndoTimer = setTimeout(() => { qnUndo = null; if($("qnMsg").contains(undo)) qnSay(""); }, 8000);
+        } }));
+    }
+    row.append(acts);
+    return row;
+  }) : [h("div", { class:"notei" }, h("div", { class:"txt", text:"No notes yet for this ANDA." }))]));
+}
+function qnSync(){ const ta = $("qnText"), n = ta.value.length; $("qnCount").textContent = n + "/" + QN_MAX; $("qnSave").disabled = !ta.value.trim(); }
+function saveQuickNote(){
+  if(!current) return;
+  const [ok, msg] = addQuickNote(current, $("qnText").value);
+  if(ok){ delete qnDrafts[current]; qnEditing = null; paintNotes(current); $("qnText").focus(); }
+  qnSay(msg, !ok);
+  if(ok) setTimeout(() => { if($("qnMsg").textContent === msg) qnSay(""); }, 4000);
+}
+function openNotesOnCard(){     /* the Notes button and the N key: open the card fully, show the notes, and put the pointer in the box */
+  if(!current || card.style.display !== "block") return;
+  if(card.classList.contains("mini")) $("moreBtn").click();                 /* a peek becomes the full card first: asking for notes is asking for the card */
+  if(!card.classList.contains("expanded")) card.classList.add("expanded");
+  $("x-notes-d").open = true;
+  setTimeout(() => { clampCard(); $("x-notes-d").scrollIntoView({ block:"nearest" }); $("qnText").focus({ preventScroll:true }); $("qnText").scrollIntoView({ block:"nearest" }); }, 0);
+}
+$("qnText").addEventListener("input", () => { if(current){ if($("qnText").value) qnDrafts[current] = $("qnText").value; else delete qnDrafts[current]; } qnSync(); if($("qnMsg").classList.contains("bad")) qnSay(""); });
+$("qnText").addEventListener("keydown", e => {
+  if(e.key === "Enter" && (e.ctrlKey || e.metaKey)){ e.preventDefault(); e.stopPropagation(); saveQuickNote(); }
+  else if(e.key === "Escape"){ e.preventDefault(); e.stopPropagation(); card.focus({ preventScroll:true }); }     /* the first Escape leaves the box (the text is kept); the next one closes the card */
+});
+$("qnSave").addEventListener("click", saveQuickNote);
+
 /* ---------------- card ---------------- */
 /* Pocket Plain, Calendar Ribbon and Glass Sheet lead with one answer: how many days later (or earlier) the forecast is than the goal, from the same fields as the clock. */
 function paintHero(id, d){
@@ -2280,7 +2803,7 @@ function fill(id){
   $("x-pending").innerHTML = d.pending.length
     ? d.pending.map(([t, due, w]) => `<div class="rowi"><span>${t}</span><span class="due ${w ? "warn" : ""}">${due}</span></div>`).join("")
     : `<div class="rowi"><span>No open items.</span></div>`;
-  $("x-notes").innerHTML = d.notes.map(([who, t]) => `<div class="notei"><div class="who">${who}</div>${t}</div>`).join("");
+  paintNotes(id);
   $("x-forecast").textContent = d.forecast;
   paintDetails(id);
   paintMail(id);
@@ -2301,7 +2824,7 @@ function fill(id){
     $("x-watch").innerHTML = fl.map(f => `<div class="wf"><div>${f.text}</div><div class="why">${f.why}</div><div class="src">Source: ${f.src}</div></div>`).join("");
   }
   $("chipSister").textContent = "Sister ANDA · " + d.sisters.length; $("chipSister").hidden = d.sisters.length === 0;
-  $("chipNotes").textContent = "Notes · " + d.notes.length;
+  $("chipNotes").textContent = "Notes · " + notesFor(id).length;
   paintRefs(id);
   paintAgents();
 }
@@ -2534,6 +3057,7 @@ document.addEventListener("keydown", e => {
   if(k === "e" && !e.ctrlKey) toggleExpand();
   else if(k === "s" && !e.ctrlKey) copyStatus();
   else if(k === "r" && !e.ctrlKey) openReplies();
+  else if(k === "n" && !e.ctrlKey && !e.altKey && !e.metaKey){ e.preventDefault(); openNotesOnCard(); }
   else if(e.key === " " && document.activeElement === card){ e.preventDefault(); setPin(!pinnedCard); }
   else if(e.key === "Enter" && document.activeElement === card){ e.preventDefault(); copyStatus(); }
   else if(k === "c" && !e.ctrlKey && current) writeClipboard($("c-ai").textContent).catch(() => {});
@@ -2977,20 +3501,78 @@ $("lookupIn").addEventListener("keydown", e => {
 $("lookupIn").addEventListener("input", () => { if(lkBar()){ lkIdx = 0; paintLookup(); } });
 
 /* ---------------- draft check window (port of UI/DraftWindow: checks as soon as it opens; AI actions stay off until a model is approved) ---------------- */
-const SAMPLE_DRAFT = "Hi all, quick status. ANDA 216482 is on track, with a goal date of Oct 10, 2026 and a forecast of Oct 17, 2026. ANDA 214990 is running late. ANDA 123456 needs a call.";
+const SAMPLE_DRAFT = "Hi all, quick status. ANDA 216482 is on track, with a goal date of Oct 10, 2026 and a forecast of Oct 17, 2026. ANDA 214990 is running late. ANDA 123456 needs a call. The IR responce for ANDA 216482 (750 mg, cycle 3) is due Jul 28.";
+const RV_RECEIPT_ROUND20 = "Not checked: grammar and wording beyond the short list of rules under Proofreading (your mail program's own checker still applies, and a fuller check needs an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record.";
+let drView = "all";      /* "all", "proof" (proofreading only) or "facts" (fact check only) */
+function setDraftView(v){
+  drView = v;
+  $("drCheck").setAttribute("aria-pressed", String(v === "all")); $("drProofBtn").setAttribute("aria-pressed", String(v === "proof")); $("drFactBtn").setAttribute("aria-pressed", String(v === "facts"));
+  runDraftCheck();
+}
 function runDraftCheck(){
-  const r = draftReview($("drText").value, demoToday());
-  paintBeforeSend($("drText").value, r);
-  $("drOut").innerHTML = r.findings.map(f => `<div class="find ${f.kind === "diff" || f.kind === "unknown" ? "diff" : f.kind}">${f.text.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</div>`).join("");
+  const text = $("drText").value, r = draftReview(text, demoToday()), extra = factExtras(text), pr = proofread(text);
+  $("drFactWrap").hidden = drView === "proof"; $("drProofWrap").hidden = drView === "facts"; $("drSend").hidden = drView === "proof";
+  paintBeforeSend(text, r, extra);
+  /* fact check: the shared result, with its last line saying what Proofreading now covers */
+  $("drOut").innerHTML = r.findings.map(f => `<div class="find ${f.kind === "diff" || f.kind === "unknown" ? "diff" : f.kind}${f.text === RV_RECEIPT ? " receipt" : ""}">${(f.text === RV_RECEIPT ? RV_RECEIPT_ROUND20 : f.text).replace(/&/g, "&amp;").replace(/</g, "&lt;")}</div>`).join("");
+  const facts = $("drFacts"); facts.replaceChildren();
+  extra.diffs.forEach(d => facts.append(h("div", { class:"find diff", text:d.text })));
+  const also = factExtrasSummary(extra); if(also) facts.append(h("div", { class:"find ok", text:also }));
+  extra.notes.forEach(n => facts.append(h("div", { class:"find note", text:n.text })));
+  /* proofreading */
+  const box = $("drProof"); box.replaceChildren();
+  if(text.trim()){
+    const items = pr.items.filter(i => drView === "proof" || !i.alsoInFacts);
+    if(!items.length) box.append(h("div", { class:"find ok", text:"Proofreading found nothing by its rules: spelling of common words and of names in your data, spacing, punctuation, capitals, brackets and date style." }));
+    items.forEach(i => box.append(h("div", { class:"find " + (i.to !== null ? "fix" : "note"), text:i.text })));
+    if(pr.more) box.append(h("div", { class:"find note", text:`${pr.more} more item${pr.more === 1 ? "" : "s"} of the same kind are not listed.` }));
+    if(pr.fixes){
+      const say = h("span", { role:"status", text:`${pr.fixes} change${pr.fixes === 1 ? "" : "s"} can be made without guessing.` });
+      const copy = h("button", { class:"pill quiet", type:"button", id:"drCopyFixed", text:"Copy corrected draft" });
+      copy.addEventListener("click", () => writeClipboard(pr.corrected).then(() => { say.textContent = "Corrected draft copied. Your own text was not changed."; },
+        () => { say.textContent = "Your browser did not allow copying. Use “Apply here” and copy from the box above."; }));
+      const apply = h("button", { class:"pill quiet", type:"button", id:"drApplyFixed", text:"Apply here" });
+      apply.addEventListener("click", () => { $("drText").value = pr.corrected; runDraftCheck(); $("drText").focus(); });
+      box.append(h("div", { class:"prfoot" }, copy, apply, say));
+    }
+    box.append(h("p", { class:"prfine", text:"A short list of fixed rules, not a full spelling or grammar check. “Apply here” changes only the box above; the app never types into your email." }));
+  } else box.append(h("div", { class:"find note", text:"Nothing to proofread yet. Select your draft and press the shortcut, or paste it above." }));
+  paintRecall(text);
+}
+function paintRecall(text){
+  const box = $("drRecall"), groups = text && text.trim() ? recallFor(text) : []; box.replaceChildren();
+  if(!groups.length) return;
+  box.append(h("div", { class:"lbl", text:"FOR YOUR RECALL · YOUR NOTES AND OPEN ITEMS" }));
+  groups.forEach(g => {
+    const open = g.items.length, parts = [`${g.notes.length} note${g.notes.length === 1 ? "" : "s"}${g.latest ? ` (latest ${g.latest})` : ""}`, open ? `${open} open item${open === 1 ? "" : "s"}` : "no open items"];
+    const body = h("div", { class:"rc" });
+    body.append(h("div", { class:"rsub", text:"NOTES · THE ONES YOUR DRAFT TOUCHES FIRST, THEN THE NEWEST" }));
+    if(!g.notes.length) body.append(h("div", { class:"rn" }, h("div", { class:"txt", text:"No notes yet for this ANDA. Open the card and press N to add one." })));
+    g.notes.slice(0, 4).forEach(n => {
+      const who = h("div", { class:"who", text:n.who + (n.mine ? " · quick note" : "") });
+      if(n.shared.length) who.append(" · ", h("b", { text:"also in your draft: " + n.shared.slice(0, 3).join(", ") }));
+      body.append(h("div", { class:"rn" }, who, h("div", { class:"txt", text:cut(n.text, 260) })));
+    });
+    if(g.notes.length > 4) body.append(h("div", { class:"rn" }, h("div", { class:"who", text:`${g.notes.length - 4} more on the card.` })));
+    body.append(h("div", { class:"rsub", text:"OPEN ITEMS" }));
+    if(!g.items.length) body.append(h("div", { class:"ri" }, h("span", { text:"No open items in your data or your to-do lists." })));
+    g.items.slice(0, 5).forEach(i => body.append(h("div", { class:"ri" }, h("span", { text:i.title }), h("span", { class:"due" + (i.urgent ? " warn" : ""), text:[i.due, i.source === "your data" ? "" : i.source].filter(Boolean).join(" · ") }))));
+    const openCardBtn = h("button", { class:"pill quiet", type:"button", text:"Open the card" });
+    openCardBtn.addEventListener("click", () => { const r = $("draft").getBoundingClientRect(); openCard(g.id, { anchor:{ x:Math.round(r.right + 12), y:Math.round(r.top) }, forceFull:true }); });
+    body.append(h("div", { class:"rfoot" }, openCardBtn));
+    box.append(h("details", { class:"recall", "data-anda":g.id }, h("summary", {}, `ANDA ${g.id} `, h("span", { text:"· " + parts.join(" · ") })), body));
+  });
 }
 function openDraft(text){
   closeMenus(); markStep("draft");
   const box = $("draft"); box.style.display = "block"; if(isSheet()) $("scrim").style.display = "block";
-  $("drText").value = text || ""; runDraftCheck();
+  $("drText").value = text || ""; setDraftView("all");
   document.querySelectorAll("#draft [data-ai]").forEach(b => { b.disabled = !state.ai; });
   setTimeout(() => $("drText").focus(), 30);
 }
-$("drCheck").addEventListener("click", runDraftCheck);
+$("drCheck").addEventListener("click", () => setDraftView("all"));
+$("drProofBtn").addEventListener("click", () => setDraftView("proof"));
+$("drFactBtn").addEventListener("click", () => setDraftView("facts"));
 $("drSample").addEventListener("click", () => { $("drText").value = SAMPLE_DRAFT; runDraftCheck(); });
 $("drDone").addEventListener("click", () => closeApp("draft"));
 $("drText").addEventListener("input", () => { clearTimeout(runDraftCheck.t); runDraftCheck.t = setTimeout(runDraftCheck, 250); });
@@ -3096,7 +3678,7 @@ function applyLook(id){
 (function buildSettings(){
   LOOKS.forEach(([id, name, , form]) => {
     const l = document.createElement("label"); l.className = "opt";
-    l.innerHTML = `<input type="radio" name="look" value="${id}" ${id === "t" ? "checked" : ""}> ${name}`;
+    l.innerHTML = `<input type="radio" name="look" value="${id}" ${id === "v" ? "checked" : ""}> ${name}`;
     l.firstChild.addEventListener("change", () => applyLook(id));
     (form === "full" ? $("setLook") : $("setCompact")).appendChild(l);
   });
@@ -3537,7 +4119,7 @@ function openReplies(){
     });
     m.appendChild(b);
   });
-  const r = $("chipReplies").getBoundingClientRect();
+  const shown = $("chipReplies").getBoundingClientRect(), r = shown.width ? shown : (() => { const c = card.getBoundingClientRect(); return { left:c.left + 16, top:c.bottom - 8 }; })();
   m.style.display = "block";
   m.style.left = Math.max(8, Math.min(r.left, innerWidth - m.offsetWidth - 8)) + "px";
   m.style.top = Math.max(8, r.top - m.offsetHeight - 6) + "px";
@@ -5098,7 +5680,7 @@ function applyEdition(){
   ["agentsBlock", "todoBlock"].forEach(id => { const e = $(id); if(e) e.hidden = !all; });
   $("actionsLabel").textContent = all ? "MY ACTIONS · YOUR OWN PROMPT, AGENT OR TO-DO ITEM, ON YOUR OWN SHORTCUT" : "STORED PROMPTS · USED BY ASK, OR ON A SHORTCUT OF THEIR OWN";
   $("allTools").checked = all;
-  const look = LOOKS.find(l => l[0] === state.look) || LOOKS.find(l => l[0] === "t");
+  const look = LOOKS.find(l => l[0] === state.look) || LOOKS.find(l => l[0] === "v");
   root.dataset.dir = look[2];
   root.style.setProperty("--op", state.op + "%");
   if(typeof rebuildJump === "function") rebuildJump();
@@ -5311,7 +5893,7 @@ $("expBtn").addEventListener("click", toggleExpand);
 $("chipCopy").addEventListener("click", copyStatus);
 $("moreBtn").addEventListener("click", () => { card.classList.remove("mini"); if(current){ renderBrief(current); prepareAgents(); } if($("watchSlot").style.display !== "none") markStep("watch"); setTimeout(clampCard, 0); });
 $("chipSister").addEventListener("click", () => { const s = current && DATA[current].sisters[0]; if(s){ current = s[0]; fill(current); renderBrief(current); prepareAgents(); setTimeout(clampCard, 0); } });
-$("chipNotes").addEventListener("click", () => showNotice("This is not connected in the prototype. In the full build it opens the project notes.", anchorForCard()));
+$("chipNotes").addEventListener("click", openNotesOnCard);
 $("chipOpen").addEventListener("click", () => showNotice("This is not connected in the prototype. The full build links to your system of record.", anchorForCard()));
 card.addEventListener("click", e => {
   const s = e.target.closest(".sister");

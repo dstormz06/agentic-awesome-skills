@@ -17,7 +17,7 @@ public class SettingsTests
         Assert.Equal(("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+Shift+R"), (s.PeekHotkey, s.LookupHotkey, s.DraftHotkey));
         Assert.Null(s.PortfolioPath); Assert.Null(s.NotesFolder); Assert.Null(s.ReferenceDataPath);
         Assert.False(s.UsageLog); Assert.Equal("", s.StandingInstructions);
-        Assert.Equal(0.92, s.CardOpacity);                 // a new install starts at 92% (round 16)
+        Assert.Equal(0.90, s.CardOpacity);                 // a new install starts at 90% (round 20; 92% before)
         Assert.True(s.CaptureViaCopy);
         Assert.False(s.FirstRunDone);
         Assert.Null(s.ActiveLens);
