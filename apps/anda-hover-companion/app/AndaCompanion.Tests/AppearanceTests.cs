@@ -34,20 +34,22 @@ public class AppearanceTests
     }
 
     [Fact]
-    public void There_are_twenty_looks_and_T_is_the_default()
+    public void Twenty_three_looks_are_defined_eight_are_offered_and_W_is_the_default()
     {
         Assert.Equal(new[]
             {
                 AppearanceId.A, AppearanceId.B, AppearanceId.C, AppearanceId.D, AppearanceId.E, AppearanceId.F, AppearanceId.G,
                 AppearanceId.H, AppearanceId.I, AppearanceId.J, AppearanceId.K, AppearanceId.L, AppearanceId.M, AppearanceId.N, AppearanceId.O,
-                AppearanceId.P, AppearanceId.Q, AppearanceId.R, AppearanceId.S, AppearanceId.T,
+                AppearanceId.P, AppearanceId.Q, AppearanceId.R, AppearanceId.S, AppearanceId.T, AppearanceId.U, AppearanceId.V, AppearanceId.W,
             },
             Appearances.All.Select(a => a.Id));
-        Assert.Equal(16, Appearances.All.Count(a => !a.IsCompact));
+        Assert.Equal(19, Appearances.All.Count(a => !a.IsCompact));
+        Assert.Equal(new[] { AppearanceId.W, AppearanceId.V, AppearanceId.U, AppearanceId.T, AppearanceId.K, AppearanceId.P, AppearanceId.L, AppearanceId.O }, Appearances.Offered.Select(a => a.Id));   // round 23: the eight a person can choose
         Assert.Equal(4, Appearances.All.Count(a => a.IsCompact));
-        Assert.Equal(AppearanceId.T, Appearances.Default);      // T · Pocket Plain replaced K as the default in round 19
-        Assert.Equal(AppearanceId.T, new AndaCompanion.Services.Settings().Appearance);
-        Assert.Equal(AppearanceId.T, Appearances.Get(Appearances.Default).Id);
+        Assert.Equal(AppearanceId.W, Appearances.Default);      // W · Graphite Gauge replaced T as the default in round 23 (T replaced K in round 19)
+        Assert.Equal(AppearanceId.W, new AndaCompanion.Services.Settings().Appearance);
+        Assert.Equal(AppearanceId.W, Appearances.Get(Appearances.Default).Id);
+        Assert.Equal(22, (int)AppearanceId.W);
         Assert.Equal(19, (int)AppearanceId.T);                  // appended: every number saved in an earlier settings file still means the same look
     }
 

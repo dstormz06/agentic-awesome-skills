@@ -177,9 +177,9 @@ a deep link to the record in the system of record.
 
 ## 5. Visual language
 
-**Appearance is a preference, never information.** The Windows app ships with **twenty selectable looks** today
-(Settings → Appearance): sixteen full cards (A–K, P–S and T) and four compact boxes (L–O). **The simulation and the lab have two more, U and V:
-22 looks in all, 18 full cards and four compact boxes.** **No look draws a grid, hatching, texture or
+**Appearance is a preference, never information.** Since round 23 the Windows app and the simulation offer **the same eight looks**
+(Settings → Appearance): six full cards (W, V, U, T, K, P) and two compact boxes (L, O); see §11g. Fifteen earlier looks were retired; the lab keeps them, folded.
+*(Before round 23: twenty in the app, twenty-three in the simulation.)* **No look draws a grid, hatching, texture or
 other pattern behind its content** (the owner's decision, 2026-11-03). **The default is T · Pocket Plain**, chosen by the owner on 2026-11-06, in the simulation,
 the lab and, since round 19, the Windows app (K · Graphite Quiet was the default from 2026-11-02 until then, and A before it). All full looks share identical anatomy, slot
 order, status semantics, and interactions — switching appearance never moves, adds,
@@ -475,7 +475,7 @@ one primary action, answer first, progressive disclosure) and applied on Windows
 
 - The default of round 18 was **T · Pocket Plain**, with **U · Calendar Ribbon** and **V · Glass Sheet** beside it. In round 20 the owner made **V · Glass Sheet the default** (§11d), and in round 22 asked for a new default that blends it with Graphite and the gauge: **W · Graphite Gauge** (§11f). The Windows app still opens in T until the glass looks are ported. The 19 earlier looks are not changed.
   Every look can be chosen in *Settings, Look and feel* and in the tray menu, with or without *Show all tools* (round 19). All looks are light only.
-- The icon is **Loupe**: an indigo plate, a white ring and an amber center. A small amber dot on the tray icon means *urgent* (below).
+- The icon is **Loupe**: an indigo plate and a white ring. *(Until round 23 it had an amber center.)* Amber appears only on the tray icon, as a dot or a number, when something needs the person today (below).
 - **One Bar** is an option for the lookup window (*Settings, Look and feel*, in both editions since round 19); **Today** is a small window in the tray menu under *Show all tools*, and is not in the focused edition.
 - *Comfortable* or *Compact* spacing, and *Standard*, *Larger* or *Largest* text, are in *Settings, How it starts*. They change this app's
   windows only.
@@ -696,7 +696,7 @@ Also fixed on the way: what the card scrolled to could end up under the action a
 Enter button and other smaller buttons and features at the bottom". W takes three things from three looks: the **quiet graphite palette** of K (color only where the
 status needs it), the **gauge** of P (how much of the review clock has run, now beside the answer, with the percentage in words for a screen reader), and the **glass
 sheet and action area** of V (one answer first; *Add a note* on Enter, then the small buttons, pinned to the bottom; 90% to start, 40 to 100%). V · Glass Sheet is the
-next look in the list, one click away. The Windows app still opens in T · Pocket Plain.
+next look in the list, one click away. (The Windows app received W, V and U in round 23, §11g.)
 
 **The taskbar** of the look-alike desktop is 40 px high (it was 48), with its icons, search box and clock scaled to fit. Every button is still at least 24 px.
 
@@ -704,7 +704,7 @@ next look in the list, one click away. The Windows app still opens in T · Pocke
 made it look that way. The Loupe had an amber center, the same amber as the dot, so the icon at rest already carried the alert color; and the dot followed the
 "urgent" rule, which the sample data always meets. Now:
 
-- **At rest the tray icon has no amber.** (The larger app icon, on the desktop shortcut and in window titles, keeps its amber center as the mark.)
+- **At rest the tray icon has no amber.** (In round 22 the larger app icon kept its amber center; in round 23 the owner asked for it to go there too.)
 - **The dot means "something needs you today"**, and nothing else: an action item due today or overdue; a goal date that is today or has passed; an ANDA the person's
   sheet marks as an immediate risk, a safety issue or a customer service issue; a message marked urgent that has had no reply for two days. A forecast that is late, a
   goal date that is close, or an item due in five days does not light it: the card and the watch list already say those.
@@ -731,6 +731,41 @@ should look at the portfolio file once at midnight to recount is a decision for 
    today's actions; the documents were corrected. **The larger form of the same problem is unchanged: the Windows app trails the simulation by rounds 18 to 22.**
 Also fixed on the way: a mark from the sheet was put into the watch list as markup, not as text (it is escaped now); text scrolling under the pinned action area
 showed through the glass (the area is 97% solid).
+
+## 11g. Round 23: eight looks in both, a number on the tray icon, a choice of when it is counted, and three proposals for the default
+
+**Eight looks, the same in the app and the simulation.** The owner: "cut down to only top 8 appearances for both app and simulation". The eight are the six full
+cards **W · Graphite Gauge** (default), **V · Glass Sheet**, **U · Calendar Ribbon**, **T · Pocket Plain**, **K · Graphite Quiet**, **P · Bronze Gauge**, and the two
+compact boxes **L · Graphite Strip** and **O · Teal Badge**. *Why these:* the four answer-first looks the owner chose or asked for in rounds 18 to 22; K, the calm
+classic layout that projects well; P, the bronze the owner liked, with the dial W took from it; and one wide and one very small compact box. The choice is a
+proposal that was acted on: the list is one line in each program, so a swap is small. A setting or a backup that names a retired look falls back to the default.
+The fifteen retired looks keep their definitions (a compact box still borrows its sibling's colors) and are shown, folded, at the end of the Appearance Lab.
+
+**W, V and U in the Windows app.** All three are T's layout. W adds the graphite colors and the half dial beside the answer; U adds the calendar under the
+answer, drawn by the same rules as the simulation (a Monday start, weekends shaded, a federal holiday named, the gap drawn) with the same sentence under it;
+V has slightly darker secondary text and rounder corners. **The app does not draw the blur** of the simulation's glass: on Windows a blurred window is blurred
+as a rectangle, including the margin around the rounded card, and that has to be seen on a real desktop before it ships. The sheet follows the transparency
+setting, as every card in the app does. In the app the main action is still *Copy status*, because notes are not ported.
+
+**A number on the tray icon.** One thing that needs the person today shows the dot; two to nine show the number; more show "9+". The tooltip and the spoken
+label always give the true count. Windows draws tray pictures at 16 to 24 px, so the number sits in a badge that covers the upper right quarter of the icon.
+
+**When the icon is counted again** is now the person's choice, in *Settings, How it starts*: only when the app is used; also once a day, just after midnight
+(the default, which the owner approved); or also every hour. A scheduled count looks at the portfolio file once, on the PC, and sends nothing. This replaces the
+earlier rule that the app never reads on a timer; `SECURITY.md` says so.
+
+**The Loupe has no amber at any size**, in the app's icon, the extension's icon and the simulation.
+
+**Three proposals for a new default, shown first and not yet switched on** (the owner: "I prefer the visual/line graph from appearance U … add either a brief
+visual or clear auto adaptive text colors and styles to indicate 'days until' the actual GDUFA Goal Date. Show me 3 new appearances first"). Each is W with U's
+calendar, and each says how many days are left to the goal date:
+- **X · Graphite Calendar**: the dial gives way to a count ("79 DAYS TO GOAL"); the calendar follows the answer. The smallest change.
+- **Y · Graphite Runway**: one line for the review clock (how much has run, where today is, the days left), then the calendar.
+- **Z · Graphite Countdown**: the days to the goal date become the first line, and the forecast gap the second. This changes what the card says first.
+
+The indicator follows the distance, **in words as well as in color**: more than 30 days, quiet; 30 days or fewer, amber; 7 days or fewer, amber on a tint in
+heavier type; the day itself, solid amber ("The goal date is today"); after it, solid red ("The goal date passed 3 days ago"). The thresholds are a proposal.
+The Lab has a control that shows each state.
 
 ## 12. Engagement roadmap — seven features that make it the daily habit
 

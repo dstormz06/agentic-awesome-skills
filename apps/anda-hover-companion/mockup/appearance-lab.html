@@ -299,13 +299,41 @@ h2.sec{font-size:13px;letter-spacing:.12em;font-weight:700;color:var(--ink3);mar
 .ribbon5 svg{display:block;width:100%;height:auto}
 .ribbon5 svg text{font-weight:500;font-size:9.5px;font-family:var(--c-font,sans-serif);fill:var(--c-ink3)}
 .ribbon5 .rt{font-size:12px;color:var(--c-ink2);margin-top:4px}
+/* ---- round 23: three proposals for the default. Each keeps the calendar ribbon and says how many days are left to the goal date.
+   The style of that indicator follows the distance; the words always carry the meaning, so color is never the only signal. ---- */
+.card[data-prop]{width:372px}
+.lv-calm{--lv-ink:var(--c-ink);--lv-bg:transparent;--lv-line:var(--c-line);--lv-fill:#9aa5b0;--lv-w:650}
+.lv-near{--lv-ink:#8a5800;--lv-bg:transparent;--lv-line:#c9a45c;--lv-fill:#c98a14;--lv-w:700}
+.lv-soon{--lv-ink:#7a4d00;--lv-bg:#faf1dc;--lv-line:#8a5800;--lv-fill:#b3730a;--lv-w:800}
+.lv-today{--lv-ink:#fff;--lv-bg:#8a5800;--lv-line:#8a5800;--lv-fill:#8a5800;--lv-w:800}
+.lv-passed{--lv-ink:#fff;--lv-bg:#a33636;--lv-line:#a33636;--lv-fill:#a33636;--lv-w:800}
+.cd5{grid-column:2;grid-row:1 / span 2;box-sizing:border-box;width:96px;text-align:center;padding:8px 4px 7px;border-radius:12px;border:1.5px solid var(--lv-line);background:var(--lv-bg);color:var(--lv-ink)}
+.cd5 b{display:block;font-size:24px;line-height:1.05;font-weight:var(--lv-w);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.cd5 b.w{font-size:17px;line-height:1.5}
+.cd5 span{display:block;margin-top:3px;font-size:9px;font-weight:800;letter-spacing:.05em}
+.cl5{padding:0 18px 12px}
+.cl5 .cap{font-size:9.5px;font-weight:800;letter-spacing:.13em;color:var(--c-ink3);margin-bottom:5px}
+.cl5 svg{display:block;width:100%;height:auto}
+.cl5 svg text{font-weight:600;font-size:9.5px;font-family:var(--c-font,sans-serif);fill:var(--c-ink3)}
+.cl5 .rt{font-size:12.5px;color:var(--c-ink2);margin-top:5px}
+.cl5 .rt b{display:inline-block;color:var(--lv-ink);background:var(--lv-bg);font-weight:var(--lv-w);border-radius:6px}
+.cl5.lv-soon .rt b,.cl5.lv-today .rt b,.cl5.lv-passed .rt b{padding:0 6px}
+.card[data-prop="z"] .hero5{display:block}
+.card[data-prop="z"] .hero5 .hl b{color:var(--lv-ink);font-weight:var(--lv-w)}
+.card[data-prop="z"] .hero5.boxed .hl{display:inline-flex;background:var(--lv-bg);border:1.5px solid var(--lv-line);border-radius:10px;padding:6px 12px 7px}
+.card[data-prop="z"] .hero5.boxed .hl span{color:var(--lv-ink)}
+.fpill{display:inline-block;font-size:11.5px;font-weight:700;border-radius:99px;padding:2px 9px;margin-right:6px}
+.fpill.late{background:var(--c-warn-bg);color:var(--c-warn)}.fpill.good{background:var(--c-good-bg);color:var(--c-good)}
+.note5{font-size:12.5px;color:var(--ink2);max-width:86ch;margin:0 0 12px}
+details.retired{margin-top:30px;border-top:1px solid var(--line);padding-top:6px}
+details.retired>summary{cursor:pointer;font-size:13px;letter-spacing:.12em;font-weight:700;color:var(--ink3);padding:12px 0;min-height:24px}
 </style>
 </head>
 <body>
 <div class="wrap" role="main">
   <p class="eyebrow">ALL DATA FICTIONAL · LIGHT ONLY</p>
   <h1>Appearance Lab</h1>
-  <p class="lede">Twenty-three card designs for the same facts. W (Graphite Gauge) is the default. Nineteen are full cards and four are compact boxes that stay out of the way of an open email. The designs differ only in surface, type and progress marker; the information is identical.</p>
+  <p class="lede">Eight looks are offered, in the app and in the simulation: six full cards and two compact boxes that stay out of the way of an open email. W (Graphite Gauge) is the default. Three proposals for a new default come first, for the owner to choose from; the fifteen looks retired in round 23 are folded at the end. The designs differ only in surface, type and progress marker; the information is identical.</p>
 
   <div class="bar" role="toolbar" aria-label="Controls">
     <div class="seg" role="group" aria-label="Record shown">
@@ -314,18 +342,28 @@ h2.sec{font-size:13px;letter-spacing:.12em;font-weight:700;color:var(--ink3);mar
     </div>
   </div>
   
-  <h2 class="sec">FULL CARDS · T TO W</h2>
-  <section class="grid" id="gridPocket"></section>
-  <h2 class="sec">FULL CARDS · A TO E</h2>
-  <section class="grid" id="gridCur"></section>
-  <h2 class="sec">FULL CARDS · F TO K</h2>
-  <section class="grid" id="gridNew"></section>
-  <h2 class="sec">FULL CARDS · P TO S</h2>
-  <section class="grid" id="gridBronze"></section>
-  <h2 class="sec">COMPACT BOXES · L TO O · SHOWN OVER AN OPEN EMAIL</h2>
+  <h2 class="sec" id="propHead">PROPOSED FOR THE DEFAULT · X, Y, Z · NOT IN THE APP OR THE SIMULATION YET</h2>
+  <p class="note5">Each proposal is W with the calendar from U, and each says how many days are left to the goal date. The indicator changes with the distance: more than 30 days is quiet; 30 days or fewer is amber; 7 days or fewer is amber on a tint, in heavier type; the day itself and a date that has passed are solid. The words say the same, so the color is never the only signal. Use the second control to see each state; it changes the indicator only, not the dates on the card.</p>
+  <div class="bar" role="toolbar" aria-label="Days until the goal date, for the proposals">
+    <div class="seg" role="group" aria-label="Days until the goal date">
+      <button type="button" data-days="rec" aria-pressed="true">As recorded</button>
+      <button type="button" data-days="21" aria-pressed="false">21 days</button>
+      <button type="button" data-days="5" aria-pressed="false">5 days</button>
+      <button type="button" data-days="0" aria-pressed="false">Today</button>
+      <button type="button" data-days="-3" aria-pressed="false">Passed 3 days ago</button>
+    </div>
+  </div>
+  <section class="grid" id="gridProp"></section>
+  <h2 class="sec">THE SIX FULL CARDS OFFERED</h2>
+  <section class="grid" id="gridOffered"></section>
+  <h2 class="sec">THE TWO COMPACT BOXES OFFERED · SHOWN OVER AN OPEN EMAIL</h2>
   <section class="grid" id="gridCompact"></section>
+  <details class="retired" id="retired"><summary>RETIRED IN ROUND 23 · FIFTEEN LOOKS NO LONGER OFFERED</summary>
+    <section class="grid" id="gridRetired"></section>
+    <section class="grid" id="gridRetiredCompact" style="margin-top:18px"></section>
+  </details>
 
-  <p class="foot">Compact boxes never take keyboard focus, make no AI call, and open their sibling look's full card on a click or when the shortcut is pressed again. The runway in J is drawn from the days to goal and the forecast delta, both on the card. P to S use the same bronze palette in four different shapes. All colors are original to this prototype.</p>
+  <p class="foot">Compact boxes never take keyboard focus, make no AI call, and open their sibling look's full card on a click or when the shortcut is pressed again. The runway in J is drawn from the days to goal and the forecast delta, both on the card. All colors are original to this prototype.</p>
 </div>
 
 <script>
@@ -422,7 +460,46 @@ function ribbonHTML(id, d){
   out += `<rect x="${Math.min(gx, fx).toFixed(1)}" y="35" width="${Math.abs(fx - gx).toFixed(1)}" height="4" rx="2" fill="${tone}"/><polygon points="${gx.toFixed(1)},25 ${(gx + 7.5).toFixed(1)},36.5 ${gx.toFixed(1)},48 ${(gx - 7.5).toFixed(1)},36.5" fill="#fff" stroke="#1d2329" stroke-width="2"/><circle cx="${fx.toFixed(1)}" cy="36.5" r="7" fill="${dark}"/>`;
   const near = Math.abs(gx - fx) < 78, ga = near ? (gx <= fx ? "end" : "start") : "middle", fa = near ? (gx <= fx ? "start" : "end") : "middle";
   const ends = `<text x="0" y="77">${nice(start).replace(/^\w+ /, "")}</text><text x="300" y="77" text-anchor="end">${nice(start + (N - 1) * DAY).replace(/^\w+ /, "")}</text>`;
-  return `<div class="slot ribbon5"><div class="cap">GOAL AND FORECAST ON THE CALENDAR</div><svg viewBox="0 0 300 78" role="img" aria-label="Calendar ribbon. ${said}">${out}<text x="${gx.toFixed(1)}" y="16" text-anchor="${ga}">Goal</text><text x="${fx.toFixed(1)}" y="16" text-anchor="${fa}">Forecast</text>${labels}${ends}</svg><div class="rt">${said}</div></div>`;
+  return `<div class="slot ribbon5"><div class="cap">GOAL AND FORECAST ON THE CALENDAR</div><svg viewBox="0 0 300 80" role="img" aria-label="Calendar ribbon. ${said}">${out}<text x="${gx.toFixed(1)}" y="16" text-anchor="${ga}">Goal</text><text x="${fx.toFixed(1)}" y="16" text-anchor="${fa}">Forecast</text>${labels}${ends}</svg><div class="rt">${said}</div></div>`;
+}
+/* ---- round 23: the three proposals ---- */
+const OFFERED = ["w", "v", "u", "t", "k", "p"], OFFERED_COMPACT = ["l", "o"];
+const PROPOSALS = [
+  { id:"x", name:"X · Graphite Calendar", tag:"W with the gauge replaced by a count of the days to the goal date, and the calendar under the answer. The smallest change from today's default.", sw:["#fdfdfd","#56626e","#8a5800"] },
+  { id:"y", name:"Y · Graphite Runway", tag:"The answer, then one line for the review clock: how much has run, where today is, and the days left. The calendar follows. Two pictures, no gauge.", sw:["#fdfdfd","#6e7a86","#c98a14"] },
+  { id:"z", name:"Z · Graphite Countdown", tag:"Leads with the days to the goal date. The forecast gap becomes the second line. This changes what the card says first.", sw:["#fdfdfd","#56626e","#a33636"] }
+];
+let days = "rec";
+const daysTo = id => days === "rec" ? DATA[id].daysTo : +days;
+const levelOf = n => n < 0 ? "passed" : n === 0 ? "today" : n <= 7 ? "soon" : n <= 30 ? "near" : "calm";
+const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+const cdWords = n => n < 0 ? `The goal date passed ${plural(-n, "day")} ago` : n === 0 ? "The goal date is today" : `${plural(n, "day")} to the goal date`;
+function clockLineHTML(id, d){
+  const n = daysTo(id), lv = levelOf(n), total = DATA[id].daysTo / (1 - d.pct / 100);
+  const pct = n <= 0 ? 100 : Math.max(0, Math.min(100, Math.round(100 * (1 - n / total)))), x = 6 + pct * 2.82;
+  const said = `${pct} percent of the review clock has run. ${cdWords(n)}.`;
+  return `<div class="slot cl5 lv-${lv}"><div class="cap">TIME LEFT TO THE GOAL DATE</div>
+    <svg viewBox="0 0 300 40" role="img" aria-label="${said}"><rect x="6" y="14" width="282" height="8" rx="4" fill="var(--lv-fill)" opacity="${lv === "calm" ? ".45" : "1"}"/><rect x="6" y="14" width="${(x - 6).toFixed(1)}" height="8" rx="4" fill="#59646f"/>
+      <circle cx="${x.toFixed(1)}" cy="18" r="6" fill="#fff" stroke="#1d2329" stroke-width="2"/><polygon points="288,9 296,18 288,27 280,18" fill="#fff" stroke="#1d2329" stroke-width="2"/>
+      ${n > 0 ? (pct > 82 ? `<text x="${(x + 6).toFixed(1)}" y="8" text-anchor="end">Today</text>` : `<text x="${Math.max(14, x).toFixed(1)}" y="38" text-anchor="middle">Today</text>`) : ""}<text x="296" y="38" text-anchor="end">Goal</text><text x="6" y="${n > 0 && pct > 82 ? 38 : 8}">${pct}% of the clock has run</text></svg>
+    <div class="rt"><b>${n > 0 ? plural(n, "day") : n === 0 ? "Today" : plural(-n, "day") + " past"}</b> ${n > 0 ? "to the goal date" : n === 0 ? "is the goal date" : "the goal date"} · Goal ${d.goal}</div></div>`;
+}
+function proposalCard(pr, id){
+  const d = DATA[id], n = daysTo(id), lv = levelOf(n), m = Math.abs(d.delta), spine = d.late ? "#8a5800" : "#1b7a4b";
+  const head = `<div class="slot hd"><div class="idrow"><span class="num">ANDA ${id}</span><span class="seal">✓ Verified</span><span class="tools">${ICON.pin}${ICON.exp}${ICON.x}</span></div>
+      <h3 class="drug">${d.drug}</h3><div class="meta">${d.meta}</div><div class="fresh">${d.asOf}</div></div>`;
+  const attn = d.attn ? `<div class="slot"><div class="attn warn"><span class="k">⚠ NEEDS YOU</span><span><b>${d.attn.split(" — ")[0]}</b> — ${d.attn.split(" — ")[1]}</span></div></div>` : "";
+  const gapLine = `<div class="hl"><b>${m}</b><span>day${m === 1 ? "" : "s"} ${d.delta > 0 ? "later than" : "ahead of"} the goal</span></div><div class="hs">Goal ${d.goal} · Forecast ${d.fc} · ${d.conf}</div>`;
+  let top;
+  if (pr.id === "x") top = `<div class="slot hero5 ${d.late ? "late" : "good"}">${gapLine}<div class="cd5 lv-${lv}" role="img" aria-label="${cdWords(n)}"><b${n === 0 ? ' class="w"' : ""}>${n === 0 ? "Today" : Math.abs(n)}</b><span>${n > 0 ? "DAYS TO GOAL" : n === 0 ? "IS THE GOAL DATE" : "DAYS PAST GOAL"}</span></div></div>${ribbonHTML(id, d)}`;
+  else if (pr.id === "y") top = `<div class="slot hero5 ${d.late ? "late" : "good"}" style="display:block">${gapLine}</div>${clockLineHTML(id, d)}${ribbonHTML(id, d)}`;
+  else top = `<div class="slot hero5 lv-${lv}${lv === "calm" || lv === "near" ? "" : " boxed"}"><div class="hl"><b>${n === 0 ? "Today" : Math.abs(n)}</b><span>${n > 0 ? `day${n === 1 ? "" : "s"} to the goal date` : n === 0 ? "is the goal date" : `day${n === -1 ? "" : "s"} past the goal date`}</span></div>
+      <div class="hs"><span class="fpill ${d.late ? "late" : "good"}">Forecast ${plural(m, "day")} ${d.delta > 0 ? "later" : "earlier"}</span>Goal ${d.goal} · Forecast ${d.fc} · ${d.conf}</div></div>${ribbonHTML(id, d)}`;
+  return `<article class="card" data-look="w" data-prop="${pr.id}" style="--spine:${spine}" aria-label="ANDA ${id} card in proposal ${pr.name}">
+    ${head}${top}${attn}
+    <div class="slot rail"><span class="lblx">LATEST</span><span>${d.latest}</span></div>
+    <div class="slot"><div class="chips"><button class="chip" type="button" tabindex="-1">Add a note · ${d.notes} notes</button><button class="chip" type="button" tabindex="-1">Copy status</button><button class="chip" type="button" tabindex="-1">Sister ANDA · ${d.sisters}</button><button class="chip link" type="button" tabindex="-1">Open ANDA page ↗</button></div></div>
+  </article>`;
 }
 function card(look, id){
   const d = DATA[id], ring = look.prog === "ring", gauge = look.prog === "gauge", dial = ring || gauge, lay = look.layout || "";
@@ -474,24 +551,34 @@ function compactBox(c, id){
   return `<div class="cbx ${c.form}${d.late ? " late" : ""}" data-look="${c.tokens}" aria-label="Compact box ${c.name} for ANDA ${id}">${inner}</div>`;
 }
 function render(){
-  for (const [gridId, grp] of [["gridPocket", "pocket"], ["gridCur", "cur"], ["gridNew", "new"], ["gridBronze", "bronze"]]){
-    document.getElementById(gridId).innerHTML = LOOKS.filter(l => (l.grp || (l.cur ? "cur" : "new")) === grp).map(l => `
+  const fullTile = l => `
       <div class="tile" data-id="${l.id}">
         <div class="thead"><div><div class="nm">${l.name}${l.def ? '<span class="badge new">DEFAULT</span>' : ""}</div><div class="tg">${l.tag}</div></div>
           <span class="sw" aria-hidden="true">${l.sw.map(c => `<i style="background:${c}"></i>`).join("")}</span></div>
         <div class="stage">${card(l, rec)}</div>
-      </div>`).join("");
-  }
-  document.getElementById("gridCompact").innerHTML = COMPACT.map(c => `
+      </div>`;
+  const compactTile = c => `
     <div class="tile" data-id="${c.id}">
       <div class="thead"><div><div class="nm">${c.name}</div><div class="tg">${c.tag}</div></div>
         <span class="sw" aria-hidden="true">${c.sw.map(x => `<i style="background:${x}"></i>`).join("")}</span></div>
       <div class="mailstage"><div class="mailmock" aria-hidden="true"><b>To:</b> Review team · <b>Subject:</b> Thursday huddle prep<div class="ln" style="width:92%"></div><div class="ln" style="width:78%"></div><div class="ln" style="width:85%"></div></div>${compactBox(c, rec)}</div>
-    </div>`).join("");
+    </div>`;
+  document.getElementById("gridProp").innerHTML = PROPOSALS.map(pr => `
+      <div class="tile" data-id="${pr.id}">
+        <div class="thead"><div><div class="nm">${pr.name}<span class="badge cur">PROPOSAL</span></div><div class="tg">${pr.tag}</div></div>
+          <span class="sw" aria-hidden="true">${pr.sw.map(c => `<i style="background:${c}"></i>`).join("")}</span></div>
+        <div class="stage">${proposalCard(pr, rec)}</div>
+      </div>`).join("");
+  document.getElementById("gridOffered").innerHTML = OFFERED.map(id => fullTile(LOOKS.find(l => l.id === id))).join("");
+  document.getElementById("gridCompact").innerHTML = OFFERED_COMPACT.map(id => compactTile(COMPACT.find(c => c.id === id))).join("");
+  document.getElementById("gridRetired").innerHTML = LOOKS.filter(l => !OFFERED.includes(l.id)).map(fullTile).join("");
+  document.getElementById("gridRetiredCompact").innerHTML = COMPACT.filter(c => !OFFERED_COMPACT.includes(c.id)).map(compactTile).join("");
 }
 document.addEventListener("click", e => {
   const r = e.target.closest("[data-rec]");
   if (r){ rec = r.dataset.rec; document.querySelectorAll("[data-rec]").forEach(b => b.setAttribute("aria-pressed", b === r)); render(); }
+  const dd = e.target.closest("[data-days]");
+  if (dd){ days = dd.dataset.days; document.querySelectorAll("[data-days]").forEach(b => b.setAttribute("aria-pressed", b === dd)); render(); }
 });
 render();
 </script>

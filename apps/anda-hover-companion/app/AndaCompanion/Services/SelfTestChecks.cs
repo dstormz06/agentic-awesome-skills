@@ -163,7 +163,7 @@ internal static class SelfTestChecks
 
             var s = new Settings
             {
-                Appearance = Theming.AppearanceId.E, Consent = ConsentModel.PeekFirst, CardOpacity = 0.9,
+                Appearance = Theming.AppearanceId.K, Consent = ConsentModel.PeekFirst, CardOpacity = 0.9,
                 ActiveLens = "Facility focus", CaptureViaCopy = false, FirstRunDone = true, AutoHideSeconds = 40,
             };
             SettingsService.Save(s, settingsPath);
@@ -179,7 +179,7 @@ internal static class SelfTestChecks
 
             File.WriteAllText(settingsPath, "{ this is not json");
             var d = SettingsService.Load(settingsPath);
-            if (d.Appearance != Theming.Appearances.Default || d.Appearance != Theming.AppearanceId.T ||
+            if (d.Appearance != Theming.Appearances.Default || d.Appearance != Theming.AppearanceId.W ||
                 !d.CaptureViaCopy || d.Consent != ConsentModel.Whisper || d.AutoHideSeconds != UI.AutoHidePolicy.Default)
                 problems.Add("corrupt settings did not fall back to defaults");
 

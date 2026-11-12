@@ -127,6 +127,14 @@
             <Border Classes="hair"/>
 
             <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="TRAY ICON · WHEN IT IS COUNTED AGAIN"/>
+              <WrapPanel Name="TrayRecountPanel"/>
+              <TextBlock Classes="hint" Text="The tray icon shows a dot when one thing needs you today, and the number when there are two or more. It is counted whenever the app reads your data: when it starts, when a card opens and when Settings are saved. A scheduled count looks at your portfolio file once, on this PC; nothing is sent anywhere." TextWrapping="Wrap"/>
+            </StackPanel>
+
+            <Border Classes="hair"/>
+
+            <StackPanel Spacing="6">
               <TextBlock Classes="lbl" Text="URGENT ANDAs"/>
               <CheckBox Name="EscalateCheck">
                 <TextBlock Text="In whisper mode, open a peek by itself for an urgent or at-risk ANDA" TextWrapping="Wrap"/>

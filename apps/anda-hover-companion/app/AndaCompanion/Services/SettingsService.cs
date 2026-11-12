@@ -15,7 +15,7 @@ public enum MyTodoMode { Review = 0, AddAtOnce = 1 }
 
 public sealed class Settings
 {
-    public AppearanceId Appearance { get; set; } = Appearances.Default;   // T · Pocket Plain is the product default
+    public AppearanceId Appearance { get; set; } = Appearances.Default;   // W · Graphite Gauge is the product default
 
     /// <summary>
     /// Hide a card or compact box after this many idle seconds (0 = never). Pointer over it, a pinned card and an
@@ -35,6 +35,8 @@ public sealed class Settings
 
     /// <summary>A forecast at least this many days after the goal counts as at risk (3, 7 or 14).</summary>
     public int UrgentLateDays { get; set; } = UrgencyPolicy.DefaultLateDays;
+    /// <summary>When the tray icon is counted again on a schedule: "use", "daily" or "hourly" (see TrayRecount). Round 23.</summary>
+    public string TrayRecount { get; set; } = Services.TrayRecount.Daily;
 
     /// <summary>Warn about a goal date within this many business days before or after a federal holiday (0 turns it off).</summary>
     public int HolidayLeadDays { get; set; } = 3;
@@ -229,6 +231,7 @@ public static class SettingsService
     {
         loaded.AutoHideSeconds = UI.AutoHidePolicy.Normalize(loaded.AutoHideSeconds);
         loaded.UrgentLateDays = UrgencyPolicy.Normalize(loaded.UrgentLateDays);
+        loaded.TrayRecount = Services.TrayRecount.Normalize(loaded.TrayRecount);
         if (!Settings.HolidayLeadChoices.Contains(loaded.HolidayLeadDays)) loaded.HolidayLeadDays = 3;
         if (!NativeHostRegistration.IsValidExtensionId(loaded.ExtensionId)) loaded.ExtensionId = NativeHostRegistration.DefaultExtensionId;
         loaded.PortfolioColumns ??= new();
@@ -243,7 +246,7 @@ public static class SettingsService
         if (!Settings.MiddleClickModifiers.Contains(loaded.MiddleClickModifier ?? "")) loaded.MiddleClickModifier = "Ctrl";
         if (HotkeyParser.ValidateSet(("Select & Peek", loaded.PeekHotkey), ("Lookup", loaded.LookupHotkey), ("Review a draft", loaded.DraftHotkey)) is not null)
         { loaded.PeekHotkey = "Ctrl+Alt+A"; loaded.LookupHotkey = "Ctrl+Alt+Space"; loaded.DraftHotkey = "Ctrl+Alt+Shift+R"; }
-        if (!Enum.IsDefined(loaded.Appearance)) loaded.Appearance = Appearances.Default;
+        if (!Enum.IsDefined(loaded.Appearance) || !Appearances.IsOffered(loaded.Appearance)) loaded.Appearance = Appearances.Default;   // a look that is no longer offered falls back to the default
         loaded.CardOpacity = Settings.NormalizeOpacity(loaded.CardOpacity);
         if (!Enum.IsDefined(loaded.MyTodoMode)) loaded.MyTodoMode = MyTodoMode.Review;
         loaded.AskHotkey = Settings.RepairAskHotkey(loaded.AskHotkey, new[] { loaded.PeekHotkey, loaded.LookupHotkey, loaded.DraftHotkey });

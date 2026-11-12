@@ -42,12 +42,12 @@ public class Round19Tests : IClassFixture<HeadlessFixture>
     private static List<string> Texts(CardWindow w) => w.GetVisualDescendants().OfType<TextBlock>().Where(t => t.IsEffectivelyVisible).Select(t => t.Text ?? "").ToList();
 
     [Fact]
-    public void T_is_appended_and_is_the_default_in_both_editions()
+    public void T_is_appended_and_the_default_look_applies_in_both_editions()
     {
-        Assert.Equal(AppearanceId.T, Appearances.Default);
+        Assert.Equal(AppearanceId.W, Appearances.Default);      // W replaced T as the default in round 23; T is still offered
         Assert.Equal(CardLayout.Pocket, Appearances.T.Look.Layout);
         Assert.False(Appearances.T.IsCompact);
-        Assert.Equal(AppearanceId.T, Edition.Appearance(new Settings()));                                              // nothing chosen: the default look
+        Assert.Equal(AppearanceId.W, Edition.Appearance(new Settings()));                                              // nothing chosen: the default look
         Assert.Equal(AppearanceId.K, Edition.Appearance(new Settings { ShowAllTools = true, Appearance = AppearanceId.K }));   // someone who chose K keeps K
         Assert.Equal(AppearanceId.K, Edition.Appearance(new Settings { Appearance = AppearanceId.K }));                        // in the focused edition too
     }
@@ -218,7 +218,7 @@ public class Round19Tests : IClassFixture<HeadlessFixture>
     }
 
     /// <summary>Counts pixels close to the alert amber (#F2A93B) in an 8-bit RGBA, non-interlaced PNG, which is what make-icons.mjs writes.</summary>
-    private static int AmberPixels(string path)
+    internal static int AmberPixels(string path)
     {
         byte[] f = File.ReadAllBytes(path);
         int w = 0, h = 0; using var idat = new MemoryStream();
@@ -295,7 +295,7 @@ public class Round19Tests : IClassFixture<HeadlessFixture>
             }
             finally { w.Close(); Settle(); }
         }, CancellationToken.None);
-        Assert.Equal(Appearances.All.Count, r.radios);              // every look can be picked without "Show all tools"
+        Assert.Equal(Appearances.Offered.Count, r.radios);          // every offered look (eight since round 23) can be picked without "Show all tools"
         Assert.Equal(Appearances.Get(Appearances.Default).Name, r.first);   // the default look is listed first, and a new install has it chosen
         Assert.True(r.firstChecked);
         Assert.Contains("Look and feel", r.jump);

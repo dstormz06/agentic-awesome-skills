@@ -125,6 +125,14 @@ internal static class SelfTest
         // at least one shot, alternating the at-risk and healthy records so both states are exercised.
         var shots = new CardShot[]
         {
+            new("card-w", AppearanceId.W, "216482", false, false, 1.0, true),
+            new("card-w-expanded", AppearanceId.W, "216482", true, false, 1.0, false),
+            new("card-w-healthy", AppearanceId.W, "214990", false, false, 1.0, false),
+            new("card-w-peek", AppearanceId.W, "216482", false, true, 1.0, false),
+            new("card-w-transparent-90", AppearanceId.W, "216482", false, false, 0.90, false),
+            new("card-v", AppearanceId.V, "216482", false, false, 1.0, false),
+            new("card-u", AppearanceId.U, "216482", false, false, 1.0, false),
+            new("card-u-healthy", AppearanceId.U, "214990", false, false, 1.0, false),
             new("card-t", AppearanceId.T, "216482", false, false, 1.0, true),
             new("card-t-expanded", AppearanceId.T, "216482", true, false, 1.0, false),
             new("card-t-healthy", AppearanceId.T, "214990", false, false, 1.0, false),

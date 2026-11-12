@@ -8,7 +8,9 @@ namespace AndaCompanion.Services;
 /// It now shows only when something needs the person today: an action item that says it is due today or overdue, or a goal date that is
 /// today or has passed. The sample records never raise it. A message marked urgent that has waited two days, and a column of the sheet that
 /// marks a safety or customer service issue, are in the simulation and not in the app yet (the app does not read mail in the background).
-/// It is recomputed only when the app reads data (at start, when a card opens, when Settings are applied): there is no timer.
+/// It is recounted when the app reads data (at start, when a card opens, when Settings are applied) and, since round 23, on the schedule the
+/// person chooses in Settings (never, once just after midnight, or every hour as well): see <see cref="TrayRecount"/>.
+/// One thing shows a dot; two to nine show the number; more show "9+".
 /// </summary>
 public static class TrayState
 {
@@ -34,6 +36,18 @@ public static class TrayState
         }
         return n;
     }
+
+    /// <summary>What the icon carries for this many things: nothing, a dot, the number, or "9+".</summary>
+    public static string Badge(int alerts) => alerts <= 0 ? "" : alerts == 1 ? "dot" : alerts > 9 ? "9+" : alerts.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+    /// <summary>The embedded picture for that badge (see Assets/make-icons.mjs, which draws them).</summary>
+    public static string Picture(int alerts) => Badge(alerts) switch
+    {
+        "" => "tray-32.png",
+        "dot" => "tray-32-alert.png",
+        "9+" => "tray-32-9plus.png",
+        var n => $"tray-32-{n}.png",
+    };
 
     /// <summary>The tooltip says how many, never which: a tooltip can be read over a shoulder.</summary>
     public static string Tip(string connectionLabel, int alerts) =>

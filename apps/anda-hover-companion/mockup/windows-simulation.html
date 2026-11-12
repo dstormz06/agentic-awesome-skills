@@ -1353,6 +1353,10 @@ PS C:\work&gt; </div>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><button class="pill quiet" id="recentsClear" type="button">Clear recents</button><span class="hint" id="recentsStatus" role="status" style="margin:0"></span></div>
     <p class="hint">Only six-digit numbers are kept, in this PC's settings, and never sent anywhere. Turning this off clears them. ANDAs you keep with “Keep in my list” on a card stay until you remove them and are saved in a backup.</p>
     <hr class="hair">
+    <div class="lbl">TRAY ICON · WHEN IT IS COUNTED AGAIN</div>
+    <div class="wrap" role="radiogroup" aria-label="When the tray icon is counted again"><label class="opt"><input type="radio" name="trec" value="use"> Only when I use the app</label><label class="opt"><input type="radio" name="trec" value="daily" checked> Also once a day, just after midnight</label><label class="opt"><input type="radio" name="trec" value="hourly"> Also every hour</label></div>
+    <p class="hint">The tray icon shows a dot when one thing needs you today, and the number when there are two or more. It is counted whenever the app reads your data: when it starts, when a card opens and when Settings are saved. A scheduled count looks at your portfolio file once, on this PC; nothing is sent anywhere.</p>
+    <hr class="hair">
     <div class="lbl">WATCH MY BACK · SHORT NOTICES NEAR THE CLOCK</div>
     <label class="opt"><input type="checkbox" id="setWatch"> Tell me when something in my data needs a look</label>
     <label class="opt"><input type="checkbox" id="setNews"> Show division news from the shared news document</label>
@@ -1744,7 +1748,7 @@ PS C:\work&gt; </div>
     <div class="fresh" id="c-fresh"></div>
   </div>
   <div class="slot hero5" id="c-hero"><div class="hl"><b id="c-hero-n"></b><span id="c-hero-u"></span></div><div class="hs" id="c-hero-s"></div><div class="hgauge" id="c-hgauge" role="img" aria-label=""><svg viewBox="0 0 112 62" aria-hidden="true"><path class="tr" pathLength="100" d="M10 56 A46 46 0 0 1 102 56"/><path class="fg" id="c-hgfg" pathLength="100" d="M10 56 A46 46 0 0 1 102 56"/></svg><b id="c-hgv"></b><span>OF THE CLOCK</span></div></div>
-  <div class="slot ribbon5" id="c-ribbon-slot"><div class="cap">Goal and forecast on the calendar</div><svg id="c-ribbon" viewBox="0 0 300 78" role="img" aria-label=""></svg><div class="rt" id="c-ribbon-t"></div></div>
+  <div class="slot ribbon5" id="c-ribbon-slot"><div class="cap">Goal and forecast on the calendar</div><svg id="c-ribbon" viewBox="0 0 300 80" role="img" aria-label=""></svg><div class="rt" id="c-ribbon-t"></div></div>
   <div class="clockwrap">
   <div class="railcol" id="c-rail" aria-hidden="true"><b id="c-rail-n"></b><span class="cap" id="c-rail-cap">DAYS TO GOAL</span><span class="rdelta" id="c-rail-d"></span><span class="rconf" id="c-rail-c"></span></div>
   <div class="slot clock">
@@ -2051,11 +2055,13 @@ function paintClock(){     /* the taskbar clock: the real time to the second and
   const x = new Date(CLOCK_FIXED ? BASE_DAY : realToday()); date.textContent = (x.getUTCMonth() + 1) + "/" + x.getUTCDate() + "/" + x.getUTCFullYear();
   date.parentElement.title = CLOCK_FIXED ? "Clock fixed for testing" : "The time on this computer (" + SIM_TZ.replace(/_/g, " ") + ")";
   /* "today" has changed (midnight passed while the page was open): what needs the person today is counted again */
-  const day = +x;
-  if(clockDay !== null && day !== clockDay){ try{ refreshTrayState(); if(isOpen("hub")) paintHub(); if(current && card.style.display === "block") fill(current); }catch(e){} }
-  clockDay = day;
+  /* the scheduled count the person chose in Settings: never ("use"), once just after midnight ("daily"), or at each hour as well ("hourly") */
+  const day = +x, hour = CLOCK_FIXED ? 10 : wallNow().hour;
+  const due = clockDay !== null && state.trayRecount !== "use" && (day !== clockDay || (state.trayRecount === "hourly" && hour !== clockHour));
+  if(due){ try{ refreshTrayState(); if(isOpen("hub")) paintHub(); if(current && card.style.display === "block") fill(current); }catch(e){} }
+  clockDay = day; clockHour = hour;
 }
-let clockDay = null;
+let clockDay = null, clockHour = null;
 setInterval(paintClock, CLOCK_FIXED ? 10000 : 1000);
 document.addEventListener("visibilitychange", () => { if(!document.hidden) paintClock(); });
 paintClock();
@@ -2320,7 +2326,7 @@ const state = { dir:"w", look:"w", form:"full", autoHide:10, mode:"whisper", esc
   replies:null,
   density:"comfortable", ts:"standard", lookupStyle:"box", recentsOn:true, recents:[], pins:[],
   cardFields:["applicant", "established", "project", "agentCo", "agentEmail", "applicantEmail", "myNotes", "doc356h", "doc32p1"],
-  watchOn:false, newsOn:false, newsFile:"", watchCap:3, wDay:null, wCount:0, wSeen:new Set(), wSnoozed:new Set(), hubSeen:new Set() };
+  watchOn:false, newsOn:false, newsFile:"", watchCap:3, trayRecount:"daily", wDay:null, wCount:0, wSeen:new Set(), wSnoozed:new Set(), hubSeen:new Set() };
 const steps = {};
 const APP_WINS = ["lookup", "plib", "settings", "draft", "wlist", "replies", "actwin", "todo", "mytodo", "notes", "ask", "today", "hub"];
 
@@ -2482,6 +2488,7 @@ $("setNews").addEventListener("change", e => setNewsOn(e.target.checked));
 $("newsPick").addEventListener("click", () => { state.newsFile = "Division-News.docx (simulated; a synced SharePoint folder)"; $("newsFile").value = state.newsFile; $("watchStatus").textContent = "Document chosen. Tick the box above to show its news."; });
 $("newsClear").addEventListener("click", () => { state.newsFile = ""; $("newsFile").value = ""; setNewsOn(false); });
 document.querySelectorAll("input[name=wcap]").forEach(r => r.addEventListener("change", () => { if(r.checked){ state.watchCap = +r.value; showNextWhisper(); } }));
+document.querySelectorAll("input[name=trec]").forEach(r => r.addEventListener("change", () => { if(r.checked){ state.trayRecount = r.value; refreshTrayState(); } }));     /* saving a setting is a use: it counts */
 $("newsPush").addEventListener("click", () => {
   const t = new Date(demoToday());
   NEWS_DOC.unshift({ date:[t.getUTCFullYear(), t.getUTCMonth() + 1, t.getUTCDate()], text:NEWS_SAMPLES[newsPushed++ % NEWS_SAMPLES.length] });
@@ -2491,6 +2498,7 @@ $("newsPush").addEventListener("click", () => {
 function syncRound19(){
   $("setWatch").checked = state.watchOn; $("setNews").checked = state.newsOn; $("newsFile").value = state.newsFile;
   document.querySelectorAll("input[name=wcap]").forEach(r => { r.checked = +r.value === state.watchCap; });
+  document.querySelectorAll("input[name=trec]").forEach(r => { r.checked = r.value === state.trayRecount; });
   document.querySelectorAll("#setFields input").forEach(c => { c.checked = state.cardFields.includes(c.dataset.field); });
 }
 
@@ -2795,10 +2803,14 @@ const card = $("card"), scrim = $("scrim"), chip = $("chip");
 const RING_C = 2 * Math.PI * 21;
 
 /* [id, name, token set it uses, form]. L–O are compact boxes that borrow a sibling's tokens and expand into its full card. */
-const LOOKS = [["w","W · Graphite Gauge","w","full"],["v","V · Glass Sheet","v","full"],["t","T · Pocket Plain","t","full"],["u","U · Calendar Ribbon","u","full"],["a","A · Quiet Fluent","a","full"],["b","B · Docket Ledger","b","full"],["c","C · Signal","c","full"],["d","D · Draft","d","full"],["e","E · Instrument","e","full"],
+const ALL_LOOKS = [["w","W · Graphite Gauge","w","full"],["v","V · Glass Sheet","v","full"],["t","T · Pocket Plain","t","full"],["u","U · Calendar Ribbon","u","full"],["a","A · Quiet Fluent","a","full"],["b","B · Docket Ledger","b","full"],["c","C · Signal","c","full"],["d","D · Draft","d","full"],["e","E · Instrument","e","full"],
   ["f","F · Agency Bronze","f","full"],["g","G · Harbor Teal","g","full"],["h","H · Sage Clinical","h","full"],["i","I · Indigo Dossier","i","full"],["j","J · Cobalt Timeline","j","full"],["k","K · Graphite Quiet","k","full"],
   ["l","L · Graphite Strip","k","strip"],["m","M · Fluent Tile","a","tile"],["n","N · Bronze Ticket","f","ticket"],["o","O · Teal Badge","g","badge"],
   ["p","P · Bronze Gauge","p","full"],["q","Q · Bronze Folder","q","full"],["r","R · Bronze Rail","r","full"],["s","S · Bronze Tag","s","full"]];
+/* Round 23: eight looks are offered, here and in the Windows app: six full cards and two compact boxes. The other fifteen keep their
+   styles in this page (the Appearance Lab still shows them, folded), but nothing lists them, and a backup that names one falls back to the default. */
+const OFFERED = ["w", "v", "u", "t", "k", "p", "l", "o"];
+const LOOKS = OFFERED.map(id => ALL_LOOKS.find(l => l[0] === id));
 const AUTO_CHOICES = [0, 10, 20, 40];
 const CONSENTS = [["full","① Full card: the hotkey press is the consent"],["peek","② Peek first: expand for the full brief"],["whisper","③ Whisper invite: opens only if clicked (default)"]];
 let prompts = [
@@ -3704,11 +3716,22 @@ function alertReasons(){
     out.push({ id:m.id, kind:"mail", text:`ANDA ${m.id}: a message marked urgent has had no reply for ${m.daysOld} days` });
   return out;
 }
+/* What the tray icon carries: nothing, a dot for one thing, the number for two to nine, "9+" beyond. The same rule as the Windows app's pictures. */
+const trayBadge = n => n <= 0 ? "" : n === 1 ? "dot" : n > 9 ? "9+" : String(n);
+function trayGlyph(n, big){
+  const t = trayBadge(n), loupe = big
+    ? '<rect x="2" y="2" width="60" height="60" rx="15" fill="#3a3f8f"/><rect x="2.75" y="2.75" width="58.5" height="58.5" rx="14.3" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width="1.5"/><circle cx="28" cy="28" r="14" fill="none" stroke="#fff" stroke-width="5.5"/><line x1="39" y1="39" x2="51" y2="51" stroke="#fff" stroke-width="7" stroke-linecap="round"/>'
+    : '<rect x="1" y="1" width="62" height="62" rx="15" fill="#3a3f8f"/><circle cx="27" cy="27" r="14.5" fill="none" stroke="#fff" stroke-width="8"/><line x1="38.5" y1="38.5" x2="53" y2="53" stroke="#fff" stroke-width="10" stroke-linecap="round"/>';
+  const badge = `<circle cx="44" cy="20" r="20" fill="#fff"/><circle cx="44" cy="20" r="17.5" fill="#f2a93b"/><text x="44" y="${t.length > 1 ? 28 : 30}" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-weight="800" font-size="${t.length > 1 ? 22 : 28}" fill="#1d2329">${t}</text>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">${loupe}${badge}</svg>`)}")`;
+}
 function refreshTrayState(){
   const n = alertReasons().length, g = document.querySelector("#appIcon .glyph");
   if(!g) return;
-  g.classList.toggle("alert", n > 0);
-  const fg = document.querySelector("#flyIcon .glyph"); if(fg) fg.classList.toggle("alert", n > 0);     /* the same icon while it sits behind the ^ arrow */
+  g.classList.toggle("alert", n > 0); g.dataset.count = trayBadge(n);
+  g.style.backgroundImage = n > 1 ? trayGlyph(n, false) : "";     /* one thing: the dot (from the stylesheet). Two or more: the number. */
+  const fg = document.querySelector("#flyIcon .glyph");            /* the same icon while it sits behind the ^ arrow */
+  if(fg){ fg.classList.toggle("alert", n > 0); fg.dataset.count = trayBadge(n); fg.style.backgroundImage = n > 1 ? trayGlyph(n, true) : ""; }
   const say = n ? ` ${n} ${n === 1 ? "thing needs" : "things need"} your attention today.` : "";
   $("appIcon").setAttribute("aria-label", "ANDA Companion (Notula) tray icon." + say + " Click for lookup, right-click or long-press for the menu.");
   /* one tooltip, written in one place: the connection, then what needs the person. It never names an ANDA: a tooltip can be read over a shoulder. */
@@ -4075,7 +4098,8 @@ $("plClose").addEventListener("click", () => closeApp("plib"));
 
 /* settings */
 function applyLook(id){
-  const [, , tokens, form0] = LOOKS.find(l => l[0] === id);
+  const found = LOOKS.find(l => l[0] === id); if(!found) return;     /* a look that is no longer offered changes nothing */
+  const [, , tokens, form0] = found;
   const form = form0;                                     /* the look the person chose applies in both editions (round 19) */
   state.look = id; state.dir = tokens; state.form = form; setDir(tokens);
   /* a compact box that is open follows the change in place */
@@ -6124,7 +6148,7 @@ function snapSettings(){
     actions:JSON.parse(JSON.stringify(s.actions)), agents:JSON.parse(JSON.stringify(s.agents)), todoShowFromData:s.todoAuto, todoRefreshSeconds:s.todoRefresh,
     myTodoMode:s.clMode, adaptive:s.adaptive, allTools:s.allTools,
     textSize:s.ts, density:s.density, lookupStyle:s.lookupStyle, rememberRecents:s.recentsOn, pins:[...s.pins],
-    cardFields:[...s.cardFields], watchBack:s.watchOn, divisionNews:s.newsOn, noticesPerDay:s.watchCap, andaPage:s.andaUrl };   /* the counts of opened sections belong to this PC: they are not in a backup */
+    cardFields:[...s.cardFields], watchBack:s.watchOn, divisionNews:s.newsOn, noticesPerDay:s.watchCap, andaPage:s.andaUrl, trayRecount:s.trayRecount };   /* the counts of opened sections belong to this PC: they are not in a backup */
 }
 const DEFAULT_SETTINGS = { ...snapSettings(), allTools:false }, DEFAULT_PROMPTS = prompts.map(p => [...p]), DEFAULT_REPLIES = state.replies.map(r => ({ ...r }));
 const oneOf = (v, list, fallback) => list.includes(v) ? v : fallback;
@@ -6150,7 +6174,7 @@ function applySettings(x){
   s.ts = oneOf(x.textSize, ["standard", "large", "xl"], d.textSize); s.density = oneOf(x.density, ["comfortable", "compact"], d.density); s.lookupStyle = oneOf(x.lookupStyle, ["box", "bar"], d.lookupStyle);
   s.andaUrl = typeof x.andaPage === "string" ? x.andaPage.slice(0, 300).trim() : d.andaPage;     /* kept as written: it is checked each time the button is pressed */
   s.cardFields = Array.isArray(x.cardFields) ? DETAIL_FIELDS.map(f => f[0]).filter(k => x.cardFields.includes(k)) : [...d.cardFields];
-  s.watchOn = typeof x.watchBack === "boolean" ? x.watchBack : d.watchBack; s.watchCap = oneOf(x.noticesPerDay, WATCH_CAPS, d.noticesPerDay);
+  s.watchOn = typeof x.watchBack === "boolean" ? x.watchBack : d.watchBack; s.watchCap = oneOf(x.noticesPerDay, WATCH_CAPS, d.noticesPerDay); s.trayRecount = oneOf(x.trayRecount, ["use", "daily", "hourly"], d.trayRecount);
   s.newsOn = x.divisionNews === true && !!s.newsFile;   /* the document's location belongs to this PC and is never in a backup */
   s.recentsOn = typeof x.rememberRecents === "boolean" ? x.rememberRecents : d.rememberRecents; s.pins = Array.isArray(x.pins) ? [...new Set(x.pins.filter(six))].slice(0, PIN_MAX) : []; applyDisplay();
   s.actions = x.actions === undefined ? starterActions() : normActions(x.actions, Object.values(s.keys));

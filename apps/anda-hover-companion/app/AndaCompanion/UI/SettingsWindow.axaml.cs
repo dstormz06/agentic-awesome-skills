@@ -33,7 +33,7 @@ public partial class SettingsWindow : Window
         InitializeComponent();
 
         // The default look is listed first, as in the simulation; the others follow in their usual order.
-        foreach (var a in Appearances.All.OrderBy(x => x.Id == Appearances.Default ? 0 : 1))
+        foreach (var a in Appearances.Offered)
         {
             var rb = new RadioButton
             {
@@ -383,6 +383,12 @@ public partial class SettingsWindow : Window
             var rb = new RadioButton { Content = $"{days}+ days late", GroupName = "late", IsChecked = days == _settings.UrgentLateDays, Margin = new Avalonia.Thickness(0, 0, 14, 2) };
             rb.IsCheckedChanged += (_, _) => { if (!_loading && rb.IsChecked == true) { _settings.UrgentLateDays = days; Apply(); } };
             LatePanel.Children.Add(rb);
+        }
+        foreach (var (id, label) in TrayRecount.Choices)
+        {
+            var rb = new RadioButton { Content = label, GroupName = "trayrecount", IsChecked = id == TrayRecount.Normalize(_settings.TrayRecount), Margin = new Avalonia.Thickness(0, 0, 14, 2) };
+            rb.IsCheckedChanged += (_, _) => { if (!_loading && rb.IsChecked == true) { _settings.TrayRecount = id; Apply(); } };
+            TrayRecountPanel.Children.Add(rb);
         }
         foreach (int days in Settings.HolidayLeadChoices)
         {

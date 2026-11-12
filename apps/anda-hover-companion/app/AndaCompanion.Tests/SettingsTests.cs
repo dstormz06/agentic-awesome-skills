@@ -10,7 +10,7 @@ public class SettingsTests
     public void Defaults_match_the_product_decisions()
     {
         var s = new Settings();
-        Assert.Equal(AppearanceId.T, s.Appearance);      // T · Pocket Plain is the default
+        Assert.Equal(AppearanceId.W, s.Appearance);      // W · Graphite Gauge is the default (round 23)
         Assert.Equal(10, s.AutoHideSeconds);
         Assert.Equal(ConsentModel.Whisper, s.Consent);     // whisper invite is the default (tester feedback)
         Assert.True(s.EscalateUrgent); Assert.Equal(7, s.UrgentLateDays); Assert.Equal(3, s.HolidayLeadDays);
@@ -34,15 +34,17 @@ public class SettingsTests
     public void A_missing_file_gives_defaults()
     {
         var s = SettingsService.Load(Path.Combine(Temp.NewDir(), "nope.json"));
-        Assert.Equal(AppearanceId.T, s.Appearance);
+        Assert.Equal(AppearanceId.W, s.Appearance);
     }
 
     [Fact]
     public void An_existing_testers_choice_is_kept_when_the_default_changes()
     {
         string path = Path.Combine(Temp.NewDir(), "settings.json");
-        File.WriteAllText(path, "{ \"Appearance\": 0 }");          // saved by an earlier build: A
-        Assert.Equal(AppearanceId.A, SettingsService.Load(path).Appearance);
+        File.WriteAllText(path, "{ \"Appearance\": 10 }");         // saved by an earlier build: K, which is still offered
+        Assert.Equal(AppearanceId.K, SettingsService.Load(path).Appearance);
+        File.WriteAllText(path, "{ \"Appearance\": 0 }");          // A was retired in round 23: the default takes its place
+        Assert.Equal(AppearanceId.W, SettingsService.Load(path).Appearance);
     }
 
     [Fact]
@@ -51,7 +53,7 @@ public class SettingsTests
         string path = Path.Combine(Temp.NewDir(), "settings.json");
         File.WriteAllText(path, "{ \"Appearance\": 99, \"AutoHideSeconds\": -5 }");
         var s = SettingsService.Load(path);
-        Assert.Equal(AppearanceId.T, s.Appearance);
+        Assert.Equal(AppearanceId.W, s.Appearance);
         Assert.Equal(10, s.AutoHideSeconds);
     }
 

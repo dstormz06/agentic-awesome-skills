@@ -318,6 +318,11 @@ public partial class CardWindow : Window
     // Pocket (T): the answer first, and Copy status kept at the bottom of the card.
     private StackPanel? _hero;
     private TextBlock? _heroNumber, _heroUnit, _heroSub, _copyLabel;
+    // W: a half dial beside the answer. U: the calendar ribbon under it, with its sentence.
+    private StackPanel? _heroGaugeBox, _ribbonSlot;
+    private ProgressControl? _heroGauge;
+    private CalendarRibbon? _ribbon;
+    private TextBlock? _ribbonText;
     private DockPanel? _pocketDock;
     private bool Pocket => _hero is not null;
 
@@ -340,9 +345,32 @@ public partial class CardWindow : Window
                 var line = new WrapPanel { Orientation = Avalonia.Layout.Orientation.Horizontal };
                 line.Children.Add(_heroNumber); line.Children.Add(_heroUnit);
                 _hero = new StackPanel { Name = "Hero", Margin = new Thickness(h, 4, h, v + 2) };
-                _hero.Children.Add(line); _hero.Children.Add(_heroSub);
+                if (look.HeroGauge)
+                {
+                    // W: the answer on the left, and on the right how much of the review clock has run, as a half dial with the figure inside it.
+                    _heroGauge = new ProgressControl { Width = 96, Height = 53 };
+                    _heroGaugeBox = new StackPanel { Name = "HeroGauge", Spacing = 1, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center, Margin = new Thickness(14, 0, 0, 0) };
+                    _heroGaugeBox.Children.Add(_heroGauge);
+                    _heroGaugeBox.Children.Add(new TextBlock { Text = "OF THE CLOCK", FontSize = 9.5, FontWeight = FontWeight.Bold, LetterSpacing = 0.8, Foreground = (IBrush)res["C.Ink3"]!, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center });
+                    var answer = new StackPanel(); answer.Children.Add(line); answer.Children.Add(_heroSub);
+                    var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto") };
+                    Grid.SetColumn(_heroGaugeBox, 1);
+                    grid.Children.Add(answer); grid.Children.Add(_heroGaugeBox);
+                    _hero.Children.Add(grid);
+                }
+                else { _hero.Children.Add(line); _hero.Children.Add(_heroSub); }
+                if (look.Ribbon)
+                {
+                    // U: the weeks around the two dates, and the same in a sentence.
+                    _ribbon = new CalendarRibbon();
+                    _ribbonText = new TextBlock { FontSize = 12, Foreground = (IBrush)res["C.Ink2"]!, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 4, 0, 0) };
+                    _ribbonSlot = new StackPanel { Name = "Ribbon", Margin = new Thickness(h, 0, h, v) };
+                    _ribbonSlot.Children.Add(new TextBlock { Classes = { "lbl" }, Text = "GOAL AND FORECAST ON THE CALENDAR", Margin = new Thickness(0, 0, 0, 2) });
+                    _ribbonSlot.Children.Add(_ribbon); _ribbonSlot.Children.Add(_ribbonText);
+                }
                 Avalonia.Automation.AutomationProperties.SetLiveSetting(_hero, Avalonia.Automation.AutomationLiveSetting.Polite);
                 Slots.Children.Insert(Slots.Children.IndexOf(ClockPanel), _hero);
+                if (_ribbonSlot is not null) Slots.Children.Insert(Slots.Children.IndexOf(ClockPanel), _ribbonSlot);
                 HeaderBand.Padding = new Thickness(h, v + 4, h, 6);
 
                 // One main action: Copy status is filled, as wide as the card, and stays at the bottom while the rest scrolls. Enter triggers it.
@@ -492,6 +520,23 @@ public partial class CardWindow : Window
                 _heroNumber.Foreground = (IBrush)Application.Current!.Resources[d > 0 ? "C.Warn" : "C.Good"]!;
                 _heroUnit!.Text = d == 0 ? "the goal date" : $"day{(n == 1 ? "" : "s")} {(d > 0 ? "later than" : "ahead of")} the goal";
                 _heroSub!.Text = $"Goal {record.GoalDate} · Forecast {record.ForecastDate}" + (record.ForecastConfidence.Length > 0 ? $" · {record.ForecastConfidence}" : "");
+            }
+            if (_heroGaugeBox is not null && _heroGauge is not null)
+            {
+                _heroGaugeBox.IsVisible = record.HasProgress;     // no percentage in the data: no dial, never an estimate
+                _heroGauge.Value = Math.Max(0, record.ProgressPct);
+                Avalonia.Automation.AutomationProperties.SetName(_heroGauge, $"{Math.Max(0, record.ProgressPct)} percent of the review clock has run");
+            }
+            if (_ribbonSlot is not null && _ribbon is not null && _ribbonText is not null)
+            {
+                bool both = gap && !mini && record.GoalDateValue is not null && record.ForecastDateValue is not null;
+                _ribbonSlot.IsVisible = both;
+                if (both)
+                {
+                    _ribbon.Set(record.GoalDateValue, record.ForecastDateValue, Calendar);
+                    _ribbonText.Text = CalendarRibbon.Describe(record.GoalDateValue!.Value, record.ForecastDateValue!.Value, Calendar);
+                    Avalonia.Automation.AutomationProperties.SetName(_ribbon, "Calendar ribbon. " + _ribbonText.Text);
+                }
             }
         }
         if (_railDays is not null)

@@ -17,8 +17,7 @@
   </ItemGroup>
   <ItemGroup>
     <!-- The Loupe icon: the tray picture (rest and "needs a look") is read from here; the exe icon is the .ico above. Drawn by Assets/make-icons.mjs. -->
-    <AvaloniaResource Include="Assets\tray-32.png" />
-    <AvaloniaResource Include="Assets\tray-32-alert.png" />
+    <AvaloniaResource Include="Assets\tray-32*.png" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.3.18" />

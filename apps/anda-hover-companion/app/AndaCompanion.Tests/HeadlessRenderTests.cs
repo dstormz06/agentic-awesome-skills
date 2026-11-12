@@ -68,7 +68,7 @@ public class HeadlessRenderTests : IClassFixture<HeadlessFixture>
 
         Assert.NotNull(result.frame);
         Assert.InRange(result.frame!.PixelSize.Width, 300, 700);
-        Assert.InRange(result.frame.PixelSize.Height, 300, 900);
+        Assert.InRange(result.frame.PixelSize.Height, 300, 1100);   // U adds the calendar under the answer; on a real screen the card is limited to the work area and scrolls
 
         // light surface: relative luminance well above mid
         double lum = (0.2126 * result.Color.R + 0.7152 * result.Color.G + 0.0722 * result.Color.B) / 255.0;
@@ -151,18 +151,18 @@ public class HeadlessRenderTests : IClassFixture<HeadlessFixture>
                     "EscalateCheck", "LatePanel", "HolidayPanel", "PeekKeyBox", "LookupKeyBox", "DraftKeyBox", "PortfolioBox", "NotesBox", "ReferenceBox", "InstructionsBox", "UsageCheck",
                     "ConnBanner", "MiddleCheck", "ProviderPanel", "MyApiExpander", "ApiEndpoint", "TonePanel", "SignOffBox", "RepliesManage", "ReferenceUrlBox", "ReferenceUpdate", "OutlookOn",
                     "ActionsPanel", "ActionAdd", "AgentsPanel", "AgentAdd", "TodoAutoCheck", "TodoRefreshPanel", "TodoOpen",
-                    "MyTodoKeyBox", "MyTodoModePanel", "MyTodoOpen", "AdaptiveCheck", "AllToolsCheck", "SuggestedBtn" }
+                    "MyTodoKeyBox", "MyTodoModePanel", "MyTodoOpen", "AdaptiveCheck", "AllToolsCheck", "SuggestedBtn", "TrayRecountPanel" }
                 .Where(n => win.FindControl<Control>(n) is not null).ToList();
             int radios = win.GetVisualDescendants().OfType<RadioButton>().Count();
             win.Close();
             return (found, radios);
         }, CancellationToken.None);
 
-        Assert.Equal(44, names.found.Count);
-        // nineteen appearances + four auto-hide choices + three consent models + three "late" choices + four holiday-lead choices
+        Assert.Equal(45, names.found.Count);
+        // eight offered appearances + three choices for the tray count + four auto-hide choices + three consent models + three "late" choices + four holiday-lead choices
         // + four connection choices + five tones + four middle-click keys + two Outlook clouds + three Outlook message counts + five to-do refresh choices + two to-do list modes. (The four API-timeout choices sit inside the collapsed
         // "My API" expander, whose content is not part of the visual tree until it is opened.)
-        Assert.Equal(20 + 4 + 3 + 3 + 4 + 4 + 5 + 4 + 2 + 3 + 5 + 2, names.radios);
+        Assert.Equal(8 + 3 + 4 + 3 + 3 + 4 + 4 + 5 + 4 + 2 + 3 + 5 + 2, names.radios);
     }
 
     [Fact]

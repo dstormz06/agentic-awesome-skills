@@ -39,7 +39,7 @@ MAKE IT YOURS (tray icon, then Settings)
   Tick Maintenance, "Show all tools" to also see the two to-do lists, agents and dates. The looks are
   always under "Look and feel". Nothing is deleted, and what you chose comes back. Items below
   marked (all tools) appear only then.
-  - Appearance: 20 looks (T is the default; L to O are small boxes that stay out of the way
+  - Appearance: 8 looks (W is the default; L and O are small boxes that stay out of the way
     of an email), auto-hide (10 seconds to start), transparency (40 to 100 percent, starting at 90), how a card opens.
   - Shortcuts: your own keys, with a live note on any that another program already uses.
     An optional middle-click is off by default.
@@ -61,8 +61,8 @@ MAKE IT YOURS (tray icon, then Settings)
   - Tray icon, then Prompt library: add your own lens.
 
 THE NEWER DESIGN
-  This build has the Loupe icon and the default card that leads with one answer and one main
-  action (Copy status, or Enter). One Bar, Today, recent ANDAs, card details with Copy, notices
+  This build has the Loupe icon, eight looks, and a default card (W) that leads with one answer,
+  a gauge beside it, and one main action (Copy status, or Enter). One Bar, Today, recent ANDAs, card details with Copy, notices
   near the clock and the one question before sending are shown in the browser simulation only.
   TRIAL-SHEET.md lists five everyday tasks for judging whether the design helps.
 

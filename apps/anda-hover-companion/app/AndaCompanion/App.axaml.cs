@@ -89,7 +89,7 @@ public partial class App : Application
             _hotkeys.WaitReady(TimeSpan.FromMilliseconds(1500));
 
             // A tray failure must be reported, not fatal: the hotkeys still work without it.
-            try { _tray = BuildTrayIcon(desktop); RefreshTrayState(); }
+            try { _tray = BuildTrayIcon(desktop); RefreshTrayState(); ArmTrayRecount(); }
             catch (Exception ex) { _trayError = ex.Message; }
             desktop.Exit += (_, _) => { _hotkeys.Dispose(); _mouse?.Dispose(); _outlook?.Dispose(); _tray?.Dispose(); };
             ConnectionStatus.Changed += () => Dispatcher.UIThread.Post(UpdateTrayTip);
@@ -384,7 +384,7 @@ public partial class App : Application
         menu.Add(new NativeMenuItemSeparator());
 
         // Round 19: the looks are offered in both editions (the owner asked for them back).
-        menu.Add(BuildRadioSubmenu("Appearance", Appearances.All.Select(a => (a.Name, (object)a.Id)),
+        menu.Add(BuildRadioSubmenu("Appearance", Appearances.Offered.Select(a => (a.Name, (object)a.Id)),
             () => (object)_settings.Appearance,
             value => { _settings.Appearance = (AppearanceId)value; ApplySettings(); },
             separatorBefore: Appearances.L.Name));
@@ -489,6 +489,7 @@ public partial class App : Application
         ApplyMouseTrigger();
         ApplyData();
         RefreshTrayState();   // the data source may have changed
+        ArmTrayRecount();     // and so may the schedule of the count
         // Findings from an agent that has since been changed or switched off are not shown any more.
         if (AgentsFingerprint() != _agentsFingerprint) { _agentsFingerprint = AgentsFingerprint(); _agents.ClearCache(); }
         RebuildActionsMenu();
@@ -508,8 +509,23 @@ public partial class App : Application
     }
 
     private int _urgentShown = -1;
+    private Avalonia.Threading.DispatcherTimer? _trayRecountTimer;
 
-    /// <summary>Recounts what needs the person today and shows or removes the amber dot (round 22: not "urgent" any more). Called only when the app reads data; never on a timer.</summary>
+    /// <summary>
+    /// Sets the one timer for the scheduled count of the tray icon, as chosen in Settings: none, just after midnight, or at each hour too.
+    /// Each count looks at the data source once (a portfolio file is read again only if it changed) and sets the timer for the next one.
+    /// </summary>
+    private void ArmTrayRecount()
+    {
+        _trayRecountTimer?.Stop(); _trayRecountTimer = null;
+        if (_tray is null || SelfTestRun is not null) return;
+        if (TrayRecount.Next(DateTime.Now, _settings.TrayRecount) is not { } wait) return;
+        _trayRecountTimer = new Avalonia.Threading.DispatcherTimer { Interval = wait < TimeSpan.FromSeconds(5) ? TimeSpan.FromSeconds(5) : wait };
+        _trayRecountTimer.Tick += (_, _) => { RefreshTrayState(); ArmTrayRecount(); };
+        _trayRecountTimer.Start();
+    }
+
+    /// <summary>Recounts what needs the person today and shows the dot (one thing), the number (two or more) or nothing. Called when the app reads data and, if the person chose it in Settings, on a schedule (see ArmTrayRecount).</summary>
     private void RefreshTrayState()
     {
         if (_tray is null) return;
@@ -517,9 +533,9 @@ public partial class App : Application
         try { urgent = TrayState.AlertCount(_repository, Today()); }
         catch (Exception) { urgent = 0; }                       // an unreadable file must never take the tray icon down
         if (urgent == _urgentShown) return;
-        bool dotChanged = _urgentShown < 0 || (urgent > 0) != (_urgentShown > 0);
+        bool pictureChanged = _urgentShown < 0 || TrayState.Picture(urgent) != TrayState.Picture(_urgentShown);
         _urgentShown = urgent;
-        if (dotChanged) _tray.Icon = new WindowIcon(RenderTrayBitmap(urgent > 0));
+        if (pictureChanged) _tray.Icon = new WindowIcon(RenderTrayBitmap(urgent));
         UpdateTrayTip();
     }
 
@@ -548,12 +564,12 @@ public partial class App : Application
         }
     }
 
-    /// <summary>The Loupe icon for the tray. At rest it carries no amber. <paramref name="needsLook"/> adds the small amber dot, shown only while something needs the person today (see TrayState). If the picture cannot be read, a plain drawn tile is used so the tray never has no icon.</summary>
-    private static Bitmap RenderTrayBitmap(bool needsLook = false)
+    /// <summary>The Loupe icon for the tray. At rest it carries no amber. <paramref name="alerts"/> chooses the picture: plain for none, a dot for one thing, the number for more (see TrayState). If the picture cannot be read, a plain drawn tile is used so the tray never has no icon.</summary>
+    private static Bitmap RenderTrayBitmap(int alerts = 0)
     {
         try
         {
-            using var stream = Avalonia.Platform.AssetLoader.Open(new Uri(needsLook ? "avares://AndaCompanion/Assets/tray-32-alert.png" : "avares://AndaCompanion/Assets/tray-32.png"));
+            using var stream = Avalonia.Platform.AssetLoader.Open(new Uri("avares://AndaCompanion/Assets/" + TrayState.Picture(alerts)));
             return new Bitmap(stream);
         }
         catch (Exception)
