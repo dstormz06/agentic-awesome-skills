@@ -38,7 +38,7 @@ MAKE IT YOURS (tray icon, then Settings)
   top jumps to any section. Nothing here needs a rebuild.
   Tick Maintenance, "Show all tools" to also see the two to-do lists, agents, the looks and dates. Nothing
   is deleted, and what you chose comes back. Items below marked (all tools) appear only then.
-  - (all tools) Appearance: 19 looks (K is the default; L to O are small boxes that stay out of the way
+  - (all tools) Appearance: 20 looks (T is the default; L to O are small boxes that stay out of the way
     of an email), auto-hide (10 seconds to start), transparency (40 to 100 percent, starting at 92), how a card opens.
   - Shortcuts: your own keys, with a live note on any that another program already uses.
     An optional middle-click is off by default.
@@ -59,10 +59,11 @@ MAKE IT YOURS (tray icon, then Settings)
   - Back up, restore or reset your settings.
   - Tray icon, then Prompt library: add your own lens.
 
-ROUND 18 (CALMER DESIGN)
-  The new card, One Bar, Today and recent ANDAs are shown in the browser simulation only. This
-  build has the new Loupe icon; its cards still use the earlier default look until the design is
-  ported. TRIAL-SHEET.md lists five everyday tasks for judging whether the new design helps.
+THE NEWER DESIGN
+  This build has the Loupe icon and the default card that leads with one answer and one main
+  action (Copy status, or Enter). One Bar, Today, recent ANDAs, card details with Copy, notices
+  near the clock and the one question before sending are shown in the browser simulation only.
+  TRIAL-SHEET.md lists five everyday tasks for judging whether the design helps.
 
 IF SOMETHING DOES NOT WORK
   - Nothing appears when you press Ctrl+Alt+A: another program may own that combination.

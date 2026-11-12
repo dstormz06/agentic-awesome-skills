@@ -15,10 +15,11 @@ It comes in two parts that work alone or together:
 - **Edge extension** (`extension/`): works in Edge and other Chromium browsers. It runs only when asked, on the one tab, with no network
   access. With the app connected (native messaging) it uses the app's portfolio and rules.
 
-**Round 18 (a calmer, more professional design).** It is built and published first in the browser simulation and the lab, for the owner to review. The Windows
-app has only the new **Loupe** icon so far; it still opens with the earlier default look (K · Graphite Quiet) until the design is ported. The new default card (**T · Pocket Plain**), the two new
-looks (**U**, **V**), **One Bar**, **Today**, recent and kept ANDAs, spacing and text size are described in `DESIGN.md` §11b. The five-task way to judge whether it helps in daily
-use is `demo/TRIAL-SHEET.md`.
+**Where the newer design stands (rounds 18 and 19).** New work is built and published first in the browser simulation, for the owner to review, and ported to the Windows app
+afterwards. **In the Windows app today:** the Loupe icon, the default card **T · Pocket Plain** (one answer first, one main action), the tray icon's amber dot for an urgent ANDA, the
+N and A number prefixes (N210793 is an NDA and is refused; A210793 is read as ANDA 210793) and the new default shortcuts. **Only in the simulation so far:** the looks U and V, One Bar,
+Today, recent and kept ANDAs, spacing and text size (round 18), and card details with Copy, notices near the clock with division news, and one question before sending (round 19).
+`DESIGN.md` §11b and §11c describe them; `demo/TRIAL-SHEET.md` is the five-task way to judge whether the design helps in daily use.
 
 All data in the demos is fictional. This is a prototype, not an FDA product. It has not been used by a real RPM, on real data, in Edge
 itself, or on a managed FDA computer. Please read `VERIFICATION.md` for what has and has not been proven.

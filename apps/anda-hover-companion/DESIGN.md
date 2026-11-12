@@ -177,12 +177,11 @@ a deep link to the record in the system of record.
 
 ## 5. Visual language
 
-**Appearance is a preference, never information.** The Windows app ships with **nineteen selectable looks** today
-(Settings → Appearance): fifteen full cards (A–K and P–S) and four compact boxes (L–O). **Round 18 adds three more, T to V,
-in the simulation and the lab: 22 looks in all, 18 full cards and four compact boxes.** **No look draws a grid, hatching, texture or
-other pattern behind its content** (the owner's decision, 2026-11-03). **In the Windows app, K · Graphite Quiet is still the default**
-(changed from A on 2026-11-02 by the product owner). **In the simulation and the lab the default is T · Pocket Plain**, chosen by the
-owner on 2026-11-06; the Windows app takes it when the new design is ported (§11b). All full looks share identical anatomy, slot
+**Appearance is a preference, never information.** The Windows app ships with **twenty selectable looks** today
+(Settings → Appearance): sixteen full cards (A–K, P–S and T) and four compact boxes (L–O). **The simulation and the lab have two more, U and V:
+22 looks in all, 18 full cards and four compact boxes.** **No look draws a grid, hatching, texture or
+other pattern behind its content** (the owner's decision, 2026-11-03). **The default is T · Pocket Plain**, chosen by the owner on 2026-11-06, in the simulation,
+the lab and, since round 19, the Windows app (K · Graphite Quiet was the default from 2026-11-02 until then, and A before it). All full looks share identical anatomy, slot
 order, status semantics, and interactions — switching appearance never moves, adds,
 or removes information:
 
@@ -198,7 +197,7 @@ or removes information:
 | H | Sage Clinical | Soft sage band, generous radii and spacing; the calmest | Ten dots |
 | I | Indigo Dossier | A formal case file — double rule, serif name and labels | Five-step stepper |
 | J | Cobalt Timeline | Gold top rule; goal against forecast drawn on one runway, so the gap is the picture | Timeline |
-| **K** | **Graphite Quiet** *(app default until the port)* | Monochrome in soft slate (accent `#56626E`, not near-black) — color appears only where status needs it; outlined attention, text-only chips; quiet in a meeting, sharp on a projector | Line with a dot |
+| K | Graphite Quiet *(the default before T)* | Monochrome in soft slate (accent `#56626E`, not near-black) — color appears only where status needs it; outlined attention, text-only chips; quiet in a meeting, sharp on a projector | Line with a dot |
 | L | Graphite Strip | Compact (about 340 × 63–81 px): number, goal, forecast, status edge | — |
 | M | Fluent Tile | Compact (about 196 × 123–145 px): the forecast gap in large type, one attention line | — |
 | N | Bronze Ticket | Compact (about 300 × 64–68 px): a slim ticket with a stub | — |
@@ -207,7 +206,7 @@ or removes information:
 | Q | Bronze Folder | Bronze palette on warm paper; the number on a bronze tab, a plain edge, underlined chips | Line with a dot |
 | R | Bronze Rail | Bronze palette; a tinted column carries the days to goal in large figures, the detail reads down the right | Solid square bar |
 | S | Bronze Tag | Bronze palette; an ID-tag head (a small slot, centered), goal and forecast in two columns | Thin bar |
-| T | Pocket Plain | *Round 18; simulation and lab only; the default there.* White card, soft slate ink, one amber accent. One answer first: how many days later or earlier than the goal, with its confidence and source; then the facts; one main action, **Copy status**, pinned at the bottom | Thin bar |
+| **T** | **Pocket Plain** *(default)* | *Round 18; in the Windows app since round 19.* White card, soft slate ink, one amber accent. One answer first: how many days later or earlier than the goal, with its confidence and source; then the facts; one main action, **Copy status**, pinned at the bottom | Thin bar |
 | U | Calendar Ribbon | *Round 18; simulation and lab only.* The same answer, with the weeks around the goal and the forecast drawn out: weekends, a federal holiday and the gap. Always has a written twin of the ribbon for screen readers and for the copy | Thin bar |
 | V | Glass Sheet | *Round 18; simulation and lab only.* The same layout on a frosted sheet. At least 86% opaque, and solid when Windows asks for less transparency | Thin bar |
 
@@ -395,8 +394,8 @@ All looks are light-only (§5).
 
 ## 11. Implementation status — the Windows app
 
-**`app/`** contains the working v0: a .NET 8 / Avalonia tray application with all nineteen
-looks (K default; four of them compact boxes) selectable from the tray menu, auto-hide, all three consent models
+**`app/`** contains the working v0: a .NET 8 / Avalonia tray application with twenty
+looks (T default; four of them compact boxes) selectable from the tray menu, auto-hide, all three consent models
 (Whisper default, with the urgent-peek rule), four rebindable global hotkeys (`Ctrl+Alt+A` Select & Peek,
 `Ctrl+Alt+Space` lookup, `Ctrl+Alt+Shift+R` review a draft, `Ctrl+Alt+Shift+P` ask about a selection), the weekend and federal-holiday WATCH line, the draft
 check and the writing actions (Proofread / Rewrite / Fact-check, preview before send, Copy only), reading
@@ -532,14 +531,72 @@ opened). There is no background polling.
 
 `tools/wording-check.mjs` reads every window, message, document and the simulation, and lists anything that breaks these rules. Run it with `node tools/wording-check.mjs`.
 
-**What is and is not in the Windows app today.** *In the app:* the Loupe icon (the executable, the tray, the extension's icons), US
-spellings in the app's messages. *Only in the simulation and the lab:* the T, U and V looks as the default, One Bar, Today, recents and
-*Keep in my list*, spacing and text size, and the tray dot. *Next step, after the owner's review:* port these to the app, restyle the
+**What is and is not in the Windows app today.** *In the app:* the Loupe icon, the default card T with its one answer and its one main action, the tray dot, US
+spellings. *Only in the simulation and the lab:* the looks U and V, One Bar, Today, recents and *Keep in my list*, spacing and text size. *Next:* port these, restyle the
 extension card, and run the Windows CI self-test, which renders each window and presses real keys.
 
 **What this does not prove.** Whether a real RPM finds it better. Only the trial sheet in `demo/TRIAL-SHEET.md` can show that: five everyday tasks, timed against the
 earlier design, by people who use the real application every day. Real Windows rendering (fonts, scaling, the taskbar) can only be checked in the CI renders
 and on a real PC.
+
+## 11c. Round 19: details you can copy, a tool that speaks up, and one question before sending (simulation first)
+
+**The owner's rule for this round: nothing the tool raises should take more than two minutes to act on.** So every new thing ends in one action: Copy, Open the card, Snooze,
+or one question to answer.
+
+**Number forms.** The agency writes applications as a letter and six digits. **N is an NDA and A is an ANDA.** "N210793" is refused, with the reason, exactly like "NDA 210793";
+"A210793" is read as ANDA 210793, and the card shows the number that was read. The app, the extension and the simulation give the same answer on 47 shared cases.
+
+**Shortcuts.** *Review a draft* is now `Ctrl+Alt+Shift+R` and *My to-do list* `Ctrl+Alt+Shift+L`, because Word uses `Ctrl+Alt+D` and `Ctrl+Alt+L` and an app that registers a
+shortcut takes it from every other program. A shortcut someone saved is kept. Microsoft's published lists could not be read from the build environment, so the new pair is
+chosen from memory of those lists and should be tried once in Word and Outlook.
+
+**The answer figure** on the default card is 30 px beside 15 px words (it was 46 px): large enough to be read first, not so large that it shouts.
+
+**Card details (simulation; not yet in the app).** Expanding a card (E) brings up *Applicant and project*: applicant with its short name in parentheses, established name,
+project description, US agent and its email, applicant email, the RPM's own notes, and the locations of the latest 356h and Module 3.2.P.1. Each has **Copy**, and **Copy all** gives
+one labeled line per field. The rules:
+
+- **Every value is a column of the person's own sheet.** A column the sheet lacks reads "not in your sheet" and has no Copy button. Nothing is guessed.
+- **Nothing is looked up on the web.** A short name for an applicant comes from the sheet. A web search would tell a search engine which applicant is being worked on, and a
+  guessed abbreviation could end up in an action letter.
+- **The person chooses the columns** (*Settings, My files and writing, Card details*; twelve are offered in the simulation, in a fixed order). The choice travels in a backup.
+- **Text is text.** A formula or markup in a cell is shown and copied as written, never run.
+- When a connection to the agency's own data (through Elsa) exists, the same slots can be filled from it. That connection is not built: its fields are not known here.
+
+**Watch-back (simulation; not yet in the app).** The first thing in this product that speaks without being asked, so it is **off until switched on**.
+
+- One short notice near the clock, bottom right, above the taskbar. It never takes the keyboard and hides by itself after 12 seconds (it waits while the pointer is on it).
+- It says the ANDA number and a short reason from the data, by the card's own rules, most urgent first. **It never shows the person's notes**, so nothing private appears in a meeting.
+- **At most 1, 3 or 5 a day** (3 to start). *Open the card*, *Snooze for today* or *Dismiss*. When the limit is reached, Settings says how many more are waiting in *News and alerts*.
+- The app would check when it starts, when the portfolio file changes and once each morning. There is no network use. The simulation checks when a box is ticked, when the demo
+  date changes and on *Check now*, and says so.
+- **Silence does not mean all is well.** A notice fires only on what the data shows, and the screen says that.
+
+**Division news, the status hub (simulation; not yet in the app).** The division keeps one Word document in SharePoint; a line added there appears as a notice on every RPM's
+screen and in *News and alerts* (tray menu).
+
+- **How it is read:** from the copy of the document that OneDrive syncs to the PC, as a local file. That needs no new network address and no sign-in by the app. Reading
+  SharePoint directly would need an application registration approved by IT; it is not built.
+- **How the document is written:** one paragraph per line of news, starting with its date. Lines from the last 14 days are shown, newest first; a line dated in the future is ignored.
+- **A push channel is a risk, stated plainly:** anyone who can edit that document can put words on every screen. So a line is plain text, cut to 240 characters, never run, and
+  counted in the same daily limit. Two hundred new lines still produce at most five notices a day.
+- Division news cannot be switched on without a document, and a restored backup cannot switch it on either: the document's location belongs to the PC.
+
+**One question before sending (simulation; not yet in the app or the extension).** Review now ends with a single line: **the one question that would close the most important
+open gap, or "No open gaps."** It is chosen by fixed rules, in this order: a date or status that differs from the record; a number that is not in the data; a day that does not
+match its date, or a deadline on a weekend, a holiday or in the past; a mention of an attachment (the tool cannot see attachments). It gives facts and one question, **not a
+verdict on whether to reply, or to whom**: that stays with the person, and the line says so. The shared review result is unchanged, so the app, the extension and the simulation
+still agree on the 46 shared cases.
+
+**Considered and not built, with the reason** (the owner's list of 2026-11-12; details in `ROADMAP.md`): live web search for abbreviations (leaks the applicant; unsafe in a
+letter); TickTick (an outside cloud service; ANDA tasks would leave the agency); automatic determination of the earliest lawful approval date, First Generic or Noteworthy status
+(legal and policy calls; the tool can show inputs and say "possible, please confirm", never decide or add to a tracker); Apple Intelligence (Mac only; the users are on Windows);
+code extensions written by users (a security risk; *My actions*, *My agents* and the chosen columns cover the need); a rewrite as a Power App (it cannot register a global shortcut,
+read a selection in another program or open a card at the pointer; Power BI suits a leadership dashboard); pasting into other programs (Copy only, for now).
+
+**What round 19 does not prove.** That a notice near the clock helps more than it interrupts; three a day is a guess. That the Word document is a workable way to run division
+news: nobody has written one. That the chosen shortcuts are free on a real FDA laptop. Nothing in this section has been used by a real RPM.
 
 ## 12. Engagement roadmap — seven features that make it the daily habit
 

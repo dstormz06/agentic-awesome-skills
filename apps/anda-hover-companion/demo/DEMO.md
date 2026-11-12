@@ -8,8 +8,9 @@ Thank you for trying it. Fictional data only. A concept prototype, not an FDA pr
 > Until then, use the **browser simulation** or the deck on a device you are allowed to use. The Windows build is
 > for a personal or approved device, with fictional data only.
 
-> **New in round 18.** The calmer design (a card that leads with one answer and one main action, the Loupe icon, One Bar, Today, recent ANDAs) is shown in the **browser
-> simulation** only. This Windows build has the new icon; its cards still use the earlier default look until the design is ported. To judge the new design for daily use, follow `TRIAL-SHEET.md`.
+> **What this Windows build has of the newer design.** The Loupe icon, the default card that leads with one answer and one main action (Copy status, or Enter), an amber dot on
+> the tray icon while an ANDA is urgent, and the shortcuts **Ctrl+Alt+Shift+R** (Review a draft) and **Ctrl+Alt+Shift+L** (My to-do list). One Bar, Today, recent ANDAs, card details
+> with Copy, notices near the clock and the one question before sending are shown in the **browser simulation** only. To judge the design for daily use, follow `TRIAL-SHEET.md`.
 
 ## Pick a path
 

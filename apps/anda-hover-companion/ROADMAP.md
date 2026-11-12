@@ -45,6 +45,8 @@ tester, with real data, or against a live model.**
 | A separate to-do list mode for the daily workload (any task, ANDA related or not), turned from rough highlighted notes into items | **Built (round 16); tested offline only** | *My to-do list* has its own shortcut (chosen in Settings; Ctrl+Alt+L at first; none is allowed), its own window and its own file, and is apart from the ANDA to-do list. *Notes to my to-do list* reads highlighted or pasted notes **by plain rules, with no AI** into suggested items (title, day, urgent, repeat, Work/Personal/Other, an ANDA number kept) that can be changed or unticked before **Add**; or, if chosen, added at once with Undo. Items that repeat come back by themselves; a missed repeating item moves to its next day instead of piling up | The reader is rules, not understanding: it can mistake a sentence, split a task wrongly or miss a date written in a way it does not know (it never invents one, and says "I could not read that date" for an unreadable typed one). No times of day. No yearly repeat (daily, weekdays, weekly and monthly only). A word such as "monthly" in "submit the monthly report" is read as a repeat, and a date after two tasks joined by "and" belongs only to the task it follows; both are shown in the fields and can be changed. When notes are longer than 6,000 characters the unfinished last sentence is dropped and the window says so. Not shared between people. Real notes from real emails have not been tried |
 | Settings that arrange themselves, easy on day 1 | **Built (round 16)** | Every section is collapsed except what needs a look (a shortcut Windows did not register, an unreadable portfolio file, an AI connection that was never tested, an agent or action that is not ready), what a new user needs first (shortcuts and the portfolio) and up to two sections the person opens often (three visits). Each open section says why. Expand all, Collapse all, Suggested view, "Go to" opens a collapsed section, (the first-run card that stood here was removed in round 17) | Whether a real first-day user finds it easier has not been measured; the rules are the author's. Only a count per section is kept (no text), and it can be switched off and forgotten |
 | A more professional, calmer look and an icon, built for daily use | **Round 18: designed and built in the simulation and the lab; the Windows app has only the new icon so far** | New default card **T · Pocket Plain** (one answer first, one main action), **U · Calendar Ribbon**, **V · Glass Sheet**; **One Bar** lookup option; a **Today** window; **recent and kept ANDAs**; spacing and text size; the **Loupe** icon with an amber dot for *urgent*; US English and one glossary. The 19 earlier looks stay under *Show all tools*. See `DESIGN.md` §11b | Not yet reviewed by the owner and not yet in the Windows app. Whether it makes the daily work easier is not measured: `demo/TRIAL-SHEET.md` is the way to find out. Real Windows rendering can only be checked in the CI renders. The "bottom alert statuses" the owner mentioned earlier are not yet identified, and the existing `Ctrl+Alt+D` / `Ctrl+Alt+L` shortcuts, which Word also uses, have not been moved (risk R108) |
+| Copy the applicant's details from the expanded card; show the tool's alerts and division news near the clock; one thing to check before sending | **Round 19: built in the simulation; not yet in the Windows app or the extension** | *Applicant and project* on the expanded card (columns of the person's sheet, each with Copy; "not in your sheet" when missing; the person chooses the columns). *Watch my back*: off until switched on, one short notice near the clock, at most 1, 3 or 5 a day. *Division news*: lines of one Word document in SharePoint, read from the synced copy. Review ends with one question or "No open gaps." See `DESIGN.md` §11c | The header row of a real portfolio was assumed (applicant information, project description, the RPM's notes), not seen. The Word document does not exist yet. Three notices a day is a guess. Nothing was tried by an RPM |
+| The default card and the tray dot in the Windows app; N is an NDA and A is an ANDA; shortcuts that Word does not use | **Round 19: built in the app** (run on Windows by the workflow) | T · Pocket Plain is the app's default look; the tray icon shows an amber dot while an ANDA is urgent; `Ctrl+Alt+Shift+R` and `Ctrl+Alt+Shift+L` replace `Ctrl+Alt+D` and `Ctrl+Alt+L` | The looks U and V, One Bar, Today, recent and kept ANDAs, spacing and text size are still only in the simulation. The new shortcuts were chosen without reading Microsoft's lists (not reachable from the build environment) |
 
 ## Decided on the owner's behalf (2026-11-02)
 
@@ -86,6 +88,31 @@ with pilot evidence rather than argued from memory.
 3. Add one real ANDA to your sheet with its active ingredient, dosage form and strength, then open its card.
 4. Compare the "RLD LABEL" date with the Drugs@FDA website for that product. If they differ, or the card says "not checked", send the message it shows: it names the missing column.
 Until someone has done this once, the RLD line stays labeled unverified.
+
+## The owner's list of 2026-11-12: what was decided, and why
+
+The owner sent a long list of ideas and said "everything else, you decide". Each was put in one of four groups.
+
+**Built this round (simulation first):** card details with Copy and chosen columns; notices near the clock (watch-back) and daily reminders; the division status hub fed by a
+SharePoint Word document; one question before sending; N is an NDA and A is an ANDA; shortcuts off Word's own; a smaller answer figure.
+
+**Next, from the person's own files (no new access needed):** an event file from a selection, opened in Outlook for the person to confirm (single or recurring); an FEI checked
+against a list file the person points to (the submission facility status view, once it can be exported or connected); suggested SOPs, MAPPs and Exari template names from a list
+the division maintains; a sticky-note template copied with three steps, and a Windows+V tip; the tray icon acting on what was last copied, as a backup trigger; a leadership
+dashboard prototype with numbers from the opt-in usage log; the rest of the Windows app port.
+
+**Needs access or approval that does not exist yet:** Elsa and CDER One Analytics (no access; fields unknown; the card's slots are ready); live Outlook monitoring (an
+application registration approved by IT; today's optional read-only link was never tested against Microsoft); automatic updates (a signed build and an IT distribution channel);
+the Outlook AI Companion (unknown to the author; ask its team; it will not be reverse-engineered); AI drafting and advice (an approved model).
+
+**Advised against, with the reason:** live web search for an applicant's abbreviation (it tells a search engine which applicant is being worked on, and a guess could reach an
+action letter); TickTick (an outside cloud service: ANDA tasks would leave the agency; the local My to-do list stays, and an export can be added); deciding the earliest lawful
+approval date, First Generic or Noteworthy status (legal and policy determinations: the tool may show the inputs and say "possible, please confirm", and may remind about the
+tracker, never add to it); Apple Intelligence (Mac only); code extensions written by users (a security risk: My actions, My agents and chosen columns cover the need); a rewrite
+as a Power App (no global shortcut, no reading of a selection in another program, no card at the pointer; Power BI is right for the dashboard, and a specification can be written
+for the agency's own tenant); pasting into other programs (Copy only, until copying has proved itself).
+
+**Still the owner's to confirm:** the product name. The owner wrote "Notalus"; the product is "ANDA Companion (Notula)" everywhere, so nothing was renamed until the spelling is confirmed.
 
 ## Not verified yet (check before building)
 

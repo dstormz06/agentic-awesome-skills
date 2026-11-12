@@ -318,6 +318,7 @@ public partial class CardWindow : Window
     // Pocket (T): the answer first, and Copy status kept at the bottom of the card.
     private StackPanel? _hero;
     private TextBlock? _heroNumber, _heroUnit, _heroSub, _copyLabel;
+    private DockPanel? _pocketDock;
     private bool Pocket => _hero is not null;
 
     private static void Detach(Control c) { if (c.Parent is Panel p) p.Children.Remove(c); }
@@ -367,7 +368,7 @@ public partial class CardWindow : Window
                 Detach(ChipsSlot);
                 var host = (Panel)Body.Parent!;
                 host.Children.Remove(Body);
-                var dock = new DockPanel { Name = "PocketDock" };
+                var dock = _pocketDock = new DockPanel { Name = "PocketDock" };
                 DockPanel.SetDock(ChipsSlot, Dock.Bottom);
                 dock.Children.Add(ChipsSlot); dock.Children.Add(Body);
                 host.Children.Add(dock);
@@ -640,8 +641,11 @@ public partial class CardWindow : Window
     {
         var screen = Screens.ScreenFromPoint(at) ?? Screens.Primary;
         if (screen is null) return;
-        double pinned = Pocket && !_mini ? 104 : 0;   // the Copy status area stays below the scrolling part
-        Body.MaxHeight = Math.Max(240, screen.WorkingArea.Height / screen.Scaling - 52 - 2 - Body.Margin.Top - pinned);
+        double limit = Math.Max(240, screen.WorkingArea.Height / screen.Scaling - 52 - 2 - Body.Margin.Top);
+        // Pocket keeps Copy status below the scrolling part, so the limit belongs to the two together: the pinned area takes what it needs
+        // and the facts scroll in the rest. (A fixed allowance was too small on a 1024 x 768 screen: Windows run 36.)
+        if (_pocketDock is not null) { _pocketDock.MaxHeight = limit; Body.MaxHeight = double.PositiveInfinity; }
+        else Body.MaxHeight = limit;
     }
 
     // ---------------- agent findings (the person's own agents; nothing runs unless they switched it on) ----------------

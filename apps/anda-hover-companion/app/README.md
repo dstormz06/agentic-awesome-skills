@@ -3,9 +3,11 @@
 A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
 **All bundled data is fictional.** Not an FDA product; a concept prototype.
 
-> **Round 18 status.** This app has the new **Loupe** icon (the program, the tray and the extension). The new default card, the two new looks, One Bar,
-> Today, recent and kept ANDAs, spacing and text size are built **only in the browser simulation** (`../mockup/windows-simulation.html`) and are not in this app yet. They are
-> ported after the owner has reviewed the simulation. Until then this app opens with K · Graphite Quiet, as described below. See `../DESIGN.md` §11b.
+> **What this app has of the newer design.** The **Loupe** icon; the default card **T · Pocket Plain** (one answer first, then the facts, and one main action, Copy status, which Enter
+> triggers); an amber dot on the tray icon while any ANDA in the data is urgent; the short number forms (**N210793 is an NDA and is refused; A210793 is read as ANDA 210793**); and
+> the default shortcuts **Ctrl+Alt+Shift+R** (Review a draft) and **Ctrl+Alt+Shift+L** (My to-do list), which replaced Ctrl+Alt+D and Ctrl+Alt+L because Word uses those. A shortcut
+> you already saved is kept. **Not in this app yet, only in the browser simulation** (`../mockup/windows-simulation.html`): the looks U and V, One Bar, Today, recent and kept ANDAs,
+> spacing and text size, card details with Copy, notices near the clock with division news, and the one question before sending. See `../DESIGN.md` §11b and §11c.
 
 ## Quick setup (under 5 minutes)
 
@@ -14,8 +16,8 @@ A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
 memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat`, pin the tray icon.
 
 1. `dotnet run --project AndaCompanion` (or double-click the published `AndaCompanion.exe`).
-2. First run opens **Settings** automatically: pick an appearance (the default is **K · Graphite
-   Quiet**), a consent model, auto-hide and your transparency — a demo card appears alongside so
+2. First run opens **Settings** automatically: pick an appearance (the default is **T · Pocket
+   Plain**), a consent model, auto-hide and your transparency — a demo card appears alongside so
    every choice previews live.
 3. Optional, the day API access is approved: open **Settings, Connection**. For Claude, set
    `ANTHROPIC_API_KEY` (agency-approved channel), choose Claude, check the model name and press **Test**.
@@ -28,8 +30,8 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
 - **Tray app** — the Loupe icon (an indigo plate, a white ring and an amber center), no notifications. Menu: lookup, demo cards, quick
   Appearance switch, **Settings…**, **Prompt library…**. All persisted to
   `%AppData%\AndaCompanion\settings.json`.
-- **Settings window** — Appearance (nineteen looks, **light-only by product decision**; **K ·
-  Graphite Quiet is the default**): fifteen full cards (A–K and P–S, none with a pattern behind it) and four **compact boxes** (L–O),
+- **Settings window** — Appearance (twenty looks, **light-only by product decision**; **T ·
+  Pocket Plain is the default**, K · Graphite Quiet was the default before it): sixteen full cards (A–K, P–S and T, none with a pattern behind it) and four **compact boxes** (L–O),
   Auto-hide (Off / 10 / 20 / 40 s, default 10), Consent model (**Whisper invite is the default** for
   new installs; an install that already saved a choice keeps it), **urgent items** (in whisper mode an
   at-risk or late ANDA opens a peek by itself), the weekend/holiday window, **My data**,

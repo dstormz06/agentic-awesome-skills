@@ -105,6 +105,28 @@ public class Round19Tests : IClassFixture<HeadlessFixture>
     }
 
     [Fact]
+    public async Task On_a_short_screen_the_facts_scroll_and_the_action_stays_in_view()
+    {
+        // Windows run 36: on a 1024 x 768 screen the card was 753 px tall in a 720 px work area. The limit now belongs to the card as a whole.
+        var r = await Inspect(Late, false, w =>
+        {
+            var dock = w.GetVisualDescendants().OfType<DockPanel>().First(d => d.Name == "PocketDock");
+            var body = w.FindControl<ScrollViewer>("Body")!;
+            var chips = w.FindControl<StackPanel>("ChipsSlot")!;
+            bool limited = !double.IsInfinity(dock.MaxHeight) && double.IsInfinity(body.MaxHeight);
+            dock.MaxHeight = 420;                       // a very short screen
+            Settle(); Settle();
+            return (limited, DockH: dock.Bounds.Height, ChipsH: chips.Bounds.Height, BodyH: body.Bounds.Height, Scrolls: body.Extent.Height > body.Viewport.Height + 1,
+                    CopyVisible: w.FindControl<Button>("CopyChip")!.IsEffectivelyVisible, ChipsBottom: chips.Bounds.Bottom);
+        });
+        Assert.True(r.limited);
+        Assert.True(r.DockH <= 420.5, $"the card is {r.DockH} high");
+        Assert.True(r.ChipsH >= 60 && r.CopyVisible, "the action area keeps its full height");
+        Assert.True(r.BodyH > 100 && r.Scrolls, $"the facts scroll in the rest ({r.BodyH})");
+        Assert.True(r.ChipsBottom <= r.DockH + 0.5);
+    }
+
+    [Fact]
     public async Task Enter_copies_the_status_line_and_says_so()
     {
         var label = await Inspect(Late, false, w =>
