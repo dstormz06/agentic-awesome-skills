@@ -905,11 +905,119 @@ CI: **Run 40** (`df57d89`, this round) passed on Linux and, on Windows, built, p
 
 No RPM and no director has used any of it. The glass card, the notes and the proofreader exist only in the browser simulation; the Windows app has the 90% start and nothing else from this round. The proofreading list will miss most grammar and some spelling, and it has not been run on real mail, so its false alarms on real text are not known. The agency's desktops were not seen: the look is Windows 11 as it ships, and no agency artwork is used, on purpose. Real Edge and Chrome on Windows, a projector, a touch screen and a screen reader were not used, as before.
 
+## Round 21: Enter adds a note, a live clock, a proofreader that reads grammar, a pitch deck, and a review of the whole
+
+The owner asked, the same day as round 20: a desert photograph as the Windows background; the *Copy status* bar "thinner/shorter and more transparent", with Enter going "straight to adding a new notes" and the recent notes shown below; a small button to "the specific ANDA webpage … customizable as a new settings"; "a tad bit of professional shadow"; "always use today's date and time … current to the second and using EST time as default or based on current regional time clock/timezone"; "your proofreader and fact checking still not working? Why can you just be seamlessly integrating to any local default AI like Apple Intelligence or Windows built in AI?"; "a professional and polished pitch deck"; and "Rigorously review this entire application … Find the 5 biggest useability design or code problems. Fix the important ones without changing the main concept."
+
+What was done (all in the browser simulation unless said otherwise):
+
+1. **The card's actions.** *Add a note* is the main action (Enter), slim and tinted; *Copy status* is a small button and the S key; *Open ANDA page* goes to an `https` address the person sets.
+2. **A live clock.** The real time to the second and the real date, in the computer's time zone; the sample dates move forward by whole weeks so they read as current.
+3. **The desktop.** A drawn desert under a blue sky is the default background; layered shadows.
+4. **The proofreader.** The reported fault was reproduced first: in a sandboxed frame, as the hosted page runs, the rules worked but their results were below the fold, and a sentence with ordinary grammar mistakes went unremarked. Results now come first, the draft is shown with its changes marked, and about thirty grammar rules were added.
+5. **An AI built into the PC.** Used only where the browser already has an on-device model, on a click, with the answer marked as unchecked.
+6. **The review.** Five problems named in `DESIGN.md` §11e; four fixed, one (the app trails the simulation) recorded with a first step: the rules as 32 shared cases in `mockup/proofread-golden.json`.
+7. **A pitch deck** of 13 slides, as a separate artifact. Its figures that nobody has measured are left as bracketed blanks.
+
+Not done, and said so: nothing of this round is in the Windows app or the extension; the owner's photograph is not used (the site could not be reached from the build environment); no real on-device model was available to test with; Apple Intelligence cannot be used at all on Windows.
+
+Local results on this code: C# **979 passed, 12 skipped, 0 failed** (unchanged: the app was not touched); extension unit **31 passed**; simulation: this round's suite 30, **97 checks** (accessibility scans among them, no violations), and every earlier suite, after the updates listed under R163 (one check of suite 29, that the recall row is the last thing in the Review window, had not been brought up to date with the folded AI options that now follow it; it was corrected in round 22); `node tools/wording-check.mjs` reports **0 findings**.
+
+CI: the Windows app was not changed in this round, so no new Windows run was started. The last one before it, run 40 on `df57d89` (round 20), was green.
+
+| Claim | Evidence | Limit |
+|---|---|---|
+| **Enter adds a note; S and the small button copy the status; the main action is 34 px high and tinted; every action is on screen** | Suite 30 (A1 to A16, in four looks, with an accessibility scan); suites 24 and 29 updated on purpose | **Simulation only.** In the Windows app Enter still copies the status |
+| **Open ANDA page accepts only a plain `https` address with `{anda}`, puts only a six-digit number into it, and says so when there is none** | Suite 30 (U1 to U10: ten addresses, a hand-edited backup, a pinned card) | **Simulation only**: the look-alike browser shows where it would go; no page is opened. The address shown at first is an example |
+| **The clock is the real one, to the second, in the region's time zone, and the sample data follows it**: goal still a Saturday, 73 to 79 days out; the open item due in 2 to 8 days; the mail, the draft, the notes, the news and the review tell one story | Suite 30 (C1 to C12: Eastern, Pacific, Berlin and Tokyo; across a midnight, a new year and a leap day, with the browser's clock set) | Checked with a set clock, not by waiting. The rule "whole weeks" means the sample Thursday can be up to six days ago |
+| **With `?clock=fixed` nothing moved**: every earlier suite passes unchanged against Jul 16, 2026 | Every earlier suite | The suites no longer exercise the live clock except suite 30 |
+| **The desert is drawn in the page; four backgrounds; no image file** | Suite 30 (D1 to D3, with a scan of the whole desktop); suite 29 (W) | It is a drawing in the manner of the photograph, not the photograph |
+| **Grammar rules correct five bad drafts exactly and stay silent on eight good ones** (there/their/they're, its/it's, your/you're, then/than, to/too, could of, verb agreement, me and him, missing apostrophes, a/an, capitals of days and months) | Suite 30 (G1 to G3); `mockup/proofread-golden.json` (32 cases) and its parity script | About thirty rules with their context words. They will miss most grammar that needs meaning, and they have not been run on real mail |
+| **The draft is shown with each change marked, as text; Apply here makes every change; a date that does not exist is named** | Suite 30 (G4 to G8) | The marked view shows the first 4,000 characters |
+| **Results are in view when Review opens at 1366 by 768; the AI options are last and folded; an empty window says what to do** | Suite 30 (L1 to L6, with a scan) | Not checked on a real laptop screen with real fonts |
+| **The on-device AI is used only when its model is already installed; never downloaded; shown first, run on a click, answer unchecked and Copy only; a failure is reported as text** | Suite 30 (I1 to I9, against stand-ins for an available, a failing and a refusing model) | **No real model answered.** In the build browser the feature exists and reports its model as not installed, which is the state the page refuses to change |
+| **Quick notes survive a reload where the browser allows a store, say so where it does not, and a tampered store is read safely; Reset clears them** | Suite 30 (S1 to S5) | A hosted page may be refused a store; then notes last until a reload, as before |
+| **What the card scrolls to stops above the action area; the Lookup box's Enter acts once** | Suite 30 (V1 to V3, A15); suites 6 and 8, which found both | |
+
+### Defects caught in round 21
+
+| # | Finding | Found by | Disposition |
+|---|---|---|---|
+| R154 | **Review's results were below the fold**: under the text box came the AI buttons and two paragraphs about them, so on a 768 px screen the window looked as if nothing had happened | **The owner** ("still not working"), then a reproduction in a sandboxed frame | Results come right under the buttons, with a summary line; the AI options are folded at the bottom |
+| R155 | **The proofreader missed ordinary grammar**: "Their going … me and him will … ANDA 216482 are … there goal date" raised only two spelling items | The same reproduction | About thirty grammar rules, each with its context; the draft with changes marked |
+| R156 | **Enter in the Lookup box was handled twice**: it opened the card and then acted on the card too. For rounds it silently copied the status line over whatever was on the clipboard; with this round's change it would have jumped into the notes | Suite 8, which could no longer reach a control behind an unexpectedly expanded card | A key typed into a box belongs to that box; a check holds the clipboard and the card's state |
+| R157 | What the card scrolled to could sit under the action area that stays at the bottom | Suite 6 (a click that could not land) | The card's scrolling leaves room for the action area |
+| R158 | Quick notes were lost on a reload | The review | Kept in the browser's store where allowed; the box says which; Reset clears them |
+| R159 | A date that does not exist ("Jan 37") passed the fact check | A mistake in the script that made a picture for the deck | Dates that do not exist are named with the reason |
+| R160 | After *Open ANDA page* the card stayed in front of the page it had opened | This round's own suite (a click that could not land) | The card steps aside unless pinned |
+| R161 | An AI button's explanation replaced the review's results | Reading the code while moving it | It appears with the AI options |
+| R162 | The first version of the on-device AI code treated a model that is not installed as ready, which would have started a download of several gigabytes on a click | Asking the build browser what it really reports | Only an installed model counts; the page says so otherwise |
+| R163 | Older suites expected the previous main action, button labels and default background | The full run | Updated on purpose |
+
+### What round 21 does not prove
+
+No RPM, director or investor has used any of it. The Windows app has none of this round and still lacks rounds 18 to 20 beyond the default card, the tray dot and the 90% start: **what a person would install is not what the simulation shows**. The proofreader is a list of rules: it has no sense of meaning, and its false alarms on real mail are unknown. No on-device model was available, so that path is proven only against stand-ins. The live clock was checked by setting the browser's clock. The desert is a drawing. The deck's market, price, pilot size and funding figures are blanks for the owner; none was researched. Whether a federal employee may take this to a private investor is a question for the agency's ethics and technology-transfer offices, and is not answered here.
+
+## Round 22: a quieter default look, a thinner taskbar, and a tray icon that speaks only when something needs the person today
+
+The owner asked, after seeing round 21: "make the windows bottom taskbar a bit thinner/shorter"; "for the default appearance can you create a new one that would replace the current default. This new default will blend the best features of graphite Guaze while still keeping the Enter button and other smaller buttons and features at the bottom"; "for the current tray icon design, don't have it to look like there's currently a new alert … this should only be triggered when there's an actual scenarios such as a specific ANDA is due today, potential customer service issues, immediate risks or safety issues, an email that was deemed either urgent or important and it has not been responded in 2 days"; and, again, "Find the 5 biggest useability design or code problems. Fix the important ones without changing the main concept."
+
+"graphite Guaze" was read as the two existing looks **K · Graphite Quiet** and **P · Bronze Gauge**. That reading is an assumption; the previous default is one click away.
+
+What was done:
+
+1. **W · Graphite Gauge, the new default** (simulation and Appearance Lab): the glass sheet of V in the graphite palette of K, with the gauge of P beside the answer, and the same action area at the bottom.
+2. **The taskbar** of the look-alike desktop is 40 px high (it was 48).
+3. **The tray icon** carries no amber at rest, and the dot means *something needs you today* (simulation; the picture and the first two reasons also in the Windows app). The tooltip and the tray menu count the reasons; *News and alerts* lists them; each opens its card.
+4. **The review.** Five problems named in `DESIGN.md` §11f; four fixed, one stated as a limit with an open decision.
+
+Not done, and said so: W is not in the Windows app, which still opens in T · Pocket Plain; the app's dot has no "mark in the sheet" and no mail reason; the app recounts the dot only when it reads data, so not at midnight; the pitch deck's three pictures were retaken with the new look, and its text was not changed.
+
+Local results on this code: C# **980 passed, 12 skipped, 0 failed**; extension unit **31 passed**, and its end-to-end test passes; simulation: this round's suite 31, **85 checks** (accessibility scans among them, no violations), and every earlier suite, after the updates listed under R173 (33 suite files in all, none with a failure, each run against the final page); `node tools/wording-check.mjs` reports **0 findings in 133 files**.
+
+CI: run 41 on `963a441` is green on Windows (build, every test including the Windows-only ones, the extension's rules against the app's output, the single-file program, the app's own self-test, the demo bundle) and on Linux. The commit that follows it changes only the simulation (the notice that says where the dot is) and documents, which the Windows workflow does not build.
+
+| Claim | Evidence | Limit |
+|---|---|---|
+| **The page opens in W · Graphite Gauge**: graphite colors, a gauge beside the answer that follows the record (62%, 88%) and is read out in words, the same six actions pinned at the bottom, Enter still adds a note | Suite 31 (W1 to W9, W13); suites 4, 22, 24, 28 and 29 updated on purpose | **Simulation and Lab only.** "Graphite Gauge" is a reading of the owner's words |
+| **Nothing collides**: on the small card, with the largest text and widest spacing, and at 1920, 1366, 1280, 1024 and 390 px wide; the sheet follows the transparency setting from 40% to 100% | Suite 31 (W4, W12, W14, W16, W23) | Not seen on a real laptop screen with real fonts; the blur behind a rounded card has not been seen on a real Windows desktop |
+| **The other 22 looks did not change** | Before the stylesheet change and after it, the card was rendered in eight looks, full and small, plus Settings: 17 pictures, each identical byte for byte. Suite 31 (W17 to W21); the older suites | Eight of 23 looks were compared as pictures; the rest are covered by the older suites' checks, not by pictures |
+| **The taskbar is 40 px**, everything in it fits, every button is at least 24 px high, the tray menu and a card opened low stay above it, the live clock fits | Suite 31 (T1 to T7, with a scan) | |
+| **At rest the tray icon has no amber**, in the simulation and in the app's picture | Suite 31 (A2); C# `The_tray_picture_carries_amber_only_when_something_needs_the_person`, which reads the pixels of both pictures | The larger app icon keeps its amber center |
+| **The dot means "needs you today"**: due today or overdue yes, due tomorrow no; goal today or passed yes, goal tomorrow no; a late forecast or an item due in five days no | Suite 31 (A1, A3, A4, A12 to A18); C# `The_tray_dot_is_only_for_what_needs_the_person_today_and_its_tooltip_never_names_an_ANDA` | In the app, "due today" is read from the words of the action item, because the sheet has no due-date column the app reads |
+| **A mark in the sheet lights it and is shown on the card**; a mark that carries markup is shown as plain text, runs nothing and is cut to 120 characters; a malformed mark is ignored | Suite 31 (A19 to A25, with a scan) | **Simulation only**: the app reads no such column |
+| **An urgent message with no reply lights it after two days**, only while Outlook is connected and signed in; one day is too soon; an answered message never counts | Suite 31 (A26 to A30, A34) | **Simulation only, with a made-up message.** The app reads mail for the open ANDA on request, never in the background, so it cannot know this today |
+| **The dot can be explained**: the tooltip and the spoken label count and never name an ANDA; the tray menu counts; *News and alerts* lists each reason, follows changes while open, opens the card, and says so when there is nothing | Suite 31 (A4 to A11, A31 to A33, with a scan) | |
+| **The tooltip keeps the connection and the count together** | Suite 31 (A35 to A37) | |
+| **The dot is recounted when the date changes** | Suite 31 (A39, A40: the browser's clock is run across midnight) | **Simulation only.** In the app the dot changes only when the app reads data |
+| **A what-if is never a switch with no visible effect**: with the icon behind the ^ arrow, a notice says where the dot is; behind the arrow the icon shows it | Suite 31 (A41 to A43) | On Windows an icon behind the arrow shows nothing on the taskbar either; the person pins it once |
+| **The Appearance Lab shows W first, as the only default, with today's actions; 23 designs** | Suite 31 (R2 to R4, with a scan); suites 10 and 24 | |
+
+### Defects caught in round 22
+
+| # | Finding | Found by | Disposition |
+|---|---|---|---|
+| R164 | **The tray icon at rest carried the alert color**: an amber center in the lens, the same amber as the dot | **The owner** ("don't have it to look like there's currently a new alert"), then a close-up picture of the tray | No amber at rest, in the simulation and in the app's picture; a test reads the pixels |
+| R165 | **The dot was on all the time**: it followed "urgent", which the sample data always meets, and in the app nothing ever cleared it | The owner; reading `TrayState` | The dot means "needs you today"; the sample records never raise it in the app |
+| R166 | Nothing said why the dot was on | The review | Tooltip count, tray menu count, *Needs you today* in News and alerts, the mark on the card |
+| R167 | **Two writers for one tooltip**: the connection text and the alert count each replaced the other on the tray icon | Reading the code for the test of R166 | One function writes both |
+| R168 | A rule about "today" was not recounted when the date changed | The review | Recounted at the date change in the simulation; a stated limit and an open decision in the app |
+| R169 | The stylesheet named every look in every rule of the answer-first family (29 selectors to edit for W) | Building W | Two attributes set in one function; 17 pictures identical before and after |
+| R170 | A mark from the sheet would have been put into the watch list as markup | Writing the attack case | Escaped; a test tries markup |
+| R171 | Text scrolling under the pinned action area showed through the glass | A picture of the new look | The action area is 97% solid |
+| R172 | The Appearance Lab and five documents named a default and a main action that no longer existed | The review | Corrected |
+| R174 | Switching on *An item is due today* showed nothing: the tray icon sits behind the ^ arrow until it is pinned | Preparing the walk-through for the owner | A notice says where the dot is; the icon behind the arrow shows the dot too |
+| R173 | Older suites expected V as the default, 22 looks, the old tray rule and the old taskbar height | The full run | Updated on purpose |
+
+### What round 22 does not prove
+
+No RPM or director has used it. "Graphite Gauge" is a reading of two words; the owner may have meant something else. The Windows app has the tray rule and picture only: **it still opens in T · Pocket Plain and has none of rounds 20 to 22 beyond that and the 90% start.** The app's "due today" depends on the words in the sheet's action item. Nothing in the app yet reads a risk, safety or service mark, and nothing may read mail in the background without a decision by the owner and IT. The tray picture was checked as pixels, not seen in a real Windows notification area, where icons are drawn at 16 to 24 px.
+
 ## Still open
 
 GDUFA III tier table (needs the commitment-letter text and the dual-source rule); a real-keyboard check of rebound shortcuts on
 non-US layouts (rebinding is built); UI Automation capture; code signing; the live Claude call; **the live Elsa call (the two
 translations in `ElsaMapping.cs`, once the API is available)**; a 508 pass with a screen reader; a real-email-client
-check that compact boxes do not disturb typing; a real-mouse hover check for auto-hide on Windows; **Alert Hub, Patent Analysis and Triaging Agent details from DPM IT and a first real call to each**; a delivered-keystroke check of a person's own shortcut on Windows; a shared supervisor list (needs an approved place).
+check that compact boxes do not disturb typing; a real-mouse hover check for auto-hide on Windows; **Alert Hub, Patent Analysis and Triaging Agent details from DPM IT and a first real call to each**; a delivered-keystroke check of a person's own shortcut on Windows; a shared supervisor list (needs an approved place). **From rounds 18 to 22: the port of the simulation's design to the Windows app and the extension** (the looks U, V and W, notes on the card, Enter adds a note, Open ANDA page, the proofreading rules, the recall row, card details, notices and news, the one question, text size and spacing, recents, One Bar, Today); a decision on whether the app may recount the tray dot once at midnight; a Flag column and a mail rule for the tray dot in the app; the tray picture seen in a real Windows notification area.
 `npm run test` for the whole repository stops in this authoring environment at an unrelated test that needs a
 newer `git` (`--ref-format=reftable`); `npm run validate` and `npm run security:docs` pass.

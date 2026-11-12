@@ -6306,8 +6306,14 @@ $("swAi").addEventListener("change", e => {
   syncAiBox();
 });
 $("swAgentFail").addEventListener("change", e => { state.agentFail = e.target.checked; });
-$("swDue").addEventListener("change", e => setDueToday(e.target.checked));
-$("swFlag").addEventListener("change", e => setSheetFlag(e.target.checked));
+/* As on Windows, an icon behind the ^ arrow shows nothing on the taskbar: say where the dot is, so the what-if is never a switch with no visible effect. */
+function sayWhereTheDotIs(on){
+  if(!on || !state.running || !alertReasons().length) return;
+  showNotice(state.pinned ? "The tray icon now shows its dot. Right-click it, then News and alerts, to see why."
+    : "The tray icon now shows its dot. The icon is behind the ^ arrow near the clock: open the arrow to see it, or pin the icon to the taskbar.", { x:Math.max(12, innerWidth - 380), y:Math.max(60, innerHeight - 150) });
+}
+$("swDue").addEventListener("change", e => { setDueToday(e.target.checked); sayWhereTheDotIs(e.target.checked); });
+$("swFlag").addEventListener("change", e => { setSheetFlag(e.target.checked); sayWhereTheDotIs(e.target.checked); });
 $("swToday").addEventListener("change", e => { state.pretend = e.target.checked; refreshTrayState(); if(current && card.style.display === "block") fill(current); clReload(true); if(state.watchOn || state.newsOn) watchCheck(); if(isOpen("hub")) paintHub(); });
 
 /* ---------------- card controls ---------------- */

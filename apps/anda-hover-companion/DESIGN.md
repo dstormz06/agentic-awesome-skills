@@ -712,6 +712,8 @@ made it look that way. The Loupe had an amber center, the same amber as the dot,
   (2 today)*; that window opens with *Needs you today*, one line per reason, each of which opens its card; a mark from the sheet is the first line of the card's watch row.
   With nothing to report the window says so and states the rule.
 - **"Today" is recounted when the date changes**, so an item due tomorrow lights the dot after midnight without anything being pressed (simulation).
+- **An icon behind the ^ arrow shows nothing on the taskbar**, on Windows and here. So that the two what-ifs of the demonstration are never switches with no visible
+  effect, a short notice says where the dot is. In daily use the person pins the icon to the taskbar once; `demo/DEMO.md` says how.
 
 *What is real and what is not.* In the **Windows app** the dot now follows the first two reasons, read from the person's own sheet (a goal date; an action item whose
 text says it is due today or overdue), never from a sample record, and it is recounted only when the app reads data. The **sheet's mark** and the **unanswered urgent
