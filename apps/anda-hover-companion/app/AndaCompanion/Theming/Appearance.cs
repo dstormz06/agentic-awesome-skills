@@ -3,17 +3,17 @@ using Avalonia.Media;
 namespace AndaCompanion.Theming;
 
 /// <summary>
-/// Nineteen looks. A–K and P–S are full cards (K is the product default); L–O are the compact forms, which
-/// borrow a sibling's palette and expand into that sibling's full card. Saved settings store the numeric
+/// Twenty looks. A–K, P–S and T are full cards (T · Pocket Plain is the product default since round 19; K was the default before it);
+/// L–O are the compact forms, which borrow a sibling's palette and expand into that sibling's full card. Saved settings store the numeric
 /// value, so new members are only ever appended. No look draws a pattern, texture or grid behind its content.
 /// </summary>
-public enum AppearanceId { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S }
+public enum AppearanceId { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T }
 
 public enum ProgressVariant { Bar, Ticks, Ring, Solid, Capsule, Line, Dots, Step, Timeline, Gauge }
 
 /// <summary>How the card's blocks are arranged. Standard is the common anatomy; the others rearrange the same
 /// blocks (the facts and their order of importance never change).</summary>
-public enum CardLayout { Standard, Gauge, Folder, Rail, Tag }
+public enum CardLayout { Standard, Gauge, Folder, Rail, Tag, Pocket }
 
 /// <summary>Full = the regular quick-look card. The rest are the compact boxes (see CompactCardWindow).</summary>
 public enum CardForm { Full, Strip, Tile, Ticket, Badge }
@@ -215,7 +215,7 @@ public static class Appearances
 
     public static readonly Appearance K = new(
         AppearanceId.K, "K · Graphite Quiet",
-        "Monochrome in soft slate. Color appears only where status needs it. Quiet in a meeting, sharp on a projector. The default.",
+        "Monochrome in soft slate. Color appears only where status needs it. Quiet in a meeting, sharp on a projector. The default before round 19.",
         new("#FDFDFD", "#2A2E33", "#4A4E53", "#5C6167", "#ECECEC", "#DEDEDE",
             "#56626E", "#48535E", "#1A6B43", "#E6F1EA", "#8A5800", "#FAF1DC",
             "#A33636", "#F9E9E9", "#E6E6E6", "#6E7A86", "#1A56626E"),
@@ -293,6 +293,28 @@ public static class Appearances
         },
     };
 
+    /// <summary>
+    /// The default since round 19. One answer first (how many days later or earlier than the goal, never without the two dates and the
+    /// confidence beneath it), then the facts, and one main action, Copy status, kept at the bottom of the card where Enter reaches it.
+    /// </summary>
+    public static readonly Appearance T = new(
+        AppearanceId.T, "T · Pocket Plain",
+        "One answer first: how many days later or earlier than the goal. Then the facts, and one main action, Copy status. The default.",
+        new("#FFFFFF", "#1D2329", "#46505A", "#58616B", "#ECEEF1", "#DDE1E6",
+            "#3F4A56", "#333D47", "#1A6B43", "#E6F1EA", "#8A5800", "#FAF1DC",
+            "#A33636", "#F9E9E9", "#E6E8EB", "#6A7683", "#173F4A56"),
+        Radius: 12, Progress: ProgressVariant.Bar,
+        BodyFont: Sans, NumFont: Sans, DrugFont: Sans,
+        DrugItalic: false, StampSeal: false, MonoLabels: false)
+    {
+        Look = new()
+        {
+            Layout = CardLayout.Pocket,
+            Seal = SealStyle.Quiet,
+            SlotPadV = 12, SlotPadH = 18,
+        },
+    };
+
     // ---- Compact forms: small boxes that stay out of the way of an open email. They borrow a sibling's
     // palette, make no AI call, and expand into that sibling's full card on click (or the E key). ----
 
@@ -324,10 +346,10 @@ public static class Appearances
         Form = CardForm.Badge, ExpandsAs = AppearanceId.G,
     };
 
-    public static readonly IReadOnlyList<Appearance> All = new[] { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S };
+    public static readonly IReadOnlyList<Appearance> All = new[] { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T };
 
-    /// <summary>The product default, by direction of the product owner (replaced A on 2026-11-02).</summary>
-    public static readonly AppearanceId Default = AppearanceId.K;
+    /// <summary>The product default, by direction of the product owner (K replaced A on 2026-11-02; T replaced K on 2026-11-12).</summary>
+    public static readonly AppearanceId Default = AppearanceId.T;
 
     public static Appearance Get(AppearanceId id) => All.First(a => a.Id == id);
 }

@@ -179,7 +179,7 @@ internal static class SelfTestChecks
 
             File.WriteAllText(settingsPath, "{ this is not json");
             var d = SettingsService.Load(settingsPath);
-            if (d.Appearance != Theming.Appearances.Default || d.Appearance != Theming.AppearanceId.K ||
+            if (d.Appearance != Theming.Appearances.Default || d.Appearance != Theming.AppearanceId.T ||
                 !d.CaptureViaCopy || d.Consent != ConsentModel.Whisper || d.AutoHideSeconds != UI.AutoHidePolicy.Default)
                 problems.Add("corrupt settings did not fall back to defaults");
 

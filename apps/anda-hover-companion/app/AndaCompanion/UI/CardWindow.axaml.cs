@@ -130,6 +130,7 @@ public partial class CardWindow : Window
             case Key.C when _record is not null && BriefText.Text is { Length: > 0 } text:
                 Clipboard?.SetTextAsync(text); break;
             case Key.S: CopyStatusLine(); break;
+            case Key.Enter when Pocket && !_mini: CopyStatusLine(); e.Handled = true; break;   // the one main action of the default card
             case Key.R: OpenReplies(); break;
         }
     }
@@ -202,9 +203,9 @@ public partial class CardWindow : Window
         if (_record is null) return;
         Clipboard?.SetTextAsync(Services.StatusLine.Build(_record));
         UsageLog.Record("copy_status", (DateTime.Now - _shownAt).TotalSeconds);
-        CopyChip.Content = "Copied ✓";
+        if (_copyLabel is not null) _copyLabel.Text = "Copied ✓"; else CopyChip.Content = "Copied ✓";
         Avalonia.Threading.DispatcherTimer.RunOnce(
-            () => CopyChip.Content = "Copy status", TimeSpan.FromSeconds(1.2));
+            () => { if (_copyLabel is not null) _copyLabel.Text = "Copy status"; else CopyChip.Content = "Copy status"; }, TimeSpan.FromSeconds(1.2));
     }
 
     private void OpenFirstSister()
@@ -240,6 +241,8 @@ public partial class CardWindow : Window
                 SealText.Foreground = Br(look.SealInk!);
                 break;
             default:
+                SealText[!TextBlock.ForegroundProperty] = new Avalonia.Markup.Xaml.MarkupExtensions.DynamicResourceExtension("C.Good");
+                if (!a.StampSeal) Seal[!Border.BackgroundProperty] = new Avalonia.Markup.Xaml.MarkupExtensions.DynamicResourceExtension("C.GoodBg");
                 if (a.StampSeal)
                 {
                     Seal.Background = Brushes.Transparent;
@@ -283,6 +286,7 @@ public partial class CardWindow : Window
         // Chips
         foreach (var chip in new[] { CopyChip, SisterChip, NotesChip, OpenChip })
         {
+            if (look.Layout == CardLayout.Pocket) break;   // Pocket styles its own: one filled action, the rest plain text
             switch (look.Chips)
             {
                 case ChipStyle.Tint:
@@ -311,6 +315,10 @@ public partial class CardWindow : Window
 
     private TextBlock? _railDays, _railCaption;
     private string _pctSuffix = "";
+    // Pocket (T): the answer first, and Copy status kept at the bottom of the card.
+    private StackPanel? _hero;
+    private TextBlock? _heroNumber, _heroUnit, _heroSub, _copyLabel;
+    private bool Pocket => _hero is not null;
 
     private static void Detach(Control c) { if (c.Parent is Panel p) p.Children.Remove(c); }
 
@@ -322,6 +330,49 @@ public partial class CardWindow : Window
         double h = look.SlotPadH, v = look.SlotPadV;
         switch (look.Layout)
         {
+            case CardLayout.Pocket:
+            {
+                // The answer first: one figure with its unit, and beneath it the two dates and the confidence, so the figure is never shown alone.
+                _heroNumber = new TextBlock { FontSize = 30, FontWeight = FontWeight.Bold, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Bottom, Margin = new Thickness(0, 0, 8, 0) };
+                _heroUnit = new TextBlock { FontSize = 15, FontWeight = FontWeight.SemiBold, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Bottom, Margin = new Thickness(0, 0, 0, 3), TextWrapping = TextWrapping.Wrap, Foreground = (IBrush)res["C.Ink"]! };
+                _heroSub = new TextBlock { FontSize = 12.5, Foreground = (IBrush)res["C.Ink2"]!, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 6, 0, 0) };
+                var line = new WrapPanel { Orientation = Avalonia.Layout.Orientation.Horizontal };
+                line.Children.Add(_heroNumber); line.Children.Add(_heroUnit);
+                _hero = new StackPanel { Name = "Hero", Margin = new Thickness(h, 4, h, v + 2) };
+                _hero.Children.Add(line); _hero.Children.Add(_heroSub);
+                Avalonia.Automation.AutomationProperties.SetLiveSetting(_hero, Avalonia.Automation.AutomationLiveSetting.Polite);
+                Slots.Children.Insert(Slots.Children.IndexOf(ClockPanel), _hero);
+                HeaderBand.Padding = new Thickness(h, v + 4, h, 6);
+
+                // One main action: Copy status is filled, as wide as the card, and stays at the bottom while the rest scrolls. Enter triggers it.
+                Detach(CopyChip);
+                _copyLabel = new TextBlock { Text = "Copy status", FontWeight = FontWeight.SemiBold, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center };
+                var keycap = new Border
+                {
+                    BorderBrush = Brushes.White, BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(4), Padding = new Thickness(5, 1), Margin = new Thickness(10, 0, 0, 0), Opacity = 0.85,
+                    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                    Child = new TextBlock { Text = "Enter", FontSize = 10.5, Foreground = Brushes.White },
+                };
+                var label = new StackPanel { Orientation = Avalonia.Layout.Orientation.Horizontal, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center };
+                label.Children.Add(_copyLabel); label.Children.Add(keycap);
+                CopyChip.Content = label;
+                CopyChip.Classes.Add("filled");
+                CopyChip.Background = (IBrush)res["C.Accent"]!; CopyChip.BorderBrush = (IBrush)res["C.Accent"]!; CopyChip.Foreground = Brushes.White;
+                CopyChip.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch; CopyChip.HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Center;
+                CopyChip.MinHeight = 44; CopyChip.CornerRadius = new CornerRadius(10); CopyChip.Margin = new Thickness(h, v - 2, h, 0);
+                ToolTip.SetTip(CopyChip, "Copy a formatted status sentence for emails and trackers (Enter or S)");
+                ChipsSlot.Children.Insert(1, CopyChip);
+                foreach (var chip in new[] { RepliesChip, SisterChip, NotesChip, OpenChip })
+                { chip.BorderThickness = new Thickness(0); chip.Background = Brushes.Transparent; chip.Padding = new Thickness(2, 3); chip.MinHeight = 28; chip.Margin = new Thickness(0, 0, 14, 0); }
+                Detach(ChipsSlot);
+                var host = (Panel)Body.Parent!;
+                host.Children.Remove(Body);
+                var dock = new DockPanel { Name = "PocketDock" };
+                DockPanel.SetDock(ChipsSlot, Dock.Bottom);
+                dock.Children.Add(ChipsSlot); dock.Children.Add(Body);
+                host.Children.Add(dock);
+                break;
+            }
             case CardLayout.Folder:
             {
                 // The number sits on a bronze tab in the top-left corner; the corner itself is square.
@@ -427,6 +478,21 @@ public partial class CardWindow : Window
         // A sheet that has no progress or forecast shows nothing there, never an estimate.
         Progress.IsVisible = record.HasProgress || timeline;
         PctText.Text = ring || !record.HasProgress ? "" : record.ProgressPct + "%" + _pctSuffix;
+        if (_hero is not null)
+        {
+            // Without a forecast there is no gap to state, so the plain goal and forecast rows are shown instead: never an estimate.
+            bool gap = record.HasForecast && record.ForecastDeltaDays is not null;
+            _hero.IsVisible = gap; ClockPanel.IsVisible = !gap;
+            if (gap)
+            {
+                int d = record.ForecastDeltaDays!.Value, n = Math.Abs(d);
+                _heroNumber!.Text = d == 0 ? "On" : n.ToString();
+                _heroNumber.FontSize = d == 0 ? 22 : 30;
+                _heroNumber.Foreground = (IBrush)Application.Current!.Resources[d > 0 ? "C.Warn" : "C.Good"]!;
+                _heroUnit!.Text = d == 0 ? "the goal date" : $"day{(n == 1 ? "" : "s")} {(d > 0 ? "later than" : "ahead of")} the goal";
+                _heroSub!.Text = $"Goal {record.GoalDate} · Forecast {record.ForecastDate}" + (record.ForecastConfidence.Length > 0 ? $" · {record.ForecastConfidence}" : "");
+            }
+        }
         if (_railDays is not null)
         {
             int? days = record.DaysToGoal;
@@ -574,7 +640,8 @@ public partial class CardWindow : Window
     {
         var screen = Screens.ScreenFromPoint(at) ?? Screens.Primary;
         if (screen is null) return;
-        Body.MaxHeight = Math.Max(240, screen.WorkingArea.Height / screen.Scaling - 52 - 2 - Body.Margin.Top);
+        double pinned = Pocket && !_mini ? 104 : 0;   // the Copy status area stays below the scrolling part
+        Body.MaxHeight = Math.Max(240, screen.WorkingArea.Height / screen.Scaling - 52 - 2 - Body.Margin.Top - pinned);
     }
 
     // ---------------- agent findings (the person's own agents; nothing runs unless they switched it on) ----------------

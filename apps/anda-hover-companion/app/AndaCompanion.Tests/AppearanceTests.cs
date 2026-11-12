@@ -34,20 +34,21 @@ public class AppearanceTests
     }
 
     [Fact]
-    public void There_are_nineteen_looks_and_K_is_the_default()
+    public void There_are_twenty_looks_and_T_is_the_default()
     {
         Assert.Equal(new[]
             {
                 AppearanceId.A, AppearanceId.B, AppearanceId.C, AppearanceId.D, AppearanceId.E, AppearanceId.F, AppearanceId.G,
                 AppearanceId.H, AppearanceId.I, AppearanceId.J, AppearanceId.K, AppearanceId.L, AppearanceId.M, AppearanceId.N, AppearanceId.O,
-                AppearanceId.P, AppearanceId.Q, AppearanceId.R, AppearanceId.S,
+                AppearanceId.P, AppearanceId.Q, AppearanceId.R, AppearanceId.S, AppearanceId.T,
             },
             Appearances.All.Select(a => a.Id));
-        Assert.Equal(15, Appearances.All.Count(a => !a.IsCompact));
+        Assert.Equal(16, Appearances.All.Count(a => !a.IsCompact));
         Assert.Equal(4, Appearances.All.Count(a => a.IsCompact));
-        Assert.Equal(AppearanceId.K, Appearances.Default);
-        Assert.Equal(AppearanceId.K, new AndaCompanion.Services.Settings().Appearance);
-        Assert.Equal(AppearanceId.K, Appearances.Get(Appearances.Default).Id);
+        Assert.Equal(AppearanceId.T, Appearances.Default);      // T · Pocket Plain replaced K as the default in round 19
+        Assert.Equal(AppearanceId.T, new AndaCompanion.Services.Settings().Appearance);
+        Assert.Equal(AppearanceId.T, Appearances.Get(Appearances.Default).Id);
+        Assert.Equal(19, (int)AppearanceId.T);                  // appended: every number saved in an earlier settings file still means the same look
     }
 
     [Fact]

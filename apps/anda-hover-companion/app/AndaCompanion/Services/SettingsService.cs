@@ -15,7 +15,7 @@ public enum MyTodoMode { Review = 0, AddAtOnce = 1 }
 
 public sealed class Settings
 {
-    public AppearanceId Appearance { get; set; } = Appearances.Default;   // K · Graphite Quiet is the product default
+    public AppearanceId Appearance { get; set; } = Appearances.Default;   // T · Pocket Plain is the product default
 
     /// <summary>
     /// Hide a card or compact box after this many idle seconds (0 = never). Pointer over it, a pinned card and an

@@ -85,10 +85,10 @@
                            FontFamily="{DynamicResource C.NumFont}" Foreground="{DynamicResource C.Ink}"
                            VerticalAlignment="Center" Text="ANDA 216482"/>
               </Border>
-              <Border Name="Seal" Grid.Column="2" Background="{DynamicResource C.GoodBg}"
+              <!-- The seal's colors are set in code (ApplyAppearanceStructure): a resource binding here would win over a look's own seal. -->
+              <Border Name="Seal" Grid.Column="2"
                       CornerRadius="99" Padding="8,3" VerticalAlignment="Center">
-                <TextBlock Name="SealText" FontSize="10" FontWeight="Bold" LetterSpacing="0.8"
-                           Foreground="{DynamicResource C.Good}" Text="✓ VERIFIED"/>
+                <TextBlock Name="SealText" FontSize="10" FontWeight="Bold" LetterSpacing="0.8" Text="✓ VERIFIED"/>
               </Border>
               <StackPanel Name="ToolsPanel" Grid.Column="4" Orientation="Horizontal" Spacing="2">
                 <Button Name="PinBtn" Classes="tool" ToolTip.Tip="Pin (Space)" AutomationProperties.Name="Pin card">

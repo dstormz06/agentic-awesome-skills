@@ -121,10 +121,14 @@ internal static class SelfTest
     private static async Task RenderAllAsync(SelfTestOptions o, IAndaRepository repo, Report report)
     {
         var briefs = new OfflineBriefService();
-        // K is the default look until the new design is ported, so it gets the full set; every other full look and every compact form gets
+        // T is the default look, so it gets its own set; K, the default before it, keeps the full set; every other full look and every compact form gets
         // at least one shot, alternating the at-risk and healthy records so both states are exercised.
         var shots = new CardShot[]
         {
+            new("card-t", AppearanceId.T, "216482", false, false, 1.0, true),
+            new("card-t-expanded", AppearanceId.T, "216482", true, false, 1.0, false),
+            new("card-t-healthy", AppearanceId.T, "214990", false, false, 1.0, false),
+            new("card-t-peek", AppearanceId.T, "216482", false, true, 1.0, false),
             new("card-k", AppearanceId.K, "216482", false, false, 1.0, true),
             new("card-k-expanded", AppearanceId.K, "216482", true, false, 1.0, true),
             new("card-k-healthy", AppearanceId.K, "214990", false, false, 1.0, false),

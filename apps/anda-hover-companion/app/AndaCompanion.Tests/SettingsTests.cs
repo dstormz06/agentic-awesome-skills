@@ -10,7 +10,7 @@ public class SettingsTests
     public void Defaults_match_the_product_decisions()
     {
         var s = new Settings();
-        Assert.Equal(AppearanceId.K, s.Appearance);      // K · Graphite Quiet is the default
+        Assert.Equal(AppearanceId.T, s.Appearance);      // T · Pocket Plain is the default
         Assert.Equal(10, s.AutoHideSeconds);
         Assert.Equal(ConsentModel.Whisper, s.Consent);     // whisper invite is the default (tester feedback)
         Assert.True(s.EscalateUrgent); Assert.Equal(7, s.UrgentLateDays); Assert.Equal(3, s.HolidayLeadDays);
@@ -34,7 +34,7 @@ public class SettingsTests
     public void A_missing_file_gives_defaults()
     {
         var s = SettingsService.Load(Path.Combine(Temp.NewDir(), "nope.json"));
-        Assert.Equal(AppearanceId.K, s.Appearance);
+        Assert.Equal(AppearanceId.T, s.Appearance);
     }
 
     [Fact]
@@ -51,7 +51,7 @@ public class SettingsTests
         string path = Path.Combine(Temp.NewDir(), "settings.json");
         File.WriteAllText(path, "{ \"Appearance\": 99, \"AutoHideSeconds\": -5 }");
         var s = SettingsService.Load(path);
-        Assert.Equal(AppearanceId.K, s.Appearance);
+        Assert.Equal(AppearanceId.T, s.Appearance);
         Assert.Equal(10, s.AutoHideSeconds);
     }
 

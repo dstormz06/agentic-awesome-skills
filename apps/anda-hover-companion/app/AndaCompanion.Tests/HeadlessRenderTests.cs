@@ -162,7 +162,7 @@ public class HeadlessRenderTests : IClassFixture<HeadlessFixture>
         // nineteen appearances + four auto-hide choices + three consent models + three "late" choices + four holiday-lead choices
         // + four connection choices + five tones + four middle-click keys + two Outlook clouds + three Outlook message counts + five to-do refresh choices + two to-do list modes. (The four API-timeout choices sit inside the collapsed
         // "My API" expander, whose content is not part of the visual tree until it is opened.)
-        Assert.Equal(19 + 4 + 3 + 3 + 4 + 4 + 5 + 4 + 2 + 3 + 5 + 2, names.radios);
+        Assert.Equal(20 + 4 + 3 + 3 + 4 + 4 + 5 + 4 + 2 + 3 + 5 + 2, names.radios);
     }
 
     [Fact]
