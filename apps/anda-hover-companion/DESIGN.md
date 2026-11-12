@@ -649,6 +649,46 @@ added pieces are decoration, hidden from screen readers; the text people select 
 mistypes: it is a first list, and it will miss most grammar. That three extra facts are the right three. That anyone wants notes in a tool that also reads a notes folder.
 Nothing in this section has been used by a real RPM, and none of it except the 90% start is in the Windows app.
 
+## 11e. Round 21: Enter adds a note, a live clock, a proofreader that reads grammar, and a review of the whole (simulation first)
+
+The owner's requests of 2026-11-12, later the same day: a desert photograph as the desktop; the *Copy status* bar "thinner/shorter and more transparent", with Enter going
+"straight to adding a new notes" and the recent notes below; a small button to "the specific ANDA webpage … customizable as a new settings"; "a tad bit of professional shadow
+and Apple design feelings"; "always use today's date and time … current to the second"; "your proofreader and fact checking still not working? Why can you just be seamlessly
+integrating to any local default AI"; a pitch deck; and "find the 5 biggest useability design or code problems. Fix the important ones without changing the main concept."
+
+**The card's actions.** The main action is **Add a note** (Enter): a slim, tinted button, 34 px high, in place of the solid 44 px bar. **Copy status** is a small button and the
+**S** key; one line under the buttons says so. The notes are the first section of the drawer, so Enter shows the box with the newest notes right below it. **Open ANDA page**
+goes to an address the person sets in *Settings, My files and writing*, with `{anda}` where the number goes. Only a plain `https` address is opened, only the six digits are
+put into it, and with no address the button says so. After the page opens the card steps aside unless it is pinned. In the Windows app Enter still copies the status, because
+notes are not in the app yet.
+
+**A live clock, and sample data that follows it.** The taskbar shows the real time to the second and the real date, in the time zone of the person's computer (Eastern Time if
+the browser does not say). The sample records were written around Thursday, Jul 16, 2026; so that they read as current, **every date in them moves forward by a whole number of
+weeks**: a Saturday goal date stays a Saturday, "Thursday huddle" stays true, the goal is 73 to 79 days away and the open item is due in 2 to 8 days, whatever the day. "Today",
+for every rule, is the real today. With `?clock=fixed` the page stays at Jul 16, 2026, which is what the test suites use.
+
+**The desktop.** A desert under a blue sky is the default background, **drawn in the page**: the photograph the owner pointed to could not be fetched from the build
+environment, and a photograph would be the first image file in a page that has none. The card and the app windows have a quieter, layered shadow.
+
+**The proofreader.** The review found why it read as "not working": the results were below the fold, under the AI buttons and two paragraphs about them, and the rules
+missed ordinary grammar. Now the results come right under the buttons, with one summary line; the AI options are folded at the bottom; **the draft is shown with each change
+marked**; and about thirty grammar rules join the spelling list (words that sound alike, a verb that does not agree, a missing apostrophe, *a* or *an*, a date that does not
+exist), each needing the words around it before it speaks. It is still a list of fixed rules and says so.
+
+**An AI built into the PC.** Apple Intelligence runs only on Apple devices, and the people this is for work on Windows. Windows has an on-device model on Copilot+ PCs,
+and Edge and Chrome expose one to web pages on some computers. The simulation asks the browser whether it has one **that is already on the PC**; if so, the three AI buttons
+use it, after showing what will be given to it, and mark the answer as unchecked and Copy only. It never starts a model download. In the build browser the feature exists
+but its model is not installed, so this path was tried against a stand-in, not a real model. For the Windows app it would be one more provider, off until IT approves it.
+
+**The review: the five largest problems, and what was done.**
+1. *Results below the fold in Review, and an empty window that explained nothing.* Fixed.
+2. *A proofreader too thin to trust.* Grammar rules, the marked draft, and dates that do not exist. Still rules, not a language model.
+3. *One keystroke handled twice.* Enter in the Lookup box opened the card and then also acted on the card (it copied the status without saying so). Fixed.
+4. *Notes that vanish on a reload, in a feature whose point is recall.* Kept in the browser's store for the page where that is allowed; the box says which. Fixed.
+5. *The simulation and the Windows app have drifted apart*, and the newest rules had no shared test cases. The cases are now a file in the repository
+   (`mockup/proofread-golden.json`, 32 cases) that a port must reproduce. **The port itself is not done**; that is the largest open item.
+Also fixed on the way: what the card scrolled to could end up under the action area; a card stayed in front of the page it had just opened.
+
 ## 12. Engagement roadmap — seven features that make it the daily habit
 
 Engagement here means *the tool pays the user every time they touch it* — never

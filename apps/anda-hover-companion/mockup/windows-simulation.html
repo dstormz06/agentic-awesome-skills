@@ -862,6 +862,8 @@ details.sec>summary h3.grp{padding:0;margin:0}
 /* a quiet, layered shadow and a hairline of light along the top edge, in the manner of a well-made desktop panel (round 21) */
 :root[data-dir="t"] #card,:root[data-dir="u"] #card,:root[data-dir="v"] #card{box-shadow:var(--c-shadow),inset 0 1px 0 rgba(255,255,255,.7);-webkit-font-smoothing:antialiased}
 :root[data-dir="t"] .app-win,:root[data-dir="u"] .app-win,:root[data-dir="v"] .app-win{box-shadow:0 0 0 .5px rgba(15,23,35,.10),0 8px 18px -6px rgba(15,23,35,.14),0 30px 60px -20px rgba(15,23,35,.32);border-radius:14px}
+/* what the card scrolls to must not end up under the action area that stays at the bottom */
+:root[data-dir="t"] #card,:root[data-dir="u"] #card,:root[data-dir="v"] #card{scroll-padding-bottom:150px}
 .acthint{display:none;font-size:calc(10.5px*var(--ts));line-height:1.3;color:var(--c-ink3);margin-top:2px}
 :root[data-dir="t"] .acthint,:root[data-dir="u"] .acthint,:root[data-dir="v"] .acthint{display:block}
 .acthint b{font-weight:650;color:var(--c-ink2)}
@@ -2620,6 +2622,15 @@ function factExtras(draft){
   const out = { diffs:[], notes:[], checked:{ strength:0, cycle:0, due:0 }, ids:knownIdsIn(draft) };
   if(!draft || !draft.trim()) return out;
   const noteHits = new Set();
+  /* a date that does not exist (found while making a picture for the deck: "Jan 37" went through unnoticed) */
+  { const re = /\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.? (\d{1,2})(?:st|nd|rd|th)?(?:,? (\d{4}))?(?!\d)|(?<![\d\/])(\d{1,2})\/(\d{1,2})\/(\d{4})(?![\d\/])/gi; let m, n = 0;
+    while((m = re.exec(draft)) && n < 3){
+      if(/\t/.test(draft.slice(draft.lastIndexOf("\n", m.index) + 1, m.index))) continue;
+      const mon = m[1] ? MONTHS.indexOf(m[1].slice(0, 3).toLowerCase()) + 1 : +m[4], day = m[1] ? +m[2] : +m[5], year = +(m[3] || m[6] || 2028);     /* with no year, Feb 29 is allowed */
+      if(mon < 1 || mon > 12){ n++; out.diffs.push({ key:"x" + m.index, kind:"diff", text:`“${rvSquash(m[0])}” is not a date: there is no month ${mon}.` }); continue; }
+      const dim = rvDim(year, mon);
+      if(day < 1 || day > dim){ n++; out.diffs.push({ key:"x" + m.index, kind:"diff", text:`“${rvSquash(m[0])}” is not a date: ${new Date(Date.UTC(2000, mon - 1, 1)).toLocaleDateString("en-US", { month:"long", timeZone:"UTC" })}${m[3] || m[6] ? " " + year : ""} has ${m[3] || m[6] || mon !== 2 ? "" : "at most "}${dim} days.` }); }
+    } }
   for(const paragraph of draft.split(/\r?\n\s*\r?\n/)){
     let context = null;
     for(const sentence of paragraph.replace(/([.!?])\s+/g, "$1\u0000").split(/\u0000|\r?\n/).filter(x => x.trim())){
@@ -2835,7 +2846,9 @@ function openAndaPage(){
     h("button", { class:"btn", type:"button", text:"Back to my portfolio", onclick:() => { box.remove(); webAddress(null); } }));
   webAddress(url, "ANDA " + current);
   setFocusWin("web"); $("webBody").scrollTop = 0;
-  showNotice("Opened the page of ANDA " + current + " in the browser window.", anchorForCard());
+  const where = anchorForCard(), id = current;
+  if(!pinnedCard) closeCard();      /* the person has gone to the page: the card steps aside, unless they pinned it */
+  showNotice("Opened the page of ANDA " + id + " in the browser window.", where);
 }
 function webAddress(url, title){     /* the tab and the address pill of the look-alike browser */
   const tab = document.querySelector("#web .tabs .tab"), pill = document.querySelector("#web .addr .url");
@@ -3285,7 +3298,8 @@ document.addEventListener("keydown", e => {
     for(const id of APP_WINS) if($(id).style.display === "block"){ closeApp(id); return; }
     hideChip(); if(compact.style.display === "block") closeCompact(); if(card.style.display === "block") closeCard(); return;
   }
-  if(card.style.display !== "block" || /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
+  /* a key typed into a box belongs to that box, even when the box has just opened the card and handed it the focus (Enter in the Lookup box used to act on the card as well) */
+  if(card.style.display !== "block" || /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName) || (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))) return;
   const k = e.key.toLowerCase();
   if(k === "e" && !e.ctrlKey) toggleExpand();
   else if(k === "s" && !e.ctrlKey) copyStatus();

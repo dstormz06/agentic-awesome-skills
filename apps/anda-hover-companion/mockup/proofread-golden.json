@@ -1,0 +1,505 @@
+{
+ "about": "Shared cases for Proofread and the extra fact checks (rounds 20 and 21). Written by the browser simulation with its clock fixed at Jul 16, 2026 and the fictional demo records. A port to the Windows app or the extension must give the same answers.",
+ "today": "2026-07-16",
+ "cases": [
+  {
+   "draft": "Hi all, quick status. ANDA 216482 is on track, with a goal date of Oct 10, 2026 and a forecast of Oct 17, 2026. ANDA 214990 is running late. ANDA 123456 needs a call. The IR responce for ANDA 216482 (750 mg, cycle 3) is due Jul 28.",
+   "proofread": {
+    "items": [
+     "“responce” is usually spelled “response”."
+    ],
+    "corrected": "Hi all, quick status. ANDA 216482 is on track, with a goal date of Oct 10, 2026 and a forecast of Oct 17, 2026. ANDA 214990 is running late. ANDA 123456 needs a call. The IR response for ANDA 216482 (750 mg, cycle 3) is due Jul 28.",
+    "fixes": 1
+   },
+   "facts": {
+    "differences": [
+     "ANDA 216482: the draft says 750 mg, but your data says Metformin HCl ER Tablets, 500 mg.",
+     "ANDA 216482: the draft says cycle 3, but your data says cycle 2.",
+     "ANDA 216482: the draft gives a due date of Jul 28, but your data says the IR response is due Jul 21, 2026."
+    ],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "hi team, i recieved the the ammendment for anda 216482 .It is a ANDA for Metfromin tablets,500 mg (cycle 2.",
+   "proofread": {
+    "items": [
+     "“recieved” is usually spelled “received”.",
+     "“ammendment” is usually spelled “amendment”.",
+     "“Metfromin” looks like “Metformin”, a name in your data for ANDA 216482.",
+     "“anda” is written “ANDA”.",
+     "“a ANDA” reads “an ANDA”.",
+     "“i” on its own is written “I”.",
+     "A space comes before a punctuation mark, for example “2 .”.",
+     "A space is missing after “,” in “n tablets,500 mg (”.",
+     "A sentence starts with a small letter: “hi team, i recieved the the”.",
+     "The draft has 1 opening and 0 closing parentheses.",
+     "The word “the” appears twice in a row: “the the”."
+    ],
+    "corrected": "Hi team, I received the amendment for ANDA 216482. It is an ANDA for Metformin tablets, 500 mg (cycle 2.",
+    "fixes": 10
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": "Also checked 1 strength and 1 review cycle against your sheet: no difference."
+   }
+  },
+  {
+   "draft": "The applicant will submit the responce tommorow.The team agreed.",
+   "proofread": {
+    "items": [
+     "“responce” is usually spelled “response”.",
+     "“tommorow” is usually spelled “tomorrow”.",
+     "A space is missing after the period in “e tommorow.The team”."
+    ],
+    "corrected": "The applicant will submit the response tomorrow. The team agreed.",
+    "fixes": 3
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "Please see the status ,as discussed ; thanks !",
+   "proofread": {
+    "items": [
+     "3 spaces come before a punctuation mark, for example “s ,”."
+    ],
+    "corrected": "Please see the status, as discussed; thanks!",
+    "fixes": 3
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "ANDA 216482: Meridan has not replied;;",
+   "proofread": {
+    "items": [
+     "“Meridan” looks like “Meridian”, a name in your data for ANDA 216482.",
+     "A punctuation mark is doubled: “ot replied;;”."
+    ],
+    "corrected": "ANDA 216482: Meridian has not replied;",
+    "fixes": 2
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "The FDA labelling guidance was recieved.  Thanks,,",
+   "proofread": {
+    "items": [
+     "“labelling” is usually spelled “labeling”.",
+     "“recieved” is usually spelled “received”.",
+     "One place has two or more spaces in a row.",
+     "A punctuation mark is doubled: “d. Thanks,,”."
+    ],
+    "corrected": "The FDA labeling guidance was received. Thanks,",
+    "fixes": 4
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "Their going to send the the responce tommorow and me and him will review it. ANDA 216482 are on track for there goal date.",
+   "proofread": {
+    "items": [
+     "“responce” is usually spelled “response”.",
+     "“tommorow” is usually spelled “tomorrow”.",
+     "“Their going”: this may be “They're”.",
+     "“for there goal”: this is usually “their”.",
+     "“me and him will”: as the subject this reads “he and I”.",
+     "“ANDA 216482 are”: with one subject this is “is”.",
+     "The word “the” appears twice in a row: “the the”."
+    ],
+    "corrected": "They're going to send the response tomorrow and he and I will review it. ANDA 216482 is on track for their goal date.",
+    "fixes": 7
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "Its a late response, and the applicant dont know weather or not they was told. We should of asked sooner then last week.",
+   "proofread": {
+    "items": [
+     "“Its a”: this is usually “It's”.",
+     "“sooner then”: after a comparison this is “than”.",
+     "“should of”: this is “have”.",
+     "“weather or not”: this is usually “whether”.",
+     "“they was”: with more than one this is “were”.",
+     "“dont”: an apostrophe is missing: “don't”."
+    ],
+    "corrected": "It's a late response, and the applicant don't know whether or not they were told. We should have asked sooner than last week.",
+    "fixes": 6
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "Between you and I, this is a honest mistake by a applicant; an review is not needed. It is to late.",
+   "proofread": {
+    "items": [
+     "“is to late”: this is usually “too”.",
+     "“Between you and I”: after a preposition this is “me”.",
+     "“a honest” reads “an honest”.",
+     "“a applicant” reads “an applicant”.",
+     "“an review” reads “a review”."
+    ],
+    "corrected": "Between you and me, this is an honest mistake by an applicant; a review is not needed. It is too late.",
+    "fixes": 5
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "The team has went over the draft on monday. They will submitted it in january. Your welcome to check there notes.",
+   "proofread": {
+    "items": [
+     "“check there notes”: this is usually “their”.",
+     "“Your welcome”: this is usually “You're”.",
+     "“has went”: after has or have this is “gone”.",
+     "“will submitted”: after this word the verb is “submit”.",
+     "“on monday”: a day of the week takes a capital: “Monday”.",
+     "“january”: a month takes a capital: “January”."
+    ],
+    "corrected": "The team has gone over the draft on Monday. They will submit it in January. You're welcome to check their notes.",
+    "fixes": 6
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "i think its not ready; we was waiting for a NDA holder and an PSG, and noone replied.",
+   "proofread": {
+    "items": [
+     "“its not”: this is usually “it's”.",
+     "“we was”: with more than one this is “were”.",
+     "“noone”: these are two words: “no one”.",
+     "“a NDA” reads “an NDA”.",
+     "“an PSG” reads “a PSG”.",
+     "“i” on its own is written “I”.",
+     "A sentence starts with a small letter: “i think its not ready; we wa”."
+    ],
+    "corrected": "I think it's not ready; we were waiting for an NDA holder and a PSG, and no one replied.",
+    "fixes": 6
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "The plan (see below is ready. He said “yes.",
+   "proofread": {
+    "items": [
+     "The draft has 1 opening and 0 closing parentheses.",
+     "The draft has 1 opening and 0 closing quotation marks."
+    ],
+    "corrected": "The plan (see below is ready. He said “yes.",
+    "fixes": 0
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "Goal Oct 3, 2026 and 10/17/2026.",
+   "proofread": {
+    "items": [
+     "Dates are written in two ways (“Oct 3, 2026” and “10/17/2026”). One style reads more easily."
+    ],
+    "corrected": "Goal Oct 3, 2026 and 10/17/2026.",
+    "fixes": 0
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "There is not enough time. There will be a meeting. Their goal date is Oct 3. It was their response.",
+   "proofread": {
+    "items": [],
+    "corrected": "There is not enough time. There will be a meeting. Their goal date is Oct 3. It was their response.",
+    "fixes": 0
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "Does ANDA 216482 have an open IR? What should it do? If it were late we would say so. Should it have a note?",
+   "proofread": {
+    "items": [],
+    "corrected": "Does ANDA 216482 have an open IR? What should it do? If it were late we would say so. Should it have a note?",
+    "fixes": 0
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "This may of course change. We sent it to many applicants; it led to much discussion. From early to late July.",
+   "proofread": {
+    "items": [],
+    "corrected": "This may of course change. We sent it to many applicants; it led to much discussion. From early to late July.",
+    "fixes": 0
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "Option A applies. An NDA, an ANDA, an RLD, an FDA letter, a PSG, a MAPP, a user fee, a one-time event, an hour, a unit, an SOP and an IR.",
+   "proofread": {
+    "items": [],
+    "corrected": "Option A applies. An NDA, an ANDA, an RLD, an FDA letter, a PSG, a MAPP, a user fee, a one-time event, an hour, a unit, an SOP and an IR.",
+    "fixes": 0
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "Its goal date is its own. It's on track and it's late. The applicant and its response. Your draft, their team, you're right, they're going.",
+   "proofread": {
+    "items": [],
+    "corrected": "Its goal date is its own. It's on track and it's late. The applicant and its response. Your draft, their team, you're right, they're going.",
+    "fixes": 0
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "She and I will review it. Please send it to him and me. They are ready; we are too. More than enough, and then we wait.",
+   "proofread": {
+    "items": [],
+    "corrected": "She and I will review it. Please send it to him and me. They are ready; we are too. More than enough, and then we wait.",
+    "fixes": 0
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "The response is due on Monday, March 3. He may march in May. The review has gone well and they have done it.",
+   "proofread": {
+    "items": [],
+    "corrected": "The response is due on Monday, March 3. He may march in May. The review has gone well and they have done it.",
+    "fixes": 0
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "See eCTD section 3.2.P.1, e.g. the table. No. 5 applies. Dr. Smith agreed, i.e. no change.",
+   "proofread": {
+    "items": [],
+    "corrected": "See eCTD section 3.2.P.1, e.g. the table. No. 5 applies. Dr. Smith agreed, i.e. no change.",
+    "fixes": 0
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "Tablets and tablet strengths (500 mg and 750 mg) are listed at www.fda.gov; write to a.b@fda.gov.",
+   "proofread": {
+    "items": [],
+    "corrected": "Tablets and tablet strengths (500 mg and 750 mg) are listed at www.fda.gov; write to a.b@fda.gov.",
+    "fixes": 0
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "ANDA\tApplicant\tGoal date\n216482\tFictional Pharma A\tOct 10, 2026",
+   "proofread": {
+    "items": [],
+    "corrected": "ANDA\tApplicant\tGoal date\n216482\tFictional Pharma A\tOct 10, 2026",
+    "fixes": 0
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "That that is fine. He had had enough.",
+   "proofread": {
+    "items": [],
+    "corrected": "That that is fine. He had had enough.",
+    "fixes": 0
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "ANDA 216482 (500 mg, cycle 2): the IR response is due Jul 21.",
+   "proofread": {
+    "items": [],
+    "corrected": "ANDA 216482 (500 mg, cycle 2): the IR response is due Jul 21.",
+    "fixes": 0
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": "Also checked 1 strength, 1 review cycle and 1 due date against your sheet: no difference."
+   }
+  },
+  {
+   "draft": "2. ANDA 214990 - the 750 mg strength from the same applicant. It shares a manufacturing site with the 500 mg application, so any facility finding on one matters to both.",
+   "proofread": {
+    "items": [],
+    "corrected": "2. ANDA 214990 - the 750 mg strength from the same applicant. It shares a manufacturing site with the 500 mg application, so any facility finding on one matters to both.",
+    "fixes": 0
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": "Also checked 1 strength against your sheet: no difference."
+   }
+  },
+  {
+   "draft": "ANDA 214990 is in its second cycle.",
+   "proofread": {
+    "items": [],
+    "corrected": "ANDA 214990 is in its second cycle.",
+    "fixes": 0
+   },
+   "facts": {
+    "differences": [
+     "ANDA 214990: the draft says cycle 2, but your data says cycle 3."
+    ],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "ANDA 999999 is 750 mg in cycle 9, due Jul 1.",
+   "proofread": {
+    "items": [],
+    "corrected": "ANDA 999999 is 750 mg in cycle 9, due Jul 1.",
+    "fixes": 0
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "ANDA 216482 and ANDA 214990 are both 750 mg.",
+   "proofread": {
+    "items": [
+     "“ANDA 214990 are”: with one subject this is “is”."
+    ],
+    "corrected": "ANDA 216482 and ANDA 214990 is both 750 mg.",
+    "fixes": 1
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "The goal date is Jan 37, 2027. Due 13/45/2026. Feb 29, 2027 and Feb 29, 2028. June 31.",
+   "proofread": {
+    "items": [],
+    "corrected": "The goal date is Jan 37, 2027. Due 13/45/2026. Feb 29, 2027 and Feb 29, 2028. June 31.",
+    "fixes": 0
+   },
+   "facts": {
+    "differences": [
+     "“Jan 37, 2027” is not a date: January 2027 has 31 days.",
+     "“13/45/2026” is not a date: there is no month 13.",
+     "“Feb 29, 2027” is not a date: February 2027 has 28 days."
+    ],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "Fine: Oct 3, 2026, 10/17/2026, Feb 29, Sep 30, version 3/4, ratio 12/40.",
+   "proofread": {
+    "items": [
+     "Dates are written in two ways (“Oct 3, 2026” and “10/17/2026”). One style reads more easily."
+    ],
+    "corrected": "Fine: Oct 3, 2026, 10/17/2026, Feb 29, Sep 30, version 3/4, ratio 12/40.",
+    "fixes": 0
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  },
+  {
+   "draft": "",
+   "proofread": {
+    "items": [],
+    "corrected": "",
+    "fixes": 0
+   },
+   "facts": {
+    "differences": [],
+    "notes": [],
+    "alsoChecked": null
+   }
+  }
+ ]
+}
