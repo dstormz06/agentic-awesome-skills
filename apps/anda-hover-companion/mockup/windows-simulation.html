@@ -1230,8 +1230,8 @@ C:\work&gt; </div>
   
     <hr class="hair">
     <div class="lbl">WHICH TOOLS ARE SHOWN</div>
-    <label class="opt"><input type="checkbox" id="allTools"> Show all tools (the two to-do lists, agents, appearance and dates)</label>
-    <p class="hint">Off shows the three main tools: look up an ANDA, review a draft and ask about a selection. A few small extras, such as the Watch list and Quick replies, stay in the tray menu. Turning this on loses nothing and changes no data.</p>
+    <label class="opt"><input type="checkbox" id="allTools"> Show all tools (the two to-do lists, agents and dates)</label>
+    <p class="hint">Off shows the three main tools: look up an ANDA, review a draft and ask about a selection. A few small extras, such as the Watch list and Quick replies, stay in the tray menu, and the looks are always under Look and feel. Turning this on loses nothing and changes no data.</p>
     <hr class="hair">
     <div class="lbl">THIS WINDOW · ARRANGES ITSELF</div>
     <label class="opt"><input type="checkbox" id="adaptCheck" checked> Open the sections that need a look or that I use most, and collapse the rest</label>
@@ -3087,8 +3087,8 @@ $("plClose").addEventListener("click", () => closeApp("plib"));
 /* settings */
 function applyLook(id){
   const [, , tokens, form0] = LOOKS.find(l => l[0] === id);
-  const form = state.allTools ? form0 : "full";           /* the focused product always shows the full card, in the default look */
-  state.look = id; state.dir = tokens; state.form = form; root.dataset.dir = state.allTools ? tokens : "t";
+  const form = form0;                                     /* the look the person chose applies in both editions (round 19) */
+  state.look = id; state.dir = tokens; state.form = form; root.dataset.dir = tokens;
   /* a compact box that is open follows the change in place */
   if(compactId){ if(form === "full"){ const c = compactId; closeCompact(); openCard(c, { anchor:{ x:compact.offsetLeft, y:compact.offsetTop }, forceFull:true }); } else showCompact(compactId, { x:compact.offsetLeft - 10, y:compact.offsetTop - 14 }); }
   else if(form !== "full" && current){ const c = current, a = { x:card.offsetLeft, y:card.offsetTop }; showCompact(c, a); }
@@ -3117,7 +3117,7 @@ function applyLook(id){
   [0, 2, 3, 5].forEach(n => { const o = document.createElement("option"); o.value = n; o.textContent = n === 0 ? "0 (only weekends and holidays)" : String(n); if(n === state.lead) o.selected = true; $("setLead").appendChild(o); });
   $("setLead").addEventListener("change", e => { state.lead = +e.target.value; if(current && card.style.display === "block") fill(current); });
   $("setOp").addEventListener("input", e => {
-    state.op = +e.target.value; $("setOpV").textContent = state.op + "%"; root.style.setProperty("--op", (state.allTools ? state.op : 100) + "%");
+    state.op = +e.target.value; $("setOpV").textContent = state.op + "%"; root.style.setProperty("--op", state.op + "%");
   });
   $("setLens").addEventListener("change", e => { state.lens = e.target.selectedIndex <= 0 ? null : e.target.value; });
   $("setManage").addEventListener("click", () => { showApp("plib"); renderPrompts(0); });
@@ -3204,7 +3204,7 @@ function openMenu(){
   if(!acts.length) maBox.append(item("No actions yet. Add one in Settings.", "", null, { disabled:true }));
   acts.forEach(a => maBox.append(item(a.name, a.hotkey || "", () => runActionFromMenu(a))));
   ma.addEventListener("click", () => { maBox.hidden = !maBox.hidden; });
-  menu.append(...(state.allTools ? [ma, maBox, ap, subBox] : []), ah, ahBox,
+  menu.append(...(state.allTools ? [ma, maBox] : []), ap, subBox, ah, ahBox,
     item("Settings…", "", () => showApp("settings")),
     ...(state.allTools ? [item("Prompt library…", "", () => { showApp("plib"); renderPrompts(0); })] : []),
     item("Quick replies…", "", () => { showApp("replies"); renderReplies(0); }),
@@ -5037,8 +5037,8 @@ $("ntOpenList").addEventListener("click", () => openMyTodo());
 /* ---- Settings arrange themselves (SettingsAdvisor, SettingsWindow.Adaptive) ---- */
 const SECS = [["look", "Look and feel"], ["start", "How it starts"], ["dates", "Dates"], ["files", "My files and writing"], ["myTodo", "My to-do list"], ["actions", "My actions, agents and ANDA to-do list"], ["connections", "AI and connections"], ["maintenance", "Maintenance"]];
 const SEC_USE_MIN = 3, SEC_USE_MAX = 1000, SEC_SUGGEST_MAX = 2;
-/* the focused product shows five sections; the rest appear with "Show all tools" */
-const FOCUS_SECS = ["start", "files", "actions", "connections", "maintenance"];
+/* the focused product shows six sections; the rest appear with "Show all tools" */
+const FOCUS_SECS = ["look", "start", "files", "actions", "connections", "maintenance"];   /* the looks came back to the focused edition in round 19, at the owner's request */
 const secShown = k => state.allTools || FOCUS_SECS.includes(k);
 const secTitle = (k, name) => k === "actions" && !state.allTools ? "Ask: my stored prompts" : name;
 const cap1 = k => k[0].toUpperCase() + k.slice(1);
@@ -5090,7 +5090,7 @@ function secTouch(k){
   const use = state.sectionUse; use[k] = Math.min(SEC_USE_MAX, (use[k] || 0) + 1);
   if(Object.values(use).reduce((a, b) => a + b, 0) > 120) Object.keys(use).forEach(x => { use[x] = Math.ceil(use[x] / 2); });
 }
-/* the focused product: five sections, the card always solid and in the default look, no shortcut taken for My to-do list */
+/* the focused product: six sections, the look the person chose, no shortcut taken for My to-do list */
 function applyEdition(){
   const all = state.allTools;
   document.body.classList.toggle("all-tools", all);
@@ -5099,8 +5099,8 @@ function applyEdition(){
   $("actionsLabel").textContent = all ? "MY ACTIONS · YOUR OWN PROMPT, AGENT OR TO-DO ITEM, ON YOUR OWN SHORTCUT" : "STORED PROMPTS · USED BY ASK, OR ON A SHORTCUT OF THEIR OWN";
   $("allTools").checked = all;
   const look = LOOKS.find(l => l[0] === state.look) || LOOKS.find(l => l[0] === "t");
-  root.dataset.dir = all ? look[2] : "t";
-  root.style.setProperty("--op", (all ? state.op : 100) + "%");
+  root.dataset.dir = look[2];
+  root.style.setProperty("--op", state.op + "%");
   if(typeof rebuildJump === "function") rebuildJump();
   paintKeys();
 }
@@ -5183,7 +5183,7 @@ function syncSettingsUI(){
   check("clmode", s.clMode); check("ts", s.ts); check("density", s.density); check("lkstyle", s.lookupStyle); $("setRecents").checked = s.recentsOn; syncRound19(); $("adaptCheck").checked = s.adaptive; applyEdition();
   $("todoAuto").checked = s.todoAuto; renderActions(); renderAgents(); if(isOpen("todo")){ tdApplyTimer(); tdReload(true); }
   $("setUrgent").checked = s.escalate; $("setLead").value = String(s.lead); $("setCapture").checked = s.capture;
-  $("setOp").value = s.op; $("setOpV").textContent = s.op + "%"; root.style.setProperty("--op", (s.allTools ? s.op : 100) + "%");
+  $("setOp").value = s.op; $("setOpV").textContent = s.op + "%"; root.style.setProperty("--op", s.op + "%");
   $("setMiddle").checked = s.middle; $("setStyle").value = s.style; $("setSignoff").value = s.signoff; $("claudeModel").value = s.claudeModel;
   Object.entries({ apiName:"name", apiEndpoint:"endpoint", apiHeader:"header", apiScheme:"scheme", apiEnv:"env", apiModel:"model", apiTemplate:"template", apiPath:"path" })
     .forEach(([id, key]) => { $(id).value = s.myApi[key]; });
@@ -5251,6 +5251,18 @@ $("bkReset").addEventListener("click", () => {
 
 /* go to a section: the group names and the labels inside them; choosing one opens its group first */
 let jumpEntries = [];
+/* The Go to list shows names in sentence case. The small labels on the page are set in capitals as a style; a list of them in capitals is hard to read. */
+const JUMP_PROPER = { anda:"ANDA", andas:"ANDAs", ai:"AI", api:"API", pc:"PC", rld:"RLD", psg:"PSG", fda:"FDA", "drugs@fda":"Drugs@FDA", outlook:"Outlook", elsa:"Elsa", claude:"Claude",
+  microsoft:"Microsoft", windows:"Windows", sharepoint:"SharePoint", i:"I", us:"US", edge:"Edge", excel:"Excel", csv:"CSV", word:"Word" };
+const JUMP_PHRASES = [["alert hub", "Alert Hub"], ["patent analysis", "Patent Analysis"], ["triaging agent", "Triaging Agent"], ["companion lens", "Companion Lens"], ["select & peek", "Select & Peek"], ["used by ask", "used by Ask"]];
+function sentenceCase(t){
+  if(/[a-z]/.test(t.replace(/ANDAs/g, "ANDAS"))) return t;   /* already written in mixed case */
+  return t.split(" · ").map(part => {
+    let low = part.toLowerCase().replace(/[a-z@]+/g, w => JUMP_PROPER[w] || w);
+    for(const [phrase, shown] of JUMP_PHRASES) low = low.split(phrase).join(shown);
+    return low.replace(/[A-Za-z]/, c => c.toUpperCase());
+  }).join(" · ");
+}
 function rebuildJump(){
   const sel = $("setJump"); jumpEntries = [];
   document.querySelectorAll("#settings details.sec").forEach(d => {
@@ -5259,7 +5271,7 @@ function rebuildJump(){
     jumpEntries.push({ title:d.querySelector("h3.grp").textContent, box:d, key:k, target:d });
     d.querySelectorAll(".lbl").forEach(l => { if(!l.closest("[hidden]")) jumpEntries.push({ title:l.textContent, box:d, key:k, target:l }); });
   });
-  sel.innerHTML = `<option value="-1">Choose a section…</option>` + jumpEntries.map((e, i) => `<option value="${i}">${e.title.replace(/</g, "&lt;")}</option>`).join("");
+  sel.innerHTML = `<option value="-1">Choose a section…</option>` + jumpEntries.map((e, i) => `<option value="${i}">${sentenceCase(e.title).replace(/</g, "&lt;")}</option>`).join("");
 }
 (function buildJump(){
   const sel = $("setJump");

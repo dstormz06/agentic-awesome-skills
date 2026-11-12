@@ -473,10 +473,10 @@ one primary action, answer first, progressive disclosure) and applied on Windows
 
 **The owner's decisions (2026-11-06).**
 
-- The new default is **T · Pocket Plain**. **U · Calendar Ribbon** and **V · Glass Sheet** are selectable looks. The 19 earlier looks stay
-  under *Show all tools* and are not changed. All looks are light only.
+- The new default is **T · Pocket Plain**. **U · Calendar Ribbon** and **V · Glass Sheet** are selectable looks. The 19 earlier looks are not changed.
+  Every look can be chosen in *Settings, Look and feel* and in the tray menu, with or without *Show all tools* (round 19). All looks are light only.
 - The icon is **Loupe**: an indigo plate, a white ring and an amber center. A small amber dot on the tray icon means *urgent* (below).
-- **One Bar** is an option for the lookup window (*Settings, Look and feel*, with *Show all tools* on); **Today** is a small window in the tray menu, also under *Show all tools*. Neither is in the focused edition.
+- **One Bar** is an option for the lookup window (*Settings, Look and feel*, in both editions since round 19); **Today** is a small window in the tray menu under *Show all tools*, and is not in the focused edition.
 - *Comfortable* or *Compact* spacing, and *Standard*, *Larger* or *Largest* text, are in *Settings, How it starts*. They change this app's
   windows only.
 - Recent ANDAs and *Keep in my list* are saved on the PC, with a *Clear recents* button and an off switch.
@@ -594,6 +594,13 @@ letter); TickTick (an outside cloud service; ANDA tasks would leave the agency);
 (legal and policy calls; the tool can show inputs and say "possible, please confirm", never decide or add to a tracker); Apple Intelligence (Mac only; the users are on Windows);
 code extensions written by users (a security risk; *My actions*, *My agents* and the chosen columns cover the need); a rewrite as a Power App (it cannot register a global shortcut,
 read a selection in another program or open a card at the pointer; Power BI suits a leadership dashboard); pasting into other programs (Copy only, for now).
+
+**The looks stay in reach, and the Go to list reads like a list (simulation and app).** Round 17 hid *Look and feel* behind *Show all tools* and drew the card solid in the
+default look. The owner went looking for the looks and could not find them, so the rule was wrong for the person it was written for: **every look, the compact boxes and the
+transparency slider are in Settings in both editions, the tray menu keeps its *Appearance* list, and what a person chooses applies at once.** *Show all tools* now governs
+tools only (the two to-do lists, agents, dates). A new install still opens in T · Pocket Plain at the 92% the owner chose in round 16. The **Go to** list showed the small
+capital labels as they are drawn on the page, which made a column of capitals; it now shows them in sentence case, keeping abbreviations and names (ANDA, API, PC, Drugs@FDA,
+Alert Hub, Select & Peek). The labels on the page are unchanged.
 
 **What round 19 does not prove.** That a notice near the clock helps more than it interrupts; three a day is a guess. That the Word document is a workable way to run division
 news: nobody has written one. That the chosen shortcuts are free on a real FDA laptop. Nothing in this section has been used by a real RPM.

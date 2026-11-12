@@ -38,8 +38,8 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   **standing instructions** for the writing actions, **four rebindable shortcuts** (Select & Peek, Lookup, Review a draft, Ask), an optional
   **usage log** (off by default), **card transparency slider** (40–100%, starting at 92%; text always stays opaque),
   companion lens picker, and the **connection panel** (Auto, Offline, Claude with its model name, or My API) with one-click Test.
-  A **Go to** list at the top jumps to any section (and opens it). With **Show all tools** on, Settings is eight collapsible sections, each with a strong line under it: *Look and feel*, *How it
-  starts*, *Dates*, *My files and writing*, *My to-do list*, *My actions, agents and ANDA to-do list*, *AI and connections*, *Maintenance*. The **focused edition, which is the default**, shows five: *How it starts*, *My files and writing*, *Ask: my stored prompts*, *AI and connections* and *Maintenance*. **They arrange
+  A **Go to** list at the top jumps to any section (and opens it); its names are in sentence case, with abbreviations such as ANDA and API kept (`SettingsSections.SentenceCase`). With **Show all tools** on, Settings is eight collapsible sections, each with a strong line under it: *Look and feel*, *How it
+  starts*, *Dates*, *My files and writing*, *My to-do list*, *My actions, agents and ANDA to-do list*, *AI and connections*, *Maintenance*. The **focused edition, which is the default**, shows six: *Look and feel* (back since round 19, with every look and the transparency slider), *How it starts*, *My files and writing*, *Ask: my stored prompts*, *AI and connections* and *Maintenance*. **They arrange
   themselves:** when Settings opens, everything is collapsed except what needs a look (a shortcut Windows did not register, a portfolio file that could not be
   read, an AI connection that was never tested, an agent or action that is not ready), what a new user needs first (shortcuts, portfolio) and up to two sections
   opened three or more times; each open section says why. *Suggested view*, *Expand all* and *Collapse all* are always there. Only a count per section is kept (`settings.json`; no text), can be forgotten, and stops when the
@@ -125,8 +125,8 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   then your clipboard is put back; nothing in terminals) and is never kept. Limits: cells are read from the tab-separated text that Excel puts on the
   clipboard, up to 20,000 characters, 1,000 rows and 30 columns; **not tried against real Excel**. `Services/SelectionHelpers.cs`, `UI/AskWindow.*`, `App.Ask.cs`.
 - **The focused edition** — the product opens with what the supervisor asked for: **ANDA lookup** and **reviewing a draft**, plus **Ask**. Hidden until
-  *Settings, Maintenance, Show all tools* is ticked: the two to-do lists (and their shortcut), agents, the appearance picker (the card is solid, in the
-  default look), the dates section and the transparency slider. Nothing is deleted, and what was chosen comes back when all tools are shown. There is no *Getting started* card, and the demo has no list of steps. `Edition` in `Services/SettingsService.cs`.
+  *Settings, Maintenance, Show all tools* is ticked: the two to-do lists (and their shortcut), agents and the dates section. The looks, the transparency slider and
+  the tray menu's *Appearance* list are in both editions (since round 19: the owner asked for the looks back in Settings). Nothing is deleted, and what was chosen comes back when all tools are shown. There is no *Getting started* card, and the demo has no list of steps. `Edition` in `Services/SettingsService.cs`.
 - **Writing actions (Proofread, Rewrite, Fact-check)** — buttons in the draft window, **off until an
   approved model is connected**. Each shows a **preview of the exact text that will be sent** (your draft,
   the matching records for Fact-check, your standing instructions and chosen lens) and sends nothing

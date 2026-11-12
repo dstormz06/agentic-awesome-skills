@@ -32,7 +32,8 @@ public partial class SettingsWindow : Window
         _onChanged = onChanged;
         InitializeComponent();
 
-        foreach (var a in Appearances.All)
+        // The default look is listed first, as in the simulation; the others follow in their usual order.
+        foreach (var a in Appearances.All.OrderBy(x => x.Id == Appearances.Default ? 0 : 1))
         {
             var rb = new RadioButton
             {

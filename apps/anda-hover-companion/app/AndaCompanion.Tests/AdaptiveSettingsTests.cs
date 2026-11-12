@@ -31,22 +31,25 @@ public class SettingsAdvisorTests
     }
 
     [Fact]
-    public void The_focused_product_shows_five_sections_and_a_hidden_one_is_never_opened_or_counted()
+    public void The_focused_product_shows_six_sections_and_a_hidden_one_is_never_opened_or_counted()
     {
         var shown = SettingsSections.Visible(false);
-        Assert.Equal(new[] { SettingsSection.Start, SettingsSection.Files, SettingsSection.Actions, SettingsSection.Connections, SettingsSection.Maintenance }, shown.OrderBy(x => (int)x));
+        Assert.Equal(new[] { SettingsSection.Look, SettingsSection.Start, SettingsSection.Files, SettingsSection.Actions, SettingsSection.Connections, SettingsSection.Maintenance }, shown.OrderBy(x => (int)x));
         Assert.Equal(8, SettingsSections.Visible(true).Count);
         Assert.Equal("Ask: my stored prompts", SettingsSections.Title(SettingsSection.Actions, false));
         Assert.Equal("My actions, agents and ANDA to-do list", SettingsSections.Title(SettingsSection.Actions, true));
 
-        // Look and Dates are used a lot, but they are hidden, so the two slots go to sections that are shown
-        var s = new Settings { SectionUse = new() { ["Look"] = 9, ["Dates"] = 8, ["Connections"] = 4, ["Files"] = 3 } };
+        // My to-do list and Dates are used a lot, but they are hidden, so the two slots go to sections that are shown
+        var s = new Settings { SectionUse = new() { ["MyTodo"] = 9, ["Dates"] = 8, ["Connections"] = 4, ["Files"] = 3 } };
         var advice = SettingsAdvisor.Advise(s, SettingsFacts.AllWell, shown);
-        Assert.Equal(5, advice.Count);
-        Assert.DoesNotContain(advice, a => a.Section is SettingsSection.Look or SettingsSection.Dates or SettingsSection.MyTodo);
+        Assert.Equal(6, advice.Count);
+        Assert.DoesNotContain(advice, a => a.Section is SettingsSection.Dates or SettingsSection.MyTodo);
         Assert.Equal(new[] { SettingsSection.Files, SettingsSection.Connections }, advice.Where(a => a.Open).Select(a => a.Section));
         // with every section shown the busiest two win
-        Assert.Equal(new[] { SettingsSection.Look, SettingsSection.Dates }, Open(s, SettingsFacts.AllWell));
+        Assert.Equal(new[] { SettingsSection.Dates, SettingsSection.MyTodo }, Open(s, SettingsFacts.AllWell));
+        // Look and feel came back to the focused product in round 19: used a lot, it opens
+        var looker = new Settings { SectionUse = new() { ["Look"] = 9, ["Files"] = 3 } };
+        Assert.Contains(SettingsAdvisor.Advise(looker, SettingsFacts.AllWell, shown), a => a.Section == SettingsSection.Look && a.Open);
     }
 
     [Fact]
@@ -175,7 +178,7 @@ public class AdaptiveSettingsUiTests : IClassFixture<HeadlessFixture>
     private static string Text(Window w, string name) => w.FindControl<TextBlock>(name)!.Text ?? "";
 
     [Fact]
-    public async Task A_new_install_shows_five_sections_all_collapsed_with_no_getting_started_card()
+    public async Task A_new_install_shows_six_sections_all_collapsed_with_no_getting_started_card()
     {
         var r = await _fx.Session.Dispatch(() =>
         {
@@ -196,10 +199,11 @@ public class AdaptiveSettingsUiTests : IClassFixture<HeadlessFixture>
         Assert.Empty(r.open);
         Assert.False(r.card);
         Assert.Contains("Everything is in order", r.adaptive);
-        Assert.Equal(new[] { "SecStart", "SecFiles", "SecActions", "SecConnections", "SecMaintenance" }, r.visible);
+        Assert.Equal(new[] { "SecLook", "SecStart", "SecFiles", "SecActions", "SecConnections", "SecMaintenance" }, r.visible);
         Assert.Equal("Ask: my stored prompts", r.actionsTitle);
         Assert.Contains("Ask: my stored prompts", r.jump);
-        Assert.DoesNotContain("Look and feel", r.jump);
+        Assert.Contains("Look and feel", r.jump);                 // the looks are in both editions (round 19)
+        Assert.DoesNotContain("Dates", r.jump);
         Assert.DoesNotContain("My to-do list", r.jump);
     }
 
@@ -265,7 +269,7 @@ public class AdaptiveSettingsUiTests : IClassFixture<HeadlessFixture>
             var jump = w.FindControl<ComboBox>("JumpBox")!;
             var items = jump.ItemsSource!.Cast<string>().ToList();
             bool closedBefore = !w.OpenSections.Contains(SettingsSection.Actions);
-            jump.SelectedIndex = items.FindIndex(i => i.StartsWith("MY AGENTS")); Settle();
+            jump.SelectedIndex = items.FindIndex(i => i.StartsWith("My agents")); Settle();
             bool openAfter = w.OpenSections.Contains(SettingsSection.Actions);
             bool reset = jump.SelectedIndex == -1;
             jump.SelectedIndex = items.IndexOf("Maintenance"); Settle();
@@ -276,7 +280,7 @@ public class AdaptiveSettingsUiTests : IClassFixture<HeadlessFixture>
 
         Assert.Contains("Look and feel", r.items);
         Assert.Contains("My to-do list", r.items);
-        Assert.Contains(r.items, i => i.StartsWith("APPEARANCE"));
+        Assert.Contains(r.items, i => i.StartsWith("Appearance"));
         Assert.True(r.closedBefore);
         Assert.True(r.openAfter);
         Assert.True(r.reset);

@@ -36,9 +36,10 @@ MAKE IT YOURS (tray icon, then Settings)
   The app opens focused: Lookup, Review a draft and Ask. Settings opens on what needs a look and keeps
   the other sections collapsed; click a heading to open one, or use "Expand all". A "Go to" list at the
   top jumps to any section. Nothing here needs a rebuild.
-  Tick Maintenance, "Show all tools" to also see the two to-do lists, agents, the looks and dates. Nothing
-  is deleted, and what you chose comes back. Items below marked (all tools) appear only then.
-  - (all tools) Appearance: 20 looks (T is the default; L to O are small boxes that stay out of the way
+  Tick Maintenance, "Show all tools" to also see the two to-do lists, agents and dates. The looks are
+  always under "Look and feel". Nothing is deleted, and what you chose comes back. Items below
+  marked (all tools) appear only then.
+  - Appearance: 20 looks (T is the default; L to O are small boxes that stay out of the way
     of an email), auto-hide (10 seconds to start), transparency (40 to 100 percent, starting at 92), how a card opens.
   - Shortcuts: your own keys, with a live note on any that another program already uses.
     An optional middle-click is off by default.

@@ -21,7 +21,7 @@ restored and reset. A backup holds no secret and no file path, and a restore nev
 You can also write your own **actions** (a prompt, an AI request or an agent request on a shortcut you choose), keep an **ANDA to-do list** that
 includes what your data says needs a look, keep a separate **My to-do list** for the rest of your daily workload, ANDA related or not (highlight rough notes and press its shortcut:
 they become suggested items, read by plain rules with no AI), and register agents such as the division's Alert Hub, Patent Analysis and Triaging Agent. Those three are listed but
-not connected: their addresses and formats are needed from DPM IT. Settings open on what needs a look and keep the rest collapsed. The product opens **focused**: ANDA lookup, reviewing a draft and Ask about a selection; the to-do lists, agents, looks and dates appear only when *Show all tools* is ticked.
+not connected: their addresses and formats are needed from DPM IT. Settings open on what needs a look and keep the rest collapsed. The product opens **focused**: ANDA lookup, reviewing a draft and Ask about a selection; the to-do lists, agents and dates appear only when *Show all tools* is ticked, and the looks can always be chosen in Settings.
 
 **Where it fits the work, and how each is measured** (hypotheses to confirm with the testers):
 

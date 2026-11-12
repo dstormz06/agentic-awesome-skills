@@ -24,11 +24,11 @@ public class Round19Tests : IClassFixture<HeadlessFixture>
     private static AndaRecord Late => new MockAndaRepository().Find("216482")!;
     private static AndaRecord Early => new MockAndaRepository().Find("214990")!;
 
-    private async Task<T> Inspect<T>(AndaRecord record, bool mini, Func<CardWindow, T> read, AppearanceId id = AppearanceId.T)
+    private async Task<T> Inspect<T>(AndaRecord record, bool mini, Func<CardWindow, T> read, AppearanceId id = AppearanceId.T, double opacity = 1.0)
     {
         return await _fx.Session.Dispatch(() =>
         {
-            ThemeManager.Apply(id);
+            ThemeManager.Apply(id, opacity);
             var w = new CardWindow(new OfflineBriefService(), new MockAndaRepository().Find) { CloseWhenDeactivated = false, Today = () => new DateOnly(2026, 7, 16) };
             try
             {
@@ -47,8 +47,9 @@ public class Round19Tests : IClassFixture<HeadlessFixture>
         Assert.Equal(AppearanceId.T, Appearances.Default);
         Assert.Equal(CardLayout.Pocket, Appearances.T.Look.Layout);
         Assert.False(Appearances.T.IsCompact);
-        Assert.Equal(AppearanceId.T, Edition.Appearance(new Settings()));                                              // focused edition: always the default look
+        Assert.Equal(AppearanceId.T, Edition.Appearance(new Settings()));                                              // nothing chosen: the default look
         Assert.Equal(AppearanceId.K, Edition.Appearance(new Settings { ShowAllTools = true, Appearance = AppearanceId.K }));   // someone who chose K keeps K
+        Assert.Equal(AppearanceId.K, Edition.Appearance(new Settings { Appearance = AppearanceId.K }));                        // in the focused edition too
     }
 
     [Fact]
@@ -193,6 +194,57 @@ public class Round19Tests : IClassFixture<HeadlessFixture>
         Assert.DoesNotContain("216482", three);
     }
 
+    [Theory]
+    [InlineData("CARD TRANSPARENCY", "Card transparency")]
+    [InlineData("APPEARANCE · FULL CARD", "Appearance · Full card")]
+    [InlineData("MY DATA · YOUR ANDA PORTFOLIO (EXCEL OR CSV)", "My data · Your ANDA portfolio (Excel or CSV)")]
+    [InlineData("OUTLOOK (OPTIONAL) · READ-ONLY MAIL ABOUT THE OPEN ANDA", "Outlook (optional) · Read-only mail about the open ANDA")]
+    [InlineData("DRUGS@FDA · A FILE ON THIS PC", "Drugs@FDA · A file on this PC")]
+    [InlineData("WHAT I ASK THE AI", "What I ask the AI")]
+    [InlineData("RLD AND PSG DATES", "RLD and PSG dates")]
+    [InlineData("URGENT ANDAs", "Urgent ANDAs")]
+    [InlineData("STORED PROMPTS · USED BY ASK, OR ON A SHORTCUT OF THEIR OWN", "Stored prompts · Used by Ask, or on a shortcut of their own")]
+    [InlineData("SELECT & PEEK", "Select & Peek")]
+    [InlineData("MY AGENTS · ALERT HUB, PATENT ANALYSIS, TRIAGING AGENT AND YOUR OWN", "My agents · Alert Hub, Patent Analysis, Triaging Agent and your own")]
+    [InlineData("EDGE EXTENSION · OPTIONAL", "Edge extension · Optional")]
+    [InlineData("COMPANION LENS · PROMPT LIBRARY", "Companion Lens · Prompt library")]
+    [InlineData("Look and feel", "Look and feel")]                       // already in mixed case: left as it is
+    [InlineData("Ask: my stored prompts", "Ask: my stored prompts")]
+    public void The_Go_to_list_names_are_in_sentence_case_with_names_and_abbreviations_kept(string label, string shown) =>
+        Assert.Equal(shown, SettingsSections.SentenceCase(label));
+
+    [Fact]
+    public async Task The_Go_to_list_in_Settings_has_no_name_in_capitals_and_offers_the_looks_in_the_focused_edition()
+    {
+        var r = await _fx.Session.Dispatch(() =>
+        {
+            var w = new SettingsWindow(new Settings(), new PromptLibraryService(Path.Combine(Temp.NewDir(), "p.json")), () => { });
+            try
+            {
+                w.Show(); Settle();
+                var jump = w.FindControl<ComboBox>("JumpBox")!.ItemsSource!.Cast<string>().ToList();
+                w.ExpandAll(); Settle();
+                var looks = w.GetVisualDescendants().OfType<RadioButton>().Where(b => b.IsEffectivelyVisible && Appearances.All.Any(look => look.Name == (b.Content as string))).ToList();
+                int radios = looks.Count;
+                string first = (string)looks[0].Content!;
+                bool firstChecked = looks[0].IsChecked == true;
+                return (jump, radios, first, firstChecked);
+            }
+            finally { w.Close(); Settle(); }
+        }, CancellationToken.None);
+        Assert.Equal(Appearances.All.Count, r.radios);              // every look can be picked without "Show all tools"
+        Assert.Equal(Appearances.Get(Appearances.Default).Name, r.first);   // the default look is listed first, and a new install has it chosen
+        Assert.True(r.firstChecked);
+        Assert.Contains("Look and feel", r.jump);
+        Assert.Contains(r.jump, t => t.StartsWith("Appearance"));
+        Assert.All(r.jump, t => Assert.True(t.Any(char.IsLower), t));
+        // no word of three or more letters is left in capitals unless it is a known name or abbreviation
+        var allowed = new HashSet<string> { "ANDA", "AI", "API", "PC", "RLD", "PSG", "FDA", "CSV", "US" };
+        foreach (var t in r.jump)
+            foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(t, @"\b[A-Z]{3,}\b"))
+                Assert.True(allowed.Contains(m.Value), $"“{m.Value}” in “{t}”");
+    }
+
     /// <summary>A picture for a person to look at. Not run unless ANDA_SHOTS_DIR is set.</summary>
     [ShotFact]
     public async Task Save_pictures_of_the_default_card()
@@ -201,5 +253,8 @@ public class Round19Tests : IClassFixture<HeadlessFixture>
         Directory.CreateDirectory(dir);
         foreach (var (name, rec, mini) in new[] { ("r19-card-t-late", Late, false), ("r19-card-t-early", Early, false), ("r19-card-t-peek", Late, true) })
             await Inspect(rec, mini, w => { Settle(); Settle(); w.CaptureRenderedFrame()?.Save(Path.Combine(dir, name + ".png")); return 0; });
+        // the starting transparency (92%), which the focused edition now uses too
+        await Inspect(Late, false, w => { Settle(); Settle(); w.CaptureRenderedFrame()?.Save(Path.Combine(dir, "r19-card-t-late-92.png")); return 0; }, AppearanceId.T, Settings.DefaultCardOpacity);
+        await Inspect(Late, false, w => { Settle(); Settle(); w.CaptureRenderedFrame()?.Save(Path.Combine(dir, "r19-card-k-late-92.png")); return 0; }, AppearanceId.K, Settings.DefaultCardOpacity);
     }
 }

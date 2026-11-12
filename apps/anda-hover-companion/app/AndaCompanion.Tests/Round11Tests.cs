@@ -145,9 +145,9 @@ public class Round11UiTests : IClassFixture<HeadlessFixture>
             return (items, model, afterFirst, afterSecond);
         }, CancellationToken.None);
         Assert.True(r.items.Count >= 12, "sections listed: " + r.items.Count);
-        Assert.Contains("CONNECTION · WHICH API, IF ANY", r.items);
-        Assert.Contains("BACK UP, RESTORE, RESET", r.items);
-        Assert.Contains("MY WRITING · TONE, STYLE, SIGN-OFF, QUICK REPLIES", r.items);
+        Assert.Contains("Connection · Which API, if any", r.items);
+        Assert.Contains("Back up, restore, reset", r.items);
+        Assert.Contains("My writing · Tone, style, sign-off, quick replies", r.items);
         Assert.Equal("claude-opus-4-8", r.model);
         Assert.Equal(("Click again to reset", "Warm"), r.afterFirst);              // the first click only asks
         Assert.Equal(("", 10), r.afterSecond);                                      // the second one resets

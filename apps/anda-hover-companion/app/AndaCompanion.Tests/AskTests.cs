@@ -11,7 +11,7 @@ namespace AndaCompanion.Tests;
 
 /// <summary>
 /// "Ask about a selection": the window in real controls (what it says about a selection, the quick checks, stored prompts, an instruction typed here, and
-/// that nothing runs unless a button is pressed), the Ask shortcut (repair, clashes, backup) and the focused edition (the default look and a solid card).
+/// that nothing runs unless a button is pressed), the Ask shortcut (repair, clashes, backup) and the focused edition (fewer tools; the chosen look applies in both).
 /// </summary>
 [Collection("Global state")]
 public class AskTests : IClassFixture<HeadlessFixture>
@@ -378,22 +378,25 @@ public class AskTests : IClassFixture<HeadlessFixture>
     // ---------- the focused edition ----------
 
     [Fact]
-    public void The_focused_edition_shows_the_default_look_and_a_solid_card_until_all_tools_are_shown()
+    public void The_look_and_the_transparency_a_person_chose_apply_in_both_editions()
     {
+        // Until round 19 the focused edition forced the default look and a solid card. The owner asked for the looks back.
         var s = new Settings { Appearance = AppearanceId.P, CardOpacity = 0.6 };
         Assert.False(s.ShowAllTools);                       // focused by default
-        Assert.Equal(Appearances.Default, Edition.Appearance(s));
-        Assert.Equal(1.0, Edition.Opacity(s));
-        s.ShowAllTools = true;
-        Assert.Equal(AppearanceId.P, Edition.Appearance(s));  // the choice was kept and comes back
+        Assert.Equal(AppearanceId.P, Edition.Appearance(s));
         Assert.Equal(0.6, Edition.Opacity(s));
+        s.ShowAllTools = true;
+        Assert.Equal(AppearanceId.P, Edition.Appearance(s));
+        Assert.Equal(0.6, Edition.Opacity(s));
+        Assert.Equal(Appearances.Default, Edition.Appearance(new Settings()));   // nothing chosen: the default look
     }
 
     [Fact]
-    public void The_Settings_sections_in_the_focused_edition_are_the_five_that_matter()
+    public void The_Settings_sections_in_the_focused_edition_are_the_six_that_matter()
     {
         var focused = Enum.GetValues<SettingsSection>().Where(s => SettingsSections.Visible(false).Contains(s)).ToList();
-        Assert.Equal(5, focused.Count);
+        Assert.Equal(6, focused.Count);
+        Assert.Contains(SettingsSection.Look, focused);             // the looks are in both editions (round 19)
         Assert.True(Enum.GetValues<SettingsSection>().Length > focused.Count);
         Assert.Equal(Enum.GetValues<SettingsSection>().Length, SettingsSections.Visible(true).Count());
         Assert.Equal("Ask: my stored prompts", SettingsSections.Title(SettingsSection.Actions, false));

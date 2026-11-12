@@ -492,7 +492,7 @@ public class OutlookUiTests : IClassFixture<HeadlessFixture>
         }, CancellationToken.None);
 
         Assert.Equal((false, false, "○ Outlook is off."), r.offState);
-        Assert.Contains("OUTLOOK · OPTIONAL, READ-ONLY", r.sections);
+        Assert.Contains("Outlook · Optional, read-only", r.sections);
         Assert.True(r.onState.Item1);
         Assert.True(r.onState.Item2);
         Assert.Equal((Client, "contoso.onmicrosoft.com", 10), (r.onState.Item3, r.onState.Item4, r.onState.Item5));

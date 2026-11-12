@@ -22,7 +22,7 @@ public partial class SettingsWindow
     private readonly HashSet<SettingsSection> _touched = new();
     private bool _applyingLayout, _useDirty;
 
-    /// <summary>The sections that are shown now (all of them with "Show all tools", otherwise the five of the focused product).</summary>
+    /// <summary>The sections that are shown now (all of them with "Show all tools", otherwise the six of the focused product).</summary>
     private IReadOnlySet<SettingsSection> Shown => SettingsSections.Visible(_settings.ShowAllTools);
 
     /// <summary>The sections that are open right now, in the order shown.</summary>
@@ -99,7 +99,7 @@ public partial class SettingsWindow
                 if (panel.Children.FirstOrDefault() is TextBlock { Text: { Length: > 0 } label } first && first.Classes.Contains("lbl"))
                     _jump.Add(new JumpTarget(label, sec, panel));
         }
-        JumpBox.ItemsSource = _jump.Select(j => j.Title).ToList();
+        JumpBox.ItemsSource = _jump.Select(j => SettingsSections.SentenceCase(j.Title)).ToList();
     }
 
     // ---------- what is open, and why ----------

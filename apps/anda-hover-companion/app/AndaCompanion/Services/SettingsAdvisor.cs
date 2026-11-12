@@ -21,12 +21,40 @@ public static class SettingsSections
     public static string Title(SettingsSection s) => All.First(x => x.Id == s).Title;
 
     /// <summary>
-    /// The focused product shows five groups; the rest (appearance, dates, My to-do list and the agents) appear only when "Show all tools" is on.
+    /// The focused product shows six groups; the rest (dates, My to-do list and the agents) appear only when "Show all tools" is on.
+    /// Look and feel came back to the focused product in round 19: the owner wanted the looks in Settings.
     /// The Actions group stays, because it holds the stored prompts that Ask uses, but under a shorter name.
     /// </summary>
     public static IReadOnlySet<SettingsSection> Visible(bool showAllTools) => showAllTools
         ? All.Select(x => x.Id).ToHashSet()
-        : new HashSet<SettingsSection> { SettingsSection.Start, SettingsSection.Files, SettingsSection.Actions, SettingsSection.Connections, SettingsSection.Maintenance };
+        : new HashSet<SettingsSection> { SettingsSection.Look, SettingsSection.Start, SettingsSection.Files, SettingsSection.Actions, SettingsSection.Connections, SettingsSection.Maintenance };
+
+    private static readonly Dictionary<string, string> Proper = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["anda"] = "ANDA", ["andas"] = "ANDAs", ["ai"] = "AI", ["api"] = "API", ["pc"] = "PC", ["rld"] = "RLD", ["psg"] = "PSG", ["fda"] = "FDA", ["drugs@fda"] = "Drugs@FDA",
+        ["outlook"] = "Outlook", ["elsa"] = "Elsa", ["claude"] = "Claude", ["microsoft"] = "Microsoft", ["windows"] = "Windows", ["sharepoint"] = "SharePoint", ["i"] = "I", ["us"] = "US",
+        ["edge"] = "Edge", ["excel"] = "Excel", ["csv"] = "CSV", ["word"] = "Word",
+    };
+    private static readonly (string Low, string Shown)[] ProperPhrases =
+    {
+        ("alert hub", "Alert Hub"), ("patent analysis", "Patent Analysis"), ("triaging agent", "Triaging Agent"), ("companion lens", "Companion Lens"), ("select & peek", "Select & Peek"), ("used by ask", "used by Ask"),
+    };
+
+    /// <summary>
+    /// A label written in capitals, as the Go to list shows it: sentence case, with names and abbreviations kept. The small labels in the window are set in
+    /// capitals as a style; a list of them in capitals is hard to read. A label already in mixed case is returned as it is.
+    /// </summary>
+    public static string SentenceCase(string label)
+    {
+        if (label.Replace("ANDAs", "ANDAS").Any(char.IsLower)) return label;
+        return string.Join(" · ", label.Split(" · ").Select(part =>
+        {
+            string low = System.Text.RegularExpressions.Regex.Replace(part.ToLowerInvariant(), "[a-z@]+", m => Proper.TryGetValue(m.Value, out var p) ? p : m.Value);
+            foreach (var (phrase, shown) in ProperPhrases) low = low.Replace(phrase, shown);
+            int i = 0; while (i < low.Length && !char.IsLetter(low[i])) i++;
+            return i < low.Length ? low[..i] + char.ToUpperInvariant(low[i]) + low[(i + 1)..] : low;
+        }));
+    }
 
     public static string Title(SettingsSection s, bool showAllTools) =>
         s == SettingsSection.Actions && !showAllTools ? "Ask: my stored prompts" : Title(s);

@@ -383,10 +383,11 @@ public partial class App : Application
         menu.Add(demoHealthy);
         menu.Add(new NativeMenuItemSeparator());
 
-        menu.Add(Full(BuildRadioSubmenu("Appearance", Appearances.All.Select(a => (a.Name, (object)a.Id)),
+        // Round 19: the looks are offered in both editions (the owner asked for them back).
+        menu.Add(BuildRadioSubmenu("Appearance", Appearances.All.Select(a => (a.Name, (object)a.Id)),
             () => (object)_settings.Appearance,
             value => { _settings.Appearance = (AppearanceId)value; ApplySettings(); },
-            separatorBefore: Appearances.L.Name)));
+            separatorBefore: Appearances.L.Name));
         menu.Add(BuildRadioSubmenu("Auto-hide", AutoHidePolicy.Choices.Select(c => (AutoHidePolicy.Label(c), (object)c)),
             () => (object)_settings.AutoHideSeconds,
             value => { _settings.AutoHideSeconds = (int)value; ApplySettings(); }));
@@ -420,7 +421,7 @@ public partial class App : Application
 
     private readonly List<NativeMenuItem> _fullOnly = new();
 
-    /// <summary>Marks a tray item as one that only "Show all tools" shows. The focused menu is Lookup, Review a draft, Ask, the watch list and Settings.</summary>
+    /// <summary>Marks a tray item as one that only "Show all tools" shows. The focused menu is Lookup, Review a draft, Ask, the watch list, Appearance and Settings.</summary>
     private T Full<T>(T item) where T : NativeMenuItem { _fullOnly.Add(item); return item; }
 
     private void ShowToolsInTray() { foreach (var item in _fullOnly) item.IsVisible = _settings.ShowAllTools; }

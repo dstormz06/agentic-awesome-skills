@@ -81,10 +81,10 @@ public class Round15UiTests : IClassFixture<HeadlessFixture>
         Assert.Equal(0.40, r.at40, 3);
         Assert.Equal(0.65, r.at65, 3);
         Assert.Equal(0.40, r.below, 3);
-        Assert.Contains(r.jump, j => j.StartsWith("MY ACTIONS"));
-        Assert.Contains(r.jump, j => j.StartsWith("MY AGENTS"));
-        Assert.Contains(r.jump, j => j.StartsWith("MY ANDA TO-DO LIST"));
-        Assert.Contains(r.jump, j => j.StartsWith("MY TO-DO LIST"));
+        Assert.Contains(r.jump, j => j.StartsWith("My actions ·"));
+        Assert.Contains(r.jump, j => j.StartsWith("My agents"));
+        Assert.Contains(r.jump, j => j.StartsWith("My ANDA to-do list"));
+        Assert.Contains(r.jump, j => j.StartsWith("My to-do list ·"));
         Assert.Contains(r.jump, j => j == "My to-do list");                 // the group names are in the list too
     }
 

@@ -3,5 +3,5 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Edge/Chromium extension; no dependencies. Tests: node --test tests/unit"
+  "description": "Edge/Chromium extension; no dependencies. Tests: node --test tests/unit/*.test.mjs"
 }

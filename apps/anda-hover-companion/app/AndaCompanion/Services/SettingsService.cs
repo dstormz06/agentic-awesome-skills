@@ -198,13 +198,14 @@ public sealed class Settings
 }
 
 /// <summary>
-/// What the focused product shows. With "Show all tools" off the card is always drawn solid and in the default look, and the shortcut for
-/// My to-do list is not taken from other programs; the chosen look and transparency are kept and come back when all tools are shown.
+/// What the focused product shows. With "Show all tools" off the shortcut for My to-do list is not taken from other programs.
+/// The look and the transparency the person chose apply in both editions (round 19; before that the focused product forced the default look).
 /// </summary>
 public static class Edition
 {
-    public static AppearanceId Appearance(Settings s) => s.ShowAllTools ? s.Appearance : Appearances.Default;
-    public static double Opacity(Settings s) => s.ShowAllTools ? s.CardOpacity : 1.0;
+    // Round 19: the looks and the transparency the person chose apply in both editions (the owner asked for the looks back in Settings).
+    public static AppearanceId Appearance(Settings s) => s.Appearance;
+    public static double Opacity(Settings s) => s.CardOpacity;
 }
 
 public static class SettingsService

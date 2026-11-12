@@ -469,9 +469,9 @@
               <StackPanel Spacing="6">
                 <TextBlock Classes="lbl" Text="WHICH TOOLS ARE SHOWN"/>
                 <CheckBox Name="AllToolsCheck">
-                  <TextBlock Text="Show all tools (the two to-do lists, agents, appearance and dates)" TextWrapping="Wrap"/>
+                  <TextBlock Text="Show all tools (the two to-do lists, agents and dates)" TextWrapping="Wrap"/>
                 </CheckBox>
-                <TextBlock Name="AllToolsHint" Classes="hint" Text="Off keeps the app to three things: look up an ANDA, review a draft and ask about a selection. Turning it on loses nothing and changes no data."/>
+                <TextBlock Name="AllToolsHint" Classes="hint" Text="Off keeps the app to three things: look up an ANDA, review a draft and ask about a selection. The looks are always under Look and feel. Turning it on loses nothing and changes no data."/>
               </StackPanel>
 
               <Border Classes="hair"/>
