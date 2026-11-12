@@ -12,11 +12,11 @@ public class Round16Tests
     [Theory]
     [InlineData("", "")]                                           // none stays none
     [InlineData("ctrl+alt+k", "Ctrl+Alt+K")]                       // read and written in the usual form
-    [InlineData("<img src=x onerror=1>", "Ctrl+Alt+L")]            // not a shortcut: the default
-    [InlineData("Ctrl+L", "Ctrl+Alt+L")]                           // one modifier is not enough: the default
+    [InlineData("<img src=x onerror=1>", "Ctrl+Alt+Shift+L")]            // not a shortcut: the default
+    [InlineData("Ctrl+L", "Ctrl+Alt+Shift+L")]                           // one modifier is not enough: the default
     [InlineData("Ctrl+Alt+A", "")]                                 // the same as Select & Peek: none, never two features on one key
     [InlineData("Ctrl+Alt+Space", "")]
-    [InlineData("Ctrl+Alt+D", "")]
+    [InlineData("Ctrl+Alt+Shift+R", "")]
     public void The_myTodo_shortcut_is_repaired_when_a_saved_file_is_read(string saved, string expected)
     {
         var s = SettingsService.Normalize(new Settings { MyTodoHotkey = saved });
@@ -27,7 +27,7 @@ public class Round16Tests
     public void A_null_shortcut_and_an_unknown_mode_are_repaired()
     {
         var s = SettingsService.Normalize(new Settings { MyTodoHotkey = null!, MyTodoMode = (MyTodoMode)42 });
-        Assert.Equal("Ctrl+Alt+L", s.MyTodoHotkey);            // an unreadable value is the default; only an empty text means "none"
+        Assert.Equal("Ctrl+Alt+Shift+L", s.MyTodoHotkey);            // an unreadable value is the default; only an empty text means "none"
         Assert.Equal(MyTodoMode.Review, s.MyTodoMode);
     }
 
@@ -55,15 +55,15 @@ public class Round16Tests
     {
         var actions = new List<CustomAction>
         {
-            new() { Name = "Mine", Kind = ActionKind.AddToTodo, Template = "x", Hotkey = "Ctrl+Alt+L", Enabled = true },     // the same keys as the to-do list
+            new() { Name = "Mine", Kind = ActionKind.AddToTodo, Template = "x", Hotkey = "Ctrl+Alt+Shift+L", Enabled = true },     // the same keys as the to-do list
             new() { Name = "Other", Kind = ActionKind.AddToTodo, Template = "x", Hotkey = "Ctrl+Alt+J", Enabled = true },
         };
-        var bindings = HotkeyService.FromCombos("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+D", actions, "Ctrl+Alt+L");
+        var bindings = HotkeyService.FromCombos("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+Shift+R", actions, "Ctrl+Alt+Shift+L");
         Assert.Equal(new[] { HotkeyService.IdPeek, HotkeyService.IdLookup, HotkeyService.IdDraft, HotkeyService.IdMyTodo, HotkeyService.IdActionBase + 1 }, bindings.Select(b => b.Id));
         Assert.Equal(bindings.Count, bindings.Select(b => b.Combo).Distinct().Count());
-        Assert.DoesNotContain(HotkeyService.FromCombos("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+D", null, ""), b => b.Id == HotkeyService.IdMyTodo);
-        Assert.DoesNotContain(HotkeyService.FromCombos("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+D", null, "nonsense"), b => b.Id == HotkeyService.IdMyTodo);
-        Assert.DoesNotContain(HotkeyService.FromCombos("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+D", null, "Ctrl+Alt+A"), b => b.Id == HotkeyService.IdMyTodo);
+        Assert.DoesNotContain(HotkeyService.FromCombos("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+Shift+R", null, ""), b => b.Id == HotkeyService.IdMyTodo);
+        Assert.DoesNotContain(HotkeyService.FromCombos("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+Shift+R", null, "nonsense"), b => b.Id == HotkeyService.IdMyTodo);
+        Assert.DoesNotContain(HotkeyService.FromCombos("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+Shift+R", null, "Ctrl+Alt+A"), b => b.Id == HotkeyService.IdMyTodo);
         var fallback = bindings.First(b => b.Id == HotkeyService.IdMyTodo).Fallback;
         Assert.Contains("My to-do list", fallback);
         Assert.Contains("tray icon", fallback);
@@ -85,7 +85,7 @@ public class Round16Tests
         // an older file with none of the new fields gets the defaults
         File.WriteAllText(path, "{\"FirstRunDone\":true}");
         var old = SettingsService.Load(path);
-        Assert.Equal("Ctrl+Alt+L", old.MyTodoHotkey);
+        Assert.Equal("Ctrl+Alt+Shift+L", old.MyTodoHotkey);
         Assert.Equal(0.92, old.CardOpacity, 3);
         Assert.True(old.AdaptiveSettings);
         Assert.False(old.ShowAllTools);

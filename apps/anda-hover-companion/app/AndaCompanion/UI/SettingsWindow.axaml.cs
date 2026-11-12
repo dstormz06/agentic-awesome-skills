@@ -393,7 +393,7 @@ public partial class SettingsWindow : Window
         // shortcuts: click a box, press the keys
         BindKey(PeekKeyBox, PeekKeyReset, "Select & Peek", () => _settings.PeekHotkey, v => _settings.PeekHotkey = v, "Ctrl+Alt+A");
         BindKey(LookupKeyBox, LookupKeyReset, "Lookup box", () => _settings.LookupHotkey, v => _settings.LookupHotkey = v, "Ctrl+Alt+Space");
-        BindKey(DraftKeyBox, DraftKeyReset, "Review a draft", () => _settings.DraftHotkey, v => _settings.DraftHotkey = v, "Ctrl+Alt+D");
+        BindKey(DraftKeyBox, DraftKeyReset, "Review a draft", () => _settings.DraftHotkey, v => _settings.DraftHotkey = v, "Ctrl+Alt+Shift+R");
         BindKey(AskKeyBox, AskKeyReset, "Ask about a selection", () => _settings.AskHotkey, v => _settings.AskHotkey = v, Settings.DefaultAskHotkey);
         KeyStatus.Text = _hooks?.HotkeyStatus() ?? "";
 

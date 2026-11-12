@@ -22,7 +22,7 @@ public class HotkeyTests
     [Fact]
     public void Default_bindings_are_the_documented_three_and_do_not_collide()
     {
-        Assert.Equal(new[] { "Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+D" }, HotkeyService.Bindings.Select(b => b.Combo));
+        Assert.Equal(new[] { "Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+Shift+R" }, HotkeyService.Bindings.Select(b => b.Combo));
         Assert.Equal(3, HotkeyService.Bindings.Select(b => b.Id).Distinct().Count());
         Assert.Equal(3, HotkeyService.Bindings.Select(b => (b.Modifiers, b.VirtualKey)).Distinct().Count());
     }
@@ -38,13 +38,14 @@ public class HotkeyTests
         }
         Assert.Equal(0x41u, HotkeyService.Bindings.Single(b => b.Id == HotkeyService.IdPeek).VirtualKey);
         Assert.Equal(0x20u, HotkeyService.Bindings.Single(b => b.Id == HotkeyService.IdLookup).VirtualKey);
-        Assert.Equal(0x44u, HotkeyService.Bindings.Single(b => b.Id == HotkeyService.IdDraft).VirtualKey);
+        Assert.Equal(0x52u, HotkeyService.Bindings.Single(b => b.Id == HotkeyService.IdDraft).VirtualKey);   // R, with Shift: Ctrl+Alt+D is Word's own
+        Assert.True((HotkeyService.Bindings.Single(b => b.Id == HotkeyService.IdDraft).Modifiers & 0x4) != 0, "Review a draft needs Shift");
     }
 
     [Fact]
     public void Custom_bindings_register_with_their_own_keys_and_failures_name_the_custom_combination()
     {
-        var custom = HotkeyService.FromCombos("Ctrl+Shift+P", "Ctrl+Alt+L", "Ctrl+Alt+Shift+9");
+        var custom = HotkeyService.FromCombos("Ctrl+Shift+P", "Ctrl+Alt+Shift+L", "Ctrl+Alt+Shift+9");
         var api = new FakeApi();
         api.FailWith[HotkeyService.IdDraft] = 1409;
         var status = HotkeyService.RegisterAll(api, custom);

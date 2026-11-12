@@ -44,7 +44,7 @@ public class ShotTests : IClassFixture<HeadlessFixture>
             w.Close();
 
             var store = new MyTodoService(Path.Combine(Temp.NewDir(), "c.json"));
-            var notes = new NotesWindow(new NotesHooks(store, () => day, () => "Ctrl+Alt+L", () => { }),
+            var notes = new NotesWindow(new NotesHooks(store, () => day, () => "Ctrl+Alt+Shift+L", () => { }),
                 "Don't forget to confirm the facility inspection date with the team tomorrow ASAP. Also email the team lead re: the Thursday huddle. Need to submit the IR response for ANDA 216482 by Friday. errands: book the dentist, pick up the dry cleaning\nThe inspection report was clear.\nSubmit the expense report on the 1st every month", false);
             notes.Show(); Settle(); Save(notes, dir, "notes-to-my-todo-list");
             notes.AddTicked(); Settle(); Save(notes, dir, "notes-added");
@@ -52,7 +52,7 @@ public class ShotTests : IClassFixture<HeadlessFixture>
 
             store.Add("Renew the vehicle registration", TodoCategory.Personal, day.AddDays(-2), false, Repeat.None, -1, null, "You", day);
             store.Add("Call the applicant about the inspection", TodoCategory.Work, day, true, Repeat.None, -1, "216482", "You", day);
-            var w2 = new MyTodoWindow(new MyTodoHooks(store, () => day, () => "Ctrl+Alt+L", _ => { }, (_, _) => { }));
+            var w2 = new MyTodoWindow(new MyTodoHooks(store, () => day, () => "Ctrl+Alt+Shift+L", _ => { }, (_, _) => { }));
             w2.Show(); Settle(); Save(w2, dir, "my-todo-list");
             Avalonia.Automation.AutomationProperties.GetName(w2);
             var edit = w2.GetVisualDescendants().OfType<Button>().First(b => Avalonia.Automation.AutomationProperties.GetName(b) == "Edit: Renew the vehicle registration");

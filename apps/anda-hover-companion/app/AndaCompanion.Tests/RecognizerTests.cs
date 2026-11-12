@@ -45,6 +45,9 @@ public class RecognizerTests
     [InlineData("IND 123456")]
     [InlineData("BLA 125000")]
     [InlineData("MF-012345")]
+    [InlineData("N210793")]              // the short form: N is for NDA
+    [InlineData("n210793")]
+    [InlineData("N-210793")]
     [InlineData("ANDA/NDA 216482")]      // ambiguous: the label right before the digits says NDA, so decline rather than guess
     public void A_number_labelled_as_another_application_type_is_never_taken_for_an_ANDA(string text) =>
         Assert.Null(AndaValidator.Extract(text));
@@ -53,6 +56,9 @@ public class RecognizerTests
     [InlineData("NDA 021234 and ANDA 216482", "216482")]      // the labeled one is skipped, the real one found
     [InlineData("ANDA 021234", "021234")]                      // old-style ANDA numbers still work
     [InlineData("IND 123456; 214990", "214990")]
+    [InlineData("A210793", "210793")]                           // the short form: A is for ANDA
+    [InlineData("N210793 and A216482", "216482")]               // the NDA is skipped, the ANDA found
+    [InlineData("IN210793", "210793")]                          // an N inside a longer word is not the NDA prefix
     public void Labels_only_exclude_the_number_they_label(string text, string expected) =>
         Assert.Equal(expected, AndaValidator.Extract(text));
 

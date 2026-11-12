@@ -1,6 +1,7 @@
 // The same rule as the app's Data/EntityKinds.cs: six digits, optionally prefixed "ANDA", but never a number that is labeled as
 // another kind of application (NDA, BLA, IND, DMF, MF, NDC). Showing the wrong application's card is worse than showing none.
-const ANDA = /(?:ANDA[-\s#]?)?(?<!\d)(?<!\b(?:NDA|BLA|IND|DMF|NDC|MF)(?:[-\s#:.]|No(?![A-Za-z])|Number(?![A-Za-z]))*)(\d{6})(?!\d)/gi;
+// The agency's short form follows the same rule: "N210793" is an NDA (N is for NDA) and is rejected; "A210793" is an ANDA and is read as 210793.
+const ANDA = /(?:ANDA[-\s#]?)?(?<!\d)(?<!(?<![A-Za-z0-9_])N-?)(?<!\b(?:NDA|BLA|IND|DMF|NDC|MF)(?:[-\s#:.]|No(?![A-Za-z])|Number(?![A-Za-z]))*)(\d{6})(?!\d)/gi;
 
 export function extractNumber(text) {
   if (!text || !String(text).trim()) return null;

@@ -3,7 +3,7 @@ using AndaCompanion.Services;
 
 namespace AndaCompanion.UI;
 
-/// <summary>Turns a key press in Settings into a shortcut string such as "Ctrl+Alt+D". Modifier-only presses are ignored.</summary>
+/// <summary>Turns a key press in Settings into a shortcut string such as "Ctrl+Alt+Shift+R". Modifier-only presses are ignored.</summary>
 public static class HotkeyCapture
 {
     public static string? FromKey(Key key, KeyModifiers modifiers)

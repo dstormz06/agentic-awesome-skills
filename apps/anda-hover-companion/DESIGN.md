@@ -383,7 +383,7 @@ history. Open these in any browser, desktop or phone, with fictional data:
 - **`mockup/windows-simulation.html`** — a Windows 11 desktop in the browser (default **T**) that ports the app's
   logic: the recognizer, the placement rule, the three consent models (§2, **whisper default with the urgent-peek
   rule**), the offline brief, auto-hide, the compact boxes (a click or the hotkey again expands them), the **WATCH
-  line with the federal-holiday calendar** (OPM dates, 3-business-day window) and the **draft check** (`Ctrl+Alt+D`).
+  line with the federal-holiday calendar** (OPM dates, 3-business-day window) and the **draft check** (`Ctrl+Alt+Shift+R`).
   My data, the writing actions and rebinding shortcuts need real files and a model connection, so the simulation only
   describes them. It also shows the Edge extension's **right-click menu** (Browser window only, where the extension runs) and the app's **Watch list**. It shows the forecast-first clock, the single
   needs-attention signal, a sample streamed companion brief (no model is called), pin / expand / keyboard, and the
@@ -398,7 +398,7 @@ All looks are light-only (§5).
 **`app/`** contains the working v0: a .NET 8 / Avalonia tray application with all nineteen
 looks (K default; four of them compact boxes) selectable from the tray menu, auto-hide, all three consent models
 (Whisper default, with the urgent-peek rule), four rebindable global hotkeys (`Ctrl+Alt+A` Select & Peek,
-`Ctrl+Alt+Space` lookup, `Ctrl+Alt+D` review a draft, `Ctrl+Alt+Shift+P` ask about a selection), the weekend and federal-holiday WATCH line, the draft
+`Ctrl+Alt+Space` lookup, `Ctrl+Alt+Shift+R` review a draft, `Ctrl+Alt+Shift+P` ask about a selection), the weekend and federal-holiday WATCH line, the draft
 check and the writing actions (Proofread / Rewrite / Fact-check, preview before send, Copy only), reading
 the person's own Excel or CSV portfolio and notes folder, one RLD-labeling date from a downloaded Drugs@FDA
 file, an optional usage log, the
@@ -568,7 +568,7 @@ streaks, badges, or noise. Ranked by payoff-per-build-effort:
    of the tool's forecast accuracy by division ("median error ±8 days, trailing 6
    months"). An AI tool that publishes its own report card is what "first place in AI
    automation" looks like to a review committee.
-7. **Grounded proofread** *(built: Ctrl+Alt+D draft check with no AI, plus Proofread, Rewrite and Fact-check that stay off until
+7. **Grounded proofread** *(built: Ctrl+Alt+Shift+R draft check with no AI, plus Proofread, Rewrite and Fact-check that stay off until
    a model is approved; never run against a live model)* — a second hotkey on the same
    select-and-press mechanism. It checks a selected draft against the record before
    anything is sent: dates, drug names and numbers that do not match are flagged first,

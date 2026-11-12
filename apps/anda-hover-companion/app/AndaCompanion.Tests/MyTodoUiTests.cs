@@ -33,14 +33,14 @@ public class MyTodoUiTests : IClassFixture<HeadlessFixture>
 
     private static MyTodoWindow NewMyTodo(MyTodoService store, Func<DateOnly> today, List<string>? opened = null, List<string>? cards = null)
     {
-        var w = new MyTodoWindow(new MyTodoHooks(store, today, () => "Ctrl+Alt+L", s => opened?.Add(s ?? "(empty)"), (n, _) => cards?.Add(n)));
+        var w = new MyTodoWindow(new MyTodoHooks(store, today, () => "Ctrl+Alt+Shift+L", s => opened?.Add(s ?? "(empty)"), (n, _) => cards?.Add(n)));
         w.Show(); Settle();
         return w;
     }
 
     private static NotesWindow NewNotes(MyTodoService store, string text, bool atOnce = false, Func<DateOnly>? today = null)
     {
-        var w = new NotesWindow(new NotesHooks(store, today ?? (() => Wed), () => "Ctrl+Alt+L", () => { }), text, atOnce);
+        var w = new NotesWindow(new NotesHooks(store, today ?? (() => Wed), () => "Ctrl+Alt+Shift+L", () => { }), text, atOnce);
         w.Show(); Settle();
         return w;
     }
@@ -244,7 +244,7 @@ public class MyTodoUiTests : IClassFixture<HeadlessFixture>
         }, CancellationToken.None);
 
         Assert.Contains("empty", r.summary);
-        Assert.Contains("Ctrl+Alt+L", r.summary);
+        Assert.Contains("Ctrl+Alt+Shift+L", r.summary);
         Assert.True(r.rollHidden);
     }
 
@@ -387,7 +387,7 @@ public class MyTodoUiTests : IClassFixture<HeadlessFixture>
             Click(w.FindControl<Button>("ActionAdd")!); Settle();
             var added = settings.MyActions[^1];
             var box = Named<TextBox>(w, "Shortcut for " + added.Name);
-            box.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.L, KeyModifiers = KeyModifiers.Control | KeyModifiers.Alt }); Settle();
+            box.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.L, KeyModifiers = KeyModifiers.Control | KeyModifiers.Alt | KeyModifiers.Shift }); Settle();
             string hotkey = added.Hotkey, status = w.FindControl<TextBlock>("ActionsStatus")!.Text ?? "";
             w.Close(); Settle();
             return (hotkey, status);
@@ -432,14 +432,14 @@ public class MyTodoUiTests : IClassFixture<HeadlessFixture>
             return (initial, changed, afterClash, clashText, afterWeak, cleared, clearedBox, reset, mode, bindings.Any(b => b.Id == HotkeyService.IdMyTodo));
         }, CancellationToken.None);
 
-        Assert.Equal("Ctrl+Alt+L", r.initial);
+        Assert.Equal("Ctrl+Alt+Shift+L", r.initial);
         Assert.Equal("Ctrl+Alt+K", r.changed);
         Assert.Equal("Ctrl+Alt+K", r.afterClash);
         Assert.False(string.IsNullOrWhiteSpace(r.clashText));
         Assert.Equal("Ctrl+Alt+K", r.afterWeak);
         Assert.Equal("", r.cleared);
         Assert.Equal("None", r.clearedBox);
-        Assert.Equal("Ctrl+Alt+L", r.reset);
+        Assert.Equal("Ctrl+Alt+Shift+L", r.reset);
         Assert.Equal(MyTodoMode.AddAtOnce, r.mode);
         Assert.True(r.Item10);
     }

@@ -312,7 +312,7 @@ public class Phase1UiTests : IClassFixture<HeadlessFixture>
         Assert.Contains("Loaded 1 ANDA from Portfolio.csv", r.res.Item1);
         Assert.True(r.res.Item2);
         Assert.Equal(PortfolioColumns.Fields.Count, r.res.Item3);
-        Assert.Equal("Ctrl+Alt+A", r.res.Item4); Assert.Equal("Ctrl+Alt+D", r.res.Item5);
+        Assert.Equal("Ctrl+Alt+A", r.res.Item4); Assert.Equal("Ctrl+Alt+Shift+R", r.res.Item5);
         Assert.Equal("Hotkeys: ok", r.res.Item6);
         Assert.Equal("Weird Forecast", r.saved);
     }
@@ -321,6 +321,7 @@ public class Phase1UiTests : IClassFixture<HeadlessFixture>
     public void Key_presses_become_shortcuts_and_modifier_only_presses_are_ignored()
     {
         Assert.Equal("Ctrl+Alt+D", HotkeyCapture.FromKey(Avalonia.Input.Key.D, Avalonia.Input.KeyModifiers.Control | Avalonia.Input.KeyModifiers.Alt));
+        Assert.Equal("Ctrl+Alt+Shift+R", HotkeyCapture.FromKey(Avalonia.Input.Key.R, Avalonia.Input.KeyModifiers.Control | Avalonia.Input.KeyModifiers.Alt | Avalonia.Input.KeyModifiers.Shift));
         Assert.Equal("Ctrl+Shift+F9", HotkeyCapture.FromKey(Avalonia.Input.Key.F9, Avalonia.Input.KeyModifiers.Control | Avalonia.Input.KeyModifiers.Shift));
         Assert.Equal("Ctrl+Alt+Space", HotkeyCapture.FromKey(Avalonia.Input.Key.Space, Avalonia.Input.KeyModifiers.Control | Avalonia.Input.KeyModifiers.Alt));
         Assert.Equal("Ctrl+Alt+7", HotkeyCapture.FromKey(Avalonia.Input.Key.D7, Avalonia.Input.KeyModifiers.Control | Avalonia.Input.KeyModifiers.Alt));

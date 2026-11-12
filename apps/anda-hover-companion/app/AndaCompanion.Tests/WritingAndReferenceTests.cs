@@ -211,6 +211,7 @@ public class HotkeyParserTests
     [Theory]
     [InlineData("Ctrl+Alt+A", 0x3u, 0x41u, "Ctrl+Alt+A")]
     [InlineData("alt + ctrl + d", 0x3u, 0x44u, "Ctrl+Alt+D")]
+    [InlineData("shift + alt + ctrl + r", 0x7u, 0x52u, "Ctrl+Alt+Shift+R")]
     [InlineData("Ctrl+Shift+F9", 0x6u, 0x78u, "Ctrl+Shift+F9")]
     [InlineData("Ctrl+Alt+Space", 0x3u, 0x20u, "Ctrl+Alt+Space")]
     [InlineData("Control+Alt+Shift+7", 0x7u, 0x37u, "Ctrl+Alt+Shift+7")]
@@ -240,7 +241,7 @@ public class HotkeyParserTests
     [Fact]
     public void A_set_must_be_valid_and_must_not_repeat()
     {
-        Assert.Null(HotkeyParser.ValidateSet(("A", "Ctrl+Alt+A"), ("B", "Ctrl+Alt+Space"), ("C", "Ctrl+Alt+D")));
+        Assert.Null(HotkeyParser.ValidateSet(("A", "Ctrl+Alt+A"), ("B", "Ctrl+Alt+Space"), ("C", "Ctrl+Alt+Shift+R")));
         Assert.Contains("same shortcut", HotkeyParser.ValidateSet(("A", "Ctrl+Alt+A"), ("B", "alt+ctrl+a"))!);
         Assert.StartsWith("B:", HotkeyParser.ValidateSet(("A", "Ctrl+Alt+A"), ("B", "Ctrl+C"))!);
     }
@@ -249,11 +250,11 @@ public class HotkeyParserTests
     public void Bindings_follow_the_settings_and_fall_back_to_the_default_for_a_bad_or_duplicate_choice()
     {
         var b = HotkeyService.FromCombos("Ctrl+Shift+P", "Ctrl+Alt+Space", "Ctrl+Shift+P");   // the draft key repeats the peek key
-        Assert.Equal(new[] { "Ctrl+Shift+P", "Ctrl+Alt+Space", "Ctrl+Alt+D" }, b.Select(x => x.Combo));
+        Assert.Equal(new[] { "Ctrl+Shift+P", "Ctrl+Alt+Space", "Ctrl+Alt+Shift+R" }, b.Select(x => x.Combo));
         Assert.Equal(0x50u, b[0].VirtualKey);
         Assert.True((b[0].Modifiers & 0x4000) != 0);                                           // MOD_NOREPEAT is kept
         var bad = HotkeyService.FromCombos("Ctrl+C", null, "");
-        Assert.Equal(new[] { "Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+D" }, bad.Select(x => x.Combo));
+        Assert.Equal(new[] { "Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+Shift+R" }, bad.Select(x => x.Combo));
         Assert.Equal(3, HotkeyService.Bindings.Count);
     }
 }

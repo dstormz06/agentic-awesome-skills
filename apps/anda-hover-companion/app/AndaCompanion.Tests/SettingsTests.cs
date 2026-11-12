@@ -14,7 +14,7 @@ public class SettingsTests
         Assert.Equal(10, s.AutoHideSeconds);
         Assert.Equal(ConsentModel.Whisper, s.Consent);     // whisper invite is the default (tester feedback)
         Assert.True(s.EscalateUrgent); Assert.Equal(7, s.UrgentLateDays); Assert.Equal(3, s.HolidayLeadDays);
-        Assert.Equal(("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+D"), (s.PeekHotkey, s.LookupHotkey, s.DraftHotkey));
+        Assert.Equal(("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+Shift+R"), (s.PeekHotkey, s.LookupHotkey, s.DraftHotkey));
         Assert.Null(s.PortfolioPath); Assert.Null(s.NotesFolder); Assert.Null(s.ReferenceDataPath);
         Assert.False(s.UsageLog); Assert.Equal("", s.StandingInstructions);
         Assert.Equal(0.92, s.CardOpacity);                 // a new install starts at 92% (round 16)
@@ -70,18 +70,18 @@ public class SettingsTests
         string path = Path.Combine(Temp.NewDir(), "settings.json");
         SettingsService.Save(new Settings
         {
-            PeekHotkey = "Ctrl+Shift+P", LookupHotkey = "Ctrl+Alt+L", DraftHotkey = "Ctrl+Alt+Shift+9", EscalateUrgent = false, UrgentLateDays = 14, HolidayLeadDays = 5,
+            PeekHotkey = "Ctrl+Shift+P", LookupHotkey = "Ctrl+Alt+Shift+L", DraftHotkey = "Ctrl+Alt+Shift+9", EscalateUrgent = false, UrgentLateDays = 14, HolidayLeadDays = 5,
             PortfolioPath = @"C:\Users\x\Portfolio.xlsx", PortfolioColumns = new() { ["goal"] = "Target" }, NotesFolder = @"C:\Notes", ReferenceDataPath = @"C:\d.zip",
             StandingInstructions = "Plain words.", UsageLog = true,
         }, path);
         var s = SettingsService.Load(path);
-        Assert.Equal(("Ctrl+Shift+P", "Ctrl+Alt+L", "Ctrl+Alt+Shift+9"), (s.PeekHotkey, s.LookupHotkey, s.DraftHotkey));
+        Assert.Equal(("Ctrl+Shift+P", "Ctrl+Alt+Shift+L", "Ctrl+Alt+Shift+9"), (s.PeekHotkey, s.LookupHotkey, s.DraftHotkey));
         Assert.False(s.EscalateUrgent); Assert.Equal(14, s.UrgentLateDays); Assert.Equal(5, s.HolidayLeadDays);
         Assert.Equal("Target", s.PortfolioColumns["goal"]); Assert.Equal("Plain words.", s.StandingInstructions); Assert.True(s.UsageLog);
 
         File.WriteAllText(path, "{ \"PeekHotkey\": \"Ctrl+C\", \"LookupHotkey\": \"x\", \"UrgentLateDays\": 5, \"HolidayLeadDays\": 9, \"PortfolioColumns\": null, \"StandingInstructions\": null }");
         var bad = SettingsService.Load(path);
-        Assert.Equal(("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+D"), (bad.PeekHotkey, bad.LookupHotkey, bad.DraftHotkey));
+        Assert.Equal(("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+Shift+R"), (bad.PeekHotkey, bad.LookupHotkey, bad.DraftHotkey));
         Assert.Equal(7, bad.UrgentLateDays); Assert.Equal(3, bad.HolidayLeadDays);
         Assert.NotNull(bad.PortfolioColumns); Assert.Equal("", bad.StandingInstructions);
 

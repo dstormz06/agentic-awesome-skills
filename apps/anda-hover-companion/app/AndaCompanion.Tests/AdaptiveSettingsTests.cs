@@ -241,7 +241,7 @@ public class AdaptiveSettingsUiTests : IClassFixture<HeadlessFixture>
         {
             ThemeManager.Apply(AppearanceId.K);
             using var home = new EnvScope(AppPaths.HomeEnvVar, Temp.NewDir());
-            var todo = new HotkeyBinding(HotkeyService.IdMyTodo, "My to-do list", "Ctrl+Alt+L", 0, 0, "");
+            var todo = new HotkeyBinding(HotkeyService.IdMyTodo, "My to-do list", "Ctrl+Alt+Shift+L", 0, 0, "");
             var peek = new HotkeyBinding(HotkeyService.IdPeek, "Select & Peek", "Ctrl+Alt+A", 0, 0, "");
             var w = NewWindow(new Settings { ShowAllTools = true }, Hooks(new[] { new HotkeyStatus(peek, true, 0), new HotkeyStatus(todo, false, 1409) }));
             var open = w.OpenSections.ToList(); string pill = Text(w, "PillTextMyTodo"); string adaptive = Text(w, "AdaptiveText");

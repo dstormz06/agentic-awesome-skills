@@ -25,10 +25,12 @@ public static class EntityKinds
     /// another kind of application or file — NDA, BLA, IND, DMF, MF, NDC — is rejected: NDA and
     /// DMF numbers are also six digits and can coincide with a real ANDA number, and showing the
     /// wrong application's card is worse than showing none.
+    /// The agency's short form is treated the same way: "N210793" is an NDA (N is for NDA) and is rejected, while
+    /// "A210793" is an ANDA (A is for ANDA) and is read as 210793. The card always shows the number that was read.
     /// </summary>
     public static readonly EntityKind Anda =
         new("ANDA",
-            @"(?:ANDA[-\s#]?)?(?<![0-9])(?<!\b(?:NDA|BLA|IND|DMF|NDC|MF)(?:[-\s#:.]|No(?![A-Za-z])|Number(?![A-Za-z]))*)([0-9]{6})(?![0-9])",
+            @"(?:ANDA[-\s#]?)?(?<![0-9])(?<!(?<![A-Za-z0-9_])N-?)(?<!\b(?:NDA|BLA|IND|DMF|NDC|MF)(?:[-\s#:.]|No(?![A-Za-z])|Number(?![A-Za-z]))*)([0-9]{6})(?![0-9])",
             "Abbreviated New Drug Application");
 
     /// <summary>

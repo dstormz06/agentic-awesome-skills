@@ -303,14 +303,14 @@ internal static class SelfTest
             string file = Path.Combine(o.OutDir, "home", "my-todo-check.json");
             if (File.Exists(file)) File.Delete(file);
             var store = new MyTodoService(file);
-            var notes = new NotesWindow(new NotesHooks(store, () => day, () => "Ctrl+Alt+L", () => { }),
+            var notes = new NotesWindow(new NotesHooks(store, () => day, () => "Ctrl+Alt+Shift+L", () => { }),
                 "Don't forget to confirm the facility inspection date with the team tomorrow ASAP\nsend the weekly status memo every Friday\n- update the tracking sheet and email the applicant\nFYI the huddle moved to 2pm", false);
             notes.Show();
             report.Add(await ShootAsync(notes, "notes-to-my-todo-list", o.OutDir, false));
             int found = notes.SuggestionCount;
             notes.AddTicked();
             notes.Close();
-            var win = new MyTodoWindow(new MyTodoHooks(store, () => day, () => "Ctrl+Alt+L", _ => { }, (_, _) => { }));
+            var win = new MyTodoWindow(new MyTodoHooks(store, () => day, () => "Ctrl+Alt+Shift+L", _ => { }, (_, _) => { }));
             win.Show();
             report.Add(await ShootAsync(win, "my-todo-list", o.OutDir, false));
             bool ok = found >= 3 && store.Items.Count >= 3 && win.View.Open == store.Items.Count(i => !i.Done) && store.Items.Any(i => i.Repeat == Repeat.Weekly);

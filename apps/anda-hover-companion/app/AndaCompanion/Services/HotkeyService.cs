@@ -29,12 +29,12 @@ public sealed class HotkeyService : IDisposable
 {
     public const int IdPeek = 1;    // Ctrl+Alt+A     → peek at the current selection
     public const int IdLookup = 2;  // Ctrl+Alt+Space → lookup box
-    public const int IdDraft = 3;   // Ctrl+Alt+D     → check the selected draft
+    public const int IdDraft = 3;   // Ctrl+Alt+Shift+R     → check the selected draft
 
     private const int WmHotkey = 0x0312;
     private const int WmQuit = 0x0012;
     private const int ErrorHotkeyAlreadyRegistered = 1409;
-    private const uint ModAlt = 0x1, ModControl = 0x2, ModNoRepeat = 0x4000;
+    private const uint ModAlt = 0x1, ModControl = 0x2, ModShift = 0x4, ModNoRepeat = 0x4000;
 
     public static readonly IReadOnlyList<HotkeyBinding> Bindings = new[]
     {
@@ -42,8 +42,8 @@ public sealed class HotkeyService : IDisposable
             ModControl | ModAlt | ModNoRepeat, 0x41, "Please choose another shortcut in Settings, or use the tray icon."),
         new HotkeyBinding(IdLookup, "Lookup", "Ctrl+Alt+Space",
             ModControl | ModAlt | ModNoRepeat, 0x20, "Please choose another shortcut in Settings, or use the tray icon."),
-        new HotkeyBinding(IdDraft, "Review a draft", "Ctrl+Alt+D",
-            ModControl | ModAlt | ModNoRepeat, 0x44, "Please choose another shortcut in Settings, or use the tray icon."),
+        new HotkeyBinding(IdDraft, "Review a draft", "Ctrl+Alt+Shift+R",
+            ModControl | ModAlt | ModShift | ModNoRepeat, 0x52, "Please choose another shortcut in Settings, or use the tray icon."),
     };
 
     /// <summary>Custom actions use ids from here upward: the id is this number plus the action's position in Settings.</summary>

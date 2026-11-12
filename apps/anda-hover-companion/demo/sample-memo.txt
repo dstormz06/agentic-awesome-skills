@@ -26,7 +26,7 @@ Reference numbers that should NOT open a card (try selecting each one):
 How to try it: select a number above (double-click selects a whole number),
 then press Ctrl+Alt+A. Or press Ctrl+Alt+Space and type one.
 
-Draft reply (not sent). Select this paragraph and press Ctrl+Alt+D:
+Draft reply (not sent). Select this paragraph and press Ctrl+Alt+Shift+R:
 
 Hi all, quick status. ANDA 216482 is on track, with a goal date of Oct 10, 2026 and a forecast of Oct 17, 2026. ANDA 214990 is running late. ANDA 123456 needs a call.
 

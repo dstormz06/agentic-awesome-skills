@@ -57,7 +57,7 @@ async function peek(tab, menuText) {
     const settings = await service.effectiveSettings();
     if (!text.trim()) return send(tabId, { type: 'anda:notice', text: 'Please select an ANDA number first, then use the shortcut or right-click.', autoHideSeconds: settings.autoHideSeconds });
     if (extractNumber(text) === null)
-      return send(tabId, { type: 'anda:notice', text: 'No ANDA number in the selection (a number labeled NDA, BLA, IND, DMF or MF is not treated as an ANDA). Please use the toolbar button to type one.', anchor, autoHideSeconds: settings.autoHideSeconds });
+      return send(tabId, { type: 'anda:notice', text: 'No ANDA number in the selection (a number labeled NDA, BLA, IND, DMF or MF, or written with an N as in N210793, is not treated as an ANDA). Please use the toolbar button to type one.', anchor, autoHideSeconds: settings.autoHideSeconds });
     const r = await service.lookup(text);
     if (!r.ok) return send(tabId, { type: 'anda:notice', text: r.message, anchor, autoHideSeconds: settings.autoHideSeconds });
     return send(tabId, { type: 'anda:show', step: r.step, card: r.card, anchor, reason: r.step === 'peek' && r.card.urgency.isUrgent ? r.card.urgency.reason : null, autoHideSeconds: r.settings.autoHideSeconds });

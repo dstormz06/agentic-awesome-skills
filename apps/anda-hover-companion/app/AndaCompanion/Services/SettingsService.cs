@@ -43,10 +43,11 @@ public sealed class Settings
     // ---- shortcuts (Settings, Triggers) ----
     public string PeekHotkey { get; set; } = "Ctrl+Alt+A";
     public string LookupHotkey { get; set; } = "Ctrl+Alt+Space";
-    public string DraftHotkey { get; set; } = "Ctrl+Alt+D";
+    // Review a draft and My to-do list moved off Ctrl+Alt+D and Ctrl+Alt+L in round 19 for the reason given below (Word uses both). A saved choice is kept.
+    public string DraftHotkey { get; set; } = "Ctrl+Alt+Shift+R";
 
     // ---- ask about a selection: select text or cells, press this, choose a stored prompt or a quick check ----
-    // Three modifiers on purpose: Word, Outlook and Excel use many Ctrl+Alt+letter shortcuts (Ctrl+Alt+M is Word's New comment, Ctrl+Alt+D its Insert endnote), and a
+    // Three modifiers on purpose: Word, Outlook and Excel use many Ctrl+Alt+letter shortcuts (Ctrl+Alt+M is Word's New comment, Ctrl+Alt+D its Insert endnote, Ctrl+Alt+L its list-number field), and a
     // shortcut this app registers is taken from them. Ctrl+Alt+Shift+letter is far less used. It can be changed or removed under Settings.
     public const string DefaultAskHotkey = "Ctrl+Alt+Shift+P";
 
@@ -64,7 +65,7 @@ public sealed class Settings
     }
 
     // ---- my to-do list (Settings, My to-do list): a separate feature for anything, with its own shortcut ----
-    public const string DefaultMyTodoHotkey = "Ctrl+Alt+L";
+    public const string DefaultMyTodoHotkey = "Ctrl+Alt+Shift+L";
 
     /// <summary>Highlight text, press this, and the notes become suggested to-do items. Empty means no shortcut (the tray menu still works).</summary>
     public string MyTodoHotkey { get; set; } = DefaultMyTodoHotkey;
@@ -240,7 +241,7 @@ public static class SettingsService
         if (!Enum.IsDefined(loaded.Provider)) loaded.Provider = ProviderChoice.Auto;
         if (!Settings.MiddleClickModifiers.Contains(loaded.MiddleClickModifier ?? "")) loaded.MiddleClickModifier = "Ctrl";
         if (HotkeyParser.ValidateSet(("Select & Peek", loaded.PeekHotkey), ("Lookup", loaded.LookupHotkey), ("Review a draft", loaded.DraftHotkey)) is not null)
-        { loaded.PeekHotkey = "Ctrl+Alt+A"; loaded.LookupHotkey = "Ctrl+Alt+Space"; loaded.DraftHotkey = "Ctrl+Alt+D"; }
+        { loaded.PeekHotkey = "Ctrl+Alt+A"; loaded.LookupHotkey = "Ctrl+Alt+Space"; loaded.DraftHotkey = "Ctrl+Alt+Shift+R"; }
         if (!Enum.IsDefined(loaded.Appearance)) loaded.Appearance = Appearances.Default;
         loaded.CardOpacity = Settings.NormalizeOpacity(loaded.CardOpacity);
         if (!Enum.IsDefined(loaded.MyTodoMode)) loaded.MyTodoMode = MyTodoMode.Review;

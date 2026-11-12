@@ -761,11 +761,11 @@ details.sec>summary h3.grp{padding:0;margin:0}
 :root[data-dir="t"] .chip.link:not(#chipCopy),:root[data-dir="u"] .chip.link:not(#chipCopy),:root[data-dir="v"] .chip.link:not(#chipCopy){color:var(--c-accent)}
 .hero5{padding-top:calc(4px*var(--sp));padding-bottom:calc(14px*var(--sp))}
 .hero5 .hl{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
-.hero5 .hl b{font-size:calc(46px*var(--ts));line-height:1;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-.hero5 .hl b.sm{font-size:calc(30px*var(--ts))}
-.hero5 .hl span{font-size:calc(16px*var(--ts));font-weight:600}
+.hero5 .hl b{font-size:calc(30px*var(--ts));line-height:1;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.hero5 .hl b.sm{font-size:calc(22px*var(--ts))}
+.hero5 .hl span{font-size:calc(15px*var(--ts));font-weight:600}
 .hero5.late .hl b{color:var(--c-warn)}.hero5.good .hl b{color:var(--c-good)}
-.hero5 .hs{font-size:calc(12.5px*var(--ts));color:var(--c-ink2);margin-top:8px}
+.hero5 .hs{font-size:calc(12.5px*var(--ts));color:var(--c-ink2);margin-top:6px}
 .ribbon5{padding:0 18px calc(12px*var(--sp))}
 .ribbon5 .cap{font-size:calc(9.5px*var(--ts));font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--c-ink3);margin-bottom:2px}
 .ribbon5 svg{display:block;width:100%;height:auto}
@@ -928,9 +928,9 @@ C:\work&gt; </div>
       <div class="row">
         <button class="btn key" type="button" id="keyPeek" aria-label="Press Control Alt A">Ctrl+Alt+A</button>
         <button class="btn key" type="button" id="keyLook" aria-label="Press Control Alt Space">Ctrl+Alt+Space</button>
-        <button class="btn key" type="button" id="keyDraft" aria-label="Press Control Alt D">Ctrl+Alt+D</button>
+        <button class="btn key" type="button" id="keyDraft" aria-label="Press Control Alt Shift R">Ctrl+Alt+Shift+R</button>
         <button class="btn key" type="button" id="keyAsk" aria-label="Press Control Alt Shift P">Ctrl+Alt+Shift+P</button>
-        <button class="btn key full-only" type="button" id="keyList" aria-label="Press Control Alt L">Ctrl+Alt+L</button>
+        <button class="btn key full-only" type="button" id="keyList" aria-label="Press Control Alt Shift L">Ctrl+Alt+Shift+L</button>
         <button class="btn" type="button" id="trayMenuBtn">Tray menu</button>
         <button class="btn" type="button" id="openSettingsBtn">Settings</button>
         <button class="btn full-only" type="button" id="openTodoBtn">ANDA to-do list</button>
@@ -1492,7 +1492,7 @@ const DATA = {
 
 /* Recognizer: six-digit number, but never one labeled as another application type (NDA, BLA, IND, DMF, MF, NDC).
    Same behavior as Data/EntityKinds.cs; scanned without regex lookbehind so older Safari parses this file. */
-const OTHER_LABEL = /(?:^|[^A-Za-z0-9_])(?:NDA|BLA|IND|DMF|NDC|MF)(?:[-\s#:.]|No(?![A-Za-z])|Number(?![A-Za-z]))*$/i;
+const OTHER_LABEL = /(?:^|[^A-Za-z0-9_])(?:(?:NDA|BLA|IND|DMF|NDC|MF)(?:[-\s#:.]|No(?![A-Za-z])|Number(?![A-Za-z]))*|N-?)$/i;   /* "N210793" is an NDA; "A210793" is an ANDA */
 function extractNumber(text){
   if(!text) return null;
   const re = /\d+/g; let m;
@@ -1855,7 +1855,7 @@ const noticeLifetime = text => Math.min(8, Math.max(2.5, 1.2 + text.length / 14)
 /* ---------------- state ---------------- */
 let keyVia = null;
 const state = { dir:"t", look:"t", form:"full", autoHide:10, mode:"whisper", escalate:true, lead:3, pretend:false, capture:true, op:92, lens:null, pinned:false, running:true, ai:false,
-  keys:{ peek:"Ctrl+Alt+A", look:"Ctrl+Alt+Space", draft:"Ctrl+Alt+D", ask:"Ctrl+Alt+Shift+P", list:"Ctrl+Alt+L" }, taken:{ peek:false, look:false, draft:false, ask:false, list:false },
+  keys:{ peek:"Ctrl+Alt+A", look:"Ctrl+Alt+Space", draft:"Ctrl+Alt+Shift+R", ask:"Ctrl+Alt+Shift+P", list:"Ctrl+Alt+Shift+L" }, taken:{ peek:false, look:false, draft:false, ask:false, list:false },
   adaptive:true, allTools:location.hash === "#all", sectionUse:{}, clMode:0,
   middle:false, middleMod:"Ctrl", provider:"auto", tone:"", style:"", signoff:"", claudeModel:"claude-opus-4-8",
   outlook:{ on:false, cloud:"com", client:"", tenant:"organizations", max:5, step:"out", msg:"" },
@@ -2689,7 +2689,8 @@ function submitLookup(){
   const n = extractNumber($("lookupIn").value);
   if(!n){
     const raw = $("lookupIn").value.trim();
-    $("lookupErr").textContent = /^(NDA|BLA|IND|DMF|MF|NDC)\b/i.test(raw) ? "NDA, BLA, IND and similar numbers are not ANDA numbers. Please enter a six-digit ANDA number."
+    $("lookupErr").textContent = /^N-?\d{6}$/i.test(raw) ? `${raw.toUpperCase()} is an NDA number (N is for NDA, A is for ANDA). Please enter a six-digit ANDA number.`
+      : /^(NDA|BLA|IND|DMF|MF|NDC)\b/i.test(raw) ? "NDA, BLA, IND and similar numbers are not ANDA numbers. Please enter a six-digit ANDA number."
       : /^\d{3}[\s-]\d{3}$/.test(raw) ? "Please enter the six digits without spaces or dashes." : "Please enter a six-digit ANDA number.";
     $("lookupErr").style.display = "block"; return;
   }
@@ -2767,7 +2768,7 @@ const ctxmenu = $("ctxmenu");
 function closeCtx(){ ctxmenu.style.display = "none"; }
 function extensionPeek(text, anchor){
   const number = extractNumber(text);
-  if(!number){ showNotice("No ANDA number in the selection (a number labeled NDA, BLA, IND, DMF or MF is not treated as an ANDA).", anchor); return; }
+  if(!number){ showNotice("No ANDA number in the selection (a number labeled NDA, BLA, IND, DMF or MF, or written with an N as in N210793, is not treated as an ANDA).", anchor); return; }
   if(!DATA[number]){ showNotice(`ANDA ${number} is not in your data.`, anchor); return; }
   const step = firstStep(number);
   if(step === "invite") showInvite(`ANDA ${number}`, anchor, () => openCard(number, { anchor }));
@@ -2993,7 +2994,7 @@ function launch(){
 
 /* ---------------- round 10: shortcuts, middle-click, my data, my writing, my API, connection ---------------- */
 const KEYKINDS = [["peek", "Select & Peek", "keyBoxPeek"], ["look", "Lookup box", "keyBoxLook"], ["draft", "Review a draft", "keyBoxDraft"], ["ask", "Ask about a selection", "keyBoxAsk"], ["list", "My to-do list", "keyBoxList"]];
-const KEY_DEFAULT = { peek:"Ctrl+Alt+A", look:"Ctrl+Alt+Space", draft:"Ctrl+Alt+D", ask:"Ctrl+Alt+Shift+P", list:"Ctrl+Alt+L" };
+const KEY_DEFAULT = { peek:"Ctrl+Alt+A", look:"Ctrl+Alt+Space", draft:"Ctrl+Alt+Shift+R", ask:"Ctrl+Alt+Shift+P", list:"Ctrl+Alt+Shift+L" };
 function keyName(e){
   const c = e.code || "";
   if(/^Key[A-Z]$/.test(c)) return c.slice(3);

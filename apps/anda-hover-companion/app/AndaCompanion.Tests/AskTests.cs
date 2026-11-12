@@ -315,7 +315,7 @@ public class AskTests : IClassFixture<HeadlessFixture>
         Assert.Equal("Ctrl+Alt+Shift+P", Settings.DefaultAskHotkey);
         Assert.Equal(3, Settings.DefaultAskHotkey.Split('+').Length - 1);
         Assert.Equal(Settings.DefaultAskHotkey, new Settings().AskHotkey);
-        var others = new[] { "Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+D" };
+        var others = new[] { "Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+Shift+R" };
         Assert.DoesNotContain(Settings.DefaultAskHotkey, others);
     }
 
@@ -327,23 +327,23 @@ public class AskTests : IClassFixture<HeadlessFixture>
     [InlineData("Ctrl+C", "Ctrl+Alt+Shift+P")]              // too few modifiers is unreadable
     [InlineData("ctrl+alt+shift+q", "Ctrl+Alt+Shift+Q")]    // readable: normalised
     [InlineData("Ctrl+Alt+A", "")]                          // clashes with Select & Peek: none
-    [InlineData("Ctrl+Alt+D", "")]                          // clashes with Review a draft: none
+    [InlineData("Ctrl+Alt+Shift+R", "")]                          // clashes with Review a draft: none
     public void A_saved_Ask_shortcut_is_repaired(string? saved, string expected) =>
-        Assert.Equal(expected, Settings.RepairAskHotkey(saved, new[] { "Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+D" }));
+        Assert.Equal(expected, Settings.RepairAskHotkey(saved, new[] { "Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+Shift+R" }));
 
     [Fact]
     public void The_Ask_shortcut_is_registered_with_its_own_id_unless_it_clashes_and_the_to_do_shortcut_cannot_take_it()
     {
-        var withAsk = HotkeyService.FromCombos("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+D", null, "Ctrl+Alt+L", "Ctrl+Alt+Shift+P");
+        var withAsk = HotkeyService.FromCombos("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+Shift+R", null, "Ctrl+Alt+Shift+L", "Ctrl+Alt+Shift+P");
         var ask = Assert.Single(withAsk, b => b.Id == HotkeyService.IdAsk);
         Assert.Equal("Ctrl+Alt+Shift+P", ask.Combo);
         Assert.Equal(5, withAsk.Count);
 
-        var none = HotkeyService.FromCombos("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+D", null, null, "");
+        var none = HotkeyService.FromCombos("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+Shift+R", null, null, "");
         Assert.DoesNotContain(none, b => b.Id == HotkeyService.IdAsk);
 
-        var clash = HotkeyService.FromCombos("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+D", null, "Ctrl+Alt+L", "Ctrl+Alt+L");
-        Assert.Single(clash, b => b.Combo == "Ctrl+Alt+L");   // the second one asking for it is left out, never registered twice
+        var clash = HotkeyService.FromCombos("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+Shift+R", null, "Ctrl+Alt+Shift+L", "Ctrl+Alt+Shift+L");
+        Assert.Single(clash, b => b.Combo == "Ctrl+Alt+Shift+L");   // the second one asking for it is left out, never registered twice
     }
 
     [Fact]

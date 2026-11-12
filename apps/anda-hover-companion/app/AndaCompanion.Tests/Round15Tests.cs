@@ -69,7 +69,7 @@ public class Round15Tests
     [Fact]
     public void A_shortcut_is_kept_only_if_it_is_valid_and_unused()
     {
-        var reserved = new[] { "Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+D" };
+        var reserved = new[] { "Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+Shift+R" };
         var clean = MyActionRules.Normalize(new List<CustomAction>
         {
             new() { Name = "ok", Hotkey = "ctrl + alt + t" }, new() { Name = "dup", Hotkey = "Ctrl+Alt+T" },
@@ -106,11 +106,11 @@ public class Round15Tests
             new() { Name = "off", Hotkey = "Ctrl+Alt+T", Enabled = false }, new() { Name = "good", Hotkey = "Ctrl+Alt+G" },
             new() { Name = "clash", Hotkey = "Ctrl+Alt+A" }, new() { Name = "good2", Hotkey = "Ctrl+Shift+F5" }, new() { Name = "bad", Hotkey = "x" },
         };
-        var b = HotkeyService.FromCombos("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+D", actions);
+        var b = HotkeyService.FromCombos("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+Shift+R", actions);
         Assert.Equal(new[] { 1, 2, 3, HotkeyService.IdActionBase + 1, HotkeyService.IdActionBase + 3 }, b.Select(x => x.Id));
         Assert.Equal("good", b[3].Name);
         Assert.Equal("Ctrl+Shift+F5", b[4].Combo);
-        Assert.Equal(3, HotkeyService.FromCombos("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+D").Count);   // the old call still works
+        Assert.Equal(3, HotkeyService.FromCombos("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+Shift+R").Count);   // the old call still works
     }
 
     // ---------- filling prompts and titles ----------

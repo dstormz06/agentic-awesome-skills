@@ -23,15 +23,15 @@ public static class HotkeyParser
                 case "shift": mods |= ModShift; break;
                 case "win" or "windows" or "meta": error = "The Windows key is reserved by Windows. Use Ctrl, Alt or Shift."; return false;
                 default:
-                    if (key is not null) { error = "Please use one key plus modifiers, for example Ctrl+Alt+D."; return false; }
+                    if (key is not null) { error = "Please use one key plus modifiers, for example Ctrl+Alt+Shift+R."; return false; }
                     key = raw;
                     break;
             }
         }
-        if (key is null) { error = "Please add a key after the modifiers, for example Ctrl+Alt+D."; return false; }
+        if (key is null) { error = "Please add a key after the modifiers, for example Ctrl+Alt+Shift+R."; return false; }
         int modCount = ((mods & ModControl) != 0 ? 1 : 0) + ((mods & ModAlt) != 0 ? 1 : 0) + ((mods & ModShift) != 0 ? 1 : 0);
         if ((mods & (ModControl | ModAlt)) == 0 || modCount < 2)
-        { error = "Please use at least two modifiers, one of them Ctrl or Alt (for example Ctrl+Alt+D), so everyday shortcuts such as Ctrl+C keep working."; return false; }
+        { error = "Please use at least two modifiers, one of them Ctrl or Alt (for example Ctrl+Alt+Shift+R), so everyday shortcuts such as Ctrl+C keep working."; return false; }
 
         string k = key.ToUpperInvariant(); uint vk;
         if (k.Length == 1 && k[0] is >= 'A' and <= 'Z') vk = k[0];

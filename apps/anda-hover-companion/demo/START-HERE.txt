@@ -20,7 +20,7 @@ TRY IT
      A new install shows a small invite that you click. An at-risk ANDA such as 216482
      opens a small peek by itself (Settings can turn that off). Click "Full brief" to
      see the whole card, including the WATCH line about weekend and holiday dates.
-  2. Select any text and press Ctrl+Alt+D. It reviews a draft against the record and against itself
+  2. Select any text and press Ctrl+Alt+Shift+R. It reviews a draft against the record and against itself
      (dates, weekdays, holidays, repeated words, a placeholder left in). No AI is used and nothing
      leaves the computer.
   3. Press Ctrl+Alt+Space from anywhere and type a number.
@@ -51,7 +51,7 @@ MAKE IT YOURS (tray icon, then Settings)
   - (all tools) ANDA to-do list: the tray icon's "ANDA to-do list..." shows your items and what your data says
     needs a look. It updates itself only while it is open.
   - (all tools) My to-do list: a separate list for your daily workload (ANDA related or not). Select rough notes anywhere and
-    press Ctrl+Alt+L (or choose another shortcut here): they become suggested items that you can
+    press Ctrl+Alt+Shift+L (or choose another shortcut here): they become suggested items that you can
     change before you press Add. They are read by simple rules on this PC, with no AI.
   - Connection: Auto, Offline, Claude (with its model name) or your own API. The banner says
     "Connected" only after a request has really succeeded.

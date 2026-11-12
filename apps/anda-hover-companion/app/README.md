@@ -60,7 +60,7 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   until the situation changes. It refreshes itself only while it is open (every 15 s, 30 s, 1 min or 5 min, or never) and at once when the list
   changes; a changed portfolio file is read at the next refresh; nothing runs when it is closed. It is kept in `todo.json`, plain text on this PC, and
   is never sent anywhere. `Services/Todo.cs`, `UI/TodoWindow`.
-- **My to-do list** — a second, separate mode for your daily workload (any task, ANDA related or not), apart from the ANDA to-do list (which is built from your ANDA data): its own shortcut (chosen in Settings; **Ctrl+Alt+L** at
+- **My to-do list** — a second, separate mode for your daily workload (any task, ANDA related or not), apart from the ANDA to-do list (which is built from your ANDA data): its own shortcut (chosen in Settings; **Ctrl+Alt+Shift+L** at
   first; *None* is allowed, and the tray menu still opens it), its own windows and its own file (`mytodo.json`, plain text on this PC, never sent anywhere).
   **Notes to my to-do list**: select rough notes anywhere and press the shortcut (or paste them) and they are read **by plain rules, with no AI**
   (`Services/NoteParser.cs`) into suggested items: a tidy title (filler such as "don't forget to" removed), a due day ("tomorrow", "by Friday", "Nov 12", "the 1st"),
@@ -83,7 +83,7 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   starters). Lenses are guidance, never authority — grounding rules always outrank
   them (see ../SECURITY.md).
 - **Global hotkeys** — `Ctrl+Alt+A`: peek at the current text selection (Select & Peek);
-  `Ctrl+Alt+Space`: lookup window; `Ctrl+Alt+D`: review the selected draft; `Ctrl+Alt+Shift+P`: ask about a selection. All four are
+  `Ctrl+Alt+Space`: lookup window; `Ctrl+Alt+Shift+R`: review the selected draft; `Ctrl+Alt+Shift+P`: ask about a selection. All four are
   **rebindable in Settings** (at least two modifiers including Ctrl or Alt; letters, digits, F1–F12 or
   Space; never the Windows key; no two the same). The hotkey is always the consent act: a card opens
   only after your own selection and shortcut. Registration is **checked**: if another program owns a
@@ -103,7 +103,7 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   It states what the data shows and says "this tool does not decide": it never claims how GDUFA treats
   such a date. Closures declared by executive order or a funding lapse are not predictable: add them
   to `closures.txt` in the data folder (`2025-12-24 Executive order closing`).
-- **Review a draft** — `Ctrl+Alt+D` or tray → *Review a draft…* opens a window with the selected text
+- **Review a draft** — `Ctrl+Alt+Shift+R` or tray → *Review a draft…* opens a window with the selected text
   and checks it **at once, with no AI and no network**: the ANDA numbers it names, any goal or forecast
   date it gives, and on-track or late wording, against the record; then the draft against itself and the
   calendar (a weekday that does not belong to its date, a deadline on a weekend, a federal holiday or in the
@@ -306,7 +306,7 @@ AndaCompanion/
   UI/AutoHide.cs        the auto-hide rule (pure) and its timer
   UI/ChipWindow.*       whisper invite + invalid-number notice
   UI/LookupWindow.*     Ctrl+Alt+Space lookup
-  UI/DraftWindow.*      Ctrl+Alt+D review a draft and the writing actions (preview before send, Copy only)
+  UI/DraftWindow.*      Ctrl+Alt+Shift+R review a draft and the writing actions (preview before send, Copy only)
   UI/AskWindow.*        Ctrl+Alt+Shift+P ask about a selection: quick checks, stored prompts, an instruction typed there (App.Ask.cs opens it)
   UI/SettingsWindow.*   appearance, consent, urgent rule, shortcuts and other ways to start it, My data, My writing, connection and My API, Outlook, backup, usage log
   UI/QuickRepliesWindow.* the person's own quick replies (templates filled from the card)
