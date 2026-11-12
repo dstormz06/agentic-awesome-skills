@@ -18,7 +18,7 @@
   --sim:#3d6fa5; --sim-ink:#ffffff; --sim-soft:rgba(61,111,165,.12);
   --ok:#177245; --bad:#a33636;
   --shadow-win:0 18px 40px -14px rgba(20,30,45,.30),0 2px 8px rgba(20,30,45,.10);
-  --tb-h:48px; --banner-h:34px;
+  --tb-h:40px; --banner-h:34px;
   --op:90%;
 }
 
@@ -220,9 +220,11 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 #taskbar .tray #appIcon{display:none}
 #taskbar .tray #appIcon.pinned{display:grid}
 /* the Loupe icon (Assets/loupe.svg and loupe-small.svg): the small drawing for 18 px, the full one for 28 px; "alert" adds the amber dot for something that needs a look */
-.glyph{display:block;width:18px;height:18px;background:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22 width=%2264%22 height=%2264%22%3E %3Crect x=%221%22 y=%221%22 width=%2262%22 height=%2262%22 rx=%2215%22 fill=%22%233a3f8f%22/%3E %3Ccircle cx=%2227%22 cy=%2227%22 r=%2214.5%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%228%22/%3E %3Cline x1=%2238.5%22 y1=%2238.5%22 x2=%2253%22 y2=%2253%22 stroke=%22%23fff%22 stroke-width=%2210%22 stroke-linecap=%22round%22/%3E %3Ccircle cx=%2227%22 cy=%2227%22 r=%226.5%22 fill=%22%23f2a93b%22/%3E %3C/svg%3E") center/contain no-repeat}
-.glyph.alert{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22 width=%2264%22 height=%2264%22%3E %3Crect x=%221%22 y=%221%22 width=%2262%22 height=%2262%22 rx=%2215%22 fill=%22%233a3f8f%22/%3E %3Ccircle cx=%2227%22 cy=%2227%22 r=%2214.5%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%228%22/%3E %3Cline x1=%2238.5%22 y1=%2238.5%22 x2=%2253%22 y2=%2253%22 stroke=%22%23fff%22 stroke-width=%2210%22 stroke-linecap=%22round%22/%3E %3Ccircle cx=%2227%22 cy=%2227%22 r=%226.5%22 fill=%22%23f2a93b%22/%3E %3Ccircle cx=%2251%22 cy=%2213%22 r=%2211%22 fill=%22%23fff%22/%3E%3Ccircle cx=%2251%22 cy=%2213%22 r=%228%22 fill=%22%23f2a93b%22/%3E%3C/svg%3E")}
-.glyph.big{width:28px;height:28px;background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22 width=%2264%22 height=%2264%22%3E %3Crect x=%222%22 y=%222%22 width=%2260%22 height=%2260%22 rx=%2215%22 fill=%22%233a3f8f%22/%3E %3Crect x=%222.75%22 y=%222.75%22 width=%2258.5%22 height=%2258.5%22 rx=%2214.3%22 fill=%22none%22 stroke=%22%23fff%22 stroke-opacity=%22.28%22 stroke-width=%221.5%22/%3E %3Ccircle cx=%2228%22 cy=%2228%22 r=%2214%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%225.5%22/%3E %3Cline x1=%2239%22 y1=%2239%22 x2=%2251%22 y2=%2251%22 stroke=%22%23fff%22 stroke-width=%227%22 stroke-linecap=%22round%22/%3E %3Ccircle cx=%2228%22 cy=%2228%22 r=%225%22 fill=%22%23f2a93b%22/%3E %3C/svg%3E")}
+/* The tray icon at rest carries no amber: amber means "something needs you today", and appears only as the dot (see alertReasons). */
+.glyph{display:block;width:18px;height:18px;background:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22 width=%2264%22 height=%2264%22%3E %3Crect x=%221%22 y=%221%22 width=%2262%22 height=%2262%22 rx=%2215%22 fill=%22%233a3f8f%22/%3E %3Ccircle cx=%2227%22 cy=%2227%22 r=%2214.5%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%228%22/%3E %3Cline x1=%2238.5%22 y1=%2238.5%22 x2=%2253%22 y2=%2253%22 stroke=%22%23fff%22 stroke-width=%2210%22 stroke-linecap=%22round%22/%3E %3C/svg%3E") center/contain no-repeat}
+.glyph.alert{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22 width=%2264%22 height=%2264%22%3E %3Crect x=%221%22 y=%221%22 width=%2262%22 height=%2262%22 rx=%2215%22 fill=%22%233a3f8f%22/%3E %3Ccircle cx=%2227%22 cy=%2227%22 r=%2214.5%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%228%22/%3E %3Cline x1=%2238.5%22 y1=%2238.5%22 x2=%2253%22 y2=%2253%22 stroke=%22%23fff%22 stroke-width=%2210%22 stroke-linecap=%22round%22/%3E %3Ccircle cx=%2251%22 cy=%2213%22 r=%2211%22 fill=%22%23fff%22/%3E%3Ccircle cx=%2251%22 cy=%2213%22 r=%228%22 fill=%22%23f2a93b%22/%3E%3C/svg%3E")}
+.glyph.big{width:28px;height:28px;background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22 width=%2264%22 height=%2264%22%3E %3Crect x=%222%22 y=%222%22 width=%2260%22 height=%2260%22 rx=%2215%22 fill=%22%233a3f8f%22/%3E %3Crect x=%222.75%22 y=%222.75%22 width=%2258.5%22 height=%2258.5%22 rx=%2214.3%22 fill=%22none%22 stroke=%22%23fff%22 stroke-opacity=%22.28%22 stroke-width=%221.5%22/%3E %3Ccircle cx=%2228%22 cy=%2228%22 r=%2214%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%225.5%22/%3E %3Cline x1=%2239%22 y1=%2239%22 x2=%2251%22 y2=%2251%22 stroke=%22%23fff%22 stroke-width=%227%22 stroke-linecap=%22round%22/%3E %3C/svg%3E")}
+.glyph.big.alert{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22 width=%2264%22 height=%2264%22%3E %3Crect x=%222%22 y=%222%22 width=%2260%22 height=%2260%22 rx=%2215%22 fill=%22%233a3f8f%22/%3E %3Crect x=%222.75%22 y=%222.75%22 width=%2258.5%22 height=%2258.5%22 rx=%2214.3%22 fill=%22none%22 stroke=%22%23fff%22 stroke-opacity=%22.28%22 stroke-width=%221.5%22/%3E %3Ccircle cx=%2228%22 cy=%2228%22 r=%2214%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%225.5%22/%3E %3Cline x1=%2239%22 y1=%2239%22 x2=%2251%22 y2=%2251%22 stroke=%22%23fff%22 stroke-width=%227%22 stroke-linecap=%22round%22/%3E %3Ccircle cx=%2251%22 cy=%2213%22 r=%2211%22 fill=%22%23fff%22/%3E%3Ccircle cx=%2251%22 cy=%2213%22 r=%228%22 fill=%22%23f2a93b%22/%3E%3C/svg%3E")}
 
 /* tray overflow flyout + context menu */
 .pop{position:fixed;z-index:45;background:rgba(250,251,252,.97);border:1px solid var(--win-line);border-radius:10px;
@@ -839,33 +841,47 @@ details.sec>summary h3.grp{padding:0;margin:0}
 :root[data-density="compact"]{--sp:.72}
 :root[data-ts="large"]{--ts:1.15}
 :root[data-ts="xl"]{--ts:1.3}
-:root[data-dir="t"],:root[data-dir="u"],:root[data-dir="v"]{--c-bg:#ffffff;--c-ink:#1d2329;--c-ink2:#46505a;--c-ink3:#58616b;--c-hair:#eceef1;--c-line:#dde1e6;--c-accent:#3f4a56;--c-accent2:#333d47;--c-good:#1a6b43;--c-good-bg:#e6f1ea;--c-warn:#8a5800;--c-warn-bg:#faf1dc;--c-bad:#a33636;--c-bad-bg:#f9e9e9;--c-track:#e6e8eb;--c-fill:#6a7683;--c-mark:rgba(63,74,86,.09);--c-radius:12px;--c-shadow:0 0 0 .5px rgba(15,23,35,.10),0 1px 2px rgba(15,23,35,.06),0 8px 18px -6px rgba(15,23,35,.16),0 28px 56px -18px rgba(15,23,35,.30);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
-:root[data-dir="v"]{--c-ink2:#3c444d;--c-ink3:#4a525b;--c-radius:16px}
+:root[data-fam="pocket"]{--c-bg:#ffffff;--c-ink:#1d2329;--c-ink2:#46505a;--c-ink3:#58616b;--c-hair:#eceef1;--c-line:#dde1e6;--c-accent:#3f4a56;--c-accent2:#333d47;--c-good:#1a6b43;--c-good-bg:#e6f1ea;--c-warn:#8a5800;--c-warn-bg:#faf1dc;--c-bad:#a33636;--c-bad-bg:#f9e9e9;--c-track:#e6e8eb;--c-fill:#6a7683;--c-mark:rgba(63,74,86,.09);--c-radius:12px;--c-shadow:0 0 0 .5px rgba(15,23,35,.10),0 1px 2px rgba(15,23,35,.06),0 8px 18px -6px rgba(15,23,35,.16),0 28px 56px -18px rgba(15,23,35,.30);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
+:root[data-glass]{--c-ink2:#3c444d;--c-ink3:#4a525b;--c-radius:16px}
 .hero5,.ribbon5{display:none}
-:root[data-dir="t"] .hero5,:root[data-dir="u"] .hero5,:root[data-dir="v"] .hero5{display:block}
+:root[data-fam="pocket"] .hero5{display:block}
 :root[data-dir="u"] .ribbon5{display:block}
-:root[data-dir="t"] .clockwrap>.slot.clock,:root[data-dir="u"] .clockwrap>.slot.clock,:root[data-dir="v"] .clockwrap>.slot.clock{display:none}
-:root[data-dir="t"] .slot,:root[data-dir="u"] .slot,:root[data-dir="v"] .slot{padding:calc(12px*var(--sp)) 18px}
-:root[data-dir="t"] .hd,:root[data-dir="u"] .hd,:root[data-dir="v"] .hd{padding-top:calc(16px*var(--sp));padding-bottom:calc(6px*var(--sp))}
-:root[data-dir="t"] .drug,:root[data-dir="u"] .drug,:root[data-dir="v"] .drug{font-size:calc(13.5px*var(--ts));margin-top:6px}
-:root[data-dir="t"] .seal,:root[data-dir="u"] .seal,:root[data-dir="v"] .seal{background:transparent;border:1px solid #cfd3d8;color:var(--c-ink2)}
-:root[data-dir="t"] .attn,:root[data-dir="u"] .attn,:root[data-dir="v"] .attn{border:none;border-radius:10px}
-:root[data-dir="t"] .chips,:root[data-dir="u"] .chips,:root[data-dir="v"] .chips{gap:4px 14px}
-/* round 21: the main action is "Add a note" (Enter). It is a slim, tinted button, not a solid bar; Copy status is one of the small buttons (and the S key). */
-:root[data-dir="t"] #chipNotes,:root[data-dir="u"] #chipNotes,:root[data-dir="v"] #chipNotes{flex:1 1 100%;order:-1;justify-content:center;display:flex;align-items:center;
+:root[data-fam="pocket"] .clockwrap>.slot.clock{display:none}
+:root[data-fam="pocket"] .slot{padding:calc(12px*var(--sp)) 18px}
+:root[data-fam="pocket"] .hd{padding-top:calc(16px*var(--sp));padding-bottom:calc(6px*var(--sp))}
+:root[data-fam="pocket"] .drug{font-size:calc(13.5px*var(--ts));margin-top:6px}
+:root[data-fam="pocket"] .seal{background:transparent;border:1px solid #cfd3d8;color:var(--c-ink2)}
+:root[data-fam="pocket"] .attn{border:none;border-radius:10px}
+:root[data-fam="pocket"] .chips{gap:4px 14px}
+/* round 21: the main action is "Add a note" (Enter). It is a slim,tinted button,not a solid bar; Copy status is one of the small buttons (and the S key). */
+:root[data-fam="pocket"] #chipNotes{flex:1 1 100%;order:-1;justify-content:center;display:flex;align-items:center;
   background:color-mix(in srgb,var(--c-accent) 10%,transparent);border:1px solid color-mix(in srgb,var(--c-accent) 26%,transparent);color:var(--c-accent2);font-weight:650;border-radius:9px;min-height:34px;margin-bottom:4px;
   transition:background-color .12s ease,border-color .12s ease}
-:root[data-dir="t"] #chipNotes:hover,:root[data-dir="u"] #chipNotes:hover,:root[data-dir="v"] #chipNotes:hover{background:color-mix(in srgb,var(--c-accent) 16%,transparent);border-color:color-mix(in srgb,var(--c-accent) 40%,transparent)}
-:root[data-dir="t"] #chipNotes::after,:root[data-dir="u"] #chipNotes::after,:root[data-dir="v"] #chipNotes::after{content:"Enter";font:500 10.5px/1 ui-monospace,Consolas,monospace;border:1px solid currentColor;border-radius:4px;padding:2px 5px;margin-left:10px;opacity:.7}
-:root[data-dir="t"] .chip:not(#chipNotes),:root[data-dir="u"] .chip:not(#chipNotes),:root[data-dir="v"] .chip:not(#chipNotes){border:none;background:none;padding:6px 2px;min-height:32px;border-radius:6px}
-:root[data-dir="t"] .chip.link:not(#chipNotes),:root[data-dir="u"] .chip.link:not(#chipNotes),:root[data-dir="v"] .chip.link:not(#chipNotes){color:var(--c-accent)}
-/* a quiet, layered shadow and a hairline of light along the top edge, in the manner of a well-made desktop panel (round 21) */
-:root[data-dir="t"] #card,:root[data-dir="u"] #card,:root[data-dir="v"] #card{box-shadow:var(--c-shadow),inset 0 1px 0 rgba(255,255,255,.7);-webkit-font-smoothing:antialiased}
-:root[data-dir="t"] .app-win,:root[data-dir="u"] .app-win,:root[data-dir="v"] .app-win{box-shadow:0 0 0 .5px rgba(15,23,35,.10),0 8px 18px -6px rgba(15,23,35,.14),0 30px 60px -20px rgba(15,23,35,.32);border-radius:14px}
+:root[data-fam="pocket"] #chipNotes:hover{background:color-mix(in srgb,var(--c-accent) 16%,transparent);border-color:color-mix(in srgb,var(--c-accent) 40%,transparent)}
+:root[data-fam="pocket"] #chipNotes::after{content:"Enter";font:500 10.5px/1 ui-monospace,Consolas,monospace;border:1px solid currentColor;border-radius:4px;padding:2px 5px;margin-left:10px;opacity:.7}
+:root[data-fam="pocket"] .chip:not(#chipNotes){border:none;background:none;padding:6px 2px;min-height:32px;border-radius:6px}
+:root[data-fam="pocket"] .chip.link:not(#chipNotes){color:var(--c-accent)}
+/* round 22: W · Graphite Gauge, the default. The answer first and the actions at the bottom, as in Glass Sheet; graphite, as in K · Graphite Quiet;
+   and the gauge of P · Bronze Gauge beside the answer, saying how far through its review clock the application is. */
+:root[data-dir="w"]{--c-bg:#fdfdfd;--c-ink:#2a2e33;--c-ink2:#4a4e53;--c-ink3:#5c6167;--c-hair:#ececec;--c-line:#dedede;--c-accent:#56626e;--c-accent2:#48535e;--c-good:#1a6b43;--c-good-bg:#e6f1ea;--c-warn:#8a5800;--c-warn-bg:#faf1dc;--c-bad:#a33636;--c-bad-bg:#f9e9e9;--c-track:#e3e5e8;--c-fill:#6e7a86;--c-mark:rgba(86,98,110,.10);--c-radius:16px}
+.hgauge{display:none}
+:root[data-dir="w"] .hero5{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:14px;align-items:center}
+:root[data-dir="w"] .hero5 .hl,:root[data-dir="w"] .hero5 .hs{grid-column:1}
+:root[data-dir="w"] .hgauge{display:block;grid-column:2;grid-row:1 / span 2;position:relative;width:96px;height:66px}
+.hgauge svg{width:96px;height:53px;display:block}
+.hgauge .tr{fill:none;stroke:var(--c-track);stroke-width:9;stroke-linecap:round}
+.hgauge .fg{fill:none;stroke:var(--c-fill);stroke-width:9;stroke-linecap:round;transition:stroke-dasharray .35s ease}
+.hgauge b{position:absolute;left:0;right:0;top:27px;text-align:center;font-size:calc(15px*var(--ts));font-weight:700;font-variant-numeric:tabular-nums;color:var(--c-ink)}
+.hgauge span{position:absolute;left:0;right:0;bottom:0;text-align:center;font-size:calc(9.5px*var(--ts));font-weight:700;letter-spacing:.08em;color:var(--c-ink3)}
+#card.mini .hgauge{transform:scale(.86);transform-origin:right center}
+@media (prefers-reduced-motion: reduce){.hgauge .fg{transition:none}}
+/* a quiet,layered shadow and a hairline of light along the top edge,in the manner of a well-made desktop panel (round 21) */
+:root[data-fam="pocket"] #card{box-shadow:var(--c-shadow),inset 0 1px 0 rgba(255,255,255,.7);-webkit-font-smoothing:antialiased}
+:root[data-fam="pocket"] .app-win{box-shadow:0 0 0 .5px rgba(15,23,35,.10),0 8px 18px -6px rgba(15,23,35,.14),0 30px 60px -20px rgba(15,23,35,.32);border-radius:14px}
 /* what the card scrolls to must not end up under the action area that stays at the bottom */
-:root[data-dir="t"] #card,:root[data-dir="u"] #card,:root[data-dir="v"] #card{scroll-padding-bottom:150px}
+:root[data-fam="pocket"] #card{scroll-padding-bottom:150px}
 .acthint{display:none;font-size:calc(10.5px*var(--ts));line-height:1.3;color:var(--c-ink3);margin-top:2px}
-:root[data-dir="t"] .acthint,:root[data-dir="u"] .acthint,:root[data-dir="v"] .acthint{display:block}
+:root[data-fam="pocket"] .acthint{display:block}
 .acthint b{font-weight:650;color:var(--c-ink2)}
 .hero5{padding-top:calc(4px*var(--sp));padding-bottom:calc(14px*var(--sp))}
 .hero5 .hl{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
@@ -880,18 +896,18 @@ details.sec>summary h3.grp{padding:0;margin:0}
 .ribbon5 svg text{font:500 9.5px var(--c-font);fill:var(--c-ink3)}
 .ribbon5 .rt{font-size:calc(12px*var(--ts));color:var(--c-ink2);margin-top:4px}
 #card.mini .ribbon5{display:none}
-:root[data-dir="v"] #card{background-color:color-mix(in srgb,var(--c-bg) var(--op),transparent);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);border-color:rgba(255,255,255,.7)}
-@media (prefers-reduced-transparency: reduce){:root[data-dir="v"] #card{background-color:var(--c-bg);-webkit-backdrop-filter:none;backdrop-filter:none}}
-@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){:root[data-dir="v"] #card{background-color:var(--c-bg)}}
+:root[data-glass] #card{background-color:color-mix(in srgb,var(--c-bg) var(--op),transparent);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);border-color:rgba(255,255,255,.7)}
+@media (prefers-reduced-transparency: reduce){:root[data-glass] #card{background-color:var(--c-bg);-webkit-backdrop-filter:none;backdrop-filter:none}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){:root[data-glass] #card{background-color:var(--c-bg)}}
 
-:root[data-dir="t"] .chips-slot,:root[data-dir="u"] .chips-slot,:root[data-dir="v"] .chips-slot{position:sticky;bottom:0;z-index:3;background:var(--c-bg);padding-top:calc(10px*var(--sp));padding-bottom:calc(10px*var(--sp))}
+:root[data-fam="pocket"] .chips-slot{position:sticky;bottom:0;z-index:3;background:var(--c-bg);padding-top:calc(10px*var(--sp));padding-bottom:calc(10px*var(--sp))}
 /* the facts scroll under the action area: on glass they are blurred away there, so nothing readable shows through the buttons */
-:root[data-dir="v"] .chips-slot{background:color-mix(in srgb,var(--c-bg) 90%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
-@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){:root[data-dir="v"] .chips-slot{background:var(--c-bg)}}
-@media (prefers-reduced-transparency: reduce){:root[data-dir="v"] .chips-slot{background:var(--c-bg);-webkit-backdrop-filter:none;backdrop-filter:none}}
-:root[data-dir="t"] .chips,:root[data-dir="u"] .chips,:root[data-dir="v"] .chips{gap:0 14px}
-:root[data-dir="t"] .chip:not(#chipNotes),:root[data-dir="u"] .chip:not(#chipNotes),:root[data-dir="v"] .chip:not(#chipNotes){font-size:calc(12px*var(--ts));min-height:28px;padding:3px 2px}
-:root[data-dir="v"] #card{background-image:linear-gradient(165deg,rgba(255,255,255,.65),rgba(255,255,255,0) 38%)}
+:root[data-glass] .chips-slot{background:color-mix(in srgb,var(--c-bg) 97%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){:root[data-glass] .chips-slot{background:var(--c-bg)}}
+@media (prefers-reduced-transparency: reduce){:root[data-glass] .chips-slot{background:var(--c-bg);-webkit-backdrop-filter:none;backdrop-filter:none}}
+:root[data-fam="pocket"] .chips{gap:0 14px}
+:root[data-fam="pocket"] .chip:not(#chipNotes){font-size:calc(12px*var(--ts));min-height:28px;padding:3px 2px}
+:root[data-glass] #card{background-image:linear-gradient(165deg,rgba(255,255,255,.65),rgba(255,255,255,0) 38%)}
 
 /* ---- One Bar (a lookup style), recent ANDAs, Today ---- */
 .lk-recent{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}
@@ -1034,17 +1050,21 @@ body{background:#4f9be0}
 /* taskbar: centered icons, a search box, a line under the open app, weather at the left */
 #taskbar{background:rgba(238,243,249,.82);border-top:1px solid rgba(255,255,255,.55);-webkit-backdrop-filter:blur(24px) saturate(1.6);backdrop-filter:blur(24px) saturate(1.6)}
 .desk[data-wall="dusk"] #taskbar,.desk[data-wall="slate"] #taskbar{background:rgba(236,241,247,.9)}
-#taskbar .mid{gap:4px;align-items:center}
-#taskbar .app{position:relative;width:42px;height:42px;border-radius:6px}
+#taskbar .mid{gap:3px;align-items:center}
+#taskbar .app{position:relative;width:36px;height:34px;border-radius:6px}
+#taskbar .app svg{width:20px;height:20px}
+#taskbar .tray button{height:30px;min-width:30px}
+#taskbar .clock{font-size:11px;line-height:1.15}
+#taskbar .wx svg{width:18px;height:18px}
 #taskbar .app:hover{background:rgba(255,255,255,.75)}
 #taskbar .app.on{background:rgba(255,255,255,.85);box-shadow:0 0 0 1px rgba(20,30,45,.06)}
-#taskbar .app[data-app-icon]::after{content:"";position:absolute;left:50%;bottom:2px;width:6px;height:3px;margin-left:-3px;border-radius:2px;background:#8a949f}
+#taskbar .app[data-app-icon]::after{content:"";position:absolute;left:50%;bottom:1px;width:6px;height:3px;margin-left:-3px;border-radius:2px;background:#8a949f}
 #taskbar .app.on::after{width:16px;margin-left:-8px;background:var(--sim)}
-#taskbar .find{display:flex;align-items:center;gap:8px;height:34px;width:190px;padding:0 14px;margin:0 4px;border-radius:99px;background:rgba(255,255,255,.78);border:1px solid rgba(20,30,45,.08);font-size:12.5px;color:var(--ink2)}
+#taskbar .find{display:flex;align-items:center;gap:8px;height:28px;width:176px;padding:0 12px;margin:0 4px;border-radius:99px;background:rgba(255,255,255,.78);border:1px solid rgba(20,30,45,.08);font-size:12.5px;color:var(--ink2)}
 #taskbar .wx{display:flex;align-items:center;gap:8px;padding:0 8px;font-size:11.5px;line-height:1.15;color:var(--ink)}
 #taskbar .wx span{display:grid}#taskbar .wx small{color:var(--ink2);font-size:11px}
 #taskbar .tray button{border-radius:6px}
-@media (max-width:1240px){#taskbar .find{width:42px;padding:0;justify-content:center;font-size:0;gap:0}}
+@media (max-width:1240px){#taskbar .find{width:34px;padding:0;justify-content:center;font-size:0;gap:0}}
 @media (max-width:1040px){
   .icon.deco,#mail .rail,#chat .rail,#taskbar .wx,#taskbar .find,.win .bar .srch{display:none}
   #deskIcon{top:auto}
@@ -1221,6 +1241,8 @@ PS C:\work&gt; </div>
       <label class="sw"><input type="checkbox" id="swConflictLook"> Another program already owns <span data-key="look"></span></label>
       <label class="sw full-only"><input type="checkbox" id="swConflictList"> Another program already owns <span data-key="list"></span></label>
       <label class="sw"><input type="checkbox" id="swToday"> Pretend today is Oct 1, 2026 (goal dates get close)</label>
+      <label class="sw"><input type="checkbox" id="swDue"> An item is due today (tray dot)</label>
+      <label class="sw"><input type="checkbox" id="swFlag"> The sheet marks a service issue (tray dot)</label>
       <label class="sw"><input type="checkbox" id="swAi"> An approved AI model is connected (sample brief)</label>
       <div class="row" style="margin-top:6px"><button class="btn" type="button" id="newsPush">Division news: a colleague adds a line</button></div>
       <label class="sw full-only"><input type="checkbox" id="swAgentFail"> An agent cannot be reached (rehearse a failure)</label>
@@ -1668,6 +1690,8 @@ PS C:\work&gt; </div>
   <!-- ===== News and alerts: division news from one shared Word document, and what the person's own data says needs a look ===== -->
   <div class="app-win" id="hub" role="dialog" aria-label="News and alerts">
     <div class="hdr"><h2>News and alerts</h2><button class="pill" id="hubClose" type="button">Close</button></div>
+    <div class="lbl" id="hubNowLbl">NEEDS YOU TODAY · WHY THE TRAY ICON SHOWS ITS DOT</div>
+    <div id="hubNow"></div>
     <div class="lbl">DIVISION NEWS</div>
     <p class="hint" id="hubNewsNote" style="margin:0 0 4px"></p>
     <div id="hubNews"></div>
@@ -1719,7 +1743,7 @@ PS C:\work&gt; </div>
     <div class="meta" id="c-meta"></div>
     <div class="fresh" id="c-fresh"></div>
   </div>
-  <div class="slot hero5" id="c-hero"><div class="hl"><b id="c-hero-n"></b><span id="c-hero-u"></span></div><div class="hs" id="c-hero-s"></div></div>
+  <div class="slot hero5" id="c-hero"><div class="hl"><b id="c-hero-n"></b><span id="c-hero-u"></span></div><div class="hs" id="c-hero-s"></div><div class="hgauge" id="c-hgauge" role="img" aria-label=""><svg viewBox="0 0 112 62" aria-hidden="true"><path class="tr" pathLength="100" d="M10 56 A46 46 0 0 1 102 56"/><path class="fg" id="c-hgfg" pathLength="100" d="M10 56 A46 46 0 0 1 102 56"/></svg><b id="c-hgv"></b><span>OF THE CLOCK</span></div></div>
   <div class="slot ribbon5" id="c-ribbon-slot"><div class="cap">Goal and forecast on the calendar</div><svg id="c-ribbon" viewBox="0 0 300 78" role="img" aria-label=""></svg><div class="rt" id="c-ribbon-t"></div></div>
   <div class="clockwrap">
   <div class="railcol" id="c-rail" aria-hidden="true"><b id="c-rail-n"></b><span class="cap" id="c-rail-cap">DAYS TO GOAL</span><span class="rdelta" id="c-rail-d"></span><span class="rconf" id="c-rail-c"></span></div>
@@ -1790,7 +1814,16 @@ document.documentElement.lang = document.documentElement.lang || "en";   /* the 
    ============================================================ */
 const $ = id => document.getElementById(id);
 const root = document.documentElement;
-root.dataset.dir = "v";
+/* One place says which family a look belongs to, so the stylesheet never has to name each look.
+   "pocket": the answer-first layout with the actions at the bottom. "glass": the sheet that follows the transparency setting. */
+const LOOK_TRAITS = { t:["pocket"], u:["pocket"], v:["pocket","glass"], w:["pocket","glass"] };
+function setDir(tokens){
+  const tr = LOOK_TRAITS[tokens] || [];
+  root.dataset.dir = tokens;
+  if(tr.includes("pocket")) root.dataset.fam = "pocket"; else delete root.dataset.fam;
+  if(tr.includes("glass")) root.dataset.glass = ""; else delete root.dataset.glass;
+}
+setDir("w");
 
 /* ---------------- fictional data (same records as the Windows app's mock repository) ---------------- */
 const DATA = {
@@ -1920,7 +1953,7 @@ function evaluateDate(t, lead){
 
 /* ---- Services/WatchRules.cs: deterministic flags with their evidence; states what the data shows, never what a rule means ---- */
 const SEV = { info:0, warn:1, bad:2 };
-const RANK = { "goal-passed":0, "goal-soon":1, "goal-date-calendar":2, "forecast-date-calendar":3, "no-goal-date":6 };
+const RANK = { "sheet-flag":-1, "goal-passed":0, "goal-soon":1, "goal-date-calendar":2, "forecast-date-calendar":3, "no-goal-date":6 };
 /* ---------------- the clock (round 21) ----------------
    The page tells the real time, to the second, in the time zone of the person's own computer (Eastern Time if the browser does not say).
    The sample records were written around Thursday, Jul 16, 2026. So that they read as current, every date in them is moved forward by a whole number of
@@ -1966,6 +1999,21 @@ if(SHIFT_DAYS){
   const walk = document.createTreeWalker(document.getElementById("desk"), NodeFilter.SHOW_TEXT);
   for(let node = walk.nextNode(); node; node = walk.nextNode()){ const t = node.nodeValue; if(t && /\d/.test(t) && !node.parentElement.closest("script, style, #taskbar, .banner")){ const r = redate(t); if(r !== t) node.nodeValue = r; } }
 }
+/* what-if: the open item of ANDA 216482 is due today. Its own due date is kept and put back when the box is cleared. */
+let dueKept = null;
+function setDueToday(on){
+  const d = DATA["216482"];
+  if(on && !dueKept){ dueKept = d.attnDue; const x = new Date(demoToday()); d.attnDue = [x.getUTCFullYear(), x.getUTCMonth() + 1, x.getUTCDate()]; }
+  else if(!on && dueKept){ d.attnDue = dueKept; dueKept = null; }
+  refreshTrayState(); if(current && card.style.display === "block") fill(current); if(isOpen("hub")) paintHub();
+}
+/* what-if: the sheet's Flag column marks an ANDA. The text is shown as the sheet has it. */
+const SAMPLE_FLAG = "Customer service: the applicant has asked twice for a status and has had no answer (made-up sample)";
+function setSheetFlag(on){
+  const d = DATA["214990"];
+  if(on) d.alerts = [SAMPLE_FLAG]; else delete d.alerts;
+  refreshTrayState(); if(current && card.style.display === "block") fill(current); if(isOpen("hub")) paintHub();
+}
 const demoToday = () => state.pretend ? shiftT(ymd(2026, 10, 1)) : CLOCK_FIXED ? BASE_DAY : realToday();   /* "today" for every rule; the what-if moves it to two days before the goal date */
 /* Copies text and resolves only when the browser really accepted it. Hosted pages often forbid the clipboard API, so the older copy command is the fallback.
    Every "Copied" message in this page waits for this promise: a refusal is always reported, never hidden. */
@@ -2002,7 +2050,12 @@ function paintClock(){     /* the taskbar clock: the real time to the second and
   time.textContent = simClock(!CLOCK_FIXED);
   const x = new Date(CLOCK_FIXED ? BASE_DAY : realToday()); date.textContent = (x.getUTCMonth() + 1) + "/" + x.getUTCDate() + "/" + x.getUTCFullYear();
   date.parentElement.title = CLOCK_FIXED ? "Clock fixed for testing" : "The time on this computer (" + SIM_TZ.replace(/_/g, " ") + ")";
+  /* "today" has changed (midnight passed while the page was open): what needs the person today is counted again */
+  const day = +x;
+  if(clockDay !== null && day !== clockDay){ try{ refreshTrayState(); if(isOpen("hub")) paintHub(); if(current && card.style.display === "block") fill(current); }catch(e){} }
+  clockDay = day;
 }
+let clockDay = null;
 setInterval(paintClock, CLOCK_FIXED ? 10000 : 1000);
 document.addEventListener("visibilitychange", () => { if(!document.hidden) paintClock(); });
 paintClock();
@@ -2022,6 +2075,8 @@ function watchFlags(id){
     else if(f.near !== null) flags.push({ code, sev:"info", text:`${what} date ${shortDate(t)} is ${f.near} business day${f.near === 1 ? "" : "s"} ${f.before ? "before" : "after"} ${f.name}.`, why:"Staffing and turnaround around a federal holiday can differ. Worth a look if the date is tight.", src:"U.S. federal calendar (OPM)" });
   };
   const goal = ymd(...d.goalD), fc = ymd(...d.fcD);
+  /* a mark the person's own sheet carries: an immediate risk, a safety issue or a customer service issue. Shown as written, never interpreted. */
+  (Array.isArray(d.alerts) ? d.alerts : []).forEach(a => flags.push({ code:"sheet-flag", sev:"bad", text:"Marked in your sheet: " + cut(a, 120), why:"Your sheet marks this ANDA as needing you now, so the tray icon shows its dot until the mark is removed from the sheet.", src:"Flag column of the portfolio sheet (fictional demo data)" }));
   rule("goal-date-calendar", "Goal", goal); rule("forecast-date-calendar", "Forecast", fc);
   const days = Math.round((goal - today) / DAY);
   if(days < 0) flags.push({ code:"goal-passed", sev:"bad", text:`The goal date (${shortDate(goal)}) passed ${-days} day${days === -1 ? "" : "s"} ago.`, why:"The record still lists this goal date. Confirm whether it moved or the data is out of date.", src });
@@ -2255,7 +2310,7 @@ const noticeLifetime = text => Math.min(8, Math.max(2.5, 1.2 + text.length / 14)
 
 /* ---------------- state ---------------- */
 let keyVia = null;
-const state = { dir:"v", look:"v", form:"full", autoHide:10, mode:"whisper", escalate:true, lead:3, pretend:false, capture:true, op:90, lens:null, pinned:false, running:true, ai:false,
+const state = { dir:"w", look:"w", form:"full", autoHide:10, mode:"whisper", escalate:true, lead:3, pretend:false, capture:true, op:90, lens:null, pinned:false, running:true, ai:false,
   keys:{ peek:"Ctrl+Alt+A", look:"Ctrl+Alt+Space", draft:"Ctrl+Alt+Shift+R", ask:"Ctrl+Alt+Shift+P", list:"Ctrl+Alt+Shift+L" }, taken:{ peek:false, look:false, draft:false, ask:false, list:false },
   adaptive:true, allTools:location.hash === "#all", sectionUse:{}, clMode:0,
   middle:false, middleMod:"Ctrl", provider:"auto", tone:"", style:"", signoff:"", claudeModel:"claude-opus-4-8",
@@ -2385,7 +2440,11 @@ $("whOpen").addEventListener("click", () => {
 });
 function openHub(){ closeMenus(); showApp("hub"); $("hub").style.zIndex = "52"; paintHub(); }
 function paintHub(){
-  const news = $("hubNews"), data = $("hubData"); news.replaceChildren(); data.replaceChildren();
+  const news = $("hubNews"), data = $("hubData"), now = $("hubNow"); news.replaceChildren(); data.replaceChildren(); now.replaceChildren();
+  { const reasons = alertReasons();
+    if(!reasons.length) now.append(h("div", { class:"hrow", text:"Nothing needs you today, so the tray icon shows no dot. The dot is for an item due today or overdue, a goal date that is today or has passed, an ANDA your sheet marks as an immediate risk, a safety issue or a customer service issue, and a message marked urgent that has had no reply for two days (only while Outlook is connected)." }));
+    reasons.forEach(r => { const b = h("button", { type:"button", class:"hrow" }, h("span", { class:"t", text:r.text }));
+      b.addEventListener("click", () => { if(DATA[r.id]) openCard(r.id, { anchor:{ x:Math.max(12, innerWidth - 420), y:80 } }); }); now.append(b); }); }
   const on = state.newsOn && state.newsFile;
   $("hubNewsNote").textContent = on ? `From ${state.newsFile}. Lines from the last ${NEWS_DAYS} days, newest first.` : "Division news is off. Switch it on, and choose the document, in Settings, How it starts.";
   if(on){
@@ -2736,7 +2795,7 @@ const card = $("card"), scrim = $("scrim"), chip = $("chip");
 const RING_C = 2 * Math.PI * 21;
 
 /* [id, name, token set it uses, form]. L–O are compact boxes that borrow a sibling's tokens and expand into its full card. */
-const LOOKS = [["v","V · Glass Sheet","v","full"],["t","T · Pocket Plain","t","full"],["u","U · Calendar Ribbon","u","full"],["a","A · Quiet Fluent","a","full"],["b","B · Docket Ledger","b","full"],["c","C · Signal","c","full"],["d","D · Draft","d","full"],["e","E · Instrument","e","full"],
+const LOOKS = [["w","W · Graphite Gauge","w","full"],["v","V · Glass Sheet","v","full"],["t","T · Pocket Plain","t","full"],["u","U · Calendar Ribbon","u","full"],["a","A · Quiet Fluent","a","full"],["b","B · Docket Ledger","b","full"],["c","C · Signal","c","full"],["d","D · Draft","d","full"],["e","E · Instrument","e","full"],
   ["f","F · Agency Bronze","f","full"],["g","G · Harbor Teal","g","full"],["h","H · Sage Clinical","h","full"],["i","I · Indigo Dossier","i","full"],["j","J · Cobalt Timeline","j","full"],["k","K · Graphite Quiet","k","full"],
   ["l","L · Graphite Strip","k","strip"],["m","M · Fluent Tile","a","tile"],["n","N · Bronze Ticket","f","ticket"],["o","O · Teal Badge","g","badge"],
   ["p","P · Bronze Gauge","p","full"],["q","Q · Bronze Folder","q","full"],["r","R · Bronze Rail","r","full"],["s","S · Bronze Tag","s","full"]];
@@ -2988,6 +3047,7 @@ function paintHero(id, d){
   if(d.delta === 0){ num.textContent = "On"; num.className = "sm"; $("c-hero-u").textContent = "the goal date"; }
   else { num.textContent = String(n); num.className = ""; $("c-hero-u").textContent = ` day${n === 1 ? "" : "s"} ${d.delta > 0 ? "later than" : "ahead of"} the goal`; }
   $("c-hero-s").textContent = `Goal ${d.goal} · Forecast ${d.fc} · ${d.fconf}`;
+  $("c-hgfg").style.strokeDasharray = d.pct + " 100"; $("c-hgv").textContent = d.pct + "%"; $("c-hgauge").setAttribute("aria-label", d.pct + " percent of the review clock has run");
   paintRibbon(d);
 }
 /* the calendar ribbon: the weeks around the goal and the forecast, weekends shaded, a federal holiday marked, the gap between the two drawn; a sentence says the same in words */
@@ -3067,7 +3127,7 @@ function fill(id){
     }
     $("x-watch-d").style.display = fl.length ? "" : "none";
     $("x-watch-n").textContent = "· " + fl.length;
-    $("x-watch").innerHTML = fl.map(f => `<div class="wf"><div>${f.text}</div><div class="why">${f.why}</div><div class="src">Source: ${f.src}</div></div>`).join("");
+    $("x-watch").innerHTML = fl.map(f => `<div class="wf"><div>${escHTML(f.text)}</div><div class="why">${escHTML(f.why)}</div><div class="src">Source: ${escHTML(f.src)}</div></div>`).join("");
   }
   $("chipSister").textContent = "Sister ANDA · " + d.sisters.length; $("chipSister").hidden = d.sisters.length === 0;
   $("chipNotes").textContent = noteButtonLabel(notesFor(id).length);
@@ -3622,12 +3682,37 @@ function paintRecents(box, onPick){
     b.addEventListener("click", () => onPick(id)); box.append(b);
   });
 }
-/* the tray icon shows its small amber dot when at least one ANDA is urgent by the app's own urgency rule; it is worked out only when the app reads its data */
+/* The tray icon's small amber dot (round 22): it used to show whenever an ANDA was "at risk", which in practice was always, so it said nothing.
+   It now shows only when something needs the person today:
+   - an open action item of an ANDA is due today or overdue;
+   - a goal date is today or has passed;
+   - the person's own data marks an ANDA as an immediate risk, a safety issue or a customer service issue (a column of their sheet);
+   - Outlook is connected and a message marked urgent or important about one of their ANDAs has had no reply for two days or more.
+   The count is worked out only when the app reads its data. The tooltip says how many, never which. */
+const ALERT_MAIL_DAYS = 2;
+const SAMPLE_URGENT_MAIL = { id:"216482", subject:"URGENT: information request response", daysOld:3, answered:false };     /* made up, like the other rehearsal mail */
+function alertReasons(){
+  const today = demoToday(), out = [];
+  for(const id of Object.keys(DATA)){
+    const d = DATA[id], goal = ymd(...d.goalD);
+    if(d.attnDue && ymd(...d.attnDue) <= today) out.push({ id, kind:"due", text:`ANDA ${id}: ${d.attn}` });
+    if(goal <= today) out.push({ id, kind:"goal", text:`ANDA ${id}: the goal date ${goal === today ? "is today" : "has passed"}` });
+    (Array.isArray(d.alerts) ? d.alerts : []).forEach(a => out.push({ id, kind:"flag", text:`ANDA ${id}: ${cut(a, 120)}` }));
+  }
+  const m = SAMPLE_URGENT_MAIL;
+  if(state.outlook.on && olState().id === "in" && !m.answered && m.daysOld >= ALERT_MAIL_DAYS && DATA[m.id])
+    out.push({ id:m.id, kind:"mail", text:`ANDA ${m.id}: a message marked urgent has had no reply for ${m.daysOld} days` });
+  return out;
+}
 function refreshTrayState(){
-  const n = Object.keys(DATA).filter(isUrgent).length, g = document.querySelector("#appIcon .glyph");
+  const n = alertReasons().length, g = document.querySelector("#appIcon .glyph");
   if(!g) return;
   g.classList.toggle("alert", n > 0);
-  $("appIcon").setAttribute("aria-label", "ANDA Companion (Notula) tray icon." + (n ? ` ${n} ANDA${n === 1 ? " is" : "s are"} urgent.` : "") + " Click for lookup, right-click or long-press for the menu.");
+  const fg = document.querySelector("#flyIcon .glyph"); if(fg) fg.classList.toggle("alert", n > 0);     /* the same icon while it sits behind the ^ arrow */
+  const say = n ? ` ${n} ${n === 1 ? "thing needs" : "things need"} your attention today.` : "";
+  $("appIcon").setAttribute("aria-label", "ANDA Companion (Notula) tray icon." + say + " Click for lookup, right-click or long-press for the menu.");
+  /* one tooltip, written in one place: the connection, then what needs the person. It never names an ANDA: a tooltip can be read over a shoulder. */
+  $("appIcon").title = "ANDA Companion (Notula) · " + connInfo().label + (n ? " ·" + say.replace(/\.$/, "") : "");
 }
 $("chipPin").addEventListener("click", () => {
   if(!current) return;
@@ -3992,7 +4077,7 @@ $("plClose").addEventListener("click", () => closeApp("plib"));
 function applyLook(id){
   const [, , tokens, form0] = LOOKS.find(l => l[0] === id);
   const form = form0;                                     /* the look the person chose applies in both editions (round 19) */
-  state.look = id; state.dir = tokens; state.form = form; root.dataset.dir = tokens;
+  state.look = id; state.dir = tokens; state.form = form; setDir(tokens);
   /* a compact box that is open follows the change in place */
   if(compactId){ if(form === "full"){ const c = compactId; closeCompact(); openCard(c, { anchor:{ x:compact.offsetLeft, y:compact.offsetTop }, forceFull:true }); } else showCompact(compactId, { x:compact.offsetLeft - 10, y:compact.offsetTop - 14 }); }
   else if(form !== "full" && current){ const c = current, a = { x:card.offsetLeft, y:card.offsetTop }; showCompact(c, a); }
@@ -4000,7 +4085,7 @@ function applyLook(id){
 (function buildSettings(){
   LOOKS.forEach(([id, name, , form]) => {
     const l = document.createElement("label"); l.className = "opt";
-    l.innerHTML = `<input type="radio" name="look" value="${id}" ${id === "v" ? "checked" : ""}> ${name}`;
+    l.innerHTML = `<input type="radio" name="look" value="${id}" ${id === "w" ? "checked" : ""}> ${name}`;
     l.firstChild.addEventListener("change", () => applyLook(id));
     (form === "full" ? $("setLook") : $("setCompact")).appendChild(l);
   });
@@ -4086,7 +4171,7 @@ function openMenu(){
     item("Review a draft…", state.keys.draft, () => openDraft("")),
     item("Ask about a selection…", state.keys.ask || "", () => openAsk("")),
     item("Watch list…", "", () => openWatchList()),
-    item("News and alerts…", "", () => openHub()),
+    item(alertReasons().length ? `News and alerts… (${alertReasons().length} today)` : "News and alerts…", "", () => openHub()),
     ...(state.allTools ? [item("Today…", "", () => openToday()),
     item("ANDA to-do list…", "", () => openTodo()),
     item("My to-do list…", state.keys.list || "", () => openMyTodo()),
@@ -4308,7 +4393,7 @@ function paintConn(){
   const c = connInfo();
   $("c-conn").className = c.cls; $("c-conn").innerHTML = `<i></i><span id="c-conn-t"></span>`; $("c-conn-t").textContent = c.label;
   $("setBanner").className = "connbar " + c.cls; $("setBannerLabel").textContent = c.label; $("setBannerText").textContent = c.text;
-  $("appIcon").title = "ANDA Companion (Notula) · " + c.label;
+  refreshTrayState();     /* the tray tooltip carries the connection too */
   $("setConn").textContent = connStatusText();
 }
 function connStatusText(){
@@ -4515,6 +4600,7 @@ function olState(){
 }
 function paintOutlook(){
   const o = state.outlook, st = olState();
+  refreshTrayState();      /* a message marked urgent that has waited two days counts only while Outlook is connected */
   $("olOn").checked = o.on; $("olClient").value = o.client; $("olTenant").value = o.tenant;
   document.querySelectorAll("#olFields input, #olFields button").forEach(el => { el.disabled = !o.on; });
   document.querySelectorAll("input[name=olcloud]").forEach(r => { r.checked = r.value === o.cloud; });
@@ -4564,7 +4650,9 @@ $("olCopy").addEventListener("click", () => {
 });
 /* made-up messages, so the drawer can be seen. Real mail is read on the person's own PC and is never part of this page. */
 function fakeMail(id){
+  const m = SAMPLE_URGENT_MAIL;
   return [
+    ...(id === m.id ? [[m.subject + " (marked urgent · no reply for " + m.daysOld + " days)", "Sample Applicant (made up)", mailDay(m.daysOld, "Jul 13, 2026"), "We need an answer on the information request before the due date. (Made-up sample text.)"]] : []),
     [`RE: ANDA ${id} labeling comments`, "Sample Reviewer (made up)", mailDay(11, "Nov 1, 2026"), "Please see the comments on the draft labeling. (Made-up sample text.)"],
     [`${id}: information request response`, "Sample Applicant (made up)", mailDay(14, "Oct 29, 2026"), "Our response is attached for your review. (Made-up sample text.)"],
     [`Cycle 2 status for ${id}`, "Sample Colleague (made up)", mailDay(16, "Oct 27, 2026"), "Notes from today's status meeting. (Made-up sample text.)"],
@@ -6003,8 +6091,8 @@ function applyEdition(){
   ["agentsBlock", "todoBlock"].forEach(id => { const e = $(id); if(e) e.hidden = !all; });
   $("actionsLabel").textContent = all ? "MY ACTIONS · YOUR OWN PROMPT, AGENT OR TO-DO ITEM, ON YOUR OWN SHORTCUT" : "STORED PROMPTS · USED BY ASK, OR ON A SHORTCUT OF THEIR OWN";
   $("allTools").checked = all;
-  const look = LOOKS.find(l => l[0] === state.look) || LOOKS.find(l => l[0] === "v");
-  root.dataset.dir = look[2];
+  const look = LOOKS.find(l => l[0] === state.look) || LOOKS.find(l => l[0] === "w");
+  setDir(look[2]);
   root.style.setProperty("--op", state.op + "%");
   if(typeof rebuildJump === "function") rebuildJump();
   paintKeys();
@@ -6218,7 +6306,9 @@ $("swAi").addEventListener("change", e => {
   syncAiBox();
 });
 $("swAgentFail").addEventListener("change", e => { state.agentFail = e.target.checked; });
-$("swToday").addEventListener("change", e => { state.pretend = e.target.checked; if(current && card.style.display === "block") fill(current); clReload(true); if(state.watchOn || state.newsOn) watchCheck(); if(isOpen("hub")) paintHub(); });
+$("swDue").addEventListener("change", e => setDueToday(e.target.checked));
+$("swFlag").addEventListener("change", e => setSheetFlag(e.target.checked));
+$("swToday").addEventListener("change", e => { state.pretend = e.target.checked; refreshTrayState(); if(current && card.style.display === "block") fill(current); clReload(true); if(state.watchOn || state.newsOn) watchCheck(); if(isOpen("hub")) paintHub(); });
 
 /* ---------------- card controls ---------------- */
 $("closeBtn").addEventListener("click", closeCard);

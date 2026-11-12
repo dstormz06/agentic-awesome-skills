@@ -272,13 +272,22 @@ h2.sec{font-size:13px;letter-spacing:.12em;font-weight:700;color:var(--ink3);mar
 @media (max-width:480px){.tile{padding:10px}.stage{padding:8px}.card{--rail:74px}.card[data-look="i"]{--rail:84px}.slot{padding-left:13px;padding-right:13px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
-/* ---- round 18: T Pocket Plain, U Calendar Ribbon, V Glass Sheet (the default since round 20) ---- */
-.card[data-look="t"],.card[data-look="u"],.card[data-look="v"]{--c-bg:#ffffff;--c-ink:#1d2329;--c-ink2:#46505a;--c-ink3:#58616b;--c-hair:#eceef1;--c-line:#dde1e6;--c-accent:#3f4a56;--c-good:#1a6b43;--c-good-bg:#e6f1ea;--c-warn:#8a5800;--c-warn-bg:#faf1dc;--c-track:#e6e8eb;--c-fill:#6a7683;--c-radius:12px;--c-shadow:0 18px 40px -14px rgba(20,24,28,.26),0 3px 9px rgba(20,24,28,.08)}
+/* ---- rounds 18 to 22: T Pocket Plain, U Calendar Ribbon, V Glass Sheet, W Graphite Gauge (the default since round 22) ---- */
+.card[data-look="t"],.card[data-look="u"],.card[data-look="v"],.card[data-look="w"]{--c-bg:#ffffff;--c-ink:#1d2329;--c-ink2:#46505a;--c-ink3:#58616b;--c-hair:#eceef1;--c-line:#dde1e6;--c-accent:#3f4a56;--c-good:#1a6b43;--c-good-bg:#e6f1ea;--c-warn:#8a5800;--c-warn-bg:#faf1dc;--c-track:#e6e8eb;--c-fill:#6a7683;--c-radius:12px;--c-shadow:0 18px 40px -14px rgba(20,24,28,.26),0 3px 9px rgba(20,24,28,.08)}
 .card[data-look="v"]{--c-ink2:#3c444d;--c-ink3:#4a525b;--c-radius:16px;background-color:color-mix(in srgb,#fff 90%,transparent);background-image:linear-gradient(165deg,rgba(255,255,255,.65),rgba(255,255,255,0) 38%);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5)}
-.card[data-look="t"] .seal,.card[data-look="u"] .seal,.card[data-look="v"] .seal{background:transparent;border:1px solid #cfd3d8;color:var(--c-ink2)}
-.card[data-look="t"] .attn,.card[data-look="u"] .attn,.card[data-look="v"] .attn{border:none;border-radius:10px}
-.card[data-look="t"] .chips .chip:first-child,.card[data-look="u"] .chips .chip:first-child,.card[data-look="v"] .chips .chip:first-child{flex:1 1 100%;justify-content:center;background:var(--c-accent);border-color:var(--c-accent);color:#fff;font-weight:650;border-radius:10px;min-height:42px;margin-bottom:4px}
-.card[data-look="t"] .chips .chip:not(:first-child),.card[data-look="u"] .chips .chip:not(:first-child),.card[data-look="v"] .chips .chip:not(:first-child){border:none;background:none;padding:4px 2px;min-height:28px}
+.card[data-look="w"]{--c-bg:#fdfdfd;--c-ink:#2a2e33;--c-ink2:#4a4e53;--c-ink3:#5c6167;--c-hair:#ececec;--c-line:#dedede;--c-accent:#56626e;--c-track:#e3e5e8;--c-fill:#6e7a86;--c-radius:16px;background-color:color-mix(in srgb,#fdfdfd 90%,transparent);background-image:linear-gradient(165deg,rgba(255,255,255,.65),rgba(255,255,255,0) 38%);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5)}
+.card[data-look="w"] .hero5{display:grid;grid-template-columns:1fr auto;column-gap:12px;align-items:center}
+.hg5{grid-column:2;grid-row:1 / span 2;position:relative;width:96px;height:66px}
+.hg5 svg{width:96px;height:53px;display:block}
+.hg5 .tr{fill:none;stroke:var(--c-track);stroke-width:9;stroke-linecap:round}
+.hg5 .fg{fill:none;stroke:var(--c-fill);stroke-width:9;stroke-linecap:round}
+.hg5 b{position:absolute;left:0;right:0;top:27px;text-align:center;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--c-ink)}
+.hg5 span{position:absolute;left:0;right:0;bottom:0;text-align:center;font-size:9.5px;font-weight:700;letter-spacing:.08em;color:var(--c-ink3)}
+.card[data-look="t"] .seal,.card[data-look="u"] .seal,.card[data-look="v"] .seal,.card[data-look="w"] .seal{background:transparent;border:1px solid #cfd3d8;color:var(--c-ink2)}
+.card[data-look="t"] .attn,.card[data-look="u"] .attn,.card[data-look="v"] .attn,.card[data-look="w"] .attn{border:none;border-radius:10px}
+.card[data-look="t"] .chips .chip:first-child,.card[data-look="u"] .chips .chip:first-child,.card[data-look="v"] .chips .chip:first-child,.card[data-look="w"] .chips .chip:first-child{flex:1 1 100%;justify-content:center;background:var(--c-accent);border-color:var(--c-accent);color:#fff;font-weight:650;border-radius:10px;min-height:42px;margin-bottom:4px}
+.card[data-look="v"] .chips .chip:first-child,.card[data-look="w"] .chips .chip:first-child{min-height:34px;background:color-mix(in srgb,var(--c-accent) 12%,transparent);border-color:color-mix(in srgb,var(--c-accent) 34%,transparent);color:var(--c-ink)}
+.card[data-look="t"] .chips .chip:not(:first-child),.card[data-look="u"] .chips .chip:not(:first-child),.card[data-look="v"] .chips .chip:not(:first-child),.card[data-look="w"] .chips .chip:not(:first-child){border:none;background:none;padding:4px 2px;min-height:28px}
 .hero5{padding:6px 18px 14px}
 .hero5 .hl{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
 .hero5 .hl b{font-size:30px;line-height:1;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
@@ -296,7 +305,7 @@ h2.sec{font-size:13px;letter-spacing:.12em;font-weight:700;color:var(--ink3);mar
 <div class="wrap" role="main">
   <p class="eyebrow">ALL DATA FICTIONAL · LIGHT ONLY</p>
   <h1>Appearance Lab</h1>
-  <p class="lede">Twenty-two card designs for the same facts. V (Glass Sheet) is the default. Eighteen are full cards and four are compact boxes that stay out of the way of an open email. The designs differ only in surface, type and progress marker; the information is identical.</p>
+  <p class="lede">Twenty-three card designs for the same facts. W (Graphite Gauge) is the default. Nineteen are full cards and four are compact boxes that stay out of the way of an open email. The designs differ only in surface, type and progress marker; the information is identical.</p>
 
   <div class="bar" role="toolbar" aria-label="Controls">
     <div class="seg" role="group" aria-label="Record shown">
@@ -305,7 +314,7 @@ h2.sec{font-size:13px;letter-spacing:.12em;font-weight:700;color:var(--ink3);mar
     </div>
   </div>
   
-  <h2 class="sec">FULL CARDS · T TO V</h2>
+  <h2 class="sec">FULL CARDS · T TO W</h2>
   <section class="grid" id="gridPocket"></section>
   <h2 class="sec">FULL CARDS · A TO E</h2>
   <section class="grid" id="gridCur"></section>
@@ -334,7 +343,8 @@ const DATA = {
     brief:"Related precedent: ANDA 216482 — same applicant, same facility. Forecast drivers and assumptions: expand → Forecast & assumptions.", sisters:1, notes:2 }
 };
 const LOOKS = [
-  { id:"v", grp:"pocket", layout:"glass", def:true, name:"V · Glass Sheet", tag:"One answer first, on a frosted sheet: how many days later or earlier than the goal, then the facts, and one main action pinned at the bottom. The sheet follows the transparency setting (90% to start), blurs what is behind it, and is solid when the system asks for less transparency.", prog:"bar", sw:["#eef2f6","#3f4a56","#8a5800"] },
+  { id:"w", grp:"pocket", layout:"gauge5", def:true, name:"W · Graphite Gauge", tag:"The default. The glass sheet in quiet graphite, with a gauge beside the answer that shows how much of the review clock has run. The same actions stay at the bottom: one main action, then the small ones.", prog:"bar", sw:["#fdfdfd","#56626e","#8a5800"] },
+  { id:"v", grp:"pocket", layout:"glass", name:"V · Glass Sheet", tag:"The default of rounds 20 and 21. One answer first, on a frosted sheet: how many days later or earlier than the goal, then the facts, and one main action pinned at the bottom. The sheet follows the transparency setting (90% to start), blurs what is behind it, and is solid when the system asks for less transparency.", prog:"bar", sw:["#eef2f6","#3f4a56","#8a5800"] },
   { id:"t", grp:"pocket", layout:"pocket", name:"T · Pocket Plain", tag:"The same layout on a plain white card, with no blur. The default of round 18.", prog:"bar", sw:["#ffffff","#3f4a56","#8a5800"] },
   { id:"u", grp:"pocket", layout:"ribbon", name:"U · Calendar Ribbon", tag:"The same answer, plus the weeks around the goal and forecast drawn out: weekends, a federal holiday and the gap.", prog:"bar", sw:["#ffffff","#3f4a56","#c98a14"] },
   { id:"a", cur:true, name:"A · Quiet Fluent", tag:"Native Windows calm. White surface, steel-blue accent, a thin bar.", prog:"bar", sw:["#fff","#3d6fa5","#177245"] },
@@ -424,9 +434,9 @@ function card(look, id){
   const goal = (days, pct) => `<div class="crow"><span class="lblx">GOAL</span><span class="cdate">${d.goal}</span>${days ? `<span class="cdays">${d.days}</span>` : ""}${pct ? `<span class="cpct">${d.pct}%</span>` : ""}</div>`;
   const fcst = (delta) => `<div class="crow"><span class="lblx">FORECAST</span><span class="cdate">${d.fc}</span>${delta ? `<span class="fdelta ${tone}">${d.fdelta}</span>` : ""}</div>`;
   let clockAndAttn;
-  if (lay === "pocket" || lay === "ribbon" || lay === "glass") {
+  if (lay === "pocket" || lay === "ribbon" || lay === "glass" || lay === "gauge5") {
     const n = Math.abs(d.delta);
-    const heroHTML = `<div class="slot hero5 ${d.late ? "late" : "good"}"><div class="hl"><b>${n}</b><span>day${n === 1 ? "" : "s"} ${d.delta > 0 ? "later than" : "ahead of"} the goal</span></div><div class="hs">Goal ${d.goal} · Forecast ${d.fc} · ${d.conf}</div></div>`;
+    const heroHTML = `<div class="slot hero5 ${d.late ? "late" : "good"}"><div class="hl"><b>${n}</b><span>day${n === 1 ? "" : "s"} ${d.delta > 0 ? "later than" : "ahead of"} the goal</span></div><div class="hs">Goal ${d.goal} · Forecast ${d.fc} · ${d.conf}</div>${lay === "gauge5" ? `<div class="hg5" role="img" aria-label="${d.pct} percent of the review clock has run"><svg viewBox="0 0 112 62" aria-hidden="true"><path class="tr" pathLength="100" d="M10 56 A46 46 0 0 1 102 56"/><path class="fg" pathLength="100" stroke-dasharray="${d.pct} 100" d="M10 56 A46 46 0 0 1 102 56"/></svg><b>${d.pct}%</b><span>OF THE CLOCK</span></div>` : ""}</div>`;
     clockAndAttn = heroHTML + (lay === "ribbon" ? ribbonHTML(id, d) : "") + attn;
   } else if (lay === "rail") {
     const days = Math.abs(d.daysTo);
@@ -443,7 +453,9 @@ function card(look, id){
     <div class="slot rail"><span class="lblx">LATEST</span><span>${d.latest}</span></div>
     <div class="slot rail"><span class="lblx acc">AHEAD</span><span>${d.ahead}</span></div>
     <div class="slot ai"><div class="tag"><span class="lblx acc">OFFLINE BRIEF</span><span class="verify">assembled from the record</span><span class="src">sources ›</span></div><div class="body">${d.brief}</div></div>
-    <div class="slot"><div class="chips"><button class="chip" type="button" tabindex="-1">Copy status</button><button class="chip" type="button" tabindex="-1">Sister ANDA · ${d.sisters}</button><button class="chip" type="button" tabindex="-1">Notes · ${d.notes}</button><button class="chip link" type="button" tabindex="-1">Open in system of record ↗</button></div></div>
+    <div class="slot"><div class="chips">${lay === "pocket" || lay === "ribbon" || lay === "glass" || lay === "gauge5"
+      ? `<button class="chip" type="button" tabindex="-1">Add a note · ${d.notes} notes</button><button class="chip" type="button" tabindex="-1">Copy status</button><button class="chip" type="button" tabindex="-1">Sister ANDA · ${d.sisters}</button><button class="chip link" type="button" tabindex="-1">Open ANDA page ↗</button>`
+      : `<button class="chip" type="button" tabindex="-1">Copy status</button><button class="chip" type="button" tabindex="-1">Sister ANDA · ${d.sisters}</button><button class="chip" type="button" tabindex="-1">Notes · ${d.notes}</button><button class="chip link" type="button" tabindex="-1">Open in system of record ↗</button>`}</div></div>
   </article>`;
 }
 let rec = "216482";

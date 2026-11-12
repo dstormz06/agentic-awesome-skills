@@ -509,12 +509,12 @@ public partial class App : Application
 
     private int _urgentShown = -1;
 
-    /// <summary>Recounts the urgent ANDAs and shows or removes the amber dot. Called only when the app reads data; never on a timer.</summary>
+    /// <summary>Recounts what needs the person today and shows or removes the amber dot (round 22: not "urgent" any more). Called only when the app reads data; never on a timer.</summary>
     private void RefreshTrayState()
     {
         if (_tray is null) return;
         int urgent;
-        try { urgent = TrayState.UrgentCount(_repository, Today(), _calendar, _settings.UrgentLateDays); }
+        try { urgent = TrayState.AlertCount(_repository, Today()); }
         catch (Exception) { urgent = 0; }                       // an unreadable file must never take the tray icon down
         if (urgent == _urgentShown) return;
         bool dotChanged = _urgentShown < 0 || (urgent > 0) != (_urgentShown > 0);
@@ -548,7 +548,7 @@ public partial class App : Application
         }
     }
 
-    /// <summary>The Loupe icon for the tray. <paramref name="needsLook"/> adds the small amber dot, shown while any ANDA in the data is urgent (see TrayState). If the picture cannot be read, a plain drawn tile is used so the tray never has no icon.</summary>
+    /// <summary>The Loupe icon for the tray. At rest it carries no amber. <paramref name="needsLook"/> adds the small amber dot, shown only while something needs the person today (see TrayState). If the picture cannot be read, a plain drawn tile is used so the tray never has no icon.</summary>
     private static Bitmap RenderTrayBitmap(bool needsLook = false)
     {
         try

@@ -16,12 +16,12 @@ It comes in two parts that work alone or together:
   access. With the app connected (native messaging) it uses the app's portfolio and rules.
 
 **Where the newer design stands (rounds 18 and 19).** New work is built and published first in the browser simulation, for the owner to review, and ported to the Windows app
-afterwards. **In the Windows app today:** the Loupe icon, the default card **T · Pocket Plain** (one answer first, one main action), the tray icon's amber dot for an urgent ANDA, the
+afterwards. **In the Windows app today:** the Loupe icon, the default card **T · Pocket Plain** (one answer first, one main action), the tray icon's amber dot, shown only while something needs the person today (round 22), the
 N and A number prefixes (N210793 is an NDA and is refused; A210793 is read as ANDA 210793) and the new default shortcuts. **Only in the simulation so far:** the looks U and V, One Bar,
 Today, recent and kept ANDAs, spacing and text size (round 18), card details with Copy, notices near the clock with division news, and one question before sending (round 19), and,
-from rounds 20 and 21, **V · Glass Sheet as the default look**, Enter to add a note, a settable *Open ANDA page* button, a live clock, grammar rules and a marked draft in Review, quick notes typed on the card, Proofread and Fact-check that work with no AI, the notes and open items shown for recall under
+from rounds 20 to 22, **W · Graphite Gauge as the default look** (the glass sheet in quiet graphite with a gauge beside the answer; V · Glass Sheet was the default of rounds 20 and 21), Enter to add a note, a settable *Open ANDA page* button, a live clock, grammar rules and a marked draft in Review, quick notes typed on the card, Proofread and Fact-check that work with no AI, the notes and open items shown for recall under
 a review, and a desktop that looks like Windows 11. The card's starting transparency is 90% in both (it was 92%).
-`DESIGN.md` §11b to §11e describe them; `mockup/proofread-golden.json` holds the cases a port of the proofreader must reproduce; `demo/TRIAL-SHEET.md` is the five-task way to judge whether the design helps in daily use.
+`DESIGN.md` §11b to §11f describe them; `mockup/proofread-golden.json` holds the cases a port of the proofreader must reproduce; `demo/TRIAL-SHEET.md` is the five-task way to judge whether the design helps in daily use.
 
 All data in the demos is fictional. This is a prototype, not an FDA product. It has not been used by a real RPM, on real data, in Edge
 itself, or on a managed FDA computer. Please read `VERIFICATION.md` for what has and has not been proven.

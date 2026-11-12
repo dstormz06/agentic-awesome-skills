@@ -3,11 +3,11 @@
 A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
 **All bundled data is fictional.** Not an FDA product; a concept prototype.
 
-> **Not in this app yet (built in the browser simulation in round 20, for review first):** V · Glass Sheet as the default look, quick notes typed on the card, Proofread and
+> **Not in this app yet (built in the browser simulation in rounds 20 to 22, for review first):** W · Graphite Gauge as the default look (and V · Glass Sheet before it), quick notes typed on the card, Proofread and
 > Fact-check that work with no AI, and the notes and open items shown for recall under a review. The card's starting transparency is 90% here too.
 >
 > **What this app has of the newer design.** The **Loupe** icon; the default card **T · Pocket Plain** (one answer first, then the facts, and one main action, Copy status, which Enter
-> triggers); an amber dot on the tray icon while any ANDA in the data is urgent; the short number forms (**N210793 is an NDA and is refused; A210793 is read as ANDA 210793**); and
+> triggers); an amber dot on the tray icon **only while something needs the person today** (an action item that says it is due today or overdue, or a goal date that is today or has passed; never for a sample record). At rest the tray icon carries no amber at all (round 22); the short number forms (**N210793 is an NDA and is refused; A210793 is read as ANDA 210793**); and
 > the default shortcuts **Ctrl+Alt+Shift+R** (Review a draft) and **Ctrl+Alt+Shift+L** (My to-do list), which replaced Ctrl+Alt+D and Ctrl+Alt+L because Word uses those. A shortcut
 > you already saved is kept. **Not in this app yet, only in the browser simulation** (`../mockup/windows-simulation.html`): the looks U and V, One Bar, Today, recent and kept ANDAs,
 > spacing and text size, card details with Copy, notices near the clock with division news, and the one question before sending. See `../DESIGN.md` §11b and §11c.

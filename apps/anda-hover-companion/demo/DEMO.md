@@ -9,7 +9,7 @@ Thank you for trying it. Fictional data only. A concept prototype, not an FDA pr
 > for a personal or approved device, with fictional data only.
 
 > **What this Windows build has of the newer design.** The Loupe icon, the default card that leads with one answer and one main action (Copy status, or Enter), an amber dot on
-> the tray icon while an ANDA is urgent, and the shortcuts **Ctrl+Alt+Shift+R** (Review a draft) and **Ctrl+Alt+Shift+L** (My to-do list). One Bar, Today, recent ANDAs, card details
+> the tray icon only while something in your own sheet needs you today (the sample data never lights it), and the shortcuts **Ctrl+Alt+Shift+R** (Review a draft) and **Ctrl+Alt+Shift+L** (My to-do list). One Bar, Today, recent ANDAs, card details
 > with Copy, notices near the clock and the one question before sending are shown in the **browser simulation** only. To judge the design for daily use, follow `TRIAL-SHEET.md`.
 
 ## Pick a path

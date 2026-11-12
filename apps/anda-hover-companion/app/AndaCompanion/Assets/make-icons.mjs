@@ -11,6 +11,8 @@ const master = readFileSync(join(here, 'loupe.svg'), 'utf8').replace(/<title>.*<
 const small = readFileSync(join(here, 'loupe-small.svg'), 'utf8').replace(/<title>.*<\/title>/, '');
 const BADGE = '<circle cx="51" cy="13" r="11" fill="#fff"/><circle cx="51" cy="13" r="8" fill="#f2a93b"/>';
 const withBadge = svg => svg.replace('</svg>', BADGE + '</svg>');
+// The tray icon at rest carries no amber: amber means "something needs you today" and appears only as the badge.
+const quiet = svg => svg.replace(/\s*<circle[^>]*fill="#f2a93b"\/>/, '');
 const SIZES = [16, 24, 32, 48, 64, 128, 256];
 const pick = px => (px <= 24 ? small : master);
 
@@ -34,8 +36,8 @@ const entries = frames.map(([px, data]) => {
   offset += data.length; return e;
 });
 writeFileSync(join(here, 'app.ico'), Buffer.concat([header, ...entries, ...frames.map(f => f[1])]));
-writeFileSync(join(here, 'tray-32.png'), await png(pick(32), 32));
-writeFileSync(join(here, 'tray-32-alert.png'), await png(withBadge(pick(32)), 32));
+writeFileSync(join(here, 'tray-32.png'), await png(quiet(pick(32)), 32));
+writeFileSync(join(here, 'tray-32-alert.png'), await png(withBadge(quiet(pick(32))), 32));
 // the browser extension's four sizes
 const ext = join(here, '..', '..', '..', 'extension', 'icons');
 for (const px of [16, 32, 48, 128]) writeFileSync(join(ext, `icon${px}.png`), await png(pick(px), px));

@@ -473,7 +473,7 @@ one primary action, answer first, progressive disclosure) and applied on Windows
 
 **The owner's decisions (2026-11-06).**
 
-- The default of round 18 was **T · Pocket Plain**, with **U · Calendar Ribbon** and **V · Glass Sheet** beside it. In round 20 the owner made **V · Glass Sheet the default** (§11d); the Windows app still opens in T until V is ported. The 19 earlier looks are not changed.
+- The default of round 18 was **T · Pocket Plain**, with **U · Calendar Ribbon** and **V · Glass Sheet** beside it. In round 20 the owner made **V · Glass Sheet the default** (§11d), and in round 22 asked for a new default that blends it with Graphite and the gauge: **W · Graphite Gauge** (§11f). The Windows app still opens in T until the glass looks are ported. The 19 earlier looks are not changed.
   Every look can be chosen in *Settings, Look and feel* and in the tray menu, with or without *Show all tools* (round 19). All looks are light only.
 - The icon is **Loupe**: an indigo plate, a white ring and an amber center. A small amber dot on the tray icon means *urgent* (below).
 - **One Bar** is an option for the lookup window (*Settings, Look and feel*, in both editions since round 19); **Today** is a small window in the tray menu under *Show all tools*, and is not in the focused edition.
@@ -509,10 +509,11 @@ be kept with *Keep in my list* on the card. Only six-digit numbers are stored (n
 on the PC, and never sent anywhere. *Clear recents* empties them; switching *Remember* off clears them and stops the saving. Kept ANDAs are part of a
 settings backup; recents are not, because they are the PC's own history. This changes the older statement that the app keeps nothing: see `SECURITY.md`.
 
-**The tray icon and the amber dot.** The Loupe reads on a light and on a dark taskbar because the plate has a faint inner edge. The dot appears when
-any known ANDA is **urgent**: its forecast is seven or more days after the goal, or a WATCH flag is serious. It is deliberately *not* "something needs a look", because
-a dot that is almost always on is ignored. **The dot changes only when the app reads data** (for example when a portfolio file is loaded or a card is
-opened). There is no background polling.
+**The tray icon and the amber dot.** The Loupe reads on a light and on a dark taskbar because the plate has a faint inner edge. *Until round 22* the dot appeared when
+any known ANDA was **urgent** (a forecast seven or more days after the goal, or a serious WATCH flag). With most portfolios, and always with the sample data, that was
+all the time, and the icon itself carried an amber center, so the tray looked as if it always had something to say. **Since round 22** (§11f) the icon at rest has no
+amber, and the dot means one thing: *something needs you today*. **In the app the dot changes only when the app reads data** (for example when a portfolio file is loaded
+or a card is opened). There is no background polling, which also means that after midnight the dot catches up the next time the app reads data.
 
 **Writing standard.** US English, sentence case, no exclamation marks, no casual words, one set of terms:
 
@@ -688,6 +689,46 @@ but its model is not installed, so this path was tried against a stand-in, not a
 5. *The simulation and the Windows app have drifted apart*, and the newest rules had no shared test cases. The cases are now a file in the repository
    (`mockup/proofread-golden.json`, 32 cases) that a port must reproduce. **The port itself is not done**; that is the largest open item.
 Also fixed on the way: what the card scrolled to could end up under the action area; a card stayed in front of the page it had just opened.
+
+## 11f. Round 22: a quieter default, a thinner taskbar, and a tray icon that speaks only when it should (simulation first; the tray rule also in the app)
+
+**The new default look: W · Graphite Gauge.** The owner asked for a default that "blends the best features" of the graphite and gauge looks "while still keeping the
+Enter button and other smaller buttons and features at the bottom". W takes three things from three looks: the **quiet graphite palette** of K (color only where the
+status needs it), the **gauge** of P (how much of the review clock has run, now beside the answer, with the percentage in words for a screen reader), and the **glass
+sheet and action area** of V (one answer first; *Add a note* on Enter, then the small buttons, pinned to the bottom; 90% to start, 40 to 100%). V · Glass Sheet is the
+next look in the list, one click away. The Windows app still opens in T · Pocket Plain.
+
+**The taskbar** of the look-alike desktop is 40 px high (it was 48), with its icons, search box and clock scaled to fit. Every button is still at least 24 px.
+
+**The tray icon.** The owner: "don't have it to look like there's currently a new alert … this should only be triggered when there's an actual scenario". Two things
+made it look that way. The Loupe had an amber center, the same amber as the dot, so the icon at rest already carried the alert color; and the dot followed the
+"urgent" rule, which the sample data always meets. Now:
+
+- **At rest the tray icon has no amber.** (The larger app icon, on the desktop shortcut and in window titles, keeps its amber center as the mark.)
+- **The dot means "something needs you today"**, and nothing else: an action item due today or overdue; a goal date that is today or has passed; an ANDA the person's
+  sheet marks as an immediate risk, a safety issue or a customer service issue; a message marked urgent that has had no reply for two days. A forecast that is late, a
+  goal date that is close, or an item due in five days does not light it: the card and the watch list already say those.
+- **The dot can always be explained.** The tooltip counts ("2 things need your attention today") and never names an ANDA; the tray menu line reads *News and alerts…
+  (2 today)*; that window opens with *Needs you today*, one line per reason, each of which opens its card; a mark from the sheet is the first line of the card's watch row.
+  With nothing to report the window says so and states the rule.
+- **"Today" is recounted when the date changes**, so an item due tomorrow lights the dot after midnight without anything being pressed (simulation).
+
+*What is real and what is not.* In the **Windows app** the dot now follows the first two reasons, read from the person's own sheet (a goal date; an action item whose
+text says it is due today or overdue), never from a sample record, and it is recounted only when the app reads data. The **sheet's mark** and the **unanswered urgent
+message** exist in the simulation only: the app has no such column yet, and it reads mail only for the open ANDA, on request, never in the background. Whether the app
+should look at the portfolio file once at midnight to recount is a decision for the owner, because it would be the app's first scheduled read.
+
+**The review: the five largest problems, and what was done.**
+1. *A tray icon that always looked as if it had news*, and a dot nobody could explain. Fixed as above, in the simulation and (for the rule and the picture) in the app.
+2. *Two writers for one tooltip.* The connection status and the alert count each replaced the other's text on the tray icon, so whichever ran last won. One function
+   now writes both. Fixed.
+3. *A rule about "today" that was never recounted when today changed.* Fixed in the simulation; in the app it is a stated limit and an open decision (above).
+4. *The stylesheet named every look in every rule* of the answer-first family: adding W meant editing 29 selectors, and the next look would have meant about 50. The
+   family and the glass behavior are now two attributes set in one function; the card was compared pixel for pixel in eight looks before and after, with no difference. Fixed.
+5. *The Appearance Lab and several documents described a product that no longer existed* (the wrong default, the old main action). The Lab now shows W first with
+   today's actions; the documents were corrected. **The larger form of the same problem is unchanged: the Windows app trails the simulation by rounds 18 to 22.**
+Also fixed on the way: a mark from the sheet was put into the watch list as markup, not as text (it is escaped now); text scrolling under the pinned action area
+showed through the glass (the area is 97% solid).
 
 ## 12. Engagement roadmap — seven features that make it the daily habit
 

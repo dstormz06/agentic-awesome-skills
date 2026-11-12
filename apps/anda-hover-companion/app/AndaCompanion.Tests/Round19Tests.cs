@@ -178,20 +178,83 @@ public class Round19Tests : IClassFixture<HeadlessFixture>
     }
 
     [Fact]
-    public void The_tray_counts_urgent_ANDAs_by_the_cards_own_rule_and_its_tooltip_never_names_them()
+    public void The_tray_dot_is_only_for_what_needs_the_person_today_and_its_tooltip_never_names_an_ANDA()
     {
+        // Round 22: the dot used to follow the card's "urgent" rule and was on all the time. The sample data never raises it now.
         var repo = new MockAndaRepository();
-        var cal = new BusinessCalendar();
         var today = new DateOnly(2026, 7, 16);
-        int expected = repo.Numbers.Count(n => UrgencyPolicy.IsUrgent(repo.Find(n)!, today, cal, UrgencyPolicy.DefaultLateDays));
-        Assert.Equal(expected, TrayState.UrgentCount(repo, today, cal, UrgencyPolicy.DefaultLateDays));
-        Assert.Equal(1, expected);                                     // the sample data has one ANDA at risk (216482)
-        Assert.Equal(0, TrayState.UrgentCount(repo, today, cal, 365));  // a threshold nothing reaches: no dot
+        Assert.Equal(0, TrayState.AlertCount(repo, today));
+        Assert.Equal(0, TrayState.AlertCount(repo, new DateOnly(2030, 1, 1)));       // even with every sample goal date long past
+
+        var real = Late with { Demo = false };                                         // at risk, forecast 14 days late, item due in 5 days: not today's business
+        Assert.True(UrgencyPolicy.IsUrgent(real, today, new BusinessCalendar(), UrgencyPolicy.DefaultLateDays));
+        Assert.False(TrayState.NeedsAttentionToday(real, today));
+        Assert.True(TrayState.NeedsAttentionToday(real with { GoalDateValue = today }, today));                       // the goal date is today
+        Assert.True(TrayState.NeedsAttentionToday(real with { GoalDateValue = today.AddDays(-3) }, today));           // or has passed
+        Assert.False(TrayState.NeedsAttentionToday(real with { GoalDateValue = today.AddDays(1) }, today));
+        foreach (string text in new[] { "IR response due today — Biopharmaceutics", "Labeling comments overdue", "Response was due 2 days ago", "PAST DUE: facility question" })
+            Assert.True(TrayState.NeedsAttentionToday(real with { Attention = new AttentionItem(AttentionLevel.Warn, text) }, today), text);
+        foreach (string text in new[] { "IR response due in 5 days — Biopharmaceutics", "Due date to be set", "Overdueness is not a word" })
+            Assert.False(TrayState.NeedsAttentionToday(real with { Attention = new AttentionItem(AttentionLevel.Warn, text) }, today), text);
+        Assert.False(TrayState.NeedsAttentionToday(real with { Demo = true, GoalDateValue = today }, today));         // a sample record never raises it
+
         Assert.Equal("ANDA Companion (Notula) · OFFLINE", TrayState.Tip("OFFLINE", 0));
-        Assert.Equal("ANDA Companion (Notula) · OFFLINE · 1 ANDA is urgent", TrayState.Tip("OFFLINE", 1));
+        Assert.Equal("ANDA Companion (Notula) · OFFLINE · 1 ANDA needs your attention today", TrayState.Tip("OFFLINE", 1));
         string three = TrayState.Tip("OFFLINE", 3);
-        Assert.Equal("ANDA Companion (Notula) · OFFLINE · 3 ANDAs are urgent", three);
+        Assert.Equal("ANDA Companion (Notula) · OFFLINE · 3 ANDAs need your attention today", three);
         Assert.DoesNotContain("216482", three);
+    }
+
+    [Fact]
+    public void The_tray_picture_carries_amber_only_when_something_needs_the_person()
+    {
+        // Round 22: the icon at rest used to have an amber center, the same amber as the dot, so the tray always looked as if it had news.
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null && dir.Name != "anda-hover-companion") dir = dir.Parent;
+        string assets = Path.Combine(dir?.FullName ?? throw new DirectoryNotFoundException("anda-hover-companion folder not found"), "app", "AndaCompanion", "Assets");
+        int rest = AmberPixels(Path.Combine(assets, "tray-32.png")), alert = AmberPixels(Path.Combine(assets, "tray-32-alert.png"));
+        Assert.Equal(0, rest);
+        Assert.InRange(alert, 12, 120);          // a dot, not a wash of color
+    }
+
+    /// <summary>Counts pixels close to the alert amber (#F2A93B) in an 8-bit RGBA, non-interlaced PNG, which is what make-icons.mjs writes.</summary>
+    private static int AmberPixels(string path)
+    {
+        byte[] f = File.ReadAllBytes(path);
+        int w = 0, h = 0; using var idat = new MemoryStream();
+        for (int p = 8; p + 8 <= f.Length;)
+        {
+            int len = (f[p] << 24) | (f[p + 1] << 16) | (f[p + 2] << 8) | f[p + 3];
+            string type = System.Text.Encoding.ASCII.GetString(f, p + 4, 4);
+            if (type == "IHDR")
+            {
+                w = (f[p + 8] << 24) | (f[p + 9] << 16) | (f[p + 10] << 8) | f[p + 11]; h = (f[p + 12] << 24) | (f[p + 13] << 16) | (f[p + 14] << 8) | f[p + 15];
+                Assert.Equal((8, 6, 0), (f[p + 16], f[p + 17], f[p + 20]));      // bit depth 8, RGBA, not interlaced
+            }
+            else if (type == "IDAT") idat.Write(f, p + 8, len);
+            p += 12 + len;
+        }
+        Assert.Equal((32, 32), (w, h));
+        idat.Position = 0;
+        using var z = new System.IO.Compression.ZLibStream(idat, System.IO.Compression.CompressionMode.Decompress);
+        using var raw = new MemoryStream(); z.CopyTo(raw);
+        byte[] d = raw.ToArray(); int stride = w * 4, n = 0;
+        byte[] prev = new byte[stride], cur = new byte[stride];
+        for (int y = 0; y < h; y++)
+        {
+            int o = y * (stride + 1); byte filter = d[o];
+            for (int x = 0; x < stride; x++)
+            {
+                int a = x >= 4 ? cur[x - 4] : 0, b = prev[x], c = x >= 4 ? prev[x - 4] : 0, v = d[o + 1 + x];
+                int pred = filter switch { 0 => 0, 1 => a, 2 => b, 3 => (a + b) / 2, _ => Paeth(a, b, c) };
+                cur[x] = (byte)(v + pred);
+            }
+            for (int x = 0; x < stride; x += 4)
+                if (cur[x + 3] > 200 && Math.Abs(cur[x] - 0xF2) < 24 && Math.Abs(cur[x + 1] - 0xA9) < 24 && Math.Abs(cur[x + 2] - 0x3B) < 40) n++;
+            (prev, cur) = (cur, prev);
+        }
+        return n;
+        static int Paeth(int a, int b, int c) { int p = a + b - c, pa = Math.Abs(p - a), pb = Math.Abs(p - b), pc = Math.Abs(p - c); return pa <= pb && pa <= pc ? a : pb <= pc ? b : c; }
     }
 
     [Theory]
