@@ -486,8 +486,8 @@ public partial class App : Application
             _briefs = BriefServiceFactory.Create(() => _prompts.GetText(_settings.ActiveLens), _settings);
         }
         ApplyMouseTrigger();
-        RefreshTrayState();   // the data source may have changed
         ApplyData();
+        RefreshTrayState();   // the data source may have changed
         // Findings from an agent that has since been changed or switched off are not shown any more.
         if (AgentsFingerprint() != _agentsFingerprint) { _agentsFingerprint = AgentsFingerprint(); _agents.ClearCache(); }
         RebuildActionsMenu();

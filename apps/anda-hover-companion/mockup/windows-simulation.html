@@ -316,6 +316,35 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
   font-family:var(--c-font);font-size:calc(14px*var(--ts));line-height:1.5;animation:cardin .18s cubic-bezier(.2,.9,.3,1);
 }
 #card.pinned{outline:2px solid var(--c-accent);outline-offset:-1px}
+/* ---- round 19: card details, notices near the clock, News and alerts, one question before sending ---- */
+.drow{display:grid;grid-template-columns:118px 1fr auto;gap:8px;align-items:baseline;padding:6px 0;border-top:1px solid var(--c-hair)}
+.drow:first-child{border-top:none}
+.drow .k{font-size:calc(11.5px*var(--ts));color:var(--c-ink3)}
+.drow .v{min-width:0;overflow-wrap:anywhere;color:var(--c-ink)}
+.drow .v.none{color:var(--c-ink3)}
+.drow .cp,.dfoot .cp{border:1px solid var(--c-line);background:none;color:var(--c-ink2);border-radius:6px;font-family:inherit;font-size:calc(11px*var(--ts));padding:2px 8px;min-height:26px}
+.drow .cp:hover,.dfoot .cp:hover{color:var(--c-ink);border-color:var(--c-ink3)}
+.dfoot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px;font-size:calc(11px*var(--ts));color:var(--c-ink3)}
+#whisper{position:fixed;z-index:68;right:max(12px,env(safe-area-inset-right,0px));bottom:calc(var(--tb-h) + 12px + env(safe-area-inset-bottom,0px));width:340px;max-width:calc(100vw - 24px);display:none;
+  background:#fff;color:var(--ink);border:1px solid var(--win-line);border-radius:12px;box-shadow:var(--shadow-win);padding:12px 14px;font-size:13px;animation:chipin .16s cubic-bezier(.2,.9,.3,1)}
+#whisper .wk{font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--ink3);display:flex;align-items:center;gap:6px}
+#whisper .wk i{width:7px;height:7px;border-radius:50%;background:#c98a14;display:inline-block}
+#whisper.news .wk i{background:var(--sim)}
+#whisper .wt{margin:4px 0 8px;line-height:1.4;overflow-wrap:anywhere}
+#whisper .wa{display:flex;gap:6px;flex-wrap:wrap}
+#whisper .wa button{border:1px solid var(--win-line);background:#fff;border-radius:8px;padding:4px 10px;font-size:12px;min-height:28px}
+#whisper .wa button.pri{background:var(--sim);border-color:var(--sim);color:#fff;font-weight:600}
+#hub{width:480px;max-width:calc(100vw - 24px);padding:16px 18px;left:max(12px,calc(50% - 240px));top:56px;max-height:calc(100% - var(--tb-h) - 84px);overflow:auto}
+#hub .hrow{display:flex;gap:10px;align-items:baseline;width:100%;padding:8px 2px;border:none;border-top:1px solid var(--c-hair);background:none;color:inherit;font:inherit;text-align:left}
+#hub button.hrow:hover{background:var(--c-mark)}
+#hub .hrow .d{font-size:calc(11px*var(--ts));color:var(--c-ink3);min-width:64px;white-space:nowrap}
+#hub .hrow .t{flex:1;min-width:0;overflow-wrap:anywhere}
+#hub .hrow .new{font-size:9.5px;font-weight:800;letter-spacing:.08em;border-radius:99px;padding:1px 8px;background:var(--c-warn-bg);color:var(--c-warn)}
+.bsend{margin-top:8px;padding:10px 12px;border-radius:8px;border:1px solid var(--c-line)}
+.bsend.gap{border-color:var(--c-warn)}
+.bsend .k{font-size:calc(9.5px*var(--ts));font-weight:800;letter-spacing:.12em;color:var(--c-ink3)}
+.bsend .q{font-weight:650;margin-top:3px}
+.bsend .f{font-size:calc(11px*var(--ts));color:var(--c-ink3);margin-top:4px}
 /* A translucent card blurs what is behind it, so the text stays readable. Reduced transparency makes every look solid. */
 #card,#compact{-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
 @media (prefers-reduced-transparency:reduce){#card,#compact{--op:100% !important;-webkit-backdrop-filter:none;backdrop-filter:none}}
@@ -944,6 +973,7 @@ C:\work&gt; </div>
       <label class="sw full-only"><input type="checkbox" id="swConflictList"> Another program already owns <span data-key="list"></span></label>
       <label class="sw"><input type="checkbox" id="swToday"> Pretend today is Oct 1, 2026 (goal dates get close)</label>
       <label class="sw"><input type="checkbox" id="swAi"> An approved AI model is connected (sample brief)</label>
+      <div class="row" style="margin-top:6px"><button class="btn" type="button" id="newsPush">Division news: a colleague adds a line</button></div>
       <label class="sw full-only"><input type="checkbox" id="swAgentFail"> An agent cannot be reached (rehearse a failure)</label>
       <p class="fine">Simulated here: the desktop, look-alike app windows (no logos, no real products), the hotkey and clipboard hand-off, the sample brief. No data leaves this page.</p>
     </div>
@@ -1049,6 +1079,14 @@ C:\work&gt; </div>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><button class="pill quiet" id="recentsClear" type="button">Clear recents</button><span class="hint" id="recentsStatus" role="status" style="margin:0"></span></div>
     <p class="hint">Only six-digit numbers are kept, in this PC's settings, and never sent anywhere. Turning this off clears them. ANDAs you keep with “Keep in my list” on a card stay until you remove them and are saved in a backup.</p>
     <hr class="hair">
+    <div class="lbl">WATCH MY BACK · SHORT NOTICES NEAR THE CLOCK</div>
+    <label class="opt"><input type="checkbox" id="setWatch"> Tell me when something in my data needs a look</label>
+    <label class="opt"><input type="checkbox" id="setNews"> Show division news from the shared news document</label>
+    <div class="frow"><input type="text" id="newsFile" readonly placeholder="The division's news document (.docx) in a synced SharePoint folder" aria-label="Division news document"><button class="pill quiet" id="newsPick" type="button">Choose…</button><button class="pill quiet" id="newsClear" type="button">Clear</button></div>
+    <div class="wrap" role="radiogroup" aria-label="Notices a day"><label class="opt"><input type="radio" name="wcap" value="1"> At most 1 a day</label><label class="opt"><input type="radio" name="wcap" value="3" checked> At most 3 a day</label><label class="opt"><input type="radio" name="wcap" value="5"> At most 5 a day</label></div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><button class="pill quiet" id="watchNow" type="button">Check now</button><button class="pill quiet" id="hubOpen" type="button">News and alerts…</button><span class="hint" id="watchStatus" role="status" style="margin:0"></span></div>
+    <p class="hint">Both are off until you switch them on. A notice is one short line near the clock. It never takes the keyboard, hides by itself, and shows the ANDA number and a short reason, never your notes. The Windows app would check when it starts, when your portfolio file changes and once each morning; this page checks when you switch a box on, when the demo date changes and when you press Check now. Division news is plain text from one Word document: anyone who can edit that document can put a line on your screen, so each line is cut to 240 characters and counts toward the daily limit. A notice fires only on what the data shows; silence does not mean all is well.</p>
+    <hr class="hair">
     <div class="lbl">OTHER WAYS TO START IT</div>
     <label class="opt"><input type="checkbox" id="setMiddle"> Middle-click (wheel button) on selected text starts Select &amp; Peek</label>
     <div class="wrap" id="setMiddleMod"></div>
@@ -1071,6 +1109,10 @@ C:\work&gt; </div>
     <div class="frow"><input type="text" id="dataUrl" placeholder="Optional: the https address of the Drugs@FDA data file, to update it from FDA" aria-label="Drugs@FDA data file address"><button class="pill quiet" id="dataUpdate" type="button">Update now</button><span></span></div>
     <div class="hint" id="dataRefStatus" style="margin:0 0 4px"></div>
     <p class="hint">Update now fetches that one address, only when you press it, and keeps the file only if it really is a Drugs@FDA data file. It needs the network and is the only thing here that does. The address is the file link on FDA's Drugs@FDA data files page; the app does not guess it. The PSG line has no official source connected: it shows a date from a PSG column in your own sheet, or says it is not available.</p>
+    <hr class="hair">
+    <div class="lbl">CARD DETAILS · COLUMNS OF YOUR SHEET SHOWN WHEN A CARD IS EXPANDED</div>
+    <div class="wrap" id="setFields" role="group" aria-label="Card details"></div>
+    <p class="hint">Each is a column of your portfolio file, shown with a Copy button when you expand a card (E). A column your sheet does not have reads “not in your sheet”. Nothing here is looked up on the web.</p>
     <hr class="hair">
     <div class="lbl">MY WRITING · TONE, STYLE, SIGN-OFF, QUICK REPLIES</div>
     <div class="wrap" id="setTone"></div>
@@ -1235,6 +1277,7 @@ C:\work&gt; </div>
     <p class="hint" id="drAiHint">Off until a model is approved and connected. When on, a preview shows the exact text first, nothing is sent until you press Send, and the result is Copy only: the app never pastes or sends for you.</p>
     <div class="lbl">RESULT</div>
     <div id="drOut" aria-live="polite"></div>
+    <div id="drSend" aria-live="polite"></div>
   </div>
 
   <!-- ===== my action (prompt, AI or agent) ===== -->
@@ -1349,6 +1392,17 @@ C:\work&gt; </div>
     <p class="hint">The same rules as the card and the watch list, read from your data when you open this window. Nothing runs while it is closed.</p>
   </div>
 
+  <!-- ===== News and alerts: division news from one shared Word document, and what the person's own data says needs a look ===== -->
+  <div class="app-win" id="hub" role="dialog" aria-label="News and alerts">
+    <div class="hdr"><h2>News and alerts</h2><button class="pill" id="hubClose" type="button">Close</button></div>
+    <div class="lbl">DIVISION NEWS</div>
+    <p class="hint" id="hubNewsNote" style="margin:0 0 4px"></p>
+    <div id="hubNews"></div>
+    <div class="lbl">FROM YOUR DATA</div>
+    <div id="hubData"></div>
+    <p class="hint">Division news is the text of one Word document your division keeps in SharePoint, read from the copy synced to this PC. The rest follows the same rules as the card and the watch list. Nothing here is sent anywhere, and silence does not mean all is well.</p>
+  </div>
+
   <!-- ===== watch list and page scan ===== -->
   <div class="app-win" id="wlist" role="dialog" aria-label="Watch list">
     <div class="hdr"><h2 id="wlTitle">Watch list</h2><button class="pill" id="wlDone" type="button">Done</button></div>
@@ -1373,6 +1427,7 @@ C:\work&gt; </div>
 
 <div id="compact" role="button" tabindex="-1" aria-label="ANDA compact status. Click to open the full card."></div>
 <div id="scrim"></div>
+<div id="whisper" role="region" aria-label="Notice near the clock"><div class="wk"><i></i><span id="whKind"></span></div><div class="wt" id="whText" role="status"></div><div class="wa"><button class="pri" id="whOpen" type="button">Open</button><button id="whSnooze" type="button">Snooze for today</button><button id="whClose" type="button">Dismiss</button></div></div>
 <button id="chip" type="button"><span class="dot" id="chipDot"></span><span id="chipTxt"></span><span class="go" id="chipGo">Peek&nbsp;›</span></button>
 
 <div id="card" role="dialog" aria-label="ANDA quick brief" tabindex="-1">
@@ -1423,6 +1478,7 @@ C:\work&gt; </div>
     <div class="body" id="c-ai"></div>
   </div>
   <div id="ext">
+    <details id="x-details-d" open><summary>Applicant and project <span id="x-details-n" style="font-weight:400;color:var(--c-ink3)"></span></summary><div class="cnt"><div id="x-details"></div><div class="dfoot"><button class="cp" id="x-details-all" type="button">Copy all</button><span id="x-details-src"></span><span id="x-details-status" role="status"></span></div></div></details>
     <details id="x-watch-d"><summary>Watch list <span id="x-watch-n" style="font-weight:400;color:var(--c-ink3)"></span></summary><div class="cnt" id="x-watch"></div></details>
     <details><summary>Pending &amp; urgent items <span id="x-pending-n" style="font-weight:400;color:var(--c-ink3)"></span></summary><div class="cnt" id="x-pending"></div></details>
     <details><summary>Recent project notes</summary><div class="cnt" id="x-notes"></div></details>
@@ -1459,6 +1515,11 @@ root.dataset.dir = "t";
 /* ---------------- fictional data (same records as the Windows app's mock repository) ---------------- */
 const DATA = {
   "216482": {
+    details:{ applicant:"Meridian Pharmaceuticals, Inc. (fictional)", short:"Meridian", established:"metformin hydrochloride extended-release tablets, 500 mg",
+      project:"Cycle 2 review of a minor amendment; one biopharmaceutics information request is open.",
+      agentCo:"Northgate Regulatory Agents LLC (fictional)", agentEmail:"us.agent@northgate-agents.example", applicantEmail:"regulatory@meridian-pharma.example",
+      myNotes:"Ask for the dissolution table again if the response leaves it out.", doc356h:null, doc32p1:null,
+      teamLead:"Team lead A (demo)", division:"Division of Project Management (demo)", fei:"3009990001 (fictional)" },
     drug:"Metformin HCl ER Tablets, 500 mg", meta:"Meridian Pharmaceuticals (fictional) · Cycle 2",
     goal:"Oct 3, 2026", goalD:[2026,10,3], fcD:[2026,10,17], days:"· 79 days", daysTo:79, delta:14, pct:62,
     fc:"Oct 17, 2026", fdelta:"▲ +14 d vs goal", late:true, fconf:"moderate confidence",
@@ -1473,6 +1534,11 @@ const DATA = {
     ai:"Forecast runs 14 days past goal: this applicant's last two IR responses averaged 31 days against 21-day asks, and the shared-facility finding on 214990 wasn't closed until late cycle. Untested assumption in the plan: “no new facility inspection needed”. Worth raising at Thursday's huddle."
   },
   "214990": {
+    details:{ applicant:"Meridian Pharmaceuticals, Inc. (fictional)", short:"Meridian", established:"metformin hydrochloride extended-release tablets, 750 mg",
+      project:"Cycle 3; facility question closed, labeling in final format.",
+      agentCo:"Northgate Regulatory Agents LLC (fictional)", agentEmail:"us.agent@northgate-agents.example", applicantEmail:null,
+      myNotes:null, doc356h:"S:\\ANDA214990\\356h_2026-06-12.pdf (fictional path)", doc32p1:"S:\\ANDA214990\\m3\\32p1_description.pdf (fictional path)",
+      teamLead:"Team lead A (demo)", division:"Division of Project Management (demo)", fei:"3009990001 (fictional)" },
     drug:"Metformin HCl ER Tablets, 750 mg", meta:"Meridian Pharmaceuticals (fictional) · Cycle 3",
     goal:"Aug 15, 2026", goalD:[2026,8,15], fcD:[2026,8,6], days:"· 30 days", daysTo:30, delta:-9, pct:88,
     fc:"Aug 6, 2026", fdelta:"▼ 9 d ahead of goal", late:false, fconf:"high confidence",
@@ -1862,9 +1928,203 @@ const state = { dir:"t", look:"t", form:"full", autoHide:10, mode:"whisper", esc
   data:{ portfolio:null, notes:null, ref:null },
   myApi:{ name:"My API", endpoint:"", header:"Authorization", scheme:"Bearer", env:"", model:"", template:"", path:"choices[0].message.content" },
   replies:null,
-  density:"comfortable", ts:"standard", lookupStyle:"box", recentsOn:true, recents:[], pins:[] };
+  density:"comfortable", ts:"standard", lookupStyle:"box", recentsOn:true, recents:[], pins:[],
+  cardFields:["applicant", "established", "project", "agentCo", "agentEmail", "applicantEmail", "myNotes", "doc356h", "doc32p1"],
+  watchOn:false, newsOn:false, newsFile:"", watchCap:3, wDay:null, wCount:0, wSeen:new Set(), wSnoozed:new Set(), hubSeen:new Set() };
 const steps = {};
-const APP_WINS = ["lookup", "plib", "settings", "draft", "wlist", "replies", "actwin", "todo", "mytodo", "notes", "ask", "today"];
+const APP_WINS = ["lookup", "plib", "settings", "draft", "wlist", "replies", "actwin", "todo", "mytodo", "notes", "ask", "today", "hub"];
+
+/* ================= round 19 =================
+   1. Card details: columns of the person's own sheet, shown when a card is expanded, each with Copy. Nothing is looked up anywhere.
+   2. Watch-back: short notices near the clock about what the data shows, and division news read from one shared Word document.
+      Both are off until switched on, limited per day, plain text, and never take the keyboard.
+   3. One question before sending: the most important open gap in a reviewed draft, from fixed rules, or "No open gaps." */
+const DETAIL_FIELDS = [["applicant", "Applicant"], ["established", "Established name"], ["project", "Project description"], ["agentCo", "US agent"], ["agentEmail", "US agent email"],
+  ["applicantEmail", "Applicant email"], ["myNotes", "My notes"], ["doc356h", "Latest 356h"], ["doc32p1", "Module 3.2.P.1"], ["teamLead", "Team lead"], ["division", "Division"], ["fei", "Facility FEI"]];
+const NOT_IN_SHEET = "not in your sheet";
+function detailValue(id, key){
+  const d = (DATA[id] && DATA[id].details) || {}, v = d[key];
+  if(v == null || v === "") return null;
+  return key === "applicant" && d.short ? `${v} (${d.short})` : String(v);   /* the short name comes from the sheet, never from a web search */
+}
+function paintDetails(id){
+  const box = $("x-details"); box.replaceChildren();
+  const keys = DETAIL_FIELDS.filter(f => state.cardFields.includes(f[0]));
+  let have = 0;
+  keys.forEach(([key, label]) => {
+    const v = detailValue(id, key), row = document.createElement("div"); row.className = "drow";
+    const k = document.createElement("span"); k.className = "k"; k.textContent = label;
+    const val = document.createElement("span"); val.className = "v" + (v == null ? " none" : ""); val.textContent = v == null ? NOT_IN_SHEET : v;
+    row.append(k, val);
+    if(v != null){ have++; const b = document.createElement("button"); b.type = "button"; b.className = "cp"; b.textContent = "Copy"; b.dataset.copy = key; b.setAttribute("aria-label", "Copy " + label.toLowerCase()); row.append(b); }
+    else row.append(document.createElement("span"));
+    box.append(row);
+  });
+  if(!keys.length){ const e = document.createElement("div"); e.className = "drow"; e.textContent = "No columns are chosen. Choose them in Settings, My files and writing."; box.append(e); }
+  $("x-details-n").textContent = keys.length ? `· ${have} of ${keys.length} in your sheet` : "";
+  $("x-details-src").textContent = state.data && state.data.portfolio ? "From my-portfolio.xlsx (simulated)." : "From the fictional demo records.";
+  $("x-details-all").hidden = have === 0; $("x-details-status").textContent = "";
+}
+function detailsBlock(id){
+  return [`ANDA ${id}`].concat(DETAIL_FIELDS.filter(f => state.cardFields.includes(f[0])).map(([key, label]) => [label, detailValue(id, key)]).filter(x => x[1] != null).map(([l, v]) => `${l}: ${v}`)).join("\n");
+}
+function copyDetail(text, what){
+  const st = $("x-details-status");
+  writeClipboard(text).then(() => { st.textContent = `Copied: ${what}.`; }, () => { st.textContent = "Your browser did not allow copying. Please select the text and press Ctrl+C."; });
+}
+$("x-details").addEventListener("click", e => {
+  const b = e.target.closest("[data-copy]"); if(!b || !current) return;
+  copyDetail(detailValue(current, b.dataset.copy), DETAIL_FIELDS.find(f => f[0] === b.dataset.copy)[1].toLowerCase());
+});
+$("x-details-all").addEventListener("click", () => { if(current) copyDetail(detailsBlock(current), "all the details shown"); });
+(function buildFieldChecks(){
+  DETAIL_FIELDS.forEach(([key, label]) => {
+    const l = document.createElement("label"); l.className = "opt";
+    const c = document.createElement("input"); c.type = "checkbox"; c.dataset.field = key; c.checked = state.cardFields.includes(key);
+    c.addEventListener("change", () => {
+      const on = new Set(state.cardFields); if(c.checked) on.add(key); else on.delete(key);
+      state.cardFields = DETAIL_FIELDS.map(f => f[0]).filter(k => on.has(k));
+      if(current && card.style.display === "block") paintDetails(current);
+    });
+    l.append(c, document.createTextNode(" " + label)); $("setFields").append(l);
+  });
+})();
+
+/* ---- notices near the clock ---- */
+const WATCH_CAPS = [1, 3, 5], NEWS_MAX = 240, NEWS_DAYS = 14, WHISPER_MS = 12000;
+const NEWS_DOC = [   /* fictional: the paragraphs the app would read from the division's Word document; each starts with a date */
+  { date:[2026, 7, 16], text:"The Thursday huddle moves to 2:00 PM today, same room." },
+  { date:[2026, 7, 15], text:"Status updates for cycle 2 applications are due to team leads by Friday." },
+  { date:[2026, 7, 10], text:"The division tracker has a new column for facility status. Please fill it in for your applications." } ];
+const NEWS_SAMPLES = ["Building access is limited to the north entrance until 3:00 PM.", "The labeling template was updated this morning. Please use the new version for letters that go out this week.", "Reminder: timesheets are due by noon tomorrow."];
+let wQueue = [], wCurrent = null, wTimer = null, newsPushed = 0;
+const cut = (t, n) => { t = String(t).replace(/\s+/g, " ").trim(); return t.length > n ? t.slice(0, n - 1).trimEnd() + "…" : t; };
+function newsItems(){
+  const today = demoToday();
+  return NEWS_DOC.map(n => ({ t:ymd(...n.date), text:cut(n.text, NEWS_MAX) })).filter(n => n.t <= today && today - n.t <= NEWS_DAYS * DAY).sort((a, b) => b.t - a.t)
+    .map(n => ({ key:"n|" + isoDate(n.t) + "|" + stableHash(n.text), kind:"news", t:n.t, text:n.text }));
+}
+function watchItems(){   /* the rules of the card, the watch list and the to-do list: nothing new is decided here */
+  return Object.keys(DATA).flatMap(autoRowsFor).filter(r => r.sev !== "info").sort((a, b) => a.priority - b.priority || (a.number < b.number ? -1 : 1))
+    .map(r => ({ key:"d|" + r.key, kind:"data", number:r.number, text:cut(r.title, 140) }));
+}
+function watchCheck(){
+  const st = $("watchStatus");
+  if(!state.running){ st.textContent = "The app is not running."; return 0; }
+  const day = isoDate(demoToday()); if(state.wDay !== day){ state.wDay = day; state.wCount = 0; state.wSnoozed.clear(); }
+  const pending = [];
+  if(state.newsOn && state.newsFile) newsItems().forEach(i => { if(!state.wSeen.has(i.key)) pending.push(i); });
+  if(state.watchOn) watchItems().forEach(i => { if(!state.wSeen.has(i.key) && !state.wSnoozed.has(i.key)) pending.push(i); });
+  wQueue = pending;
+  st.textContent = !state.watchOn && !(state.newsOn && state.newsFile) ? "Notices are off." : pending.length ? "" : "Nothing new to tell you.";
+  showNextWhisper();
+  return pending.length;
+}
+function showNextWhisper(){
+  const box = $("whisper"); if(box.style.display === "block" || !wQueue.length) return;
+  if(state.wCount >= state.watchCap){
+    $("watchStatus").textContent = `Today's limit of ${state.watchCap} ${state.watchCap === 1 ? "notice" : "notices"} is reached. ${wQueue.length} more ${wQueue.length === 1 ? "is" : "are"} in News and alerts.`;
+    return;
+  }
+  const i = wQueue.shift(); wCurrent = i; state.wSeen.add(i.key); state.wCount++;
+  box.classList.toggle("news", i.kind === "news");
+  $("whKind").textContent = i.kind === "news" ? "DIVISION NEWS" : "FROM YOUR DATA";
+  $("whText").textContent = i.text;
+  $("whOpen").textContent = i.kind === "news" ? "Open News and alerts" : "Open the card";
+  $("whSnooze").hidden = i.kind === "news";
+  box.style.display = "block";
+  clearTimeout(wTimer); wTimer = setTimeout(() => hideWhisper(true), WHISPER_MS);
+}
+function hideWhisper(next){
+  $("whisper").style.display = "none"; wCurrent = null; clearTimeout(wTimer);
+  if(next) setTimeout(showNextWhisper, 500);
+}
+$("whisper").addEventListener("pointerenter", () => clearTimeout(wTimer));
+$("whisper").addEventListener("pointerleave", () => { if(wCurrent){ clearTimeout(wTimer); wTimer = setTimeout(() => hideWhisper(true), 4000); } });
+$("whClose").addEventListener("click", () => hideWhisper(true));
+$("whSnooze").addEventListener("click", () => { if(wCurrent){ state.wSnoozed.add(wCurrent.key); state.wSeen.delete(wCurrent.key); } hideWhisper(true); });
+$("whOpen").addEventListener("click", () => {
+  const i = wCurrent; hideWhisper(false); if(!i) return;
+  if(i.kind === "news") openHub(); else if(DATA[i.number]) openCard(i.number, { anchor:{ x:Math.max(12, innerWidth - 420), y:80 }, mini:state.mode === "peek" });
+});
+function openHub(){ closeMenus(); showApp("hub"); $("hub").style.zIndex = "52"; paintHub(); }
+function paintHub(){
+  const news = $("hubNews"), data = $("hubData"); news.replaceChildren(); data.replaceChildren();
+  const on = state.newsOn && state.newsFile;
+  $("hubNewsNote").textContent = on ? `From ${state.newsFile}. Lines from the last ${NEWS_DAYS} days, newest first.` : "Division news is off. Switch it on, and choose the document, in Settings, How it starts.";
+  if(on){
+    const items = newsItems();
+    if(!items.length){ const e = document.createElement("div"); e.className = "hrow"; e.textContent = `No lines in the last ${NEWS_DAYS} days.`; news.append(e); }
+    items.forEach(i => {
+      const row = document.createElement("div"); row.className = "hrow";
+      const d = document.createElement("span"); d.className = "d"; d.textContent = shortDate(i.t);
+      const t = document.createElement("span"); t.className = "t"; t.textContent = i.text;
+      row.append(d, t);
+      if(!state.hubSeen.has(i.key)){ const n = document.createElement("span"); n.className = "new"; n.textContent = "NEW"; row.append(n); state.hubSeen.add(i.key); }
+      news.append(row);
+    });
+  }
+  const rows = watchItems();
+  if(!rows.length){ const e = document.createElement("div"); e.className = "hrow"; e.textContent = "Nothing in your data needs a look by these rules."; data.append(e); }
+  rows.forEach(i => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "hrow";
+    const t = document.createElement("span"); t.className = "t"; t.textContent = i.text; b.append(t);
+    if(state.wSnoozed.has(i.key)){ const z = document.createElement("span"); z.className = "d"; z.textContent = "snoozed today"; b.append(z); }
+    b.addEventListener("click", () => { if(DATA[i.number]) openCard(i.number, { anchor:{ x:Math.max(12, innerWidth - 420), y:80 } }); });
+    data.append(b);
+  });
+}
+$("hubClose").addEventListener("click", () => closeApp("hub"));
+$("hubOpen").addEventListener("click", () => openHub());
+$("watchNow").addEventListener("click", () => watchCheck());
+$("setWatch").addEventListener("change", e => { state.watchOn = e.target.checked; if(!state.watchOn && wCurrent && wCurrent.kind === "data") hideWhisper(false); watchCheck(); });
+function setNewsOn(on){
+  state.newsOn = on && !!state.newsFile; $("setNews").checked = state.newsOn;
+  if(on && !state.newsFile) $("watchStatus").textContent = "Please choose the division's news document first.";
+  else { if(!state.newsOn && wCurrent && wCurrent.kind === "news") hideWhisper(false); watchCheck(); }
+}
+$("setNews").addEventListener("change", e => setNewsOn(e.target.checked));
+$("newsPick").addEventListener("click", () => { state.newsFile = "Division-News.docx (simulated; a synced SharePoint folder)"; $("newsFile").value = state.newsFile; $("watchStatus").textContent = "Document chosen. Tick the box above to show its news."; });
+$("newsClear").addEventListener("click", () => { state.newsFile = ""; $("newsFile").value = ""; setNewsOn(false); });
+document.querySelectorAll("input[name=wcap]").forEach(r => r.addEventListener("change", () => { if(r.checked){ state.watchCap = +r.value; showNextWhisper(); } }));
+$("newsPush").addEventListener("click", () => {
+  const t = new Date(demoToday());
+  NEWS_DOC.unshift({ date:[t.getUTCFullYear(), t.getUTCMonth() + 1, t.getUTCDate()], text:NEWS_SAMPLES[newsPushed++ % NEWS_SAMPLES.length] });
+  if(state.newsOn && state.newsFile){ watchCheck(); if(isOpen("hub")) paintHub(); }
+  else showNotice("A line was added to the division news document. Division news is off, so nothing is shown. Switch it on in Settings, How it starts.", { x:innerWidth - 360, y:innerHeight - 150 });
+});
+function syncRound19(){
+  $("setWatch").checked = state.watchOn; $("setNews").checked = state.newsOn; $("newsFile").value = state.newsFile;
+  document.querySelectorAll("input[name=wcap]").forEach(r => { r.checked = +r.value === state.watchCap; });
+  document.querySelectorAll("#setFields input").forEach(c => { c.checked = state.cardFields.includes(c.dataset.field); });
+}
+
+/* ---- one question before sending ---- */
+function beforeSend(text, review){
+  if(!text || !text.trim()) return null;
+  const f = review.findings, q = t => ({ gap:true, text:t });
+  const diff = f.find(x => x.kind === "diff"), unknown = f.find(x => x.kind === "unknown");
+  let m;
+  if(diff){
+    if((m = /^ANDA (\d{6}): the draft gives the (goal|forecast) date as (.+), but the record says (.+)\.$/.exec(diff.text))) return q(`For ANDA ${m[1]}, which ${m[2]} date is right: ${m[3]} (your draft) or ${m[4]} (the record)?`);
+    if((m = /^ANDA (\d{6}): the draft sounds (on track|late or at risk), but the record's forecast is (.+)\.$/.exec(diff.text))) return q(`Is ANDA ${m[1]} really ${m[2]}? The record's forecast is ${m[3]}.`);
+    if((m = /^The draft says “(.+)”, but (.+) is an? ([A-Z][a-z]+day)\.$/.exec(diff.text))) return q(`In “${m[1]}”, which is right: the day or the date? ${m[2]} is a ${m[3]}.`);
+    return q("Is this difference intended? " + diff.text);
+  }
+  if(unknown && (m = /^ANDA (\d{6}) /.exec(unknown.text))) return q(`Is ${m[1]} the right ANDA number? It is not in your data.`);
+  const self = f.find(x => x.kind === "note" && /Please check|not a business day|a federal holiday|is in the past|appears twice/.test(x.text));
+  if(self) return q("Is this intended? " + self.text);
+  if(/\b(attached|attachment|attachments|attaching|enclosed)\b/i.test(text)) return q("Is the file attached? The draft mentions an attachment, and this tool cannot see attachments.");
+  return { gap:false, text:"No open gaps." };
+}
+function paintBeforeSend(text, review){
+  const box = $("drSend"), b = beforeSend(text, review); box.replaceChildren(); if(!b) return;
+  const w = document.createElement("div"); w.className = "bsend" + (b.gap ? " gap" : "");
+  const k = document.createElement("div"); k.className = "k"; k.textContent = "ONE QUESTION BEFORE YOU SEND";
+  const qq = document.createElement("div"); qq.className = "q"; qq.textContent = b.text;
+  const fine = document.createElement("div"); fine.className = "f"; fine.textContent = b.gap ? "The most important of the items above, chosen by fixed rules on this PC. Whether to send, and to whom, stays your call." : "None of the checks above found a gap. This tool cannot see recipients or attachments, and it does not judge tone.";
+  w.append(k, qq, fine); box.append(w);
+}
 let current = null, pinnedCard = false, focusedWin = "mail", lastSel = null, deselecting = false;
 let pointer = { x: Math.round(innerWidth * 0.4), y: Math.round(innerHeight * 0.4) };
 let chipTimer = null, streamTimer = null, keysTimer = null, chipAccept = null;
@@ -2022,6 +2282,7 @@ function fill(id){
     : `<div class="rowi"><span>No open items.</span></div>`;
   $("x-notes").innerHTML = d.notes.map(([who, t]) => `<div class="notei"><div class="who">${who}</div>${t}</div>`).join("");
   $("x-forecast").textContent = d.forecast;
+  paintDetails(id);
   paintMail(id);
   $("c-gfg").style.strokeDasharray = d.pct + " 100"; $("c-gv").textContent = d.pct + "%";
   $("c-rail-n").textContent = String(Math.abs(d.daysTo)); $("c-rail-cap").textContent = d.daysTo < 0 ? "DAYS PAST GOAL" : "DAYS TO GOAL";
@@ -2109,7 +2370,10 @@ function closeCard(){
 function setPin(v){
   pinnedCard = v; card.classList.toggle("pinned", v); $("pinBtn").classList.toggle("on", v);
 }
-function toggleExpand(){ card.classList.toggle("expanded"); setTimeout(clampCard, 0); }
+function toggleExpand(){
+  card.classList.toggle("expanded");
+  setTimeout(() => { clampCard(); if(card.classList.contains("expanded")) $("x-details-d").scrollIntoView({ block:"nearest" }); }, 0);   /* expanding is asking for the details: bring them into view */
+}
 function copyStatus(){
   if(!current) return;
   const text = statusLine(current), btn = $("chipCopy");
@@ -2716,6 +2980,7 @@ $("lookupIn").addEventListener("input", () => { if(lkBar()){ lkIdx = 0; paintLoo
 const SAMPLE_DRAFT = "Hi all, quick status. ANDA 216482 is on track, with a goal date of Oct 10, 2026 and a forecast of Oct 17, 2026. ANDA 214990 is running late. ANDA 123456 needs a call.";
 function runDraftCheck(){
   const r = draftReview($("drText").value, demoToday());
+  paintBeforeSend($("drText").value, r);
   $("drOut").innerHTML = r.findings.map(f => `<div class="find ${f.kind === "diff" || f.kind === "unknown" ? "diff" : f.kind}">${f.text.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</div>`).join("");
 }
 function openDraft(text){
@@ -2917,6 +3182,7 @@ function openMenu(){
     item("Review a draft…", state.keys.draft, () => openDraft("")),
     item("Ask about a selection…", state.keys.ask || "", () => openAsk("")),
     item("Watch list…", "", () => openWatchList()),
+    item("News and alerts…", "", () => openHub()),
     ...(state.allTools ? [item("Today…", "", () => openToday()),
     item("ANDA to-do list…", "", () => openTodo()),
     item("My to-do list…", state.keys.list || "", () => openMyTodo()),
@@ -2980,7 +3246,7 @@ document.addEventListener("pointerdown", e => {
 
 addEventListener("hashchange", () => { const on = location.hash === "#all"; if(on !== state.allTools){ state.allTools = on; applyEdition(); } });
 function exitApp(){
-  state.running = false; closeCard(); hideChip(); closeCtx(); APP_WINS.forEach(closeApp);
+  state.running = false; closeCard(); hideChip(); hideWhisper(false); closeCtx(); APP_WINS.forEach(closeApp);
   $("appIcon").style.display = "none"; $("deskIcon").classList.add("attn");
   showKeys("look", "The app has exited. Double-click Start-Demo.bat on the desktop to start it again.");
 }
@@ -4864,7 +5130,8 @@ function snapSettings(){
     outlook:{ enabled:o.on, cloud:o.cloud, clientId:o.client, tenant:o.tenant, maxItems:o.max }, lens:s.lens,
     actions:JSON.parse(JSON.stringify(s.actions)), agents:JSON.parse(JSON.stringify(s.agents)), todoShowFromData:s.todoAuto, todoRefreshSeconds:s.todoRefresh,
     myTodoMode:s.clMode, adaptive:s.adaptive, allTools:s.allTools,
-    textSize:s.ts, density:s.density, lookupStyle:s.lookupStyle, rememberRecents:s.recentsOn, pins:[...s.pins] };   /* the counts of opened sections belong to this PC: they are not in a backup */
+    textSize:s.ts, density:s.density, lookupStyle:s.lookupStyle, rememberRecents:s.recentsOn, pins:[...s.pins],
+    cardFields:[...s.cardFields], watchBack:s.watchOn, divisionNews:s.newsOn, noticesPerDay:s.watchCap };   /* the counts of opened sections belong to this PC: they are not in a backup */
 }
 const DEFAULT_SETTINGS = { ...snapSettings(), allTools:false }, DEFAULT_PROMPTS = prompts.map(p => [...p]), DEFAULT_REPLIES = state.replies.map(r => ({ ...r }));
 const oneOf = (v, list, fallback) => list.includes(v) ? v : fallback;
@@ -4888,6 +5155,9 @@ function applySettings(x){
   s.keys = { ...base, ask, list };
   s.clMode = oneOf(x.myTodoMode, [0, 1], 0); s.adaptive = typeof x.adaptive === "boolean" ? x.adaptive : true; s.allTools = typeof x.allTools === "boolean" ? x.allTools : false;
   s.ts = oneOf(x.textSize, ["standard", "large", "xl"], d.textSize); s.density = oneOf(x.density, ["comfortable", "compact"], d.density); s.lookupStyle = oneOf(x.lookupStyle, ["box", "bar"], d.lookupStyle);
+  s.cardFields = Array.isArray(x.cardFields) ? DETAIL_FIELDS.map(f => f[0]).filter(k => x.cardFields.includes(k)) : [...d.cardFields];
+  s.watchOn = typeof x.watchBack === "boolean" ? x.watchBack : d.watchBack; s.watchCap = oneOf(x.noticesPerDay, WATCH_CAPS, d.noticesPerDay);
+  s.newsOn = x.divisionNews === true && !!s.newsFile;   /* the document's location belongs to this PC and is never in a backup */
   s.recentsOn = typeof x.rememberRecents === "boolean" ? x.rememberRecents : d.rememberRecents; s.pins = Array.isArray(x.pins) ? [...new Set(x.pins.filter(six))].slice(0, PIN_MAX) : []; applyDisplay();
   s.actions = x.actions === undefined ? starterActions() : normActions(x.actions, Object.values(s.keys));
   s.agents = normAgents(x.agents); clearAgentCache();
@@ -4910,7 +5180,7 @@ function applySettings(x){
 function syncSettingsUI(){
   const s = state, check = (name, value) => document.querySelectorAll(`input[name=${name}]`).forEach(r => { r.checked = r.value === String(value); });
   check("look", s.look); check("autohide", s.autoHide); check("consent", s.mode); check("tone", s.tone); check("provider", s.provider); check("midmod", s.middleMod); check("todorefresh", s.todoRefresh);
-  check("clmode", s.clMode); check("ts", s.ts); check("density", s.density); check("lkstyle", s.lookupStyle); $("setRecents").checked = s.recentsOn; $("adaptCheck").checked = s.adaptive; applyEdition();
+  check("clmode", s.clMode); check("ts", s.ts); check("density", s.density); check("lkstyle", s.lookupStyle); $("setRecents").checked = s.recentsOn; syncRound19(); $("adaptCheck").checked = s.adaptive; applyEdition();
   $("todoAuto").checked = s.todoAuto; renderActions(); renderAgents(); if(isOpen("todo")){ tdApplyTimer(); tdReload(true); }
   $("setUrgent").checked = s.escalate; $("setLead").value = String(s.lead); $("setCapture").checked = s.capture;
   $("setOp").value = s.op; $("setOpV").textContent = s.op + "%"; root.style.setProperty("--op", (s.allTools ? s.op : 100) + "%");
@@ -4975,7 +5245,7 @@ $("bkReset").addEventListener("click", () => {
   }
   clearTimeout(resetTimer); b.dataset.armed = ""; b.textContent = "Reset all settings…";
   prompts.splice(0, prompts.length, ...DEFAULT_PROMPTS.map(p => [...p])); state.replies = DEFAULT_REPLIES.map(r => ({ ...r }));
-  applySettings(DEFAULT_SETTINGS); state.sectionUse = {}; state.recents = []; applyEdition();
+  state.newsFile = ""; state.wSeen.clear(); state.wSnoozed.clear(); state.hubSeen.clear(); state.wCount = 0; hideWhisper(false); applySettings(DEFAULT_SETTINGS); state.sectionUse = {}; state.recents = []; applyEdition();
   $("bkStatus").textContent = "All settings are back to their defaults. File locations on this PC were kept."; $("bkStatus").style.color = "var(--c-ink2)";
 });
 
@@ -5020,7 +5290,7 @@ $("swAi").addEventListener("change", e => {
   document.querySelectorAll("#draft [data-ai]").forEach(b => { b.disabled = !state.ai; });
 });
 $("swAgentFail").addEventListener("change", e => { state.agentFail = e.target.checked; });
-$("swToday").addEventListener("change", e => { state.pretend = e.target.checked; if(current && card.style.display === "block") fill(current); clReload(true); });
+$("swToday").addEventListener("change", e => { state.pretend = e.target.checked; if(current && card.style.display === "block") fill(current); clReload(true); if(state.watchOn || state.newsOn) watchCheck(); if(isOpen("hub")) paintHub(); });
 
 /* ---------------- card controls ---------------- */
 $("closeBtn").addEventListener("click", closeCard);
