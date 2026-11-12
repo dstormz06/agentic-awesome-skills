@@ -169,6 +169,8 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 #web .addr .url{flex:1;background:#f1f3f5;border-radius:99px;padding:4px 12px;font-size:12px;color:var(--ink2)}
 #web .body{font:13px/1.5 "Segoe UI",-apple-system,system-ui,sans-serif;color:#1f2328}
 #web h2{margin:0 0 6px;font-size:14px}
+#webAnda{border:1px solid var(--win-line);border-radius:8px;padding:12px 14px;margin:0 0 16px;background:#f7fafd}
+#webAnda .wa{margin:0 0 10px;font-size:12.5px;color:var(--ink2)}
 #web table{border-collapse:collapse;width:100%;font-size:12px;margin:0 0 14px}
 #web th,#web td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--win-line);vertical-align:top}
 #web th{font-size:10px;letter-spacing:.08em;color:var(--ink3);font-weight:800}
@@ -284,7 +286,10 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 #lookup .r{display:flex;gap:8px}
 #lookup .err{color:var(--c-bad);font-size:calc(11.5px*var(--ts));margin-top:6px;display:none}
 #draft{width:480px;padding:16px 18px;left:calc(50% - 240px);top:52px;max-height:calc(100% - var(--tb-h) - 76px);overflow:auto}
-#draft textarea{min-height:128px;resize:vertical}
+#draft textarea{min-height:84px;resize:vertical}
+#drAiBox{margin-top:12px;border-top:1px solid var(--c-hair);padding-top:8px}
+#drAiBox summary{cursor:pointer;font-size:calc(12.5px*var(--ts));font-weight:650;color:var(--c-ink2);padding:4px 0}
+#drAiBox summary span{font-weight:400;color:var(--c-ink3)}
 #draft .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 #draft .find{margin:6px 0 0;padding:8px 10px;border-radius:8px;font-size:calc(12px*var(--ts));line-height:1.4}
 #draft .find.diff{background:var(--c-warn-bg);color:var(--c-warn)}
@@ -292,6 +297,20 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 #draft .find.note{background:var(--c-mark);color:var(--c-ink2)}
 #draft .pill:disabled{opacity:.55}
 #drFactWrap,#drProofWrap{margin-top:10px}
+/* round 21: a summary line, the draft with its changes marked, and the answer of an AI built into the PC */
+#drSummary{margin-top:10px;font-size:calc(12.5px*var(--ts));font-weight:650;color:var(--c-ink)}
+#drSummary span{font-weight:400;color:var(--c-ink2)}
+#draft .prmark{margin:8px 0 0;padding:10px 12px;border:1px solid var(--c-line);border-radius:8px;background:#fff;font-size:calc(12.5px*var(--ts));line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;max-height:190px;overflow:auto;color:var(--c-ink)}
+#draft .prmark del{color:var(--c-bad);text-decoration-thickness:1.5px;background:var(--c-bad-bg);border-radius:3px;padding:0 1px}
+#draft .prmark ins{color:var(--c-good);text-decoration:none;font-weight:650;background:var(--c-good-bg);border-radius:3px;padding:0 2px;margin-left:1px}
+#draft .prk{font-size:calc(9.5px*var(--ts));font-weight:800;letter-spacing:.12em;color:var(--c-ink3);margin:10px 0 0}
+#drLocalAi:empty,#drLocalOut:empty{display:none}
+#drLocalOut .lai{margin-top:8px;padding:10px 12px;border:1px solid var(--c-line);border-radius:8px;background:#fff}
+#drLocalOut .lai .k{font-size:calc(9.5px*var(--ts));font-weight:800;letter-spacing:.12em;color:var(--c-ink3)}
+#drLocalOut .lai .t{white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 0 8px;font-size:calc(12.5px*var(--ts));line-height:1.5}
+#drLocalOut .lai .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#drLocalOut .lai .row span{font-size:calc(11.5px*var(--ts));color:var(--c-ink3)}
+#drLocalOut .pill{min-height:30px;padding:4px 12px;font-size:calc(12px*var(--ts))}
 /* the facts from the sheet and the notes are read before the closing line that says what was not checked */
 #drFactWrap:not([hidden]){display:flex;flex-direction:column}
 #drOut,#drFacts{display:contents}
@@ -820,7 +839,7 @@ details.sec>summary h3.grp{padding:0;margin:0}
 :root[data-density="compact"]{--sp:.72}
 :root[data-ts="large"]{--ts:1.15}
 :root[data-ts="xl"]{--ts:1.3}
-:root[data-dir="t"],:root[data-dir="u"],:root[data-dir="v"]{--c-bg:#ffffff;--c-ink:#1d2329;--c-ink2:#46505a;--c-ink3:#58616b;--c-hair:#eceef1;--c-line:#dde1e6;--c-accent:#3f4a56;--c-accent2:#333d47;--c-good:#1a6b43;--c-good-bg:#e6f1ea;--c-warn:#8a5800;--c-warn-bg:#faf1dc;--c-bad:#a33636;--c-bad-bg:#f9e9e9;--c-track:#e6e8eb;--c-fill:#6a7683;--c-mark:rgba(63,74,86,.09);--c-radius:12px;--c-shadow:0 18px 40px -14px rgba(20,24,28,.26),0 3px 9px rgba(20,24,28,.08);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
+:root[data-dir="t"],:root[data-dir="u"],:root[data-dir="v"]{--c-bg:#ffffff;--c-ink:#1d2329;--c-ink2:#46505a;--c-ink3:#58616b;--c-hair:#eceef1;--c-line:#dde1e6;--c-accent:#3f4a56;--c-accent2:#333d47;--c-good:#1a6b43;--c-good-bg:#e6f1ea;--c-warn:#8a5800;--c-warn-bg:#faf1dc;--c-bad:#a33636;--c-bad-bg:#f9e9e9;--c-track:#e6e8eb;--c-fill:#6a7683;--c-mark:rgba(63,74,86,.09);--c-radius:12px;--c-shadow:0 0 0 .5px rgba(15,23,35,.10),0 1px 2px rgba(15,23,35,.06),0 8px 18px -6px rgba(15,23,35,.16),0 28px 56px -18px rgba(15,23,35,.30);--c-font:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;--c-drug-font:var(--c-font);--c-num-font:var(--c-font)}
 :root[data-dir="v"]{--c-ink2:#3c444d;--c-ink3:#4a525b;--c-radius:16px}
 .hero5,.ribbon5{display:none}
 :root[data-dir="t"] .hero5,:root[data-dir="u"] .hero5,:root[data-dir="v"] .hero5{display:block}
@@ -832,10 +851,20 @@ details.sec>summary h3.grp{padding:0;margin:0}
 :root[data-dir="t"] .seal,:root[data-dir="u"] .seal,:root[data-dir="v"] .seal{background:transparent;border:1px solid #cfd3d8;color:var(--c-ink2)}
 :root[data-dir="t"] .attn,:root[data-dir="u"] .attn,:root[data-dir="v"] .attn{border:none;border-radius:10px}
 :root[data-dir="t"] .chips,:root[data-dir="u"] .chips,:root[data-dir="v"] .chips{gap:4px 14px}
-:root[data-dir="t"] #chipCopy,:root[data-dir="u"] #chipCopy,:root[data-dir="v"] #chipCopy{flex:1 1 100%;order:-1;justify-content:center;display:flex;align-items:center;background:var(--c-accent);border-color:var(--c-accent);color:#fff;font-weight:650;border-radius:10px;min-height:44px;margin-bottom:6px}
-:root[data-dir="t"] #chipCopy::after,:root[data-dir="u"] #chipCopy::after,:root[data-dir="v"] #chipCopy::after{content:"Enter";font:500 10.5px/1 ui-monospace,Consolas,monospace;border:1px solid currentColor;border-radius:4px;padding:2px 5px;margin-left:10px;opacity:.85}
-:root[data-dir="t"] .chip:not(#chipCopy),:root[data-dir="u"] .chip:not(#chipCopy),:root[data-dir="v"] .chip:not(#chipCopy){border:none;background:none;padding:6px 2px;min-height:32px;border-radius:6px}
-:root[data-dir="t"] .chip.link:not(#chipCopy),:root[data-dir="u"] .chip.link:not(#chipCopy),:root[data-dir="v"] .chip.link:not(#chipCopy){color:var(--c-accent)}
+/* round 21: the main action is "Add a note" (Enter). It is a slim, tinted button, not a solid bar; Copy status is one of the small buttons (and the S key). */
+:root[data-dir="t"] #chipNotes,:root[data-dir="u"] #chipNotes,:root[data-dir="v"] #chipNotes{flex:1 1 100%;order:-1;justify-content:center;display:flex;align-items:center;
+  background:color-mix(in srgb,var(--c-accent) 10%,transparent);border:1px solid color-mix(in srgb,var(--c-accent) 26%,transparent);color:var(--c-accent2);font-weight:650;border-radius:9px;min-height:34px;margin-bottom:4px;
+  transition:background-color .12s ease,border-color .12s ease}
+:root[data-dir="t"] #chipNotes:hover,:root[data-dir="u"] #chipNotes:hover,:root[data-dir="v"] #chipNotes:hover{background:color-mix(in srgb,var(--c-accent) 16%,transparent);border-color:color-mix(in srgb,var(--c-accent) 40%,transparent)}
+:root[data-dir="t"] #chipNotes::after,:root[data-dir="u"] #chipNotes::after,:root[data-dir="v"] #chipNotes::after{content:"Enter";font:500 10.5px/1 ui-monospace,Consolas,monospace;border:1px solid currentColor;border-radius:4px;padding:2px 5px;margin-left:10px;opacity:.7}
+:root[data-dir="t"] .chip:not(#chipNotes),:root[data-dir="u"] .chip:not(#chipNotes),:root[data-dir="v"] .chip:not(#chipNotes){border:none;background:none;padding:6px 2px;min-height:32px;border-radius:6px}
+:root[data-dir="t"] .chip.link:not(#chipNotes),:root[data-dir="u"] .chip.link:not(#chipNotes),:root[data-dir="v"] .chip.link:not(#chipNotes){color:var(--c-accent)}
+/* a quiet, layered shadow and a hairline of light along the top edge, in the manner of a well-made desktop panel (round 21) */
+:root[data-dir="t"] #card,:root[data-dir="u"] #card,:root[data-dir="v"] #card{box-shadow:var(--c-shadow),inset 0 1px 0 rgba(255,255,255,.7);-webkit-font-smoothing:antialiased}
+:root[data-dir="t"] .app-win,:root[data-dir="u"] .app-win,:root[data-dir="v"] .app-win{box-shadow:0 0 0 .5px rgba(15,23,35,.10),0 8px 18px -6px rgba(15,23,35,.14),0 30px 60px -20px rgba(15,23,35,.32);border-radius:14px}
+.acthint{display:none;font-size:calc(10.5px*var(--ts));line-height:1.3;color:var(--c-ink3);margin-top:2px}
+:root[data-dir="t"] .acthint,:root[data-dir="u"] .acthint,:root[data-dir="v"] .acthint{display:block}
+.acthint b{font-weight:650;color:var(--c-ink2)}
 .hero5{padding-top:calc(4px*var(--sp));padding-bottom:calc(14px*var(--sp))}
 .hero5 .hl{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
 .hero5 .hl b{font-size:calc(30px*var(--ts));line-height:1;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
@@ -859,8 +888,7 @@ details.sec>summary h3.grp{padding:0;margin:0}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){:root[data-dir="v"] .chips-slot{background:var(--c-bg)}}
 @media (prefers-reduced-transparency: reduce){:root[data-dir="v"] .chips-slot{background:var(--c-bg);-webkit-backdrop-filter:none;backdrop-filter:none}}
 :root[data-dir="t"] .chips,:root[data-dir="u"] .chips,:root[data-dir="v"] .chips{gap:0 14px}
-:root[data-dir="t"] #chipCopy,:root[data-dir="u"] #chipCopy,:root[data-dir="v"] #chipCopy{margin-bottom:4px}
-:root[data-dir="t"] .chip:not(#chipCopy),:root[data-dir="u"] .chip:not(#chipCopy),:root[data-dir="v"] .chip:not(#chipCopy){font-size:calc(12px*var(--ts));min-height:28px;padding:3px 2px}
+:root[data-dir="t"] .chip:not(#chipNotes),:root[data-dir="u"] .chip:not(#chipNotes),:root[data-dir="v"] .chip:not(#chipNotes){font-size:calc(12px*var(--ts));min-height:28px;padding:3px 2px}
 :root[data-dir="v"] #card{background-image:linear-gradient(165deg,rgba(255,255,255,.65),rgba(255,255,255,0) 38%)}
 
 /* ---- One Bar (a lookup style), recent ANDAs, Today ---- */
@@ -909,16 +937,22 @@ details.sec>summary h3.grp{padding:0;margin:0}
 .desk[data-wall="dusk"]{--w-bg1:#0c1c3a;--w-bg2:#071226;--w-p0:#06266b;--w-p1:#0f4fc2;--w-p2:#2b7de9;--w-p3:#123a7a;--w-edge:rgba(160,200,255,.28);--desk-ink:#ffffff;--desk-halo:rgba(0,0,0,.65)}
 .desk[data-wall="slate"]{--w-bg1:#3d6c97;--w-bg2:#1f456b;--desk-ink:#ffffff;--desk-halo:rgba(0,0,0,.6)}
 .desk[data-wall="slate"] .wall .bloom{display:none}
+/* the desert: sand dunes under a clear blue sky, drawn here (the owner's choice of scene, round 21) */
+.wall .dunes{display:none}
+.desk[data-wall="desert"] .wall .dunes{display:inline}
+.desk[data-wall="desert"] .wall .bloom,.desk[data-wall="desert"] .wall .plainbg{display:none}
+.desk[data-wall="desert"]{--desk-ink:#ffffff;--desk-halo:rgba(0,20,60,.7)}
+.desk[data-wall="desert"] #taskbar{background:rgba(240,244,249,.86)}
 /* The drawing is the first thing in the desktop and sits at the back. The desktop must not become a layer of its own: the card, the notices and the menus
    are outside it and have to stay in one order with the windows inside it. */
 .wall{position:absolute;inset:0;width:100%;height:100%;z-index:0;display:block}
-body{background:#cfe3f6}
+body{background:#4f9be0}
 .icon{color:var(--desk-ink);text-shadow:0 0 3px var(--desk-halo),0 1px 2px var(--desk-halo);font-size:12px}
 .icon:hover{background:rgba(255,255,255,.28)}
 .icon.deco{pointer-events:none;user-select:none;-webkit-user-select:none}
 #deskIcon{top:140px}
 /* the card itself has the keyboard focus when it opens: the ring is in the look's own color, not the simulation's blue */
-#card:focus-visible{outline:2px solid color-mix(in srgb,var(--c-accent) 50%,transparent);outline-offset:2px;border-radius:var(--c-radius)}
+#card:focus-visible{outline:1.5px solid color-mix(in srgb,var(--c-accent) 30%,transparent);outline-offset:3px;border-radius:var(--c-radius)}
 #wallPick button[aria-pressed="true"]{background:var(--sim);border-color:var(--sim);color:#fff;font-weight:600}
 
 /* windows: Windows 11 corners, a soft shadow, caption buttons the right size */
@@ -1020,7 +1054,7 @@ body{background:#cfe3f6}
 </style>
 </head>
 <body>
-<div class="desk" id="desk" role="main" data-wall="bloom">
+<div class="desk" id="desk" role="main" data-wall="desert">
   <div class="banner" role="note">
     <h1>Browser simulation</h1><span class="long">of the ANDA Companion (Notula) Windows app.</span><span class="short">Fictional data. Not an FDA product.</span>
     <span class="sp"></span>
@@ -1033,8 +1067,24 @@ body{background:#cfe3f6}
       <linearGradient id="wg1" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="-400"><stop offset="0" style="stop-color:var(--w-p2)"/><stop offset="1" style="stop-color:var(--w-p3)"/></linearGradient>
       <linearGradient id="wg2" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="-400"><stop offset="0" style="stop-color:var(--w-p1)"/><stop offset="1" style="stop-color:var(--w-p2)"/></linearGradient>
       <linearGradient id="wg3" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="-400"><stop offset="0" style="stop-color:var(--w-p0)"/><stop offset="1" style="stop-color:var(--w-p1)"/></linearGradient>
+      <linearGradient id="dsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c66bd"/><stop offset=".38" stop-color="#4f9be0"/><stop offset=".62" stop-color="#a9d3f2"/><stop offset=".7" stop-color="#dcecf6"/></linearGradient>
+      <linearGradient id="dfar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9c08d"/><stop offset="1" stop-color="#d9a468"/></linearGradient>
+      <linearGradient id="dmid" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3c27c"/><stop offset="1" stop-color="#e09a4b"/></linearGradient>
+      <linearGradient id="dnear" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f8cf8c"/><stop offset=".55" stop-color="#ecab57"/><stop offset="1" stop-color="#d98d3a"/></linearGradient>
+      <linearGradient id="dshade" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c47a35"/><stop offset="1" stop-color="#9c5a24"/></linearGradient>
+      <filter id="dblur" x="-20%" y="-200%" width="140%" height="500%"><feGaussianBlur stdDeviation="9"/></filter>
     </defs>
-    <rect width="1600" height="900" fill="url(#wg0)"/>
+    <rect class="plainbg" width="1600" height="900" fill="url(#wg0)"/>
+    <g class="dunes">
+      <rect width="1600" height="900" fill="url(#dsky)"/>
+      <g fill="#fff" filter="url(#dblur)" opacity=".55"><ellipse cx="330" cy="150" rx="250" ry="13"/><ellipse cx="520" cy="118" rx="160" ry="9"/><ellipse cx="1180" cy="210" rx="300" ry="15"/><ellipse cx="1390" cy="170" rx="150" ry="8"/><ellipse cx="820" cy="300" rx="220" ry="9"/></g>
+      <path d="M0 560C180 520 330 548 520 536C700 524 800 488 990 508C1180 528 1330 500 1600 520V900H0Z" fill="url(#dfar)"/>
+      <path d="M0 640C220 560 420 590 640 560C760 544 840 520 940 540C1120 576 1300 640 1600 600V900H0Z" fill="url(#dmid)"/>
+      <path d="M640 560C760 544 840 520 940 540C1010 600 1050 700 1010 900H420C560 800 640 680 640 560Z" fill="url(#dshade)" opacity=".85"/>
+      <path d="M-20 760C260 640 560 610 820 690C1080 770 1320 800 1620 720V900H-20Z" fill="url(#dnear)"/>
+      <path d="M820 690C1080 770 1320 800 1620 720V900H1040C980 820 900 740 820 690Z" fill="url(#dshade)" opacity=".5"/>
+      <g fill="none" stroke="#9a5a22" stroke-opacity=".13" stroke-width="1.6"><path d="M-40 742C360 650 820 690 1660 820" /><path d="M-34 751C370 660 824 699 1660 827" /><path d="M-28 760C380 670 828 708 1660 834" /><path d="M-22 769C390 680 832 717 1660 841" /><path d="M-16 778C400 690 836 726 1660 848" /><path d="M-10 787C410 700 840 735 1660 855" /><path d="M-4 796C420 710 844 744 1660 862" /><path d="M2 805C430 720 848 753 1660 869" /><path d="M8 814C440 730 852 762 1660 876" /><path d="M14 823C450 740 856 771 1660 883" /><path d="M20 832C460 750 860 780 1660 890" /><path d="M26 841C470 760 864 789 1660 897" /><path d="M32 850C480 770 868 798 1660 904" /><path d="M38 859C490 780 872 807 1660 911" /><path d="M44 868C500 790 876 816 1660 918" /><path d="M50 877C510 800 880 825 1660 925" /></g>
+    </g>
     <g class="bloom" transform="translate(800 500)"><g opacity=".55"><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(9) scale(1.62)" fill="url(#wg1)"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(39) scale(1.62)" fill="url(#wg1)"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(69) scale(1.62)" fill="url(#wg1)"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(99) scale(1.62)" fill="url(#wg1)"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(129) scale(1.62)" fill="url(#wg1)"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(159) scale(1.62)" fill="url(#wg1)"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(189) scale(1.62)" fill="url(#wg1)"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(219) scale(1.62)" fill="url(#wg1)"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(249) scale(1.62)" fill="url(#wg1)"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(279) scale(1.62)" fill="url(#wg1)"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(309) scale(1.62)" fill="url(#wg1)"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(339) scale(1.62)" fill="url(#wg1)"/></g><g opacity=".8"><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(24) scale(1.18)" fill="url(#wg2)" stroke="var(--w-edge)" stroke-width=".9"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(54) scale(1.18)" fill="url(#wg2)" stroke="var(--w-edge)" stroke-width=".9"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(84) scale(1.18)" fill="url(#wg2)" stroke="var(--w-edge)" stroke-width=".9"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(114) scale(1.18)" fill="url(#wg2)" stroke="var(--w-edge)" stroke-width=".9"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(144) scale(1.18)" fill="url(#wg2)" stroke="var(--w-edge)" stroke-width=".9"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(174) scale(1.18)" fill="url(#wg2)" stroke="var(--w-edge)" stroke-width=".9"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(204) scale(1.18)" fill="url(#wg2)" stroke="var(--w-edge)" stroke-width=".9"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(234) scale(1.18)" fill="url(#wg2)" stroke="var(--w-edge)" stroke-width=".9"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(264) scale(1.18)" fill="url(#wg2)" stroke="var(--w-edge)" stroke-width=".9"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(294) scale(1.18)" fill="url(#wg2)" stroke="var(--w-edge)" stroke-width=".9"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(324) scale(1.18)" fill="url(#wg2)" stroke="var(--w-edge)" stroke-width=".9"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(354) scale(1.18)" fill="url(#wg2)" stroke="var(--w-edge)" stroke-width=".9"/></g><g><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(0) scale(.72)" fill="url(#wg3)" stroke="var(--w-edge)" stroke-width="1.2"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(36) scale(.72)" fill="url(#wg3)" stroke="var(--w-edge)" stroke-width="1.2"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(72) scale(.72)" fill="url(#wg3)" stroke="var(--w-edge)" stroke-width="1.2"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(108) scale(.72)" fill="url(#wg3)" stroke="var(--w-edge)" stroke-width="1.2"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(144) scale(.72)" fill="url(#wg3)" stroke="var(--w-edge)" stroke-width="1.2"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(180) scale(.72)" fill="url(#wg3)" stroke="var(--w-edge)" stroke-width="1.2"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(216) scale(.72)" fill="url(#wg3)" stroke="var(--w-edge)" stroke-width="1.2"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(252) scale(.72)" fill="url(#wg3)" stroke="var(--w-edge)" stroke-width="1.2"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(288) scale(.72)" fill="url(#wg3)" stroke="var(--w-edge)" stroke-width="1.2"/><path d="M0 0C96-70 132-270 0-400C-132-270-96-70 0 0Z" transform="rotate(324) scale(.72)" fill="url(#wg3)" stroke="var(--w-edge)" stroke-width="1.2"/></g></g>
   </svg>
   <div class="icon deco" aria-hidden="true" style="top:52px">
@@ -1134,7 +1184,8 @@ PS C:\work&gt; </div>
       <div id="appPick" role="group" aria-label="Which simulated apps to show"></div>
       <div class="lbl">DESKTOP BACKGROUND</div>
       <div id="wallPick" class="row" role="group" aria-label="Desktop background">
-        <button class="btn" type="button" data-wall="bloom" aria-pressed="true">Light blue</button>
+        <button class="btn" type="button" data-wall="desert" aria-pressed="true">Desert</button>
+        <button class="btn" type="button" data-wall="bloom" aria-pressed="false">Light blue</button>
         <button class="btn" type="button" data-wall="dusk" aria-pressed="false">Dark blue</button>
         <button class="btn" type="button" data-wall="slate" aria-pressed="false">Plain</button>
       </div>
@@ -1192,7 +1243,7 @@ PS C:\work&gt; </div>
       <button id="appIcon" type="button" aria-label="ANDA Companion (Notula) tray icon. Click for lookup, right-click or long-press for the menu."><span class="glyph"></span></button>
       <button type="button" tabindex="-1" aria-hidden="true" class="hide-narrow"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 6.5a9 9 0 0112 0M4 9a6 6 0 018 0M6.2 11.4a3 3 0 013.6 0" stroke="#454b53" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="13" r=".9" fill="#454b53"/></svg></button>
       <button type="button" tabindex="-1" aria-hidden="true" class="hide-narrow"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2.5 6h2.5L8.5 3v10L5 10H2.5z" fill="#454b53"/><path d="M11 5.5a3.5 3.5 0 010 5" stroke="#454b53" stroke-width="1.4" stroke-linecap="round"/></svg></button>
-      <div class="clock" aria-label="Clock, simulated"><div id="simClockTime">10:42 AM</div><div>7/16/2026</div></div>
+      <div class="clock" aria-label="Clock"><div id="simClockTime">10:42 AM</div><div id="simClockDate">7/16/2026</div></div>
     </div>
   </div>
 
@@ -1308,6 +1359,11 @@ PS C:\work&gt; </div>
     <div class="frow"><input type="text" id="dataUrl" placeholder="Optional: the https address of the Drugs@FDA data file, to update it from FDA" aria-label="Drugs@FDA data file address"><button class="pill quiet" id="dataUpdate" type="button">Update now</button><span></span></div>
     <div class="hint" id="dataRefStatus" style="margin:0 0 4px"></div>
     <p class="hint">Update now fetches that one address, only when you press it, and keeps the file only if it really is a Drugs@FDA data file. It needs the network and is the only thing here that does. The address is the file link on FDA's Drugs@FDA data files page; the app does not guess it. The PSG line has no official source connected: it shows a date from a PSG column in your own sheet, or says it is not available.</p>
+    <hr class="hair">
+    <div class="lbl">ANDA PAGE · WHERE “OPEN ANDA PAGE” ON THE CARD GOES</div>
+    <div class="frow"><input type="text" id="setAndaUrl" maxlength="300" spellcheck="false" autocomplete="off" placeholder="https://your-system/anda/{anda}" aria-label="ANDA page address"><button class="pill quiet" id="setAndaUrlReset" type="button">Use the example</button><span></span></div>
+    <div class="hint" id="setAndaUrlStatus" role="status" style="margin:0 0 4px"></div>
+    <p class="hint">Write {anda} where the six-digit number goes. Only an https address is opened, in your default browser, and only the number is put into it. Leave it empty and the button says so instead of guessing. The address shown at first is an example for this simulation.</p>
     <hr class="hair">
     <div class="lbl">CARD DETAILS · COLUMNS OF YOUR SHEET SHOWN WHEN A CARD IS EXPANDED</div>
     <div class="wrap" id="setFields" role="group" aria-label="Card details"></div>
@@ -1470,13 +1526,7 @@ PS C:\work&gt; </div>
       <button class="pill quiet" id="drSample" type="button">Use the sample draft</button>
     </div>
     <p class="hint" id="drLocalHint">All three run on this PC by fixed rules. No AI is used and nothing is sent.</p>
-    <div class="lbl">AI ACTIONS · NEED AN APPROVED MODEL</div>
-    <div class="acts" style="margin-top:0">
-      <button class="pill quiet" type="button" data-ai="Rewrite" disabled>Rewrite</button>
-      <button class="pill quiet" type="button" data-ai="Proofread" disabled>Proofread with AI</button>
-      <button class="pill quiet" type="button" data-ai="Fact-check" disabled>Fact-check with AI</button>
-    </div>
-    <p class="hint" id="drAiHint">Off until a model is approved and connected. When on, a preview shows the exact text first, nothing is sent until you press Send, and the result is Copy only: the app never pastes or sends for you.</p>
+    <div id="drSummary" role="status"></div>
     <div id="drFactWrap">
       <div class="lbl" id="drFactLbl">FACT CHECK · YOUR DATA, YOUR NOTES AND THE CALENDAR</div>
       <div id="drOut" aria-live="polite"></div>
@@ -1488,6 +1538,17 @@ PS C:\work&gt; </div>
     </div>
     <div id="drSend" aria-live="polite"></div>
     <div id="drRecall"></div>
+    <details id="drAiBox"><summary>AI options <span id="drAiState">· off</span></summary>
+      <div class="lbl">AI ACTIONS · NEED AN APPROVED MODEL, OR THE AI BUILT INTO THIS PC</div>
+      <div class="acts" style="margin-top:0">
+        <button class="pill quiet" type="button" data-ai="Rewrite" disabled>Rewrite</button>
+        <button class="pill quiet" type="button" data-ai="Proofread" disabled>Proofread with AI</button>
+        <button class="pill quiet" type="button" data-ai="Fact-check" disabled>Fact-check with AI</button>
+      </div>
+      <p class="hint" id="drAiHint">Off until a model is approved and connected. When on, a preview shows the exact text first, nothing is sent until you press Send, and the result is Copy only: the app never pastes or sends for you.</p>
+      <p class="hint" id="drLocalAi" role="status"></p>
+      <div id="drLocalOut" aria-live="polite"></div>
+    </details>
   </div>
 
   <!-- ===== my action (prompt, AI or agent) ===== -->
@@ -1688,32 +1749,32 @@ PS C:\work&gt; </div>
     <div class="body" id="c-ai"></div>
   </div>
   <div id="ext">
-    <details id="x-details-d" open><summary>Applicant and project <span id="x-details-n" style="font-weight:400;color:var(--c-ink3)"></span></summary><div class="cnt"><div id="x-details"></div><div class="dfoot"><button class="cp" id="x-details-all" type="button">Copy all</button><span id="x-details-src"></span><span id="x-details-status" role="status"></span></div></div></details>
-    <details id="x-watch-d"><summary>Watch list <span id="x-watch-n" style="font-weight:400;color:var(--c-ink3)"></span></summary><div class="cnt" id="x-watch"></div></details>
-    <details><summary>Pending &amp; urgent items <span id="x-pending-n" style="font-weight:400;color:var(--c-ink3)"></span></summary><div class="cnt" id="x-pending"></div></details>
     <details id="x-notes-d"><summary>My notes and project notes <span id="x-notes-n" style="font-weight:400;color:var(--c-ink3)"></span></summary><div class="cnt">
       <div class="qn">
         <label for="qnText" id="qnLabel">Add a quick note</label>
         <textarea id="qnText" rows="2" maxlength="500" placeholder="Type a note, then press Ctrl+Enter or Save note"></textarea>
         <div class="qnrow"><button class="cp go" id="qnSave" type="button" disabled>Save note</button><span id="qnMsg" role="status"></span><span id="qnCount">0/500</span></div>
-        <p class="fine">Kept on this PC, in the app's own notes file. Your sheet and your notes folder are never changed, and a note is never sent anywhere.</p>
+        <p class="fine" id="qnFine">Kept on this PC, in the app's own notes file. Your sheet and your notes folder are never changed, and a note is never sent anywhere.</p>
       </div>
       <div id="x-notes"></div></div></details>
+    <details id="x-details-d" open><summary>Applicant and project <span id="x-details-n" style="font-weight:400;color:var(--c-ink3)"></span></summary><div class="cnt"><div id="x-details"></div><div class="dfoot"><button class="cp" id="x-details-all" type="button">Copy all</button><span id="x-details-src"></span><span id="x-details-status" role="status"></span></div></div></details>
+    <details id="x-watch-d"><summary>Watch list <span id="x-watch-n" style="font-weight:400;color:var(--c-ink3)"></span></summary><div class="cnt" id="x-watch"></div></details>
+    <details><summary>Pending &amp; urgent items <span id="x-pending-n" style="font-weight:400;color:var(--c-ink3)"></span></summary><div class="cnt" id="x-pending"></div></details>
     <details id="x-mail-d" hidden><summary>Recent Outlook mail <span id="x-mail-n" style="font-weight:400;color:var(--c-ink3)"></span></summary><div class="cnt" id="x-mail"></div></details>
     <details id="x-agents-d" hidden><summary><span id="x-agents-t">Agent findings</span></summary><div class="cnt" id="x-agents"></div></details>
     <details><summary>Forecast &amp; assumptions</summary><div class="cnt" id="x-forecast"></div></details>
     <details><summary>Sister / related ANDAs</summary><div class="cnt" id="x-sisters"></div></details>
   </div>
   <div class="slot chips-slot"><div class="chips">
+    <button class="chip" id="chipNotes" type="button"></button>
     <button class="chip" id="chipCopy" type="button">Copy status</button>
     <button class="chip" id="chipReplies" type="button" aria-haspopup="menu">Quick replies ▾</button>
     <button class="chip" id="chipPin" type="button" aria-pressed="false">Keep in my list</button>
     <button class="chip" id="chipSister" type="button"></button>
-    <button class="chip" id="chipNotes" type="button"></button>
-    <button class="chip link" id="chipOpen" type="button">Open in system of record ↗</button>
-  </div></div>
+    <button class="chip link" id="chipOpen" type="button">Open ANDA page ↗</button>
+  </div><div class="acthint" id="actHint"><b>Enter</b> adds a note · <b>S</b> or <b>Copy status</b> copies the status line</div></div>
   <button id="moreBtn" type="button">Full brief ↓</button>
-  <div class="kbdbar"><span>Esc close</span><span>Enter copy status</span><span>E expand</span><span>Space pin</span><span>R quick replies</span><span>N note</span></div>
+  <div class="kbdbar"><span>Esc close</span><span>Enter add a note</span><span>S copy status</span><span>E expand</span><span>Space pin</span><span>R quick replies</span></div>
 </div>
 
 <script>
@@ -1858,7 +1919,52 @@ function evaluateDate(t, lead){
 /* ---- Services/WatchRules.cs: deterministic flags with their evidence; states what the data shows, never what a rule means ---- */
 const SEV = { info:0, warn:1, bad:2 };
 const RANK = { "goal-passed":0, "goal-soon":1, "goal-date-calendar":2, "forecast-date-calendar":3, "no-goal-date":6 };
-const demoToday = () => state.pretend ? ymd(2026, 10, 1) : ymd(2026, 7, 16);   /* demo records are frozen at their extract date unless the tester moves the clock */
+/* ---------------- the clock (round 21) ----------------
+   The page tells the real time, to the second, in the time zone of the person's own computer (Eastern Time if the browser does not say).
+   The sample records were written around Thursday, Jul 16, 2026. So that they read as current, every date in them is moved forward by a whole number of
+   weeks: a Saturday stays a Saturday, "Thursday huddle" stays true, and the goal is still about 11 weeks away. "Today", for every rule, is the real today.
+   With ?clock=fixed in the address the page stays at Jul 16, 2026, 10:42 AM: the test suites use that so their expected dates never go stale. */
+const CLOCK_FIXED = /(?:^|&)clock=fixed(?:&|$)/.test(location.search.slice(1));
+const SIM_TZ = (() => { try{ return Intl.DateTimeFormat().resolvedOptions().timeZone || "America/New_York"; }catch(e){ return "America/New_York"; } })();
+const BASE_DAY = ymd(2026, 7, 16);
+function wallNow(){     /* the wall clock of that time zone, as numbers */
+  const out = {}; try{
+    new Intl.DateTimeFormat("en-US", { timeZone:SIM_TZ, hourCycle:"h23", year:"numeric", month:"numeric", day:"numeric", hour:"numeric", minute:"numeric", second:"numeric" })
+      .formatToParts(new Date()).forEach(x => { if(x.type !== "literal") out[x.type] = +x.value; });
+  }catch(e){ const n = new Date(); return { year:n.getFullYear(), month:n.getMonth() + 1, day:n.getDate(), hour:n.getHours(), minute:n.getMinutes(), second:n.getSeconds() }; }
+  return out;
+}
+const realToday = () => { const n = wallNow(); return ymd(n.year, n.month, n.day); };
+const SHIFT_DAYS = CLOCK_FIXED ? 0 : 7 * Math.floor((realToday() - BASE_DAY) / (7 * DAY));
+const SHIFT_LAG = CLOCK_FIXED ? 0 : Math.round((realToday() - BASE_DAY) / DAY) - SHIFT_DAYS;      /* 0 to 6: how many days after the sample Thursday today is */
+/* A date of the sample data, moved to the present. Dates in the two weeks after the sample Thursday (a due date "next week") move one more week when
+   today is late in the week, so that nothing that was due soon reads as overdue. */
+const shiftT = t => t + (SHIFT_DAYS + (SHIFT_LAG >= 4 && t > BASE_DAY && t <= BASE_DAY + 13 * DAY ? 7 : 0)) * DAY;
+const shiftYMD = a => { const x = new Date(shiftT(ymd(a[0], a[1], a[2]))); return [x.getUTCFullYear(), x.getUTCMonth() + 1, x.getUTCDate()]; };
+const RD_MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], RD_DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const RD_RE = /\b(?:(Mon|Tue|Wed|Thu|Fri|Sat|Sun) )?(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{1,2})(?:, (\d{4}))?\b|\b(?:(Mon|Tue|Wed|Thu|Fri|Sat|Sun) )?(\d{1,2})\/(\d{1,2})\/(\d{4})\b|\b(20\d{2})-(\d{2})-(\d{2})\b/g;
+function redate(text){     /* every date written in a sample text, moved the same way and written in the same style */
+  if(!SHIFT_DAYS || typeof text !== "string") return text;
+  return text.replace(RD_RE, (all, wd1, mon, day, year, wd2, nm, nd, ny, iy, im, id) => {
+    const t0 = mon ? ymd(year ? +year : 2026, RD_MON.indexOf(mon) + 1, +day) : nm ? ymd(+ny, +nm, +nd) : ymd(+iy, +im, +id);
+    if(Number.isNaN(t0)) return all;
+    const x = new Date(shiftT(t0)), Y = x.getUTCFullYear(), M = x.getUTCMonth(), D = x.getUTCDate(), wd = RD_DOW[x.getUTCDay()];
+    if(mon) return (wd1 ? wd + " " : "") + RD_MON[M] + " " + D + (year ? ", " + Y : "");
+    if(nm) return (wd2 ? wd + " " : "") + (M + 1) + "/" + D + "/" + Y;
+    return Y + "-" + String(M + 1).padStart(2, "0") + "-" + String(D).padStart(2, "0");
+  });
+}
+if(SHIFT_DAYS){
+  const deep = o => { for(const k of Object.keys(o)){ const v = o[k]; if(typeof v === "string") o[k] = redate(v); else if(Array.isArray(v) && v.length === 3 && v.every(n => typeof n === "number") && v[0] > 2000) o[k] = shiftYMD(v); else if(v && typeof v === "object") deep(v); } };
+  deep(DATA);
+  /* the data is read each morning: it is as of today (or yesterday, before 07:12) */
+  const n = wallNow(), asOf = new Date(realToday() - (n.hour * 60 + n.minute < 432 ? DAY : 0));
+  Object.values(DATA).forEach(d => { d.asOf = d.asOf.replace(/data as of [A-Z][a-z]{2} \d{1,2}/, "data as of " + RD_MON[asOf.getUTCMonth()] + " " + asOf.getUTCDate()); });
+  /* the sample windows: every date written in them */
+  const walk = document.createTreeWalker(document.getElementById("desk"), NodeFilter.SHOW_TEXT);
+  for(let node = walk.nextNode(); node; node = walk.nextNode()){ const t = node.nodeValue; if(t && /\d/.test(t) && !node.parentElement.closest("script, style, #taskbar, .banner")){ const r = redate(t); if(r !== t) node.nodeValue = r; } }
+}
+const demoToday = () => state.pretend ? shiftT(ymd(2026, 10, 1)) : CLOCK_FIXED ? BASE_DAY : realToday();   /* "today" for every rule; the what-if moves it to two days before the goal date */
 /* Copies text and resolves only when the browser really accepted it. Hosted pages often forbid the clipboard API, so the older copy command is the fallback.
    Every "Copied" message in this page waits for this promise: a refusal is always reported, never hidden. */
 function writeClipboard(text){
@@ -1884,10 +1990,20 @@ function writeClipboard(text){
 /* The simulated clock starts at 10:42 AM on the extract date and then runs, so the taskbar, the to-do footer and every "updated" label tell the same time. */
 const SIM_START = Date.now();
 function simClock(withSeconds){
-  const t = 10 * 3600 + 42 * 60 + Math.floor((Date.now() - SIM_START) / 1000), h = Math.floor(t / 3600) % 24, m = Math.floor(t / 60) % 60, sec = t % 60;
+  let h, m, sec;
+  if(CLOCK_FIXED){ const t = 10 * 3600 + 42 * 60 + Math.floor((Date.now() - SIM_START) / 1000); h = Math.floor(t / 3600) % 24; m = Math.floor(t / 60) % 60; sec = t % 60; }
+  else { const n = wallNow(); h = n.hour % 24; m = n.minute; sec = n.second; }
   return `${(h + 11) % 12 + 1}:${String(m).padStart(2, "0")}${withSeconds ? ":" + String(sec).padStart(2, "0") : ""} ${h >= 12 ? "PM" : "AM"}`;
 }
-setInterval(() => { const el = document.getElementById("simClockTime"); if(el) el.textContent = simClock(false); }, 10000);
+function paintClock(){     /* the taskbar clock: the real time to the second and the real date (Jul 16, 2026, 10:42 AM when the clock is fixed for the tests) */
+  const time = document.getElementById("simClockTime"), date = document.getElementById("simClockDate"); if(!time || !date) return;
+  time.textContent = simClock(!CLOCK_FIXED);
+  const x = new Date(CLOCK_FIXED ? BASE_DAY : realToday()); date.textContent = (x.getUTCMonth() + 1) + "/" + x.getUTCDate() + "/" + x.getUTCFullYear();
+  date.parentElement.title = CLOCK_FIXED ? "Clock fixed for testing" : "The time on this computer (" + SIM_TZ.replace(/_/g, " ") + ")";
+}
+setInterval(paintClock, CLOCK_FIXED ? 10000 : 1000);
+document.addEventListener("visibilitychange", () => { if(!document.hidden) paintClock(); });
+paintClock();
 const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
 Object.values(DATA).forEach(d => {
   Object.defineProperty(d, "daysTo", { get(){ return Math.round((ymd(...d.goalD) - demoToday()) / DAY); }, enumerable:true, configurable:true });
@@ -2142,7 +2258,7 @@ const state = { dir:"v", look:"v", form:"full", autoHide:10, mode:"whisper", esc
   adaptive:true, allTools:location.hash === "#all", sectionUse:{}, clMode:0,
   middle:false, middleMod:"Ctrl", provider:"auto", tone:"", style:"", signoff:"", claudeModel:"claude-opus-4-8",
   outlook:{ on:false, cloud:"com", client:"", tenant:"organizations", max:5, step:"out", msg:"" },
-  data:{ portfolio:null, notes:null, ref:null }, quickNotes:{},
+  data:{ portfolio:null, notes:null, ref:null }, quickNotes:{}, andaUrl:"https://tracker.example/anda/{anda}",
   myApi:{ name:"My API", endpoint:"", header:"Authorization", scheme:"Bearer", env:"", model:"", template:"", path:"choices[0].message.content" },
   replies:null,
   density:"comfortable", ts:"standard", lookupStyle:"box", recentsOn:true, recents:[], pins:[],
@@ -2213,6 +2329,7 @@ const NEWS_DOC = [   /* fictional: the paragraphs the app would read from the di
   { date:[2026, 7, 16], text:"The Thursday huddle moves to 2:00 PM today, same room." },
   { date:[2026, 7, 15], text:"Status updates for cycle 2 applications are due to team leads by Friday." },
   { date:[2026, 7, 10], text:"The division tracker has a new column for facility status. Please fill it in for your applications." } ];
+if(SHIFT_DAYS) NEWS_DOC.forEach(n => { n.date = shiftYMD(n.date); });
 const NEWS_SAMPLES = ["Building access is limited to the north entrance until 3:00 PM.", "The labeling template was updated this morning. Please use the new version for letters that go out this week.", "Reminder: timesheets are due by noon tomorrow."];
 let wQueue = [], wCurrent = null, wTimer = null, newsPushed = 0;
 const cut = (t, n) => { t = String(t).replace(/\s+/g, " ").trim(); return t.length > n ? t.slice(0, n - 1).trimEnd() + "…" : t; };
@@ -2334,10 +2451,41 @@ const PR_WORDS = { recieve:"receive", recieved:"received", recieving:"receiving"
   approvel:"approval", completly:"completely", confirmaton:"confirmation", extention:"extension", informaton:"information", infomation:"information", requst:"request", reqeust:"request", updtae:"update",
   comunicate:"communicate", comunication:"communication", correspondance:"correspondence", discrepency:"discrepancy", guidence:"guidance", prefered:"preferred", proceedure:"procedure", reveiw:"review",
   reveiwed:"reviewed", reveiwer:"reviewer", sumary:"summary", transfered:"transferred", attatched:"attached", attachement:"attachment", availible:"available", avaliable:"available", bussiness:"business",
-  busines:"business", expidite:"expedite", expediate:"expedite", priorty:"priority", specifc:"specific", strenght:"strength", wether:"whether", thier:"their", recieveing:"receiving", alot:"a lot" };
+  busines:"business", expidite:"expedite", expediate:"expedite", priorty:"priority", specifc:"specific", strenght:"strength", wether:"whether", recieveing:"receiving" };
+/* [what to look for, what it becomes (null = say so and change nothing), the reason, how many times to report]. The first group in a pattern is the part that changes. */
+const PR_NOUNS = "goal|forecast|response|responses|application|applications|amendment|amendments|draft|review|reviews|team|teams|letter|letters|date|dates|status|facility|facilities|labeling|applicant|applicants|comments|questions|request|requests|report|reports|data|notes|email|emails|plan|meeting|deadline|submission|submissions|records|file|files|site|sites|own";
+const PR_GRAMMAR = [
+  [/\b(their|there) (?:going|coming|sending|planning|waiting|reviewing|working|asking|still|also|already)\b/gi, "they're", "this may be"],
+  [/\b(their) (?:is|are|was|were|will be|has been|have been)\b/gi, "there", "this may be"],
+  [new RegExp("\\b(?:for|of|with|by|from|on|about|to|at|meet|met|miss|missed|reach|reached|send|sent|review|reviewed|check|checked|update|updated|confirm|confirmed) (there|they're) (?:" + PR_NOUNS + ")\\b", "gi"), "their", "this is usually"],
+  [/\b(your) (?:welcome|going to|not|right that|correct that|invited)\b/gi, "you're", "this is usually"],
+  [new RegExp("\\b(you're) (?:" + PR_NOUNS + ")\\b", "gi"), "your", "this is usually"],
+  [/\b(its) (?:a|an|the|not|been|going to|on track|too)\b/gi, "it's", "this is usually"],
+  [new RegExp("\\b(it's) (?:" + PR_NOUNS + ")\\b", "gi"), "its", "this is usually"],
+  [/\b(?:more|less|later|earlier|sooner|better|worse|greater|fewer|higher|lower|longer|shorter|rather|other) (then)\b/gi, "than", "after a comparison this is"],
+  [/\b(?:is|are|was|were|be|been|it's|far|way|not|much) (to) (?:late|early|many|much|soon|few|long|short)\b/gi, "too", "this is usually"],
+  [/\b(?:could|should|would|must|might) (of)\b(?! course)/gi, "have", "this is"],
+  [/\b(?:an|the|no|any|little) (affect)\b/gi, "effect", "the noun is"],
+  [/\b(weather) (?:or not|we|it|this|that|to)\b/gi, "whether", "this is usually"],
+  [/\b(?:an|any|the|your|our|my|for|some) (advise)\b/gi, "advice", "the noun is"],
+  [/\b(loose) (?:the|a|an|track|time|sight)\b/gi, "lose", "this is usually"],
+  [/\b(?:[Bb]etween|[Ff]or|[Ww]ith|[Tt]o|[Ff]rom) (?:you|him|her|them) and (I)\b/g, "me", "after a preposition this is"],
+  [/\b(me and him|him and me) (?:will|is|are|was|were|have|has|can|should|would|did|do)\b/gi, "he and I", "as the subject this reads"],
+  [/\b(me and her|her and me) (?:will|is|are|was|were|have|has|can|should|would|did|do)\b/gi, "she and I", "as the subject this reads"],
+  [/\b(me and them|them and me) (?:will|is|are|was|were|have|has|can|should|would|did|do)\b/gi, "they and I", "as the subject this reads"],
+  [/\b(?:ANDA\s*(?:No\.?\s*)?[0-9]{6}|it|he|she|the applicant|the response|the amendment|the review|the goal date|the forecast|the facility|the draft|the letter|the request) (are)\b(?! you)/gi, "is", "with one subject this is"],
+  [/\b(?:we|they|the applicants|the reviewers|both ANDAs|the teams) (is|was|has|does)\b/gi, m => ({ is:"are", was:"were", has:"have", does:"do" })[m[1].toLowerCase()], "with more than one this is"],
+  [/\b(?:has|have|had) (went|came|did|saw|ran|began|wrote|took|gave)\b/gi, m => ({ went:"gone", came:"come", did:"done", saw:"seen", ran:"run", began:"begun", wrote:"written", took:"taken", gave:"given" })[m[1].toLowerCase()], "after has or have this is"],
+  [/\b(?:will|did not|didn't|does not|doesn't|do not|don't) (submitted|received|reviewed|approved|responded|confirmed|completed|provided|requested|updated|scheduled)\b/gi,
+    m => ({ submitted:"submit", received:"receive", reviewed:"review", approved:"approve", responded:"respond", confirmed:"confirm", completed:"complete", provided:"provide", requested:"request", updated:"update", scheduled:"schedule" })[m[1].toLowerCase()], "after this word the verb is"],
+  [/\b(dont|cant|wont|doesnt|isnt|didnt|wasnt|werent|hasnt|havent|wouldnt|couldnt|shouldnt|arent|thats|whats|youre|theyre|ive)\b/gi, m => ({ dont:"don't", cant:"can't", wont:"won't", doesnt:"doesn't", isnt:"isn't", didnt:"didn't", wasnt:"wasn't", werent:"weren't", hasnt:"hasn't", havent:"haven't", wouldnt:"wouldn't", couldnt:"couldn't", shouldnt:"shouldn't", arent:"aren't", thats:"that's", whats:"what's", youre:"you're", theyre:"they're", ive:"I've" })[m[1].toLowerCase()], "an apostrophe is missing:", 4],
+  [/\b(aswell|incase|infact|inorder|atleast|eachother|noone|thankyou|alot)\b/gi, m => ({ aswell:"as well", incase:"in case", infact:"in fact", inorder:"in order", atleast:"at least", eachother:"each other", noone:"no one", thankyou:"thank you", alot:"a lot" })[m[1].toLowerCase()], "these are two words:", 3],
+  [/\b(?:on|by|until|since|last|next|this|every) (monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/g, m => m[1][0].toUpperCase() + m[1].slice(1), "a day of the week takes a capital:"],
+  [/\b(january|february|april|june|july|august|september|october|november|december)\b/g, m => m[1][0].toUpperCase() + m[1].slice(1), "a month takes a capital:"],
+];
 const PR_ABBR = new Set(["e.g", "i.e", "etc", "vs", "no", "dr", "mr", "ms", "mrs", "approx", "inc", "ltd", "co", "st", "jr", "sr", "fig", "ref", "est", "dept", "attn", "cc", "u.s", "a.m", "p.m"]);
 const PR_GENERIC = new Set(["tablets", "tablet", "capsules", "capsule", "injection", "solution", "extended", "release", "fictional", "pharmaceuticals", "pharmaceutical", "regulatory", "agents"]);
-const PR_MAX = 14;
+const PR_MAX = 16;
 const prCase = (like, word) => like === like.toUpperCase() && like.length > 1 ? word.toUpperCase() : /^[A-Z]/.test(like) ? word[0].toUpperCase() + word.slice(1) : word;
 function prDistance(a, b){      /* edits to turn one word into the other; swapping two neighbors counts as one */
   const m = a.length, n = b.length; if(Math.abs(m - n) > 2) return 3;
@@ -2363,7 +2511,7 @@ function prNames(ids){          /* names worth protecting from a slip of the fin
 }
 function proofread(draft){
   const items = [], text = draft || "";
-  if(!text.trim()) return { items, corrected:text, fixes:0, total:0 };
+  if(!text.trim()) return { items, corrected:text, fixes:0, total:0, marks:[] };
   const add = (msg, start, end, to, alsoInFacts) => items.push({ text:msg, start, end, to:to === undefined ? null : to, alsoInFacts:!!alsoInFacts });
   const squash = t => rvSquash(t);
   let m;
@@ -2383,6 +2531,29 @@ function proofread(draft){
         }
       }
     } }
+  /* 1b. grammar that fixed rules can see (round 21): words that sound alike, a verb that does not agree, a missing apostrophe, "a" or "an".
+        Each rule needs the words around it to be sure; where it cannot be sure it says "may be" and changes nothing. */
+  { const seenRule = new Set();
+    for(const [re, to, why, max] of PR_GRAMMAR){
+      re.lastIndex = 0; let n = 0;
+      while((m = re.exec(text)) && n < (max || 2)){
+        const from = m[1] !== undefined ? m[1] : m[0], at = m.index + m[0].indexOf(from), fix = typeof to === "function" ? to(m) : to;
+        const key = why + "|" + from.toLowerCase(); if(seenRule.has(key)) continue; seenRule.add(key); n++;
+        const shown = from === "I" || /^I\b|\bI$|\bI'/.test(fix) && from === from.toLowerCase() ? fix : prCase(from, fix);
+        add(`“${squash(m[0])}”: ${why} “${shown}”.`, at, at + from.length, shown);
+      }
+    }
+    /* "a" before a vowel sound and "an" before a consonant sound */
+    { const re = /\b(a|an) ([A-Za-z][A-Za-z']*)/g; let n = 0;
+      while((m = re.exec(text)) && n < 3){
+        const art = m[1].toLowerCase(), w = m[2], lw = w.toLowerCase();
+        const letters = w.length > 1 && w.length <= 3 && w === w.toUpperCase();                  /* a short abbreviation is spelled out: an NDA, an RLD, a PSG */
+        const vowelSound = letters ? /^[AEFHILMNORSX]/.test(w) : (/^[aeiou]/.test(lw) && !/^(?:uni|use|usa|usu|uti|ute|ubi|eu|one|once|ura|uro)/.test(lw)) || /^(?:hour|honest|honor|heir)/.test(lw);
+        if(lw === "anda" || lw === "and" || w.length < 2) continue;                              /* "a ANDA" has its own rule below */
+        if(art === "a" && vowelSound){ n++; add(`“${m[0]}” reads “${prCase(m[1], "an")} ${w}”.`, m.index, m.index + m[1].length, prCase(m[1], "an")); }
+        else if(art === "an" && !vowelSound){ n++; add(`“${m[0]}” reads “${prCase(m[1], "a")} ${w}”.`, m.index, m.index + m[1].length, prCase(m[1], "a")); }
+      } }
+  }
   /* 2. ANDA written in lower case before a number, and "a ANDA" */
   { const re = /\b(anda)(?=\s*(?:no\.?|#|number)?\s*[0-9])/gi; let n = 0;
     while((m = re.exec(text))) if(m[1] !== "ANDA" && ++n <= 2) add(`“${m[1]}” is written “ANDA”.`, m.index, m.index + 4, "ANDA"); }
@@ -2437,10 +2608,10 @@ function proofread(draft){
       if(++n <= 5) add(`A placeholder is still in the draft: “${squash(m[0])}”.`, undefined, undefined, undefined, true); } }
   /* the corrected text: every change that can be made without guessing, applied from the end so positions stay right; overlapping changes are skipped */
   const fixes = items.filter(i => i.to !== null && i.start !== undefined).sort((a, b) => b.start - a.start);
-  let corrected = text, floor = Infinity, applied = 0;
-  for(const f of fixes){ if(f.end > floor) continue; corrected = corrected.slice(0, f.start) + f.to + corrected.slice(f.end); floor = f.start; applied++; }
+  let corrected = text, floor = Infinity, applied = 0; const marks = [];
+  for(const f of fixes){ if(f.end > floor) continue; corrected = corrected.slice(0, f.start) + f.to + corrected.slice(f.end); floor = f.start; applied++; marks.unshift({ start:f.start, end:f.end, to:f.to }); }
   const shown = items.filter(i => i.text);
-  return { items:shown.slice(0, PR_MAX), more:Math.max(0, shown.length - PR_MAX), corrected, fixes:applied, total:shown.length };
+  return { items:shown.slice(0, PR_MAX), more:Math.max(0, shown.length - PR_MAX), corrected, fixes:applied, total:shown.length, marks };
 }
 
 /* More facts from the person's own sheet and notes: strength, review cycle, the date of the open action item, and dates that also appear in a note. */
@@ -2636,16 +2807,75 @@ document.querySelectorAll("#wallPick [data-wall]").forEach(b => b.addEventListen
   document.querySelectorAll("#wallPick [data-wall]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
 }));
 
+/* ---------------- Open ANDA page (round 21): one small button on the card goes to the page of that ANDA in the person's own system.
+   The address is theirs to set, with {anda} where the six digits go. Only an https address is ever opened, and only the number is put into it. */
+const ANDA_URL_DEFAULT = "https://tracker.example/anda/{anda}";
+function andaPageUrl(id, template){
+  const t = String(template == null ? "" : template).trim();
+  if(!t) return [null, "No web address is set for ANDA pages. Add one in Settings, My files and writing."];
+  if(t.length > 300) return [null, "That address is too long. Please check it in Settings, My files and writing."];
+  if(!/^https:\/\/[^\s<>"'`\\]+$/i.test(t)) return [null, "The ANDA page address must start with https:// and have no spaces. Please check it in Settings, My files and writing."];
+  if(!t.includes("{anda}")) return [null, "The ANDA page address needs {anda} where the six-digit number goes. Please check it in Settings, My files and writing."];
+  if(!/^[0-9]{6}$/.test(String(id))) return [null, "Open an ANDA first."];
+  let url; try{ url = new URL(t.split("{anda}").join(id)); }catch(e){ return [null, "That address could not be read. Please check it in Settings, My files and writing."]; }
+  if(url.protocol !== "https:" || url.username || url.password) return [null, "The ANDA page address must be a plain https address. Please check it in Settings, My files and writing."];
+  return [url.href, null];
+}
+function openAndaPage(){
+  if(!current) return;
+  const [url, why] = andaPageUrl(current, state.andaUrl);
+  if(!url){ showNotice(why, anchorForCard()); return; }
+  /* In the Windows app this hands the address to the default browser. Here the look-alike browser window shows where it would go: no real page is opened from this page. */
+  const d = DATA[current], web = $("web");
+  if(!state.apps.web || web.hidden){ showNotice("The app would open " + url + " in your browser. (Show the Browser window in Demo controls to see it here.)", anchorForCard()); return; }
+  let box = $("webAnda");
+  if(!box){ box = h("div", { id:"webAnda" }); $("webBody").insertBefore(box, $("webBody").querySelector("h2")); }
+  box.replaceChildren(h("span", { class:"tag", text:"SIMULATED PAGE · WHERE “OPEN ANDA PAGE” GOES" }),
+    h("h2", { text:`ANDA ${current} · ${d.drug}` }), h("p", { class:"wa", text:d.meta + ". In the Windows app this address opens in your default browser; nothing but the number is put into it." }),
+    h("button", { class:"btn", type:"button", text:"Back to my portfolio", onclick:() => { box.remove(); webAddress(null); } }));
+  webAddress(url, "ANDA " + current);
+  setFocusWin("web"); $("webBody").scrollTop = 0;
+  showNotice("Opened the page of ANDA " + current + " in the browser window.", anchorForCard());
+}
+function webAddress(url, title){     /* the tab and the address pill of the look-alike browser */
+  const tab = document.querySelector("#web .tabs .tab"), pill = document.querySelector("#web .addr .url");
+  if(tab && tab.childNodes[1]) tab.childNodes[1].textContent = title || "My portfolio (demo)";
+  if(pill && pill.lastChild) pill.lastChild.textContent = url || "https://tracker.example/portfolio";
+}
+
 /* ---------------- quick notes (round 20): a person's own notes about one ANDA, typed on the card ----------------
    They are kept by the app on this PC (here: in this page until it is reloaded). The sheet and the notes folder are only ever read.
    A note is shown as text, never as markup, and is never sent anywhere; a notice near the clock never shows one. */
 const QN_MAX = 500, QN_PER_ANDA = 50, QN_MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 let qnSeq = 0, qnUndo = null, qnUndoTimer = null, qnEditing = null;
+/* The Windows app keeps quick notes in its own file. This page keeps them in the browser's own store for this page, so a reload does not lose them;
+   a hosted page is often not allowed a store, and then they last until the page is reloaded (the note box says which). Reset clears them. */
+const QN_STORE = "anda-companion-sim.quick-notes.v1";
+let qnStored = false;
+function qnSave(){
+  try{ localStorage.setItem(QN_STORE, JSON.stringify({ seq:qnSeq, notes:state.quickNotes })); qnStored = true; }catch(e){ qnStored = false; }
+  const f = document.getElementById("qnFine"); if(f) f.textContent = qnFineText();
+}
+const qnFineText = () => "Kept on this PC, in the app's own notes file. Your sheet and your notes folder are never changed, and a note is never sent anywhere." +
+  (qnStored ? " In this simulation notes are kept in this browser until you press Reset." : " In this simulation notes last until the page is reloaded.");
+function qnLoad(){
+  try{
+    const raw = localStorage.getItem(QN_STORE); qnStored = true; if(!raw) return;
+    const x = JSON.parse(raw); if(!x || typeof x.notes !== "object" || !x.notes) return;
+    for(const id of Object.keys(x.notes)){
+      if(!/^[0-9]{6}$/.test(id) || !Array.isArray(x.notes[id])) continue;
+      const list = x.notes[id].slice(0, 50).map(n => n && typeof n.text === "string" && typeof n.when === "string" && Number.isFinite(n.t) ? { id:"q" + (++qnSeq), text:n.text.slice(0, 500), when:n.when.slice(0, 40), t:n.t } : null).filter(Boolean);
+      if(list.length) state.quickNotes[id] = list;
+    }
+  }catch(e){ qnStored = false; }
+}
 const qnDrafts = {};
 const qnClean = t => String(t == null ? "" : t).replace(/\r\n?/g, "\n").replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, "").replace(/\n{3,}/g, "\n\n").trim().slice(0, QN_MAX);
 function noteTime(who){     /* "You · Jul 8" gives the day in the demo year; a label with no date sorts last */
   const m = /([A-Z][a-z]{2}) (\d{1,2})(?:,|\b)/.exec(who || ""), i = m ? QN_MON.indexOf(m[1]) : -1;
-  return i < 0 ? 0 : Date.UTC(2026, i, +m[2]);
+  if(i < 0) return 0;
+  const today = CLOCK_FIXED ? BASE_DAY : realToday(), y = new Date(today).getUTCFullYear(), t = Date.UTC(y, i, +m[2]);
+  return t > today + DAY ? Date.UTC(y - 1, i, +m[2]) : t;      /* a note has no year: it is the most recent such day */
 }
 function notesFor(id){      /* a person's quick notes and the project notes of the record, newest first */
   const d = DATA[id]; if(!d) return [];
@@ -2661,24 +2891,26 @@ function addQuickNote(id, text){
   if(list.length >= QN_PER_ANDA) return [false, `This ANDA already has ${QN_PER_ANDA} quick notes. Delete one to add another.`];
   const day = new Date(demoToday());
   list.push({ id:"q" + (++qnSeq), text:clean, when:`${QN_MON[day.getUTCMonth()]} ${day.getUTCDate()}, ${simClock(false)}`, t:demoToday() + 43200000 + qnSeq });
+  qnSave();
   return [true, "Note saved."];
 }
 function editQuickNote(id, noteId, text){
   const n = (state.quickNotes[id] || []).find(x => x.id === noteId), clean = qnClean(text);
   if(!n) return [false, "That note is no longer here."];
   if(!clean) return [false, "A note cannot be empty. Use Delete to remove it."];
-  n.text = clean; return [true, "Note changed."];
+  n.text = clean; qnSave(); return [true, "Note changed."];
 }
 function deleteQuickNote(id, noteId){
   const list = state.quickNotes[id] || [], i = list.findIndex(x => x.id === noteId);
   if(i < 0) return null;
-  const [gone] = list.splice(i, 1); return { id, at:i, note:gone };
+  const [gone] = list.splice(i, 1); qnSave(); return { id, at:i, note:gone };
 }
+const noteButtonLabel = n => "Add a note" + (n ? ` · ${n} note${n === 1 ? "" : "s"}` : "");
 function qnSay(text, bad){ const m = $("qnMsg"); m.replaceChildren(text); m.classList.toggle("bad", !!bad); }
 function paintNotes(id){
   const list = notesFor(id), box = $("x-notes");
   $("x-notes-n").textContent = "· " + list.length;
-  $("chipNotes").textContent = "Notes · " + list.length;
+  $("chipNotes").textContent = noteButtonLabel(list.length);
   $("qnLabel").textContent = "Add a quick note for ANDA " + id;
   const ta = $("qnText"); ta.value = qnDrafts[id] || ""; qnSync();
   box.replaceChildren(...(list.length ? list.map(n => {
@@ -2702,7 +2934,7 @@ function paintNotes(id){
           const gone = deleteQuickNote(id, n.id); if(!gone) return;
           qnUndo = gone; clearTimeout(qnUndoTimer); paintNotes(id);
           const undo = h("button", { class:"cp", type:"button", text:"Undo", onclick:() => {
-            if(!qnUndo) return; (state.quickNotes[qnUndo.id] || (state.quickNotes[qnUndo.id] = [])).splice(qnUndo.at, 0, qnUndo.note); const back = qnUndo.id; qnUndo = null; clearTimeout(qnUndoTimer);
+            if(!qnUndo) return; (state.quickNotes[qnUndo.id] || (state.quickNotes[qnUndo.id] = [])).splice(qnUndo.at, 0, qnUndo.note); qnSave(); const back = qnUndo.id; qnUndo = null; clearTimeout(qnUndoTimer);
             if(current === back) paintNotes(back); qnSay("Note restored."); } });
           $("qnMsg").replaceChildren("Note deleted. ", undo); $("qnMsg").classList.remove("bad");
           qnUndoTimer = setTimeout(() => { qnUndo = null; if($("qnMsg").contains(undo)) qnSay(""); }, 8000);
@@ -2733,6 +2965,7 @@ $("qnText").addEventListener("keydown", e => {
   else if(e.key === "Escape"){ e.preventDefault(); e.stopPropagation(); card.focus({ preventScroll:true }); }     /* the first Escape leaves the box (the text is kept); the next one closes the card */
 });
 $("qnSave").addEventListener("click", saveQuickNote);
+qnLoad(); $("qnFine").textContent = qnFineText();
 
 /* ---------------- card ---------------- */
 /* Pocket Plain, Calendar Ribbon and Glass Sheet lead with one answer: how many days later (or earlier) the forecast is than the goal, from the same fields as the clock. */
@@ -2824,7 +3057,7 @@ function fill(id){
     $("x-watch").innerHTML = fl.map(f => `<div class="wf"><div>${f.text}</div><div class="why">${f.why}</div><div class="src">Source: ${f.src}</div></div>`).join("");
   }
   $("chipSister").textContent = "Sister ANDA · " + d.sisters.length; $("chipSister").hidden = d.sisters.length === 0;
-  $("chipNotes").textContent = "Notes · " + notesFor(id).length;
+  $("chipNotes").textContent = noteButtonLabel(notesFor(id).length);
   paintRefs(id);
   paintAgents();
 }
@@ -3059,7 +3292,7 @@ document.addEventListener("keydown", e => {
   else if(k === "r" && !e.ctrlKey) openReplies();
   else if(k === "n" && !e.ctrlKey && !e.altKey && !e.metaKey){ e.preventDefault(); openNotesOnCard(); }
   else if(e.key === " " && document.activeElement === card){ e.preventDefault(); setPin(!pinnedCard); }
-  else if(e.key === "Enter" && document.activeElement === card){ e.preventDefault(); copyStatus(); }
+  else if(e.key === "Enter" && document.activeElement === card){ e.preventDefault(); openNotesOnCard(); }     /* round 21: Enter goes straight to a new note; S copies the status line */
   else if(k === "c" && !e.ctrlKey && current) writeClipboard($("c-ai").textContent).catch(() => {});
 });
 $("keyPeek").addEventListener("click", () => hotkey("peek", "button"));
@@ -3501,8 +3734,67 @@ $("lookupIn").addEventListener("keydown", e => {
 $("lookupIn").addEventListener("input", () => { if(lkBar()){ lkIdx = 0; paintLookup(); } });
 
 /* ---------------- draft check window (port of UI/DraftWindow: checks as soon as it opens; AI actions stay off until a model is approved) ---------------- */
-const SAMPLE_DRAFT = "Hi all, quick status. ANDA 216482 is on track, with a goal date of Oct 10, 2026 and a forecast of Oct 17, 2026. ANDA 214990 is running late. ANDA 123456 needs a call. The IR responce for ANDA 216482 (750 mg, cycle 3) is due Jul 28.";
+const SAMPLE_DRAFT = redate("Hi all, quick status. ANDA 216482 is on track, with a goal date of Oct 10, 2026 and a forecast of Oct 17, 2026. ANDA 214990 is running late. ANDA 123456 needs a call. The IR responce for ANDA 216482 (750 mg, cycle 3) is due Jul 28.");
 const RV_RECEIPT_ROUND20 = "Not checked: grammar and wording beyond the short list of rules under Proofreading (your mail program's own checker still applies, and a fuller check needs an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record.";
+/* An AI that is built into the browser or the PC and runs on it (round 21). Edge and Chrome offer one on some computers; nothing leaves the PC.
+   It is used only if the browser really has it, only when the person presses the button, and its answer is shown as unchecked and is Copy only.
+   Written from the published shape of those browser features and tried here against a stand-in, not against a real model. */
+async function localAI(){
+  try{
+    if(typeof self.Proofreader === "function" || typeof self.Proofreader === "object" && self.Proofreader){
+      const a = await self.Proofreader.availability({ expectedInputLanguages:["en"] }); if(a === "available") return { kind:"proofreader", state:a }; if(a === "downloadable" || a === "downloading") return { kind:null, state:"not-installed" }; }
+    if(self.LanguageModel){ const a = await self.LanguageModel.availability(); if(a === "available") return { kind:"prompt", state:a }; if(a === "downloadable" || a === "downloading") return { kind:null, state:"not-installed" }; }
+  }catch(e){ return { kind:null, state:"blocked" }; }
+  return { kind:null, state:"none" };
+}
+async function localAIRun(kind, task, text){
+  if(kind === "proofreader" && task === "Proofread"){
+    const pr = await self.Proofreader.create({ expectedInputLanguages:["en"] }), r = await pr.proofread(text);
+    return String(r && (r.correctedInput || r.corrected) || "");
+  }
+  const ask = { Proofread:"Proofread the text below for spelling, grammar and punctuation. Change nothing else. Reply with the corrected text only.",
+    Rewrite:"Rewrite the text below so that it is brief, polite and professional. Keep every number, date and name exactly as written. Reply with the rewritten text only.",
+    "Fact-check":"List, as short bullet points, every statement in the text below that a reader should verify before sending. Do not state whether they are true." }[task];
+  const session = await self.LanguageModel.create(), out = await session.prompt(ask + "\n\n---\n" + text);
+  try{ session.destroy && session.destroy(); }catch(e){}
+  return String(out || "");
+}
+let localAIState = null;
+async function paintLocalAI(){
+  const line = $("drLocalAi"); if(!line) return;
+  localAIState = await localAI();
+  const s = localAIState;
+  line.textContent = s.kind ? "AI on this PC: found in this browser. It runs on this PC and sends nothing. The three buttons above use it; its answers are not checked."
+    : s.state === "not-installed" ? "AI on this PC: this browser has a built-in AI, but its model is not on this PC yet, and this tool will not start that download. Once the browser has it (your IT decides that), the three buttons above use it."
+    : s.state === "blocked" ? "AI on this PC: this page is not allowed to use the browser's built-in AI here. Opening the simulation as a file may allow it."
+    : "AI on this PC: none was found in this browser. Edge and Chrome include one on some computers, and Windows has one on Copilot+ PCs; the Windows app would use it only if your IT approves it.";
+  document.querySelectorAll("#draft [data-ai]").forEach(b => { b.disabled = !(state.ai || s.kind); });
+  syncAiBox();
+}
+function syncAiBox(){     /* the AI options stay folded while there is nothing to use; they open by themselves when there is */
+  const on = state.ai || !!(localAIState && localAIState.kind);
+  $("drAiState").textContent = state.ai ? "· an approved model is connected" : on ? "· the AI on this PC is ready" : "· off";
+  if(on) $("drAiBox").open = true;
+}
+async function runLocalAI(task){
+  const text = $("drText").value, out = $("drLocalOut"); out.replaceChildren();
+  if(!text.trim()){ out.append(h("div", { class:"find note", text:"There is no draft to give to the AI yet." })); return; }
+  const box = h("div", { class:"lai" }, h("div", { class:"k", text:`${task.toUpperCase()} · THE AI ON THIS PC · NOTHING IS SENT` }));
+  const body = h("div", { class:"t", text:`This gives your draft (${text.length.toLocaleString("en-US")} characters) to the AI built into this browser. It runs on this PC.` });
+  const run = h("button", { class:"pill", type:"button", text:"Run on this PC" }), note = h("span", { role:"status" });
+  run.addEventListener("click", async () => {
+    run.disabled = true; note.textContent = "Working on this PC…";
+    try{
+      const answer = await localAIRun(localAIState.kind, task, text.slice(0, 12000));
+      if(!answer.trim()){ note.textContent = "The AI on this PC gave no answer."; run.disabled = false; return; }
+      body.textContent = answer; box.firstChild.textContent = `${task.toUpperCase()} · FROM THE AI ON THIS PC · NOT CHECKED`;
+      const copy = h("button", { class:"pill quiet", type:"button", text:"Copy" });
+      copy.addEventListener("click", () => writeClipboard(answer).then(() => { note.textContent = "Copied. Your own text was not changed."; }, () => { note.textContent = "Your browser did not allow copying. Select the text above instead."; }));
+      run.replaceWith(copy); note.textContent = "Read it before you use it: an AI can be wrong, and this one saw only your draft.";
+    }catch(e){ note.textContent = "The AI on this PC could not do this (" + cut(String(e && e.message || e), 80) + ")."; run.disabled = false; }
+  });
+  box.append(body, h("div", { class:"row" }, run, note)); out.append(box); box.scrollIntoView({ block:"nearest" });
+}
 let drView = "all";      /* "all", "proof" (proofreading only) or "facts" (fact check only) */
 function setDraftView(v){
   drView = v;
@@ -3513,6 +3805,12 @@ function runDraftCheck(){
   const text = $("drText").value, r = draftReview(text, demoToday()), extra = factExtras(text), pr = proofread(text);
   $("drFactWrap").hidden = drView === "proof"; $("drProofWrap").hidden = drView === "facts"; $("drSend").hidden = drView === "proof";
   paintBeforeSend(text, r, extra);
+  { const sum = $("drSummary"); sum.replaceChildren();
+    if(text.trim()){
+      const facts = r.findings.filter(f => f.kind === "diff" || f.kind === "unknown").length + extra.diffs.length, words = pr.total;
+      const a = facts ? `${facts} difference${facts === 1 ? "" : "s"} from your data` : "No difference from your data", b2 = words ? `${words} wording item${words === 1 ? "" : "s"}` : "no wording items";
+      sum.append(drView === "proof" ? b2[0].toUpperCase() + b2.slice(1) : drView === "facts" ? a : a + " · " + b2, h("span", { text:pr.fixes && drView !== "facts" ? ` · ${pr.fixes} can be fixed for you` : "" }));
+    } }
   /* fact check: the shared result, with its last line saying what Proofreading now covers */
   $("drOut").innerHTML = r.findings.map(f => `<div class="find ${f.kind === "diff" || f.kind === "unknown" ? "diff" : f.kind}${f.text === RV_RECEIPT ? " receipt" : ""}">${(f.text === RV_RECEIPT ? RV_RECEIPT_ROUND20 : f.text).replace(/&/g, "&amp;").replace(/</g, "&lt;")}</div>`).join("");
   const facts = $("drFacts"); facts.replaceChildren();
@@ -3527,6 +3825,12 @@ function runDraftCheck(){
     items.forEach(i => box.append(h("div", { class:"find " + (i.to !== null ? "fix" : "note"), text:i.text })));
     if(pr.more) box.append(h("div", { class:"find note", text:`${pr.more} more item${pr.more === 1 ? "" : "s"} of the same kind are not listed.` }));
     if(pr.fixes){
+      /* the draft itself, with each change shown where it is: what goes is struck out, what comes is beside it */
+      const LIMIT = 4000, mark = h("div", { class:"prmark", id:"drMarked", tabindex:"0", aria:"Your draft with the changes marked" }); let at = 0;
+      for(const k of pr.marks){ if(k.start > LIMIT) break;
+        mark.append(text.slice(at, k.start)); if(k.end > k.start) mark.append(h("del", { text:text.slice(k.start, k.end) })); if(k.to) mark.append(h("ins", { text:k.to })); at = k.end; }
+      mark.append(text.slice(at, LIMIT) + (text.length > LIMIT ? " …" : ""));
+      box.append(h("div", { class:"prk", text:"YOUR DRAFT, WITH THE CHANGES MARKED" }), mark);
       const say = h("span", { role:"status", text:`${pr.fixes} change${pr.fixes === 1 ? "" : "s"} can be made without guessing.` });
       const copy = h("button", { class:"pill quiet", type:"button", id:"drCopyFixed", text:"Copy corrected draft" });
       copy.addEventListener("click", () => writeClipboard(pr.corrected).then(() => { say.textContent = "Corrected draft copied. Your own text was not changed."; },
@@ -3537,6 +3841,7 @@ function runDraftCheck(){
     }
     box.append(h("p", { class:"prfine", text:"A short list of fixed rules, not a full spelling or grammar check. “Apply here” changes only the box above; the app never types into your email." }));
   } else box.append(h("div", { class:"find note", text:"Nothing to proofread yet. Select your draft and press the shortcut, or paste it above." }));
+  if(!text.trim()) $("drSummary").textContent = `Nothing was selected. Select text in any window and press ${state.keys.draft || "Review a draft in the tray menu"}, paste a draft above, or press “Use the sample draft”.`;
   paintRecall(text);
 }
 function paintRecall(text){
@@ -3566,8 +3871,9 @@ function paintRecall(text){
 function openDraft(text){
   closeMenus(); markStep("draft");
   const box = $("draft"); box.style.display = "block"; if(isSheet()) $("scrim").style.display = "block";
-  $("drText").value = text || ""; setDraftView("all");
+  $("drText").value = text || ""; setDraftView("all"); $("drLocalOut").replaceChildren();
   document.querySelectorAll("#draft [data-ai]").forEach(b => { b.disabled = !state.ai; });
+  $("drAiBox").open = false; syncAiBox(); paintLocalAI();
   setTimeout(() => $("drText").focus(), 30);
 }
 $("drCheck").addEventListener("click", () => setDraftView("all"));
@@ -3577,9 +3883,11 @@ $("drSample").addEventListener("click", () => { $("drText").value = SAMPLE_DRAFT
 $("drDone").addEventListener("click", () => closeApp("draft"));
 $("drText").addEventListener("input", () => { clearTimeout(runDraftCheck.t); runDraftCheck.t = setTimeout(runDraftCheck, 250); });
 document.querySelectorAll("#draft [data-ai]").forEach(b => b.addEventListener("click", () => {
+  if(!state.ai && localAIState && localAIState.kind){ runLocalAI(b.dataset.ai); return; }      /* no approved model, but the PC has its own */
   const ins = instructionsText();
-  $("drOut").innerHTML = `<div class="find note">${b.dataset.ai}: in the Windows app a preview shows exactly what would be sent (your draft, the matching records, your standing instructions) and nothing leaves until you press Send; the result is Copy only. This simulation never calls a model.</div>` +
-    `<div class="find note">Your writing instructions that would go with it: ${ins ? ins.replace(/</g, "&lt;").replace(/\n/g, " · ") : "none set (Settings, My writing)"}</div>`;
+  $("drLocalOut").replaceChildren(
+    h("div", { class:"find note", text:`${b.dataset.ai}: in the Windows app a preview shows exactly what would be sent (your draft, the matching records, your standing instructions) and nothing leaves until you press Send; the result is Copy only. This simulation never calls a model.` }),
+    h("div", { class:"find note", text:"Your writing instructions that would go with it: " + (ins ? ins.replace(/\n/g, " · ") : "none set (Settings, My writing)") }));
 }));
 
 /* ---------------- watch list and page scan (the app's Watch list window and the extension's "scan this page") ---------------- */
@@ -3958,7 +4266,7 @@ function middleRule(on, mod, ctrl, shift, alt){
 /* the PSG and RLD lines: always two, a date with its source or a brief reason there is none (same words as the app) */
 const NO_PSG = "not available: no PSG date in your data, and no official PSG source is connected";
 const NO_RLD = "not available: no Drugs@FDA file chosen (app: Settings, My data)";
-const DEMO_REF = { "216482":["Jan 14, 2026", "Mar 3, 2026"], "214990":["Nov 20, 2025", "Mar 3, 2026"] };
+const DEMO_REF = { "216482":["Jan 14, 2026", "Mar 3, 2026"].map(redate), "214990":["Nov 20, 2025", "Mar 3, 2026"].map(redate) };
 function refLines(id){
   const demoData = state.data.portfolio === null, dr = DEMO_REF[id];
   const psg = !demoData ? NO_PSG : dr ? dr[0] + " · fictional demo date" : NO_PSG;
@@ -4243,11 +4551,12 @@ $("olCopy").addEventListener("click", () => {
 /* made-up messages, so the drawer can be seen. Real mail is read on the person's own PC and is never part of this page. */
 function fakeMail(id){
   return [
-    [`RE: ANDA ${id} labeling comments`, "Sample Reviewer (made up)", "Nov 1, 2026", "Please see the comments on the draft labeling. (Made-up sample text.)"],
-    [`${id}: information request response`, "Sample Applicant (made up)", "Oct 29, 2026", "Our response is attached for your review. (Made-up sample text.)"],
-    [`Cycle 2 status for ${id}`, "Sample Colleague (made up)", "Oct 27, 2026", "Notes from today's status meeting. (Made-up sample text.)"],
+    [`RE: ANDA ${id} labeling comments`, "Sample Reviewer (made up)", mailDay(11, "Nov 1, 2026"), "Please see the comments on the draft labeling. (Made-up sample text.)"],
+    [`${id}: information request response`, "Sample Applicant (made up)", mailDay(14, "Oct 29, 2026"), "Our response is attached for your review. (Made-up sample text.)"],
+    [`Cycle 2 status for ${id}`, "Sample Colleague (made up)", mailDay(16, "Oct 27, 2026"), "Notes from today's status meeting. (Made-up sample text.)"],
   ];
 }
+const mailDay = (ago, fixed) => CLOCK_FIXED ? fixed : longDate(realToday() - ago * DAY);     /* the made-up mail is always a couple of weeks old */
 function paintMail(id){
   const d = $("x-mail-d"), o = state.outlook, st = olState();
   d.hidden = !o.on;
@@ -5713,7 +6022,7 @@ function snapSettings(){
     actions:JSON.parse(JSON.stringify(s.actions)), agents:JSON.parse(JSON.stringify(s.agents)), todoShowFromData:s.todoAuto, todoRefreshSeconds:s.todoRefresh,
     myTodoMode:s.clMode, adaptive:s.adaptive, allTools:s.allTools,
     textSize:s.ts, density:s.density, lookupStyle:s.lookupStyle, rememberRecents:s.recentsOn, pins:[...s.pins],
-    cardFields:[...s.cardFields], watchBack:s.watchOn, divisionNews:s.newsOn, noticesPerDay:s.watchCap };   /* the counts of opened sections belong to this PC: they are not in a backup */
+    cardFields:[...s.cardFields], watchBack:s.watchOn, divisionNews:s.newsOn, noticesPerDay:s.watchCap, andaPage:s.andaUrl };   /* the counts of opened sections belong to this PC: they are not in a backup */
 }
 const DEFAULT_SETTINGS = { ...snapSettings(), allTools:false }, DEFAULT_PROMPTS = prompts.map(p => [...p]), DEFAULT_REPLIES = state.replies.map(r => ({ ...r }));
 const oneOf = (v, list, fallback) => list.includes(v) ? v : fallback;
@@ -5737,6 +6046,7 @@ function applySettings(x){
   s.keys = { ...base, ask, list };
   s.clMode = oneOf(x.myTodoMode, [0, 1], 0); s.adaptive = typeof x.adaptive === "boolean" ? x.adaptive : true; s.allTools = typeof x.allTools === "boolean" ? x.allTools : false;
   s.ts = oneOf(x.textSize, ["standard", "large", "xl"], d.textSize); s.density = oneOf(x.density, ["comfortable", "compact"], d.density); s.lookupStyle = oneOf(x.lookupStyle, ["box", "bar"], d.lookupStyle);
+  s.andaUrl = typeof x.andaPage === "string" ? x.andaPage.slice(0, 300).trim() : d.andaPage;     /* kept as written: it is checked each time the button is pressed */
   s.cardFields = Array.isArray(x.cardFields) ? DETAIL_FIELDS.map(f => f[0]).filter(k => x.cardFields.includes(k)) : [...d.cardFields];
   s.watchOn = typeof x.watchBack === "boolean" ? x.watchBack : d.watchBack; s.watchCap = oneOf(x.noticesPerDay, WATCH_CAPS, d.noticesPerDay);
   s.newsOn = x.divisionNews === true && !!s.newsFile;   /* the document's location belongs to this PC and is never in a backup */
@@ -5759,7 +6069,16 @@ function applySettings(x){
   s.lens = typeof x.lens === "string" && prompts.some(p => p[0] === x.lens) ? x.lens : null;
   syncSettingsUI();
 }
+function syncAndaUrl(){
+  const box = $("setAndaUrl"), st = $("setAndaUrlStatus"); if(document.activeElement !== box) box.value = state.andaUrl;
+  const [url, why] = andaPageUrl("216482", state.andaUrl);
+  st.textContent = url ? "For ANDA 216482 the button opens " + url : why.replace(" Please check it in Settings, My files and writing.", "").replace(" Add one in Settings, My files and writing.", " The button will say so.");
+  st.style.color = url || !state.andaUrl.trim() ? "" : "var(--c-bad)";
+}
+$("setAndaUrl").addEventListener("input", e => { state.andaUrl = e.target.value.slice(0, 300).trim(); syncAndaUrl(); });
+$("setAndaUrlReset").addEventListener("click", () => { state.andaUrl = ANDA_URL_DEFAULT; $("setAndaUrl").value = state.andaUrl; syncAndaUrl(); });
 function syncSettingsUI(){
+  syncAndaUrl();
   const s = state, check = (name, value) => document.querySelectorAll(`input[name=${name}]`).forEach(r => { r.checked = r.value === String(value); });
   check("look", s.look); check("autohide", s.autoHide); check("consent", s.mode); check("tone", s.tone); check("provider", s.provider); check("midmod", s.middleMod); check("todorefresh", s.todoRefresh);
   check("clmode", s.clMode); check("ts", s.ts); check("density", s.density); check("lkstyle", s.lookupStyle); $("setRecents").checked = s.recentsOn; syncRound19(); $("adaptCheck").checked = s.adaptive; applyEdition();
@@ -5881,7 +6200,8 @@ $("swConflictLook").addEventListener("change", e => setTaken("look", e.target.ch
 $("swConflictList").addEventListener("change", e => setTaken("list", e.target.checked));
 $("swAi").addEventListener("change", e => {
   state.ai = e.target.checked; paintConn(); if(current && !card.classList.contains("mini")) renderBrief(current);
-  document.querySelectorAll("#draft [data-ai]").forEach(b => { b.disabled = !state.ai; });
+  document.querySelectorAll("#draft [data-ai]").forEach(b => { b.disabled = !(state.ai || (localAIState && localAIState.kind)); });
+  syncAiBox();
 });
 $("swAgentFail").addEventListener("change", e => { state.agentFail = e.target.checked; });
 $("swToday").addEventListener("change", e => { state.pretend = e.target.checked; if(current && card.style.display === "block") fill(current); clReload(true); if(state.watchOn || state.newsOn) watchCheck(); if(isOpen("hub")) paintHub(); });
@@ -5894,13 +6214,13 @@ $("chipCopy").addEventListener("click", copyStatus);
 $("moreBtn").addEventListener("click", () => { card.classList.remove("mini"); if(current){ renderBrief(current); prepareAgents(); } if($("watchSlot").style.display !== "none") markStep("watch"); setTimeout(clampCard, 0); });
 $("chipSister").addEventListener("click", () => { const s = current && DATA[current].sisters[0]; if(s){ current = s[0]; fill(current); renderBrief(current); prepareAgents(); setTimeout(clampCard, 0); } });
 $("chipNotes").addEventListener("click", openNotesOnCard);
-$("chipOpen").addEventListener("click", () => showNotice("This is not connected in the prototype. The full build links to your system of record.", anchorForCard()));
+$("chipOpen").addEventListener("click", openAndaPage);
 card.addEventListener("click", e => {
   const s = e.target.closest(".sister");
   if(s && DATA[s.dataset.anda]){ current = s.dataset.anda; fill(current); renderBrief(current); prepareAgents(); setTimeout(clampCard, 0); }
 });
 card.addEventListener("keydown", e => { if((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("sister")){ e.preventDefault(); e.target.click(); } });
-$("resetBtn").addEventListener("click", () => { try{ location.reload(); }catch(e){} });
+$("resetBtn").addEventListener("click", () => { try{ localStorage.removeItem(QN_STORE); }catch(e){} try{ location.reload(); }catch(e){} });
 addEventListener("resize", () => {
   if(card.style.display !== "block") return;
   const sheet = isSheet(); card.classList.toggle("sheet", sheet); scrim.style.display = sheet ? "block" : "none";
