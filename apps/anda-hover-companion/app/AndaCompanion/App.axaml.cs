@@ -89,7 +89,7 @@ public partial class App : Application
             _hotkeys.WaitReady(TimeSpan.FromMilliseconds(1500));
 
             // A tray failure must be reported, not fatal: the hotkeys still work without it.
-            try { _tray = BuildTrayIcon(desktop); }
+            try { _tray = BuildTrayIcon(desktop); RefreshTrayState(); }
             catch (Exception ex) { _trayError = ex.Message; }
             desktop.Exit += (_, _) => { _hotkeys.Dispose(); _mouse?.Dispose(); _outlook?.Dispose(); _tray?.Dispose(); };
             ConnectionStatus.Changed += () => Dispatcher.UIThread.Post(UpdateTrayTip);
@@ -217,6 +217,7 @@ public partial class App : Application
     public void OpenCard(AndaRecord record, PixelPoint near, bool mini)
     {
         _lastCard = (record, near, mini);
+        RefreshTrayState();
         if (ThemeManager.Current.IsCompact)
         {
             CloseOpenCards();
@@ -485,6 +486,7 @@ public partial class App : Application
             _briefs = BriefServiceFactory.Create(() => _prompts.GetText(_settings.ActiveLens), _settings);
         }
         ApplyMouseTrigger();
+        RefreshTrayState();   // the data source may have changed
         ApplyData();
         // Findings from an agent that has since been changed or switched off are not shown any more.
         if (AgentsFingerprint() != _agentsFingerprint) { _agentsFingerprint = AgentsFingerprint(); _agents.ClearCache(); }
@@ -501,7 +503,23 @@ public partial class App : Application
     private void UpdateTrayTip()
     {
         if (_tray is null) return;
-        _tray.ToolTipText = $"ANDA Companion (Notula) · {ConnectionStatus.Current.Label}";
+        _tray.ToolTipText = TrayState.Tip(ConnectionStatus.Current.Label, _urgentShown);
+    }
+
+    private int _urgentShown = -1;
+
+    /// <summary>Recounts the urgent ANDAs and shows or removes the amber dot. Called only when the app reads data; never on a timer.</summary>
+    private void RefreshTrayState()
+    {
+        if (_tray is null) return;
+        int urgent;
+        try { urgent = TrayState.UrgentCount(_repository, Today(), _calendar, _settings.UrgentLateDays); }
+        catch (Exception) { urgent = 0; }                       // an unreadable file must never take the tray icon down
+        if (urgent == _urgentShown) return;
+        bool dotChanged = _urgentShown < 0 || (urgent > 0) != (_urgentShown > 0);
+        _urgentShown = urgent;
+        if (dotChanged) _tray.Icon = new WindowIcon(RenderTrayBitmap(urgent > 0));
+        UpdateTrayTip();
     }
 
     /// <summary>Starts or stops the middle-click trigger to match Settings. The hook exists only while the setting is on.</summary>
@@ -529,7 +547,7 @@ public partial class App : Application
         }
     }
 
-    /// <summary>The Loupe icon for the tray. <paramref name="needsLook"/> adds the small amber dot (the picture is ready; it is not switched on until the new design is ported). If the picture cannot be read, a plain drawn tile is used so the tray never has no icon.</summary>
+    /// <summary>The Loupe icon for the tray. <paramref name="needsLook"/> adds the small amber dot, shown while any ANDA in the data is urgent (see TrayState). If the picture cannot be read, a plain drawn tile is used so the tray never has no icon.</summary>
     private static Bitmap RenderTrayBitmap(bool needsLook = false)
     {
         try

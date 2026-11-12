@@ -154,6 +154,23 @@ public class Round19Tests : IClassFixture<HeadlessFixture>
         Assert.DoesNotContain("days later than the goal", t);
     }
 
+    [Fact]
+    public void The_tray_counts_urgent_ANDAs_by_the_cards_own_rule_and_its_tooltip_never_names_them()
+    {
+        var repo = new MockAndaRepository();
+        var cal = new BusinessCalendar();
+        var today = new DateOnly(2026, 7, 16);
+        int expected = repo.Numbers.Count(n => UrgencyPolicy.IsUrgent(repo.Find(n)!, today, cal, UrgencyPolicy.DefaultLateDays));
+        Assert.Equal(expected, TrayState.UrgentCount(repo, today, cal, UrgencyPolicy.DefaultLateDays));
+        Assert.Equal(1, expected);                                     // the sample data has one ANDA at risk (216482)
+        Assert.Equal(0, TrayState.UrgentCount(repo, today, cal, 365));  // a threshold nothing reaches: no dot
+        Assert.Equal("ANDA Companion (Notula) · OFFLINE", TrayState.Tip("OFFLINE", 0));
+        Assert.Equal("ANDA Companion (Notula) · OFFLINE · 1 ANDA is urgent", TrayState.Tip("OFFLINE", 1));
+        string three = TrayState.Tip("OFFLINE", 3);
+        Assert.Equal("ANDA Companion (Notula) · OFFLINE · 3 ANDAs are urgent", three);
+        Assert.DoesNotContain("216482", three);
+    }
+
     /// <summary>A picture for a person to look at. Not run unless ANDA_SHOTS_DIR is set.</summary>
     [ShotFact]
     public async Task Save_pictures_of_the_default_card()
