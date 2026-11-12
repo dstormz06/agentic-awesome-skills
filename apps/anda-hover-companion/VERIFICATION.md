@@ -1073,7 +1073,7 @@ Not done, and said so: the proofreader and its recall row, card details with Cop
 
 Local results on this code: C# **1,086 passed, 15 skipped, 0 failed** (1,092 with the picture tests switched on); extension unit **31 passed**; simulation: this round's suite 33, **53 checks**, the new parity script (20 cases, no mismatch), and every earlier suite after the updates listed under R188 (**36 suite files in all, none with a failure, each run against the final page**); `node tools/wording-check.mjs` reports **0 findings in 137 files**.
 
-CI: {{CI}}
+CI: run 44 on `20f6b22` is green on Windows (build, every test including the Windows-only ones, the extension's rules against the app's output, the single-file program, the app's own self-test, which draws the card in X, and the demo bundle) and on Linux. Run 43, on the commit before it (`a322fb5`), had passed its build and tests on Windows when the next push cancelled it during the self-test; run 44 contains everything run 43 did.
 
 | Claim | Evidence | Limit |
 |---|---|---|
