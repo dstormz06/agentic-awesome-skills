@@ -783,6 +783,8 @@ calendar out.
 - **Enter, N or the button goes straight to a new note**: the drawer opens at *My notes* with the cursor in the box. On the small card the full card opens first.
 - **Ctrl+Enter saves.** A plain Enter in the box is a new line. Escape leaves the box; a second Escape closes the card, so a half-typed note is not thrown away
   by one keystroke. **A key typed in the box belongs to the box**: S does not copy the status and E does not fold the drawer.
+- **A half-typed note keeps the card open** when another window is clicked: a person reads the email while writing the note. Once the note is saved, a click
+  elsewhere closes the card as before.
 - A note can be changed, deleted (with Undo) and copied. The newest is first. The button counts project notes and the person's own together.
 - **Copy status** is the first small button and the S key. One line under the buttons says so.
 - The rules are the simulation's: text only, 500 characters, 50 notes for one ANDA, a six-digit number as the key.

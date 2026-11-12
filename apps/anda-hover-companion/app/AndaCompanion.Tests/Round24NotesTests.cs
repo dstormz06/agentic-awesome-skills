@@ -253,6 +253,30 @@ public class Round24NotesTests : IClassFixture<HeadlessFixture>
     }
 
     [Fact]
+    public async Task A_half_typed_note_keeps_the_card_open_when_another_window_is_clicked()
+    {
+        var r = await _fx.Session.Dispatch(() =>
+        {
+            ThemeManager.Apply(AppearanceId.X);
+            var w = new CardWindow(new OfflineBriefService(), new MockAndaRepository().Find) { CloseWhenDeactivated = true, QuickNotes = new QuickNotesService(NewStore()) };
+            try
+            {
+                bool closed = false; w.Closed += (_, _) => closed = true;
+                w.Show(Late, new PixelPoint(40, 40), false); Settle();
+                Key(w, Avalonia.Input.Key.Enter);
+                var box = w.FindControl<TextBox>("QuickNoteBox")!;
+                bool emptyAtFirst = w.HasUnsavedNote;
+                box.Text = "half a note";
+                bool unsaved = w.HasUnsavedNote;
+                Key(box, Avalonia.Input.Key.Enter, KeyModifiers.Control);
+                return (emptyAtFirst, unsaved, afterSave: w.HasUnsavedNote, closed);
+            }
+            finally { w.Close(); Settle(); ThemeManager.Apply(Appearances.Default); }
+        }, CancellationToken.None);
+        Assert.Equal((false, true, false, false), r);        // with text in the box the card would stay; once saved it closes on a click elsewhere as before
+    }
+
+    [Fact]
     public async Task A_note_can_be_changed_deleted_put_back_and_copied()
     {
         var r = await Card((w, notes, _) =>

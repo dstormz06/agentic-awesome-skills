@@ -103,7 +103,8 @@ public partial class CardWindow : Window
             else if (e.Key == Key.Escape) { Root.Focus(); Focus(); e.Handled = true; }
         }, Avalonia.Interactivity.RoutingStrategies.Tunnel);
         QuickNoteBox.PropertyChanged += (_, e) => { if (e.Property == TextBox.TextProperty) QuickNoteCount.Text = $"{(QuickNoteBox.Text ?? "").Length} / {QuickNotesService.MaxLength}"; };
-        Deactivated += (_, _) => { if (!_pinned && CloseWhenDeactivated) Close(); };
+        // A click elsewhere closes the card, unless it is pinned or a note is half typed: a person reads the email while writing the note.
+        Deactivated += (_, _) => { if (!_pinned && CloseWhenDeactivated && !HasUnsavedNote) Close(); };
         KeyDown += OnKey;
         ApplyAppearanceStructure();
 
@@ -232,6 +233,9 @@ public partial class CardWindow : Window
     }
 
     // ---------------------------------------------------------------- my notes (round 24)
+
+    /// <summary>True while the note box holds text that has not been saved. The card then stays open when another window is clicked.</summary>
+    public bool HasUnsavedNote => !string.IsNullOrWhiteSpace(QuickNoteBox.Text);
 
     private string? _editingNoteId;
     private (string Number, int At, QuickNote Note)? _lastDeleted;

@@ -1057,11 +1057,59 @@ CI: run 42 on `2a9a7f9` is green on Windows (build, every test including the Win
 
 No RPM or director has used it. The choice among X, Y and Z, and the thresholds, are the owner's. The eight looks kept are a reading of "top 8". The app's W, V and U and its numbered tray pictures were seen only as pictures made without a screen: **nobody has seen them on a real Windows desktop**, and the app's glass has no blur. The scheduled count is the app's first timed read of the portfolio file; it was approved by the owner, not by IT. The app still trails the simulation on notes, the proofreader and the rest of rounds 18 to 22.
 
+## Round 24: X is the default in both programs; notes, Enter adds a note and Open ANDA page come to the Windows app
+
+The owner, on the three proposals and the eight looks of round 23: "I prefer x. Yes to the second question. Proceed with all". That was read as: make X the default in both programs in W's place (as proposed), and go on with the port, starting with notes (as recommended). The rest of the port was not reached in this round.
+
+What was done:
+
+1. **X · Graphite Calendar is the default** in the simulation, the Appearance Lab and the Windows app, and takes W's place in the eight.
+2. **One rule for the days to the goal date**, with 20 shared cases (`mockup/countdown-golden.json`) that both programs answer alike.
+3. **Notes in the Windows app**: Enter, N or the button opens a new note; Ctrl+Enter saves; change, delete with Undo, copy; kept in `quick-notes.json` in the app's own folder.
+4. **Copy status is a small button and the S key** in the app, as in the simulation since round 21.
+5. **Open ANDA page works in the app**: an `https` address set in Settings, handed to the default browser.
+
+Not done, and said so: the proofreader and its recall row, card details with Copy, notices near the clock and division news, the one question before sending, text size and spacing, recent and kept ANDAs, One Bar and Today are still simulation only; the app still draws no blur behind the glass looks.
+
+Local results on this code: C# **1,086 passed, 15 skipped, 0 failed** (1,092 with the picture tests switched on); extension unit **31 passed**; simulation: this round's suite 33, **53 checks**, the new parity script (20 cases, no mismatch), and every earlier suite after the updates listed under R188 (**36 suite files in all, none with a failure, each run against the final page**); `node tools/wording-check.mjs` reports **0 findings in 137 files**.
+
+CI: {{CI}}
+
+| Claim | Evidence | Limit |
+|---|---|---|
+| **Both programs open in X**; W is defined and not offered; a setting or backup that names W opens in X | Suite 33 (X1, X2, X19); C# `X_is_the_default_takes_Ws_place_in_the_eight_and_W_is_still_defined`; the offered-looks parity test of round 23, which reads the simulation's list | |
+| **X shows the answer first, the days to the goal date beside it, and the calendar under it**; nothing collides, on the small card, with the largest text, and from 390 to 1920 px wide | Suite 33 (X3 to X10, X16 to X18, X21, with accessibility scans); C# `The_default_card_shows_the_days_to_the_goal_date_beside_the_answer_and_the_calendar_under_it`; pictures of both programs' cards were looked at | The app's card was seen as pictures made without a screen, not on a Windows desktop |
+| **The count changes at 30 days, at 7 days, on the day and after it, in words, ground and weight, not in color alone**, and both programs agree | Suite 33 (X11 to X15, each level scanned for contrast); `mockup/countdown-golden.json` with its parity script and C# `The_days_to_goal_rule_answers_the_shared_cases_exactly_as_the_simulation_does`; C# `Every_level_keeps_its_text_readable_on_its_ground` (measured contrast) | The thresholds were proposed by the builder and accepted with the look, not tested with users |
+| **In the app, Enter goes to a new note and Ctrl+Enter saves it**; the button counts project notes and the person's own; on the small card the full card opens first; every full look behaves the same | C# `Round24NotesTests` (Enter, the small card, three other looks) | **Keys were raised by the test, not typed on a real keyboard** |
+| **A key typed in the note box belongs to the box**: S does not copy, E does not fold, a plain Enter is a new line, Escape leaves the box without closing the card | C# `A_key_typed_in_the_note_box_belongs_to_the_box` | |
+| **A half-typed note keeps the card open when another window is clicked** | C# `A_half_typed_note_keeps_the_card_open_when_another_window_is_clicked` | The test reads the rule; no real window was clicked |
+| **A note can be changed, deleted, put back and copied; one ANDA holds 50; a note is cleaned as the simulation cleans it** | C# `Round24NotesTests` (the store: add, list, change, delete, restore, the limit, the cleaning) | The cleaning rule is tested by the same examples in words, not by a shared file |
+| **Notes survive a restart; a damaged file is set aside and never overwritten; a file edited by hand is read safely; a folder that cannot be written is reported** | C# `Notes_survive_a_restart…`, `A_file_edited_by_hand_is_read_safely`, `A_folder_that_cannot_be_written…` | The file is not encrypted |
+| **Open ANDA page opens exactly one https address with six digits in it**; `http`, `javascript:`, `file:`, a space, a quote, a user name and password, a missing `{anda}` and an address over 300 characters are refused with the simulation's words; a browser that cannot start is reported | C# `Round24NotesTests` (eleven addresses, seven bad numbers, the card, Settings) | **No real browser was started**: the tests replace the hand-off. The address is the person's own setting |
+| **A long holiday name is not cut on the calendar** | Suite 33 (X22, with the real clock set to Nov 12, 2026) | Two long names in one window could still touch each other |
+
+### Defects caught in round 24
+
+| # | Finding | Found by | Disposition |
+|---|---|---|---|
+| R182 | **"Birthday of Martin Luther King, Jr." was cut at the left edge of the calendar** | A picture of X with today's real dates | A name near an edge is anchored to that edge |
+| R183 | **In the app, Ctrl+Enter in the note box added a line and saved nothing**: the box handles Enter before the card sees it | The first run of the new tests | The box's two keys (Ctrl+Enter, Escape) are caught on the way down |
+| R184 | **The app's "Open in system of record" button did nothing at all** | Reading the card's code for the port | It is now Open ANDA page, and it works or says why not |
+| R185 | A source comment said the app writes "exactly two JSON files"; it writes several | Adding the notes file | Corrected: it writes only inside its one folder |
+| R186 | After a note was added from outside the card, the button's count was stale until the next paint | A picture | The count is painted whenever the notes open |
+| R189 | **A click into the email would have closed the card and thrown away a half-typed note** | Reading the new code as a person would use it | The card stays open while the box holds unsaved text |
+| R187 | A test waited across midnight with the card set to hide after ten seconds, and read a hidden card | The first run of suite 33 | The test keeps the card open |
+| R188 | Older suites and C# tests expected W as the default, Copy status as the main action and Enter to copy | The full runs | Updated on purpose; suite 31's section on W as the default was removed, and suite 33 covers the default |
+
+### What round 24 does not prove
+
+No RPM or director has used it. **The app now writes the person's own notes to a file**, by the owner's direction; whether that folder is the right place, and whether such notes fall under records rules, has not been asked of IT. Nobody has typed a note, pressed Enter or opened a page in the app on a real Windows desktop: the tests raise the keys and replace the browser. The app has no blur behind X. The proofreader, card details, notices, One Bar and Today are still only in the simulation.
+
 ## Still open
 
 GDUFA III tier table (needs the commitment-letter text and the dual-source rule); a real-keyboard check of rebound shortcuts on
 non-US layouts (rebinding is built); UI Automation capture; code signing; the live Claude call; **the live Elsa call (the two
 translations in `ElsaMapping.cs`, once the API is available)**; a 508 pass with a screen reader; a real-email-client
-check that compact boxes do not disturb typing; a real-mouse hover check for auto-hide on Windows; **Alert Hub, Patent Analysis and Triaging Agent details from DPM IT and a first real call to each**; a delivered-keystroke check of a person's own shortcut on Windows; a shared supervisor list (needs an approved place). **From rounds 18 to 22: the port of the simulation's design to the Windows app and the extension** (notes on the card, Enter adds a note, Open ANDA page, the proofreading rules, the recall row, card details, notices and news, the one question, text size and spacing, recents, One Bar, Today); the owner's choice among the proposals X, Y and Z; the blur of the glass looks on a real Windows desktop; a Flag column and a mail rule for the tray dot in the app; the tray picture seen in a real Windows notification area.
+check that compact boxes do not disturb typing; a real-mouse hover check for auto-hide on Windows; **Alert Hub, Patent Analysis and Triaging Agent details from DPM IT and a first real call to each**; a delivered-keystroke check of a person's own shortcut on Windows; a shared supervisor list (needs an approved place). **From rounds 18 to 22: the port of the simulation's design to the Windows app and the extension** (the proofreading rules, the recall row, card details, notices and news, the one question, text size and spacing, recents, One Bar, Today); where the notes file should live and whether records rules cover it (for IT); the blur of the glass looks on a real Windows desktop; a Flag column and a mail rule for the tray dot in the app; the tray picture seen in a real Windows notification area.
 `npm run test` for the whole repository stops in this authoring environment at an unrelated test that needs a
 newer `git` (`--ref-format=reftable`); `npm run validate` and `npm run security:docs` pass.
