@@ -853,6 +853,58 @@ CI: Windows run 36 **failed** on the first push of the new card (`card-placement
 
 No RPM has used any of it. The three simulation features are proposals to look at, not parts of the Windows app. The Word document for division news does not exist, and reading it from a synced folder has not been tried; neither has any connection to SharePoint, Elsa or CDER One Analytics. The real portfolio's columns were assumed. The new shortcuts were not tried in Word, Outlook or Excel. With the looks back in the focused edition the card is drawn at the 92% the owner chose in round 16, where round 17 drew it solid: it was looked at in the simulation over the Mail window, not on a Windows desktop. A notice near the clock can be seen by others in a meeting; the design limits what it shows and how often, and cannot make it private. "Things should not take more than two minutes to act on" is the owner's rule and was used to shape the features; no timing was measured.
 
+## Round 20: glass by default at 90%, quick notes on the card, a proofreader that works with no AI, and a desktop that looks like Windows 11
+
+The owner answered the open question ("Leave Notula alone") and asked, for a director's test the same day: the default appearance "should use the glass design"; transparency "from 40 percent to 100 percent but the default should be 90 percent"; "make sure all of the features and sub features/functions of the proofread mode/tool will work flawlessly … you can actually proofread and also factcheck and also cross references/leveraging the user's ANDA portfolio or the user's personal notes"; show "the user's most recent and relevant notes +/- relevant to-do list items at the bottom row and as auto collapsed"; add a way to "create personal notes or quick notes of the particular ANDA" on the hover card; and make the simulation "actually look like windows 11 at the FDA … to make my director feels at home".
+
+What was done:
+
+1. **Glass by default at 90%.** V · Glass Sheet is the default look in the simulation and the lab, listed first. The sheet follows the transparency setting (40 to 100%, starting at 90% for every look). The Windows app's start is 90% too. **The app's default look is still T · Pocket Plain**: glass there needs a blur behind a rounded card that has to be seen on a Windows desktop first.
+2. **Quick notes on the card (simulation).** *Notes* or **N**: add, edit, delete with Undo, copy. Kept by the app; the sheet and the notes folder stay read-only.
+3. **Proofread and Fact-check with no AI (simulation).** The two buttons, which were switched off until a model is approved, now work by fixed rules; a corrected draft can be copied or applied in the tool's own window. Fact-check adds strength, review cycle and the due date of the open item from the sheet, and traces a date to the note it stands in.
+4. **Notes and open items for recall (simulation).** One closed row per ANDA at the bottom of the Review window.
+5. **The Windows 11 look (simulation).** Wallpaper (three choices), taskbar, windows, and Mail, Chat, browser and terminal in the manner of the real programs, **drawn from shapes with no logo, image file or agency artwork**.
+
+Not done, and said so: none of items 2 to 4 is in the Windows app or the extension; V is not in the app; no real FDA desktop was seen, so "at the FDA" is Windows 11 as it ships, in blues, and nothing that claims to be the agency's.
+
+Local results on this code: C# **979 passed, 12 skipped, 0 failed** (the contrast checks now run at 90%); extension unit **31 passed** and the standalone browser run all pass; simulation: this round's suite 29, **122 checks** (seven accessibility scans among them, no violations), and every earlier suite: the matrix **1,090**, the in-frame check **152**, four accessibility suites with no violations, the review parity **46 of 46**, the selection parity **21 cases, 0 mismatches**, the recognizer parity **47 cases, 0 mismatches**, and suites 2 to 28 (41, 13, 68, 26, 38, 15, 65, 56, 39, 24, 254, 12, 144, 133, 94, 101, 49, 94 and 44 checks), all passing; `node tools/wording-check.mjs` reports **0 findings in 133 files**.
+
+CI: **Run 40** (`df57d89`, this round) passed on Linux and, on Windows, built, passed every test including the Windows-only ones, published the executable and passed the app's own self-test. Only the 90% start touches the app in this round; the rest is in the simulation, which the workflow does not run.
+
+| Claim | Evidence | Limit |
+|---|---|---|
+| **A new page opens in V · Glass Sheet at 90%; the slider runs 40 to 100 and governs the glass; every other look starts at 90% too** | Suite 29 (G1 to G11); suites 4, 18, 20, 22, 24 and 28 updated to the new default and start; `Round15Tests`, `Round16Tests`, `SettingsTests` for the app's 0.90 | The app's default look is unchanged (T). Glass was looked at over the three drawn wallpapers, not on a Windows desktop |
+| **Nothing readable shows through the action area of the glass card** | Suite 29 (G10); pictures before and after | Blur is a browser feature here; where it is missing the area is solid |
+| **Quick notes: add, edit, delete with Undo, copy; text only; 500 characters and 50 per ANDA; unsaved text survives closing; never in a notice or the backup; the card's letter shortcuts do not fire while typing** | Suite 29 (N1 to N30, with one accessibility scan and a refused clipboard) | **Simulation only**, and notes last until the page is reloaded. Where a real notes file should live is not decided |
+| **Proofread works with no AI**: five drafts corrected exactly as expected, seven clean drafts raise nothing, brackets and date styles are counted, a 120,000 character draft is handled, markup in a draft is text | Suite 29 (P1 to P16) | **Simulation only.** About 120 words and a dozen rules: it is not a spelling or grammar checker and says so. The word list was written here, not taken from RPM mail |
+| **Fact-check reads strength, cycle and due date from the sheet, traces dates to notes, and does not guess** (two ANDAs in one sentence, a sister product in the next sentence, spreadsheet rows, unknown numbers) | Suite 29 (F1 to F11) | **Simulation only.** The three extra facts were chosen here. A fact the sheet does not hold cannot be checked |
+| **The shared review is unchanged** | Suite 29 (P16); the review parity script, 46 of 46; the selection parity script | The new layer has no shared cases with the app yet, because the app does not have it |
+| **Recall: one closed row per ANDA of the draft, three at most; notes the draft touches first; open items from the record and both to-do lists; text only** | Suite 29 (R1 to R12, two accessibility scans, and the real path: select the draft in Mail, press the shortcut) | **Simulation only.** "Relevant" means a shared date or word of four letters or more |
+| **The desktop looks like Windows 11 and uses no logo or image file; every added piece is hidden from screen readers; selecting text and every shortcut work as before** | Suite 29 (W1 to W14: three backgrounds each scanned, five screen sizes); every earlier suite; pictures at 1920, 1366, 1024 and 390 px looked at | Likeness is a judgment made here from memory of the real programs. Real Segoe fonts were not installed |
+| **Everything earlier still works** | Every earlier suite, the matrix, the frame check | Expectations changed on purpose: the default look, the 90% start, the names of the Review buttons, the closing line of the fact check |
+
+### Defects caught in round 20
+
+| # | Finding | Found by | Disposition |
+|---|---|---|---|
+| R141 | **Proofread and Fact-check did nothing without a model**: the buttons were greyed out, so the "proofreader" could not proofread | **The owner** | Both work by fixed rules; the AI versions stay beside them, off |
+| R142 | The *Notes* button on the card answered "This is not connected in the prototype" | Reading the code for the owner's request | It opens the notes, with the box to add one |
+| R143 | **On the glass card, facts scrolling under the Copy status area showed through the buttons** | Looking at the first picture | The area blurs what is under it; solid where blur is missing |
+| R144 | **A false alarm in the new strength check**: in the demo email the sentence after "ANDA 214990 - the 750 mg strength" speaks of "the 500 mg application", and it was read as a wrong strength for 214990 | Suite 29 (F4), written from the demo email | A strength is compared only in the sentence that names the ANDA |
+| R145 | The list of ANDAs named in a draft missed a number that stood close after another | Suite 29 (R8) | The recognizer's own list is used |
+| R146 | **The wallpaper made the desktop a layer of its own, so an open card covered the tray menu and, on a phone, the dimmer covered Settings** | Three earlier suites (3, 8 and 9), which timed out clicking | The desktop is not a layer; the drawing sits behind by order |
+| R147 | The search boxes drawn in the Mail and Chat title bars failed the contrast check | The accessibility scans of suite 29 | Solid boxes with dark text |
+| R148 | Window titles were cut off ("Inbo…") at 1366 and 1280 px | Looking at the picture; suite 29 (W6, W14) | The search box gives way when the bar is narrow |
+| R149 | Two desktop icons were drawn on top of each other | Looking at the picture | Placed one under the other; a check compares their boxes |
+| R150 | **An older fault: pressing R on a small peek card opened the quick replies menu in the top-left corner of the screen** | A picture taken by a script that typed into a peek by mistake | The menu opens at the card |
+| R151 | Pressing N on a peek did nothing | The same picture | It opens the full card with the notes |
+| R152 | The line that says what was not checked stood between the facts | Looking at the picture | It comes after every fact |
+| R153 | The rule for a space before a mark missed "216482 .It" | The first trial of the rules | The mark moves back and the space goes after it |
+
+### What round 20 does not prove
+
+No RPM and no director has used any of it. The glass card, the notes and the proofreader exist only in the browser simulation; the Windows app has the 90% start and nothing else from this round. The proofreading list will miss most grammar and some spelling, and it has not been run on real mail, so its false alarms on real text are not known. The agency's desktops were not seen: the look is Windows 11 as it ships, and no agency artwork is used, on purpose. Real Edge and Chrome on Windows, a projector, a touch screen and a screen reader were not used, as before.
+
 ## Still open
 
 GDUFA III tier table (needs the commitment-letter text and the dual-source rule); a real-keyboard check of rebound shortcuts on
