@@ -1121,7 +1121,7 @@ Not done, and said so: card details with Copy, notices near the clock and divisi
 
 **Every suite was run twice on the final code**; the app was rebuilt from nothing between its two runs, and the simulation suites ran one after another the first time and in three groups side by side the second. Results, identical in both runs: C# **1,104 passed, 15 skipped, 0 failed**; extension unit **31 passed** and its end-to-end run **ALL PASS**; simulation: **37 suite files, none with a failure**, among them the three parity scripts for this work (32 cases, 372 + 8 cases, 20 cases; no mismatch); `node tools/wording-check.mjs` **0 findings in 139 files**; `npm run validate` and `npm run security:docs` pass.
 
-CI: the Windows run for this commit is read after the push; its result is in the line added below this record by the next commit.
+CI: **no Windows run had started for the round 25 commit (`ec2479b`) twelve minutes after the push**, although the commit changes files the workflow watches, and a manual start was refused to this session (403). The last Windows run is still run 44, on the round 24 code. Until a run on this code is read, "the same rules on Windows" in the table below rests on the local runs only. A second commit under the app's folder was pushed to give the trigger another chance; what happened is in the reply to the owner for this round.
 
 | Claim | Evidence | Limit |
 |---|---|---|

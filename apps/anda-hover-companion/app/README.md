@@ -261,11 +261,13 @@ dotnet test AndaCompanion.Tests                              # everything (Windo
 dotnet test AndaCompanion.Tests --filter "Category!=Windows" # what runs on Linux/macOS
 ```
 
-762 cross-platform tests at the time of writing (recognizer, status line, GDUFA rules, the federal-holiday
+1,104 cross-platform tests at the time of writing, round 25 (the figure was 762 when this paragraph was first written; recognizer, status line, GDUFA rules, the federal-holiday
 calendar against OPM's dates, watch rules, urgency, draft check, portfolio and notes readers, writing prompts,
 hotkey parsing and registration with a fake API, brief fencing and fallback, provider selection, settings,
 contrast, placement, the to-do list, custom actions, the agent connector, headless renders and interaction tests of the real windows) plus Windows-only tests that use real Win32 (clipboard snapshot/restore, hotkey registration and
-conflict, owner window). Tests never touch the real `%AppData%`.
+conflict, owner window). Tests never touch the real `%AppData%`. `Round25ProofreadTests` holds the app to the simulation's answers for Proofread, the fact checks and
+the one question (`../mockup/proofread-golden.json`, `../mockup/proofread-stress-golden.json`); after a change to those rules in the simulation, write the stress file again with
+`../tools/proofread-stress.cjs` and make the app agree.
 
 ## Self-test — evidence from the machine it runs on
 
