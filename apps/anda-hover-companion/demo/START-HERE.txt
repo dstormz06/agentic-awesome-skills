@@ -63,8 +63,11 @@ MAKE IT YOURS (tray icon, then Settings)
 THE NEWER DESIGN
   This build has the Loupe icon, eight looks, and a default card (X) that leads with one answer,
   the days to the goal date beside it, the calendar under it, and one main action: Add a note
-  (Enter). S copies the status line. Your notes are kept in quick-notes.json in this folder. One Bar, Today, recent ANDAs, card details with Copy, notices
-  near the clock and the one question before sending are shown in the browser simulation only.
+  (Enter). S copies the status line. Your notes are kept in quick-notes.json in this folder.
+  Review a draft (Ctrl+Alt+Shift+R) proofreads and fact-checks by fixed rules, with no AI and
+  nothing sent, asks one question before you send, and lists your notes for recall.
+  One Bar, Today, recent ANDAs, card details with Copy and notices near the clock are shown in
+  the browser simulation only.
   TRIAL-SHEET.md lists five everyday tasks for judging whether the design helps.
 
 IF SOMETHING DOES NOT WORK

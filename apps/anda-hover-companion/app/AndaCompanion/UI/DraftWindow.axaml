@@ -25,44 +25,93 @@
           <Button Grid.Column="1" Name="CloseBtn" Classes="primary" Content="Done"/>
         </Grid>
         <ScrollViewer Name="Body" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <StackPanel Spacing="10" Margin="0,0,2,0">
+        <StackPanel Spacing="10" Margin="0,0,14,0">
 
           <TextBlock Classes="lbl" Text="YOUR DRAFT"/>
           <TextBox Name="DraftBox" AcceptsReturn="True" TextWrapping="Wrap" Height="140"
-                   Watermark="Paste or type an email draft. Select it in your mail and press the Check-a-draft shortcut to bring it here."
+                   Watermark="Paste or type an email or chat draft. Select it in any window and press the Review-a-draft shortcut to bring it here."
                    AutomationProperties.Name="Your draft"/>
 
-          <TextBlock Classes="lbl" Text="CHECKED AGAINST THE RECORD · NO AI"/>
-          <StackPanel Name="FindingsPanel" Spacing="5"/>
+          <WrapPanel Name="ViewRow" Orientation="Horizontal" AutomationProperties.Name="What to check">
+            <Button Name="ViewAllBtn" Classes="primary" Margin="0,0,8,6" Content="Check everything"/>
+            <Button Name="ViewProofBtn" Margin="0,0,8,6" Content="Proofread"/>
+            <Button Name="ViewFactBtn" Margin="0,0,8,6" Content="Fact-check"/>
+            <Button Name="SampleBtn" Margin="0,0,8,6" Content="Use the sample draft"/>
+          </WrapPanel>
+          <TextBlock Classes="hint" Text="All three run on this PC by fixed rules. No AI is used and nothing is sent."/>
+          <TextBlock Name="SummaryText" FontSize="12.5" FontWeight="SemiBold" TextWrapping="Wrap" Foreground="{DynamicResource C.Ink}"
+                     AutomationProperties.LiveSetting="Polite"/>
 
-          <TextBlock Classes="lbl" Margin="0,6,0,0" Text="WRITING HELP · USES YOUR OWN INSTRUCTIONS"/>
-          <TextBlock Name="AiNote" Classes="hint"/>
-          <StackPanel Orientation="Horizontal" Spacing="8">
-            <Button Name="ProofBtn" Content="Proofread"/>
-            <Button Name="RewriteBtn" Content="Rewrite"/>
-            <Button Name="FactBtn" Content="Fact-check"/>
+          <StackPanel Name="FactWrap" Spacing="6">
+            <TextBlock Classes="lbl" Text="FACT CHECK · YOUR DATA, YOUR NOTES AND THE CALENDAR"/>
+            <StackPanel Name="FindingsPanel" Spacing="5"/>
           </StackPanel>
 
-          <StackPanel Name="PreviewPanel" IsVisible="False" Spacing="6">
-            <TextBlock Classes="lbl" Text="WHAT WILL BE SENT · NOTHING IS SENT UNTIL YOU SAY SO"/>
-            <TextBox Name="PreviewBox" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="150"
-                     FontFamily="Cascadia Mono, Consolas, DejaVu Sans Mono, monospace" FontSize="11"
-                     AutomationProperties.Name="Exactly what will be sent"/>
-            <StackPanel Orientation="Horizontal" Spacing="8">
-              <Button Name="SendBtn" Classes="primary" Content="Send"/>
-              <Button Name="CancelBtn" Content="Cancel"/>
+          <StackPanel Name="ProofWrap" Spacing="6">
+            <TextBlock Classes="lbl" Margin="0,4,0,0" Text="PROOFREADING · FIXED RULES, NO AI"/>
+            <StackPanel Name="ProofPanel" Spacing="5"/>
+            <StackPanel Name="FixPanel" IsVisible="False" Spacing="6">
+              <TextBlock Classes="lbl" Margin="0,4,0,0" Text="YOUR DRAFT, WITH THE CHANGES MARKED"/>
+              <Border BorderBrush="{DynamicResource C.Line}" BorderThickness="1" CornerRadius="8" Padding="10,8">
+                <SelectableTextBlock Name="MarkedText" FontSize="12.5" TextWrapping="Wrap" Foreground="{DynamicResource C.Ink}"
+                                     AutomationProperties.Name="Your draft with the changes marked"/>
+              </Border>
+              <WrapPanel Orientation="Horizontal">
+                <Button Name="CopyFixedBtn" Margin="0,0,8,4" Content="Copy corrected draft"/>
+                <Button Name="ApplyFixedBtn" Margin="0,0,10,4" Content="Apply here"/>
+                <TextBlock Name="FixStatus" Classes="hint" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite"/>
+              </WrapPanel>
             </StackPanel>
+            <TextBlock Name="ProofFine" Classes="hint"
+                       Text="A short list of fixed rules, not a full spelling or grammar check. “Apply here” changes only the box above; the app never types into your email."/>
           </StackPanel>
 
-          <StackPanel Name="ResultPanel" IsVisible="False" Spacing="6">
-            <TextBlock Name="ResultLabel" Classes="lbl" Text="RESULT"/>
-            <TextBox Name="ResultBox" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="150"
-                     AutomationProperties.Name="Result"/>
-            <StackPanel Orientation="Horizontal" Spacing="8">
-              <Button Name="CopyBtn" Content="Copy result"/>
-              <TextBlock Name="ResultNote" Classes="hint" VerticalAlignment="Center"/>
+          <Border Name="SendBox" IsVisible="False" BorderThickness="1" CornerRadius="8" Padding="12,10" Margin="0,4,0,0" BorderBrush="{DynamicResource C.Line}">
+            <StackPanel Spacing="4">
+              <TextBlock Classes="lbl" Text="ONE QUESTION BEFORE YOU SEND"/>
+              <TextBlock Name="SendQuestionText" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" Foreground="{DynamicResource C.Ink}"
+                         AutomationProperties.LiveSetting="Polite"/>
+              <TextBlock Name="SendFine" Classes="hint"/>
             </StackPanel>
-          </StackPanel>
+          </Border>
+
+          <StackPanel Name="RecallPanel" IsVisible="False" Spacing="6" Margin="0,4,0,0"/>
+
+          <Expander Name="AiExpander" HorizontalAlignment="Stretch" Margin="0,4,0,0">
+            <Expander.Header>
+              <TextBlock Name="AiHeader" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink}" Text="AI options · off"/>
+            </Expander.Header>
+            <StackPanel Spacing="8">
+              <TextBlock Classes="lbl" Text="AI ACTIONS · NEED AN APPROVED AI PLATFORM"/>
+              <TextBlock Name="AiNote" Classes="hint"/>
+              <WrapPanel Orientation="Horizontal">
+                <Button Name="RewriteBtn" Margin="0,0,8,4" Content="Rewrite"/>
+                <Button Name="ProofBtn" Margin="0,0,8,4" Content="Proofread with AI"/>
+                <Button Name="FactBtn" Margin="0,0,8,4" Content="Fact-check with AI"/>
+              </WrapPanel>
+
+              <StackPanel Name="PreviewPanel" IsVisible="False" Spacing="6">
+                <TextBlock Classes="lbl" Text="WHAT WILL BE SENT · NOTHING IS SENT UNTIL YOU SAY SO"/>
+                <TextBox Name="PreviewBox" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="150"
+                         FontFamily="Cascadia Mono, Consolas, DejaVu Sans Mono, monospace" FontSize="11"
+                         AutomationProperties.Name="Exactly what will be sent"/>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <Button Name="SendBtn" Classes="primary" Content="Send"/>
+                  <Button Name="CancelBtn" Content="Cancel"/>
+                </StackPanel>
+              </StackPanel>
+
+              <StackPanel Name="ResultPanel" IsVisible="False" Spacing="6">
+                <TextBlock Name="ResultLabel" Classes="lbl" Text="RESULT"/>
+                <TextBox Name="ResultBox" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="150"
+                         AutomationProperties.Name="Result"/>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <Button Name="CopyBtn" Content="Copy result"/>
+                  <TextBlock Name="ResultNote" Classes="hint" VerticalAlignment="Center"/>
+                </StackPanel>
+              </StackPanel>
+            </StackPanel>
+          </Expander>
 
         </StackPanel>
         </ScrollViewer>

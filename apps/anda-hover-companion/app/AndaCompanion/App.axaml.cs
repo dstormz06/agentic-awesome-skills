@@ -313,7 +313,18 @@ public partial class App : Application
     private void OpenDraft(string text)
     {
         if (_draftWindow is not null) { _draftWindow.Close(); _draftWindow = null; }
-        var win = new DraftWindow(text, _repository.Find, new WritingService(ChatCompleterFactory.CreateReporting(_settings)), _settings, _prompts, Today, _calendar);
+        DraftWindow? win = null;
+        win = new DraftWindow(text, _repository.Find, new WritingService(ChatCompleterFactory.CreateReporting(_settings)), _settings, _prompts, Today, _calendar)
+        {
+            // For the recall row: the person's own notes and open items. Read from the app's own files on this PC; nothing is sent.
+            QuickNotes = _quickNotes, AndaTodo = () => _todo.Items, MyTodo = () => _myTodo.Items,
+            OpenCard = number =>
+            {
+                if (_repository.Find(number) is not { } record || win is null) return;
+                var at = win.Position; var size = win.Bounds.Size; double scale = win.RenderScaling;
+                OpenCard(record, new PixelPoint(at.X + (int)(size.Width * scale) + 12, at.Y + 40), mini: false);
+            },
+        };
         win.Closed += (_, _) => { if (ReferenceEquals(_draftWindow, win)) _draftWindow = null; };
         _draftWindow = win;
         win.Show();

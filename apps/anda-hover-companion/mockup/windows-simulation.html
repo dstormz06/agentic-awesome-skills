@@ -2729,7 +2729,7 @@ function factExtras(draft){
       /* review cycle */
       { const mine = +((/Cycle (\d)/.exec(d.meta) || [])[1] || 0);
         const c = /\bcycle\s*(?:no\.?\s*)?(\d)\b/i.exec(sentence) || /\b(first|second|third|fourth|fifth|1st|2nd|3rd|4th|5th)[- ]cycle\b/i.exec(sentence);
-        if(mine && c){ const said = +c[1] || FX_ORD[c[1].toLowerCase()]; out.checked.cycle++;
+        if(mine && c){ const said = /^[0-9]$/.test(c[1]) ? +c[1] : FX_ORD[c[1].toLowerCase()]; out.checked.cycle++;      /* "cycle 0" used to read as "cycle undefined" */
           if(said !== mine && !out.diffs.some(x => x.key === "c" + subject)) out.diffs.push({ key:"c" + subject, kind:"diff", text:`ANDA ${subject}: the draft says cycle ${said}, but your data says cycle ${mine}.` }); } }
       /* dates: the open action item of the record, and dates that also stand in a note */
       const mentions = []; DATE_RE.lastIndex = 0;

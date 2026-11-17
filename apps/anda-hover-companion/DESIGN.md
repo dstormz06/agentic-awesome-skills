@@ -800,8 +800,44 @@ goes; only `https`, no user name or password, at most 300 characters; only six d
 address, or a bad one, nothing is opened and the card says why. After the page opens the card steps aside unless it is pinned. The button used to read *Open
 in system of record* and did nothing.
 
-**Still only in the simulation:** Proofread and Fact-check with their recall row, card details with Copy, notices near the clock and division news, the one
-question before sending, text size and spacing, recent and kept ANDAs, One Bar and Today, and the blur behind the glass looks.
+**Still only in the simulation after round 24:** Proofread and Fact-check with their recall row and the one question before sending (ported in round 25, §11i),
+card details with Copy, notices near the clock and division news, text size and spacing, recent and kept ANDAs, One Bar and Today, and the blur behind the glass looks.
+
+## 11i. Round 25: Review works with no AI in the Windows app, answer for answer with the simulation
+
+The owner asked to proceed with the port and to test everything twice. The piece chosen first was the one a person uses on every message: *Review a draft*.
+
+**What the Windows app has now.** The Review window opens on the selected text and runs three kinds of fixed rules on this PC. No AI is used and nothing is sent.
+
+1. **Fact-check**: the earlier review (numbers, goal and forecast dates, on-track or late wording, weekdays, deadlines, placeholders) and, new here, the strength,
+   the review cycle, the due date of the open action item, a date that does not exist, and a date that also stands in one of the person's notes.
+2. **Proofread**: a short list of rules: about 140 common slips, a name one slip away from a name in the person's data for an ANDA the draft names, words that
+   sound alike, a verb that does not agree, a missing apostrophe, "a" or "an", spacing, punctuation, capitals, brackets, date style and very long sentences.
+   The draft is shown with each change marked. *Copy corrected draft* copies; *Apply here* changes only the app's own box. The app never types into an email.
+3. **One question before you send**: the most important finding, as a question, or "No open gaps." It is hidden in the Proofread view, which is about wording only.
+
+Under them, **For your recall**: for each of the first three ANDAs the draft names, the person's quick notes and the record's notes (the ones the draft touches
+first, then the newest) and the open items from the record and both to-do lists, folded, with a button that opens the card.
+
+Three buttons choose the view: *Check everything*, *Proofread*, *Fact-check*. The checks are the same in each; the view chooses what is shown, and the chosen
+button says "selected" to a screen reader. The AI actions (Rewrite, Proofread with AI, Fact-check with AI) moved into a folded *AI options* section and work as before.
+
+**How "the same as the simulation" is kept true.** The simulation's rules are JavaScript; the app's are C#. The two languages read a pattern differently (in
+JavaScript a word character, a digit and a word boundary are ASCII, white space is a fixed list, and "$" is only the end of the text), so the app rewrites each
+pattern once, in one place (`JsRegex` in `Services/Proofreader.cs`), instead of trusting each pattern to behave. The simulation writes its answers to two files:
+`mockup/proofread-golden.json` (32 drafts written by hand) and `mockup/proofread-stress-golden.json` (372 drafts made by a seeded mix of those drafts, slips of
+the fingers and awkward characters, and 8 with a quick note; written by `tools/proofread-stress.cjs`, which also holds the earlier review's findings and the one
+question for each draft). The app's tests must reproduce every answer, character for character. They do.
+
+**What differs on purpose, because the app's data differs.** The simulation's sample records carry a due date and an established name; a record in the app does
+not have those fields. The app reads the due date from the record's first action item that says "due" with a date, the strength from the product name or the
+Strength column, and the names from the product, the applicant line and the active ingredient. A portfolio file has no action items, so with a person's own
+sheet the due-date check stays silent; that is stated, not hidden. A note label without a date ("Your sheet") is worded "in your notes (Your sheet)".
+
+**One defect found in the simulation by doing the port:** "cycle 0" in a draft was reported as "cycle undefined". Both programs now say "cycle 0".
+
+**Still only in the simulation:** card details with Copy, notices near the clock and division news, text size and spacing, recent and kept ANDAs, One Bar and
+Today, the on-device AI option in Review, and the blur behind the glass looks.
 
 ## 12. Engagement roadmap — seven features that make it the daily habit
 

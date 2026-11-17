@@ -345,6 +345,12 @@ internal static class SelfTestChecks
             if (draft.NumbersChecked < 1) problems.Add("draft check did not read the ANDA number");
             if (DraftCheck.Check("ANDA 999999 is done.", repo.Find).Findings.All(f => f.Kind != DraftFindingKind.UnknownAnda)) problems.Add("draft check did not flag an unknown ANDA");
 
+            // Proofread and the extra fact checks: fixed rules, the same answer on every PC.
+            var proof = Proofreader.Check("i recieved teh responce for anda 216482 .Thanks", repo.Find);   // wording-ok (the slips are there to be found)
+            if (proof.Corrected != "I received the response for ANDA 216482. Thanks" || proof.Fixes != 6) problems.Add($"proofread gave \"{proof.Corrected}\" with {proof.Fixes} changes");
+            var extras = FactExtras.Check("ANDA 216482 (750 mg, cycle 3) is due Jul 28.", repo.Find, r => DraftNotes.For(r, null, new DateOnly(2026, 7, 16)), new DateOnly(2026, 7, 16));
+            if (extras.Differences.Count != 3) problems.Add($"the extra fact checks found {extras.Differences.Count} of 3 differences");
+
             if (!HotkeyParser.TryParse("Ctrl+Alt+Shift+Q", out _, out _, out _, out _)) problems.Add("a valid shortcut was refused");
             if (HotkeyParser.TryParse("Q", out _, out _, out _, out _)) problems.Add("a bare letter was accepted as a shortcut");
 
@@ -357,7 +363,7 @@ internal static class SelfTestChecks
             File.Delete(csv);
 
             return problems.Count == 0
-                ? new(name, CheckStatus.Pass, "federal-calendar dates, weekend flag, draft check, shortcut parsing and a sample portfolio file all behave; no network, nothing outside the self-test folder")
+                ? new(name, CheckStatus.Pass, "federal-calendar dates, weekend flag, draft check, proofreading, the extra fact checks, shortcut parsing and a sample portfolio file all behave; no network, nothing outside the self-test folder")
                 : new(name, CheckStatus.Fail, string.Join("; ", problems));
         }
         catch (Exception ex) { return new(name, CheckStatus.Fail, ex.GetType().Name + ": " + ex.Message); }

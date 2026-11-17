@@ -94,6 +94,23 @@ public class ShotTests : IClassFixture<HeadlessFixture>
                 new MockAndaRepository().Find, new WritingService(null), new Settings(), new PromptLibraryService(Path.Combine(Temp.NewDir(), "p2.json")), () => new DateOnly(2026, 11, 4));
             draft.Show(); Settle(); Save(draft, dir, "review-a-draft");
             draft.Close();
+
+            // Round 25: the three views with the sample draft, and the recall row opened.
+            var quick = new QuickNotesService(Path.Combine(Temp.NewDir(), "q.json"), () => new DateTime(2026, 7, 16, 10, 42, 0));
+            quick.Add("216482", "Call with the applicant on Jul 21 about the IR response.");
+            var review = new DraftWindow(DraftWindow.SampleDraft, new MockAndaRepository().Find, new WritingService(null), new Settings(), new PromptLibraryService(Path.Combine(Temp.NewDir(), "p3.json")),
+                () => new DateOnly(2026, 7, 16)) { QuickNotes = quick, OpenCard = _ => { } };
+            review.Show(); Settle(); Save(review, dir, "review-25-all");
+            review.SetView("proof"); Settle(); Save(review, dir, "review-25-proofread");
+            review.SetView("facts"); Settle();
+            foreach (var box in review.FindControl<StackPanel>("RecallPanel")!.Children.OfType<Expander>().Take(1)) box.IsExpanded = true;
+            for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
+            Save(review, dir, "review-25-facts-recall");
+            review.Close();
+            var messy = new DraftWindow("hi team, i recieved the the ammendment for anda 216482 .It is a ANDA for Metfromin tablets,500 mg (cycle 2.", new MockAndaRepository().Find, new WritingService(null), new Settings(),
+                new PromptLibraryService(Path.Combine(Temp.NewDir(), "p4.json")), () => new DateOnly(2026, 7, 16));
+            messy.Show(); messy.SetView("proof"); Settle(); Save(messy, dir, "review-25-messy");
+            messy.Close();
         }, CancellationToken.None);
     }
 }

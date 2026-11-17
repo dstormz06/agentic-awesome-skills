@@ -3,8 +3,10 @@
 A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
 **All bundled data is fictional.** Not an FDA product; a concept prototype.
 
-> **Not in this app yet (built in the browser simulation in rounds 20 to 22, for review first):** Proofread and
-> Fact-check that work with no AI, and the notes and open items shown for recall under a review. The card's starting transparency is 90% here too.
+> **New in round 25: Review works with no AI.** *Review a draft* (`Ctrl+Alt+Shift+R`) now has three views, all by fixed rules on this PC, with nothing sent: **Check everything**, **Proofread** (a short list of spelling, grammar,
+> spacing and punctuation rules; the draft with each change marked; *Copy corrected draft* or *Apply here*, which changes only the app's own box) and **Fact-check** (the draft against your data, your notes and the calendar, now with
+> strength, review cycle, the due date of the open item, and dates that do not exist). Under them: **one question before you send**, and **For your recall**, your own notes and open items for each ANDA the draft names.
+> The rules are the simulation's, answer for answer (`../mockup/proofread-golden.json` and `proofread-stress-golden.json`). The AI actions moved into a folded *AI options* section and are unchanged. The card's starting transparency is 90% here too.
 >
 > **What this app has of the newer design.** The **Loupe** icon, with no amber at any size; **eight looks, the same as the simulation** (X, V, U, T, K, P and the compact boxes L and O), with
 > **X · Graphite Calendar** as the default since round 24 (one answer first; beside it the days to the goal date, in a style that follows the distance; under it the calendar). **Quick notes on the card**
@@ -13,7 +15,7 @@ A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
 > setting for when it is counted again (only when the app is used, also once just after midnight, or also every hour); an amber dot on the tray icon **only while something needs the person today** (an action item that says it is due today or overdue, or a goal date that is today or has passed; never for a sample record). At rest the tray icon carries no amber at all (round 22); the short number forms (**N210793 is an NDA and is refused; A210793 is read as ANDA 210793**); and
 > the default shortcuts **Ctrl+Alt+Shift+R** (Review a draft) and **Ctrl+Alt+Shift+L** (My to-do list), which replaced Ctrl+Alt+D and Ctrl+Alt+L because Word uses those. A shortcut
 > you already saved is kept. **Not in this app yet, only in the browser simulation** (`../mockup/windows-simulation.html`): One Bar, Today, recent and kept ANDAs,
-> spacing and text size, card details with Copy, notices near the clock with division news, and the one question before sending. See `../DESIGN.md` §11b and §11c.
+> spacing and text size, card details with Copy, and notices near the clock with division news. See `../DESIGN.md` §11b, §11c and §11i.
 
 ## Quick setup (under 5 minutes)
 
@@ -118,9 +120,11 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
   calendar (a weekday that does not belong to its date, a deadline on a weekend, a federal holiday or in the
   past, two different goal dates for one ANDA, a placeholder left in, a word typed twice, an ANDA number with
   the wrong number of digits). It lists differences and says exactly what it checked and did not: a clean
-  result means none of those checks found a problem, not that the draft is correct. Spelling, grammar and
-  other wording need an approved AI connection (Proofread, Rewrite, Fact-check, each with a preview before
-  anything is sent). `Services/DraftCheck.cs`, `Services/DraftReview.cs`.
+  result means none of those checks found a problem, not that the draft is correct. Since round 25 the same window
+  proofreads by fixed rules (`Services/Proofreader.cs`: a short list, not a full spelling or grammar check), compares strength, review cycle and
+  the open item's due date, points out a date that also stands in one of your notes, asks one question before you send, and lists your notes and
+  open items for recall (`Services/DraftExtras.cs`). A fuller check of wording needs an approved AI connection (Rewrite, Proofread with AI,
+  Fact-check with AI, each with a preview before anything is sent). `Services/DraftCheck.cs`, `Services/DraftReview.cs`.
 - **Ask about a selection** — select text or spreadsheet cells anywhere and press `Ctrl+Alt+Shift+P` (or tray → *Ask about a selection…*). The
   window shows what was selected, says in words what it looks like (one ANDA number, a table of rows and columns, a list, text) and offers **one
   suggested button** that fits (*Find duplicates*, *Look it up* or *Review as a draft*); nothing runs until a button is pressed. **Quick checks run on this PC
@@ -134,7 +138,7 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat
 - **The focused edition** — the product opens with what the supervisor asked for: **ANDA lookup** and **reviewing a draft**, plus **Ask**. Hidden until
   *Settings, Maintenance, Show all tools* is ticked: the two to-do lists (and their shortcut), agents and the dates section. The looks, the transparency slider and
   the tray menu's *Appearance* list are in both editions (since round 19: the owner asked for the looks back in Settings). Nothing is deleted, and what was chosen comes back when all tools are shown. There is no *Getting started* card, and the demo has no list of steps. `Edition` in `Services/SettingsService.cs`.
-- **Writing actions (Proofread, Rewrite, Fact-check)** — buttons in the draft window, **off until an
+- **AI writing actions (Rewrite, Proofread with AI, Fact-check with AI)** — buttons under *AI options* in the draft window, **off until an
   approved model is connected**. Each shows a **preview of the exact text that will be sent** (your draft,
   the matching records for Fact-check, your standing instructions and chosen lens) and sends nothing
   until you press Send. The result is **Copy only**: the app never pastes, replaces or sends for you.

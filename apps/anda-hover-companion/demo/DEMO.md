@@ -9,8 +9,8 @@ Thank you for trying it. Fictional data only. A concept prototype, not an FDA pr
 > for a personal or approved device, with fictional data only.
 
 > **What this Windows build has of the newer design.** The Loupe icon, eight looks with **X · Graphite Calendar** as the default (one answer, the days to the goal date beside it, the calendar under it, and one main action: Add a note, or Enter; S copies the status line), a dot or a number on
-> the tray icon only while something in your own sheet needs you today (the sample data never lights it), and the shortcuts **Ctrl+Alt+Shift+R** (Review a draft) and **Ctrl+Alt+Shift+L** (My to-do list). One Bar, Today, recent ANDAs, card details
-> with Copy, notices near the clock and the one question before sending are shown in the **browser simulation** only. To judge the design for daily use, follow `TRIAL-SHEET.md`.
+> the tray icon only while something in your own sheet needs you today (the sample data never lights it), and the shortcuts **Ctrl+Alt+Shift+R** (Review a draft: Proofread and Fact-check by fixed rules with no AI, one question before you send, and your notes for recall) and **Ctrl+Alt+Shift+L** (My to-do list). One Bar, Today, recent ANDAs, card details
+> with Copy and notices near the clock are shown in the **browser simulation** only. To judge the design for daily use, follow `TRIAL-SHEET.md`.
 
 ## Pick a path
 

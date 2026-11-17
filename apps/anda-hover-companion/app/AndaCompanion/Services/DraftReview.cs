@@ -88,6 +88,10 @@ public static class DraftReview
     public const string ReceiptNote =
         "Not checked: spelling, grammar and other wording (these need an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record.";
 
+    /// <summary>The same closing line as the Review window shows it since Proofread came to the app: wording is no longer "not checked" as a whole.</summary>
+    public const string ReceiptNoteWithProofreading =
+        "Not checked: grammar and wording beyond the short list of rules under Proofreading (your mail program's own checker still applies, and a fuller check needs an approved AI connection), facts that are not in your data, and anything the draft only implies. A clean result means none of the checks above found a problem, not that the draft is correct. This is not the system of record.";
+
     private static string Plural(int n) => n == 1 ? "" : "s";
 
     private static string JoinList(IReadOnlyList<string> parts) =>
