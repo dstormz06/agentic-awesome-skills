@@ -153,7 +153,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
     [true, 3, true], 'W2 once on, the sheet is compared with its last kept copy');
   eq(await axe(p, '#cmp'), [], 'W3 accessibility scan of the weekly comparison');
   await p.uncheck('#cmWeekOn'); await settle(p, 200);
-  eq(await p.evaluate(() => [cmpResult, cmpA, document.getElementById('cmStatus').textContent]), [null, null, 'No copies are kept, and the copies that were kept are deleted.'], 'W4 switching it off clears the comparison and says the copies are deleted');
+  eq(await p.evaluate(() => [!!cmpResult, !!cmpA, document.getElementById('cmStatus').textContent, document.getElementById('cmWeekDel').hidden]), [true, true, 'No new copies are kept. The copies that exist stay until you delete them.', false], 'W4 switching it off keeps the copies that exist and offers to delete them (round 29: only the person deletes)');
   await p.evaluate(() => cmpSetMode('two')); await settle(p, 100);
   eq(await p.evaluate(() => [document.getElementById('cmPick').hidden, document.getElementById('cmWeek').hidden, document.getElementById('cmPickB').hidden]), [false, true, false], 'W5 back on "Two files" both choosers are there again');
   await p.close();

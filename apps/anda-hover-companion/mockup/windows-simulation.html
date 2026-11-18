@@ -266,6 +266,11 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
          border-radius:var(--c-radius);box-shadow:var(--c-shadow);font-family:var(--c-font);font-size:calc(13px*var(--ts))}
 .app-win h2{margin:0;font-size:calc(15px*var(--ts))}
 .app-win .hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.onbar{display:block;width:100%;margin:12px 0 0;padding:6px 2px 0;min-height:26px;border:none;border-top:1px solid var(--c-line);background:none;color:var(--c-ink2);font:inherit;font-size:calc(11.5px*var(--ts));text-align:left;cursor:pointer}
+.onbar::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;border:1.5px solid var(--c-ink2);margin-right:7px;vertical-align:baseline}
+.onbar.still{cursor:default}
+.onbar:hover:not(.still){color:var(--c-ink)}
+
 .app-win .lbl{font-size:calc(9.5px*var(--ts));font-weight:800;letter-spacing:.13em;color:var(--c-ink3);margin:14px 0 6px}
 .app-win .lbl:first-of-type{margin-top:0}
 .app-win .hint{font-size:calc(11px*var(--ts));color:var(--c-ink3);margin:4px 0 0}
@@ -790,6 +795,18 @@ body:not(.all-tools) .full-only{display:none !important}
 #cmKeyRow[hidden]{display:none}
 #cmp{width:680px;padding:18px 20px;left:calc(50% - 340px);top:40px;max-height:calc(100% - var(--tb-h) - 56px);overflow:auto}
 #usage{width:480px;padding:18px 20px;left:calc(50% - 240px);top:70px}
+#conn{width:660px;padding:18px 20px;left:calc(50% - 330px);top:44px;max-height:calc(100% - var(--tb-h) - 56px);overflow:auto;z-index:54}
+#about{width:520px;padding:18px 20px;left:calc(50% - 260px);top:60px;max-height:calc(100% - var(--tb-h) - 76px);overflow:auto;z-index:54}
+#conn .acts,#about .acts{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+#conn .find{margin:6px 0 0;padding:8px 10px;border-radius:8px;font-size:calc(12.5px*var(--ts));line-height:1.45;overflow-wrap:anywhere}
+#conn .find.ok{background:var(--c-good-bg);color:var(--c-good)}
+#conn .find.note{background:var(--c-mark);color:var(--c-ink)}
+#conn .cm-scroll{max-height:200px;overflow:auto;border:1px solid var(--c-line);border-radius:8px;margin-top:4px}
+#conn .cm-table{width:100%;border-collapse:collapse;font-size:calc(12px*var(--ts))}
+#conn .cm-table caption{position:absolute;left:-9999px}
+#conn .cm-table th,#conn .cm-table td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--c-hair);vertical-align:top;overflow-wrap:anywhere}
+#conn .cm-table thead th{position:sticky;top:0;background:var(--c-bg);font-weight:650;color:var(--c-ink2)}
+#conn .cm-table td:first-child{white-space:nowrap}
 #cmp .acts,#usage .acts{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
 #cmp .cm-pick{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
 #cmp .cm-pick .lbl{display:block;margin-bottom:4px}
@@ -1756,7 +1773,7 @@ PS C:\work&gt; </div>
       <div><label class="lbl" for="cmFileA" id="cmLblA">EARLIER FILE</label><input type="file" id="cmFileA" accept=".csv,.tsv,.txt,.md,text/csv,text/plain"><p class="hint" id="cmNameA">No file yet.</p></div>
       <div id="cmPickB"><label class="lbl" for="cmFileB">LATER FILE</label><input type="file" id="cmFileB" accept=".csv,.tsv,.txt,.md,text/csv,text/plain"><p class="hint" id="cmNameB">No file yet.</p></div>
     </div>
-    <div id="cmWeek" hidden><label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;margin-top:10px"><input type="checkbox" id="cmWeekOn"><span>Keep one copy of my sheet each week, on this PC only, so I can see what changed. Off until I switch it on; switching it off deletes the copies.</span></label></div>
+    <div id="cmWeek" hidden><label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;margin-top:10px"><input type="checkbox" id="cmWeekOn"><span>Keep one copy of my sheet each week, on this PC only, so I can see what changed. Off until I switch it on. Switching it off keeps the copies that exist; only you delete them.</span></label><div class="acts"><button class="pill quiet" id="cmWeekDel" type="button" hidden>Delete the kept copies…</button></div></div>
     <div class="acts" style="align-items:center"><button class="pill quiet" id="cmSample" type="button">Use the sample files</button><button class="pill quiet" id="cmSampleDocs" type="button">Use two sample letters</button><button class="pill quiet" id="cmSampleReport" type="button" hidden>Use the sample report</button><span id="cmKeyRow"><label for="cmKey" style="font-size:12.5px;color:var(--c-ink2)">Match rows by</label><select id="cmKey" disabled><option value="">Chosen when both files are in</option></select></span></div>
     <div id="cmOut" aria-live="polite"></div>
     <hr class="hair">
@@ -1794,6 +1811,32 @@ PS C:\work&gt; </div>
     <div class="acts"><button class="pill quiet" id="usCopy" type="button" disabled>Copy the summary</button><button class="pill quiet" id="usClear" type="button">Clear the counts</button></div>
     <p class="hint" id="usStatus" role="status"></p>
     <p class="hint">Nothing is sent. If your leadership asks how the tool is used, you decide whether to copy this and share it. In the Windows app the counts are kept in a plain file you can open.</p>
+  </div>
+
+  <!-- ===== Connections and event log (round 29) ===== -->
+  <div class="app-win" id="conn" role="dialog" aria-label="Connections and event log">
+    <div class="hdr"><h2>Connections and event log</h2><button class="pill" id="cnClose" type="button">Close</button></div>
+    <p class="hint" style="margin:-4px 0 8px">What is switched on, what each one sends, where it goes and what is kept. This page is a simulation: it contacts nothing, whatever is switched on.</p>
+    <div id="cnList"></div>
+    <p class="hint" id="cnNote">“Update now” for the Drugs@FDA file fetches the one address you paste, only when you press it. “Open ANDA page” opens an address you set, in your browser. Neither is a standing connection.</p>
+    <div class="acts"><button class="pill quiet" id="cnCopy" type="button">Copy this list</button></div>
+    <div class="lbl" style="margin-top:14px">EVENT LOG · TIMES, KINDS AND COUNTS ONLY</div>
+    <p class="hint" id="cnLogEmpty">Nothing has happened yet that is written here: a connection switched on or off, data sent, a file set aside or restored, something deleted at your request, an error.</p>
+    <div class="cm-scroll" id="cnLogWrap" tabindex="0" role="region" aria-label="Event log, newest first" hidden><table class="cm-table"><caption>Event log, newest first</caption><thead><tr><th scope="col">When</th><th scope="col">What</th><th scope="col">Detail</th></tr></thead><tbody id="cnLog"></tbody></table></div>
+    <p class="hint" id="cnCount" role="status"></p>
+    <div class="acts"><button class="pill quiet" id="cnCsv" type="button" disabled>Copy as CSV</button><button class="pill quiet" id="cnSave" type="button" disabled>Save as CSV</button></div>
+    <p class="hint" id="cnStatus" role="status"></p>
+    <p class="hint">The log is only ever added to. It never holds an ANDA number, a name, an address or any text of yours. In the Windows app it is a plain file in the app's folder that you can open; here it lasts until the page is closed.</p>
+  </div>
+
+  <!-- ===== About and what changed (round 29) ===== -->
+  <div class="app-win" id="about" role="dialog" aria-label="About and what changed">
+    <div class="hdr"><h2>About and what changed</h2><button class="pill" id="abClose" type="button">Close</button></div>
+    <p style="font-size:13.5px;margin:0 0 4px"><strong>ANDA Companion (Notula)</strong> · <span id="abVersion"></span></p>
+    <p class="hint" style="margin:0 0 10px">A prototype with fictional data. Not an FDA product. It does not update itself.</p>
+    <div id="abList"></div>
+    <div class="acts"><button class="pill quiet" id="abCopy" type="button">Copy this page</button></div>
+    <p class="hint" id="abStatus" role="status"></p>
   </div>
 
   <!-- ===== Today: a small two-pane window (an option under "Show all tools") ===== -->
@@ -2444,7 +2487,7 @@ const state = { dir:"x", look:"x", form:"full", autoHide:10, mode:"whisper", esc
   cardFields:["applicant", "established", "project", "agentCo", "agentEmail", "applicantEmail", "myNotes", "doc356h", "doc32p1"],
   watchOn:false, newsOn:false, newsFile:"", watchCap:3, trayRecount:"daily", wDay:null, wCount:0, wSeen:new Set(), wSnoozed:new Set(), hubSeen:new Set() };
 const steps = {};
-const APP_WINS = ["lookup", "plib", "settings", "draft", "wlist", "replies", "actwin", "todo", "mytodo", "notes", "ask", "today", "hub", "cmp", "usage", "handoff"];
+const APP_WINS = ["lookup", "plib", "settings", "draft", "wlist", "replies", "actwin", "todo", "mytodo", "notes", "ask", "today", "hub", "cmp", "usage", "handoff", "conn", "about"];
 
 /* ================= round 19 =================
    1. Card details: columns of the person's own sheet, shown when a card is expanded, each with Copy. Nothing is looked up anywhere.
@@ -4319,7 +4362,8 @@ function cmpPaint(){
   $("cmSample").hidden = $("cmSampleDocs").hidden = cmpMode !== "two"; $("cmSampleReport").hidden = !data; $("cmKeyRow").hidden = data || (!!cmpA && cmpA.kind === "doc" && (!cmpB || cmpB.kind === "doc"));      /* a column is chosen for tables only */
   cmpNames();
   const say = text => out.append(h("p", { class:"cm-say", text }));
-  if(week && !state.weekCopy){ keyOff("Chosen when both files are in"); say("Nothing is kept yet. When this is switched on, the app keeps one copy of your sheet each week, on this PC only, so it can show what changed since the last copy."); return; }
+  $("cmWeekDel").hidden = !(week && state.weekKept);
+  if(week && !state.weekKept){ keyOff("Chosen when both files are in"); say("Nothing is kept yet. When this is switched on, the app keeps one copy of your sheet each week, on this PC only, so it can show what changed since the last copy."); return; }
   if(data){
     keyOff("Rows are matched by the ANDA number");
     if(!cmpA) return;
@@ -4346,7 +4390,7 @@ function cmpSetMode(mode){               /* two files, a report against my data,
 }
 function cmpLoadWeek(){                  /* simulation: two fictional versions stand in for the person's sheet and its kept copy */
   $("cmWhole").checked = false;
-  if(state.weekCopy){ cmpA = { ...CMP_SAMPLE_A, name:"My sheet, copy kept Nov 10" }; cmpB = { ...CMP_SAMPLE_B, name:"My sheet, today" }; cmpFresh = true; } else cmpA = cmpB = null;
+  if(state.weekKept){ cmpA = { ...CMP_SAMPLE_A, name:"My sheet, copy kept Nov 10" }; cmpB = { ...CMP_SAMPLE_B, name:"My sheet, today" }; cmpFresh = true; } else cmpA = cmpB = null;      /* a kept copy can be compared whether or not new ones are being kept */
 }
 function openCompare(mode){
   closeMenus();
@@ -4384,7 +4428,18 @@ $("cmFileB").addEventListener("change", e => cmpRead(e.target, "b"));
 $("cmModeTwo").addEventListener("click", () => cmpSetMode("two"));
 $("cmModeData").addEventListener("click", () => cmpSetMode("data"));
 $("cmModeWeek").addEventListener("click", () => cmpSetMode("week"));
-$("cmWeekOn").addEventListener("change", e => { state.weekCopy = e.target.checked; cmpLoadWeek(); cmpPaint(); cmpSay(state.weekCopy ? "From now on one copy of your sheet is kept each week, on this PC only. (Simulation: two fictional versions stand in for your sheet and its copy.)" : "No copies are kept, and the copies that were kept are deleted."); });
+$("cmWeekOn").addEventListener("change", e => {
+  state.weekCopy = e.target.checked; if(state.weekCopy) state.weekKept = true;
+  cmpLoadWeek(); cmpPaint(); logEvent("file", state.weekCopy ? "weekly copy of the sheet switched on" : "weekly copy of the sheet switched off");
+  cmpSay(state.weekCopy ? "From now on one copy of your sheet is kept each week, on this PC only. (Simulation: two fictional versions stand in for your sheet and its copy.)" : "No new copies are kept. The copies that exist stay until you delete them.");
+});
+let weekDelArmed = null;
+$("cmWeekDel").addEventListener("click", () => {      /* deleting is the person's act, and it is asked twice */
+  const b = $("cmWeekDel");
+  if(!weekDelArmed){ b.textContent = "Click again to delete"; weekDelArmed = setTimeout(() => { weekDelArmed = null; b.textContent = "Delete the kept copies…"; }, 5000); return; }
+  clearTimeout(weekDelArmed); weekDelArmed = null; b.textContent = "Delete the kept copies…";
+  state.weekKept = false; logEvent("deleted", "kept copies of the sheet"); cmpLoadWeek(); cmpPaint(); cmpSay("The kept copies were deleted. Nothing else was changed.");
+});
 const cmpUseSample = (a, b, said) => { cmpA = a; cmpB = b; cmpFresh = true; $("cmWhole").checked = false; $("cmFileA").value = ""; $("cmFileB").value = ""; $("cmKey").value = ""; cmpPaint(); cmpSay(said); };
 $("cmSample").addEventListener("click", () => cmpUseSample(CMP_SAMPLE_A, CMP_SAMPLE_B, "Two fictional versions of one report are in. Change the column that matches rows if you like."));
 $("cmSampleDocs").addEventListener("click", () => cmpUseSample(DOC_SAMPLE_A, DOC_SAMPLE_B, "Two fictional versions of one letter are in. They are compared paragraph by paragraph."));
@@ -4527,6 +4582,62 @@ $("usClose").addEventListener("click", () => closeApp("usage"));
 $("usOn").addEventListener("change", e => { usage.on = e.target.checked; $("usStatus").textContent = usage.on ? "Counting is on. From now on, each use of a tool adds one to its count for the day." : "Counting is off. What was counted so far is kept until you clear it."; usagePaint(); });
 $("usCopy").addEventListener("click", () => writeClipboard($("usOut").value).then(() => { $("usStatus").textContent = "Summary copied."; }, () => { $("usStatus").textContent = "Your browser did not allow copying. Please select the text and copy it."; }));
 $("usClear").addEventListener("click", () => { usage.days = {}; usagePaint(); $("usStatus").textContent = "The counts were cleared."; });
+
+/* ---------------- round 29: the windows for connections, the event log and what changed ---------------- */
+const evLog = [];                       /* only ever added to; in the simulation it lasts until the page is closed */
+function logEvent(type, detail){ evLog.push(eventEntry(type, detail, Date.now())); if(isOpen("conn")) connPaint(); }
+function connState(){                   /* what this page has switched on. It contacts nothing, whatever is switched on. */
+  const mine = state.provider === "myapi" && validateMyApi(state.myApi) === null;
+  const ai = state.ai ? { name:"Sample model", where:"nowhere: this page contacts nothing" }
+    : state.provider === "claude" ? { name:"Claude", where:"api.anthropic.com" }
+    : mine ? { name:oneLine(state.myApi.name || "My API", 60), where:hostOf(state.myApi.endpoint) } : null;
+  const agents = state.agents.filter(a => a.enabled).map(a => ({ name:oneLine(a.name, 60) || "Agent", where:hostOf(a.api && a.api.endpoint), auto:a.auto !== 0 }));
+  const outlook = state.outlook.on ? { where:state.outlook.cloud === "us" ? "graph.microsoft.us" : "graph.microsoft.com" } : null;
+  return { ai, agents, outlook };
+}
+let connWas = null;                     /* which kinds were on at the last look, so that a change is written to the event log once */
+function paintConnBars(){
+  const c = connState(), line = connections(c).line;
+  document.querySelectorAll(".onbar").forEach(b => { b.textContent = line; });
+  const now = { AI:!!c.ai, agents:c.agents.length, Outlook:!!c.outlook };
+  if(connWas){
+    if(now.AI !== connWas.AI) logEvent("connection", now.AI ? "AI switched on" : "AI switched off");
+    if(now.agents !== connWas.agents) logEvent("connection", `agents switched on: ${connWas.agents} to ${now.agents}`);
+    if(now.Outlook !== connWas.Outlook) logEvent("connection", now.Outlook ? "Outlook switched on" : "Outlook switched off");
+  }
+  connWas = now; if(isOpen("conn")) connPaint();
+}
+function connPaint(){
+  const r = connections(connState()), list = $("cnList"); list.replaceChildren();
+  if(r.items.length === 0) list.append(h("div", { class:"find ok", text:"Nothing is switched on, so nothing leaves this PC." }));
+  r.items.forEach(i => list.append(h("div", { class:"find note" }, h("div", { style:"font-weight:650", text:i.name }), h("div", { text:"Sends: " + i.sends }), h("div", { text:"To: " + i.where }), h("div", { text:"Kept: " + i.kept }))));
+  $("cnLine").textContent = r.line;
+  const body = $("cnLog"); body.replaceChildren();
+  const when = t => new Date(t).toLocaleString("en-US", { timeZone:simTz(), month:"short", day:"numeric", hour:"numeric", minute:"2-digit", second:"2-digit", timeZoneName:"short" });
+  evLog.slice(-200).reverse().forEach(e => body.append(h("tr", {}, h("td", { text:when(e.t) }), h("td", { text:EV_TYPES[e.type] }), h("td", { text:e.detail }))));
+  $("cnLogEmpty").hidden = evLog.length > 0; $("cnLogWrap").hidden = evLog.length === 0; $("cnCsv").disabled = $("cnSave").disabled = evLog.length === 0;
+  $("cnCount").textContent = evLog.length === 0 ? "" : `${evLog.length.toLocaleString("en-US")} ${evLog.length === 1 ? "event" : "events"}${evLog.length > 200 ? "; the newest 200 are shown, and the export holds them all" : ""}.`;
+}
+function openConn(){ closeMenus(); showApp("conn"); $("conn").style.zIndex = "54"; connPaint(); $("cnStatus").textContent = ""; }
+function openAbout(){
+  closeMenus(); showApp("about"); $("about").style.zIndex = "54";
+  $("abVersion").textContent = APP_VERSION; const box = $("abList"); box.replaceChildren();
+  CHANGES.forEach(c => box.append(h("div", { class:"lbl", text:`ROUND ${c.round}` }), h("ul", { style:"margin:4px 0 10px 18px;padding:0;font-size:13px;line-height:1.5" }, ...c.items.map(i => h("li", { text:i })))));
+}
+$("cnClose").addEventListener("click", () => closeApp("conn"));
+$("abClose").addEventListener("click", () => closeApp("about"));
+$("cnCopy").addEventListener("click", () => writeClipboard(connections(connState()).text.join("\n")).then(() => { $("cnStatus").textContent = "The list was copied. Nothing was sent."; }, () => { $("cnStatus").textContent = "Your browser did not allow copying."; }));
+$("cnCsv").addEventListener("click", () => writeClipboard(eventCsv(evLog)).then(() => { $("cnStatus").textContent = "The event log was copied as CSV. Nothing was sent."; }, () => { $("cnStatus").textContent = "Your browser did not allow copying."; }));
+$("cnSave").addEventListener("click", () => { $("cnStatus").textContent = saveTextFile("anda-companion-events.csv", eventCsv(evLog), "text/csv") ? "A download of the event log was tried. If nothing was saved, this page is not allowed to save files where it is shown: please use “Copy as CSV” instead. Nothing was sent." : "Your browser did not allow saving. Please use “Copy as CSV” instead."; });
+$("abCopy").addEventListener("click", () => writeClipboard(changesText().join("\n")).then(() => { $("abStatus").textContent = "Copied."; }, () => { $("abStatus").textContent = "Your browser did not allow copying."; }));
+/* Every window carries the line that says what is switched on. One press opens the list and the event log. */
+APP_WINS.forEach(id => { if(id === "conn") return; const b = h("button", { class:"onbar", type:"button", "aria-label":"What is switched on. Opens the list of connections and the event log." }); b.addEventListener("click", openConn); $(id).append(b); });
+$("conn").append(h("div", { class:"onbar still", id:"cnLine", role:"status" }));
+setTimeout(paintConnBars, 0);            /* once the rest of the page's code has been read */
+/* Whatever is changed in Settings, the line follows, and a connection that was switched on or off is written to the event log. */
+$("settings").addEventListener("change", () => setTimeout(paintConnBars, 0), true);
+$("settings").addEventListener("click", () => setTimeout(paintConnBars, 0), true);
+$("swAi").addEventListener("change", () => setTimeout(paintConnBars, 0));
 
 
 /* ---------------- round 18: display, recent and kept ANDAs, the tray state, One Bar, Today ---------------- */
@@ -4942,7 +5053,7 @@ $("wlDone").addEventListener("click", () => closeApp("wlist"));
 /* ---------------- app windows ---------------- */
 const appOpener = {};                   /* what had the keyboard when each window was opened */
 function showApp(id){
-  closeMenus();
+  closeMenus(); paintConnBars();
   const w = $(id), was = w.style.display === "block";
   if(!was){ const from = document.activeElement; appOpener[id] = from && from !== document.body && !w.contains(from) ? from : null; }
   w.style.display = "block"; if(isSheet()){ scrim.style.display = "block"; } if(id === "settings") onSettingsOpen();
@@ -5080,6 +5191,8 @@ function openMenu(){
     item("Compare two files…", "", () => openCompare()),
     item("Hand-off page…", "", () => openHandoff(null)),
     item("Watch list…", "", () => openWatchList()),
+    item("Connections and event log…", "", () => openConn()),
+    item("About and what changed…", "", () => openAbout()),
     item(alertReasons().length ? `News and alerts… (${alertReasons().length} today)` : "News and alerts…", "", () => openHub()),
     ...(state.allTools ? [item("Today…", "", () => openToday()),
     item("ANDA to-do list…", "", () => openTodo()),
@@ -5289,6 +5402,39 @@ function paintRefs(id){
   $("c-fresh").textContent = state.data.portfolio ? "YOUR FILE (simulated) · my-portfolio.xlsx · the same fictional records" : DATA[id].asOf;
   $("chipReplies").hidden = !(state.replies && state.replies.length);
 }
+
+/* ---------------- Round 29: what is switched on, said in every window; an event log; what changed ---------------- */
+const CONN_OFFLINE = "Offline · Local only";
+const CONN_NOTE = "“Update now” for the Drugs@FDA file fetches the one address you paste, only when you press it. “Open ANDA page” opens an address you set, in your browser. Neither is a standing connection.";
+/* c: { ai:null|{name, where}, agents:[{name, where, auto}] (only those switched on), outlook:null|{where} }. The same rule as the app's Connections.Describe. */
+function connections(c){
+  const items = [], nowhere = "no address yet, so nothing can be sent";
+  if(c.ai) items.push({ name:`${c.ai.name} (AI)`, sends:"When a full card opens: the record of that ANDA as the card shows it, with your lens and standing instructions. When you press Send: the text shown to you first. Nothing else.", where:c.ai.where || nowhere, kept:"This tool keeps nothing of what is sent. What the service keeps is set by your office's agreement with it." });
+  for(const a of c.agents || []) items.push({ name:`${a.name} (agent)`, sends:a.auto ? "By itself when a full card opens: the fields of that ANDA that its prompt names, never selected text. Also when you press Run or Send." : "Only when you press Run or Send: its prompt, filled in and shown to you.", where:a.where || nowhere, kept:"Its answer is kept in memory for the minutes you chose, never in a file." });
+  if(c.outlook) items.push({ name:"Outlook (read-only)", sends:"Only a search for the six-digit number of the open ANDA.", where:c.outlook.where, kept:"Mail is shown, never stored. The sign-in is held in memory until you sign out or close the app." });
+  const names = items.map(i => i.name);
+  const line = names.length === 0 ? CONN_OFFLINE : "Switched on: " + names.slice(0, 3).join(" · ") + (names.length > 3 ? ` · and ${names.length - 3} more` : "");
+  const text = names.length === 0 ? [CONN_OFFLINE, "Nothing is switched on, so nothing leaves this PC.", CONN_NOTE]
+    : [line, ...items.flatMap(i => [i.name, "  Sends: " + i.sends, "  To: " + i.where, "  Kept: " + i.kept]), CONN_NOTE];
+  return { line, items, text };
+}
+/* The event log: a time, a kind from a fixed list, and words and numbers the program itself wrote. Never anything the person typed, and never data. */
+const EV_TYPES = { connection:"Connection switched on or off", sent:"Data sent", send_failed:"Sending did not complete", file:"A file of yours was set aside, kept or restored", deleted:"Deleted at your request", error:"Error", warning:"Warning" };
+const EV_MAX_DETAIL = 120, EV_SAFE = /^[A-Za-z0-9 .,:;()+=/-]*$/, EV_WITHHELD = "(detail withheld: not in the allowed form)";
+function eventEntry(type, detail, whenMs){
+  const d = String(detail == null ? "" : detail);
+  return { t:new Date(whenMs).toISOString(), type:Object.prototype.hasOwnProperty.call(EV_TYPES, type) ? type : "warning", detail:d.length <= EV_MAX_DETAIL && EV_SAFE.test(d) && !/[0-9]{6}/.test(d) ? d : EV_WITHHELD };      /* six digits in a row could be an ANDA number: such a detail is never kept */
+}
+function eventCsv(entries){ return ["time_utc,type,detail", ...entries.map(e => [e.t, e.type, '"' + e.detail.replace(/"/g, '""') + '"'].join(","))].join("\r\n") + "\r\n"; }
+/* What changed, newest first. The Windows app shows the same list. */
+const APP_VERSION = "Prototype, round 29";
+const CHANGES = [
+  { round:29, items:["Every window says what is switched on, or “Offline · Local only”.", "A list of the connections: what each one sends, where, and what is kept.", "An event log you can read and export. It holds times, kinds and counts only.", "This page.", "Kept copies of your sheet are deleted only when you ask and confirm."] },
+  { round:28, items:["No AI connection is on until you choose one.", "A file of yours that cannot be read is set aside, never written over.", "Finished to-do items are archived, not deleted.", "The invite can be accepted by pressing the same shortcut again.", "No launcher script."] },
+  { round:27, items:["Compare two documents and run one of your prompts on the result.", "Check an AI answer against the files.", "Signs worth a second look, a hand-off page, a meeting page and a follow-up for a reply."] },
+  { round:26, items:["Compare two files.", "Four reading prompts, a calendar invitation and a note from a selection.", "My usage."] },
+];
+function changesText(){ return [APP_VERSION, ...CHANGES.flatMap(c => ["", `Round ${c.round}`, ...c.items.map(i => "- " + i)])]; }
 
 /* is this page connected to an API? Never: it cannot make a request. It says what is set up, and that nothing is connected. */
 function connInfo(){
@@ -5917,6 +6063,7 @@ async function awSend(){
   let reply;
   try{ reply = await m.send(); }
   catch(e){ reply = { ok:false, text:"", message:"It did not complete. Nothing was changed.", items:[] }; }
+  logEvent(reply.ok ? "sent" : "send_failed", `AI request (simulated), ${($("awPrompt") ? $("awPrompt").value.length : 0).toLocaleString("en-US")} characters`);
   if(token !== awToken) return;                 /* the window was closed or replaced while waiting */
   awBusy = false; awSent = true; $("awSend").disabled = false; $("awSend").textContent = "Send again"; $("awStatus").textContent = reply.message;
   $("awResult").hidden = !reply.ok; if(!reply.ok) return;
@@ -7154,6 +7301,7 @@ $("bkSave").addEventListener("click", () => {
 $("bkRestore").addEventListener("click", () => $("bkFile").click());
 function showImport(text){
   const [ok, msg] = importBackup(text);
+  if(ok){ logEvent("file", "settings restored from a backup"); paintConnBars(); }
   $("bkStatus").textContent = msg; $("bkStatus").style.color = ok ? "var(--c-good)" : "var(--c-bad)";
 }
 $("bkRestoreText").addEventListener("click", () => showImport($("bkText").value));

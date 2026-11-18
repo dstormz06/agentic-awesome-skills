@@ -189,7 +189,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   await p.click('#drCheck'); await settle(p);
   eq(await p.$$eval('#drRecall details', n => n.map(d => [d.dataset.anda, d.open, d.querySelector('summary').textContent])),
      [['216482', false, 'ANDA 216482 · 5 notes (latest Jul 16, 10:42 AM) · 2 open items'], ['214990', false, 'ANDA 214990 · 52 notes (latest Jul 16, 10:42 AM) · no open items']], 'R1 one closed row for each ANDA the draft names, with counts');
-  ok(await p.evaluate(() => { const r = document.getElementById('drRecall'), d = document.getElementById('draft'); return r.parentElement === d && r.nextElementSibling.id === 'drAiBox' && r.nextElementSibling === d.lastElementChild && !r.nextElementSibling.open; }), 'R2 it is the last thing in the window but the folded AI options');
+  ok(await p.evaluate(() => { const r = document.getElementById('drRecall'), d = document.getElementById('draft'); return r.parentElement === d && r.nextElementSibling.id === 'drAiBox' && r.nextElementSibling.nextElementSibling === d.lastElementChild && d.lastElementChild.classList.contains('onbar') && !r.nextElementSibling.open; }), 'R2 it is the last thing in the window but the folded AI options and, since round 29, the line that says what is switched on');
   await p.click('#drRecall details[data-anda="216482"] summary'); await settle(p);
   const rn = await p.$$eval('#drRecall details[data-anda="216482"] .rn', n => n.map(x => x.textContent));
   ok(rn.length === 5 && /also in your draft: Jul 28/.test(rn[0]) && /4 more|1 more on the card/.test(rn[4]), `R3 opened: the notes the draft touches come first, four at most, then a count (${rn.length})`);
