@@ -775,6 +775,40 @@ details.myapi input,details.myapi textarea{margin:0 0 6px}
 body:not(.all-tools) .full-only{display:none !important}
 #mytodo,#notes,#ask{z-index:52}
 #ask{width:640px;padding:18px 20px;left:calc(50% - 320px);top:44px;max-height:calc(100% - var(--tb-h) - 60px);overflow:auto}
+#cmp,#usage{z-index:52}
+#cmp{width:680px;padding:18px 20px;left:calc(50% - 340px);top:40px;max-height:calc(100% - var(--tb-h) - 56px);overflow:auto}
+#usage{width:480px;padding:18px 20px;left:calc(50% - 240px);top:70px}
+#cmp .acts,#usage .acts{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+#cmp .cm-pick{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+#cmp .cm-pick .lbl{display:block;margin-bottom:4px}
+#cmp input[type=file]{width:100%;min-height:36px;font-size:calc(12px*var(--ts));color:var(--c-ink)}
+#cmp input[type=file]::file-selector-button{min-height:34px;padding:6px 14px;margin-right:10px;border:none;border-radius:99px;background:var(--c-mark);color:var(--c-accent);font:inherit;font-weight:650;cursor:pointer}
+#cmp .lbl{margin-top:12px}
+#cmp .cm-sum p{margin:4px 0;font-size:calc(13px*var(--ts));line-height:1.45;color:var(--c-ink)}
+#cmp .cm-sum p:first-child{font-weight:650}
+#cmp .cm-bar{display:block;width:100%;height:18px;margin-top:4px}
+/* "Same" is an outline and the three kinds of change are filled, so the parts differ by more than color; every part stands at least 3 to 1 against the window */
+#cmp .cm-bar .s{fill:transparent;stroke:var(--c-ink3);stroke-width:2;vector-effect:non-scaling-stroke}
+#cmp .cm-legend i.s{background:transparent;border:2px solid var(--c-ink3);box-sizing:border-box}
+#cmp select{width:auto;min-width:220px;max-width:100%}
+#cmp .cm-bar .c,#cmp .cm-legend i.c{fill:var(--c-accent);background:var(--c-accent)}
+#cmp .cm-bar .n,#cmp .cm-legend i.n{fill:var(--c-good);background:var(--c-good)}
+#cmp .cm-bar .g,#cmp .cm-legend i.g{fill:var(--c-warn);background:var(--c-warn)}
+#cmp .cm-legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:6px;font-size:calc(12px*var(--ts));color:var(--c-ink)}
+#cmp .cm-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
+#cmp .cm-col{display:grid;grid-template-columns:minmax(90px,170px) 1fr 34px;gap:10px;align-items:center;margin-top:5px;font-size:calc(12px*var(--ts))}
+#cmp .cm-col .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--c-ink)}
+#cmp .cm-col .tr{height:10px;border-radius:5px;background:var(--c-track);overflow:hidden}
+#cmp .cm-col .fl{display:block;height:100%;border-radius:5px;background:var(--c-accent)}
+#cmp .cm-col .ct{text-align:right;font-variant-numeric:tabular-nums;color:var(--c-ink)}
+#cmp .cm-scroll{max-height:220px;overflow:auto;border:1px solid var(--c-line);border-radius:8px;margin-top:4px}
+#cmp .cm-table{width:100%;border-collapse:collapse;font-size:calc(12px*var(--ts))}
+#cmp .cm-table caption{position:absolute;left:-9999px}
+#cmp .cm-table th,#cmp .cm-table td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--c-hair);vertical-align:top;overflow-wrap:anywhere}
+#cmp .cm-table thead th{position:sticky;top:0;background:var(--c-bg);font-weight:650;color:var(--c-ink2)}
+#cmp .cm-keys{margin:4px 0 0;font-size:calc(12.5px*var(--ts));overflow-wrap:anywhere}
+#usage textarea{width:100%;resize:vertical;font-family:ui-monospace,Consolas,monospace;font-size:calc(12px*var(--ts))}
+@media (max-width:720px){#cmp .cm-pick{grid-template-columns:1fr}}
 #ask textarea{min-height:60px;resize:vertical}
 #ask #asText{white-space:pre;font-family:ui-monospace,Consolas,monospace;font-size:calc(12px*var(--ts));min-height:96px}
 #ask .acts{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
@@ -1686,6 +1720,10 @@ PS C:\work&gt; </div>
       <textarea id="asResult" readonly rows="4" aria-label="Result of the check" hidden style="margin-top:8px"></textarea>
       <div class="acts"><button class="pill quiet" id="asCopy" type="button" hidden>Copy the result</button></div>
     </div>
+    <div id="asMore" hidden></div>
+    <hr class="hair">
+    <div class="lbl">READ IT FOR ME · USES YOUR AI, AFTER A PREVIEW</div>
+    <div class="acts"><button class="pill quiet" id="asRead0" type="button">Give me the TL;DR</button><button class="pill quiet" id="asRead1" type="button">What else should I know?</button><button class="pill quiet" id="asRead2" type="button">Onboard me on this topic</button><button class="pill quiet" id="asRead3" type="button">Why does it matter?</button></div>
     <hr class="hair">
     <div class="lbl">ASK WITH A PROMPT</div>
     <div style="display:flex;gap:8px"><select id="asPrompt" aria-label="Stored prompt" style="flex:1"></select><button class="pill quiet" id="asUse" type="button">Use this prompt…</button></div>
@@ -1693,6 +1731,32 @@ PS C:\work&gt; </div>
     <div class="acts"><button class="pill quiet" id="asFillOwn" type="button">Fill it and show it</button><button class="pill quiet" id="asAskOwn" type="button">Ask my AI…</button></div>
     <p class="hint" id="asStatus" role="status" hidden></p>
     <p class="hint">Quick checks run on this PC. A prompt is filled in and shown to you first. Nothing is sent unless you press “Ask my AI…” and then Send on the preview, and only to the connection set up in Settings.</p>
+  </div>
+
+  <!-- ===== Compare two files (round 26): two versions of the same report, by fixed rules ===== -->
+  <div class="app-win" id="cmp" role="dialog" aria-label="Compare two files">
+    <div class="hdr"><h2>Compare two files</h2><button class="pill" id="cmClose" type="button">Close</button></div>
+    <p class="hint">Two versions of the same report. Everything here runs on this PC by fixed rules: no AI is used and nothing is sent.</p>
+    <div class="cm-pick">
+      <div><label class="lbl" for="cmFileA">EARLIER FILE</label><input type="file" id="cmFileA" accept=".csv,.tsv,.txt,text/csv"><p class="hint" id="cmNameA">No file yet.</p></div>
+      <div><label class="lbl" for="cmFileB">LATER FILE</label><input type="file" id="cmFileB" accept=".csv,.tsv,.txt,text/csv"><p class="hint" id="cmNameB">No file yet.</p></div>
+    </div>
+    <div class="acts" style="align-items:center"><button class="pill quiet" id="cmSample" type="button">Use the sample files</button><label for="cmKey" style="font-size:12.5px;color:var(--c-ink2)">Match rows by</label><select id="cmKey" disabled><option value="">Chosen when both files are in</option></select></div>
+    <div id="cmOut" aria-live="polite"></div>
+    <hr class="hair">
+    <div class="acts"><button class="pill quiet" id="cmCopy" type="button" disabled>Copy the summary</button><button class="pill quiet" id="cmCopyAll" type="button" disabled>Copy the full report</button><button class="pill quiet" id="cmSave" type="button" disabled>Save a report</button><button class="pill quiet" id="cmAi" type="button" disabled>Write a narrative with AI…</button></div>
+    <p class="hint" id="cmStatus" role="status"></p>
+    <p class="hint">This page reads CSV files; the Windows app also reads Excel workbooks (.xlsx). The narrative uses your AI only after a preview, and only the summary and listed changes are in it, never the files.</p>
+  </div>
+
+  <!-- ===== My usage (round 26): counts only, off until switched on ===== -->
+  <div class="app-win" id="usage" role="dialog" aria-label="My usage">
+    <div class="hdr"><h2>My usage</h2><button class="pill" id="usClose" type="button">Close</button></div>
+    <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px"><input type="checkbox" id="usOn"><span>Count how often I use each tool. Counts only: never an ANDA number, a name or any text. Kept on this PC.</span></label>
+    <textarea id="usOut" readonly rows="9" aria-label="My usage summary" style="margin-top:10px"></textarea>
+    <div class="acts"><button class="pill quiet" id="usCopy" type="button" disabled>Copy the summary</button><button class="pill quiet" id="usClear" type="button">Clear the counts</button></div>
+    <p class="hint" id="usStatus" role="status"></p>
+    <p class="hint">Nothing is sent. If your leadership asks how the tool is used, you decide whether to copy this and share it. In the Windows app the counts are kept in a plain file you can open.</p>
   </div>
 
   <!-- ===== Today: a small two-pane window (an option under "Show all tools") ===== -->
@@ -2342,7 +2406,7 @@ const state = { dir:"x", look:"x", form:"full", autoHide:10, mode:"whisper", esc
   cardFields:["applicant", "established", "project", "agentCo", "agentEmail", "applicantEmail", "myNotes", "doc356h", "doc32p1"],
   watchOn:false, newsOn:false, newsFile:"", watchCap:3, trayRecount:"daily", wDay:null, wCount:0, wSeen:new Set(), wSnoozed:new Set(), hubSeen:new Set() };
 const steps = {};
-const APP_WINS = ["lookup", "plib", "settings", "draft", "wlist", "replies", "actwin", "todo", "mytodo", "notes", "ask", "today", "hub"];
+const APP_WINS = ["lookup", "plib", "settings", "draft", "wlist", "replies", "actwin", "todo", "mytodo", "notes", "ask", "today", "hub", "cmp", "usage"];
 
 /* ================= round 19 =================
    1. Card details: columns of the person's own sheet, shown when a card is expanded, each with Copy. Nothing is looked up anywhere.
@@ -3605,10 +3669,175 @@ function shTotals(text){
   return lines;
 }
 
+/* ---- Round 26: compare two files (two versions of the same report) -------------------------------------------------------------
+   Fixed rules that run on this PC: no AI, nothing sent. Rows are matched by the column that identifies a row in both files (the app
+   suggests it; the person can choose another). Values are compared as text, as numbers ("1,000" equals "1000.0") and as dates
+   ("10/3/2026" equals "Oct 3, 2026"). The Windows app holds the same rules; mockup/compare-golden.json holds the cases both must answer alike. */
+const CMP_MAX_CHANGES = 50, CMP_MAX_CELLS = 12, CMP_MAX_KEYS = 50;
+const CMP_MAX_VALUE = 200, CMP_MAX_HEAD = 80;      /* the longest value and the longest heading that are shown; rows are still matched and compared on the whole value */
+function cmpShow(v, max){ const s = String(v), m = max || CMP_MAX_VALUE; if(s.length <= m) return s; let cut = m - 1; const c = s.charCodeAt(cut - 1); if(c >= 0xD800 && c <= 0xDBFF) cut--; return s.slice(0, cut) + "…"; }
+/* Lines for the clipboard. A line that a spreadsheet would read as a formula (it starts with =, +, - or @) gets an apostrophe in front, so a pasted report is always text. */
+function cmpForPaste(lines){ return lines.map(l => /^[=+\-@\t\r＝＋－＠]/.test(l) ? "'" + l : l); }
+const cmpCell = v => String(v == null ? "" : v).replace(/\s+/g, " ").trim();
+const CMP_KEYISH = /(^|[^a-z])(anda|application|appl|app|number|num|no|id)([^a-z]|$)|#/i;
+const CMP_NUM = /^[-+]?\$?(?:\d{1,3}(?:,\d{3})+|\d{1,15})(?:\.\d{1,6})?%?$/;
+const CMP_MON = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
+function cmpNumber(v){ return CMP_NUM.test(v) ? Number(v.replace(/[$,%]/g, "")) : null; }
+function cmpDay(v){            /* the day a cell names, as a count of days, or null: 2026-10-03, 10/3/2026, Oct 3, 2026, October 3 2026 */
+  let m, y, mo, d;
+  if((m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v))){ y = +m[1]; mo = +m[2]; d = +m[3]; }
+  else if((m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(v))){ mo = +m[1]; d = +m[2]; y = +m[3]; }
+  else if((m = /^([A-Za-z]{3})[a-z]*\.? (\d{1,2}),? (\d{4})$/.exec(v))){ mo = CMP_MON.indexOf(m[1].toLowerCase()) + 1; d = +m[2]; y = +m[3]; }
+  else return null;
+  if(y < 1900 || y > 2200 || mo < 1 || mo > 12 || d < 1 || d > new Date(Date.UTC(y, mo, 0)).getUTCDate()) return null;
+  return Math.round(Date.UTC(y, mo - 1, d) / 86400000);
+}
+function cmpHeaders(headers){   /* names as shown, made unique: an empty heading is "Column 3", a repeated one gets "(2)" */
+  const seen = new Map(), out = [];
+  headers.forEach((h, i) => { let name = cmpShow(cmpCell(h), CMP_MAX_HEAD) || "Column " + (i + 1); const k = name.toLowerCase(), n = (seen.get(k) || 0) + 1; seen.set(k, n); if(n > 1) name += " (" + n + ")"; out.push(name); });
+  return out;
+}
+function cmpPlural(n, one, many){ return n === 1 ? one : many; }
+function cmpTables(A, B, keyName){
+  const ha = cmpHeaders(A.headers || []), hb = cmpHeaders(B.headers || []), la = ha.map(h => h.toLowerCase()), lb = hb.map(h => h.toLowerCase());
+  const shared = []; la.forEach((k, i) => { const j = lb.indexOf(k); if(j >= 0) shared.push({ name:ha[i], a:i, b:j }); });
+  const colsOnlyA = ha.filter((h, i) => !lb.includes(la[i])), colsOnlyB = hb.filter((h, j) => !la.includes(lb[j]));
+  const ra = (A.rows || []).map(r => r.map(cmpCell)), rb = (B.rows || []).map(r => r.map(cmpCell));
+  const at = (row, i) => i < row.length ? row[i] : "";
+  const identifies = (rows, i) => { if(rows.length === 0) return false; const seen = new Set(); for(const r of rows){ const v = at(r, i); if(v === "" || seen.has(v)) return false; seen.add(v); } return true; };
+  /* the key: the person's choice if it is a shared column; else the first shared column that names every row once in both files, a column whose heading sounds like a number first */
+  let key = null, keyWhy = "";
+  const chosen = keyName ? shared.find(c => c.name.toLowerCase() === cmpCell(keyName).toLowerCase()) : null;
+  if(chosen){ key = chosen; keyWhy = "chosen by you"; }
+  else {
+    const able = shared.filter(c => identifies(ra, c.a) && identifies(rb, c.b));
+    key = able.find(c => CMP_KEYISH.test(c.name)) || able[0] || null;
+    keyWhy = key ? "it names every row once in both files" : shared.length === 0 ? "the files share no column" : "no shared column names every row once in both files";
+  }
+  const out = { key:key ? key.name : null, keyWhy, shared:shared.map(c => c.name), rowsA:ra.length, rowsB:rb.length, same:0, changedRows:0, changedCells:0, added:[], removed:[],
+    blankA:0, blankB:0, dupA:[], dupB:[], colsOnlyA, colsOnlyB, byColumn:[], changes:[], biggestShift:null };
+  const counts = new Map(shared.map(c => [c.name, 0]));
+  const compareRows = (name, x, y) => {
+    const cells = [], label = cmpShow(name);
+    for(const c of shared){
+      if(key && c === key) continue;
+      const va = at(x, c.a), vb = at(y, c.b); if(va === vb) continue;
+      const na = cmpNumber(va), nb = cmpNumber(vb), da = cmpDay(va), db = cmpDay(vb); let note = "";
+      if(na !== null && nb !== null){ if(na === nb) continue; if(Number.isInteger(na) && Number.isInteger(nb) && Math.abs(na) < 1e12 && Math.abs(nb) < 1e12){ const d = nb - na; note = (d > 0 ? "+" : "−") + Math.abs(d).toLocaleString("en-US"); } }
+      else if(da !== null && db !== null){ if(da === db) continue; const d = db - da; note = Math.abs(d) + " " + cmpPlural(Math.abs(d), "day", "days") + (d > 0 ? " later" : " earlier");
+        if(!out.biggestShift || Math.abs(d) > Math.abs(out.biggestShift.days)) out.biggestShift = { row:label, col:c.name, from:cmpShow(va), to:cmpShow(vb), days:d }; }
+      counts.set(c.name, counts.get(c.name) + 1); out.changedCells++;
+      if(cells.length < CMP_MAX_CELLS) cells.push({ col:c.name, from:cmpShow(va), to:cmpShow(vb), note });
+    }
+    if(cells.length === 0){ out.same++; return; }
+    out.changedRows++; if(out.changes.length < CMP_MAX_CHANGES) out.changes.push({ row:label, cells });
+  };
+  if(key){
+    const index = (rows, i, dups) => { const m = new Map(); let blank = 0; for(const r of rows){ const v = at(r, i); if(v === ""){ blank++; continue; } if(m.has(v)){ if(!dups.includes(v) && dups.length < 5) dups.push(v); continue; } m.set(v, r); } return [m, blank]; };
+    const [ma, blankA] = index(ra, key.a, out.dupA), [mb, blankB] = index(rb, key.b, out.dupB); out.blankA = blankA; out.blankB = blankB;
+    for(const [k, r] of ma){ if(mb.has(k)) compareRows(k, r, mb.get(k)); else out.removed.push(k); }
+    for(const k of mb.keys()) if(!ma.has(k)) out.added.push(k);
+  } else {
+    const n = Math.min(ra.length, rb.length);
+    for(let i = 0; i < n; i++) compareRows("row " + (i + 1), ra[i], rb[i]);
+    for(let i = n; i < ra.length; i++) out.removed.push("row " + (i + 1));
+    for(let i = n; i < rb.length; i++) out.added.push("row " + (i + 1));
+  }
+  out.addedCount = out.added.length; out.removedCount = out.removed.length; out.added = out.added.slice(0, CMP_MAX_KEYS).map(k => cmpShow(k)); out.removed = out.removed.slice(0, CMP_MAX_KEYS).map(k => cmpShow(k));
+  out.dupA = out.dupA.map(k => cmpShow(k)); out.dupB = out.dupB.map(k => cmpShow(k));
+  out.byColumn = shared.map((c, i) => [c.name, counts.get(c.name), i]).filter(x => x[1] > 0).sort((p, q) => q[1] - p[1] || p[2] - q[2]).map(x => [x[0], x[1]]);
+  return out;
+}
+function cmpList(items){ return items.length === 1 ? items[0] : items.slice(0, -1).join(", ") + " and " + items[items.length - 1]; }
+function cmpSummary(r, nameA, nameB){      /* the executive summary: a few plain sentences made from the counts */
+  const n = x => x.toLocaleString("en-US"), rows = x => `${n(x)} ${cmpPlural(x, "row", "rows")}`, lines = [];
+  lines.push(`${nameA} has ${rows(r.rowsA)}; ${nameB} has ${rows(r.rowsB)}.` + (r.key ? ` Rows were matched by “${r.key}” (${r.keyWhy}).` : r.shared.length === 0 ? "" : ` Rows were compared by position, because ${r.keyWhy}.`));
+  if(r.rowsA === 0 && r.rowsB === 0) lines.push("Neither file has any rows.");
+  else if(r.shared.length === 0) lines.push("The two files have no column heading in common, so their rows could not be compared.");
+  else if(r.changedRows === 0 && r.addedCount === 0 && r.removedCount === 0 && r.colsOnlyA.length === 0 && r.colsOnlyB.length === 0) lines.push("The two files hold the same rows and the same values.");
+  else {
+    lines.push(`${rows(r.same)} ${cmpPlural(r.same, "is", "are")} the same, ${n(r.changedRows)} changed (${n(r.changedCells)} ${cmpPlural(r.changedCells, "cell", "cells")}), ${n(r.addedCount)} ${cmpPlural(r.addedCount, "is", "are")} new in ${nameB}, and ${n(r.removedCount)} ${cmpPlural(r.removedCount, "is", "are")} no longer there.`);
+    if(r.byColumn.length > 0) lines.push(`Most changes are in ${cmpList(r.byColumn.slice(0, 3).map(c => `${c[0]} (${n(c[1])})`))}.`);
+    if(r.biggestShift) lines.push(`The largest date change: ${r.biggestShift.col} for ${r.biggestShift.row} moved ${Math.abs(r.biggestShift.days)} ${cmpPlural(Math.abs(r.biggestShift.days), "day", "days")} ${r.biggestShift.days > 0 ? "later" : "earlier"} (${r.biggestShift.from} to ${r.biggestShift.to}).`);
+    if(r.colsOnlyB.length > 0) lines.push(`${nameB} has ${cmpPlural(r.colsOnlyB.length, "a column", "columns")} that ${nameA} does not: ${cmpList(r.colsOnlyB.slice(0, 6))}.`);
+    if(r.colsOnlyA.length > 0) lines.push(`${nameA} has ${cmpPlural(r.colsOnlyA.length, "a column", "columns")} that ${nameB} does not: ${cmpList(r.colsOnlyA.slice(0, 6))}.`);
+  }
+  if(r.blankA + r.blankB > 0) lines.push(`${rows(r.blankA + r.blankB)} had no value in “${r.key}” and ${cmpPlural(r.blankA + r.blankB, "was", "were")} left out.`);
+  if(r.dupA.length + r.dupB.length > 0) lines.push(`Some values of “${r.key}” appear more than once (for example ${[...r.dupA, ...r.dupB][0]}); the first row of each was used.`);
+  lines.push("Compared as text, numbers and dates, in the columns both files have. Formulas, formatting, hidden rows and other sheets were not compared.");
+  return lines;
+}
+function cmpReport(r, nameA, nameB){       /* the summary and then the detail, as plain text to copy */
+  const lines = cmpSummary(r, nameA, nameB);
+  if(r.changes.length > 0){ lines.push("", "CHANGED");
+    for(const c of r.changes) for(const x of c.cells) lines.push(`${c.row}: ${x.col}: ${x.from === "" ? "(empty)" : x.from} → ${x.to === "" ? "(empty)" : x.to}${x.note ? " (" + x.note + ")" : ""}`);
+    if(r.changedRows > r.changes.length) lines.push(`…and ${(r.changedRows - r.changes.length).toLocaleString("en-US")} more changed ${cmpPlural(r.changedRows - r.changes.length, "row", "rows")}.`); }
+  if(r.addedCount > 0){ lines.push("", `NEW IN ${nameB.toUpperCase()}`, r.added.join(", ") + (r.addedCount > r.added.length ? `, and ${(r.addedCount - r.added.length).toLocaleString("en-US")} more` : "")); }
+  if(r.removedCount > 0){ lines.push("", `NO LONGER IN ${nameB.toUpperCase()}`, r.removed.join(", ") + (r.removedCount > r.removed.length ? `, and ${(r.removedCount - r.removed.length).toLocaleString("en-US")} more` : "")); }
+  return lines;
+}
+function cmpDigest(r, nameA, nameB, max){  /* a short form for an AI prompt: the summary, then changes until the limit is reached */
+  let text = cmpReport(r, nameA, nameB).join("\n"); const limit = max || 1800;
+  if(text.length > limit){ text = text.slice(0, limit); const cut = text.lastIndexOf("\n"); text = (cut > 200 ? text.slice(0, cut) : text) + "\n(the list is cut here)"; }
+  return text;
+}
+/* two fictional versions of one report, for trying the tool with no file at hand */
+const CMP_SAMPLE_A = { name:"Portfolio, Nov 10", headers:["ANDA", "Product", "Applicant", "Goal date", "Forecast date", "Status", "Open items"], rows:[
+  ["216482", "Metformin HCl ER Tablets, 500 mg", "Meridian Pharmaceuticals (fictional)", "10/3/2026", "10/17/2026", "IR response pending", "2"],
+  ["214990", "Metformin HCl ER Tablets, 750 mg", "Meridian Pharmaceuticals (fictional)", "8/15/2026", "8/6/2026", "On track", "0"],
+  ["217301", "Atorvastatin Calcium Tablets, 20 mg", "Northfield Generics (fictional)", "12/1/2026", "12/1/2026", "Under review", "1"],
+  ["218044", "Lisinopril Tablets, 10 mg", "Harbor Labs (fictional)", "1/15/2027", "1/29/2027", "Labeling comments sent", "3"],
+  ["219120", "Sertraline HCl Tablets, 50 mg", "Northfield Generics (fictional)", "2/20/2027", "2/20/2027", "Under review", "0"],
+  ["219555", "Amlodipine Besylate Tablets, 5 mg", "Cedar Point Pharma (fictional)", "3/5/2027", "3/5/2027", "Filed", "1,000"] ] };
+const CMP_SAMPLE_B = { name:"Portfolio, Nov 17", headers:["ANDA", "Product", "Applicant", "Goal date", "Forecast date", "Status", "Open items", "Reviewer note"], rows:[
+  ["216482", "Metformin HCl ER Tablets, 500 mg", "Meridian Pharmaceuticals (fictional)", "Oct 3, 2026", "10/31/2026", "IR response received", "1", "Response in on Nov 14"],
+  ["214990", "Metformin HCl ER Tablets, 750 mg", "Meridian Pharmaceuticals (fictional)", "8/15/2026", "8/6/2026", "On track", "0", ""],
+  ["217301", "Atorvastatin Calcium Tablets, 20 mg", "Northfield Generics (fictional)", "12/1/2026", "11/24/2026", "Under review", "1", ""],
+  ["218044", "Lisinopril Tablets, 10 mg", "Harbor Labs (fictional)", "1/15/2027", "1/29/2027", "Labeling agreed", "0", "Final format pending"],
+  ["219555", "Amlodipine Besylate Tablets, 5 mg", "Cedar Point Pharma (fictional)", "3/5/2027", "3/5/2027", "Filed", "1000.0", ""],
+  ["220017", "Losartan Potassium Tablets, 25 mg", "Harbor Labs (fictional)", "4/10/2027", "4/10/2027", "Filed", "0", "New this week"] ] };
+
+/* ---- Round 26: a calendar invitation from a selection ---------------------------------------------------------------------------
+   Fixed rules: the first real date the text names becomes an all-day event; with no year, it is the next such day. The result is a small
+   file in the standard calendar format (.ics). The person saves it and opens it in their calendar; the app sends nothing and adds nothing itself. */
+/* Control characters are taken out and the rarer line breaks become plain ones, so no part of a selection can start a line of its own in the file. */
+function icsClean(t){ let out = ""; for(const ch of String(t)){ const c = ch.charCodeAt(0); if(c === 0x85 || c === 0x2028 || c === 0x2029) out += "\n"; else if((c < 32 && c !== 9 && c !== 10 && c !== 13) || c === 127) continue; else out += ch; } return out; }
+function icsEscape(t){ return String(t).replace(/\\/g, "\\\\").replace(/\r\n|\r|\n/g, "\\n").replace(/,/g, "\\,").replace(/;/g, "\\;"); }
+function icsFold(line){ const out = []; let rest = line; while(rest.length > 60){ let cut = 60; const c = rest.charCodeAt(cut - 1); if(c >= 0xD800 && c <= 0xDBFF) cut--; out.push(rest.slice(0, cut)); rest = " " + rest.slice(cut); } out.push(rest); return out; }
+function icsFor(text, todayT, stamp, uid){
+  const t = icsClean(text || ""); if(!t.trim()) return null;
+  const today = new Date(todayT), ty = today.getUTCFullYear(), dim = (y, m) => new Date(Date.UTC(y, m, 0)).getUTCDate();
+  let day = null, m; DATE_RE.lastIndex = 0;
+  while(day === null && (m = DATE_RE.exec(t))){
+    if(m.index > 0 && /[\d\/]/.test(t[m.index - 1])) continue;
+    if(m[4] && !m[6]) continue;                                        /* "3/4" with no year is as often a fraction or a version as a date */
+    const mt = dateMention(m); if(!mt || mt.mon < 1 || mt.mon > 12 || mt.day < 1) continue;
+    if(mt.year !== null){ if(mt.year >= 1900 && mt.year <= 2200 && mt.day <= dim(mt.year, mt.mon)) day = Date.UTC(mt.year, mt.mon - 1, mt.day); }
+    else for(let y = ty; y <= ty + 8 && day === null; y++){ if(mt.day <= dim(y, mt.mon) && Date.UTC(y, mt.mon - 1, mt.day) >= todayT) day = Date.UTC(y, mt.mon - 1, mt.day); }
+  }
+  if(day === null) return null;
+  const firstLine = (t.split(/\r?\n/).find(l => l.trim()) || "").replace(/\s+/g, " ").trim(), numbers = andaNumbers(t);
+  let title = firstLine.length > 80 ? firstLine.slice(0, 79).trimEnd() + "…" : firstLine;
+  if(numbers.length === 1 && !title.includes(numbers[0])) title = `ANDA ${numbers[0]}: ${title}`;
+  const ymd8 = x => { const d = new Date(x); return `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, "0")}${String(d.getUTCDate()).padStart(2, "0")}`; };
+  const body = t.replace(/\r\n|\r/g, "\n").trim(), description = body.length > 800 ? body.slice(0, 799).trimEnd() + "…" : body;
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//ANDA Companion (Notula)//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH", "BEGIN:VEVENT", "UID:" + uid, "DTSTAMP:" + stamp,
+    "DTSTART;VALUE=DATE:" + ymd8(day), "DTEND;VALUE=DATE:" + ymd8(day + 86400000), "SUMMARY:" + icsEscape(title), "DESCRIPTION:" + icsEscape(description), "TRANSP:TRANSPARENT", "END:VEVENT", "END:VCALENDAR"];
+  const shown = new Date(day).toLocaleDateString("en-US", { weekday:"long", month:"short", day:"numeric", year:"numeric", timeZone:"UTC" });
+  return { title, day:new Date(day).toISOString().slice(0, 10), shown, ics:lines.flatMap(icsFold).join("\r\n") + "\r\n" };
+}
+/* ---- Round 26: four ways to have a text read for you. Each is a prompt that is filled in and shown first; nothing is sent until Send. */
+const READ_PROMPTS = [
+  ["Give me the TL;DR", "Give me the TL;DR of the text below in at most five short bullets. Use only what the text says. If something important is unclear or missing, say so in one line.\n\n{selection}"],
+  ["What else should I know?", "Read the text below. List what a careful reader should also know before acting on it: what it assumes, what it leaves out, dates or numbers that need checking, and anything that could be misread. At most six short bullets. Do not invent facts.\n\n{selection}"],
+  ["Onboard me on this topic", "Explain the text below to someone new to the topic: what it is about, the terms it uses, who is involved and what happens next. Plain words and short paragraphs. Mark anything you are unsure of as unsure.\n\n{selection}"],
+  ["Why does it matter?", "In three or four sentences, say why the text below matters to the reader, what decision or action it calls for, and by when, if it says. Use only what the text says.\n\n{selection}"],
+];
+
 /* the window: the selection, what it looks like, one suggested button, quick checks, stored prompts, an instruction typed here */
 let asSuggested = null, asTimer = null, asPrompts = [];
 function openAsk(text){
-  closeMenus(); markStep("ask");
+  closeMenus(); markStep("ask"); usageRecord("ask_open");
   let t = String(text == null ? "" : text); if(t.length > SH_MAX_CHARS) t = t.slice(0, SH_MAX_CHARS);
   $("asText").value = t; $("asOwn").value = ""; $("asColA").value = "1"; $("asColB").value = "2";
   asPrompts = state.actions.filter(a => a.enabled && (a.kind === 1 || a.kind === 2));
@@ -3635,6 +3864,7 @@ function askAnalyse(){
   else if(shape.kind === "text"){ btn.textContent = "Review as a draft"; asSuggested = () => askReview($("asText").value); }
   else asSuggested = null;
   btn.hidden = !asSuggested; $("asStatus").hidden = true; $("asStatus").textContent = "";
+  askMore();
 }
 function askStatus(t){ $("asStatus").textContent = t; $("asStatus").hidden = !t; }
 function askLookup(number){
@@ -3694,6 +3924,150 @@ $("asUse").addEventListener("click", () => {
 });
 $("asFillOwn").addEventListener("click", () => askRunOwn(1));
 $("asAskOwn").addEventListener("click", () => askRunOwn(2));
+
+/* ---- Round 26: the Compare two files window, the extra Ask buttons, and My usage ------------------------------------------------ */
+const CMP_AI_TEMPLATE = "Write an executive summary of the differences between two versions of a report, for a busy manager: three to five sentences, then up to five bullets with what changed and what may need attention. Use only the facts below. Do not guess at reasons.\n\n{selection}";
+const CMP_FILE_MAX = 5 * 1024 * 1024;
+let cmpA = null, cmpB = null, cmpResult = null, cmpFresh = false;      /* cmpFresh: a new pair of files is in and has not been counted yet */
+function cmpParseCsv(text, name){       /* comma, tab or semicolon; quotes with "" inside; the first row is the headings */
+  let t = String(text || ""); if(t.charCodeAt(0) === 0xFEFF) t = t.slice(1);
+  const first = t.split(/\r?\n/, 1)[0] || "", count = ch => first.split(ch).length - 1;
+  const sep = count("\t") > 0 && count("\t") >= count(",") ? "\t" : count(";") > count(",") ? ";" : ",";
+  const rows = []; let row = [], cell = "", quoted = false;
+  for(let i = 0; i < t.length; i++){
+    const c = t[i];
+    if(quoted){ if(c === '"'){ if(t[i + 1] === '"'){ cell += '"'; i++; } else quoted = false; } else cell += c; continue; }
+    if(c === '"' && cell === ""){ quoted = true; continue; }
+    if(c === sep){ row.push(cell); cell = ""; continue; }
+    if(c === "\n" || c === "\r"){ if(c === "\r" && t[i + 1] === "\n") i++; row.push(cell); cell = ""; rows.push(row); row = []; if(rows.length > 20001) break; continue; }
+    cell += c;
+  }
+  if(cell !== "" || row.length > 0){ row.push(cell); rows.push(row); }
+  const kept = rows.filter(r => r.some(x => String(x).trim() !== ""));
+  if(kept.length === 0) return null;
+  return { name, headers:kept[0].slice(0, 200), rows:kept.slice(1, 20001).map(r => r.slice(0, 200)) };
+}
+function cmpSay(text){ $("cmStatus").textContent = text; }
+function cmpNames(){ $("cmNameA").textContent = cmpA ? `${cmpA.name}: ${cmpA.rows.length.toLocaleString("en-US")} rows, ${cmpA.headers.length} columns` : "No file yet."; $("cmNameB").textContent = cmpB ? `${cmpB.name}: ${cmpB.rows.length.toLocaleString("en-US")} rows, ${cmpB.headers.length} columns` : "No file yet."; }
+function cmpBar(parts, total){          /* one bar in parts; each part is also named with its number underneath, so nothing is said by color alone */
+  const W = 560, svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"); svg.setAttribute("viewBox", `0 0 ${W} 18`); svg.setAttribute("preserveAspectRatio", "none"); svg.setAttribute("class", "cm-bar"); svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", parts.map(p => `${p[0]}: ${p[1]}`).join(", "));
+  let x = 0; const sum = Math.max(1, total);
+  parts.forEach(([, n, cls]) => { if(n <= 0) return; const w = Math.max(6, Math.round(W * n / sum)), r = document.createElementNS(svg.namespaceURI, "rect"); r.setAttribute("x", Math.min(x, W - w)); r.setAttribute("y", 0); r.setAttribute("width", Math.max(3, w - 3));      /* a small gap keeps neighbors apart whatever their colors */ r.setAttribute("height", 18); r.setAttribute("rx", 3); r.setAttribute("class", cls);
+    if(cls === "s"){ r.setAttribute("x", Math.min(x, W - w) + 1); r.setAttribute("y", 1); r.setAttribute("width", Math.max(3, w - 5)); r.setAttribute("height", 16); }      /* the outline is drawn inside the part's own space */
+    svg.append(r); x += w; });
+  return svg;
+}
+function cmpPaint(){
+  const out = $("cmOut"); out.replaceChildren(); cmpResult = null;
+  ["cmCopy", "cmCopyAll", "cmAi", "cmSave"].forEach(id => { $(id).disabled = true; });
+  const sel = $("cmKey"), wanted = sel.value;
+  if(!cmpA || !cmpB){ sel.replaceChildren(h("option", { text:"Chosen when both files are in", value:"" })); sel.disabled = true; cmpNames(); return; }
+  const r = cmpResult = cmpTables(cmpA, cmpB, wanted || null);
+  sel.replaceChildren(h("option", { text:"Suggested for you", value:"" }), ...r.shared.map(n => h("option", { text:n, value:n }))); sel.value = r.shared.includes(wanted) ? wanted : ""; sel.disabled = r.shared.length === 0;
+  cmpNames();
+  const lines = cmpSummary(r, cmpA.name, cmpB.name);
+  out.append(h("div", { class:"lbl", text:"SUMMARY" }), h("div", { class:"cm-sum", id:"cmSummary" }, ...lines.map((l, i) => h("p", { class:i === lines.length - 1 ? "hint" : "", text:l }))));
+  const rowsTotal = r.same + r.changedRows + r.addedCount + r.removedCount, parts = [["Same", r.same, "s"], ["Changed", r.changedRows, "c"], ["New", r.addedCount, "n"], ["No longer there", r.removedCount, "g"]];
+  out.append(h("div", { class:"lbl", text:"ROWS" }), cmpBar(parts, rowsTotal), h("div", { class:"cm-legend" }, ...parts.map(p => h("span", {}, h("i", { class:p[2] }), `${p[0]} ${p[1].toLocaleString("en-US")}`))));
+  if(r.byColumn.length > 0){
+    const top = r.byColumn.slice(0, 8), max = top[0][1], box = h("div", { class:"cm-cols", role:"list", "aria-label":"Changes by column" });
+    top.forEach(([name, n]) => box.append(h("div", { class:"cm-col", role:"listitem" }, h("span", { class:"nm", text:name }), h("span", { class:"tr" }, h("span", { class:"fl", style:`width:${Math.max(4, Math.round(100 * n / max))}%` })), h("span", { class:"ct", text:String(n) }))));
+    out.append(h("div", { class:"lbl", text:"CHANGES BY COLUMN" }), box);
+    if(r.byColumn.length > 8) out.append(h("p", { class:"hint", text:`${r.byColumn.length - 8} more columns changed; the full report lists every change.` }));
+  }
+  if(r.changes.length > 0){
+    const table = h("table", { class:"cm-table" }, h("caption", { text:"What changed" }), h("thead", {}, h("tr", {}, ...[r.key || "Row", "Column", "Earlier", "Later", "Change"].map(t => h("th", { scope:"col", text:t })))));
+    const body = h("tbody"); let shown = 0;
+    for(const c of r.changes){ for(const x of c.cells){ if(shown++ >= 60) break; body.append(h("tr", {}, h("th", { scope:"row", text:c.row }), h("td", { text:x.col }), h("td", { text:x.from === "" ? "(empty)" : x.from }), h("td", { text:x.to === "" ? "(empty)" : x.to }), h("td", { text:x.note }))); } }
+    table.append(body); out.append(h("div", { class:"lbl", text:"WHAT CHANGED" }), h("div", { class:"cm-scroll", tabindex:"0", role:"region", "aria-label":"What changed" }, table));
+    if(r.changedCells > 60) out.append(h("p", { class:"hint", text:`The first 60 of ${r.changedCells.toLocaleString("en-US")} changed cells are shown. “Copy the full report” has more.` }));
+  }
+  if(r.addedCount > 0) out.append(h("div", { class:"lbl", text:"NEW IN THE LATER FILE" }), h("p", { class:"cm-keys", text:r.added.join(", ") + (r.addedCount > r.added.length ? `, and ${r.addedCount - r.added.length} more` : "") }));
+  if(r.removedCount > 0) out.append(h("div", { class:"lbl", text:"NO LONGER IN THE LATER FILE" }), h("p", { class:"cm-keys", text:r.removed.join(", ") + (r.removedCount > r.removed.length ? `, and ${r.removedCount - r.removed.length} more` : "") }));
+  ["cmCopy", "cmCopyAll", "cmAi", "cmSave"].forEach(id => { $(id).disabled = false; });
+  if(cmpFresh){ cmpFresh = false; usageRecord("compare_files"); }      /* once for a pair of files, not again for each look at it */
+}
+function openCompare(){ closeMenus(); showApp("cmp"); $("cmp").style.zIndex = "52"; cmpPaint(); cmpSay(""); }
+async function cmpRead(input, side){
+  const f = input.files && input.files[0]; if(!f) return;
+  if(f.size > CMP_FILE_MAX){ cmpSay(`${f.name} is larger than 5 MB, so it was not read.`); input.value = ""; return; }
+  if(!/\.(csv|txt|tsv)$/i.test(f.name)){ cmpSay(`${f.name} is not a CSV file. This page reads CSV; the Windows app also reads Excel workbooks (.xlsx).`); input.value = ""; return; }
+  let table = null; try{ table = cmpParseCsv(await f.text(), f.name.slice(0, 80)); }catch(e){ table = null; }
+  if(!table){ cmpSay(`${f.name} could not be read as a table.`); input.value = ""; return; }
+  if(side === "a") cmpA = table; else cmpB = table;
+  cmpFresh = true;
+  cmpSay(`${f.name} was read on this PC. Nothing was sent.`); $("cmKey").value = ""; cmpPaint();
+}
+function cmpHtmlReport(){               /* a one-page report to save: text only, built from escaped values */
+  const e = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const lines = cmpReport(cmpResult, cmpA.name, cmpB.name), cut = lines.indexOf("");
+  const summary = (cut < 0 ? lines : lines.slice(0, cut)).map(l => `<p>${e(l)}</p>`).join(""), detail = cut < 0 ? "" : `<pre>${e(lines.slice(cut + 1).join("\n"))}</pre>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'"><title>Comparison: ${e(cmpA.name)} and ${e(cmpB.name)}</title><style>body{font:15px/1.5 Segoe UI,Arial,sans-serif;max-width:820px;margin:32px auto;padding:0 16px;color:#1b2430}h1{font-size:22px}pre{white-space:pre-wrap;font:13px/1.5 Consolas,monospace;background:#f4f5f7;padding:12px;border-radius:8px}</style></head><body><h1>Comparison: ${e(cmpA.name)} and ${e(cmpB.name)}</h1>${summary}${detail}<p><small>Made on this PC by fixed rules. No AI was used and nothing was sent.</small></p></body></html>`;
+}
+/* A page can ask the browser to save a file but cannot learn whether it did (a page shown inside another page is often not allowed to). So the
+   wording after a save says what was tried, as the backup in Settings does, and never claims that a file was saved. */
+function saveTextFile(name, text, type){ try{ const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); return true; }catch(e){ return false; } }
+$("cmClose").addEventListener("click", () => closeApp("cmp"));
+$("cmFileA").addEventListener("change", e => cmpRead(e.target, "a"));
+$("cmFileB").addEventListener("change", e => cmpRead(e.target, "b"));
+$("cmSample").addEventListener("click", () => { cmpA = CMP_SAMPLE_A; cmpB = CMP_SAMPLE_B; cmpFresh = true; $("cmFileA").value = ""; $("cmFileB").value = ""; $("cmKey").value = ""; cmpPaint(); cmpSay("Two fictional versions of one report are in. Change the column that matches rows if you like."); });
+$("cmKey").addEventListener("change", () => { cmpPaint(); cmpSay(cmpResult && $("cmKey").value ? `Rows are now matched by “${cmpResult.key}”.` : "The suggested column is used again."); });
+$("cmCopy").addEventListener("click", () => { if(cmpResult) writeClipboard(cmpForPaste(cmpSummary(cmpResult, cmpA.name, cmpB.name)).join("\n")).then(() => cmpSay("Summary copied."), () => cmpSay("Your browser did not allow copying. Please select the summary and copy it.")); });
+$("cmCopyAll").addEventListener("click", () => { if(cmpResult) writeClipboard(cmpForPaste(cmpReport(cmpResult, cmpA.name, cmpB.name)).join("\n")).then(() => cmpSay("Full report copied."), () => cmpSay("Your browser did not allow copying. Please use “Save a report” instead.")); });
+$("cmSave").addEventListener("click", () => { if(cmpResult) cmpSay(saveTextFile("comparison-report.html", cmpHtmlReport(), "text/html") ? "A download of the report was tried (comparison-report.html). If nothing was saved, this page is not allowed to save files where it is shown: please use “Copy the full report” instead. Nothing was sent." : "Your browser did not allow saving a file. Please use “Copy the full report” instead."); });
+$("cmAi").addEventListener("click", () => {
+  if(!cmpResult) return;
+  cmpSay("A window with exactly what would be sent is open. Nothing has been sent. Only the summary and the listed changes are in it, not the files.");
+  runCustomAction({ name:"Narrative of a comparison", kind:2, template:CMP_AI_TEMPLATE, enabled:true, hotkey:"", due:2, agentId:"", direct:false }, cmpDigest(cmpResult, cmpA.name, cmpB.name), { ...pointer }, true);
+  $("actwin").style.zIndex = "53";
+});
+
+/* Ask: four reading prompts, a calendar invitation, and "add to the notes of an ANDA" */
+READ_PROMPTS.forEach(([name, template], i) => $("asRead" + i).addEventListener("click", () => { usageRecord("reading_prompt"); askRunPrompt({ name, kind:2, template, enabled:true, hotkey:"", due:2, agentId:"", direct:false }); }));
+function askMore(){                      /* what else can be done with this selection, by fixed rules: shown only when it applies */
+  const box = $("asMore"), text = $("asText").value; box.replaceChildren();
+  const inv = text.trim() ? icsFor(text, demoToday(), "", "") : null, ids = knownIdsIn(text).slice(0, 3);
+  box.hidden = !inv && ids.length === 0; if(box.hidden) return;
+  box.append(h("hr", { class:"hair" }), h("div", { class:"lbl", text:"FROM THIS SELECTION · ON THIS PC, NO AI" }));
+  const acts = h("div", { class:"acts" });
+  if(inv){
+    acts.append(h("button", { class:"pill quiet", type:"button", id:"asIcs", text:"Save a calendar invitation", onclick:() => {
+      const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z"), made = icsFor($("asText").value, demoToday(), stamp, `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}@notula`);
+      if(!made){ askStatus("No date was found in the selection."); return; }
+      if(saveTextFile("invitation.ics", made.ics, "text/calendar")){ usageRecord("invitation_saved"); askStatus(`A download of invitation.ics was tried: an all-day event for ${made.shown}. Open the file to add it to your calendar. If nothing was saved, this page is not allowed to save files where it is shown; the Windows app saves the file itself. Nothing was sent, and nothing was added for you.`); }
+      else askStatus("Your browser did not allow saving a file.");
+    } }));
+    box.append(h("p", { class:"hint", id:"asIcsHint", text:`A date was found: ${inv.shown}. The invitation would read “${inv.title}”.` }));
+  }
+  ids.forEach(id => acts.append(h("button", { class:"pill quiet", type:"button", "data-note-for":id, text:`Add to the notes of ANDA ${id}`, onclick:() => {
+    const raw = $("asText").value, [ok, message] = addQuickNote(id, raw);
+    if(ok){ usageRecord("note_added"); askStatus(`Added to your notes on ANDA ${id}.` + (raw.trim().length > QN_MAX ? ` Only the first ${QN_MAX} characters were kept.` : "") + " Open the card and press N to see it."); }
+    else askStatus(message === "Type a note first." ? "There is nothing to add yet." : message);
+  } })));
+  box.append(acts);
+}
+
+/* My usage: counts only, kept on this page, off until switched on. Never an ANDA number, a name or any text. */
+const USAGE_EVENTS = [["card_open", "Cards opened"], ["draft_check", "Drafts reviewed"], ["ask_open", "Selections asked about"], ["compare_files", "File comparisons"], ["reading_prompt", "Reading prompts used"], ["note_added", "Notes added from a selection"], ["invitation_saved", "Calendar invitations saved"], ["copy_status", "Status lines copied"]];
+const usage = { on:false, days:{} };
+function usageDay(){ return new Date(demoToday()).toISOString().slice(0, 10); }
+function usageRecord(evt){ if(!usage.on || !USAGE_EVENTS.some(e => e[0] === evt)) return; const d = usageDay(); usage.days[d] = usage.days[d] || {}; usage.days[d][evt] = (usage.days[d][evt] || 0) + 1; }
+function usageLines(days, todayIso){     /* the summary as text: each tool with its count for the last 7 days and, in brackets, the last 30 */
+  const t = Date.parse(todayIso + "T00:00:00Z"), within = n => Object.entries(days).filter(([d]) => { const x = Date.parse(d + "T00:00:00Z"); return !isNaN(x) && x <= t && x > t - n * 86400000; });
+  const sum = (set, evt) => set.reduce((a, [, c]) => a + (Number.isInteger(c[evt]) && c[evt] > 0 ? c[evt] : 0), 0), w = within(7), m = within(30);
+  const lines = ["My usage: last 7 days (last 30 days)"]; let any = false;
+  for(const [evt, label] of USAGE_EVENTS){ const a = sum(w, evt), b = sum(m, evt); if(b > 0){ any = true; lines.push(`${label}: ${a.toLocaleString("en-US")} (${b.toLocaleString("en-US")})`); } }
+  if(!any) lines.push("Nothing has been counted yet.");
+  lines.push("Counts only. No ANDA number, name or text is ever recorded. Kept on this PC, and shared only if you copy it.");
+  return lines;
+}
+function usagePaint(){ $("usOn").checked = usage.on; $("usOut").value = usage.on || Object.keys(usage.days).length ? usageLines(usage.days, usageDay()).join("\n") : "Counting is off. Nothing is being counted."; $("usCopy").disabled = !Object.keys(usage.days).length; }
+function openUsage(){ closeMenus(); showApp("usage"); $("usage").style.zIndex = "52"; usagePaint(); $("usStatus").textContent = ""; }
+$("usClose").addEventListener("click", () => closeApp("usage"));
+$("usOn").addEventListener("change", e => { usage.on = e.target.checked; $("usStatus").textContent = usage.on ? "Counting is on. From now on, each use of a tool adds one to its count for the day." : "Counting is off. What was counted so far is kept until you clear it."; usagePaint(); });
+$("usCopy").addEventListener("click", () => writeClipboard($("usOut").value).then(() => { $("usStatus").textContent = "Summary copied."; }, () => { $("usStatus").textContent = "Your browser did not allow copying. Please select the text and copy it."; }));
+$("usClear").addEventListener("click", () => { usage.days = {}; usagePaint(); $("usStatus").textContent = "The counts were cleared."; });
 
 
 /* ---------------- round 18: display, recent and kept ANDAs, the tray state, One Bar, Today ---------------- */
@@ -4221,12 +4595,14 @@ function openMenu(){
     item("Lookup ANDA…", state.keys.look, () => openLookup(pointer)),
     item("Review a draft…", state.keys.draft, () => openDraft("")),
     item("Ask about a selection…", state.keys.ask || "", () => openAsk("")),
+    item("Compare two files…", "", () => openCompare()),
     item("Watch list…", "", () => openWatchList()),
     item(alertReasons().length ? `News and alerts… (${alertReasons().length} today)` : "News and alerts…", "", () => openHub()),
     ...(state.allTools ? [item("Today…", "", () => openToday()),
     item("ANDA to-do list…", "", () => openTodo()),
     item("My to-do list…", state.keys.list || "", () => openMyTodo()),
-    item("Notes to my to-do list…", "", () => openNotes(""))] : []),
+    item("Notes to my to-do list…", "", () => openNotes("")),
+    item("My usage…", "", () => openUsage())] : []),
     item("Demo: ANDA at risk", "", () => openCard("216482", { anchor:trayAnchor() })),
     item("Demo: ANDA on track", "", () => openCard("214990", { anchor:trayAnchor() })),
     document.createElement("hr"));

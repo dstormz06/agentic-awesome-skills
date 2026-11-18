@@ -351,6 +351,15 @@ internal static class SelfTestChecks
             var extras = FactExtras.Check("ANDA 216482 (750 mg, cycle 3) is due Jul 28.", repo.Find, r => DraftNotes.For(r, null, new DateOnly(2026, 7, 16)), new DateOnly(2026, 7, 16));
             if (extras.Differences.Count != 3) problems.Add($"the extra fact checks found {extras.Differences.Count} of 3 differences");
 
+            // Compare two files, a report made safe to paste, and a calendar invitation (round 26): fixed rules, the same answer on every PC.
+            var compared = FileCompare.Compare(FileCompare.SampleA, FileCompare.SampleB);
+            if (compared.Key != "ANDA" || compared.Same != 2 || compared.ChangedRows != 3 || compared.AddedCount != 1 || compared.RemovedCount != 1)
+                problems.Add($"comparing the two sample files gave {compared.Same} same, {compared.ChangedRows} changed, {compared.AddedCount} new, {compared.RemovedCount} gone, matched by {compared.Key ?? "position"}");
+            if (FileCompare.ForPaste(new[] { "=1+1: x", "plain" }) is not ["'=1+1: x", "plain"]) problems.Add("a report line that starts like a formula was not made safe to paste");
+            var invitation = Invitations.For("Call on Dec 1, 2026\r\nATTENDEE:x", new DateOnly(2026, 11, 18), "20261118T120000Z", "selftest@notula");
+            if (invitation is null || invitation.Day != "2026-12-01" || invitation.Ics.Split("\r\n").Any(l => l.StartsWith("ATTENDEE", StringComparison.Ordinal)))
+                problems.Add("a calendar invitation was not made as expected");
+
             if (!HotkeyParser.TryParse("Ctrl+Alt+Shift+Q", out _, out _, out _, out _)) problems.Add("a valid shortcut was refused");
             if (HotkeyParser.TryParse("Q", out _, out _, out _, out _)) problems.Add("a bare letter was accepted as a shortcut");
 
@@ -363,7 +372,7 @@ internal static class SelfTestChecks
             File.Delete(csv);
 
             return problems.Count == 0
-                ? new(name, CheckStatus.Pass, "federal-calendar dates, weekend flag, draft check, proofreading, the extra fact checks, shortcut parsing and a sample portfolio file all behave; no network, nothing outside the self-test folder")
+                ? new(name, CheckStatus.Pass, "federal-calendar dates, weekend flag, draft check, proofreading, the extra fact checks, comparing two files, a calendar invitation, shortcut parsing and a sample portfolio file all behave; no network, nothing outside the self-test folder")
                 : new(name, CheckStatus.Fail, string.Join("; ", problems));
         }
         catch (Exception ex) { return new(name, CheckStatus.Fail, ex.GetType().Name + ": " + ex.Message); }

@@ -473,6 +473,7 @@ public partial class SettingsWindow : Window
 
         UsageCheck.IsChecked = _settings.UsageLog;
         UsageCheck.IsCheckedChanged += (_, _) => { if (_loading) return; _settings.UsageLog = UsageCheck.IsChecked == true; Apply(); };
+        UsageShowBtn.Click += (_, _) => new UsageWindow(UsageLog.FilePath, UsageLog.Enabled).Show(this);
         UsageHint.Text += $" File: {AppPaths.UsageFile}";
     }
 

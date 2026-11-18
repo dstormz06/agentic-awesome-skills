@@ -372,6 +372,9 @@ public partial class App : Application
         var ask = _askItem = new NativeMenuItem(AskMenuLabel());
         ask.Click += (_, _) => OpenAsk("");
         menu.Add(ask);
+        var compare = new NativeMenuItem("Compare two files…");
+        compare.Click += (_, _) => OpenCompare();
+        menu.Add(compare);
         var watch = new NativeMenuItem("Watch list…");
         watch.Click += (_, _) => OpenWatchList();
         menu.Add(watch);

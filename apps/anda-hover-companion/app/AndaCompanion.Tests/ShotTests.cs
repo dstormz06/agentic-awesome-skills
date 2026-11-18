@@ -111,6 +111,19 @@ public class ShotTests : IClassFixture<HeadlessFixture>
                 new PromptLibraryService(Path.Combine(Temp.NewDir(), "p4.json")), () => new DateOnly(2026, 7, 16));
             messy.Show(); messy.SetView("proof"); Settle(); Save(messy, dir, "review-25-messy");
             messy.Close();
+
+            // Round 26: Compare two files with the sample files, and Ask with the extra buttons.
+            var compare = new CompareWindow { Narrative = _ => { } };
+            compare.Show(); compare.Load(FileCompare.SampleA, FileCompare.SampleB);
+            for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
+            Save(compare, dir, "compare-26");
+            compare.Close();
+            var askMore = new AskWindow(new AskHooks(() => new List<CustomAction>(), (_, _) => { }, _ => { }, _ => { })
+                { KnownAndas = t => Proofreader.KnownIds(t, new MockAndaRepository().Find), AddNote = (_, _) => (true, "Note saved."), Today = () => new DateOnly(2026, 7, 16) },
+                "ANDA 216482: call the applicant about the IR response on Nov 20, then file the memo.");
+            askMore.Show(); for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
+            Save(askMore, dir, "ask-26");
+            askMore.Close();
         }, CancellationToken.None);
     }
 }

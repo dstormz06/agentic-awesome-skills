@@ -26,7 +26,7 @@
           <Button Grid.Column="1" Name="CloseBtn" Content="Close"/>
         </Grid>
         <ScrollViewer Name="Body" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <StackPanel Spacing="10" Margin="0,0,2,0">
+        <StackPanel Spacing="10" Margin="0,0,14,0">
 
           <TextBlock Classes="lbl" Text="YOUR SELECTION"/>
           <TextBox Name="SelectionBox" AcceptsReturn="True" TextWrapping="NoWrap" Height="110" MaxLength="20000"
@@ -59,6 +59,17 @@
               <Button Name="CopyResultBtn" Content="Copy the result" IsVisible="False"/>
             </StackPanel>
           </StackPanel>
+
+          <StackPanel Name="MorePanel" Spacing="6" IsVisible="False">
+            <Border Classes="rule"/>
+            <TextBlock Classes="lbl" Text="FROM THIS SELECTION · ON THIS PC, NO AI"/>
+            <TextBlock Name="InviteHint" Classes="hint" IsVisible="False"/>
+            <WrapPanel Name="MoreButtons"/>
+          </StackPanel>
+
+          <Border Classes="rule"/>
+          <TextBlock Classes="lbl" Text="READ IT FOR ME · USES YOUR AI, AFTER A PREVIEW"/>
+          <WrapPanel Name="ReadButtons"/>
 
           <Border Classes="rule"/>
           <TextBlock Classes="lbl" Text="ASK WITH A PROMPT"/>

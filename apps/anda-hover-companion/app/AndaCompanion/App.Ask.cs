@@ -46,10 +46,33 @@ public partial class App
             RunPrompt: (action, selection) => RunCustomAction(action, selection, near,
                 withoutRecord: SelectionHelpers.Classify(selection).Kind is SelectionKind.Table or SelectionKind.List),
             ReviewDraft: OpenDraft,
-            Lookup: number => { if (_repository.Find(number) is { } record) OpenCard(record, near, mini: false); else ShowNotice(NotFoundMessage(number), near); });
+            Lookup: number => { if (_repository.Find(number) is { } record) OpenCard(record, near, mini: false); else ShowNotice(NotFoundMessage(number), near); })
+        {
+            // Round 26: a note on an ANDA the selection names, and a calendar invitation. Both are the person's own action, on this PC.
+            KnownAndas = selection => Proofreader.KnownIds(selection, _repository.Find),
+            AddNote = (number, note) => _quickNotes.Add(number, note),
+            Today = Today,
+        };
         var win = new AskWindow(hooks, text ?? "");
         win.Closed += (_, _) => { if (ReferenceEquals(_askWindow, win)) _askWindow = null; };
         _askWindow = win;
+        win.Show();
+    }
+
+    private CompareWindow? _compareWindow;
+
+    /// <summary>"Compare two files": two versions of the same report, compared on this PC. The narrative goes through the same preview as any prompt.</summary>
+    private void OpenCompare()
+    {
+        if (_compareWindow is not null) { _compareWindow.Activate(); return; }
+        var cursor = TextCaptureService.GetCursorPosition();
+        var near = new PixelPoint(cursor.X, cursor.Y);
+        var win = new CompareWindow
+        {
+            Narrative = digest => RunCustomAction(new CustomAction { Name = "Narrative of a comparison", Kind = ActionKind.AskAi, Template = FileCompare.AiTemplate, Enabled = true }, digest, near, withoutRecord: true),
+        };
+        win.Closed += (_, _) => { if (ReferenceEquals(_compareWindow, win)) _compareWindow = null; };
+        _compareWindow = win;
         win.Show();
     }
 }

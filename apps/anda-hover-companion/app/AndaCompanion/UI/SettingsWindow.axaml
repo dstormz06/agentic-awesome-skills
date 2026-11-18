@@ -479,6 +479,7 @@
                 <TextBlock Text="Keep a local log of what I use (date, event, seconds)" TextWrapping="Wrap"/>
               </CheckBox>
               <TextBlock Name="UsageHint" Classes="hint" Text="Never records ANDA numbers, drafts or any text. Off by default. It is a plain file you can read, and you share it only if you choose to."/>
+              <Button Name="UsageShowBtn" Content="Show my usage…" HorizontalAlignment="Left"/>
             </StackPanel>
 
               <Border Classes="hair"/>

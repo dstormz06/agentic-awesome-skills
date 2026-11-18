@@ -13,6 +13,7 @@ public static class UsageLog
     public static readonly IReadOnlySet<string> Events = new HashSet<string>
     {
         "card_open", "peek_auto_open", "copy_status", "copy_reply", "draft_check", "ai_proofread", "ai_rewrite", "ai_fact_check", "watch_flag_shown",
+        "ask_open", "compare_files", "reading_prompt", "note_added", "invitation_saved", "proofread_copy", "proofread_apply",
     };
 
     private static readonly object Gate = new();

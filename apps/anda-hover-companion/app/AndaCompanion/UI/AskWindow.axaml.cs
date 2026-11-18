@@ -8,7 +8,14 @@ namespace AndaCompanion.UI;
 
 /// <summary>What the Ask window needs from the running app. Everything is a callback, so the window can be tested on its own.</summary>
 public sealed record AskHooks(
-    Func<IReadOnlyList<CustomAction>> Prompts, Action<CustomAction, string> RunPrompt, Action<string> ReviewDraft, Action<string> Lookup);
+    Func<IReadOnlyList<CustomAction>> Prompts, Action<CustomAction, string> RunPrompt, Action<string> ReviewDraft, Action<string> Lookup)
+{
+    /// <summary>Round 26, all optional: which ANDAs of the person's data a text names; adding a note to one of them; today's date; saving an invitation file.</summary>
+    public Func<string, IReadOnlyList<string>>? KnownAndas { get; init; }
+    public Func<string, string, (bool Ok, string Message)>? AddNote { get; init; }
+    public Func<DateOnly>? Today { get; init; }
+    public Func<string, Task<bool>>? SaveInvitation { get; init; }
+}
 
 /// <summary>
 /// "Ask about a selection": the person selects text or spreadsheet cells and presses the Ask shortcut. The window shows what was selected, says in
@@ -71,9 +78,15 @@ public partial class AskWindow : Window
             chosen.Template = template;
             RunPrompt(chosen);
         };
+        foreach (var (name, template) in ReadingPrompts.All)
+        {
+            var b = new Button { Content = name, Margin = new Thickness(0, 0, 8, 6) };
+            b.Click += (_, _) => { UsageLog.Record("reading_prompt"); RunPrompt(new CustomAction { Name = name, Kind = ActionKind.AskAi, Template = template, Enabled = true }); };
+            ReadButtons.Children.Add(b);
+        }
         FillOwnBtn.Click += (_, _) => RunOwn(ActionKind.FillPrompt);
         AskOwnBtn.Click += (_, _) => RunOwn(ActionKind.AskAi);
-        Opened += (_, _) => { FitToScreen(); if (string.IsNullOrWhiteSpace(SelectionBox.Text)) SelectionBox.Focus(); };
+        Opened += (_, _) => { FitToScreen(); if (string.IsNullOrWhiteSpace(SelectionBox.Text)) SelectionBox.Focus(); UsageLog.Record("ask_open"); };
         Closed += (_, _) => _debounce.Stop();
         Analyse();
     }
@@ -115,6 +128,71 @@ public partial class AskWindow : Window
         }
         SuggestBtn.IsVisible = _suggested is not null;
         Status.Text = "";
+        PaintMore(text);
+    }
+
+    private DateOnly Today() => _hooks.Today?.Invoke() ?? DateOnly.FromDateTime(DateTime.Now);
+
+    /// <summary>What else can be done with this selection by fixed rules, shown only when it applies: a calendar invitation, and a note on an ANDA it names.</summary>
+    private void PaintMore(string text)
+    {
+        MoreButtons.Children.Clear();
+        var invitation = string.IsNullOrWhiteSpace(text) ? null : Invitations.For(text, Today(), "", "");
+        var ids = (_hooks.AddNote is null ? null : _hooks.KnownAndas?.Invoke(text))?.Take(3).ToList() ?? new List<string>();
+        MorePanel.IsVisible = invitation is not null || ids.Count > 0;
+        InviteHint.IsVisible = invitation is not null;
+        if (invitation is not null)
+        {
+            InviteHint.Text = $"A date was found: {invitation.Shown}. The invitation would read “{invitation.Title}”.";
+            var b = new Button { Content = "Save a calendar invitation…", Margin = new Thickness(0, 0, 8, 6), Tag = "invitation" };
+            b.Click += async (_, _) => await SaveInvitationAsync();
+            MoreButtons.Children.Add(b);
+        }
+        foreach (string id in ids)
+        {
+            var b = new Button { Content = $"Add to the notes of ANDA {id}", Margin = new Thickness(0, 0, 8, 6), Tag = "note:" + id };
+            b.Click += (_, _) =>
+            {
+                string raw = SelectionBox.Text ?? "";
+                var (ok, message) = _hooks.AddNote!(id, raw);
+                if (ok) UsageLog.Record("note_added");
+                Status.Text = ok
+                    ? $"Added to your notes on ANDA {id}." + (raw.Trim().Length > QuickNotesService.MaxLength ? $" Only the first {QuickNotesService.MaxLength} characters were kept." : "") + " Open the card and press N to see it."
+                    : message == "Type a note first." ? "There is nothing to add yet." : message;
+            };
+            MoreButtons.Children.Add(b);
+        }
+    }
+
+    /// <summary>Makes the invitation file and lets the person save it. Nothing is sent, and nothing is added to a calendar for them.</summary>
+    public async Task SaveInvitationAsync()
+    {
+        string stamp = DateTime.UtcNow.ToString("yyyyMMdd'T'HHmmss'Z'", System.Globalization.CultureInfo.InvariantCulture);
+        var made = Invitations.For(SelectionBox.Text, Today(), stamp, Guid.NewGuid().ToString("N") + "@notula");
+        if (made is null) { Status.Text = "No date was found in the selection."; return; }
+        try
+        {
+            bool saved;
+            if (_hooks.SaveInvitation is not null) saved = await _hooks.SaveInvitation(made.Ics);
+            else
+            {
+                var file = await StorageProvider.SaveFilePickerAsync(new Avalonia.Platform.Storage.FilePickerSaveOptions
+                {
+                    Title = "Save the calendar invitation", SuggestedFileName = "invitation.ics", DefaultExtension = "ics",
+                    FileTypeChoices = new[] { new Avalonia.Platform.Storage.FilePickerFileType("Calendar invitation") { Patterns = new[] { "*.ics" } } },
+                });
+                if (file is null) return;
+                await using var stream = await file.OpenWriteAsync();
+                await using var writer = new StreamWriter(stream, new System.Text.UTF8Encoding(false));
+                await writer.WriteAsync(made.Ics);
+                saved = true;
+            }
+            if (saved) UsageLog.Record("invitation_saved");
+            Status.Text = saved
+                ? $"An all-day event for {made.Shown} was saved. Open the file to add it to your calendar. Nothing was sent, and nothing was added for you."
+                : "The invitation was not saved.";
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException) { Status.Text = "The invitation could not be saved there. Please choose another folder."; }
     }
 
     private void Show(IReadOnlyList<string> lines)

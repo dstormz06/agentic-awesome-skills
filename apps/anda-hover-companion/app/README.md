@@ -3,6 +3,12 @@
 A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
 **All bundled data is fictional.** Not an FDA product; a concept prototype.
 
+> **New in round 26: Compare two files, and more from a selection.** *Compare two files…* (tray menu) takes an earlier and a later version of one report (`.xlsx` or CSV), matches rows by the column that names them, and shows
+> a short summary, a bar of the rows, a bar for each column that changed, and the changed cells. For a workbook it reads one sheet and names it. Fixed rules on this PC: no AI, nothing sent. *Copy the summary*, *Copy the full report*, *Save a report…*; and *Write a narrative with AI…*,
+> which opens the usual preview with the summary and the listed changes only, never the files. In *Ask about a selection*: four reading prompts (*TL;DR*, *What else should I know?*, *Onboard me on this topic*, *Why does it matter?*),
+> *Save a calendar invitation* when the selection names a date, and *Add to the notes of ANDA …* when it names an ANDA in your data. In Settings: *Show my usage…* (counts only, from the usage log, which is off until you switch it on).
+> The rules are the simulation's, answer for answer (`../mockup/compare-golden.json`). A security review of this round is in `../DESIGN.md` §11j and `../SECURITY.md`.
+>
 > **New in round 25: Review works with no AI.** *Review a draft* (`Ctrl+Alt+Shift+R`) now has three views, all by fixed rules on this PC, with nothing sent: **Check everything**, **Proofread** (a short list of spelling, grammar,
 > spacing and punctuation rules; the draft with each change marked; *Copy corrected draft* or *Apply here*, which changes only the app's own box) and **Fact-check** (the draft against your data, your notes and the calendar, now with
 > strength, review cycle, the due date of the open item, and dates that do not exist). Under them: **one question before you send**, and **For your recall**, your own notes and open items for each ANDA the draft names.
@@ -15,7 +21,7 @@ A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
 > setting for when it is counted again (only when the app is used, also once just after midnight, or also every hour); an amber dot on the tray icon **only while something needs the person today** (an action item that says it is due today or overdue, or a goal date that is today or has passed; never for a sample record). At rest the tray icon carries no amber at all (round 22); the short number forms (**N210793 is an NDA and is refused; A210793 is read as ANDA 210793**); and
 > the default shortcuts **Ctrl+Alt+Shift+R** (Review a draft) and **Ctrl+Alt+Shift+L** (My to-do list), which replaced Ctrl+Alt+D and Ctrl+Alt+L because Word uses those. A shortcut
 > you already saved is kept. **Not in this app yet, only in the browser simulation** (`../mockup/windows-simulation.html`): One Bar, Today, recent and kept ANDAs,
-> spacing and text size, card details with Copy, and notices near the clock with division news. See `../DESIGN.md` §11b, §11c and §11i.
+> spacing and text size, card details with Copy, and notices near the clock with division news. See `../DESIGN.md` §11b, §11c, §11i and §11j.
 
 ## Quick setup (under 5 minutes)
 
@@ -261,7 +267,7 @@ dotnet test AndaCompanion.Tests                              # everything (Windo
 dotnet test AndaCompanion.Tests --filter "Category!=Windows" # what runs on Linux/macOS
 ```
 
-1,104 cross-platform tests at the time of writing, round 25 (the figure was 762 when this paragraph was first written; recognizer, status line, GDUFA rules, the federal-holiday
+1,132 cross-platform tests at the time of writing, round 26 (the figure was 762 when this paragraph was first written; recognizer, status line, GDUFA rules, the federal-holiday
 calendar against OPM's dates, watch rules, urgency, draft check, portfolio and notes readers, writing prompts,
 hotkey parsing and registration with a fake API, brief fencing and fallback, provider selection, settings,
 contrast, placement, the to-do list, custom actions, the agent connector, headless renders and interaction tests of the real windows) plus Windows-only tests that use real Win32 (clipboard snapshot/restore, hotkey registration and

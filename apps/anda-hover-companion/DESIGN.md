@@ -836,8 +836,85 @@ sheet the due-date check stays silent; that is stated, not hidden. A note label 
 
 **One defect found in the simulation by doing the port:** "cycle 0" in a draft was reported as "cycle undefined". Both programs now say "cycle 0".
 
-**Still only in the simulation:** card details with Copy, notices near the clock and division news, text size and spacing, recent and kept ANDAs, One Bar and
+**Still only in the simulation after round 25:** card details with Copy, notices near the clock and division news, text size and spacing, recent and kept ANDAs, One Bar and
 Today, the on-device AI option in Review, and the blur behind the glass looks.
+
+## 11j. Round 26: Compare two files, four ways to read a text, an invitation and a note from a selection, My usage, and a security review
+
+The owner's leadership asked for a way to choose two Excel files and have them compared, with a short summary and clear pictures. The owner answered four
+questions first: the two files are usually **two versions of the same report**; build the fixed-rule comparison **and** the AI narrative; build it in the
+simulation **and** the Windows app; and add all four smaller items. The work then went through a security review with the repository's own *AAS Security
+Engineer* and *AAS Secure App Builder* skill sets, and its fixes are part of this round.
+
+**Compare two files** (tray menu, in both editions). The person chooses an earlier and a later file (Excel `.xlsx` or CSV in the app; CSV in the browser
+simulation). Everything is done on the PC by fixed rules; no AI is used and nothing is sent. For a workbook the app reads one sheet (the first visible sheet
+with an ANDA column, otherwise the first visible sheet) and names it beside the file name.
+
+1. **Rows are matched by the column that names each row.** The tool suggests the first column both files share in which every row has a value and no value
+   repeats, preferring a heading that sounds like a number (ANDA, ID, No, #). The person can choose another shared column. With no such column, rows are
+   compared by position, and the summary says so.
+2. **Values are compared as what they are.** "1,000" equals "1000.0"; "10/3/2026" equals "Oct 3, 2026"; extra spaces do not count. A changed whole number
+   shows the difference; a changed date shows the number of days earlier or later.
+3. **What is shown:** a summary of a few plain sentences (rows the same, changed, new, no longer there; the columns with the most changes; the largest date
+   change; columns only one file has; rows left out and why); one bar of the rows in four parts (rows that are the same as an outline, the three kinds of change filled); a bar for each of the eight columns that
+   changed most; a
+   table of the first 60 changed cells; and the lists of new and removed rows. Every part of each picture is also named with its number, so nothing is said
+   by color alone.
+4. **What can be taken away:** *Copy the summary*, *Copy the full report* (up to 50 changed rows and 50 names each of new and removed rows) and *Save a report*
+   (one web page with no script and no outside address).
+5. **Write a narrative with AI…** opens the usual preview of exactly what would be sent. It holds the summary and the listed changes, cut at 1,800
+   characters, **never the files**. Nothing is sent until the person presses Send, and the answer is Copy only.
+
+The closing line of every summary states the limit: values were compared as text, numbers and dates in the columns both files have; formulas, formatting,
+hidden rows and other sheets were not compared. Limits: 25 MB, 20,000 rows and 200 columns in the app; 5 MB in the simulation.
+
+**Four ways to have a text read** (Ask about a selection, under *Read it for me*): *Give me the TL;DR*, *What else should I know?*, *Onboard me on this
+topic* and *Why does it matter?*. Each is a stored prompt that is filled in and shown first; it uses the person's AI connection only after Send.
+
+**From a selection, with no AI:** when the selection names a date, *Save a calendar invitation* writes a small `.ics` file for an all-day event on the first
+real date in the text (with no year, the next such day; a bare "3/4" is not read as a date). The person saves the file and opens it in their calendar; the app
+sends nothing and adds nothing itself. When the selection names an ANDA that is in the person's data, *Add to the notes of ANDA …* puts the selection into
+that ANDA's quick notes (the note file of round 24, with its 500-character limit, said when a note was cut).
+
+**My usage** (in the app: Settings, *Show my usage…*; in the simulation: the tray menu, with all tools on). Leadership asked for outcomes that can be measured,
+quietly, with the person told first. The answer is the usage log that already existed, switched **off** until the person turns it on, now with seven more
+event names and a window that shows the counts for the last 7 and 30 days. It holds counts only, from a fixed list of event names: never an ANDA number, a
+name or any text. It stays on the PC; the person copies the summary if they choose to share it. Nothing is reported for them.
+
+**How "the same in both programs" is kept true.** As in round 25, the simulation writes its answers to a file, `mockup/compare-golden.json` (20 comparisons,
+14 invitations, 3 usage cases, the prompts and the event list; written by `tools/compare-golden.cjs`), and the app's tests must reproduce every answer,
+character for character. Writing the rules a second time found a real fault in the first: the simulation did not escape semicolons in a calendar file.
+
+**What the security review changed.** Each item was a finding, a fix and a test in both programs:
+
+1. **A pasted report could become a formula.** A row named `=HYPERLINK(…)`, or a file named `=x.csv`, began a line of the copied report; pasted into a
+   spreadsheet, such a line is a formula. A copied line that starts with `=`, `+`, `-` or `@` now gets an apostrophe in front, which a spreadsheet reads as
+   text. On the screen and in the saved page the value is shown exactly as it is in the file.
+2. **Control characters could reach a calendar file.** Line breaks were already escaped; the rarer ones (U+2028, U+2029, U+0085) now become plain line
+   breaks first, and other control characters are removed, so no part of a selection can start a line of its own in the file.
+3. **A very long cell could flood the window and the report.** Values, row names and headings are shown cut (200 and 80 characters, never through the
+   middle of a character); rows are still matched and compared on the whole value.
+4. **A large workbook froze the window.** The app now reads the file, and compares more than 2,000 rows, off the UI thread, and says "Reading the file…"
+   and "Comparing…". A comparison that runs into the pattern time limit is stopped and said plainly.
+5. **The saved report** now carries a content policy that lets it load and run nothing, in addition to every value being escaped.
+6. **Native calls** (user32, kernel32, gdi32) are now loaded from the Windows system folder only. This was the one rule the .NET security analyzers
+   raised; after the change they raise none.
+
+**What the design review changed.** Measured against the accessibility checklist of the repository's *Product Design Studio* skill set: the "Same" part of
+the row bar stood about 2 to 1 against the window. It is now an outline at full strength beside three filled parts (each 5.9 to 1 or better in the looks
+measured, held by a check in each program), so the parts differ by more than color; the
+file choosers in the simulation were 20 pixels tall and are now 36; the smallest text in the app's window is 12. Buttons stay 34 pixels tall, as everywhere
+else in the product: above the 24 that WCAG 2.2 AA asks, below the 44 recommended for touch.
+
+**What changed in the workflow** (from the *DevOps & Cloud* skill set's security-scanning section): the Linux job now also checks the packages against the
+public advisory list and builds with every .NET security rule on; either stops the run. The shared answer files are among the paths that start it.
+
+Checked and left as they were: no secret in the repository; no package with a known vulnerability; the workbook reader refuses document type definitions and
+outside entities and caps unzipped size; the simulation builds its windows from text nodes only; what goes to an AI is the selection inside a fence, after a
+preview, with the answer Copy only; the usage reader accepts only a date and a known event name.
+
+**Still only in the simulation:** card details with Copy, notices near the clock and division news, text size and spacing, recent and kept ANDAs, One Bar and
+Today, the on-device AI option in Review, and the blur behind the glass looks. The extension has none of round 26.
 
 ## 12. Engagement roadmap — seven features that make it the daily habit
 
