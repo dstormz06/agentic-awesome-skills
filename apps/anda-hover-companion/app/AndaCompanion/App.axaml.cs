@@ -83,7 +83,8 @@ public partial class App : Application
 
             // The event log is written from here on, and every window carries the line that says what is switched on.
             if (SelfTestRun is null) EventLog.Configure(Path.Combine(AppPaths.Root, "events.csv"));
-            _connectionKinds = Connections.Kinds(Connections.From(_settings));
+            _connectionState = Connections.From(_settings);
+            EventLog.Record("connection", Connections.StartLine(_connectionState));      // what is already on at start, so that the log never shows "off" without an "on" before it
             ConnectionBar.Line = () => Connections.Describe(Connections.From(_settings)).Line;
             ConnectionBar.Open = OpenConnections;
             Window.WindowOpenedEvent.AddClassHandler<Window>((w, _) => ConnectionBar.Attach(w));

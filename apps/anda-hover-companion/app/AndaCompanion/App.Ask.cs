@@ -91,6 +91,7 @@ public partial class App
             WeeklyOn = () => _settings.KeepWeeklySheetCopy,
             SetWeekly = on => { _settings.KeepWeeklySheetCopy = on; SettingsService.Save(_settings); EventLog.Record("file", on ? "weekly copy of the sheet switched on" : "weekly copy of the sheet switched off"); },
             HasWeeklyCopies = () => _sheetCopies.Days().Count > 0,
+            WeeklyCount = () => _sheetCopies.Days().Count,
             DeleteWeekly = () => { int n = _sheetCopies.DeleteAll(); if (n > 0) EventLog.Record("deleted", "kept copies of the sheet"); return n; },
             WeeklyPair = WeeklySheetPair,
         };
@@ -137,8 +138,10 @@ public partial class App
     private void OpenConnections()
     {
         if (_connectionsWindow is not null) { _connectionsWindow.Paint(); _connectionsWindow.Activate(); return; }
-        var win = new ConnectionsWindow(() => Connections.Describe(Connections.From(_settings)), () => EventLog.Read(), () => EventLog.Csv(EventLog.Read(int.MaxValue).Entries), EventLog.FilePath);
-        win.Closed += (_, _) => { if (ReferenceEquals(_connectionsWindow, win)) _connectionsWindow = null; };
+        var win = new ConnectionsWindow(() => Connections.Describe(Connections.From(_settings)), () => EventLog.Read(), LogForClipboard, EventLog.FilePath) { WriteAll = EventLog.Export };
+        void Follow() => Dispatcher.UIThread.Post(() => { if (ReferenceEquals(_connectionsWindow, win)) win.Paint(); });      // a line added while the window is open shows at once
+        EventLog.Recorded += Follow;
+        win.Closed += (_, _) => { EventLog.Recorded -= Follow; if (ReferenceEquals(_connectionsWindow, win)) _connectionsWindow = null; };
         _connectionsWindow = win;
         win.Show();
     }
@@ -152,14 +155,30 @@ public partial class App
         win.Show();
     }
 
-    private (bool Ai, int Agents, bool Outlook) _connectionKinds;
+    /// <summary>The whole log for the clipboard, or null when it is too long to copy (about 25,000 lines): saving has no such limit.</summary>
+    private static string? LogForClipboard()
+    {
+        try
+        {
+            if (EventLog.FilePath is { } path && File.Exists(path) && new FileInfo(path).Length > 2 * 1024 * 1024) return null;
+            using var text = new StringWriter();
+            EventLog.Export(text);
+            return text.ToString();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return null; }
+    }
 
-    /// <summary>Called when settings change: every window's line follows, and a connection switched on or off is written to the event log once.</summary>
+    private ConnState _connectionState = new(null, Array.Empty<ConnAgent>(), null);
+
+    /// <summary>
+    /// Called when settings change: every window's line follows, and a connection that was switched on or off, or that now goes somewhere
+    /// else, is written to the event log once.
+    /// </summary>
     private void ConnectionsChanged()
     {
-        var now = Connections.Kinds(Connections.From(_settings));
-        foreach (string line in Connections.Changes(_connectionKinds, now)) EventLog.Record("connection", line);
-        _connectionKinds = now;
+        var now = Connections.From(_settings);
+        foreach (string line in Connections.Changes(_connectionState, now)) EventLog.Record("connection", line);
+        _connectionState = now;
         ConnectionBar.Refresh();
         _connectionsWindow?.Paint();
     }

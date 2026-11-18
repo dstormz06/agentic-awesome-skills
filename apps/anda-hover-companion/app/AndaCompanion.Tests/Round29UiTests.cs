@@ -46,7 +46,7 @@ public class Round29UiTests : IClassFixture<HeadlessFixture>
                 var after = bars.Select(b => b.Content as string).ToArray();
                 Click(bars[1]); Settle();
                 // The card, the invite and the Connections window itself carry no such line.
-                var conn = new ConnectionsWindow(() => Connections.Describe(new ConnState(null, Array.Empty<ConnAgent>(), null)), () => (Array.Empty<EventEntry>(), 0), () => "", null);
+                var conn = new ConnectionsWindow(() => Connections.Describe(new ConnState(null, Array.Empty<ConnAgent>(), null)), () => (Array.Empty<EventEntry>(), 0, 0), () => "", null);
                 bool none = ConnectionBar.Attach(conn) is null && ConnectionBar.Attach(new ChipWindow()) is null;
                 foreach (var w in windows) w.Close();
                 line = "changed after closing"; ConnectionBar.Refresh(); Settle();                       // a closed window is no longer told
@@ -71,7 +71,7 @@ public class Round29UiTests : IClassFixture<HeadlessFixture>
         var r = await _fx.Session.Dispatch(() =>
         {
             ThemeManager.Apply(Appearances.Default);
-            var w = new ConnectionsWindow(() => Connections.Describe(state), () => (entries, 250), () => EventLog.Csv(entries), @"C:\Users\me\AppData\Roaming\AndaCompanion\events.csv", eastern)
+            var w = new ConnectionsWindow(() => Connections.Describe(state), () => (entries, 250, 2), () => EventLog.Csv(entries), @"C:\Users\me\AppData\Roaming\AndaCompanion\events.csv", eastern)
                 { WriteClipboard = t => { copied.Add(t); return Task.CompletedTask; }, SaveText = t => { saved.Add(t); return Task.FromResult(true); } };
             w.Show(); Settle();
             var list = Texts(w.List); var rows = w.Log.Children.OfType<Grid>().Select(g => g.Children.OfType<TextBlock>().Select(t => t.Text ?? "").ToArray()).ToArray();
@@ -81,16 +81,20 @@ public class Round29UiTests : IClassFixture<HeadlessFixture>
             Click(w.SaveCsvButton); Settle(); string s3 = w.Note.Text ?? "";
             var buttons = w.GetVisualDescendants().OfType<Button>().Select(b => b.Content as string ?? "").ToArray();
             var all = Texts(w);
+            bool scrolls = w.List.Parent is ScrollViewer { MaxHeight: > 100 and < 2000 };
             w.Close();
-            return (list, rows, count, line, s1, s2, s3, buttons, all);
+            return (list, rows, count, line, s1, s2, s3, buttons, all, scrolls);
         }, CancellationToken.None);
         Assert.Contains("Claude (AI)", r.list); Assert.Contains("To: api.anthropic.com", r.list);
         Assert.Contains("<b>Alert</b> Hub (agent)", r.list);                                                        // a name with markup is text
         Assert.Contains("To: no address yet, so nothing can be sent", r.list); Assert.Contains("Outlook (read-only)", r.list);
         Assert.Contains("Kept: Mail is shown, never stored. The sign-in is held in memory until you sign out or close the app.", r.list);
         Assert.Equal(new[] { "Jul 16, 9:07:07 AM EDT", "Data sent", EventLog.Withheld }, r.rows[0]);                // newest first, in the person's zone, and never an ANDA number
-        Assert.Equal(new[] { "Jul 16, 9:05:07 AM EDT", "Connection switched on or off", "AI switched on" }, r.rows[2]);
-        Assert.Equal("250 events; the newest 3 are shown, and the export holds them all.", r.count);
+        Assert.Equal(new[] { "Jul 16, 9:05:07 AM EDT", "Connection switched on, off or changed", "AI switched on" }, r.rows[2]);
+        Assert.Equal("250 events; the newest 3 are shown, and the export holds them all. 2 lines of the file are not lines of the log and are left out.", r.count);
+        Assert.Contains("Sends: When you sign in: this app's ID and the read-only permission it asks for. After that, only a search for the six-digit number of the open ANDA.", r.list);
+        Assert.Contains("Kept: Its answer is kept in memory until you close the app, and counts as fresh for the minutes you chose. It is never written to a file.", r.list);
+        Assert.True(r.scrolls);                                                                                      // with many connections the list scrolls and the buttons stay on the screen
         Assert.Equal("Switched on: Claude (AI) · <b>Alert</b> Hub (agent) · Outlook (read-only)", r.line);
         Assert.Equal(new[] { string.Join("\n", Connections.Describe(state).Text), EventLog.Csv(entries) }, copied);
         Assert.Equal(EventLog.Csv(entries), Assert.Single(saved));
@@ -105,7 +109,7 @@ public class Round29UiTests : IClassFixture<HeadlessFixture>
         var r = await _fx.Session.Dispatch(() =>
         {
             ThemeManager.Apply(Appearances.Default);
-            var w = new ConnectionsWindow(() => Connections.Describe(new ConnState(null, Array.Empty<ConnAgent>(), null)), () => (Array.Empty<EventEntry>(), 0), () => EventLog.Csv(Array.Empty<EventEntry>()), null);
+            var w = new ConnectionsWindow(() => Connections.Describe(new ConnState(null, Array.Empty<ConnAgent>(), null)), () => (Array.Empty<EventEntry>(), 0, 0), () => EventLog.Csv(Array.Empty<EventEntry>()), null);
             w.Show(); Settle();
             var v = (Texts(w.List), w.LineText.Text, w.CopyCsvButton.IsEnabled, w.SaveCsvButton.IsEnabled, w.Count.Text, w.Log.Children.Count);
             w.Close(); return v;
@@ -140,6 +144,13 @@ public class Round29UiTests : IClassFixture<HeadlessFixture>
             fail ? Task.FromException<string>(new HttpRequestException("ANDA 216482 could not be sent to https://secret.example.test")) : Task.FromResult("- an answer about ANDA 216482");
     }
 
+    /// <summary>A service that never answers in time: what an HTTP timeout looks like to the caller.</summary>
+    private sealed class SlowAi : IChatCompleter
+    {
+        public string ProviderName => "Slow AI";
+        public Task<string> CompleteAsync(string system, string user, int maxTokens, CancellationToken ct) => Task.FromException<string>(new TaskCanceledException("the request timed out"));
+    }
+
     [Fact]
     public async Task A_request_to_an_AI_is_written_to_the_event_log_as_a_kind_and_a_size_never_as_text()
     {
@@ -150,12 +161,14 @@ public class Round29UiTests : IClassFixture<HeadlessFixture>
             string system = "You are careful.", user = "<selection>\nANDA 216482 is late; the applicant is Example Pharma (fictional).\n</selection>";
             await new ReportingChatCompleter(new FakeAi(false)).CompleteAsync(system, user, 100, CancellationToken.None);
             await Assert.ThrowsAsync<HttpRequestException>(() => new ReportingChatCompleter(new FakeAi(true)).CompleteAsync(system, user, 100, CancellationToken.None));
-            var (entries, total) = EventLog.Read();
-            Assert.Equal(2, total);
-            Assert.Equal(("sent", $"AI request, {system.Length + user.Length} characters"), (entries[0].Type, entries[0].Detail));
-            Assert.Equal(("send_failed", "AI request (HttpRequestException)"), (entries[1].Type, entries[1].Detail));
+            await Assert.ThrowsAsync<TaskCanceledException>(() => new ReportingChatCompleter(new SlowAi()).CompleteAsync(system, user, 100, CancellationToken.None));
+            var (entries, total, _) = EventLog.Read();
+            // Each request is written before it goes out. One that fails, times out or is canceled has a second line: the text may have left all the same.
+            Assert.Equal(5, total);
+            string sent = $"AI request, {system.Length + user.Length} characters";
+            Assert.Equal(new[] { ("sent", sent), ("sent", sent), ("send_failed", "AI request: no answer"), ("sent", sent), ("send_failed", "AI request: timed out or canceled") }, entries.Select(e => (e.Type, e.Detail)));
             string file = File.ReadAllText(path);
-            foreach (string secret in new[] { "216482", "Example Pharma", "selection", "secret.example.test", "answer" }) Assert.DoesNotContain(secret, file);
+            foreach (string secret in new[] { "216482", "Example Pharma", "selection", "secret.example.test", "an answer about", "careful" }) Assert.DoesNotContain(secret, file);
         }
         finally { EventLog.Configure(null); ConnectionStatus.Reset(); }
     }

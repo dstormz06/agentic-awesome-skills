@@ -134,6 +134,7 @@ public sealed class OutlookService : IDisposable
         string tenant = s.TenantId.Trim(), client = s.ClientId.Trim();
         try
         {
+            EventLog.Record("sent", "Outlook sign-in request");      // this app's ID and the permission asked for go to Microsoft's sign-in address
             using var begin = await _http.PostAsync($"{Login(s.Cloud)}/{tenant}/oauth2/v2.0/devicecode",
                 new FormUrlEncodedContent(new Dictionary<string, string> { ["client_id"] = client, ["scope"] = $"{Graph(s.Cloud)}/Mail.Read" }), cts.Token);
             if (!begin.IsSuccessStatusCode)

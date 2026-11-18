@@ -476,10 +476,13 @@ public class Round15Tests
             await new AgentService(() => new[] { hub }, Env, new Handler((_, _) => new HttpResponseMessage(System.Net.HttpStatusCode.ServiceUnavailable))).RunAsync(hub, Demo, Today, null, null);
             var off = Hub(a => a.Api.Endpoint = "");
             await new AgentService(() => new[] { off }, Env, new Handler((_, _) => Json("{}"))).RunAsync(off, Demo, Today, null, null);      // never sent: nothing to write
-            var (entries, total) = EventLog.Read();
-            Assert.Equal(2, total);
+            var (entries, total, _) = EventLog.Read();
+            // Each request is written before it goes out; the one that got no answer has a second line that says so.
+            Assert.Equal(3, total);
             Assert.Equal("sent", entries[0].Type); Assert.Matches("^agent request, [0-9,]+ characters$", entries[0].Detail);
-            Assert.Equal("send_failed", entries[1].Type); Assert.Matches("^agent request, [0-9,]+ characters$", entries[1].Detail);
+            Assert.Equal("sent", entries[1].Type); Assert.Matches("^agent request, [0-9,]+ characters$", entries[1].Detail);
+            Assert.Equal(("send_failed", "agent request: no answer"), (entries[2].Type, entries[2].Detail));
+            Assert.DoesNotContain(entries, e => e.Detail == EventLog.Withheld);
             string file = File.ReadAllText(path);
             foreach (string secret in new[] { "216482", "Alert Hub", "agent.example.test", Token, "Metformin" }) Assert.DoesNotContain(secret, file);
         }

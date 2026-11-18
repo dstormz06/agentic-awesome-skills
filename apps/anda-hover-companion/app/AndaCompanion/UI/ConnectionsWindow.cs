@@ -27,13 +27,18 @@ public sealed class ConnectionsWindow : Window
     public Func<string, Task<bool>>? SaveText { get; set; }
 
     private readonly Func<ConnResult> _describe;
-    private readonly Func<(IReadOnlyList<EventEntry> Entries, int Total)> _read;
-    private readonly Func<string> _csv;
+    private readonly Func<(IReadOnlyList<EventEntry> Entries, int Total, int Unreadable)> _read;
+    private readonly Func<string?> _csv;
+    private readonly ScrollViewer _listScroll;
+
+    /// <summary>Writes the whole log to a file, line by line. When set, saving uses it off the UI thread, so a long log never holds the window.</summary>
+    public Func<TextWriter, int>? WriteAll { get; set; }
     private readonly TimeZoneInfo _zone;
     private readonly ScrollViewer _logScroll;
     private readonly TextBlock _logEmpty;
 
-    public ConnectionsWindow(Func<ConnResult> describe, Func<(IReadOnlyList<EventEntry> Entries, int Total)> read, Func<string> csv, string? file, TimeZoneInfo? zone = null)
+    /// <param name="csv">The whole log as CSV for the clipboard, or null when it is too long to copy.</param>
+    public ConnectionsWindow(Func<ConnResult> describe, Func<(IReadOnlyList<EventEntry> Entries, int Total, int Unreadable)> read, Func<string?> csv, string? file, TimeZoneInfo? zone = null)
     {
         _describe = describe; _read = read; _csv = csv; _zone = zone ?? TimeZoneInfo.Local;
         Title = "ANDA Companion (Notula) — Connections and event log"; Width = 680; SizeToContent = SizeToContent.Height; CanResize = false; Topmost = true; ShowInTaskbar = false;
@@ -54,7 +59,11 @@ public sealed class ConnectionsWindow : Window
         CopyListButton = new Button { Content = "Copy this list" };
         CopyListButton.Click += async (_, _) => await CopyAsync(string.Join("\n", _describe().Text), "The list was copied. Nothing was sent.");
         CopyCsvButton = new Button { Content = "Copy as CSV" };
-        CopyCsvButton.Click += async (_, _) => await CopyAsync(_csv(), "The event log was copied as CSV. Nothing was sent.");
+        CopyCsvButton.Click += async (_, _) =>
+        {
+            if (_csv() is { } text) await CopyAsync(text, "The event log was copied as CSV. Nothing was sent.");
+            else Note.Text = "The event log is too long to copy. Please use “Save as CSV…” instead.";
+        };
         SaveCsvButton = new Button { Content = "Save as CSV…" };
         SaveCsvButton.Click += async (_, _) => await SaveAsync();
         var close = new Button { Content = "Close" };
@@ -66,7 +75,10 @@ public sealed class ConnectionsWindow : Window
         var body = new StackPanel { Spacing = 8, Margin = new Thickness(20) };
         body.Children.Add(new TextBlock { Text = "Connections and event log", FontSize = 15, FontWeight = FontWeight.Bold, Foreground = Res("C.Ink") });
         body.Children.Add(Hint("What is switched on, what each one sends, where it goes and what is kept. “Switched on” is about your settings; whether a service answers is said on the card, only after a real request."));
-        body.Children.Add(List);
+        // The list scrolls inside the window, so that with many connections the buttons below stay on the screen.
+        _listScroll = new ScrollViewer { MaxHeight = 360, Content = List, VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto };
+        Opened += (_, _) => { if (Screens.ScreenFromWindow(this) is { } screen) _listScroll.MaxHeight = Math.Max(140, screen.WorkingArea.Height / screen.Scaling - 52 - 480); };
+        body.Children.Add(_listScroll);
         body.Children.Add(Hint(Connections.Note));
         body.Children.Add(new StackPanel { Orientation = Orientation.Horizontal, Children = { CopyListButton } });
         body.Children.Add(Label("EVENT LOG · TIMES, KINDS AND COUNTS ONLY"));
@@ -95,7 +107,7 @@ public sealed class ConnectionsWindow : Window
         }
         LineText.Text = r.Line;
 
-        var (entries, total) = _read();
+        var (entries, total, unreadable) = _read();
         Log.Children.Clear();
         foreach (var e in entries.Reverse())
         {
@@ -106,7 +118,9 @@ public sealed class ConnectionsWindow : Window
         }
         _logEmpty.IsVisible = total == 0; _logScroll.IsVisible = total > 0;
         CopyCsvButton.IsEnabled = SaveCsvButton.IsEnabled = total > 0;
-        Count.Text = total == 0 ? "" : $"{total:#,0} {(total == 1 ? "event" : "events")}{(total > entries.Count ? $"; the newest {entries.Count:#,0} are shown, and the export holds them all" : "")}.";
+        string counted = total == 0 ? "" : $"{total:#,0} {(total == 1 ? "event" : "events")}{(total > entries.Count ? $"; the newest {entries.Count:#,0} are shown, and the export holds them all" : "")}.";
+        string leftOut = unreadable == 0 ? "" : $"{unreadable:#,0} {(unreadable == 1 ? "line of the file is not a line of the log and is" : "lines of the file are not lines of the log and are")} left out.";
+        Count.Text = string.Join(" ", new[] { counted, leftOut }.Where(t => t.Length > 0));
     }
 
     private async Task CopyAsync(string text, string done)
@@ -123,18 +137,18 @@ public sealed class ConnectionsWindow : Window
 
     private async Task SaveAsync()
     {
-        string text = _csv();
         try
         {
             bool saved;
-            if (SaveText is not null) saved = await SaveText(text);
+            if (SaveText is not null) saved = await SaveText(_csv() ?? "");
             else
             {
                 var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions { Title = "Save the event log", SuggestedFileName = "anda-companion-events.csv", DefaultExtension = "csv" });
                 if (file is null) { Note.Text = "Nothing was saved."; return; }
                 await using var stream = await file.OpenWriteAsync();
                 await using var writer = new StreamWriter(stream, new System.Text.UTF8Encoding(false));
-                await writer.WriteAsync(text);
+                if (WriteAll is { } all) await Task.Run(() => all(writer));      // line by line, off the UI thread
+                else await writer.WriteAsync(_csv() ?? "");
                 saved = true;
             }
             Note.Text = saved ? "The event log was saved. Nothing was sent." : "Nothing was saved.";

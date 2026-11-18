@@ -279,6 +279,7 @@ public sealed class AgentService
             using var completer = (CustomApiConfig.CreateCompleter(agent.Api, _env, _handler, fields) as ElsaChatCompleter)
                 ?? throw new ElsaException("The agent is not set up.");
             sentChars = SystemPrompt.Length + prompt.Length;
+            EventLog.Record("sent", $"agent request, {EventLog.Count(sentChars)} characters");      // before it goes: that an agent is asked and how long the request is, never which agent or what is asked
             string text = Clean(await completer.CompleteAsync(SystemPrompt, prompt, 800, ct));
             result = string.IsNullOrWhiteSpace(text)
                 ? new(agent.Id, agent.Name, record.Number, AgentState.Failed, "", Array.Empty<string>(), _now(), $"{agent.Name} returned nothing.")
@@ -289,8 +290,7 @@ public sealed class AgentService
         catch (HttpRequestException) { result = Failed(agent, record, $"{agent.Name} could not be reached. Please check the address and your network."); }
         catch (Exception ex) { result = Failed(agent, record, $"{agent.Name} did not answer ({ex.GetType().Name})."); }
 
-        if (sentChars >= 0)      // the event log says that an agent was asked and how long the request was, never which agent or what was asked
-            EventLog.Record(result.State == AgentState.Done ? "sent" : "send_failed", $"agent request, {sentChars.ToString("#,0", System.Globalization.CultureInfo.InvariantCulture)} characters");
+        if (sentChars >= 0 && result.State != AgentState.Done) EventLog.Record("send_failed", "agent request: no answer");      // the request may have left this PC all the same
         if (promptOverride is null)
         {
             if (result.State == AgentState.Done) { _cache[key] = result; _failures.TryRemove(key, out _); }

@@ -69,7 +69,7 @@ public partial class MyTodoWindow : Window
     {
         var screen = Screens.ScreenFromWindow(this) ?? Screens.Primary;
         if (screen is null) return;
-        Body.MaxHeight = Math.Max(200, Math.Min(380, screen.WorkingArea.Height / screen.Scaling - 420));
+        Body.MaxHeight = Math.Max(200, Math.Min(380, screen.WorkingArea.Height / screen.Scaling - 420 - ConnectionBar.Height));
     }
 
     public MyTodoView View => _view;

@@ -251,7 +251,7 @@ public class Round27UiTests : IClassFixture<HeadlessFixture>
     // ---------------------------------------------------------------- the weekly copy of the sheet
 
     [Fact]
-    public void One_copy_of_the_sheet_is_kept_for_a_week_the_newest_five_stay_and_switching_off_deletes_them_all()
+    public void One_copy_of_the_sheet_is_kept_for_a_week_and_the_app_never_deletes_a_copy_by_itself()
     {
         string dir = Path.Combine(Temp.NewDir(), "sheet-copies"); var copies = new SheetCopies(dir);
         CompareTable T(string v) => new("My sheet", new[] { "ANDA", "Status" }, new[] { new[] { "216482", v } });
@@ -263,20 +263,20 @@ public class Round27UiTests : IClassFixture<HeadlessFixture>
         Assert.Null(copies.LatestBefore(monday));                                         // a copy made today is not "earlier"
         Assert.Equal(("My sheet, copy kept Nov 9", "week 1"), (copies.LatestBefore(monday.AddDays(1))!.Value.Table.Name, copies.LatestBefore(monday.AddDays(1))!.Value.Table.Rows[0][1]));
         for (int w = 1; w <= 6; w++) Assert.True(copies.Capture(T("week " + (w + 1)), monday.AddDays(7 * w)));
-        Assert.Equal(SheetCopies.Keep, copies.Days().Count);                              // seven weeks were kept one after another; five stay
-        Assert.Equal(monday.AddDays(14), copies.Days()[0]);
+        Assert.Equal(7, copies.Days().Count);                                             // seven weeks were kept one after another, and all seven stay: only the person deletes
+        Assert.Equal(monday, copies.Days()[0]);
         Assert.Equal("week 6", copies.LatestBefore(monday.AddDays(7 * 6))!.Value.Table.Rows[0][1]);
         // A file that is not one of ours, and a copy that cannot be read, are passed over.
         File.WriteAllText(Path.Combine(dir, "sheet-not-a-date.json"), "{}"); File.WriteAllText(Path.Combine(dir, "other.txt"), "x");
         File.WriteAllText(Path.Combine(dir, "sheet-2026-12-23.json"), "{ this is not json");
         Assert.Equal("week 7", copies.LatestBefore(new DateOnly(2026, 12, 25))!.Value.Table.Rows[0][1]);
-        Assert.Equal(6, copies.DeleteAll()); Assert.Empty(copies.Days()); Assert.True(File.Exists(Path.Combine(dir, "other.txt")));      // only its own files are deleted
+        Assert.Equal(8, copies.DeleteAll()); Assert.Empty(copies.Days()); Assert.True(File.Exists(Path.Combine(dir, "other.txt")));      // only its own files are deleted
     }
 
     [Fact]
     public async Task My_sheet_since_last_week_keeps_nothing_until_switched_on_and_then_compares_with_the_last_copy()
     {
-        bool on = false, kept = false; int deleted = 0; var switched = new List<bool>();
+        bool on = false, kept = false; int deleted = 0, read = 0; long tick = 1000; var switched = new List<bool>();
         var r = await _fx.Session.Dispatch(() =>
         {
             ThemeManager.Apply(Appearances.Default);
@@ -284,8 +284,10 @@ public class Round27UiTests : IClassFixture<HeadlessFixture>
             {
                 WeeklyOn = () => on, SetWeekly = v => { on = v; if (v) kept = true; switched.Add(v); },
                 HasWeeklyCopies = () => kept, DeleteWeekly = () => { deleted++; kept = false; return 2; },
-                WeeklyPair = () => (FileCompare.SampleA with { Name = "My sheet, copy kept Nov 10" }, FileCompare.SampleB with { Name = "My sheet, today" }, null),
+                WeeklyPair = () => { read++; return (FileCompare.SampleA with { Name = "My sheet, copy kept Nov 10" }, FileCompare.SampleB with { Name = "My sheet, today" }, null); },
+                WeeklyCount = () => kept ? 2 : 0,
             };
+            w.Ticks = () => tick;
             w.Show(); Settle(); w.SetMode("week"); Settle();
             var box = w.FindControl<CheckBox>("WeekBox")!;
             var off = (box.IsChecked, Pick: w.FindControl<Grid>("PickGrid")!.IsVisible, w.Kind, Say: Texts(w.FindControl<StackPanel>("Out")!).FirstOrDefault(), Copy: w.FindControl<Button>("CopyBtn")!.IsEnabled);
@@ -294,18 +296,32 @@ public class Round27UiTests : IClassFixture<HeadlessFixture>
             box.IsChecked = false; Settle();
             var del = w.FindControl<Button>("WeekDelBtn")!;
             var after = (w.Kind, w.StatusText, Offered: del.IsVisible);
+            string? count = w.FindControl<TextBlock>("WeekCountText")!.Text;
             Click(del); Settle(); var asked = (del.Content as string, deleted, w.Kind);
-            Click(del); Settle(); var gone = (del.IsVisible, deleted, w.Kind, w.StatusText);
+            Click(del); Settle(); tick += CompareWindow.WeekDeletePauseMs - 1; Click(del); Settle();
+            var twice = (del.Content as string, deleted);                                   // a double-click, or a key held down, is one press
+            w.SetMode("two"); Settle(); w.SetMode("week"); Settle();
+            var left = (del.Content as string, deleted);                                    // leaving the view withdraws the question
+            Click(del); Settle(); tick += CompareWindow.WeekDeletePauseMs; Click(del); Settle();
+            var gone = (del.IsVisible, deleted, w.Kind, w.StatusText);
+            // While keeping is switched on, a delete must not keep a fresh copy in the same press.
+            box.IsChecked = true; Settle(); int before = read;
+            Click(del); Settle(); tick += CompareWindow.WeekDeletePauseMs; Click(del); Settle();
+            var whileOn = (deleted, Read: read - before, w.Kind, w.StatusText, Say: Texts(w.FindControl<StackPanel>("Out")!).FirstOrDefault(), Count: w.FindControl<TextBlock>("WeekCountText")!.IsVisible);
             w.Close();
-            return (off, now, after, asked, gone);
+            return (off, now, after, asked, gone, count, twice, left, whileOn);
         }, CancellationToken.None);
         Assert.Equal((false, false, null, false), (r.off.IsChecked, r.off.Pick, r.off.Kind, r.off.Copy));
         Assert.StartsWith("Nothing is kept yet.", r.off.Say);
         Assert.Equal(("table", 3, "My sheet, copy kept Nov 10: 6 rows, 7 columns", "From now on one copy of your sheet is kept each week, on this PC only."), (r.now.Kind, r.now.ChangedRows, r.now.Name, r.now.StatusText));
         Assert.Equal(("table", "No new copies are kept. The copies that exist stay until you delete them.", true), r.after);      // round 29: switching it off deletes nothing
         Assert.Equal(("Click again to delete", 0, "table"), r.asked);                                                                 // the first press only asks
-        Assert.Equal((false, 1, null, "The kept copies were deleted. Nothing else was changed."), r.gone);                            // the second deletes, and says so
-        Assert.Equal(new[] { true, false }, switched);
+        Assert.Equal("2 copies are kept on this PC, one for each week. The app never deletes a copy by itself.", r.count);
+        Assert.Equal(("Click again to delete", 0), r.twice);
+        Assert.Equal(("Delete the kept copies…", 0), r.left);
+        Assert.Equal((false, 1, null, "The kept copies were deleted. Nothing else was changed."), r.gone);                            // the second press, after a pause, deletes, and says so
+        Assert.Equal((2, 0, null, "The kept copies were deleted. Nothing else was changed.", "No copy is kept at the moment. Keeping is still switched on, so a new copy is made the next time this opens.", false), r.whileOn);
+        Assert.Equal(new[] { true, false, true }, switched);
     }
 
     // ---------------------------------------------------------------- hand-off page, meeting page

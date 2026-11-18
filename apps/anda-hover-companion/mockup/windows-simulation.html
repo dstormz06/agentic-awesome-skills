@@ -266,7 +266,7 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
          border-radius:var(--c-radius);box-shadow:var(--c-shadow);font-family:var(--c-font);font-size:calc(13px*var(--ts))}
 .app-win h2{margin:0;font-size:calc(15px*var(--ts))}
 .app-win .hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.onbar{display:block;width:100%;margin:12px 0 0;padding:6px 2px 0;min-height:26px;border:none;border-top:1px solid var(--c-line);background:none;color:var(--c-ink2);font:inherit;font-size:calc(11.5px*var(--ts));text-align:left;cursor:pointer}
+.onbar{display:block;width:100%;margin:12px 0 0;padding:6px 2px 0;min-height:26px;box-sizing:border-box;border:none;border-top:1px solid var(--c-line);background:var(--c-bg);position:sticky;bottom:0;z-index:2;color:var(--c-ink2);font:inherit;font-size:calc(11.5px*var(--ts));text-align:left;cursor:pointer}
 .onbar::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;border:1.5px solid var(--c-ink2);margin-right:7px;vertical-align:baseline}
 .onbar.still{cursor:default}
 .onbar:hover:not(.still){color:var(--c-ink)}
@@ -4363,6 +4363,7 @@ function cmpPaint(){
   cmpNames();
   const say = text => out.append(h("p", { class:"cm-say", text }));
   $("cmWeekDel").hidden = !(week && state.weekKept);
+  if(week && !state.weekKept && state.weekCopy){ keyOff("Chosen when both files are in"); say("No copy is kept at the moment. Keeping is still switched on, so a new copy is made the next time this opens."); return; }
   if(week && !state.weekKept){ keyOff("Chosen when both files are in"); say("Nothing is kept yet. When this is switched on, the app keeps one copy of your sheet each week, on this PC only, so it can show what changed since the last copy."); return; }
   if(data){
     keyOff("Rows are matched by the ANDA number");
@@ -4383,6 +4384,7 @@ function cmpPaint(){
   if(cmpFresh){ cmpFresh = false; usageRecord("compare_files"); }      /* once for a pair of files, not again for each look at it */
 }
 function cmpSetMode(mode){               /* two files, a report against my data, or my sheet since the last kept copy */
+  weekDelDisarm();
   cmpMode = mode; cmpA = cmpB = null; $("cmFileA").value = ""; $("cmFileB").value = ""; $("cmKey").value = ""; $("cmAnswer").value = ""; $("cmWhole").checked = false;
   [["cmModeTwo", "two"], ["cmModeData", "data"], ["cmModeWeek", "week"]].forEach(([id, m]) => $(id).setAttribute("aria-pressed", String(m === mode)));
   if(mode === "week") cmpLoadWeek();
@@ -4390,6 +4392,7 @@ function cmpSetMode(mode){               /* two files, a report against my data,
 }
 function cmpLoadWeek(){                  /* simulation: two fictional versions stand in for the person's sheet and its kept copy */
   $("cmWhole").checked = false;
+  if(state.weekCopy) state.weekKept = true;      /* while keeping is switched on, this week's copy is made when the view opens */
   if(state.weekKept){ cmpA = { ...CMP_SAMPLE_A, name:"My sheet, copy kept Nov 10" }; cmpB = { ...CMP_SAMPLE_B, name:"My sheet, today" }; cmpFresh = true; } else cmpA = cmpB = null;      /* a kept copy can be compared whether or not new ones are being kept */
 }
 function openCompare(mode){
@@ -4429,17 +4432,23 @@ $("cmModeTwo").addEventListener("click", () => cmpSetMode("two"));
 $("cmModeData").addEventListener("click", () => cmpSetMode("data"));
 $("cmModeWeek").addEventListener("click", () => cmpSetMode("week"));
 $("cmWeekOn").addEventListener("change", e => {
-  state.weekCopy = e.target.checked; if(state.weekCopy) state.weekKept = true;
+  state.weekCopy = e.target.checked; weekDelDisarm();
   cmpLoadWeek(); cmpPaint(); logEvent("file", state.weekCopy ? "weekly copy of the sheet switched on" : "weekly copy of the sheet switched off");
   cmpSay(state.weekCopy ? "From now on one copy of your sheet is kept each week, on this PC only. (Simulation: two fictional versions stand in for your sheet and its copy.)" : "No new copies are kept. The copies that exist stay until you delete them.");
 });
-let weekDelArmed = null;
-$("cmWeekDel").addEventListener("click", () => {      /* deleting is the person's act, and it is asked twice */
+/* Deleting is the person's act, and it is asked twice. The second press counts only after a pause, so a double-click or a held key is one press;
+   and the question is withdrawn when the window closes, the view changes or the button loses the keyboard. */
+let weekDelArmed = null, weekDelAt = 0;
+const WEEK_DEL_PAUSE = 700;
+function weekDelDisarm(){ if(weekDelArmed) clearTimeout(weekDelArmed); weekDelArmed = null; $("cmWeekDel").textContent = "Delete the kept copies…"; }
+$("cmWeekDel").addEventListener("click", () => {
   const b = $("cmWeekDel");
-  if(!weekDelArmed){ b.textContent = "Click again to delete"; weekDelArmed = setTimeout(() => { weekDelArmed = null; b.textContent = "Delete the kept copies…"; }, 5000); return; }
-  clearTimeout(weekDelArmed); weekDelArmed = null; b.textContent = "Delete the kept copies…";
-  state.weekKept = false; logEvent("deleted", "kept copies of the sheet"); cmpLoadWeek(); cmpPaint(); cmpSay("The kept copies were deleted. Nothing else was changed.");
+  if(!weekDelArmed){ b.textContent = "Click again to delete"; weekDelAt = performance.now(); weekDelArmed = setTimeout(weekDelDisarm, 5000); return; }
+  if(performance.now() - weekDelAt < WEEK_DEL_PAUSE) return;
+  weekDelDisarm();
+  state.weekKept = false; logEvent("deleted", "kept copies of the sheet"); cmpA = cmpB = null; cmpPaint(); cmpSay("The kept copies were deleted. Nothing else was changed.");
 });
+$("cmWeekDel").addEventListener("blur", weekDelDisarm);
 const cmpUseSample = (a, b, said) => { cmpA = a; cmpB = b; cmpFresh = true; $("cmWhole").checked = false; $("cmFileA").value = ""; $("cmFileB").value = ""; $("cmKey").value = ""; cmpPaint(); cmpSay(said); };
 $("cmSample").addEventListener("click", () => cmpUseSample(CMP_SAMPLE_A, CMP_SAMPLE_B, "Two fictional versions of one report are in. Change the column that matches rows if you like."));
 $("cmSampleDocs").addEventListener("click", () => cmpUseSample(DOC_SAMPLE_A, DOC_SAMPLE_B, "Two fictional versions of one letter are in. They are compared paragraph by paragraph."));
@@ -4593,20 +4602,16 @@ function connState(){                   /* what this page has switched on. It co
     : state.provider === "claude" ? { name:"Claude", where:"api.anthropic.com" }
     : mine ? { name:shown(state.myApi.name, 60) || "My API", where:hostOf(state.myApi.endpoint) } : null;
   const agents = state.agents.filter(a => a.enabled).map(a => ({ name:shown(a.name, 60) || "Agent", where:hostOf(a.api && a.api.endpoint), auto:a.auto !== 0 }));
-  const outlook = state.outlook.on ? { where:state.outlook.cloud === "us" ? "graph.microsoft.us" : "graph.microsoft.com" } : null;
+  const outlook = state.outlook.on ? { where:state.outlook.cloud === "us" ? "login.microsoftonline.us and graph.microsoft.us" : "login.microsoftonline.com and graph.microsoft.com" } : null;
   return { ai, agents, outlook };
 }
-let connWas = null;                     /* which kinds were on at the last look, so that a change is written to the event log once */
+let connWas = null;                     /* what was on at the last look, so that a change is written to the event log once */
 function paintConnBars(){
   const c = connState(), line = connections(c).line;
-  document.querySelectorAll(".onbar").forEach(b => { b.textContent = line; });
-  const now = { AI:!!c.ai, agents:c.agents.length, Outlook:!!c.outlook };
-  if(connWas){
-    if(now.AI !== connWas.AI) logEvent("connection", now.AI ? "AI switched on" : "AI switched off");
-    if(now.agents !== connWas.agents) logEvent("connection", `agents switched on: ${connWas.agents} to ${now.agents}`);
-    if(now.Outlook !== connWas.Outlook) logEvent("connection", now.Outlook ? "Outlook switched on" : "Outlook switched off");
-  }
-  connWas = now; if(isOpen("conn")) connPaint();
+  /* The line is read out as it is shown: what is on, then what a press does. */
+  document.querySelectorAll(".onbar").forEach(b => { b.textContent = line; if(b.tagName === "BUTTON") b.setAttribute("aria-label", line + ". Opens the list of connections and the event log."); });
+  if(connWas) connChanges(connWas, c).forEach(l => logEvent("connection", l)); else logEvent("connection", connStart(c));
+  connWas = c; if(isOpen("conn")) connPaint();
 }
 function connPaint(){
   const r = connections(connState()), list = $("cnList"); list.replaceChildren();
@@ -4632,8 +4637,11 @@ $("cnCsv").addEventListener("click", () => writeClipboard(eventCsv(evLog)).then(
 $("cnSave").addEventListener("click", () => { $("cnStatus").textContent = saveTextFile("anda-companion-events.csv", eventCsv(evLog), "text/csv") ? "A download of the event log was tried. If nothing was saved, this page is not allowed to save files where it is shown: please use “Copy as CSV” instead. Nothing was sent." : "Your browser did not allow saving. Please use “Copy as CSV” instead."; });
 $("abCopy").addEventListener("click", () => writeClipboard(changesText().join("\n")).then(() => { $("abStatus").textContent = "Copied."; }, () => { $("abStatus").textContent = "Your browser did not allow copying."; }));
 /* Every window carries the line that says what is switched on. One press opens the list and the event log. */
-APP_WINS.forEach(id => { if(id === "conn") return; const b = h("button", { class:"onbar", type:"button", "aria-label":"What is switched on. Opens the list of connections and the event log." }); b.addEventListener("click", openConn); $(id).append(b); });
+APP_WINS.forEach(id => { if(id === "conn") return; const b = h("button", { class:"onbar", type:"button" }); b.addEventListener("click", openConn); $(id).append(b); });
 $("conn").append(h("div", { class:"onbar still", id:"cnLine", role:"status" }));
+/* The line stays in sight at the foot of a window that scrolls. It reaches down through the window's own padding, so that nothing shows below it. */
+function fitConnBars(){ document.querySelectorAll(".onbar").forEach(b => { const pad = parseFloat(getComputedStyle(b.parentElement).paddingBottom) || 0; b.style.bottom = -pad + "px"; b.style.marginBottom = -pad + "px"; b.style.paddingBottom = pad + "px"; }); }
+fitConnBars(); addEventListener("resize", fitConnBars);
 setTimeout(paintConnBars, 0);            /* once the rest of the page's code has been read */
 /* Whatever is changed in Settings, the line follows, and a connection that was switched on or off is written to the event log. */
 $("settings").addEventListener("change", () => setTimeout(paintConnBars, 0), true);
@@ -5066,6 +5074,7 @@ function closeApp(id){
   w.style.display = "none"; if(card.style.display !== "block") scrim.style.display = "none";
   /* The keyboard goes back to where it was, when that is still on the screen: never to the page body. */
   if(held && back && back.isConnected && back.getClientRects().length){ try{ back.focus({ preventScroll:true }); }catch(e){} }
+  if(id === "cmp") weekDelDisarm();               /* a question that was asked does not wait behind a closed window */
   if(id === "todo") tdStop();                      /* nothing runs once the list is closed */
   if(id === "mytodo") clClose();                /* the same for the to-do list */
   if(id === "notes") clearTimeout(ntDebounce);
@@ -5410,9 +5419,9 @@ const CONN_NOTE = "“Update now” for the Drugs@FDA file fetches the one addre
 /* c: { ai:null|{name, where}, agents:[{name, where, auto}] (only those switched on), outlook:null|{where} }. The same rule as the app's Connections.Describe. */
 function connections(c){
   const items = [], nowhere = "no address yet, so nothing can be sent";
-  if(c.ai) items.push({ name:`${c.ai.name} (AI)`, sends:"When a full card opens: the record of that ANDA as the card shows it, with your lens and standing instructions. When you press Send: the text shown to you first. Nothing else.", where:c.ai.where || nowhere, kept:"This tool keeps nothing of what is sent. What the service keeps is set by your office's agreement with it." });
-  for(const a of c.agents || []) items.push({ name:`${a.name} (agent)`, sends:a.auto ? "By itself when a full card opens: the fields of that ANDA that its prompt names, never selected text. Also when you press Run or Send." : "Only when you press Run or Send: its prompt, filled in and shown to you.", where:a.where || nowhere, kept:"Its answer is kept in memory for the minutes you chose, never in a file." });
-  if(c.outlook) items.push({ name:"Outlook (read-only)", sends:"Only a search for the six-digit number of the open ANDA.", where:c.outlook.where, kept:"Mail is shown, never stored. The sign-in is held in memory until you sign out or close the app." });
+  if(c.ai) items.push({ name:`${c.ai.name} (AI)`, sends:"When a full card opens: the whole record of that ANDA from your sheet, with its notes, and your lens. When you press Send: the text shown to you first and, for a writing action, your tone, standing instructions and sign-off. Nothing else.", where:c.ai.where || nowhere, kept:"This tool keeps nothing of what is sent. What the service keeps is set by your office's agreement with it." });
+  for(const a of c.agents || []) items.push({ name:`${a.name} (agent)`, sends:a.auto ? "By itself when a full card opens: the fields of that ANDA that its prompt names, never selected text. Also when you press Run or Send." : "Only when you press Run or Send: its prompt, filled in and shown to you.", where:a.where || nowhere, kept:"Its answer is kept in memory until you close the app, and counts as fresh for the minutes you chose. It is never written to a file." });
+  if(c.outlook) items.push({ name:"Outlook (read-only)", sends:"When you sign in: this app's ID and the read-only permission it asks for. After that, only a search for the six-digit number of the open ANDA.", where:c.outlook.where, kept:"Mail is shown, never stored. The sign-in is held in memory until you sign out or close the app." });
   const names = items.map(i => i.name);
   const line = names.length === 0 ? CONN_OFFLINE : "Switched on: " + names.slice(0, 3).join(" · ") + (names.length > 3 ? ` · and ${names.length - 3} more` : "");
   const text = names.length === 0 ? [CONN_OFFLINE, "Nothing is switched on, so nothing leaves this PC.", CONN_NOTE]
@@ -5420,11 +5429,37 @@ function connections(c){
   return { line, items, text };
 }
 /* The event log: a time, a kind from a fixed list, and words and numbers the program itself wrote. Never anything the person typed, and never data. */
-const EV_TYPES = { connection:"Connection switched on or off", sent:"Data sent", send_failed:"Sending did not complete", file:"A file of yours was set aside, kept or restored", deleted:"Deleted at your request", error:"Error", warning:"Warning" };
-const EV_MAX_DETAIL = 120, EV_SAFE = /^[A-Za-z0-9 .,:;()+=/-]*$/, EV_WITHHELD = "(detail withheld: not in the allowed form)";
+const EV_TYPES = { connection:"Connection switched on, off or changed", sent:"Data sent", send_failed:"No answer, or the request failed", file:"A file of yours was set aside, kept or restored", deleted:"Deleted at your request", error:"Error", warning:"Warning" };
+const EV_MAX_DETAIL = 120, EV_WITHHELD = "(detail withheld: not one of the log's own sentences)";
+/* Every sentence the log can hold; # stands for a count. A detail is kept only when it is one of these, when it is written and again when it is
+   read. So the log cannot hold a name, an address, a number of an ANDA or any text of the person's, whoever writes the line. */
+const EV_PHRASES = [
+  "at start: AI on, agents on: #, Outlook on", "at start: AI on, agents on: #, Outlook off", "at start: AI off, agents on: #, Outlook on", "at start: AI off, agents on: #, Outlook off",
+  "AI switched on", "AI switched off", "AI connection changed", "agents switched on: # to #", "agents changed", "Outlook switched on", "Outlook switched off", "Outlook connection changed",
+  "AI request, # characters", "AI request (simulated), # characters", "agent request, # characters", "agent request (simulated)", "connection test", "Outlook sign-in request", "Outlook search for one number", "request for the Drugs at FDA file",
+  "AI request: no answer", "AI request: timed out or canceled", "AI request (simulated): no answer", "agent request: no answer", "agent request (simulated): no answer",
+  "settings restored from a backup", "weekly copy of the sheet switched on", "weekly copy of the sheet switched off",
+  "settings file could not be used as it was at start", "ANDA to-do list could not be used as it was at start", "to-do list could not be used as it was at start", "prompt library could not be used as it was at start", "quick replies could not be used as it was at start",
+  "kept copies of the sheet",
+];
+const EV_NUMBER = /[0-9]{1,3}(?:,[0-9]{3})*/g;      /* a count, written with commas: 7, 1,234 */
 function eventEntry(type, detail, whenMs){
   const d = String(detail == null ? "" : detail);
-  return { t:new Date(whenMs).toISOString(), type:Object.prototype.hasOwnProperty.call(EV_TYPES, type) ? type : "warning", detail:d.length <= EV_MAX_DETAIL && EV_SAFE.test(d) && !/[0-9]{6}/.test(d) && !/^[=+-]/.test(d) ? d : EV_WITHHELD };      /* six digits in a row could be an ANDA number: such a detail is never kept */
+  const ok = d === "" || (d.length <= EV_MAX_DETAIL && !d.includes("#") && EV_PHRASES.includes(d.replace(EV_NUMBER, "#")));
+  return { t:new Date(whenMs).toISOString(), type:Object.prototype.hasOwnProperty.call(EV_TYPES, type) ? type : "warning", detail:ok ? d : EV_WITHHELD };
+}
+/* What is written to the log about connections: one line at start that says what is already on, and a line whenever something is switched
+   on or off or goes somewhere else. Never a name or an address. */
+function connStart(c){ return `at start: AI ${c.ai ? "on" : "off"}, agents on: ${(c.agents || []).length}, Outlook ${c.outlook ? "on" : "off"}`; }
+function connChanges(before, now){
+  const lines = [], sig = list => JSON.stringify((list || []).map(a => [a.name, a.where, !!a.auto]));
+  if(!!now.ai !== !!before.ai) lines.push(now.ai ? "AI switched on" : "AI switched off");
+  else if(now.ai && (now.ai.name !== before.ai.name || now.ai.where !== before.ai.where)) lines.push("AI connection changed");
+  const a = (before.agents || []).length, b = (now.agents || []).length;
+  if(a !== b) lines.push(`agents switched on: ${a} to ${b}`); else if(sig(before.agents) !== sig(now.agents)) lines.push("agents changed");
+  if(!!now.outlook !== !!before.outlook) lines.push(now.outlook ? "Outlook switched on" : "Outlook switched off");
+  else if(now.outlook && now.outlook.where !== before.outlook.where) lines.push("Outlook connection changed");
+  return lines;
 }
 function eventCsv(entries){ return ["time_utc,type,detail", ...entries.map(e => [e.t, e.type, '"' + e.detail.replace(/"/g, '""') + '"'].join(","))].join("\r\n") + "\r\n"; }
 /* What changed, newest first. The Windows app shows the same list. */
@@ -6062,9 +6097,11 @@ async function awSend(){
   const m = awModel; if(!m || !m.send || awBusy) return;
   awBusy = true; const token = awToken; $("awSend").disabled = true; $("awStatus").textContent = "Sending… only the text above is sent.";
   let reply;
+  /* The log says that something went out before it goes, and how long it was; if no answer comes, a second line says so. An agent writes its own lines. */
+  if(!m.agent) logEvent("sent", `AI request (simulated), ${($("awPrompt") ? $("awPrompt").value.length : 0).toLocaleString("en-US")} characters`);
   try{ reply = await m.send(); }
   catch(e){ reply = { ok:false, text:"", message:"It did not complete. Nothing was changed.", items:[] }; }
-  logEvent(reply.ok ? "sent" : "send_failed", `AI request (simulated), ${($("awPrompt") ? $("awPrompt").value.length : 0).toLocaleString("en-US")} characters`);
+  if(!reply.ok && !m.agent) logEvent("send_failed", "AI request (simulated): no answer");
   if(token !== awToken) return;                 /* the window was closed or replaced while waiting */
   awBusy = false; awSent = true; $("awSend").disabled = false; $("awSend").textContent = "Send again"; $("awStatus").textContent = reply.message;
   $("awResult").hidden = !reply.ok; if(!reply.ok) return;
@@ -6127,6 +6164,7 @@ async function askAgent(ag, id, selection, force, promptOverride){
   const task = (async () => {
     await Promise.resolve();                       /* the caller records the task first, so the drawer can say "Asking…" */
     paintAgents();
+    logEvent("sent", "agent request (simulated)");      /* that an agent was asked: never which one, or what */
     await sleep(500);
     let res;
     if(!agentReachable()) res = { agentId:ag.id, name:ag.name, number:id, state:"failed", text:"", items:[], at:Date.now(), message:`${ag.name} could not be reached. Please check the address and your network.` };
@@ -6134,6 +6172,7 @@ async function askAgent(ag, id, selection, force, promptOverride){
       const text = cleanReply(standIn(ag.name, id, ag.name));
       res = { agentId:ag.id, name:ag.name, number:id, state:"done", text, items:parseSuggestions(text, AGENT_ITEMS_MAX), at:Date.now(), message:`From ${ag.name} (simulated stand-in). Verify before acting.` };
     }
+    if(res.state !== "done") logEvent("send_failed", "agent request (simulated): no answer");
     if(!promptOverride){ if(res.state === "done"){ agentCache[ag.id + "|" + id] = res; delete agentFailed[ag.id + "|" + id]; } else agentFailed[ag.id + "|" + id] = res; }
     delete agentBusy[key]; paintAgents();
     return res;
@@ -6186,7 +6225,7 @@ function executeAction(a, id, number, selection, anchor){
   const host = hostOf(ag.api.endpoint) || "the address you set";
   showAction({ title:a.name, sub:subject, promptH:"THIS IS WHAT WILL BE SENT TO " + ag.name.toUpperCase(), prompt,
     note:`Nothing has been sent yet. Pressing Send asks ${ag.name} at ${host}. It sends this text and only the fields named in the request body you set up in Settings. (Simulation: a labeled stand-in answers; nothing is sent.)`,
-    resultH:`${ag.name.toUpperCase()} REPLIED`, sendOnOpen:a.direct, addLines:lines => addLines(lines, id, ag.name),
+    resultH:`${ag.name.toUpperCase()} REPLIED`, sendOnOpen:a.direct, agent:true, addLines:lines => addLines(lines, id, ag.name),
     send:async () => { const f = await askAgent(ag, id, selection, true, a.template); return { ok:f.state === "done", text:f.text, message:f.message, items:f.items }; } });
 }
 /* the hotkey path: the selection is read like Select & Peek reads it, then the action decides what to do with it */

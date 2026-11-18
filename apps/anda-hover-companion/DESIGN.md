@@ -976,7 +976,7 @@ in the answer also stands in the comparison or in the two files. It cannot tell 
 ### Five daily helpers
 
 1. **What changed since last week.** *My sheet since last week* compares the person's sheet today with a copy kept earlier. Copies are kept only after the
-   person switches it on: one for each week, the newest five, in the app's own folder on the PC. Since round 29, switching it off keeps the copies that exist; only the person deletes them, with a second press to confirm.
+   person switches it on: one for each week, in the app's own folder on the PC (the app never deletes one by itself). Since round 29, switching it off keeps the copies that exist; only the person deletes them, with a second press to confirm.
 2. **Hand-off page** (tray menu). One page of plain text for a colleague who covers: for each ANDA its status line, what needs a look, what is open, and,
    if ticked, the latest notes. It is made from the person's own data and notes by fixed rules; the person copies or saves it and decides who gets it. Its
    second line reads: "From my own data and notes on this PC. It is not the system of record."
@@ -1095,11 +1095,13 @@ that the list is complete without calling them connections.
 label still says "connected" only after a real request succeeded, as it has since round 10. An AI connection counts as switched on only when it is
 chosen in Settings and complete.
 
-**The event log.** One line for each event: a time in UTC, one of seven kinds, and a short detail the program wrote. It records that something
-happened and how large it was, never what it was: "AI request, 1,234 characters", never the prompt; "agent request", never which agent;
-"settings restored from a backup", never from where. The rule that keeps content out is in the function that writes the line, so no caller can get
-around it: letters, digits, spaces and a few marks only, at most 120 characters, and never six digits in a row, which could be an ANDA number.
-Anything else is written as "(detail withheld: not in the allowed form)". The window shows times in the person's own time zone with its
+**The event log.** One line for each event: a time in UTC, one of seven kinds, and a short detail. It records that something happened and how
+large it was, never what it was: "AI request, 1,234 characters", never the prompt; "agent request", never which agent; "settings restored from a
+backup", never from where. The rule that keeps content out is in the one function that makes a line, so no caller can get around it: **a detail is
+kept only when it is one of the log's own sentences**, a fixed list of 34 in which only a count varies. Anything else is written as "(detail
+withheld: not one of the log's own sentences)". The first form of the rule allowed any plain words; the review showed that a name or an address
+is plain words too, so the list replaced it. A request is written **before** it leaves, and a second line follows if no answer came, so a request
+that timed out is in the log. One line at start says what is already on. The window shows times in the person's own time zone with its
 abbreviation and the right daylight time; the file and the export hold UTC. The window can copy or save the log and has no way to clear it.
 
 **About and what changed.** The version ("Prototype, round 29") and the changes of the last four rounds, the same list in both programs. It says
@@ -1109,9 +1111,16 @@ that the tool does not update itself.
 still be compared. "Delete the kept copies…" asks with a second press, and the deletion is written to the event log.
 
 **How the two programs are kept the same.** `mockup/round29-golden.json` (written by `tools/round29-golden.cjs`) holds the simulation's answers for
-8 states of what is switched on, 21 events, the CSV and the change list; the app's tests must reproduce them character for character.
+8 states of what is switched on, 34 events, the log's 34 sentences, 13 changes of what is switched on, the CSV and the change list; the app's tests must reproduce them character for character.
 
 **In the app only:** the event log is a file (`events.csv`); in the simulation it lasts until the page is closed. **Not in the extension.**
+
+**After the separate review** (12 findings; `VERIFICATION.md`, round 29): the app no longer deletes kept copies beyond five; a delete keeps no
+fresh copy in the same press and cannot be set off by a double-click; the log holds only its own sentences and is written before a request
+goes; connection tests, the Outlook sign-in and a change of destination are written too; the line is read out as it is shown; three sentences
+in the list were corrected to what the code does (the whole record goes to the AI when a card opens; an agent's answer stays in memory until
+the app closes; Outlook's sign-in address is named); the Connections list scrolls; and in the simulation the line stays in sight at the foot of
+a window that scrolls.
 
 ## 12. Engagement roadmap — seven features that make it the daily habit
 

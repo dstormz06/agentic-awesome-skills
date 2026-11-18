@@ -27,15 +27,15 @@ public static class Connections
     {
         var items = new List<ConnItem>();
         if (c.Ai is { } ai)
-            items.Add(new($"{ai.Name} (AI)", "When a full card opens: the record of that ANDA as the card shows it, with your lens and standing instructions. When you press Send: the text shown to you first. Nothing else.",
+            items.Add(new($"{ai.Name} (AI)", "When a full card opens: the whole record of that ANDA from your sheet, with its notes, and your lens. When you press Send: the text shown to you first and, for a writing action, your tone, standing instructions and sign-off. Nothing else.",
                 ai.Where.Length > 0 ? ai.Where : Nowhere, "This tool keeps nothing of what is sent. What the service keeps is set by your office's agreement with it."));
         foreach (var a in c.Agents)
             items.Add(new($"{a.Name} (agent)", a.Auto
                     ? "By itself when a full card opens: the fields of that ANDA that its prompt names, never selected text. Also when you press Run or Send."
                     : "Only when you press Run or Send: its prompt, filled in and shown to you.",
-                a.Where.Length > 0 ? a.Where : Nowhere, "Its answer is kept in memory for the minutes you chose, never in a file."));
+                a.Where.Length > 0 ? a.Where : Nowhere, "Its answer is kept in memory until you close the app, and counts as fresh for the minutes you chose. It is never written to a file."));
         if (c.Outlook is { } o)
-            items.Add(new("Outlook (read-only)", "Only a search for the six-digit number of the open ANDA.", o.Where, "Mail is shown, never stored. The sign-in is held in memory until you sign out or close the app."));
+            items.Add(new("Outlook (read-only)", "When you sign in: this app's ID and the read-only permission it asks for. After that, only a search for the six-digit number of the open ANDA.", o.Where, "Mail is shown, never stored. The sign-in is held in memory until you sign out or close the app."));
 
         var names = items.Select(i => i.Name).ToList();
         string line = names.Count == 0 ? Offline
@@ -76,20 +76,27 @@ public static class Connections
         }
         var agents = (s.Agents ?? new()).Where(a => a is { Enabled: true })
             .Select(a => new ConnAgent(Shown(a.Name, 60) is { Length: > 0 } n ? n : "Agent", Host(a.Api?.Endpoint), a.AutoRun != AgentRun.Never)).ToList();
-        ConnOutlook? outlook = s.Outlook is { Enabled: true } o ? new(o.Cloud == OutlookCloud.UsGovernment ? "graph.microsoft.us" : "graph.microsoft.com") : null;
+        ConnOutlook? outlook = s.Outlook is { Enabled: true } o ? new(o.Cloud == OutlookCloud.UsGovernment ? "login.microsoftonline.us and graph.microsoft.us" : "login.microsoftonline.com and graph.microsoft.com") : null;
         return new ConnState(ai, agents, outlook);
     }
 
-    /// <summary>The kinds that are on, for writing a change to the event log without naming anything the person typed.</summary>
-    public static (bool Ai, int Agents, bool Outlook) Kinds(ConnState c) => (c.Ai is not null, c.Agents.Count, c.Outlook is not null);
+    /// <summary>The line written to the event log at start: what is already on. Never a name or an address.</summary>
+    public static string StartLine(ConnState c) =>
+        $"at start: AI {(c.Ai is null ? "off" : "on")}, agents on: {c.Agents.Count.ToString(CultureInfo.InvariantCulture)}, Outlook {(c.Outlook is null ? "off" : "on")}";
 
-    /// <summary>The lines for the event log when what is switched on has changed. The same words as the simulation.</summary>
-    public static IReadOnlyList<string> Changes((bool Ai, int Agents, bool Outlook) before, (bool Ai, int Agents, bool Outlook) now)
+    /// <summary>
+    /// The lines for the event log when what is switched on has changed: switched on or off, or going somewhere else (another service,
+    /// another address, another agent). The same words as the simulation; never a name or an address.
+    /// </summary>
+    public static IReadOnlyList<string> Changes(ConnState before, ConnState now)
     {
         var lines = new List<string>();
-        if (now.Ai != before.Ai) lines.Add(now.Ai ? "AI switched on" : "AI switched off");
-        if (now.Agents != before.Agents) lines.Add($"agents switched on: {before.Agents.ToString(CultureInfo.InvariantCulture)} to {now.Agents.ToString(CultureInfo.InvariantCulture)}");
-        if (now.Outlook != before.Outlook) lines.Add(now.Outlook ? "Outlook switched on" : "Outlook switched off");
+        if ((now.Ai is null) != (before.Ai is null)) lines.Add(now.Ai is null ? "AI switched off" : "AI switched on");
+        else if (now.Ai is not null && now.Ai != before.Ai) lines.Add("AI connection changed");
+        if (now.Agents.Count != before.Agents.Count) lines.Add($"agents switched on: {before.Agents.Count.ToString(CultureInfo.InvariantCulture)} to {now.Agents.Count.ToString(CultureInfo.InvariantCulture)}");
+        else if (!now.Agents.SequenceEqual(before.Agents)) lines.Add("agents changed");
+        if ((now.Outlook is null) != (before.Outlook is null)) lines.Add(now.Outlook is null ? "Outlook switched off" : "Outlook switched on");
+        else if (now.Outlook is not null && now.Outlook != before.Outlook) lines.Add("Outlook connection changed");
         return lines;
     }
 

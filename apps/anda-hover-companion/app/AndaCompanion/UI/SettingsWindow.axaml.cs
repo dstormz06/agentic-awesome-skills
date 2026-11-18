@@ -563,7 +563,7 @@ public partial class SettingsWindow : Window
         var screen = Screens.ScreenFromWindow(this) ?? Screens.Primary;
         if (screen is null) return;
         // window chrome around the scroller: outer margins 52, card padding 40, header row ~34 + spacing, safety.
-        double available = screen.WorkingArea.Height / screen.Scaling - 52 - 40 - 34 - 14 - 20;
+        double available = screen.WorkingArea.Height / screen.Scaling - 52 - 40 - 34 - 14 - 20 - ConnectionBar.Height;
         Body.MaxHeight = Math.Max(240, available);
     }
 

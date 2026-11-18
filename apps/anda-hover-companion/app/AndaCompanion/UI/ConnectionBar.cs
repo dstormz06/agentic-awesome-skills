@@ -27,6 +27,9 @@ public static class ConnectionBar
 
     private const string Suffix = ". Opens the list of connections and the event log.";
 
+    /// <summary>The room the line takes at the foot of a window. A window that fits itself to the screen leaves this much free.</summary>
+    public const double Height = 28;
+
     /// <summary>The windows that carry the line. Anything else (the card, a compact box, the invite, the Connections window itself) does not.</summary>
     public static bool Carries(Window w) => w is SettingsWindow or LookupWindow or DraftWindow or AskWindow or CompareWindow or HandoffWindow or TodoWindow or MyTodoWindow
         or NotesWindow or WatchListWindow or PromptLibraryWindow or QuickRepliesWindow or ActionWindow or UsageWindow or AboutWindow;

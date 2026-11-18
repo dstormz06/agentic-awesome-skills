@@ -28,7 +28,7 @@ public static class ReferenceDownloader
             Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
             using var http = new HttpClient(handler ?? new HttpClientHandler { MaxAutomaticRedirections = 5 }) { Timeout = TimeSpan.FromMinutes(5) };
             http.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("AndaHoverCompanion", "0"));   // generic: no account or address is ever sent
-            EventLog.Record("sent", "request for the Drugs@FDA file");
+            EventLog.Record("sent", "request for the Drugs at FDA file");
             using var response = await http.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, ct);
             if (!response.IsSuccessStatusCode) return (false, $"The server answered {(int)response.StatusCode} {response.ReasonPhrase}. Your earlier file is unchanged.");
             if (response.Content.Headers.ContentLength is > MaxBytes) return (false, "That file is larger than 250 MB, so it was not downloaded. Your earlier file is unchanged.");

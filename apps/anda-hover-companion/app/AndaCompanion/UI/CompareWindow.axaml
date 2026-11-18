@@ -50,6 +50,7 @@
             <CheckBox Name="WeekBox">
               <TextBlock TextWrapping="Wrap" FontSize="12.5" Foreground="{DynamicResource C.Ink}" Text="Keep one copy of my sheet each week, on this PC only, so I can see what changed. Off until I switch it on. Switching it off keeps the copies that exist; only you delete them."/>
             </CheckBox>
+            <TextBlock Name="WeekCountText" IsVisible="False" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource C.Ink2}"/>
             <Button Name="WeekDelBtn" Content="Delete the kept copies…" IsVisible="False" HorizontalAlignment="Left"/>
           </StackPanel>
           <WrapPanel>

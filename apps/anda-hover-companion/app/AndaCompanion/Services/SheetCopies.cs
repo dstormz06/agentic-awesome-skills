@@ -5,13 +5,13 @@ namespace AndaCompanion.Services;
 
 /// <summary>
 /// "My sheet since last week": when the person switches it on, the app keeps one copy of their portfolio sheet each week, in its own folder on
-/// this PC, so that Compare can show what changed since the last copy. Off until switched on; switching it off deletes the copies. The copies
-/// hold what the sheet holds, so they are as sensitive as the sheet: they stay on this PC, are never sent, and are not part of a backup.
-/// At most <see cref="Keep"/> copies are kept; the oldest goes first.
+/// this PC, so that Compare can show what changed since the last copy. Off until switched on; switching it off keeps the copies that exist.
+/// The copies hold what the sheet holds, so they are as sensitive as the sheet: they stay on this PC, are never sent, and are not part of a
+/// backup. <b>The app never deletes a copy by itself</b>, however many there are: they may be records, so only the person deletes them
+/// (<see cref="DeleteAll"/>, behind a second press).
 /// </summary>
 public sealed class SheetCopies
 {
-    public const int Keep = 5;
     private const long MaxBytes = 40L * 1024 * 1024;
     private static readonly CultureInfo Inv = CultureInfo.InvariantCulture;
     private readonly string _dir;
@@ -56,7 +56,6 @@ public sealed class SheetCopies
                 string path = FileFor(today), temp = path + ".tmp";
                 File.WriteAllText(temp, json);
                 File.Move(temp, path, overwrite: true);
-                foreach (var old in Days().Reverse().Skip(Keep)) File.Delete(FileFor(old));
                 return true;
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return false; }

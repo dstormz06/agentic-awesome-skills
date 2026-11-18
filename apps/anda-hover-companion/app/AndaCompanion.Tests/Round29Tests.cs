@@ -60,14 +60,20 @@ public class Round29Tests
             entries.Add(e);
             Same(bad, $"case {n}", $"{want.GetProperty("t").GetString()}|{want.GetProperty("type").GetString()}|{want.GetProperty("detail").GetString()}", $"{e.T}|{e.Type}|{e.Detail}");
         }
-        Assert.True(n >= 17, "cases are missing");
+        Assert.True(n >= 34, "cases are missing");
+        Same(bad, "sentences", string.Join("\n", Strings(doc.RootElement.GetProperty("phrases"))), string.Join("\n", EventLog.Phrases));
         Same(bad, "csv", doc.RootElement.GetProperty("csv").GetString()!, EventLog.Csv(entries));
         Same(bad, "empty csv", doc.RootElement.GetProperty("emptyCsv").GetString()!, EventLog.Csv(Array.Empty<EventEntry>()));
         Fail(bad);
-        // What the log may never hold, whatever a caller passes: an ANDA number, quoted text, markup, a line break, a long text.
-        foreach (string hostile in new[] { "ANDA 216482", "216482", "a \"quote\"", "<b>x</b>", "two\nlines", new string('a', 121), "naïve", "tab\there", "back\\slash", "at@sign" })
+        // What the log may never hold, whoever writes the line: a name, an address, a path, an ANDA number, quoted text, markup, a line break,
+        // words that are not one of its own sentences. The reviewer's four examples are the first four.
+        foreach (string hostile in new[] { "John Smith, 12 Main St", "ANDA 123 456", "path C:/Users/jsmith/sheet.xlsx", "host api.example.com", "ANDA 216482", "216482", "a \"quote\"", "<b>x</b>",
+                     "two\nlines", new string('a', 121), "naïve", "tab\there", "back\\slash", "at@sign", "12,345 characters", "AI request, 12345 characters", "AI request, 1,2345 characters", "AI switched on." })
             Assert.Equal(EventLog.Withheld, EventLog.Entry("sent", hostile, DateTime.UtcNow).Detail);
-        Assert.Equal("12,345 characters", EventLog.Entry("sent", "12,345 characters", DateTime.UtcNow).Detail);
+        Assert.Equal("AI request, 12,345 characters", EventLog.Entry("sent", "AI request, 12,345 characters", DateTime.UtcNow).Detail);
+        Assert.Equal("AI request, 1,234,567 characters", EventLog.Entry("sent", "AI request, " + EventLog.Count(1234567) + " characters", DateTime.UtcNow).Detail);
+        // Every sentence of the log is plain: letters, the place of a count, spaces and a few marks; none begins like a spreadsheet formula.
+        Assert.All(EventLog.Phrases, p => Assert.Matches("^[A-Za-z][A-Za-z #,:()-]*$", p));
     }
 
     [Fact]
@@ -103,7 +109,7 @@ public class Round29Tests
         var r = Connections.Describe(Connections.From(t, none));
         Assert.Equal($"Switched on: {t.Agents[0].Name} (agent) · {t.Agents[1].Name} (agent) · Outlook (read-only)", r.Line);
         Assert.Equal("no address yet, so nothing can be sent", r.Items[0].Where); Assert.Equal("agents.example.test", r.Items[1].Where);
-        Assert.StartsWith("By itself when a full card opens", r.Items[1].Sends); Assert.Equal("graph.microsoft.us", r.Items[2].Where);
+        Assert.StartsWith("By itself when a full card opens", r.Items[1].Sends); Assert.Equal("login.microsoftonline.us and graph.microsoft.us", r.Items[2].Where);
         Assert.DoesNotContain(r.Text, l => l.Contains("token=abc"));
 
         // A name is the person's own text: an invisible character that could reorder the line is removed. A look-alike letter in an address shows in the form the network uses.
@@ -112,9 +118,24 @@ public class Round29Tests
         var v = Connections.Describe(Connections.From(u, none));
         Assert.Equal("Switched on: Alert buH (agent)", v.Line); Assert.Equal("xn--exmple-4nf.test", v.Items[0].Where);
 
-        Assert.Equal(new[] { "AI switched on", "agents switched on: 0 to 2", "Outlook switched off" },
-            Connections.Changes((false, 0, true), (true, 2, false)));
-        Assert.Empty(Connections.Changes((true, 1, false), (true, 1, false)));
+        // What is written when what is switched on changes, and at start: the simulation's lines, and every one is a sentence the log keeps.
+        using var doc = Golden(); var bad = new List<string>(); var states = new List<ConnState>();
+        ConnState State(JsonElement st) => new(
+            st.GetProperty("ai").ValueKind == JsonValueKind.Null ? null : new(st.GetProperty("ai").GetProperty("name").GetString()!, st.GetProperty("ai").GetProperty("where").GetString()!),
+            st.GetProperty("agents").EnumerateArray().Select(a => new ConnAgent(a.GetProperty("name").GetString()!, a.GetProperty("where").GetString()!, a.GetProperty("auto").GetBoolean())).ToList(),
+            st.GetProperty("outlook").ValueKind == JsonValueKind.Null ? null : new(st.GetProperty("outlook").GetProperty("where").GetString()!));
+        foreach (var c in doc.RootElement.GetProperty("connections").EnumerateArray()) states.Add(State(c.GetProperty("state")));
+        Same(bad, "starts", string.Join("\n", Strings(doc.RootElement.GetProperty("starts"))), string.Join("\n", states.Select(Connections.StartLine)));
+        int k = 0;
+        foreach (var c in doc.RootElement.GetProperty("connChanges").EnumerateArray())
+        {
+            k++; var now = c.TryGetProperty("other", out var other) ? State(other) : states[c.GetProperty("now").GetInt32()];
+            var lines = Connections.Changes(states[c.GetProperty("before").GetInt32()], now);
+            Same(bad, $"change {k}", string.Join("\n", Strings(c.GetProperty("lines"))), string.Join("\n", lines));
+            foreach (string l in lines) Assert.Equal(l, EventLog.Entry("connection", l, DateTime.UtcNow).Detail);
+        }
+        Assert.True(k >= 13, "cases are missing"); Fail(bad);
+        foreach (var st in states) Assert.Equal(Connections.StartLine(st), EventLog.Entry("connection", Connections.StartLine(st), DateTime.UtcNow).Detail);
     }
 
     [Fact]
@@ -131,19 +152,31 @@ public class Round29Tests
             EventLog.Record("sent", "AI request, 1,234 characters", t0.AddSeconds(1));
             EventLog.Record("sent", "about ANDA 216482", t0.AddSeconds(2));
             string first = File.ReadAllText(path);
-            Assert.Equal("time_utc,type,detail\r\n2026-07-16T13:05:07.042Z,connection,\"AI switched on\"\r\n2026-07-16T13:05:08.042Z,sent,\"AI request, 1,234 characters\"\r\n2026-07-16T13:05:09.042Z,sent,\"(detail withheld: not in the allowed form)\"\r\n", first);
+            Assert.Equal("time_utc,type,detail\r\n2026-07-16T13:05:07.042Z,connection,\"AI switched on\"\r\n2026-07-16T13:05:08.042Z,sent,\"AI request, 1,234 characters\"\r\n2026-07-16T13:05:09.042Z,sent,\"(detail withheld: not one of the log's own sentences)\"\r\n", first);
             EventLog.Record("deleted", "kept copies of the sheet", t0.AddSeconds(3));
             Assert.StartsWith(first, File.ReadAllText(path));                                                    // what was there is still there, unchanged
-            var (entries, total) = EventLog.Read();
+            var (entries, total, _) = EventLog.Read();
             Assert.Equal(4, total); Assert.Equal(new[] { "connection", "sent", "sent", "deleted" }, entries.Select(e => e.Type));
             Assert.Equal(File.ReadAllText(path), EventLog.Csv(entries));                                         // the export is the file
 
             // A line added by hand cannot make the window show what the log may not hold; a line that is not ours is passed over.
-            File.AppendAllText(path, "2026-07-16T13:06:00.000Z,sent,\"the draft said: ANDA 216482 is late\"\r\nnot a line of the log\r\n2026-07-16T13:07:00.000Z,made-up,\"x\"\r\n");
-            var (again, total2) = EventLog.Read();
-            Assert.Equal(6, total2); Assert.Equal(EventLog.Withheld, again[4].Detail); Assert.Equal(("warning", "x"), (again[5].Type, again[5].Detail));
+            // The reviewer's line is one of them. A line a spreadsheet saved again, without quotes, is still read; a line that is not the log's is counted and left out.
+            File.AppendAllText(path, "2026-07-16T13:06:00.000Z,sent,\"Mail from Jane Doe at 12 Elm Street about ANDA 21 3456\"\r\nnot a line of the log\r\n2026-07-16T13:07:00.000Z,made-up,connection test\r\n");
+            var (again, total2, unreadable) = EventLog.Read();
+            Assert.Equal((6, 1), (total2, unreadable)); Assert.Equal(EventLog.Withheld, again[4].Detail); Assert.Equal(("warning", "connection test"), (again[5].Type, again[5].Detail));
+            using (var all = new StringWriter())
+            {
+                Assert.Equal(6, EventLog.Export(all));                                                           // the export goes through the same rule, line by line
+                Assert.DoesNotContain("Jane", all.ToString()); Assert.EndsWith("2026-07-16T13:07:00.000Z,warning,\"connection test\"\r\n", all.ToString());
+                Assert.StartsWith(first, all.ToString());
+            }
+            int heard = 0; void Hear() => heard++;
+            EventLog.Recorded += Hear;
+            try { EventLog.Record("sent", "connection test", t0.AddSeconds(5)); } finally { EventLog.Recorded -= Hear; }
+            Assert.Equal(1, heard);                                                                              // an open window is told, so it can show the new line
+            total2++;
             Assert.Equal(2, EventLog.Read(newest: 2).Entries.Count);
-            Assert.Equal((2, 6, "warning"), (EventLog.Read(newest: 2).Entries.Count, EventLog.Read(newest: 2).Total, EventLog.Read(newest: 2).Entries[1].Type));   // the newest are kept, every line is counted
+            Assert.Equal((2, 7, "sent"), (EventLog.Read(newest: 2).Entries.Count, EventLog.Read(newest: 2).Total, EventLog.Read(newest: 2).Entries[1].Type));   // the newest are kept, every line is counted
 
             // A spreadsheet would read a detail that begins with = + or - as a formula: such a detail is never written and never shown.
             EventLog.Record("sent", "=1+1", t0.AddSeconds(4));

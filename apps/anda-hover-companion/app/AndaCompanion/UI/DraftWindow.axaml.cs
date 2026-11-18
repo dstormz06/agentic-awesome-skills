@@ -99,7 +99,7 @@ public partial class DraftWindow : Window
     {
         var screen = Screens.ScreenFromWindow(this) ?? Screens.Primary;
         if (screen is null) return;
-        Body.MaxHeight = Math.Max(240, screen.WorkingArea.Height / screen.Scaling - 52 - 40 - 34 - 14 - 20);
+        Body.MaxHeight = Math.Max(240, screen.WorkingArea.Height / screen.Scaling - 52 - 40 - 34 - 14 - 20 - ConnectionBar.Height);
     }
 
     /// <summary>Check everything, Proofread only, or Fact-check only. The checks are the same; the view chooses what is shown.</summary>

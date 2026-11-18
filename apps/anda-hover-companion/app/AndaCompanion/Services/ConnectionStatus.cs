@@ -81,18 +81,20 @@ public sealed class ReportingChatCompleter(IChatCompleter inner) : IChatComplete
 
     public async Task<string> CompleteAsync(string system, string user, int maxTokens, CancellationToken ct)
     {
+        // The log says that something goes out before it goes, and how long it is, never the text. If no answer comes back, a second line
+        // says so: the text may have left this PC all the same.
+        EventLog.Record("sent", $"AI request, {EventLog.Count((long)system.Length + user.Length)} characters");
         try
         {
             string text = await inner.CompleteAsync(system, user, maxTokens, ct);
             ConnectionStatus.Success(inner.ProviderName);
-            EventLog.Record("sent", $"AI request, {(system.Length + user.Length).ToString("#,0", System.Globalization.CultureInfo.InvariantCulture)} characters");      // that something was sent and how long it was, never the text
             return text;
         }
-        catch (OperationCanceledException) { throw; }
+        catch (OperationCanceledException) { EventLog.Record("send_failed", "AI request: timed out or canceled"); throw; }
         catch (Exception ex)
         {
             ConnectionStatus.Failure(inner.ProviderName, ex is ElsaException ? ex.Message : ex.GetType().Name);
-            EventLog.Record("send_failed", "AI request (" + ex.GetType().Name + ")");
+            EventLog.Record("send_failed", "AI request: no answer");
             throw;
         }
     }

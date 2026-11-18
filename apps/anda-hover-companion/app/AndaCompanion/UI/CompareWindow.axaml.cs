@@ -53,6 +53,14 @@ public partial class CompareWindow : Window
     /// <summary>Deletes every kept copy and returns how many there were. Only ever called after the person asked and confirmed.</summary>
     public Func<int>? DeleteWeekly { get; init; }
 
+    /// <summary>How many copies are kept, so that the window can say it: the app never deletes one by itself.</summary>
+    public Func<int>? WeeklyCount { get; init; }
+
+    /// <summary>The pause before a second press counts, so that a double-click or a held key is one press.</summary>
+    public const int WeekDeletePauseMs = 700;
+    /// <summary>A steady clock in milliseconds. A test may set it.</summary>
+    internal Func<long> Ticks { get; set; } = () => Environment.TickCount64;
+    private long _weekDelAt;
     private bool _weekDelArmed;
     private readonly Avalonia.Threading.DispatcherTimer _weekDelTimer = new() { Interval = TimeSpan.FromSeconds(5) };
     private void DisarmWeekDelete() { _weekDelTimer.Stop(); _weekDelArmed = false; WeekDelBtn.Content = "Delete the kept copies…"; }
@@ -96,12 +104,19 @@ public partial class CompareWindow : Window
         _weekDelTimer.Tick += (_, _) => DisarmWeekDelete();
         WeekDelBtn.Click += (_, _) =>
         {
-            if (!_weekDelArmed) { _weekDelArmed = true; WeekDelBtn.Content = "Click again to delete"; _weekDelTimer.Stop(); _weekDelTimer.Start(); return; }
+            if (!_weekDelArmed) { _weekDelArmed = true; _weekDelAt = Ticks(); WeekDelBtn.Content = "Click again to delete"; _weekDelTimer.Stop(); _weekDelTimer.Start(); return; }
+            if (Ticks() - _weekDelAt < WeekDeletePauseMs) return;
             DisarmWeekDelete();
             int n = DeleteWeekly?.Invoke() ?? 0;
-            LoadWeek(); Paint(null);
+            // Nothing is read again here: reading would keep a fresh copy at once while keeping is switched on, and "deleted" would not be true.
+            _a = _b = null; _docA = _docB = null;
+            _weekProblem = WeeklyOn?.Invoke() == true ? "No copy is kept at the moment. Keeping is still switched on, so a new copy is made the next time this opens." : null;
+            Paint(null);
             Say(n == 0 ? "There was nothing to delete." : $"The kept {(n == 1 ? "copy was" : "copies were")} deleted. Nothing else was changed.");
         };
+        // The question is withdrawn when the button loses the keyboard, the view changes or the window closes.
+        WeekDelBtn.LostFocus += (_, _) => DisarmWeekDelete();
+        Closed += (_, _) => DisarmWeekDelete();
         UseBtn.Click += (_, _) => UsePrompt();
         CheckBtn.Click += (_, _) => CheckAnswer();
         KeyBox.SelectionChanged += async (_, _) =>
@@ -123,7 +138,7 @@ public partial class CompareWindow : Window
         Opened += (_, _) =>
         {
             var screen = Screens.ScreenFromWindow(this) ?? Screens.Primary;
-            if (screen is not null) Body.MaxHeight = Math.Max(240, screen.WorkingArea.Height / screen.Scaling - 52 - 40 - 34 - 14 - 20);
+            if (screen is not null) Body.MaxHeight = Math.Max(240, screen.WorkingArea.Height / screen.Scaling - 52 - 40 - 34 - 14 - 20 - ConnectionBar.Height);
             RefreshPrompts();
         };
         Paint(null);
@@ -153,6 +168,7 @@ public partial class CompareWindow : Window
     /// <summary>Two files, a report against my data, or my sheet since the last kept copy. Changing the way clears what was chosen.</summary>
     public void SetMode(string mode)
     {
+        DisarmWeekDelete();
         _mode = mode is "data" or "week" ? mode : "two";
         _a = _b = null; _docA = _docB = null; _sheetA = _sheetB = null; _weekProblem = null; AnswerBox.Text = ""; WholeBox.IsChecked = false;
         foreach (var (button, name, on) in new[] { (ModeTwoBtn, "Two files", _mode == "two"), (ModeDataBtn, "A report against my data", _mode == "data"), (ModeWeekBtn, "My sheet since last week", _mode == "week") })
@@ -500,6 +516,9 @@ public partial class CompareWindow : Window
             PickGrid.IsVisible = !week; PickBPanel.IsVisible = !data; LabelA.Text = data ? "REPORT" : "EARLIER FILE"; PickA.Content = data ? "Choose the report…" : "Choose the earlier file…";
             WeekPanel.IsVisible = week; _settingWeek = true; WeekBox.IsChecked = weekOn; WeekBox.IsEnabled = SetWeekly is not null; _settingWeek = false;
             WeekDelBtn.IsVisible = week && DeleteWeekly is not null && HasWeeklyCopies?.Invoke() == true;
+            int kept = week ? WeeklyCount?.Invoke() ?? 0 : 0;
+            WeekCountText.IsVisible = kept > 0;
+            WeekCountText.Text = kept == 1 ? "1 copy is kept on this PC. The app never deletes a copy by itself." : $"{kept:#,0} copies are kept on this PC, one for each week. The app never deletes a copy by itself.";
             SampleBtn.IsVisible = SampleDocsBtn.IsVisible = _mode == "two"; SampleReportBtn.IsVisible = data && Mine is not null;
             KeyRow.IsVisible = !data && !(_docA is not null && (_docB is not null || _b is null));      // a column is chosen for tables only
             foreach (var b in new[] { CopyBtn, CopyAllBtn, SaveBtn, AiBtn, UseBtn, CheckBtn }) b.IsEnabled = false;

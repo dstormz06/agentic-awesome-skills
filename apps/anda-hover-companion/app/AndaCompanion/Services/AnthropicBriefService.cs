@@ -105,6 +105,7 @@ public static class ConnectionService
         {
             var sw = Stopwatch.StartNew();
             var client = new AnthropicClient();
+            EventLog.Record("sent", "connection test");      // a test is a real request: a fixed sentence, nothing of the person's
             var response = await client.Messages.Create(new()
             {
                 Model = model,
@@ -135,6 +136,7 @@ public static class ConnectionService
         {
             using var completer = new ElsaChatCompleter(settings, mapping, handler);
             var sw = Stopwatch.StartNew();
+            EventLog.Record("sent", "connection test");
             var text = await completer.CompleteAsync("Reply with exactly: OK", "Reply with exactly: OK", 16, CancellationToken.None);
             sw.Stop();
             ConnectionStatus.Success(completer.ProviderName);
@@ -156,6 +158,7 @@ public static class ConnectionService
         try
         {
             var sw = Stopwatch.StartNew();
+            EventLog.Record("sent", "connection test");
             string text = await completer.CompleteAsync("Reply with exactly: OK", "Reply with exactly: OK", 16, CancellationToken.None);
             sw.Stop();
             ConnectionStatus.Success(completer.ProviderName);

@@ -69,7 +69,7 @@ public partial class NotesWindow : Window
     {
         var screen = Screens.ScreenFromWindow(this) ?? Screens.Primary;
         if (screen is null) return;
-        Body.MaxHeight = Math.Max(240, screen.WorkingArea.Height / screen.Scaling - 52 - 40 - 34 - 14 - 20);
+        Body.MaxHeight = Math.Max(240, screen.WorkingArea.Height / screen.Scaling - 52 - 40 - 34 - 14 - 20 - ConnectionBar.Height);
     }
 
     private IBrush Res(string key) => (IBrush)Application.Current!.Resources[key]!;
