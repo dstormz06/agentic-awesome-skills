@@ -1024,6 +1024,51 @@ after a preview that shows every character. `SECURITY.md` states both.
 **Still only in the simulation:** as listed under round 26. The extension has none of rounds 26 and 27. **Only in the Windows app:** Word documents and
 Excel workbooks (the simulation reads CSV, text and Markdown), and real weekly copies (the simulation shows the feature with its sample sheets).
 
+## 11l. Round 28: an audit against the owner's standing rules, an independent adversarial review, and the fixes
+
+The owner set standing rules for every tool built for a federal Windows 11 desk (no script launchers, nothing sent by default, no automatic
+deletion of what may be a record, Section 508, a private risk log, an adversarial review by someone other than the builder) and asked for the
+existing product to be checked against them, changing nothing. The audit found 27 gaps; a separate reviewer, who had not built the product,
+reproduced the most serious ones. The owner then wrote: "Yes fix and proceed with all recommendations". This section records what was fixed and
+what was left, and why. New features were listed, not built.
+
+**What was fixed, in order of seriousness.**
+
+1. **An AI connection the person did not choose.** A new install is "Offline only". Before, the default "Auto" used Claude whenever a key
+   happened to be on the PC. "Auto" is still offered, as a choice. Settings from an earlier version are moved forward once, and the app says so.
+2. **Files that were overwritten when they could not be read.** Settings, both to-do lists, prompts and replies: a file that is damaged, cut
+   off or too large is set aside under a name that says when, never written over. Writes are made beside the file and moved over it. Settings keep
+   the file of the last good start and carry a version. What a store had to do is said once at start.
+3. **Finished items deleted by the app.** They are now added to an archive file beside the list, which is only ever added to. A window to
+   search and restore them is not built.
+4. **Values from the sheet in a prompt for an AI, and the fence.** Characters nobody can see are removed and counted in the preview; a bracket
+   that looks like "<" counts as one; neither tag of the fence can be written inside it; a value from the sheet is one line with nothing hidden.
+   The security document said records reach a model only inside a fence; that was not true of the person's own prompts and is corrected.
+5. **A prompt name shown as markup in the simulation.** It is text.
+6. **A workbook that could stop the app at every start.** Whatever a file does to the reader, the app starts and says the file could not be
+   read; the reader also stops at a fixed number of characters.
+7. **Keyboard and screen reader.** The invite, which takes no focus, is accepted by pressing the same shortcut again, and says so. In the
+   simulation a window takes the keyboard when it opens and gives it back where it was; Escape closes the window in use; at phone width Tab
+   stays inside the open window; notices are announced. In the app, status lines are announced and four unnamed boxes have names.
+8. **A restore.** It keeps the lists a backup does not hold, saves what it replaces as a backup of its own, and switches no connection on.
+9. **Smaller ones.** A damaged weekly copy no longer blocks the week; the age of an agent's finding is measured in UTC; the simulation asks
+   for the time zone each time.
+10. **The `.bat` launcher is gone.** A folder named `data` beside the program keeps the demo out of the person's profile.
+11. **The 40 browser suites are in the repository** (`tools/sim-tests/`), with a runner that needs no shell script. Until now they existed only
+    in the builder's session.
+
+**What was not changed, and why.** Each of these is the owner's decision or a feature, and all are in the risk log:
+
+- The app still reads a selection by sending Ctrl+C and reading the clipboard (on by default), can install a global mouse hook for the optional
+  middle-click trigger (off by default), and ships screen-capture code used only by its self-test. An endpoint-security product may read any of
+  these as spyware-like. The lookup box and the extension's right-click menu need none of them.
+- The Windows app is an unsigned program, which the target computers do not allow without approval. The simulation is one HTML file that needs
+  JavaScript; whether that is approved there is not known.
+- Not built: a short first-run guide; backups of stored items on every change with one-click restore; an archive window; an event log of
+  connections, data sent and errors; a connection indicator in every window; a version and change-log screen; a time-zone setting.
+- Still in code rather than in Settings: the default model name, the Elsa endpoint, and extra closure dates.
+- The tray count's timer is still armed from the wall clock.
+
 ## 12. Engagement roadmap — seven features that make it the daily habit
 
 Engagement here means *the tool pays the user every time they touch it* — never

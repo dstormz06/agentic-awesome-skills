@@ -410,7 +410,7 @@
                   <TextBlock Classes="hint" Text="Nothing here is a secret: the token stays in the environment variable you name and is never saved by this app. Only https:// addresses are used (http:// for localhost). The body shown is only an example of one common shape; use the shape your own service documents. A reply that does not have text at the path is reported without showing what came back."/>
                 </StackPanel>
               </Expander>
-              <TextBlock Classes="hint" Text="Auto uses a key (ANTHROPIC_API_KEY) or Elsa setup from the environment if one exists, and is otherwise offline. Offline never sends anything. The app is fully functional offline. This line is the truth: it says Connected only after a request has really succeeded."/>
+              <TextBlock Classes="hint" Text="Offline only is how the app starts, and it never sends anything. Nothing is switched on until you choose it here. Auto uses a key (ANTHROPIC_API_KEY) or Elsa setup from the environment if one exists, and is otherwise offline. The app is fully functional offline. This line is the truth: it says Connected only after a request has really succeeded."/>
             </StackPanel>
 
             <Border Classes="hair"/>

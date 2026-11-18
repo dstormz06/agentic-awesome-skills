@@ -37,7 +37,7 @@
           <Button Grid.Column="4" Name="NotesBtn" Content="Paste notes…"/>
         </Grid>
         <TextBlock Name="AddPreview" FontSize="11.5" Foreground="{DynamicResource C.Ink3}" TextWrapping="Wrap"/>
-        <TextBlock Name="AddStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+        <TextBlock Name="AddStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
         <Grid ColumnDefinitions="Auto,8,150,*">
           <TextBlock VerticalAlignment="Center" Classes="lbl" Text="SHOW"/>
           <ComboBox Grid.Column="2" Name="FilterBox" HorizontalAlignment="Stretch" AutomationProperties.Name="Show which items"/>

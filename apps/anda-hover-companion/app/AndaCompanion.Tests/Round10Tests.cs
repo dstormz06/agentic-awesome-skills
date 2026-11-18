@@ -216,7 +216,7 @@ public class CustomApiTests
 
         File.WriteAllText(path, "{\"Tone\":\"Sarcastic\",\"Provider\":99,\"MiddleClickModifier\":\"Hyper\",\"CustomApi\":{\"RequestTemplate\":\"\"}}");
         var fixedUp = SettingsService.Load(path);
-        Assert.Equal("", fixedUp.Tone); Assert.Equal(ProviderChoice.Auto, fixedUp.Provider); Assert.Equal("Ctrl", fixedUp.MiddleClickModifier);
+        Assert.Equal("", fixedUp.Tone); Assert.Equal(ProviderChoice.Offline, fixedUp.Provider); Assert.Equal("Ctrl", fixedUp.MiddleClickModifier);
         Assert.Equal(CustomApiSettings.ExampleTemplate, fixedUp.CustomApi.RequestTemplate);
         Assert.False(fixedUp.MiddleClickTrigger);                                        // off unless chosen
     }

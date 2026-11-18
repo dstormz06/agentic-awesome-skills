@@ -85,6 +85,12 @@ public sealed class PortfolioRepository : IAndaRepository
                 (missing.Length > 0 ? $" Not found in your sheet: {missing}." : ""));
         }
         catch (PortfolioException ex) { _rows = new(); Status = new(false, 0, ex.Message); }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            // This runs at every start. Whatever a file does to the reader, the app starts, says so, and shows no rows from that file.
+            _rows = new(); _byApplicant = new(StringComparer.OrdinalIgnoreCase);
+            Status = new(false, 0, "The file could not be read. It may be damaged or hold a value this app does not expect. Nothing was changed in it.");
+        }
     }
 
     /// <summary>Re-reads the file if it changed on disk since the last load.</summary>

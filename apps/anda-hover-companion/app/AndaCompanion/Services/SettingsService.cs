@@ -114,7 +114,11 @@ public sealed class Settings
     public static bool IsValidModelName(string? name) => !string.IsNullOrWhiteSpace(name) && System.Text.RegularExpressions.Regex.IsMatch(name.Trim(), "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,79}$");
 
     /// <summary>Which connection generated text uses. Auto = decided by the environment, as before.</summary>
-    public ProviderChoice Provider { get; set; } = ProviderChoice.Auto;
+    public ProviderChoice Provider { get; set; } = ProviderChoice.Offline;      // off until the person chooses a connection here; a key found on the PC is not a choice
+
+    /// <summary>The version of this file's layout. A file with an older number is moved forward when it is read; see <see cref="SettingsService.Migrate"/>.</summary>
+    public const int CurrentSchema = 1;
+    public int SchemaVersion { get; set; } = CurrentSchema;
 
     /// <summary>The person's own API, described here instead of in code. Used only when Provider is MyApi.</summary>
     public CustomApiSettings CustomApi { get; set; } = new();
@@ -217,18 +221,82 @@ public static class Edition
 
 public static class SettingsService
 {
+    /// <summary>One plain sentence when the last <see cref="Load"/> had to repair, move forward or set aside the file; otherwise null. The app shows it once.</summary>
+    public static string? LoadNote { get; private set; }
+
+    /// <summary>The settings as they were the last time the file was read without a problem. Used when the file itself cannot be read.</summary>
+    public static string LastGoodFile(string path) => Path.Combine(Path.GetDirectoryName(path) ?? ".", Path.GetFileNameWithoutExtension(path) + ".last-good" + Path.GetExtension(path));
+
+    /// <summary>
+    /// Reads the settings. A value that cannot be read is repaired alone and the rest is kept. A file that cannot be read at all is never
+    /// overwritten: it is set aside, and the last good copy is used, or the defaults when there is none. A file from an earlier version is
+    /// moved forward (see <see cref="Migrate"/>). <see cref="LoadNote"/> says what happened.
+    /// </summary>
     public static Settings Load(string? path = null)
     {
-        path ??= AppPaths.SettingsFile;
+        path ??= AppPaths.SettingsFile; LoadNote = null;
+        if (!File.Exists(path)) return new Settings();
+        var (settings, note) = TryRead(path);
+        if (settings is not null)
+        {
+            LoadNote = note;
+            try { File.Copy(path, LastGoodFile(path), overwrite: true); } catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { /* the copy is a convenience */ }
+            return settings;
+        }
+        string? aside = SafeFile.SetAside(path);
+        var (earlier, _) = File.Exists(LastGoodFile(path)) ? TryRead(LastGoodFile(path)) : (null, null);
+        LoadNote = SafeFile.Note("settings file", aside, earlier is not null ? "Your settings from the last good start were restored." : "The settings are back at their defaults.");
+        return earlier ?? new Settings();
+    }
+
+    /// <summary>The settings in one file, or null when the file is not a settings file at all. The note says what was repaired or moved forward.</summary>
+    private static (Settings? Settings, string? Note) TryRead(string path)
+    {
+        var (text, _) = SafeFile.Read(path);
+        if (text is null) return (null, null);
         try
         {
-            if (File.Exists(path))
+            using var doc = JsonDocument.Parse(text);
+            if (doc.RootElement.ValueKind != JsonValueKind.Object) return (null, null);
+            var s = new Settings(); int repaired = 0;
+            foreach (var p in typeof(Settings).GetProperties().Where(p => p.CanRead && p.CanWrite && p.GetIndexParameters().Length == 0))
             {
-                return Normalize(JsonSerializer.Deserialize<Settings>(File.ReadAllText(path)) ?? new Settings());
+                if (!doc.RootElement.TryGetProperty(p.Name, out var el)) continue;
+                try
+                {
+                    p.SetValue(s, el.Deserialize(p.PropertyType));      // a "null" is passed on: Normalize gives each such value its meaning
+                }
+                catch (Exception ex) when (ex is JsonException or NotSupportedException or InvalidOperationException) { repaired++; }
             }
+            int version = doc.RootElement.TryGetProperty(nameof(Settings.SchemaVersion), out var v) && v.ValueKind == JsonValueKind.Number && v.TryGetInt32(out int n) ? n : 0;
+            var notes = new List<string>();
+            if (version > Settings.CurrentSchema)
+            {
+                string? copy = SafeFile.SetAside(path, "newer-version", copy: true);
+                notes.Add($"The settings file was written by a newer version of this app. A copy was kept{(copy is null ? "" : " as " + copy)}; values this version does not know are not kept in the working file.");
+            }
+            else if (version < Settings.CurrentSchema && Migrate(s, version) is { } moved) notes.Add(moved);
+            s.SchemaVersion = Settings.CurrentSchema;
+            if (repaired > 0) notes.Add($"{repaired} {(repaired == 1 ? "setting" : "settings")} in the file could not be read and {(repaired == 1 ? "is" : "are")} back at the default; the rest was kept.");
+            return (Normalize(s), notes.Count == 0 ? null : string.Join(" ", notes));
         }
-        catch { /* corrupted settings → defaults */ }
-        return new Settings();
+        catch (JsonException) { return (null, null); }
+    }
+
+    /// <summary>
+    /// Moves settings written by an earlier version forward, one step for each version, and says what changed in plain words.
+    /// Version 0 (no version in the file) to 1: the AI connection "Auto", which used a key found on the PC without being chosen here, becomes
+    /// "Offline only". An AI connection is something the person switches on in Settings.
+    /// </summary>
+    public static string? Migrate(Settings s, int fromVersion)
+    {
+        string? note = null;
+        if (fromVersion < 1 && s.Provider == ProviderChoice.Auto)
+        {
+            s.Provider = ProviderChoice.Offline;
+            note = "The AI connection is now off until you choose one in Settings, Connection. Earlier versions used a key found on this PC without asking.";
+        }
+        return note;
     }
 
     /// <summary>Repairs anything out of range or unknown to the defaults. Used for a saved file and for a restored backup alike.</summary>
@@ -248,7 +316,7 @@ public static class SettingsService
         loaded.Outlook = OutlookSettings.Normalize(loaded.Outlook);
         loaded.CustomApi ??= new();
         loaded.CustomApi.RequestTemplate = string.IsNullOrWhiteSpace(loaded.CustomApi.RequestTemplate) ? CustomApiSettings.ExampleTemplate : loaded.CustomApi.RequestTemplate;
-        if (!Enum.IsDefined(loaded.Provider)) loaded.Provider = ProviderChoice.Auto;
+        if (!Enum.IsDefined(loaded.Provider)) loaded.Provider = ProviderChoice.Offline;
         if (!Settings.MiddleClickModifiers.Contains(loaded.MiddleClickModifier ?? "")) loaded.MiddleClickModifier = "Ctrl";
         if (HotkeyParser.ValidateSet(("Select & Peek", loaded.PeekHotkey), ("Lookup", loaded.LookupHotkey), ("Review a draft", loaded.DraftHotkey)) is not null)
         { loaded.PeekHotkey = "Ctrl+Alt+A"; loaded.LookupHotkey = "Ctrl+Alt+Space"; loaded.DraftHotkey = "Ctrl+Alt+Shift+R"; }
@@ -269,9 +337,9 @@ public static class SettingsService
         path ??= AppPaths.SettingsFile;
         try
         {
-            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(path)!);
-            File.WriteAllText(path, JsonSerializer.Serialize(s, new JsonSerializerOptions { WriteIndented = true }));
+            s.SchemaVersion = Settings.CurrentSchema;
+            SafeFile.Write(path, JsonSerializer.Serialize(s, new JsonSerializerOptions { WriteIndented = true }));      // beside the file, then moved over it
         }
-        catch { /* best effort */ }
+        catch (Exception ex) when (ex is JsonException or NotSupportedException) { /* best effort */ }
     }
 }

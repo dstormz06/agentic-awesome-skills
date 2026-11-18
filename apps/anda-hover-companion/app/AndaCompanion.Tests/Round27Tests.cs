@@ -67,6 +67,25 @@ public class Round27Tests
     }
 
     [Fact]
+    public void Text_for_an_AI_is_fenced_and_a_value_is_guarded_exactly_as_in_the_simulation()
+    {
+        using var doc = Golden(); var bad = new List<string>(); int n = 0;
+        foreach (var c in doc.RootElement.GetProperty("fence").EnumerateArray())
+        {
+            n++; string text = c.GetProperty("text").GetString()!;
+            Same(bad, $"case {n} fenced", c.GetProperty("fenced").GetString()!, ActionFill.Fence(text));
+            Same(bad, $"case {n} value", c.GetProperty("value").GetString()!, ActionFill.GuardValue(text));
+            string fenced = ActionFill.Fence(text);
+            Assert.Equal(1, System.Text.RegularExpressions.Regex.Matches(fenced, "</selection>").Count);                      // only the real closing tag
+            Assert.Equal(1, System.Text.RegularExpressions.Regex.Matches(fenced, "<selection>").Count);                       // and only the real opening tag
+            Assert.DoesNotContain(fenced, ch => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(ch) == System.Globalization.UnicodeCategory.Format);
+        }
+        Assert.True(n >= 10, "cases are missing"); Fail(bad);
+        // A lone half of a pair is not a hidden character and stays where it is (it cannot be written in the shared file).
+        Assert.Equal("<selection>\n\uD83D alone\n</selection>", ActionFill.Fence("\uD83D alone"));
+    }
+
+    [Fact]
     public void A_stored_prompt_is_given_exactly_what_the_simulation_gives_it()
     {
         using var doc = Golden(); var bad = new List<string>(); int n = 0;

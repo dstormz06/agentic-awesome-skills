@@ -84,7 +84,7 @@
             <Button Name="FillOwnBtn" Content="Fill it and show it"/>
             <Button Name="AskOwnBtn" Content="Ask my AI…"/>
           </StackPanel>
-          <TextBlock Name="Status" Classes="hint"/>
+          <TextBlock Name="Status" Classes="hint" AutomationProperties.LiveSetting="Polite"/>
           <TextBlock Name="PrivacyNote" Classes="hint"/>
         </StackPanel>
         </ScrollViewer>

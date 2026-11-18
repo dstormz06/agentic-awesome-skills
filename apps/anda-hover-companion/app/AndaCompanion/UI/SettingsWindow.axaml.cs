@@ -331,7 +331,7 @@ public partial class SettingsWindow : Window
             string text;
             try { text = new FileInfo(path).Length > SettingsBackup.MaxBytes ? "" : File.ReadAllText(path); }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { BackupStatus.Text = "That file could not be read."; return; }
-            var (ok, message) = SettingsBackup.Import(text, _settings, _prompts, _replies);
+            var (ok, message) = SettingsBackup.Import(text, _settings, _prompts, _replies, keepBeforeIn: AppPaths.Root);
             BackupStatus.Text = message;
             if (!ok) return;
             Apply();

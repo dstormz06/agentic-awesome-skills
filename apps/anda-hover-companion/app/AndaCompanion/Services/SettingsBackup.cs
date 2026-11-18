@@ -20,8 +20,8 @@ public static class SettingsBackup
         public string App { get; set; } = "ANDA Companion (Notula)";
         public DateTime SavedAt { get; set; }
         public Settings Settings { get; set; } = new();
-        public List<LensPrompt> Lenses { get; set; } = new();
-        public List<QuickReply> Replies { get; set; } = new();
+        public List<LensPrompt>? Lenses { get; set; }      // null when the backup holds no such list: the person's own are then left alone
+        public List<QuickReply>? Replies { get; set; }
     }
 
     private static readonly JsonSerializerOptions Json = new() { WriteIndented = true };
@@ -41,7 +41,7 @@ public static class SettingsBackup
     }
 
     /// <summary>Applies a backup to the running settings. Returns a plain sentence either way. A refused file changes nothing.</summary>
-    public static (bool Ok, string Message) Import(string json, Settings target, PromptLibraryService lenses, QuickReplyService replies)
+    public static (bool Ok, string Message) Import(string json, Settings target, PromptLibraryService lenses, QuickReplyService replies, string? keepBeforeIn = null)
     {
         if (json.Length > MaxBytes) return (false, "That file is too large to be a backup. Nothing was changed.");
         Backup? backup;
@@ -50,17 +50,26 @@ public static class SettingsBackup
         if (backup is null || backup.Version != Version || backup.Settings is null)
             return (false, backup is { Version: > Version } ? "That backup is from a newer version of the app. Nothing was changed." : "That file is not a backup from this app. Nothing was changed.");
 
+        // What is about to be replaced is kept first, as a backup of its own in the app's folder, so a restore can itself be undone.
+        string before = "";
+        if (keepBeforeIn is not null)
+        {
+            string name = "settings.before-restore-" + DateTime.UtcNow.ToString("yyyyMMdd-HHmmss", System.Globalization.CultureInfo.InvariantCulture) + ".json";
+            before = SafeFile.Write(Path.Combine(keepBeforeIn, name), Export(target, lenses, replies)) ? $" What you had before was kept as {name}." : " What you had before could not be kept as a file.";
+        }
         var clean = SettingsService.Normalize(backup.Settings);
         CopyFrom(target, clean, skip: ThisPcOnly);
-        lenses.ReplaceAll(backup.Lenses ?? new());
-        replies.ReplaceAll(backup.Replies ?? new());
-        string message = $"Restored your settings, {lenses.Prompts.Count} lenses and {replies.Replies.Count} quick replies. File locations on this PC were kept.";
-        return (true, message + SwitchOffConnections(target));
+        // A backup that holds no list of prompts or replies leaves the person's own alone: an absent list is not an empty one.
+        if (backup.Lenses is not null) lenses.ReplaceAll(backup.Lenses);
+        if (backup.Replies is not null) replies.ReplaceAll(backup.Replies);
+        string kept = backup.Lenses is null || backup.Replies is null ? " The backup held no " + (backup.Lenses is null && backup.Replies is null ? "prompts or quick replies" : backup.Lenses is null ? "prompts" : "quick replies") + ", so yours were kept." : "";
+        string message = $"Restored your settings, {lenses.Prompts.Count} lenses and {replies.Replies.Count} quick replies. File locations on this PC were kept.{kept}";
+        return (true, message + before + SwitchOffConnections(target));
     }
 
     /// <summary>
     /// A backup is a file anyone can edit or send, and a connection is an address plus the NAME of an environment variable whose value is sent to it.
-    /// So a restore never switches on a connection that sends data or a token off this PC: My API goes back to Auto and every agent comes back
+    /// So a restore never switches on a connection that sends data or a token off this PC: the AI connection goes back to "Offline only" and every agent comes back
     /// switched off and not automatic. The address and variable name are kept, so the person can read them and switch the connection on themselves.
     /// </summary>
     public static string SwitchOffConnections(Settings target)
@@ -68,8 +77,13 @@ public static class SettingsBackup
         var notes = new List<string>();
         if (target.Provider == ProviderChoice.MyApi)
         {
-            target.Provider = ProviderChoice.Auto;
+            target.Provider = ProviderChoice.Offline;
             notes.Add("My API was not switched on: please check its address and token variable name in Settings, then choose My API again.");
+        }
+        else if (target.Provider != ProviderChoice.Offline)
+        {
+            target.Provider = ProviderChoice.Offline;
+            notes.Add("The AI connection was not switched on: please choose it again in Settings, Connection.");
         }
         int wereOn = 0;
         foreach (var agent in target.Agents)

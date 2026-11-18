@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 using AndaCompanion.Models;
@@ -173,16 +174,56 @@ public static class ActionFill
         return t.Length > MaxSelectionChars ? t[..MaxSelectionChars] : t;
     }
 
-    /// <summary>The selection as a fenced block, for any text that goes to an AI. The closing tag cannot be forged from inside the selection.</summary>
-    public static string Fence(string selection) =>
-        "<selection>\n" + Regex.Replace(selection, "</\\s*selection", "</ selection", RegexOptions.IgnoreCase) + "\n</selection>";
+    // A bracket that only looks like "<" (full-width, small, angle quotation mark, angle brackets) counts as one.
+    private static readonly Regex FenceTag = JsRegex.Make(@"([<\uFF1C\uFE64\u2039\u3008\u27E8])(\s*/?\s*)(?=[s\u017F]election)", true);
+
+    /// <summary>Characters nobody can see (zero-width, soft hyphen, direction marks, the Unicode tag block) removed, and how many there were.</summary>
+    public static (string Text, int Hidden) WithoutHidden(string text)
+    {
+        var sb = new StringBuilder(text.Length); int hidden = 0;
+        for (int i = 0; i < text.Length; i++)
+        {
+            bool pair = char.IsHighSurrogate(text[i]) && i + 1 < text.Length && char.IsLowSurrogate(text[i + 1]);
+            var category = pair ? CharUnicodeInfo.GetUnicodeCategory(char.ConvertToUtf32(text[i], text[i + 1])) : CharUnicodeInfo.GetUnicodeCategory(text[i]);
+            if (category == UnicodeCategory.Format) hidden++;
+            else { sb.Append(text[i]); if (pair) sb.Append(text[i + 1]); }
+            if (pair) i++;
+        }
+        return (sb.ToString(), hidden);
+    }
+
+    /// <summary>No opening or closing tag of the fence can be written in this text, with a real "&lt;" or with a look-alike.</summary>
+    public static string WithoutFenceTags(string text) => FenceTag.Replace(text, m => m.Groups[2].Value.Contains('/') ? "</ " : "< ");
+
+    /// <summary>
+    /// The selection as a fenced block, for any text that goes to an AI. Three things keep the text inside the fence: characters nobody can
+    /// see are removed, and the line after the fence says how many; a bracket that only looks like "&lt;" counts as one; and neither tag of
+    /// the fence can be written inside it.
+    /// </summary>
+    public static string Fence(string selection)
+    {
+        var (shown, hidden) = WithoutHidden(selection);
+        return "<selection>\n" + WithoutFenceTags(shown) + "\n</selection>"
+            + (hidden == 0 ? "" : $"\n({hidden.ToString(CultureInfo.InvariantCulture)} invisible {(hidden == 1 ? "character was" : "characters were")} removed from the text above.)");
+    }
+
+    /// <summary>
+    /// A value from the person's data that goes into a prompt for an AI, outside the fence. It stays one line with nothing hidden in it and
+    /// cannot write a tag of the fence. Words in it are still words: a sheet's free text can try to steer a model, and the preview shows it.
+    /// </summary>
+    public static string GuardValue(string value)
+    {
+        var sb = new StringBuilder(value.Length);
+        foreach (char c in WithoutHidden(value).Text) sb.Append(char.IsControl(c) ? ' ' : c);
+        return WithoutFenceTags(sb.ToString());
+    }
 
     /// <summary>Fills a prompt. <paramref name="fenceSelection"/> is true whenever the text will be sent to an AI.</summary>
     public static string Prompt(string template, AndaRecord? record, string? selection, DateOnly today, ReferenceInfo? reference, bool fenceSelection)
     {
         string sel = CleanSelection(selection);
         var extras = new Dictionary<string, string> { ["selection"] = sel.Length == 0 ? QuickReplyFill.Missing : fenceSelection ? Fence(sel) : sel };
-        return record is null ? QuickReplyFill.FillWithoutRecord(template, today, extras) : QuickReplyFill.Fill(template, record, today, reference, extras);
+        return record is null ? QuickReplyFill.FillWithoutRecord(template, today, extras) : QuickReplyFill.Fill(template, record, today, reference, extras, fenceSelection ? GuardValue : null);
     }
 
     /// <summary>

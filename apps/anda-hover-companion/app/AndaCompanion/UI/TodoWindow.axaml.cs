@@ -39,7 +39,7 @@ public partial class TodoWindow : Window
         CloseBtn.Click += (_, _) => Close();
         KeyDown += (_, e) => { if (e.Key == Key.Escape) Close(); };
         RefreshBtn.Click += (_, _) => Reload(force: true);
-        ClearBtn.Click += (_, _) => { int n = _hooks.Store.ClearCompleted(); AddStatus.Text = n == 0 ? "Nothing finished to clear." : $"Cleared {n} finished {(n == 1 ? "item" : "items")}."; };
+        ClearBtn.Click += (_, _) => { int n = _hooks.Store.ClearCompleted(); AddStatus.Text = n == 0 ? "Nothing finished to clear." : $"Cleared {n} finished {(n == 1 ? "item" : "items")}. {(n == 1 ? "It is" : "They are")} kept in {Path.GetFileName(_hooks.Store.ArchiveFile)} in the app's folder, not deleted."; };
         AddBtn.Click += (_, _) => AddTyped();
         AddBox.KeyDown += (_, e) => { if (e.Key == Key.Enter) { AddTyped(); e.Handled = true; } };
 

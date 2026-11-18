@@ -30,7 +30,7 @@
         <Border Classes="rule"/>
         <TextBlock Name="PromptHeading" Classes="lbl"/>
         <TextBox Name="PromptBox" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="150" FontSize="12" AutomationProperties.Name="The prompt"/>
-        <TextBlock Name="NoteText" Classes="hint"/>
+        <TextBlock Name="NoteText" Classes="hint" AutomationProperties.LiveSetting="Polite"/>
         <WrapPanel>
           <Button Name="CopyPromptBtn" Content="Copy prompt" Margin="0,0,8,0"/>
           <Button Name="SendBtn" Classes="primary" Content="Send" Margin="0,0,8,0" IsVisible="False"/>

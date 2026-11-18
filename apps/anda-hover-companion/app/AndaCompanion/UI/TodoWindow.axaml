@@ -32,7 +32,7 @@
           <ComboBox Grid.Column="2" Name="DueBox" HorizontalAlignment="Stretch" AutomationProperties.Name="Due date for the new item"/>
           <Button Grid.Column="4" Name="AddBtn" Classes="primary" Content="Add"/>
         </Grid>
-        <TextBlock Name="AddStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+        <TextBlock Name="AddStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
         <ScrollViewer MaxHeight="400" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel Name="Rows" Spacing="2"/>
         </ScrollViewer>

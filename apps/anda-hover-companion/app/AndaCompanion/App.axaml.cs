@@ -97,6 +97,9 @@ public partial class App : Application
             UpdateTrayTip();
             ApplyMouseTrigger();
 
+            // A file of the person's own that could not be used as it was is said once, in plain words, with where it was set aside.
+            if (SelfTestRun is null && StartNotes() is { Length: > 0 } notes) Dispatcher.UIThread.Post(() => ShowNotice(notes), DispatcherPriority.Background);
+
             if (SelfTestRun is { } selfTest)
             {
                 // Diagnostic run: render everything, report, exit. Never opens first-run windows.
@@ -181,7 +184,11 @@ public partial class App : Application
         switch (UrgencyPolicy.Decide(_settings.Consent, _settings.EscalateUrgent, urgent))
         {
             case FirstStep.Invite:
-                new ChipWindow().ShowInvite($"ANDA {record.Number}", near, () => OpenCard(record, near, mini: false));
+                // The invite takes no focus. Pressing the same shortcut again on the same number accepts it: the keyboard way in.
+                if (_invite is { IsVisible: true } waiting && waiting.Number == record.Number && waiting.Accept()) break;
+                _invite?.Close();
+                _invite = new ChipWindow();
+                _invite.ShowInvite($"ANDA {record.Number}", near, () => OpenCard(record, near, mini: false), record.Number);
                 break;
             case FirstStep.Peek:
                 if (_settings.Consent == ConsentModel.Whisper) UsageLog.Record("peek_auto_open");
@@ -192,6 +199,11 @@ public partial class App : Application
                 break;
         }
     }
+
+    private ChipWindow? _invite;
+
+    /// <summary>What the stores had to say when they read their files at start: nothing, when every file was read as it was.</summary>
+    private string StartNotes() => string.Join(" ", new[] { SettingsService.LoadNote, _todo.LoadNote, _myTodo.LoadNote, _prompts.LoadNote, _replies.LoadNote }.Where(n => !string.IsNullOrEmpty(n)));
 
     private static void ShowNotice(string message, PixelPoint? near = null)
     {
@@ -359,8 +371,8 @@ public partial class App : Application
         if (_settingsWindow is not null) { _settingsWindow.Activate(); return; }
         _settingsWindow = new SettingsWindow(_settings, _prompts, ApplySettings,
             new SettingsHooks(() => HotkeyService.Report(_hotkeys?.Status ?? Array.Empty<HotkeyStatus>()), () => _portfolio, () => _drugsMessage, MouseStatusLine, Outlook,
-                OpenTodo: OpenTodoWindow, RunAction: RunActionFromMenu, AgentProblem: _agents.SetupProblem, ClearFinished: _todo.ClearCompleted,
-                OpenMyTodo: OpenMyTodoWindow, OpenNotes: () => OpenNotes(""), ClearMyTodoFinished: _myTodo.ClearFinished, Hotkeys: () => _hotkeys?.Status ?? Array.Empty<HotkeyStatus>()), _replies);
+                OpenTodo: OpenTodoWindow, RunAction: RunActionFromMenu, AgentProblem: _agents.SetupProblem, ClearFinished: () => _todo.ClearCompleted(),
+                OpenMyTodo: OpenMyTodoWindow, OpenNotes: () => OpenNotes(""), ClearMyTodoFinished: () => _myTodo.ClearFinished(), Hotkeys: () => _hotkeys?.Status ?? Array.Empty<HotkeyStatus>()), _replies);
         _settingsWindow.Closed += (_, _) => _settingsWindow = null;
         _settingsWindow.Show();
     }

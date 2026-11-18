@@ -11,10 +11,20 @@ public static class AppPaths
 {
     public const string HomeEnvVar = "ANDA_COMPANION_HOME";
 
-    public static string Root =>
-        Environment.GetEnvironmentVariable(HomeEnvVar) is { Length: > 0 } custom
-            ? custom
-            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "AndaCompanion");
+    public static string Root => RootFor(Environment.GetEnvironmentVariable(HomeEnvVar), AppContext.BaseDirectory, Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
+
+    /// <summary>
+    /// Where the app keeps what it stores. In order: the folder named by the environment variable; a folder named "data" beside the program
+    /// (the demo ships one, so the demo never touches the person's profile and needs no launcher script); otherwise the person's own
+    /// application-data folder.
+    /// </summary>
+    internal static string RootFor(string? fromEnvironment, string programFolder, string applicationData)
+    {
+        if (fromEnvironment is { Length: > 0 }) return fromEnvironment;
+        try { string beside = Path.Combine(programFolder, "data"); if (Directory.Exists(beside)) return beside; }
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException) { /* an odd program path: the normal place is used */ }
+        return Path.Combine(applicationData, "AndaCompanion");
+    }
 
     public static string SettingsFile => Path.Combine(Root, "settings.json");
     public static string UsageFile => Path.Combine(Root, "usage.csv");

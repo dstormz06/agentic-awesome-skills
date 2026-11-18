@@ -8,7 +8,8 @@ the clipboard. Use the browser simulation or the slides instead.
 
 SET UP (about 2 minutes)
   1. Right-click the downloaded .zip and choose Extract All. Do not run it from inside the zip.
-  2. Double-click Start-Demo.bat.
+  2. Double-click AndaCompanion.exe. Then open sample-memo.txt (double-click it; it opens in Notepad).
+     There is no script to run. The demo keeps its settings in the "data" folder beside the program.
   3. If Windows says "Windows protected your PC", that is expected: the demo is not
      code-signed. If your organization allows it, choose More info, then Run anyway.
   4. A Settings window and a sample card open, and a sample memo opens in Notepad.

@@ -135,7 +135,8 @@ public class Round15Tests
         Assert.True(plain.Length <= ActionFill.MaxSelectionChars);
         string fenced = ActionFill.Prompt("Q: {selection}", null, evil, Today, null, fenceSelection: true);
         Assert.StartsWith("Q: <selection>\n", fenced);
-        Assert.EndsWith("\n</selection>", fenced);
+        Assert.EndsWith("\n</selection>\n(1 invisible character was removed from the text above.)", fenced);      // the direction mark is gone, and the line says so (round 28)
+        Assert.Contains("\n< selection>", fenced);                                                                 // an opening tag cannot be written inside either
         Assert.Equal(1, System.Text.RegularExpressions.Regex.Matches(fenced, "</selection>").Count);   // only the real closing tag
         Assert.Contains("</ selection", fenced);
     }
@@ -386,7 +387,7 @@ public class Round15Tests
         var target = new Settings();
         var (ok, message) = SettingsBackup.Import(json, target, lenses, replies);
         Assert.True(ok, message);
-        Assert.Equal(ProviderChoice.Auto, target.Provider);                              // My API is not on
+        Assert.Equal(ProviderChoice.Offline, target.Provider);                           // My API is not on, and nothing else is either (round 28)
         Assert.All(target.Agents, a => { Assert.False(a.Enabled); Assert.Equal(AgentRun.Never, a.AutoRun); });
         Assert.Contains("My API was not switched on", message);
         Assert.Contains("1 agent came back switched off", message);
@@ -461,6 +462,19 @@ public class Round15Tests
         Assert.Contains("216482", doc.RootElement.GetProperty("question").GetString());
         Assert.DoesNotContain("SELECTED TEXT", body);                           // the prompt does not use {selection}, so it is not sent
         Assert.DoesNotContain(Token, f.Message + f.Text);
+    }
+
+    [Fact]
+    public async Task A_finding_is_not_fresh_after_the_clock_was_set_back_and_its_age_is_measured_in_UTC()
+    {
+        var hub = Hub(a => a.CacheMinutes = 15);
+        var clock = new DateTime(2026, 11, 1, 1, 50, 0, DateTimeKind.Local);
+        var svc = new AgentService(() => new[] { hub }, Env, new Handler((_, _) => Json("{\"answer\":\"- one\"}")), () => clock);
+        await svc.RunAsync(hub, Demo, Today, null, null);
+        Assert.NotNull(svc.Fresh(hub, "216482"));
+        clock = clock.AddHours(-3);                                             // the clock was set back: a finding dated after "now" is not fresh
+        Assert.Null(svc.Fresh(hub, "216482"));
+        Assert.NotNull(svc.Last("alert-hub", "216482"));
     }
 
     [Fact]

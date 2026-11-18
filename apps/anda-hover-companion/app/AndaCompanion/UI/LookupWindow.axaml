@@ -13,12 +13,12 @@
                    FontFamily="{DynamicResource C.LabelFont}"
                    Foreground="{DynamicResource C.Ink3}" Text="LOOKUP ANDA"/>
         <Grid ColumnDefinitions="*,8,Auto">
-          <TextBox Name="Input" Watermark="e.g. 216482" FontSize="14"
+          <TextBox Name="Input" Watermark="e.g. 216482" FontSize="14" AutomationProperties.Name="ANDA number"
                    FontFamily="{DynamicResource C.NumFont}"/>
           <Button Grid.Column="2" Name="GoBtn" Content="Peek" FontWeight="SemiBold"
                   Foreground="{DynamicResource C.Accent}"/>
         </Grid>
-        <TextBlock Name="ErrorText" FontSize="11.5" Foreground="{DynamicResource C.Bad}" IsVisible="False"/>
+        <TextBlock Name="ErrorText" FontSize="11.5" Foreground="{DynamicResource C.Bad}" IsVisible="False" AutomationProperties.LiveSetting="Assertive"/>
       </StackPanel>
     </Border>
   </Panel>

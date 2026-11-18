@@ -64,7 +64,7 @@ public class CustomizationTests
         var (ok, message) = SettingsBackup.Import(json, t, l2, r2);
         Assert.True(ok, message);
         Assert.Equal("Warm", t.Tone); Assert.Equal("Division API", t.CustomApi.Name);
-        Assert.Equal(ProviderChoice.Auto, t.Provider);                              // a restore never switches on a connection that sends data off the PC (round 15)
+        Assert.Equal(ProviderChoice.Offline, t.Provider);                           // a restore never switches on a connection that sends data off the PC (round 15)
         Assert.Contains("My API was not switched on", message);
         Assert.Equal(40, t.AutoHideSeconds); Assert.Equal("claude-opus-5-5", t.ClaudeModel);
         Assert.Equal(@"D:\other-pc\portfolio.xlsx", t.PortfolioPath);              // not overwritten

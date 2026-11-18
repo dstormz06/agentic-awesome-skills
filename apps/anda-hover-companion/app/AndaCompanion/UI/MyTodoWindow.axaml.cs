@@ -52,7 +52,7 @@ public partial class MyTodoWindow : Window
         AddBox.TextChanged += (_, _) => ShowPreview();
         NotesBtn.Click += (_, _) => _hooks.OpenNotes(null);
         RollBtn.Click += (_, _) => { int n = _hooks.Store.RollOverOverdue(_hooks.Today()); AddStatus.Text = n == 0 ? "Nothing is overdue." : $"Moved {n} overdue {(n == 1 ? "item" : "items")} to today."; };
-        ClearBtn.Click += (_, _) => { int n = _hooks.Store.ClearFinished(); AddStatus.Text = n == 0 ? "Nothing finished to clear. Finished items that repeat stay: they come back by themselves." : $"Cleared {n} finished {(n == 1 ? "item" : "items")}."; };
+        ClearBtn.Click += (_, _) => { int n = _hooks.Store.ClearFinished(); AddStatus.Text = n == 0 ? "Nothing finished to clear. Finished items that repeat stay: they come back by themselves." : $"Cleared {n} finished {(n == 1 ? "item" : "items")}. {(n == 1 ? "It is" : "They are")} kept in {Path.GetFileName(_hooks.Store.ArchiveFile)} in the app's folder, not deleted."; };
         UndoBtn.Click += (_, _) => Undo();
 
         _onChanged = () => Dispatcher.UIThread.Post(() => Reload());

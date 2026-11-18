@@ -3,6 +3,11 @@
 A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
 **All bundled data is fictional.** Not an FDA product; a concept prototype.
 
+> **New in round 28: safer by default, after an audit and an independent review.** No AI connection is on until you choose one in Settings, Connection (a key that happens to be on the PC is no longer used by itself). A settings file, a to-do list,
+> your prompts or your replies that cannot be read are set aside under a name that says when, never written over, and the app says so once at start. Finished to-do items are no longer deleted by the app: they move to an archive file beside the list.
+> A restore keeps what it replaces as a backup of its own and switches no connection on. Text that goes to an AI has characters nobody can see removed and counted in the preview. The invite can be accepted by pressing the same shortcut again.
+> There is no launcher script: the demo keeps its files in the `data` folder beside the program. What was not changed, and why, is in `../DESIGN.md` §11l.
+>
 > **New in round 27: two documents and one of your prompts, a check of an AI answer, signs worth a second look, and five daily helpers.** *Compare two files…* now also reads documents (Word `.docx`, text, Markdown) and compares them
 > paragraph by paragraph, by fixed rules on this PC. Under the comparison, *Use this prompt…* runs one of your stored prompts on it: the prompt gets the differences the rules found and, only if you tick the box for that pair of files, the beginning of each
 > file (up to 6,000 characters each); it is always shown to you first. *Check the answer* looks up every number, date and name with a digit of a pasted AI answer in the comparison and the files, with no AI. Two more ways of working are at the top of the
@@ -35,7 +40,7 @@ A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
 
 **No .NET needed:** every green run of the *ANDA Companion (Windows)* workflow publishes
 `anda-companion-demo-win-x64`: a single self-contained `AndaCompanion.exe` plus a launcher, a sample
-memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `Start-Demo.bat`, pin the tray icon.
+memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `AndaCompanion.exe`, open `sample-memo.txt`, pin the tray icon. There is no launcher script.
 
 1. `dotnet run --project AndaCompanion` (or double-click the published `AndaCompanion.exe`).
 2. First run opens **Settings** automatically: pick an appearance (the default is **T · Pocket
@@ -266,7 +271,7 @@ dotnet publish AndaCompanion -c Release -r win-x64 --self-contained true `
 The project also cross-compiles from Linux/macOS (`dotnet build`).
 
 **Portable mode.** `ANDA_COMPANION_HOME=<folder>` moves every file the app writes (settings, prompts,
-crash log) into that folder. `Start-Demo.bat` uses it, so the demo never touches your profile.
+crash log) into that folder. A folder named `data` beside the program does the same with no variable to set; the demo ships one, so it never touches your profile.
 
 ## Tests
 
@@ -275,7 +280,7 @@ dotnet test AndaCompanion.Tests                              # everything (Windo
 dotnet test AndaCompanion.Tests --filter "Category!=Windows" # what runs on Linux/macOS
 ```
 
-1,157 cross-platform tests at the time of writing, round 27 (the figure was 762 when this paragraph was first written; recognizer, status line, GDUFA rules, the federal-holiday
+1,172 cross-platform tests at the time of writing, round 28 (the figure was 762 when this paragraph was first written; recognizer, status line, GDUFA rules, the federal-holiday
 calendar against OPM's dates, watch rules, urgency, draft check, portfolio and notes readers, writing prompts,
 hotkey parsing and registration with a fake API, brief fencing and fallback, provider selection, settings,
 contrast, placement, the to-do list, custom actions, the agent connector, headless renders and interaction tests of the real windows) plus Windows-only tests that use real Win32 (clipboard snapshot/restore, hotkey registration and

@@ -24,16 +24,34 @@ public partial class ChipWindow : Window
         Opened += (_, _) => PlaceNear();
     }
 
-    public void ShowInvite(string label, PixelPoint near, Action onAccept)
+    /// <summary>The ANDA an invite is for; null for a notice.</summary>
+    public string? Number { get; private set; }
+    private Action? _accept;
+
+    /// <summary>
+    /// An invite never takes the keyboard, so it cannot be reached with Tab. The keyboard way to accept it is to press the same shortcut
+    /// again on the same number (the app calls <see cref="Accept"/>), and the invite says so to a screen reader.
+    /// </summary>
+    public void ShowInvite(string label, PixelPoint near, Action onAccept, string? number = null)
     {
-        ChipText.Text = label;
+        ChipText.Text = label; Number = number; _accept = onAccept;
         GoText.IsVisible = true;
-        Pill.PointerPressed += (_, _) => { Close(); onAccept(); };
+        Avalonia.Automation.AutomationProperties.SetName(this, label + ". Press the shortcut again to open it, or click.");
+        Pill.PointerPressed += (_, _) => Accept();
         Open(near, TimeSpan.FromSeconds(6));
+    }
+
+    /// <summary>Opens what the invite offers. True when there was an invite to accept.</summary>
+    public bool Accept()
+    {
+        if (_accept is not { } go) return false;
+        _accept = null; Close(); go();
+        return true;
     }
 
     public void ShowNotice(string label, PixelPoint near)
     {
+        Avalonia.Automation.AutomationProperties.SetName(this, label);      // a notice is read out, not only shown
         ChipText.Text = label;
         GoText.IsVisible = false;
         Dot.IsVisible = false;

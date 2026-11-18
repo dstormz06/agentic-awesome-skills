@@ -222,7 +222,9 @@ public sealed class AgentService
     public AgentFinding? Fresh(AgentSettings agent, string number)
     {
         if (!_cache.TryGetValue(Key(agent.Id, number), out var f)) return null;
-        return agent.CacheMinutes > 0 && (_now() - f.At).TotalMinutes < agent.CacheMinutes ? f : null;
+        // Age is measured between two UTC times, and a finding dated after now (a clock that was set back) is not fresh.
+        double age = (_now().ToUniversalTime() - f.At.ToUniversalTime()).TotalMinutes;
+        return agent.CacheMinutes > 0 && age >= 0 && age < agent.CacheMinutes ? f : null;
     }
 
     /// <summary>The last finding for this agent and ANDA, fresh or not, so a card can show what it already knows while it asks again.</summary>

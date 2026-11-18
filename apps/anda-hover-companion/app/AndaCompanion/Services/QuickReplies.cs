@@ -26,9 +26,10 @@ public static class QuickReplyFill
 
     private static readonly Regex Token = new(@"\{([a-z]+)\}", RegexOptions.Compiled);
 
-    public static string Fill(string template, AndaRecord r, DateOnly today, ReferenceInfo? reference = null, IReadOnlyDictionary<string, string>? extras = null)
+    public static string Fill(string template, AndaRecord r, DateOnly today, ReferenceInfo? reference = null, IReadOnlyDictionary<string, string>? extras = null, Func<string, string>? guard = null)
     {
         var values = Values(r, today, reference);
+        if (guard is not null) foreach (string k in values.Keys.ToList()) values[k] = guard(values[k]);      // for a prompt that goes to an AI: see MyActions.GuardValue
         if (extras is not null) foreach (var (k, v) in extras) values[k] = v;
         return Token.Replace(template, m => values.TryGetValue(m.Groups[1].Value, out var v) ? v : m.Value);
     }
@@ -87,16 +88,26 @@ public sealed class QuickReplyService
         new("Date check before I quote it", "Before I give dates on ANDA {number}: goal {goal}, forecast {forecast}. Please note the weekend and holiday check on the card was run on {today}."),
     };
 
+    /// <summary>One plain sentence when the file could not be used as it was; otherwise null. The app shows it once at start.</summary>
+    public string? LoadNote { get; private set; }
+
     public QuickReplyService(string? path = null)
     {
         _path = path ?? AppPaths.RepliesFile;
+        _replies = Starters.ToList();
+        if (!File.Exists(_path)) return;
+        var (text, why) = SafeFile.Read(_path);
         try
         {
-            if (File.Exists(_path) && JsonSerializer.Deserialize<List<QuickReply>>(File.ReadAllText(_path)) is { } loaded)
-                _replies = loaded.Where(r => !string.IsNullOrWhiteSpace(r?.Name) && r.Text is not null).Take(MaxReplies).ToList();
-            else _replies = Starters.ToList();
+            if (text is null) throw new JsonException(why ?? "not readable");
+            if (JsonSerializer.Deserialize<List<QuickReply>>(text) is { } loaded)
+                _replies = loaded.Where(r => !string.IsNullOrWhiteSpace(r?.Name) && r!.Text is not null).Take(MaxReplies).ToList();
         }
-        catch { _replies = Starters.ToList(); }
+        catch (Exception ex) when (ex is JsonException or NotSupportedException or InvalidOperationException)
+        {
+            // Never overwritten by the starters: the person's replies may still be in it.
+            LoadNote = SafeFile.Note("quick replies file", SafeFile.SetAside(_path), "The starter replies are back.");
+        }
     }
 
     /// <summary>Adds or replaces a reply by name. Returns a plain reason if it was refused.</summary>
@@ -127,9 +138,8 @@ public sealed class QuickReplyService
     {
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(_path)!);
-            File.WriteAllText(_path, JsonSerializer.Serialize(_replies, new JsonSerializerOptions { WriteIndented = true }));
+            SafeFile.Write(_path, JsonSerializer.Serialize(_replies, new JsonSerializerOptions { WriteIndented = true }));
         }
-        catch { /* best effort */ }
+        catch (Exception ex) when (ex is JsonException or NotSupportedException) { /* best effort */ }
     }
 }

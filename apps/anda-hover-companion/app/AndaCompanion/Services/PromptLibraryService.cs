@@ -18,15 +18,28 @@ public sealed class PromptLibraryService
 
     public IReadOnlyList<LensPrompt> Prompts => _prompts;
 
+    /// <summary>One plain sentence when the file could not be used as it was; otherwise null. The app shows it once at start.</summary>
+    public string? LoadNote { get; private set; }
+
     public PromptLibraryService(string? path = null)
     {
         _path = path ?? AppPaths.PromptsFile;
-        try
+        // A file that cannot be read is set aside, never overwritten by the three starters below. Entries with no name or no text are left out.
+        if (File.Exists(_path))
         {
-            if (File.Exists(_path))
-                _prompts = JsonSerializer.Deserialize<List<LensPrompt>>(File.ReadAllText(_path)) ?? new();
+            var (text, why) = SafeFile.Read(_path);
+            try
+            {
+                if (text is null) throw new JsonException(why ?? "not readable");
+                _prompts = (JsonSerializer.Deserialize<List<LensPrompt>>(text) ?? new())
+                    .Where(p => !string.IsNullOrWhiteSpace(p?.Name) && p!.Text is not null).Take(MaxLenses).ToList();
+            }
+            catch (Exception ex) when (ex is JsonException or NotSupportedException or InvalidOperationException)
+            {
+                _prompts = new();
+                LoadNote = SafeFile.Note("prompt library", SafeFile.SetAside(_path), "The three starter prompts are back.");
+            }
         }
-        catch { _prompts = new(); }
 
         if (_prompts.Count == 0)
         {
@@ -91,9 +104,8 @@ public sealed class PromptLibraryService
     {
         try
         {
-            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(_path)!);
-            File.WriteAllText(_path, JsonSerializer.Serialize(_prompts, new JsonSerializerOptions { WriteIndented = true }));
+            SafeFile.Write(_path, JsonSerializer.Serialize(_prompts, new JsonSerializerOptions { WriteIndented = true }));
         }
-        catch { /* best effort */ }
+        catch (Exception ex) when (ex is JsonException or NotSupportedException) { /* best effort */ }
     }
 }

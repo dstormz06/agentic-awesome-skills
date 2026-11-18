@@ -43,8 +43,11 @@ public sealed class SheetCopies
     {
         lock (_gate)
         {
-            var days = Days();
-            if (days.Any(d => WeekStart(d) == WeekStart(today))) return false;
+            var days = Days().ToList();
+            // A week counts as kept only when its copy can be read: a damaged copy is set aside, so that the week can be kept again.
+            foreach (var d in days.Where(d => WeekStart(d) == WeekStart(today) && d <= today).ToList())
+                if (Read(d) is null) { SafeFile.SetAside(FileFor(d)); days.Remove(d); }
+            if (days.Any(d => WeekStart(d) == WeekStart(today) && d <= today)) return false;
             try
             {
                 Directory.CreateDirectory(_dir);
@@ -66,20 +69,24 @@ public sealed class SheetCopies
         lock (_gate)
         {
             foreach (var day in Days().Reverse().Where(d => d < today))
-            {
-                try
-                {
-                    string path = FileFor(day);
-                    if (new FileInfo(path).Length > MaxBytes) continue;
-                    var stored = JsonSerializer.Deserialize<Stored>(File.ReadAllText(path));
-                    if (stored?.Headers is null || stored.Rows is null) continue;
-                    var rows = stored.Rows.Select(r => (IReadOnlyList<string>)(r ?? new List<string>()).Select(c => c ?? "").ToList()).ToList();
-                    return (new CompareTable("My sheet, copy kept " + day.ToString("MMM d", Inv), stored.Headers.Select(h => h ?? "").ToList(), rows), day);
-                }
-                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException) { /* a copy that cannot be read is passed over */ }
-            }
+                if (Read(day) is { } table) return (table, day);      // a copy that cannot be read is passed over
             return null;
         }
+    }
+
+    /// <summary>The copy kept on that day, or null when there is none or it cannot be read.</summary>
+    private CompareTable? Read(DateOnly day)
+    {
+        try
+        {
+            string path = FileFor(day);
+            if (!File.Exists(path) || new FileInfo(path).Length > MaxBytes) return null;
+            var stored = JsonSerializer.Deserialize<Stored>(File.ReadAllText(path));
+            if (stored?.Headers is null || stored.Rows is null) return null;
+            var rows = stored.Rows.Select(r => (IReadOnlyList<string>)(r ?? new List<string>()).Select(c => c ?? "").ToList()).ToList();
+            return new CompareTable("My sheet, copy kept " + day.ToString("MMM d", Inv), stored.Headers.Select(h => h ?? "").ToList(), rows);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException) { return null; }
     }
 
     /// <summary>Deletes every copy. Returns how many were deleted.</summary>

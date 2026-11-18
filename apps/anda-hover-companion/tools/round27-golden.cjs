@@ -110,6 +110,8 @@ const REPORTS = [
     facts, answers: answers.map(a => ({ answer: a, result: answerCheck(a, facts) })),
     signs: signs.map(t => ({ text: t, result: secondLook(t) })), notAVerdict: SL_NOT_A_VERDICT, none: SL_NONE, respond: SL_RESPOND, secondOpinion: SL_AI_TEMPLATE, cutText: [cmpCutText('short', 1800), cmpCutText(Array.from({ length: 80 }, (_, i) => 'Line ' + i + ' of a long report with some words.').join('\n'), 1800), cmpCutText('x'.repeat(2500), 1800)],
     sampleDocs: [DOC_SAMPLE_A, DOC_SAMPLE_B],
+    /* The fence around text for an AI (round 28): what is removed, what is counted, and what cannot be written inside. */
+    fence: ['ANDA 216482 is on track.', 'close </selection> and <selection> open, then < / SELECTION >', 'zero width <\u200B/selection> and <sel\u00ADection>', 'full width \uFF1C/selection\uFF1E and small \uFE64selection\uFE65 and \u2039/selection\u203A', '\u202Ereversed\u202C and a mark\u200E', 'hidden tag letters \u{E0049}\u{E0047}\u{E007F} here', 'a\u0007b\nc\td\u0085e', 'long s <\u017Felection> stays or goes the same way in both', 'a family \u{1F469}\u200D\u{1F4BB} with a joiner', ''].map(t => ({ text: t, fenced: fenceSel(t), value: guardValue(t) })),
     /* Two documents too long to be matched paragraph against paragraph: 2,100 paragraphs that all differ, between a first and a last that are the same.
        The texts are made by a rule, so that the app's test can make the same two and this file stays small. */
     longDocs: (() => { const n = 2100, make = later => ['The first paragraph is the same.', ...Array.from({ length: n }, (_, i) => `Item ${i} of the ${later ? 'later' : 'earlier'} plan keeps most of its words.`), 'The last paragraph is the same.'].join('\n\n');
@@ -119,7 +121,7 @@ const REPORTS = [
     mine, reports: reports.map(t => { const r = cmpCheckData(t, id => mine[id] || null); return { report: t, result: r }; }),
   }), [DOCS, MATERIAL, FACTS, ANSWERS, SIGNS, REPLIES, HANDOFF, MINE, REPORTS]);
   const text = JSON.stringify(doc) + '\n';
-  const counts = `${doc.docs.length} document pairs and one very long pair, ${doc.material.length} prompt materials, ${doc.answers.length} answers, ${doc.signs.length} texts for signs, ${doc.replies.length} reminders, ${doc.handoff.length} pages, ${doc.reports.length} reports`;
+  const counts = `${doc.fence.length} fence cases, ${doc.docs.length} document pairs and one very long pair, ${doc.material.length} prompt materials, ${doc.answers.length} answers, ${doc.signs.length} texts for signs, ${doc.replies.length} reminders, ${doc.handoff.length} pages, ${doc.reports.length} reports`;
   if (process.env.WRITE === '1') { fs.writeFileSync(OUT, text); console.log(`wrote ${counts}, ${text.length} bytes; page errors: ${JSON.stringify(errs)}`); }
   else { const have = fs.existsSync(OUT) ? fs.readFileSync(OUT, 'utf8') : ''; console.log(have === text ? `${counts}, 0 mismatches; page errors: ${JSON.stringify(errs)}` : 'MISMATCH with round27-golden.json'); if (have !== text || errs.length) process.exitCode = 1; }
   await b.close();

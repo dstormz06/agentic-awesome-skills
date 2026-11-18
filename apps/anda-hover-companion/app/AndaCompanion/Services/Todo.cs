@@ -71,14 +71,36 @@ public sealed class TodoService
         return t.Length > max ? t[..max].TrimEnd() : t;
     }
 
-    private static TodoFile Load(string path)
+    /// <summary>One plain sentence when the file could not be used as it was; otherwise null. The app shows it once at start.</summary>
+    public string? LoadNote { get; private set; }
+
+    /// <summary>
+    /// Reads the list. A file that cannot be read, or is larger than 4 MB, is never overwritten: it is set aside under a name that says when, and
+    /// a new list starts. A file written by a newer version of the app is read, and a copy of it is kept first.
+    /// </summary>
+    private TodoFile Load(string path)
     {
-        try
+        if (!File.Exists(path)) return new();
+        var (text, why) = SafeFile.Read(path);
+        if (text is not null)
         {
-            if (!File.Exists(path) || new FileInfo(path).Length > 4 * 1024 * 1024) return new();
-            return Normalize(JsonSerializer.Deserialize<TodoFile>(File.ReadAllText(path)));
+            try
+            {
+                using (var doc = JsonDocument.Parse(text))
+                {
+                    if (doc.RootElement.ValueKind != JsonValueKind.Object) throw new JsonException("not a list file");
+                    if (doc.RootElement.TryGetProperty("Version", out var v) && v.ValueKind == JsonValueKind.Number && v.TryGetInt32(out int n) && n > 1)
+                    {
+                        string? copy = SafeFile.SetAside(path, "newer-version", copy: true);
+                        LoadNote = $"Your ANDA to-do list was written by a newer version of this app. A copy was kept{(copy is null ? "" : " as " + copy)} before this version reads it.";
+                    }
+                }
+                return Normalize(JsonSerializer.Deserialize<TodoFile>(text));
+            }
+            catch (Exception ex) when (ex is JsonException or NotSupportedException or InvalidOperationException) { /* set aside below */ }
         }
-        catch { return new(); }
+        LoadNote = SafeFile.Note("ANDA to-do list" + (why is null ? "" : " file (" + why + ")"), SafeFile.SetAside(path), "A new list was started.");
+        return new();
     }
 
     /// <summary>Repairs a loaded file: limits, valid dates and numbers, unique ids. Used for the saved file.</summary>
@@ -135,8 +157,9 @@ public sealed class TodoService
             if (_file.Items.Count >= MaxItems)
             {
                 var oldestDone = _file.Items.Where(i => i.Done).OrderBy(i => i.DoneOn ?? "").FirstOrDefault();
-                if (oldestDone is null) return new(null, false, $"The list is full ({MaxItems} items). Please finish or delete some.");
-                _file.Items.Remove(oldestDone);
+                if (oldestDone is null || !TodoArchive.Append(_path, new[] { oldestDone }, today, "the list was full"))
+                    return new(null, false, $"The list is full ({MaxItems} items). Please finish or delete some.");
+                _file.Items.Remove(oldestDone);      // the oldest finished item moves to the archive file; it is not deleted
             }
             item = new TodoItem
             {
@@ -179,10 +202,10 @@ public sealed class TodoService
     }
 
     /// <summary>Removes completed items the person added. Items from their data that were ticked off stay marked so they do not come back.</summary>
-    public int ClearCompleted()
+    public int ClearCompleted(DateOnly? today = null)
     {
         int n;
-        lock (_gate) { n = _file.Items.RemoveAll(i => i.Done); if (n > 0) SaveLocked(); }
+        lock (_gate) { n = ArchiveLocked(i => i.Done, today ?? DateOnly.FromDateTime(DateTime.Now), "cleared by the person"); if (n > 0) SaveLocked(); }
         if (n > 0) Changed?.Invoke();
         return n;
     }
@@ -204,10 +227,22 @@ public sealed class TodoService
             foreach (var k in _file.AutoDone.Keys.Where(k => !liveAutoKeys.Contains(k)).ToList()) { _file.AutoDone.Remove(k); changed = true; }
             foreach (var (k, v) in _file.AutoSnoozed.ToList())
                 if (!liveAutoKeys.Contains(k) || ParseIso(v) is not { } until || until <= today) { _file.AutoSnoozed.Remove(k); changed = true; }
-            changed |= _file.Items.RemoveAll(i => i.Done && ParseIso(i.DoneOn) is { } d && today.DayNumber - d.DayNumber > KeepDoneDays) > 0;
+            changed |= ArchiveLocked(i => i.Done && ParseIso(i.DoneOn) is { } d && today.DayNumber - d.DayNumber > KeepDoneDays, today, $"finished more than {KeepDoneDays} days ago") > 0;
             foreach (var i in _file.Items.Where(i => i.SnoozedUntil is not null && (ParseIso(i.SnoozedUntil) is not { } u || u <= today))) { i.SnoozedUntil = null; changed = true; }
             if (changed) SaveLocked();
         }
+    }
+
+    /// <summary>The archive file beside the list: finished items the list no longer shows. See <see cref="TodoArchive"/>.</summary>
+    public string ArchiveFile => TodoArchive.FileFor(_path);
+
+    /// <summary>Moves the chosen items to the archive file and takes them off the list. If the archive cannot be written, nothing is taken off.</summary>
+    private int ArchiveLocked(Func<TodoItem, bool> which, DateOnly today, string why)
+    {
+        var gone = _file.Items.Where(which).ToList();
+        if (gone.Count == 0 || !TodoArchive.Append(_path, gone, today, why)) return 0;
+        foreach (var i in gone) _file.Items.Remove(i);
+        return gone.Count;
     }
 
     private void SaveLocked()

@@ -1177,9 +1177,9 @@ body{background:#4f9be0}
     <svg width="38" height="38" viewBox="0 0 38 38" fill="none"><rect x="7" y="4" width="24" height="30" rx="3" fill="#fff" stroke="#7c8a97" stroke-width="1.4"/><rect x="4" y="13" width="16" height="13" rx="2.5" fill="#1f7a4d"/><path d="M8.5 16.5l7 6m0-6l-7 6" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><path d="M23 12h5M23 17h5M23 22h5M23 27h5" stroke="#9aa6b1" stroke-width="1.4" stroke-linecap="round"/></svg>
     ANDA portfolio (demo).xlsx
   </div>
-  <button class="icon" id="deskIcon" type="button" aria-label="Start-Demo.bat. Launches the app.">
+  <button class="icon" id="deskIcon" type="button" aria-label="ANDA Companion. Launches the app.">
     <svg width="38" height="38" viewBox="0 0 38 38" fill="none"><rect x="6" y="3" width="26" height="32" rx="3" fill="#fff" stroke="#8a929b" stroke-width="1.5"/><path d="M11 12h16M11 17h16M11 22h10" stroke="#8a929b" stroke-width="1.5" stroke-linecap="round"/><circle cx="27" cy="27" r="6" fill="#3a3f8f"/><path d="M25 27l2 2 3-4" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    Start-Demo.bat
+    ANDA Companion
   </button>
 
   <!-- ===== simulated apps: look-alike layouts with fictional content (no logos, no real products) ===== -->
@@ -1844,6 +1844,7 @@ PS C:\work&gt; </div>
 <div id="compact" role="button" tabindex="-1" aria-label="ANDA compact status. Click to open the full card."></div>
 <div id="scrim"></div>
 <div id="whisper" role="region" aria-label="Notice near the clock"><div class="wk"><i></i><span id="whKind"></span></div><div class="wt" id="whText" role="status"></div><div class="wa"><button class="pri" id="whOpen" type="button">Open</button><button id="whSnooze" type="button">Snooze for today</button><button id="whClose" type="button">Dismiss</button></div></div>
+<div id="chipSay" role="status" aria-live="polite" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap"></div>
 <button id="chip" type="button"><span class="dot" id="chipDot"></span><span id="chipTxt"></span><span class="go" id="chipGo">Peek&nbsp;›</span></button>
 
 <div id="card" role="dialog" aria-label="ANDA quick brief" tabindex="-1">
@@ -2079,11 +2080,11 @@ const RANK = { "sheet-flag":-1, "goal-passed":0, "goal-soon":1, "goal-date-calen
    weeks: a Saturday stays a Saturday, "Thursday huddle" stays true, and the goal is still about 11 weeks away. "Today", for every rule, is the real today.
    With ?clock=fixed in the address the page stays at Jul 16, 2026, 10:42 AM: the test suites use that so their expected dates never go stale. */
 const CLOCK_FIXED = /(?:^|&)clock=fixed(?:&|$)/.test(location.search.slice(1));
-const SIM_TZ = (() => { try{ return Intl.DateTimeFormat().resolvedOptions().timeZone || "America/New_York"; }catch(e){ return "America/New_York"; } })();
+const simTz = () => { try{ return Intl.DateTimeFormat().resolvedOptions().timeZone || "America/New_York"; }catch(e){ return "America/New_York"; } };      /* asked each time: the zone can change while the page is open */
 const BASE_DAY = ymd(2026, 7, 16);
 function wallNow(){     /* the wall clock of that time zone, as numbers */
   const out = {}; try{
-    new Intl.DateTimeFormat("en-US", { timeZone:SIM_TZ, hourCycle:"h23", year:"numeric", month:"numeric", day:"numeric", hour:"numeric", minute:"numeric", second:"numeric" })
+    new Intl.DateTimeFormat("en-US", { timeZone:simTz(), hourCycle:"h23", year:"numeric", month:"numeric", day:"numeric", hour:"numeric", minute:"numeric", second:"numeric" })
       .formatToParts(new Date()).forEach(x => { if(x.type !== "literal") out[x.type] = +x.value; });
   }catch(e){ const n = new Date(); return { year:n.getFullYear(), month:n.getMonth() + 1, day:n.getDate(), hour:n.getHours(), minute:n.getMinutes(), second:n.getSeconds() }; }
   return out;
@@ -2168,7 +2169,7 @@ function paintClock(){     /* the taskbar clock: the real time to the second and
   const time = document.getElementById("simClockTime"), date = document.getElementById("simClockDate"); if(!time || !date) return;
   time.textContent = simClock(!CLOCK_FIXED);
   const x = new Date(CLOCK_FIXED ? BASE_DAY : realToday()); date.textContent = (x.getUTCMonth() + 1) + "/" + x.getUTCDate() + "/" + x.getUTCFullYear();
-  date.parentElement.title = CLOCK_FIXED ? "Clock fixed for testing" : "The time on this computer (" + SIM_TZ.replace(/_/g, " ") + ")";
+  date.parentElement.title = CLOCK_FIXED ? "Clock fixed for testing" : "The time on this computer (" + simTz().replace(/_/g, " ") + ")";
   /* "today" has changed (midnight passed while the page was open): what needs the person today is counted again */
   /* the scheduled count the person chose in Settings: never ("use"), once just after midnight ("daily"), or at each hour as well ("hourly") */
   const day = +x, hour = CLOCK_FIXED ? 10 : wallNow().hour;
@@ -2434,7 +2435,7 @@ let keyVia = null;
 const state = { dir:"x", look:"x", form:"full", autoHide:10, mode:"whisper", escalate:true, lead:3, pretend:false, capture:true, op:90, lens:null, pinned:false, running:true, ai:false,
   keys:{ peek:"Ctrl+Alt+A", look:"Ctrl+Alt+Space", draft:"Ctrl+Alt+Shift+R", ask:"Ctrl+Alt+Shift+P", list:"Ctrl+Alt+Shift+L" }, taken:{ peek:false, look:false, draft:false, ask:false, list:false },
   adaptive:true, allTools:location.hash === "#all", sectionUse:{}, clMode:0,
-  middle:false, middleMod:"Ctrl", provider:"auto", tone:"", style:"", signoff:"", claudeModel:"claude-opus-4-8",
+  middle:false, middleMod:"Ctrl", provider:"offline", tone:"", style:"", signoff:"", claudeModel:"claude-opus-4-8",
   outlook:{ on:false, cloud:"com", client:"", tenant:"organizations", max:5, step:"out", msg:"" },
   data:{ portfolio:null, notes:null, ref:null }, quickNotes:{}, andaUrl:"https://tracker.example/anda/{anda}",
   myApi:{ name:"My API", endpoint:"", header:"Authorization", scheme:"Bearer", env:"", model:"", template:"", path:"choices[0].message.content" },
@@ -3286,7 +3287,7 @@ function renderBrief(id){
   body.innerHTML = '<span class="skel"></span><span class="skel"></span>';
   streamTimer = setTimeout(() => {
     let i = 0;
-    const note = state.lens ? `<div style="margin-top:6px;font-size:11px;color:var(--c-ink3)">Sample text. With a live connection, your lens “${state.lens}” would steer this brief.</div>` : "";
+    const note = state.lens ? `<div style="margin-top:6px;font-size:11px;color:var(--c-ink3)">Sample text. With a live connection, your lens “${escHTML(state.lens)}” would steer this brief.</div>` : "";
     body.innerHTML = '<span class="cur"></span>';
     streamTimer = setInterval(() => {
       i += 3;
@@ -3359,13 +3360,16 @@ function showChipAt(anchor){
 }
 function showNotice(text, anchor){
   hideChip();
-  $("chipTxt").textContent = text; $("chipDot").hidden = true; $("chipGo").hidden = true; chipAccept = null;
+  $("chipTxt").textContent = text; $("chipDot").hidden = true; $("chipGo").hidden = true; chipAccept = null; chipFor = null;
+  $("chipSay").textContent = text;      /* a notice is read out, not only shown */
   showChipAt(anchor || pointer);
   fadeChipAfter(noticeLifetime(text));
 }
-function showInvite(label, anchor, accept){
+let chipFor = null;                     /* the ANDA an invite is for */
+function showInvite(label, anchor, accept, number){
   hideChip();
-  $("chipTxt").textContent = label; $("chipDot").hidden = false; $("chipGo").hidden = false; chipAccept = accept;
+  $("chipTxt").textContent = label; $("chipDot").hidden = false; $("chipGo").hidden = false; chipAccept = accept; chipFor = number || null;
+  $("chipSay").textContent = label + ". Press the shortcut again to open it, or click.";
   showChipAt(anchor || pointer);
   fadeChipAfter(6000);
 }
@@ -3373,7 +3377,7 @@ function fadeChipAfter(ms){
   clearTimeout(chipTimer);
   chipTimer = setTimeout(() => { chip.classList.add("fading"); chipTimer = setTimeout(hideChip, 520); }, ms);
 }
-function hideChip(){ clearTimeout(chipTimer); chip.style.display = "none"; chip.classList.remove("fading"); chipAccept = null; }
+function hideChip(){ clearTimeout(chipTimer); chip.style.display = "none"; chip.classList.remove("fading"); chipAccept = null; chipFor = null; }
 chip.addEventListener("click", () => { const go = chipAccept; hideChip(); if(go) go(); });
 
 /* ---------------- keystroke overlay ---------------- */
@@ -3479,7 +3483,10 @@ function hotkey(kind, source){
   if(compactId === number && compact.style.display === "block"){ expandCompact(); return; }   /* compact boxes never take focus: the hotkey again is the keyboard way in */
   /* Two-stage consent: the hotkey is stage one. In whisper mode an urgent ANDA skips the invite and opens a peek (no AI call). */
   const step = firstStep(number);
-  if(step === "invite"){ markStep("invite"); showInvite(`ANDA ${number}`, anchor, () => openCard(number, { anchor })); }
+  if(step === "invite"){
+    if(chipAccept && chipFor === number){ const go = chipAccept; hideChip(); go(); return; }      /* the invite never takes the keyboard: the shortcut again is the keyboard way to accept it */
+    markStep("invite"); showInvite(`ANDA ${number}`, anchor, () => openCard(number, { anchor }), number);
+  }
   else openCard(number, { mini: step === "peek", anchor });
 }
 document.addEventListener("keydown", e => {
@@ -3495,7 +3502,9 @@ document.addEventListener("keydown", e => {
     if($("replyMenu").style.display === "block"){ $("replyMenu").style.display = "none"; return; }
     if(menuOpen() || $("flyout").style.display === "block"){ closeMenus(); return; }
     closeCtx(); if(isOpen("mytodo") && clEditing){ clCancelEdit(); return; }
-    for(const id of APP_WINS) if($(id).style.display === "block"){ closeApp(id); return; }
+    { const open = APP_WINS.filter(id => $(id).style.display === "block");
+      if(open.length){ const z = id => parseInt(getComputedStyle($(id)).zIndex, 10) || 0, holder = open.find(id => $(id).contains(document.activeElement));
+        closeApp(holder || open.slice().sort((a, b) => z(b) - z(a))[0]); return; } }
     hideChip(); if(compact.style.display === "block") closeCompact(); if(card.style.display === "block") closeCard(); return;
   }
   /* a key typed into a box belongs to that box, even when the box has just opened the card and handed it the focus (Enter in the Lookup box used to act on the card as well) */
@@ -4931,14 +4940,37 @@ document.addEventListener("pointerdown", e => { if(!e.target.closest("#ctxmenu")
 $("wlDone").addEventListener("click", () => closeApp("wlist"));
 
 /* ---------------- app windows ---------------- */
-function showApp(id){ closeMenus(); $(id).style.display = "block"; if(isSheet()){ scrim.style.display = "block"; } if(id === "settings") onSettingsOpen(); }
+const appOpener = {};                   /* what had the keyboard when each window was opened */
+function showApp(id){
+  closeMenus();
+  const w = $(id), was = w.style.display === "block";
+  if(!was){ const from = document.activeElement; appOpener[id] = from && from !== document.body && !w.contains(from) ? from : null; }
+  w.style.display = "block"; if(isSheet()){ scrim.style.display = "block"; } if(id === "settings") onSettingsOpen();
+  /* The window itself takes the keyboard, so a screen reader says that it opened. A window that puts the caret in a box of its own does so right after. */
+  if(!was){ if(!w.hasAttribute("tabindex")) w.setAttribute("tabindex", "-1"); try{ w.focus({ preventScroll:true }); }catch(e){} }
+}
 function closeApp(id){
-  $(id).style.display = "none"; if(card.style.display !== "block") scrim.style.display = "none";
+  const w = $(id), held = w.style.display === "block" && (w.contains(document.activeElement) || document.activeElement === document.body), back = appOpener[id]; delete appOpener[id];
+  w.style.display = "none"; if(card.style.display !== "block") scrim.style.display = "none";
+  /* The keyboard goes back to where it was, when that is still on the screen: never to the page body. */
+  if(held && back && back.isConnected && back.getClientRects().length){ try{ back.focus({ preventScroll:true }); }catch(e){} }
   if(id === "todo") tdStop();                      /* nothing runs once the list is closed */
   if(id === "mytodo") clClose();                /* the same for the to-do list */
   if(id === "notes") clearTimeout(ntDebounce);
   if(id === "actwin") awToken++;                   /* a reply that arrives after the window is closed is dropped */
 }
+/* At phone width a window covers the screen, so Tab stays inside the one on top: nothing behind it can be reached with the keyboard. */
+document.addEventListener("keydown", e => {
+  if(e.key !== "Tab" || !isSheet()) return;
+  const open = APP_WINS.filter(id => $(id).style.display === "block"); if(!open.length) return;
+  const z = id => parseInt(getComputedStyle($(id)).zIndex, 10) || 0, w = $(open.sort((a, b) => z(b) - z(a))[0]);
+  const items = [...w.querySelectorAll('a[href],button,input,select,textarea,summary,[tabindex]:not([tabindex="-1"])')].filter(x => !x.disabled && x.getClientRects().length);
+  if(!items.length){ e.preventDefault(); return; }
+  const first = items[0], last = items[items.length - 1], at = document.activeElement, inside = w.contains(at) && at !== w;
+  if(!inside){ e.preventDefault(); (e.shiftKey ? last : first).focus(); }
+  else if(!e.shiftKey && at === last){ e.preventDefault(); first.focus(); }
+  else if(e.shiftKey && at === first){ e.preventDefault(); last.focus(); }
+}, true);
 scrim.addEventListener("click", () => {
   if(card.style.display === "block" && !pinnedCard) closeCard();
   APP_WINS.forEach(id => { if($(id).style.display === "block" && id !== "settings") closeApp(id); });
@@ -5115,7 +5147,7 @@ addEventListener("hashchange", () => { const on = location.hash === "#all"; if(o
 function exitApp(){
   state.running = false; closeCard(); hideChip(); hideWhisper(false); closeCtx(); APP_WINS.forEach(closeApp);
   $("appIcon").style.display = "none"; $("deskIcon").classList.add("attn");
-  showKeys("look", "The app has exited. Double-click Start-Demo.bat on the desktop to start it again.");
+  showKeys("look", "The app has exited. Double-click ANDA Companion on the desktop to start it again.");
 }
 $("deskIcon").addEventListener("dblclick", () => { if(state.running) showNotice("The app is already running. Click the ^ arrow near the clock to find its icon.", { x:innerWidth - 300, y:innerHeight - 140 }); else launch(); });
 $("deskIcon").addEventListener("click", e => { if(e.detail === 0 || coarse.matches) launch(); });
@@ -5385,8 +5417,9 @@ function replyValues(id){
     status:statusLine(id), today:longDate(demoToday()), psg:ref.psg, rld:ref.rld,
   };
 }
-function fillReply(tpl, id, extra){
-  const v = Object.assign(replyValues(id), extra || {});   /* one pass: a value is never read again as a placeholder */
+function fillReply(tpl, id, extra, forAi){
+  const own = replyValues(id); if(forAi) Object.keys(own).forEach(k => { own[k] = guardValue(own[k]); });      /* a prompt for an AI: see guardValue */
+  const v = Object.assign(own, extra || {});   /* one pass: a value is never read again as a placeholder */
   return tpl.replace(/\{([a-z]+)\}/g, (m, k) => k in v ? v[k] : m);
 }
 function openReplies(){
@@ -5598,7 +5631,7 @@ const presetAgents = () => [
 ];
 const isPreset = a => a.id === "alert-hub" || a.id === "patent-analysis" || a.id === "triaging-agent";
 Object.assign(state, { actions:starterActions(), agents:presetAgents(), todoAuto:true, todoRefresh:30, agentFail:false });
-const todoStore = { items:[], autoDone:{}, autoSnoozed:{}, seq:0 };
+const todoStore = { items:[], autoDone:{}, autoSnoozed:{}, seq:0, archive:[] };      /* archive: finished items the list no longer shows; the app keeps them in a file, never deletes them */
 let agentCache = {}, agentFailed = {}, agentBusy = {}, lookupHandler = null;
 
 /* ---- rules (MyActionRules, AgentRules) ---- */
@@ -5666,14 +5699,24 @@ function cleanSelection(text){
   const t = String(text == null ? "" : text).replace(/\r\n?/g, "\n").replace(/[\u0000-\u0008\u000B-\u001F\u007F-\u009F]/g, "").trim();
   return t.length > SEL_MAX ? t.slice(0, SEL_MAX) : t;
 }
-const fenceSel = s => "<selection>\n" + s.replace(/<\/\s*selection/gi, "</ selection") + "\n</selection>";
+/* Text that goes to an AI is put inside a fence. Three things keep it there: characters nobody can see (zero-width, soft hyphen, direction marks,
+   the Unicode tag block) are removed, and the line after the fence says how many; a bracket that only looks like "<" counts as one; and neither
+   tag of the fence can be written inside it. The same rules as the app's MyActions.Fence. */
+const FENCE_HIDDEN = /\p{Cf}/gu, FENCE_TAG = /([<\uFF1C\uFE64\u2039\u3008\u27E8])(\s*\/?\s*)(?=[s\u017F]election)/giu;
+const withoutFenceTags = t => t.replace(FENCE_TAG, (m, open, mid) => mid.includes("/") ? "</ " : "< ");
+function fenceSel(s){
+  let hidden = 0; const shown = String(s).replace(FENCE_HIDDEN, () => { hidden++; return ""; });
+  return "<selection>\n" + withoutFenceTags(shown) + "\n</selection>" + (hidden ? `\n(${hidden} invisible ${hidden === 1 ? "character was" : "characters were"} removed from the text above.)` : "");
+}
+/* A value from the person's data that goes into a prompt for an AI, outside the fence: one line, nothing hidden, no tag of the fence. */
+const guardValue = v => withoutFenceTags(String(v).replace(FENCE_HIDDEN, "").replace(/[\u0000-\u001F\u007F-\u009F]/g, " "));
 function fillNoRecord(tpl, extra){
   const v = {}; REPLY_HELP.forEach(k => { v[k] = MISSING; }); v.today = longDate(demoToday()); Object.assign(v, extra || {});
   return tpl.replace(/\{([a-z]+)\}/g, (m, k) => k in v ? v[k] : m);
 }
 function actionPrompt(tpl, id, selection, fence){
   const sel = cleanSelection(selection), extra = { selection:sel ? (fence ? fenceSel(sel) : sel) : MISSING };
-  return id ? fillReply(tpl, id, extra) : fillNoRecord(tpl, extra);
+  return id ? fillReply(tpl, id, extra, fence) : fillNoRecord(tpl, extra);
 }
 function actionTitle(tpl, id, selection){
   const sel = cleanSelection(selection);
@@ -5721,7 +5764,8 @@ const todoSetDone = (id, on) => { const i = todoById(id); if(!i) return; i.done 
 const todoSnooze = (id, until) => { const i = todoById(id); if(i){ i.snoozedUntil = isoDate(until); todoChanged(); } };
 const todoWake = id => { const i = todoById(id); if(i){ i.snoozedUntil = null; todoChanged(); } };
 const todoDelete = id => { const k = todoStore.items.findIndex(i => i.id === id); if(k >= 0){ todoStore.items.splice(k, 1); todoChanged(); } };
-function todoClearDone(){ const n = todoStore.items.filter(i => i.done).length; todoStore.items = todoStore.items.filter(i => !i.done); if(n) todoChanged(); return n; }
+function todoArchive(which, why){ const gone = todoStore.items.filter(which); gone.forEach(i => todoStore.archive.push({ archivedOn:isoDate(demoToday()), why, item:i })); todoStore.items = todoStore.items.filter(i => !gone.includes(i)); return gone.length; }
+function todoClearDone(){ const n = todoArchive(i => i.done, "cleared by the person"); if(n) todoChanged(); return n; }
 function dueDate(today, businessDays){ let d = today; for(let i = 0; i < Math.min(30, Math.max(0, businessDays)); i++) d = nextBiz(d); return d; }
 
 /* ---- the live list (TodoBuilder) ---- */
@@ -5763,7 +5807,7 @@ function todoView(){
   /* forget marks for items that no longer exist, ended snoozes and old finished items (TodoService.Prune) */
   Object.keys(todoStore.autoDone).forEach(k => { if(!live.has(k)) delete todoStore.autoDone[k]; });
   Object.keys(todoStore.autoSnoozed).forEach(k => { const u = parseIso(todoStore.autoSnoozed[k]); if(!live.has(k) || u == null || u <= today) delete todoStore.autoSnoozed[k]; });
-  todoStore.items = todoStore.items.filter(i => !(i.done && parseIso(i.doneOn) != null && Math.round((today - parseIso(i.doneOn)) / DAY) > KEEP_DONE_DAYS));
+  todoArchive(i => i.done && parseIso(i.doneOn) != null && Math.round((today - parseIso(i.doneOn)) / DAY) > KEEP_DONE_DAYS, `finished more than ${KEEP_DONE_DAYS} days ago`);
   todoStore.items.forEach(i => { if(i.snoozedUntil && (parseIso(i.snoozedUntil) == null || parseIso(i.snoozedUntil) <= today)) i.snoozedUntil = null; });
   const rank = s => s === "bad" ? 2 : s === "warn" ? 1 : 0;
   rows.sort((a, b) => a.priority - b.priority || (a.due == null ? 1 : 0) - (b.due == null ? 1 : 0) || (a.due || 0) - (b.due || 0) || rank(b.sev) - rank(a.sev)
@@ -5853,7 +5897,7 @@ $("tdAdd").addEventListener("click", tdAddTyped);
 $("tdAddIn").addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); tdAddTyped(); } });
 $("tdDone").addEventListener("click", () => closeApp("todo"));
 $("tdRefresh").addEventListener("click", () => tdReload(true));
-$("tdClear").addEventListener("click", () => { const n = todoClearDone(); $("tdAddStatus").textContent = n === 0 ? "Nothing finished to clear." : `Cleared ${n} finished ${n === 1 ? "item" : "items"}.`; });
+$("tdClear").addEventListener("click", () => { const n = todoClearDone(); $("tdAddStatus").textContent = n === 0 ? "Nothing finished to clear." : `Cleared ${n} finished ${n === 1 ? "item" : "items"}. ${n === 1 ? "It is" : "They are"} kept in the archive, not deleted.`; });
 todoListeners.add(() => tdReload(false));
 $("openTodoBtn").addEventListener("click", openTodo);
 
@@ -6201,7 +6245,7 @@ $("agAdd").addEventListener("click", () => {
   });
   $("todoAuto").addEventListener("change", e => { state.todoAuto = e.target.checked; tdReload(true); });
   $("todoOpen").addEventListener("click", openTodo);
-  $("todoClearSet").addEventListener("click", () => { const n = todoClearDone(); $("todoStatus").textContent = n === 0 ? "Nothing finished to clear." : `Cleared ${n} finished ${n === 1 ? "item" : "items"}.`; });
+  $("todoClearSet").addEventListener("click", () => { const n = todoClearDone(); $("todoStatus").textContent = n === 0 ? "Nothing finished to clear." : `Cleared ${n} finished ${n === 1 ? "item" : "items"}. ${n === 1 ? "It is" : "They are"} kept in the archive, not deleted.`; });
   renderActions(); renderAgents();
 })();
 
@@ -6511,7 +6555,8 @@ const NP = (() => {
 const CL_MAX = 500, CL_TITLE_MAX = 200, CL_KEEP_DONE = 30, CL_KEEP_COUNT = 60, CL_RECENT = 7, CL_SOON = 7;
 const CL_CATS = ["Work", "Personal", "Other"], CL_REPEATS = ["Does not repeat", "Every day", "Every weekday", "Every week", "Every month"];
 const CL_REPEAT_WORDS = ["never", "every day", "every weekday", "every week", "every month"];
-const clStore = { items:[], doneByDay:{}, seq:0 };
+const clStore = { items:[], doneByDay:{}, seq:0, archive:[] };      /* archive: as for the ANDA to-do list */
+function clArchive(which, why, today){ const gone = clStore.items.filter(which); gone.forEach(i => clStore.archive.push({ archivedOn:isoDate(today), why, item:i })); clStore.items = clStore.items.filter(i => !gone.includes(i)); return gone.length; }
 const clListeners = new Set();
 const clChanged = () => clListeners.forEach(f => f());
 const clToday = () => demoToday();
@@ -6570,7 +6615,7 @@ function clRestore(item){
 }
 function clClearFinished(){
   const n = clStore.items.filter(i => i.done && i.repeat === 0).length;
-  if(n) { clStore.items = clStore.items.filter(i => !(i.done && i.repeat === 0)); clChanged(); }
+  if(n) { clArchive(i => i.done && i.repeat === 0, "cleared by the person", demoToday()); clChanged(); }
   return n;
 }
 function clRollOver(today){
@@ -6593,7 +6638,7 @@ function clRefresh(today){
     else if(!i.done && i.due != null && i.due < today){ i.due = NP.onOrAfter(i.repeat, i.repeatDay, today); changed = true; }
   });
   const before = clStore.items.length;
-  clStore.items = clStore.items.filter(i => !(i.done && i.repeat === 0 && i.doneOn != null && (today - i.doneOn) / DAY > CL_KEEP_DONE));
+  clArchive(i => i.done && i.repeat === 0 && i.doneOn != null && (today - i.doneOn) / DAY > CL_KEEP_DONE, `finished more than ${CL_KEEP_DONE} days ago`, today);
   if(clStore.items.length !== before) changed = true;
   Object.keys(clStore.doneByDay).forEach(k => { const t = parseIso(k); if(t == null || (today - t) / DAY > CL_KEEP_COUNT){ delete clStore.doneByDay[k]; changed = true; } });
   if(changed) clChanged();
@@ -6802,7 +6847,7 @@ $("clAdd").addEventListener("click", clAddTyped);
 $("clNotesBtn").addEventListener("click", () => openNotes(""));
 $("clDone").addEventListener("click", () => closeApp("mytodo"));
 $("clRoll").addEventListener("click", () => { const n = clRollOver(clToday()); setText($("clStatus"), n === 0 ? "Nothing is overdue." : `Moved ${n} overdue ${n === 1 ? "item" : "items"} to today.`); });
-$("clClear").addEventListener("click", () => { const n = clClearFinished(); setText($("clStatus"), n === 0 ? "Nothing finished to clear. Finished items that repeat stay: they come back by themselves." : `Cleared ${n} finished ${n === 1 ? "item" : "items"}.`); });
+$("clClear").addEventListener("click", () => { const n = clClearFinished(); setText($("clStatus"), n === 0 ? "Nothing finished to clear. Finished items that repeat stay: they come back by themselves." : `Cleared ${n} finished ${n === 1 ? "item" : "items"}. ${n === 1 ? "It is" : "They are"} kept in the archive, not deleted.`); });
 $("clUndo").addEventListener("click", () => {
   setText($("clStatus"), clDeleted && clRestore(clDeleted) ? "Put back: " + clDeleted.title : "It could not be put back.");
   clDeleted = null; $("clUndo").hidden = true;
@@ -6902,7 +6947,7 @@ $("ntOpenList").addEventListener("click", () => openMyTodo());
   });
   $("clOpenSet").addEventListener("click", openMyTodo);
   $("clNotesSet").addEventListener("click", () => openNotes(""));
-  $("clClearSet").addEventListener("click", () => { const n = clClearFinished(); $("clSetStatus").textContent = n === 0 ? "Nothing finished to clear. Finished items that repeat stay: they come back by themselves." : `Cleared ${n} finished ${n === 1 ? "item" : "items"}.`; });
+  $("clClearSet").addEventListener("click", () => { const n = clClearFinished(); $("clSetStatus").textContent = n === 0 ? "Nothing finished to clear. Finished items that repeat stay: they come back by themselves." : `Cleared ${n} finished ${n === 1 ? "item" : "items"}. ${n === 1 ? "It is" : "They are"} kept in the archive, not deleted.`; });
 })();
 
 /* ---- Settings arrange themselves (SettingsAdvisor, SettingsWindow.Adaptive) ---- */
@@ -7083,17 +7128,22 @@ function importBackup(text){
   if(b.version > BACKUP_VERSION) return [false, "That backup is from a newer version of the app. Nothing was changed."];
   if(b.version !== BACKUP_VERSION) return [false, "That file is not a backup from this app. Nothing was changed."];
   const clean = (list, max) => (Array.isArray(list) ? list : []).slice(0, max).map(i => ({ name:str(i && i.name, 60, "").trim(), text:str(i && i.text, 4000, "").trim() })).filter(i => i.name && i.text);
-  const lenses = clean(b.lenses, 30), replies = clean(b.replies, 30);
-  prompts.splice(0, prompts.length, ...lenses.map(l => [l.name, l.text])); state.replies = replies;
+  /* A backup that holds no list of prompts or replies leaves the person's own alone: an absent list is not an empty one. */
+  const hasLenses = Array.isArray(b.lenses), hasReplies = Array.isArray(b.replies);
+  if(hasLenses) prompts.splice(0, prompts.length, ...clean(b.lenses, 30).map(l => [l.name, l.text]));
+  if(hasReplies) state.replies = clean(b.replies, 30);
+  const lenses = prompts, replies = state.replies;
+  const kept = hasLenses && hasReplies ? "" : " The backup held no " + (!hasLenses && !hasReplies ? "prompts or quick replies" : !hasLenses ? "prompts" : "quick replies") + ", so yours were kept.";
   applySettings(b.settings);
   /* a backup is a file anyone can edit or send: it never switches on a connection that sends data or a token off the PC (the address and variable name are kept to read) */
   const notes = [];
-  if(state.provider === "myapi"){ state.provider = "auto"; notes.push("My API was not switched on: please check its address and token variable name in Settings, then choose My API again."); }
+  if(state.provider === "myapi"){ state.provider = "offline"; notes.push("My API was not switched on: please check its address and token variable name in Settings, then choose My API again."); }
+  else if(state.provider !== "offline"){ state.provider = "offline"; notes.push("The AI connection was not switched on: please choose it again in Settings, Connection."); }
   const wereOn = state.agents.filter(a => a.enabled || a.auto !== 0).length;
   state.agents.forEach(a => { a.enabled = false; a.auto = 0; });
   if(wereOn) notes.push(`${wereOn === 1 ? "1 agent" : wereOn + " agents"} came back switched off: please check ${wereOn === 1 ? "its" : "their"} address in Settings, then switch ${wereOn === 1 ? "it" : "them"} on.`);
   if(notes.length) syncSettingsUI();
-  return [true, `Restored your settings, ${lenses.length} lens${lenses.length === 1 ? "" : "es"} and ${replies.length} quick repl${replies.length === 1 ? "y" : "ies"}. File locations on this PC were kept.` + (notes.length ? " " + notes.join(" ") : "")];
+  return [true, `Restored your settings, ${lenses.length} lens${lenses.length === 1 ? "" : "es"} and ${replies.length} quick repl${replies.length === 1 ? "y" : "ies"}. File locations on this PC were kept.${kept}` + (notes.length ? " " + notes.join(" ") : "")];
 }
 $("bkSave").addEventListener("click", () => {
   const text = backupText();

@@ -27,7 +27,7 @@ desktop, and says so on screen. The shortcut, clipboard and file pickers are sim
 
 1. Right-click the zip and choose **Extract All**. Do not run it from inside the zip.
 2. Optional: check the download. `Get-FileHash .\AndaCompanion.exe -Algorithm SHA256` must match `SHA256SUMS.txt`.
-3. Double-click **Start-Demo.bat**. Windows may say "Windows protected your PC", because the build is not code-signed.
+3. Double-click **AndaCompanion.exe**, then open **sample-memo.txt** in Notepad. (There is no launcher script: the demo keeps its settings in the `data` folder beside the program.) Windows may say "Windows protected your PC", because the build is not code-signed.
    That is expected. If your organization allows it, choose **More info**, then **Run anyway**.
 4. Find the tray icon near the clock. Windows 11 hides new icons under **^**, so drag it onto the taskbar.
 5. Right-click the icon. The last gray line of the menu says which shortcuts are live. All four should show a tick.

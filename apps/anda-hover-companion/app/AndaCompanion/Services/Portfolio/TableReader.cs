@@ -100,7 +100,8 @@ public static class TableReader
 
     private static FileStream Open(string path) => new(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
 
-    private static XmlReaderSettings Safe => new() { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null, IgnoreWhitespace = false };
+    // The reader itself stops at a fixed number of characters, so a part that declares one size and unpacks to another cannot fill memory.
+    private static XmlReaderSettings Safe => new() { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null, IgnoreWhitespace = false, MaxCharactersInDocument = 400_000_000 };
 
     public static RawTable ReadXlsx(string path)
     {
@@ -270,7 +271,8 @@ public static class TableReader
     {
         if (serial < 1 || serial > 2_958_465) return serial.ToString(CultureInfo.InvariantCulture);
         var baseDate = date1904 ? new DateTime(1904, 1, 1) : new DateTime(1899, 12, 30);
-        return baseDate.AddDays(Math.Floor(serial)).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        try { return baseDate.AddDays(Math.Floor(serial)).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture); }
+        catch (ArgumentOutOfRangeException) { return serial.ToString(CultureInfo.InvariantCulture); }      // a number past the last day a date can hold stays a number
     }
 
     internal static int ColumnIndex(string cellRef)
