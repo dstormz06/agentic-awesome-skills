@@ -54,7 +54,7 @@ const closeAll = async p => { for (let i = 0; i < 4; i++) { await p.keyboard.pre
   const alpha = alphaOf(lowest.bg);
   ok(alpha > 0.38 && alpha < 0.42, `the card surface is about 40% opaque (alpha ${alpha})`);
   ok(alphaOf(lowest.ink) === 1, 'the text colour stays fully opaque at 40%');
-  await p.screenshot({ path: 'out/r16_transparency_40.png' });
+  await p.screenshot({ path: TMP + '/r16_transparency_40.png' });      // a picture for the eye only; it is not kept in the repository's folders
   await p.$eval('#setOp', e => { e.value = 100; e.dispatchEvent(new Event('input', { bubbles: true })); });
   const full = await p.evaluate(() => getComputedStyle(document.getElementById('card')).backgroundColor);
   ok(alphaOf(full) === 1, 'at 100% the card is solid');
