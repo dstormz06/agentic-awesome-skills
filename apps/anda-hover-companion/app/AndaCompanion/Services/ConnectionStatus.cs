@@ -85,12 +85,14 @@ public sealed class ReportingChatCompleter(IChatCompleter inner) : IChatComplete
         {
             string text = await inner.CompleteAsync(system, user, maxTokens, ct);
             ConnectionStatus.Success(inner.ProviderName);
+            EventLog.Record("sent", $"AI request, {(system.Length + user.Length).ToString("#,0", System.Globalization.CultureInfo.InvariantCulture)} characters");      // that something was sent and how long it was, never the text
             return text;
         }
         catch (OperationCanceledException) { throw; }
         catch (Exception ex)
         {
             ConnectionStatus.Failure(inner.ProviderName, ex is ElsaException ? ex.Message : ex.GetType().Name);
+            EventLog.Record("send_failed", "AI request (" + ex.GetType().Name + ")");
             throw;
         }
     }

@@ -276,13 +276,14 @@ public class Round27UiTests : IClassFixture<HeadlessFixture>
     [Fact]
     public async Task My_sheet_since_last_week_keeps_nothing_until_switched_on_and_then_compares_with_the_last_copy()
     {
-        bool on = false; var switched = new List<bool>();
+        bool on = false, kept = false; int deleted = 0; var switched = new List<bool>();
         var r = await _fx.Session.Dispatch(() =>
         {
             ThemeManager.Apply(Appearances.Default);
             var w = new CompareWindow
             {
-                WeeklyOn = () => on, SetWeekly = v => { on = v; switched.Add(v); },
+                WeeklyOn = () => on, SetWeekly = v => { on = v; if (v) kept = true; switched.Add(v); },
+                HasWeeklyCopies = () => kept, DeleteWeekly = () => { deleted++; kept = false; return 2; },
                 WeeklyPair = () => (FileCompare.SampleA with { Name = "My sheet, copy kept Nov 10" }, FileCompare.SampleB with { Name = "My sheet, today" }, null),
             };
             w.Show(); Settle(); w.SetMode("week"); Settle();
@@ -291,14 +292,19 @@ public class Round27UiTests : IClassFixture<HeadlessFixture>
             box.IsChecked = true; Settle();
             var now = (w.Kind, w.Result?.ChangedRows, Name: w.FindControl<TextBlock>("NameA")!.Text, w.StatusText);
             box.IsChecked = false; Settle();
-            var after = (w.Kind, w.StatusText);
+            var del = w.FindControl<Button>("WeekDelBtn")!;
+            var after = (w.Kind, w.StatusText, Offered: del.IsVisible);
+            Click(del); Settle(); var asked = (del.Content as string, deleted, w.Kind);
+            Click(del); Settle(); var gone = (del.IsVisible, deleted, w.Kind, w.StatusText);
             w.Close();
-            return (off, now, after);
+            return (off, now, after, asked, gone);
         }, CancellationToken.None);
         Assert.Equal((false, false, null, false), (r.off.IsChecked, r.off.Pick, r.off.Kind, r.off.Copy));
         Assert.StartsWith("Nothing is kept yet.", r.off.Say);
         Assert.Equal(("table", 3, "My sheet, copy kept Nov 10: 6 rows, 7 columns", "From now on one copy of your sheet is kept each week, on this PC only."), (r.now.Kind, r.now.ChangedRows, r.now.Name, r.now.StatusText));
-        Assert.Equal((null, "No copies are kept, and the copies that were kept are deleted."), r.after);
+        Assert.Equal(("table", "No new copies are kept. The copies that exist stay until you delete them.", true), r.after);      // round 29: switching it off deletes nothing
+        Assert.Equal(("Click again to delete", 0, "table"), r.asked);                                                                 // the first press only asks
+        Assert.Equal((false, 1, null, "The kept copies were deleted. Nothing else was changed."), r.gone);                            // the second deletes, and says so
         Assert.Equal(new[] { true, false }, switched);
     }
 

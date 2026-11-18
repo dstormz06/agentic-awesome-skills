@@ -465,6 +465,28 @@ public class Round15Tests
     }
 
     [Fact]
+    public async Task Asking_an_agent_is_written_to_the_event_log_as_a_kind_and_a_size_and_an_agent_that_is_not_set_up_writes_nothing()
+    {
+        string path = Path.Combine(Temp.NewDir(), "events.csv");
+        try
+        {
+            EventLog.Configure(path);
+            var hub = Hub();
+            await new AgentService(() => new[] { hub }, Env, new Handler((_, _) => Json("{\"answer\":\"- one\"}"))).RunAsync(hub, Demo, Today, null, null);
+            await new AgentService(() => new[] { hub }, Env, new Handler((_, _) => new HttpResponseMessage(System.Net.HttpStatusCode.ServiceUnavailable))).RunAsync(hub, Demo, Today, null, null);
+            var off = Hub(a => a.Api.Endpoint = "");
+            await new AgentService(() => new[] { off }, Env, new Handler((_, _) => Json("{}"))).RunAsync(off, Demo, Today, null, null);      // never sent: nothing to write
+            var (entries, total) = EventLog.Read();
+            Assert.Equal(2, total);
+            Assert.Equal("sent", entries[0].Type); Assert.Matches("^agent request, [0-9,]+ characters$", entries[0].Detail);
+            Assert.Equal("send_failed", entries[1].Type); Assert.Matches("^agent request, [0-9,]+ characters$", entries[1].Detail);
+            string file = File.ReadAllText(path);
+            foreach (string secret in new[] { "216482", "Alert Hub", "agent.example.test", Token, "Metformin" }) Assert.DoesNotContain(secret, file);
+        }
+        finally { EventLog.Configure(null); }
+    }
+
+    [Fact]
     public async Task A_finding_is_not_fresh_after_the_clock_was_set_back_and_its_age_is_measured_in_UTC()
     {
         var hub = Hub(a => a.CacheMinutes = 15);

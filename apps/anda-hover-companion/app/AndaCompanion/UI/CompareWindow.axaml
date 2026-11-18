@@ -48,8 +48,9 @@
           </Grid>
           <StackPanel Name="WeekPanel" IsVisible="False" Spacing="4">
             <CheckBox Name="WeekBox">
-              <TextBlock TextWrapping="Wrap" FontSize="12.5" Foreground="{DynamicResource C.Ink}" Text="Keep one copy of my sheet each week, on this PC only, so I can see what changed. Off until I switch it on; switching it off deletes the copies."/>
+              <TextBlock TextWrapping="Wrap" FontSize="12.5" Foreground="{DynamicResource C.Ink}" Text="Keep one copy of my sheet each week, on this PC only, so I can see what changed. Off until I switch it on. Switching it off keeps the copies that exist; only you delete them."/>
             </CheckBox>
+            <Button Name="WeekDelBtn" Content="Delete the kept copies…" IsVisible="False" HorizontalAlignment="Left"/>
           </StackPanel>
           <WrapPanel>
             <Button Name="SampleBtn" Content="Use the sample files" Margin="0,0,10,6"/>

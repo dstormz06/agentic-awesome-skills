@@ -146,6 +146,19 @@ public class ShotTests : IClassFixture<HeadlessFixture>
             var handoff = new HandoffWindow("Hand-off page", true, (watchOnly, withNotes) => Handoff.Text("Hand-off", HandoffData.Entries(HandoffData.Order(repo27, ctx27, watchOnly), repo27, ctx27, null, null, null), "Jul 16, 2026", withNotes));
             handoff.Show(); handoff.NotesBox.IsChecked = true; for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
             Save(handoff, dir, "handoff-27");
+            // Round 29: the Connections and event log window, and a window with the line that says what is switched on.
+            var st29 = new ConnState(new ConnAi("Claude", "api.anthropic.com"), new[] { new ConnAgent("Alert Hub", "", false) }, null);
+            var t29 = new DateTime(2026, 7, 16, 13, 5, 7, DateTimeKind.Utc);
+            var ev29 = new List<EventEntry> { EventLog.Entry("connection", "AI switched on", t29), EventLog.Entry("sent", "AI request, 1,234 characters", t29.AddMinutes(2)), EventLog.Entry("file", "settings restored from a backup", t29.AddMinutes(9)), EventLog.Entry("deleted", "kept copies of the sheet", t29.AddMinutes(12)) };
+            var conn29 = new ConnectionsWindow(() => Connections.Describe(st29), () => (ev29, ev29.Count), () => EventLog.Csv(ev29), @"C:\Users\me\AppData\Roaming\AndaCompanion\events.csv", TimeZoneInfo.FindSystemTimeZoneById("America/New_York"));
+            conn29.Show(); for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
+            Save(conn29, dir, "connections-29");
+            var about29 = new AboutWindow();
+            var keepLine29 = ConnectionBar.Line; ConnectionBar.Line = () => Connections.Describe(st29).Line;
+            about29.Show(); ConnectionBar.Attach(about29); for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
+            Save(about29, dir, "about-29");
+            ConnectionBar.Line = keepLine29;
+            conn29.Close(); about29.Close();
             handoff.Close();
             var review27 = new DraftWindow("Certainly! Here is a revised version.\n\nANDA 216482: under 21 CFR 314.96(a) the amendment is minor. Please send your response by Friday, Dec 4, 2026.\n\nI hope this helps.",
                 repo27.Find, new WritingService(null), new Settings(), new PromptLibraryService(Path.Combine(Temp.NewDir(), "p5.json")), () => day27)

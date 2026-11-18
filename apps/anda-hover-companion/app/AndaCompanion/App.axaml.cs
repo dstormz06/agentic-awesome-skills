@@ -81,6 +81,13 @@ public partial class App : Application
         {
             desktop.ShutdownMode = Avalonia.Controls.ShutdownMode.OnExplicitShutdown;
 
+            // The event log is written from here on, and every window carries the line that says what is switched on.
+            if (SelfTestRun is null) EventLog.Configure(Path.Combine(AppPaths.Root, "events.csv"));
+            _connectionKinds = Connections.Kinds(Connections.From(_settings));
+            ConnectionBar.Line = () => Connections.Describe(Connections.From(_settings)).Line;
+            ConnectionBar.Open = OpenConnections;
+            Window.WindowOpenedEvent.AddClassHandler<Window>((w, _) => ConnectionBar.Attach(w));
+
             // Hotkeys first, so the tray menu can state truthfully which ones are live.
             _hotkeys = new HotkeyService(
                 onHotkey: id => _ = OnHotkeyAsync(id),
@@ -98,7 +105,12 @@ public partial class App : Application
             ApplyMouseTrigger();
 
             // A file of the person's own that could not be used as it was is said once, in plain words, with where it was set aside.
-            if (SelfTestRun is null && StartNotes() is { Length: > 0 } notes) Dispatcher.UIThread.Post(() => ShowNotice(notes), DispatcherPriority.Background);
+            if (SelfTestRun is null && StartNotes() is { Length: > 0 } notes)
+            {
+                foreach (var (what, note) in new[] { ("settings file", SettingsService.LoadNote), ("ANDA to-do list", _todo.LoadNote), ("to-do list", _myTodo.LoadNote), ("prompt library", _prompts.LoadNote), ("quick replies", _replies.LoadNote) })
+                    if (!string.IsNullOrEmpty(note)) EventLog.Record("file", what + " could not be used as it was at start");
+                Dispatcher.UIThread.Post(() => ShowNotice(notes), DispatcherPriority.Background);
+            }
 
             if (SelfTestRun is { } selfTest)
             {
@@ -401,6 +413,12 @@ public partial class App : Application
         var watch = new NativeMenuItem("Watch list…");
         watch.Click += (_, _) => OpenWatchList();
         menu.Add(watch);
+        var connections = new NativeMenuItem("Connections and event log…");
+        connections.Click += (_, _) => OpenConnections();
+        menu.Add(connections);
+        var about = new NativeMenuItem("About and what changed…");
+        about.Click += (_, _) => OpenAbout();
+        menu.Add(about);
         var todo = new NativeMenuItem("ANDA to-do list…");
         todo.Click += (_, _) => OpenTodoWindow();
         menu.Add(Full(todo));
@@ -515,6 +533,7 @@ public partial class App : Application
     private void ApplySettings()
     {
         SettingsService.Save(_settings);
+        ConnectionsChanged();
         ThemeManager.Apply(Edition.Appearance(_settings), Edition.Opacity(_settings));
         UsageLog.Configure(_settings.UsageLog && SelfTestRun is null);
         _hotkeys?.Reconfigure(HotkeyBindings());

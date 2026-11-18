@@ -207,6 +207,7 @@ public sealed class OutlookService : IDisposable
             using var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            EventLog.Record("sent", "Outlook search for one number");
             using var response = await _http.SendAsync(request, ct);
             if (!response.IsSuccessStatusCode)
             {

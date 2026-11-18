@@ -87,9 +87,11 @@ public partial class App
                 ? (r.GoalDateValue?.ToString("MMM d, yyyy", System.Globalization.CultureInfo.InvariantCulture) ?? "",
                    r.HasForecast && r.ForecastDateValue is { } f ? f.ToString("MMM d, yyyy", System.Globalization.CultureInfo.InvariantCulture) : "")
                 : null,
-            // My sheet since last week: off until the person switches it on; switching it off deletes the copies.
+            // My sheet since last week: off until the person switches it on. Switching it off keeps the copies that exist; only the person deletes them.
             WeeklyOn = () => _settings.KeepWeeklySheetCopy,
-            SetWeekly = on => { _settings.KeepWeeklySheetCopy = on; SettingsService.Save(_settings); if (!on) _sheetCopies.DeleteAll(); },
+            SetWeekly = on => { _settings.KeepWeeklySheetCopy = on; SettingsService.Save(_settings); EventLog.Record("file", on ? "weekly copy of the sheet switched on" : "weekly copy of the sheet switched off"); },
+            HasWeeklyCopies = () => _sheetCopies.Days().Count > 0,
+            DeleteWeekly = () => { int n = _sheetCopies.DeleteAll(); if (n > 0) EventLog.Record("deleted", "kept copies of the sheet"); return n; },
             WeeklyPair = WeeklySheetPair,
         };
         win.Closed += (_, _) => { if (ReferenceEquals(_compareWindow, win)) _compareWindow = null; };
@@ -109,7 +111,7 @@ public partial class App
         catch (Exception ex) when (ex is Services.Portfolio.PortfolioException or IOException or UnauthorizedAccessException or InvalidDataException or NotSupportedException or System.Xml.XmlException)
         { return (null, null, "Your portfolio file could not be read just now, so there is nothing to compare."); }
         var today = Today();
-        _sheetCopies.Capture(now, today);
+        if (_settings.KeepWeeklySheetCopy) _sheetCopies.Capture(now, today);      // a new copy is kept only while keeping is switched on
         return _sheetCopies.LatestBefore(today) is { } earlier
             ? (earlier.Table, now, null)
             : (null, null, "The first copy of your sheet was kept today. What changed will show here once a copy from an earlier day exists.");
@@ -128,6 +130,39 @@ public partial class App
     }
 
     private HandoffWindow? _handoffWindow;
+    private ConnectionsWindow? _connectionsWindow;
+    private AboutWindow? _aboutWindow;
+
+    /// <summary>What is switched on, with what each connection sends, where and what is kept; and the event log.</summary>
+    private void OpenConnections()
+    {
+        if (_connectionsWindow is not null) { _connectionsWindow.Paint(); _connectionsWindow.Activate(); return; }
+        var win = new ConnectionsWindow(() => Connections.Describe(Connections.From(_settings)), () => EventLog.Read(), () => EventLog.Csv(EventLog.Read(int.MaxValue).Entries), EventLog.FilePath);
+        win.Closed += (_, _) => { if (ReferenceEquals(_connectionsWindow, win)) _connectionsWindow = null; };
+        _connectionsWindow = win;
+        win.Show();
+    }
+
+    private void OpenAbout()
+    {
+        if (_aboutWindow is not null) { _aboutWindow.Activate(); return; }
+        var win = new AboutWindow();
+        win.Closed += (_, _) => { if (ReferenceEquals(_aboutWindow, win)) _aboutWindow = null; };
+        _aboutWindow = win;
+        win.Show();
+    }
+
+    private (bool Ai, int Agents, bool Outlook) _connectionKinds;
+
+    /// <summary>Called when settings change: every window's line follows, and a connection switched on or off is written to the event log once.</summary>
+    private void ConnectionsChanged()
+    {
+        var now = Connections.Kinds(Connections.From(_settings));
+        foreach (string line in Connections.Changes(_connectionKinds, now)) EventLog.Record("connection", line);
+        _connectionKinds = now;
+        ConnectionBar.Refresh();
+        _connectionsWindow?.Paint();
+    }
 
     /// <summary>The hand-off page (every ANDA, or those that need a look) or, with numbers, a meeting page for those ANDAs. Made on this PC; nothing is sent.</summary>
     private void OpenHandoff(IReadOnlyList<string>? numbers)

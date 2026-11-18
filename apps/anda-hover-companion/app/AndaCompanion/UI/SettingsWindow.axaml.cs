@@ -334,6 +334,7 @@ public partial class SettingsWindow : Window
             var (ok, message) = SettingsBackup.Import(text, _settings, _prompts, _replies, keepBeforeIn: AppPaths.Root);
             BackupStatus.Text = message;
             if (!ok) return;
+            EventLog.Record("file", "settings restored from a backup");
             Apply();
             RebuildActions(); RebuildAgents();           // the editors now hold the restored lists, not the old ones
             BackupStatus.Text = message + " Please open Settings again to see the new values.";

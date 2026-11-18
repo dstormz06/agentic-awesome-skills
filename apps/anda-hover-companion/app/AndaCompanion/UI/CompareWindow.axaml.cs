@@ -46,6 +46,17 @@ public partial class CompareWindow : Window
     /// <summary>The weekly copy of the person's sheet: whether it is on, how it is switched, and the pair to compare (the last kept copy and the sheet now).</summary>
     public Func<bool>? WeeklyOn { get; init; }
     public Action<bool>? SetWeekly { get; init; }
+
+    /// <summary>Whether a kept copy of the sheet exists, whether or not new ones are being kept.</summary>
+    public Func<bool>? HasWeeklyCopies { get; init; }
+
+    /// <summary>Deletes every kept copy and returns how many there were. Only ever called after the person asked and confirmed.</summary>
+    public Func<int>? DeleteWeekly { get; init; }
+
+    private bool _weekDelArmed;
+    private readonly Avalonia.Threading.DispatcherTimer _weekDelTimer = new() { Interval = TimeSpan.FromSeconds(5) };
+    private void DisarmWeekDelete() { _weekDelTimer.Stop(); _weekDelArmed = false; WeekDelBtn.Content = "Delete the kept copies…"; }
+    private bool WeekKept => WeeklyOn?.Invoke() == true || HasWeeklyCopies?.Invoke() == true;
     public Func<(CompareTable? Earlier, CompareTable? Now, string? Problem)>? WeeklyPair { get; init; }
 
     /// <summary>Opens the AI preview with the digest of the comparison. Absent when the app has no way to do that (a test, or no hook).</summary>
@@ -79,7 +90,17 @@ public partial class CompareWindow : Window
             bool on = WeekBox.IsChecked == true;
             SetWeekly?.Invoke(on);
             LoadWeek(); Paint(null);
-            Say(on ? "From now on one copy of your sheet is kept each week, on this PC only." : "No copies are kept, and the copies that were kept are deleted.");
+            Say(on ? "From now on one copy of your sheet is kept each week, on this PC only." : "No new copies are kept. The copies that exist stay until you delete them.");
+        };
+        // Deleting is the person's act, and it is asked twice: the first press only asks, and the question goes away by itself after five seconds.
+        _weekDelTimer.Tick += (_, _) => DisarmWeekDelete();
+        WeekDelBtn.Click += (_, _) =>
+        {
+            if (!_weekDelArmed) { _weekDelArmed = true; WeekDelBtn.Content = "Click again to delete"; _weekDelTimer.Stop(); _weekDelTimer.Start(); return; }
+            DisarmWeekDelete();
+            int n = DeleteWeekly?.Invoke() ?? 0;
+            LoadWeek(); Paint(null);
+            Say(n == 0 ? "There was nothing to delete." : $"The kept {(n == 1 ? "copy was" : "copies were")} deleted. Nothing else was changed.");
         };
         UseBtn.Click += (_, _) => UsePrompt();
         CheckBtn.Click += (_, _) => CheckAnswer();
@@ -149,7 +170,7 @@ public partial class CompareWindow : Window
     private void LoadWeek()
     {
         _a = _b = null; _docA = _docB = null; _weekProblem = null;
-        if (WeeklyOn?.Invoke() != true || WeeklyPair is null) return;
+        if (!WeekKept || WeeklyPair is null) return;      // a kept copy can be compared whether or not new ones are being kept
         var (earlier, now, problem) = WeeklyPair();
         if (earlier is null || now is null) { _weekProblem = problem ?? "There is no earlier copy of your sheet yet."; return; }
         _a = earlier; _b = now; NewFiles();
@@ -478,6 +499,7 @@ public partial class CompareWindow : Window
             bool data = _mode == "data", week = _mode == "week", weekOn = WeeklyOn?.Invoke() == true;
             PickGrid.IsVisible = !week; PickBPanel.IsVisible = !data; LabelA.Text = data ? "REPORT" : "EARLIER FILE"; PickA.Content = data ? "Choose the report…" : "Choose the earlier file…";
             WeekPanel.IsVisible = week; _settingWeek = true; WeekBox.IsChecked = weekOn; WeekBox.IsEnabled = SetWeekly is not null; _settingWeek = false;
+            WeekDelBtn.IsVisible = week && DeleteWeekly is not null && HasWeeklyCopies?.Invoke() == true;
             SampleBtn.IsVisible = SampleDocsBtn.IsVisible = _mode == "two"; SampleReportBtn.IsVisible = data && Mine is not null;
             KeyRow.IsVisible = !data && !(_docA is not null && (_docB is not null || _b is null));      // a column is chosen for tables only
             foreach (var b in new[] { CopyBtn, CopyAllBtn, SaveBtn, AiBtn, UseBtn, CheckBtn }) b.IsEnabled = false;
@@ -491,7 +513,7 @@ public partial class CompareWindow : Window
                 if (Narrative is null) ToolTip.SetTip(AiBtn, "Needs the running app and an AI connection set up in Settings.");
                 if (_fresh) { _fresh = false; UsageLog.Record("compare_files"); }      // once for a pair of files, not again for each look at it
             }
-            if (week && !weekOn) { KeyOff("Chosen when both files are in"); Note("Nothing is kept yet. When this is switched on, the app keeps one copy of your sheet each week, on this PC only, so it can show what changed since the last copy."); return true; }
+            if (week && !WeekKept) { KeyOff("Chosen when both files are in"); Note("Nothing is kept yet. When this is switched on, the app keeps one copy of your sheet each week, on this PC only, so it can show what changed since the last copy."); return true; }
             if (week && (_a is null || _b is null)) { KeyOff("Chosen when both files are in"); Note(_weekProblem ?? "There is no earlier copy of your sheet yet."); return true; }
             if (data)
             {
