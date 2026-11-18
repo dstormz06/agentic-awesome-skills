@@ -274,6 +274,7 @@ public partial class App : Application
             _repository.Current = repo.Status.Ok ? repo : _demo;          // an unreadable file falls back to the demo records, and Settings says why
         }
         else { _portfolio = null; _repository.Current = _demo; }
+        KeepWeeklyCopyIfAsked();
 
         // The stamp includes the file's time, so a file replaced by Update now (same path) is read again.
         string? stamp = _settings.ReferenceDataPath is { Length: > 0 } p0 ? p0 + "|" + (File.Exists(p0) ? File.GetLastWriteTimeUtc(p0).Ticks : 0) : null;
@@ -318,6 +319,13 @@ public partial class App : Application
         {
             // For the recall row: the person's own notes and open items. Read from the app's own files on this PC; nothing is sent.
             QuickNotes = _quickNotes, AndaTodo = () => _todo.Items, MyTodo = () => _myTodo.Items,
+            // Round 27: a follow-up for a reply the draft asks for, and an optional second opinion through the AI, after the usual preview.
+            AddFollowUp = (title, number, day) => _todo.Add(title, number, null, day, "Review a draft", Today()),
+            SecondOpinion = draft =>
+            {
+                var cursor = TextCaptureService.GetCursorPosition();
+                RunCustomAction(new CustomAction { Name = "Second opinion: an opinion, not evidence", Kind = ActionKind.AskAi, Template = SecondLook.AiTemplate, Enabled = true }, draft, new PixelPoint(cursor.X, cursor.Y), withoutRecord: true);
+            },
             OpenCard = number =>
             {
                 if (_repository.Find(number) is not { } record || win is null) return;
@@ -375,6 +383,9 @@ public partial class App : Application
         var compare = new NativeMenuItem("Compare two files…");
         compare.Click += (_, _) => OpenCompare();
         menu.Add(compare);
+        var handoff = new NativeMenuItem("Hand-off page…");
+        handoff.Click += (_, _) => OpenHandoff(null);
+        menu.Add(handoff);
         var watch = new NativeMenuItem("Watch list…");
         watch.Click += (_, _) => OpenWatchList();
         menu.Add(watch);

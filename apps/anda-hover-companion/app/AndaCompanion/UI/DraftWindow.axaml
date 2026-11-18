@@ -75,6 +75,21 @@
             </StackPanel>
           </Border>
 
+          <WrapPanel Name="RemindPanel" IsVisible="False" Margin="0,4,0,0">
+            <Button Name="RemindBtn" Margin="0,0,10,4" Content="Put a follow-up on my to-do list for that day"/>
+            <TextBlock Name="RemindText" Classes="hint" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite"/>
+          </WrapPanel>
+
+          <StackPanel Name="SignsPanel" IsVisible="False" Spacing="5" Margin="0,4,0,0">
+            <TextBlock Classes="lbl" Text="WORTH A SECOND LOOK · NOT A VERDICT ON WHO WROTE IT"/>
+            <StackPanel Name="SignsList" Spacing="5"/>
+            <TextBlock Name="SignsFine" Classes="hint"/>
+            <WrapPanel>
+              <Button Name="SecondOpinionBtn" Margin="0,0,10,4" Content="Ask my AI for a second opinion…"/>
+              <TextBlock Classes="hint" VerticalAlignment="Center" Text="Shown to you first. An AI's view of who wrote a text is an opinion, not evidence."/>
+            </WrapPanel>
+          </StackPanel>
+
           <StackPanel Name="RecallPanel" IsVisible="False" Spacing="6" Margin="0,4,0,0"/>
 
           <Expander Name="AiExpander" HorizontalAlignment="Stretch" Margin="0,4,0,0">

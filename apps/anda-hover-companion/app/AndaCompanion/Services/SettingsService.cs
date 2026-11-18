@@ -89,6 +89,9 @@ public sealed class Settings
 
     // ---- my data (Settings, My data): the RPM's own files, read-only and local ----
     public string? PortfolioPath { get; set; }
+
+    /// <summary>Keep one copy of the portfolio sheet each week, on this PC, so Compare can show what changed (round 27). Off until the person switches it on.</summary>
+    public bool KeepWeeklySheetCopy { get; set; }
     public Dictionary<string, string> PortfolioColumns { get; set; } = new();
     public string? NotesFolder { get; set; }
 

@@ -83,6 +83,29 @@ public sealed class ActionRunner(
             lines => AddLines(lines, ownerNumber, action.Name)));
     }
 
+    /// <summary>
+    /// A stored prompt that is already filled in, for example with what Compare two files found. It is only ever shown first: such a prompt is
+    /// never sent without the preview, whatever the action's own setting, because it can hold text from the person's files.
+    /// </summary>
+    /// <param name="holds">One sentence saying what the prompt holds (the differences only, or also the beginning of each file).</param>
+    public ActionOutcome RunPrepared(CustomAction action, string subject, string prompt, string holds)
+    {
+        string size = prompt.Length.ToString("#,0", System.Globalization.CultureInfo.InvariantCulture) + " characters";
+        if (action.Kind == ActionKind.FillPrompt)
+            return Show(new ActionWindowModel(action.Name, subject, "YOUR PROMPT, FILLED IN", prompt,
+                $"Nothing was sent anywhere. {holds} It is {size} long. Please copy the text into the tool you use.", "", null, "", false, null));
+        if (action.Kind != ActionKind.AskAi) return new ActionNotice("Only a prompt that is filled and shown, or one that asks your AI, can be used here.");
+        var probe = completer();
+        (probe as IDisposable)?.Dispose();
+        if (probe is null)
+            return Show(new ActionWindowModel(action.Name, subject, "YOUR PROMPT, FILLED IN", prompt,
+                $"No AI connection is ready, so nothing can be sent. {holds} It is {size} long. You can set a connection up in Settings, or copy this text into the tool you use. Nothing was sent.",
+                "", null, "", false, null));
+        return Show(new ActionWindowModel(action.Name, subject, "THIS IS EXACTLY WHAT WILL BE SENT", prompt,
+            $"Nothing has been sent yet. Pressing Send sends only the text above ({size}), with a short fixed instruction that treats it as data, to your AI connection ({connectionLabel()}). {holds}",
+            "THE REPLY, AS RECEIVED", ct => AskAiAsync(prompt, ct), "Send", false, lines => AddLines(lines, null, action.Name)));
+    }
+
     private async Task<ActionReply> AskAiAsync(string prompt, CancellationToken ct)
     {
         var c = completer();

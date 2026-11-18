@@ -240,15 +240,18 @@ public static class FileCompare
     }
 
     /// <summary>A one-page report to save: text only, with every value escaped.</summary>
-    public static string HtmlReport(CompareResult r, string nameA, string nameB)
+    public static string HtmlReport(CompareResult r, string nameA, string nameB) => HtmlPage($"Comparison: {nameA} and {nameB}", Report(r, nameA, nameB));
+
+    /// <summary>The page for any report: a title, the lines before the first blank line as paragraphs, the rest as they are. Every value is escaped, and the page carries a policy that lets it load and run nothing.</summary>
+    public static string HtmlPage(string title, IReadOnlyList<string> reportLines)
     {
         static string E(string t) => t.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;");
-        var lines = Report(r, nameA, nameB).ToList(); int cut = lines.IndexOf("");
+        var lines = reportLines.ToList(); int cut = lines.IndexOf("");
         string summary = string.Concat((cut < 0 ? lines : lines.Take(cut)).Select(l => $"<p>{E(l)}</p>"));
         string detail = cut < 0 ? "" : $"<pre>{E(string.Join("\n", lines.Skip(cut + 1)))}</pre>";
-        string title = $"Comparison: {E(nameA)} and {E(nameB)}";
-        return "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline'\"><title>" + title + "</title><style>body{font:15px/1.5 Segoe UI,Arial,sans-serif;max-width:820px;margin:32px auto;padding:0 16px;color:#1b2430}h1{font-size:22px}pre{white-space:pre-wrap;font:13px/1.5 Consolas,monospace;background:#f4f5f7;padding:12px;border-radius:8px}</style></head><body><h1>"
-            + title + "</h1>" + summary + detail + "<p><small>Made on this PC by fixed rules. No AI was used and nothing was sent.</small></p></body></html>";
+        string head = E(title);
+        return "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline'\"><title>" + head + "</title><style>body{font:15px/1.5 Segoe UI,Arial,sans-serif;max-width:820px;margin:32px auto;padding:0 16px;color:#1b2430}h1{font-size:22px}pre{white-space:pre-wrap;font:13px/1.5 Consolas,monospace;background:#f4f5f7;padding:12px;border-radius:8px}</style></head><body><h1>"
+            + head + "</h1>" + summary + detail + "<p><small>Made on this PC by fixed rules. No AI was used and nothing was sent.</small></p></body></html>";
     }
 
     // Two fictional versions of one report, for trying the tool with no file at hand. The same as the simulation's.

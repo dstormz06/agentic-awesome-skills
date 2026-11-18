@@ -360,6 +360,16 @@ internal static class SelfTestChecks
             if (invitation is null || invitation.Day != "2026-12-01" || invitation.Ics.Split("\r\n").Any(l => l.StartsWith("ATTENDEE", StringComparison.Ordinal)))
                 problems.Add("a calendar invitation was not made as expected");
 
+            // Round 27: two documents, an AI answer checked, signs worth a second look, a reply asked for by a date, a report against the data.
+            var docs = DocCompare.Compare(DocCompare.SampleA, DocCompare.SampleB);
+            if (docs.Same != 3 || docs.Changed != 1 || docs.Added != 1 || docs.Removed != 1) problems.Add($"comparing the two sample letters gave {docs.Same} same, {docs.Changed} changed, {docs.Added} new, {docs.Removed} gone");
+            if (AnswerCheck.Check("The goal moved to Oct 17, 2026, a slip of 21 days.", string.Join("\n", DocCompare.Report(docs, "a", "b"))).Missing is not ["21"]) problems.Add("the check of an AI answer did not single out the one value that stands nowhere");
+            var signs = SecondLook.Check("Certainly! Here is a draft under 21 CFR 314.96(a).");
+            if (signs.Items.Count != 2 || signs.Items.Any(i => i.Contains("written by", StringComparison.OrdinalIgnoreCase))) problems.Add("signs worth a second look were not listed as expected");
+            if (ReplyBy.Find("Please respond by Dec 4, 2026.", new DateOnly(2026, 11, 18))?.Day != "2026-12-04") problems.Add("a reply asked for by a date was not found");
+            var checkedReport = ReportCheck.Check(new CompareTable("r", new[] { "ANDA", "Goal date" }, new[] { new[] { "216482", "10/4/2026" } }), id => id == "216482" ? ("Oct 3, 2026", "") : null);
+            if (checkedReport.Differ != 1) problems.Add("a report was not checked against the data as expected");
+
             if (!HotkeyParser.TryParse("Ctrl+Alt+Shift+Q", out _, out _, out _, out _)) problems.Add("a valid shortcut was refused");
             if (HotkeyParser.TryParse("Q", out _, out _, out _, out _)) problems.Add("a bare letter was accepted as a shortcut");
 
@@ -372,7 +382,7 @@ internal static class SelfTestChecks
             File.Delete(csv);
 
             return problems.Count == 0
-                ? new(name, CheckStatus.Pass, "federal-calendar dates, weekend flag, draft check, proofreading, the extra fact checks, comparing two files, a calendar invitation, shortcut parsing and a sample portfolio file all behave; no network, nothing outside the self-test folder")
+                ? new(name, CheckStatus.Pass, "federal-calendar dates, weekend flag, draft check, proofreading, the extra fact checks, comparing two files and two documents, the check of an AI answer, a calendar invitation, shortcut parsing and a sample portfolio file all behave; no network, nothing outside the self-test folder")
                 : new(name, CheckStatus.Fail, string.Join("; ", problems));
         }
         catch (Exception ex) { return new(name, CheckStatus.Fail, ex.GetType().Name + ": " + ex.Message); }

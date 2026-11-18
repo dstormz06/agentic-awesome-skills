@@ -4479,7 +4479,8 @@ function askMore(){                      /* what else can be done with this sele
     } }));
     box.append(h("p", { class:"hint", id:"asIcsHint", text:`A date was found: ${inv.shown}. The invitation would read “${inv.title}”.` }));
   }
-  if(ids.length) acts.append(h("button", { class:"pill quiet", type:"button", id:"asMeeting", text:ids.length === 1 ? `Make a meeting page for ANDA ${ids[0]}` : `Make a meeting page for these ${ids.length} ANDAs`, onclick:() => openHandoff(knownIdsIn($("asText").value)) }));
+  const meet = knownIdsIn(text).slice(0, 8);      /* a meeting page holds up to eight ANDAs; a note is offered for the first three */
+  if(meet.length) acts.append(h("button", { class:"pill quiet", type:"button", id:"asMeeting", text:meet.length === 1 ? `Make a meeting page for ANDA ${meet[0]}` : `Make a meeting page for these ${meet.length} ANDAs`, onclick:() => openHandoff(knownIdsIn($("asText").value)) }));
   ids.forEach(id => acts.append(h("button", { class:"pill quiet", type:"button", "data-note-for":id, text:`Add to the notes of ANDA ${id}`, onclick:() => {
     const raw = $("asText").value, [ok, message] = addQuickNote(id, raw);
     if(ok){ usageRecord("note_added"); askStatus(`Added to your notes on ANDA ${id}.` + (raw.trim().length > QN_MAX ? ` Only the first ${QN_MAX} characters were kept.` : "") + " Open the card and press N to see it."); }

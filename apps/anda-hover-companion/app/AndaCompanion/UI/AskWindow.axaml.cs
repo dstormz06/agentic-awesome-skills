@@ -15,6 +15,9 @@ public sealed record AskHooks(
     public Func<string, string, (bool Ok, string Message)>? AddNote { get; init; }
     public Func<DateOnly>? Today { get; init; }
     public Func<string, Task<bool>>? SaveInvitation { get; init; }
+
+    /// <summary>Round 27: opens a meeting page for the ANDAs a selection names (up to eight).</summary>
+    public Action<IReadOnlyList<string>>? MeetingPage { get; init; }
 }
 
 /// <summary>
@@ -139,13 +142,20 @@ public partial class AskWindow : Window
         MoreButtons.Children.Clear();
         var invitation = string.IsNullOrWhiteSpace(text) ? null : Invitations.For(text, Today(), "", "");
         var ids = (_hooks.AddNote is null ? null : _hooks.KnownAndas?.Invoke(text))?.Take(3).ToList() ?? new List<string>();
-        MorePanel.IsVisible = invitation is not null || ids.Count > 0;
+        var meet = (_hooks.MeetingPage is null ? null : _hooks.KnownAndas?.Invoke(text))?.Take(8).ToList() ?? new List<string>();      // a meeting page holds up to eight ANDAs
+        MorePanel.IsVisible = invitation is not null || ids.Count > 0 || meet.Count > 0;
         InviteHint.IsVisible = invitation is not null;
         if (invitation is not null)
         {
             InviteHint.Text = $"A date was found: {invitation.Shown}. The invitation would read “{invitation.Title}”.";
             var b = new Button { Content = "Save a calendar invitation…", Margin = new Thickness(0, 0, 8, 6), Tag = "invitation" };
             b.Click += async (_, _) => await SaveInvitationAsync();
+            MoreButtons.Children.Add(b);
+        }
+        if (meet.Count > 0)
+        {
+            var b = new Button { Content = meet.Count == 1 ? $"Make a meeting page for ANDA {meet[0]}" : $"Make a meeting page for these {meet.Count} ANDAs", Margin = new Thickness(0, 0, 8, 6), Tag = "meeting" };
+            b.Click += (_, _) => _hooks.MeetingPage!(_hooks.KnownAndas!(SelectionBox.Text ?? "").Take(8).ToList());
             MoreButtons.Children.Add(b);
         }
         foreach (string id in ids)

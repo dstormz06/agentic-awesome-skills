@@ -124,6 +124,35 @@ public class ShotTests : IClassFixture<HeadlessFixture>
             askMore.Show(); for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
             Save(askMore, dir, "ask-26");
             askMore.Close();
+
+            // Round 27: two documents with a checked answer, a report against my data, the hand-off page, and Review with its two new rows.
+            var repo27 = new MockAndaRepository(); var day27 = new DateOnly(2026, 7, 16); var ctx27 = new CardContext(day27, new BusinessCalendar());
+            var docs = new CompareWindow
+            {
+                Narrative = _ => { }, RunPrompt = (_, _, _) => { }, Today = () => day27,
+                Prompts = () => new List<CustomAction> { new() { Name = "Compare and contrast", Kind = ActionKind.AskAi, Template = "Compare.\n\n{selection}", Enabled = true } },
+                Mine = id => repo27.Find(id) is { } rec ? (rec.GoalDateValue?.ToString("MMM d, yyyy", System.Globalization.CultureInfo.InvariantCulture) ?? "", rec.ForecastDateValue?.ToString("MMM d, yyyy", System.Globalization.CultureInfo.InvariantCulture) ?? "") : null,
+            };
+            docs.Show(); Settle();
+            docs.FindControl<Button>("SampleDocsBtn")!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
+            docs.FindControl<TextBox>("AnswerBox")!.Text = "The goal date moved from Oct 3, 2026 to Oct 17, 2026, a slip of 21 days, and paragraph 9 was dropped.";
+            docs.FindControl<Button>("CheckBtn")!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
+            for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
+            Save(docs, dir, "compare-27-documents");
+            docs.SetMode("data"); docs.FindControl<Button>("SampleReportBtn")!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
+            for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
+            Save(docs, dir, "compare-27-report");
+            docs.Close();
+            var handoff = new HandoffWindow("Hand-off page", true, (watchOnly, withNotes) => Handoff.Text("Hand-off", HandoffData.Entries(HandoffData.Order(repo27, ctx27, watchOnly), repo27, ctx27, null, null, null), "Jul 16, 2026", withNotes));
+            handoff.Show(); for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
+            Save(handoff, dir, "handoff-27");
+            handoff.Close();
+            var review27 = new DraftWindow("Certainly! Here is a revised version.\n\nANDA 216482: under 21 CFR 314.96(a) the amendment is minor. Please send your response by Friday, Dec 4, 2026.\n\nI hope this helps.",
+                repo27.Find, new WritingService(null), new Settings(), new PromptLibraryService(Path.Combine(Temp.NewDir(), "p5.json")), () => day27)
+                { AddFollowUp = (_, _, _) => new TodoAddResult(null, true, null), SecondOpinion = _ => { } };
+            review27.Show(); review27.SetView("facts"); for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
+            Save(review27, dir, "review-27");
+            review27.Close();
         }, CancellationToken.None);
     }
 }

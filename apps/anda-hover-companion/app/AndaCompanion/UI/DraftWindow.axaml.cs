@@ -43,6 +43,13 @@ public partial class DraftWindow : Window
     public Func<IEnumerable<MyTodoItem>>? MyTodo { get; init; }
     public Action<string>? OpenCard { get; init; }
 
+    /// <summary>Round 27. Adds a follow-up to the ANDA to-do list (title, ANDA number or null, the day): the result says whether it was new.</summary>
+    public Func<string, string?, DateOnly, TodoAddResult>? AddFollowUp { get; init; }
+
+    /// <summary>Round 27. Opens the usual AI preview with the second-opinion prompt for the draft. Absent when the app has no way to do that.</summary>
+    public Action<string>? SecondOpinion { get; init; }
+    private ReplyReminder? _remind;
+
     public ProofResult Proof => _proof;
 
     public DraftWindow(string draft, Func<string, AndaRecord?> lookup, WritingService writing, Settings settings, PromptLibraryService prompts,
@@ -57,6 +64,8 @@ public partial class DraftWindow : Window
         _debounce.Tick += (_, _) => { _debounce.Stop(); RunCheck(); };
 
         ViewAllBtn.Click += (_, _) => SetView("all");
+        RemindBtn.Click += (_, _) => AddReminder();
+        SecondOpinionBtn.Click += (_, _) => SecondOpinion?.Invoke(DraftBox.Text ?? "");
         ViewProofBtn.Click += (_, _) => SetView("proof");
         ViewFactBtn.Click += (_, _) => SetView("facts");
         SampleBtn.IsVisible = lookup("216482") is { Demo: true };          // the sample draft is about the sample records
@@ -191,6 +200,7 @@ public partial class DraftWindow : Window
             SendBox.Background = question.Gap ? Res("C.WarnBg") : null;
         }
 
+        PaintRemind(text); PaintSigns(text);
         PaintRecall(text);
         UsageLog.Record("draft_check");
         return result;
@@ -241,6 +251,41 @@ public partial class DraftWindow : Window
     }
 
     /// <summary>For recall: for each ANDA the draft names, the person's notes (the ones the draft touches first) and open items, folded.</summary>
+    /// <summary>When the draft asks for a reply by a date, the person can put a follow-up on the to-do list for that day. The mailbox is not read.</summary>
+    private void PaintRemind(string text)
+    {
+        _remind = View != "proof" && !string.IsNullOrWhiteSpace(text) && AddFollowUp is not null ? ReplyBy.Find(text, _today()) : null;
+        RemindPanel.IsVisible = _remind is not null;
+        if (_remind is null) return;
+        RemindBtn.IsEnabled = true;
+        RemindText.Text = $"Your draft asks for a reply by {_remind.Shown}.";
+    }
+
+    private void AddReminder()
+    {
+        if (_remind is null || AddFollowUp is null) return;
+        var day = DateOnly.ParseExact(_remind.Day, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+        var result = AddFollowUp(_remind.Title, _remind.Number, day);
+        RemindText.Text = result.Reason ?? (result.Added
+            ? $"Added to your ANDA to-do list for {_remind.Shown}. This tool does not read your mail, so it cannot know whether a reply came."
+            : "That is already on your to-do list.");
+        if (result.Added) RemindBtn.IsEnabled = false;
+    }
+
+    /// <summary>Signs worth a second look: things to check, with the reason. Never a statement about who or what wrote the text.</summary>
+    private void PaintSigns(string text)
+    {
+        SignsList.Children.Clear();
+        SignsPanel.IsVisible = View != "proof" && !string.IsNullOrWhiteSpace(text);
+        if (!SignsPanel.IsVisible) return;
+        var r = Services.SecondLook.Check(text);
+        SecondOpinionBtn.IsVisible = SecondOpinion is not null;
+        if (r.Items.Count == 0) { SignsList.Children.Add(Row("✓", "C.Good", Services.SecondLook.None, "C.Ink")); SignsFine.IsVisible = false; return; }
+        foreach (string item in r.Items) SignsList.Children.Add(Row("•", "C.Ink3", item, "C.Ink"));
+        SignsList.Children.Add(Row("→", "C.Ink3", string.Join("\n", Services.SecondLook.Response), "C.Ink"));
+        SignsFine.Text = Services.SecondLook.NotAVerdict; SignsFine.IsVisible = true;
+    }
+
     private void PaintRecall(string text)
     {
         RecallPanel.Children.Clear();
