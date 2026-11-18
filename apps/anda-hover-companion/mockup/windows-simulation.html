@@ -775,7 +775,19 @@ details.myapi input,details.myapi textarea{margin:0 0 6px}
 body:not(.all-tools) .full-only{display:none !important}
 #mytodo,#notes,#ask{z-index:52}
 #ask{width:640px;padding:18px 20px;left:calc(50% - 320px);top:44px;max-height:calc(100% - var(--tb-h) - 60px);overflow:auto}
-#cmp,#usage{z-index:52}
+#cmp,#usage,#handoff{z-index:52}
+#handoff{width:640px;padding:18px 20px;left:calc(50% - 320px);top:50px;max-height:calc(100% - var(--tb-h) - 56px);overflow:auto}
+#handoff .acts{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+#handoff textarea,#cmp textarea{width:100%;resize:vertical;font-size:calc(12.5px*var(--ts))}
+#handoff textarea{font-family:ui-monospace,Consolas,monospace;font-size:calc(12px*var(--ts))}
+#cmp .cm-say,#cmp .cm-diffs p,#cmp .cm-check{margin:6px 0 0;font-size:calc(13px*var(--ts));line-height:1.45;color:var(--c-ink);overflow-wrap:anywhere}
+#cmp .cm-check.miss{padding:8px 10px;border-radius:8px;background:var(--c-warn-bg);color:var(--c-warn)}
+#cmp #cmPrompt{width:auto;min-width:260px;max-width:100%}
+#drSigns .lbl,#drRemind{margin-top:10px}
+#cmp .pill.quiet[aria-pressed="true"],#handoff .pill.quiet[aria-pressed="true"]{background:var(--c-accent);color:#fff}
+#cmp .cm-table thead th:first-child{white-space:nowrap}
+#cmKeyRow{display:inline-flex;gap:8px;align-items:center}
+#cmKeyRow[hidden]{display:none}
 #cmp{width:680px;padding:18px 20px;left:calc(50% - 340px);top:40px;max-height:calc(100% - var(--tb-h) - 56px);overflow:auto}
 #usage{width:480px;padding:18px 20px;left:calc(50% - 240px);top:70px}
 #cmp .acts,#usage .acts{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
@@ -1613,6 +1625,8 @@ PS C:\work&gt; </div>
       <div id="drProof" aria-live="polite"></div>
     </div>
     <div id="drSend" aria-live="polite"></div>
+    <div id="drRemind" hidden></div>
+    <div id="drSigns" aria-live="polite" hidden></div>
     <div id="drRecall"></div>
     <details id="drAiBox"><summary>AI options <span id="drAiState">· off</span></summary>
       <div class="lbl">AI ACTIONS · NEED AN APPROVED MODEL, OR THE AI BUILT INTO THIS PC</div>
@@ -1736,17 +1750,40 @@ PS C:\work&gt; </div>
   <!-- ===== Compare two files (round 26): two versions of the same report, by fixed rules ===== -->
   <div class="app-win" id="cmp" role="dialog" aria-label="Compare two files">
     <div class="hdr"><h2>Compare two files</h2><button class="pill" id="cmClose" type="button">Close</button></div>
-    <p class="hint">Two versions of the same report. Everything here runs on this PC by fixed rules: no AI is used and nothing is sent.</p>
-    <div class="cm-pick">
-      <div><label class="lbl" for="cmFileA">EARLIER FILE</label><input type="file" id="cmFileA" accept=".csv,.tsv,.txt,text/csv"><p class="hint" id="cmNameA">No file yet.</p></div>
-      <div><label class="lbl" for="cmFileB">LATER FILE</label><input type="file" id="cmFileB" accept=".csv,.tsv,.txt,text/csv"><p class="hint" id="cmNameB">No file yet.</p></div>
+    <p class="hint">Two versions of the same report or document. Everything here runs on this PC by fixed rules: no AI is used and nothing is sent.</p>
+    <div class="acts" role="group" aria-label="What to compare"><button class="pill quiet" id="cmModeTwo" type="button" aria-pressed="true">Two files</button><button class="pill quiet" id="cmModeData" type="button" aria-pressed="false">A report against my data</button><button class="pill quiet" id="cmModeWeek" type="button" aria-pressed="false">My sheet since last week</button></div>
+    <div class="cm-pick" id="cmPick">
+      <div><label class="lbl" for="cmFileA" id="cmLblA">EARLIER FILE</label><input type="file" id="cmFileA" accept=".csv,.tsv,.txt,.md,text/csv,text/plain"><p class="hint" id="cmNameA">No file yet.</p></div>
+      <div id="cmPickB"><label class="lbl" for="cmFileB">LATER FILE</label><input type="file" id="cmFileB" accept=".csv,.tsv,.txt,.md,text/csv,text/plain"><p class="hint" id="cmNameB">No file yet.</p></div>
     </div>
-    <div class="acts" style="align-items:center"><button class="pill quiet" id="cmSample" type="button">Use the sample files</button><label for="cmKey" style="font-size:12.5px;color:var(--c-ink2)">Match rows by</label><select id="cmKey" disabled><option value="">Chosen when both files are in</option></select></div>
+    <div id="cmWeek" hidden><label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;margin-top:10px"><input type="checkbox" id="cmWeekOn"><span>Keep one copy of my sheet each week, on this PC only, so I can see what changed. Off until I switch it on; switching it off deletes the copies.</span></label></div>
+    <div class="acts" style="align-items:center"><button class="pill quiet" id="cmSample" type="button">Use the sample files</button><button class="pill quiet" id="cmSampleDocs" type="button">Use two sample letters</button><button class="pill quiet" id="cmSampleReport" type="button" hidden>Use the sample report</button><span id="cmKeyRow"><label for="cmKey" style="font-size:12.5px;color:var(--c-ink2)">Match rows by</label><select id="cmKey" disabled><option value="">Chosen when both files are in</option></select></span></div>
     <div id="cmOut" aria-live="polite"></div>
     <hr class="hair">
     <div class="acts"><button class="pill quiet" id="cmCopy" type="button" disabled>Copy the summary</button><button class="pill quiet" id="cmCopyAll" type="button" disabled>Copy the full report</button><button class="pill quiet" id="cmSave" type="button" disabled>Save a report</button><button class="pill quiet" id="cmAi" type="button" disabled>Write a narrative with AI…</button></div>
     <p class="hint" id="cmStatus" role="status"></p>
-    <p class="hint">This page reads CSV files; the Windows app also reads Excel workbooks (.xlsx). The narrative uses your AI only after a preview, and only the summary and listed changes are in it, never the files.</p>
+    <hr class="hair">
+    <div class="lbl">ASK WITH ONE OF MY PROMPTS · SHOWN TO YOU FIRST</div>
+    <div class="acts" style="align-items:center"><select id="cmPrompt" aria-label="One of my stored prompts" disabled><option value="">No stored prompts yet. Add one under Settings.</option></select><button class="pill quiet" id="cmUse" type="button" disabled>Use this prompt…</button></div>
+    <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;margin-top:8px"><input type="checkbox" id="cmWhole"><span>Also give it the beginning of each file (up to 6,000 characters each). Without this, the prompt gets only the differences the rules found.</span></label>
+    <hr class="hair">
+    <div class="lbl"><label for="cmAnswer">CHECK AN AI ANSWER · ON THIS PC, NO AI</label></div>
+    <textarea id="cmAnswer" rows="3" maxlength="20000" placeholder="Paste an answer about these files here. Every number, date and name with a digit in it is looked up in the comparison and in the two files."></textarea>
+    <div class="acts"><button class="pill quiet" id="cmCheckBtn" type="button" disabled>Check the answer</button></div>
+    <div id="cmCheckOut" aria-live="polite"></div>
+    <p class="hint">This page reads CSV tables and plain text (.txt, .md); the Windows app also reads Excel workbooks (.xlsx) and Word documents (.docx). Nothing goes to an AI unless you press Send on a preview that shows every character.</p>
+  </div>
+
+  <!-- ===== Hand-off page and meeting page (round 27): from the person's own data and notes, by fixed rules ===== -->
+  <div class="app-win" id="handoff" role="dialog" aria-label="Hand-off page">
+    <div class="hdr"><h2 id="hoTitle">Hand-off page</h2><button class="pill" id="hoClose" type="button">Close</button></div>
+    <p class="hint">Made from your own data and notes on this PC, by fixed rules. No AI is used and nothing is sent. You decide who gets it.</p>
+    <div class="acts" role="group" aria-label="Which ANDAs" id="hoModes"><button class="pill quiet" id="hoAll" type="button" aria-pressed="true">Every ANDA in my data</button><button class="pill quiet" id="hoWatch" type="button" aria-pressed="false">Only those that need a look</button></div>
+    <label style="display:flex;gap:8px;align-items:center;font-size:13px;margin-top:10px"><input type="checkbox" id="hoNotes" checked><span>Include my notes</span></label>
+    <textarea id="hoOut" readonly rows="14" aria-label="The page, as text" style="margin-top:10px"></textarea>
+    <div class="acts"><button class="pill quiet" id="hoCopy" type="button">Copy the page</button><button class="pill quiet" id="hoSave" type="button">Save as a text file</button></div>
+    <p class="hint" id="hoStatus" role="status"></p>
+    <p class="hint">It is what your data and notes say today, not the system of record. Please read it before you pass it on.</p>
   </div>
 
   <!-- ===== My usage (round 26): counts only, off until switched on ===== -->
@@ -2406,7 +2443,7 @@ const state = { dir:"x", look:"x", form:"full", autoHide:10, mode:"whisper", esc
   cardFields:["applicant", "established", "project", "agentCo", "agentEmail", "applicantEmail", "myNotes", "doc356h", "doc32p1"],
   watchOn:false, newsOn:false, newsFile:"", watchCap:3, trayRecount:"daily", wDay:null, wCount:0, wSeen:new Set(), wSnoozed:new Set(), hubSeen:new Set() };
 const steps = {};
-const APP_WINS = ["lookup", "plib", "settings", "draft", "wlist", "replies", "actwin", "todo", "mytodo", "notes", "ask", "today", "hub", "cmp", "usage"];
+const APP_WINS = ["lookup", "plib", "settings", "draft", "wlist", "replies", "actwin", "todo", "mytodo", "notes", "ask", "today", "hub", "cmp", "usage", "handoff"];
 
 /* ================= round 19 =================
    1. Card details: columns of the person's own sheet, shown when a card is expanded, each with Copy. Nothing is looked up anywhere.
@@ -3834,6 +3871,251 @@ const READ_PROMPTS = [
   ["Why does it matter?", "In three or four sentences, say why the text below matters to the reader, what decision or action it calls for, and by when, if it says. Use only what the text says.\n\n{selection}"],
 ];
 
+/* ---- Round 27: rules for two documents, a saved prompt on two files, checking an AI answer, signs worth a second look, a reminder for a reply,
+   a hand-off page and a report checked against the person's data. All fixed rules on this PC: no AI is used and nothing is sent by any of them.
+   The Windows app holds the same rules; mockup/round27-golden.json holds the cases both must answer alike. */
+const DOC_MAX_PARAS = 2000, DOC_MAX_CHANGES = 60, DOC_SHOW = 240, CMP_PART_MAX = 6000;
+function cutAt(t, n){ if(t.length <= n) return t; let cut = n; const c = t.charCodeAt(cut - 1); if(c >= 0xD800 && c <= 0xDBFF) cut--; return t.slice(0, cut); }      /* never through the middle of one character */
+function aiClean(text){            /* what may go into a prompt: line breaks made plain, control characters removed */
+  const t = String(text == null ? "" : text).replace(/\r\n?/g, "\n"); let out = "";
+  for(let i = 0; i < t.length; i++){ const c = t.charCodeAt(i); if((c < 32 && c !== 10 && c !== 9) || (c >= 127 && c <= 159)) continue; out += t[i]; }
+  return out.trim();
+}
+function docParas(text){           /* a document as paragraphs: blocks between blank lines, or lines when there are no blank lines; spacing made single */
+  const t = String(text == null ? "" : text).replace(/\r\n?/g, "\n");
+  let blocks = t.split(/\n[ \t]*\n/);
+  const lines = t.split("\n").filter(l => l.trim() !== "");
+  if(blocks.filter(b => b.trim() !== "").length <= 2 && lines.length > 3) blocks = lines;
+  return blocks.map(b => b.replace(/\s+/g, " ").trim()).filter(b => b !== "");
+}
+function docLcs(a, b){             /* the longest list of equal paragraphs in the same order, as pairs of positions */
+  let s = 0; while(s < a.length && s < b.length && a[s] === b[s]) s++;
+  let ea = a.length, eb = b.length; while(ea > s && eb > s && a[ea - 1] === b[eb - 1]){ ea--; eb--; }
+  const n = ea - s, m = eb - s, pairs = []; let skipped = false;
+  for(let i = 0; i < s; i++) pairs.push([i, i]);
+  if(n > 0 && m > 0){
+    if(n > DOC_MAX_PARAS || m > DOC_MAX_PARAS) skipped = true;
+    else {
+      const w = m + 1, L = new Int32Array((n + 1) * w);
+      for(let i = n - 1; i >= 0; i--) for(let j = m - 1; j >= 0; j--) L[i * w + j] = a[s + i] === b[s + j] ? L[(i + 1) * w + j + 1] + 1 : Math.max(L[(i + 1) * w + j], L[i * w + j + 1]);
+      let i = 0, j = 0;
+      while(i < n && j < m){ if(a[s + i] === b[s + j]){ pairs.push([s + i, s + j]); i++; j++; } else if(L[(i + 1) * w + j] >= L[i * w + j + 1]) i++; else j++; }
+    }
+  }
+  for(let k = 0; k < a.length - ea; k++) pairs.push([ea + k, eb + k]);
+  return { pairs, skipped };
+}
+function docAlike(x, y){           /* two paragraphs that share at least half of their words: one is shown as a changed form of the other */
+  const wa = x.split(" "), wb = y.split(" "), count = new Map(); let common = 0;
+  for(const w of wa) count.set(w, (count.get(w) || 0) + 1);
+  for(const w of wb){ const c = count.get(w) || 0; if(c > 0){ common++; count.set(w, c - 1); } }
+  return common * 4 >= wa.length + wb.length;
+}
+function docAround(x, y){          /* both forms of a changed paragraph, starting a little before the first difference */
+  let d = 0; const lim = Math.min(x.length, y.length); while(d < lim && x[d] === y[d]) d++;
+  let start = d > 60 ? d - 60 : 0;
+  if(start > 0){ const sp = x.indexOf(" ", start); if(sp >= 0 && sp < d) start = sp + 1; else { const c = x.charCodeAt(start); if(c >= 0xDC00 && c <= 0xDFFF) start++; } }
+  const part = t => (start > 0 ? "…" : "") + cmpShow(t.slice(start), DOC_SHOW);
+  return [part(x), part(y)];
+}
+function docCompare(textA, textB){
+  const a = docParas(textA), b = docParas(textB), found = docLcs(a, b);
+  const out = { parasA:a.length, parasB:b.length, same:found.pairs.length, changed:0, added:0, removed:0, changes:[], skipped:found.skipped };
+  const push = c => { if(out.changes.length < DOC_MAX_CHANGES) out.changes.push(c); };
+  const gap = (ia, ja, ib, jb) => {      /* paragraphs a[ia..ja) and b[ib..jb) lie between two matches */
+    const k = Math.min(ja - ia, jb - ib);
+    for(let x = 0; x < k; x++){
+      const p = a[ia + x], q = b[ib + x];
+      if(docAlike(p, q)){ out.changed++; const two = docAround(p, q); push({ kind:"changed", at:ib + x + 1, from:two[0], to:two[1] }); }
+      else { out.removed++; push({ kind:"removed", at:ia + x + 1, from:cmpShow(p, DOC_SHOW), to:"" }); out.added++; push({ kind:"added", at:ib + x + 1, from:"", to:cmpShow(q, DOC_SHOW) }); }
+    }
+    for(let x = ia + k; x < ja; x++){ out.removed++; push({ kind:"removed", at:x + 1, from:cmpShow(a[x], DOC_SHOW), to:"" }); }
+    for(let x = ib + k; x < jb; x++){ out.added++; push({ kind:"added", at:x + 1, from:"", to:cmpShow(b[x], DOC_SHOW) }); }
+  };
+  let pi = 0, pj = 0;
+  for(const pr of found.pairs){ gap(pi, pr[0], pj, pr[1]); pi = pr[0] + 1; pj = pr[1] + 1; }
+  gap(pi, a.length, pj, b.length);
+  return out;
+}
+function docSummary(r, nameA, nameB){
+  const n = x => x.toLocaleString("en-US"), paras = x => `${n(x)} ${cmpPlural(x, "paragraph", "paragraphs")}`, lines = [];
+  lines.push(`${nameA} has ${paras(r.parasA)}; ${nameB} has ${paras(r.parasB)}.`);
+  if(r.parasA === 0 && r.parasB === 0) lines.push("Neither file has any text.");
+  else if(r.changed === 0 && r.added === 0 && r.removed === 0) lines.push("The two files have the same text, paragraph for paragraph.");
+  else lines.push(`${paras(r.same)} ${cmpPlural(r.same, "is", "are")} the same, ${n(r.changed)} changed, ${n(r.added)} ${cmpPlural(r.added, "is", "are")} new in ${nameB}, and ${n(r.removed)} ${cmpPlural(r.removed, "is", "are")} no longer there.`);
+  if(r.skipped) lines.push("The files are very long. Paragraphs in the middle were compared in order, not matched, so a moved paragraph there reads as changed.");
+  lines.push("Compared as plain text, paragraph by paragraph. Formatting, tracked changes, comments, headers, footnotes and pictures were not compared.");
+  return lines;
+}
+function docReport(r, nameA, nameB){
+  const lines = docSummary(r, nameA, nameB), of = k => r.changes.filter(c => c.kind === k);
+  if(of("changed").length){ lines.push("", "CHANGED"); for(const c of of("changed")) lines.push(`Paragraph ${c.at}: ${c.from} → ${c.to}`); }
+  if(of("added").length){ lines.push("", `NEW IN ${nameB.toUpperCase()}`); for(const c of of("added")) lines.push(`Paragraph ${c.at}: ${c.to}`); }
+  if(of("removed").length){ lines.push("", `NO LONGER IN ${nameB.toUpperCase()}`); for(const c of of("removed")) lines.push(`Paragraph ${c.at} of ${nameA}: ${c.from}`); }
+  const total = r.changed + r.added + r.removed; if(total > r.changes.length) lines.push("", `…and ${(total - r.changes.length).toLocaleString("en-US")} more ${cmpPlural(total - r.changes.length, "change", "changes")}.`);
+  return lines;
+}
+function cmpTableText(t){ return [(t.headers || []).map(cmpCell).join(" | "), ...(t.rows || []).map(r => r.map(cmpCell).join(" | "))].join("\n"); }
+/* What a saved prompt is given: the differences found by the rules and, only if the person asks for it, the beginning of each file. */
+function cmpMaterial(reportLines, nameA, textA, nameB, textB, whole){
+  const n = x => x.toLocaleString("en-US");
+  const part = (title, text) => { const t = aiClean(text); return t.length > CMP_PART_MAX ? `${title} (the first ${n(CMP_PART_MAX)} of ${n(t.length)} characters)\n${cutAt(t, CMP_PART_MAX)}` : `${title}\n${t}`; };
+  const parts = [part("DIFFERENCES, FOUND BY FIXED RULES", reportLines.join("\n"))];
+  if(whole && nameB === null) parts.push(part(`THE FILE: ${aiClean(nameA)}`, textA));      /* a report checked against the person's data: one file */
+  else if(whole) parts.push(part(`EARLIER FILE: ${aiClean(nameA)}`, textA), part(`LATER FILE: ${aiClean(nameB)}`, textB));
+  return parts.join("\n\n");
+}
+function cmpCutText(text, limit){ if(text.length <= limit) return text; const t = text.slice(0, limit), cut = t.lastIndexOf("\n"); return (cut > 200 ? t.slice(0, cut) : t) + "\n(the list is cut here)"; }
+/* two fictional versions of one letter, for trying the document comparison with no file at hand */
+const DOC_SAMPLE_A = { name:"Letter, first draft", kind:"doc", text:"Dear Dr. Lee,\n\nWe received your amendment to ANDA 216482 on Nov 3, 2026.\n\nThe goal date is Oct 3, 2026 and the review is on track.\n\nPlease respond by Dec 3, 2026.\n\nSincerely,\nThe project team (fictional)" };
+const DOC_SAMPLE_B = { name:"Letter, second draft", kind:"doc", text:"Dear Dr. Lee,\n\nWe received your amendment to ANDA 216482 on Nov 3, 2026.\n\nThe goal date is Oct 17, 2026 and the review is on track.\n\nOne labeling comment is still open.\n\nSincerely,\nThe project team (fictional)" };
+function cmpPromptFor(template, material){      /* the saved prompt with the material in the place of {selection}, or after it when the prompt has no such place */
+  const fenced = fenceSel(material);
+  return template.includes("{selection}") ? fillNoRecord(template, { selection:fenced }) : fillNoRecord(template, {}) + "\n\n" + fenced;
+}
+
+/* ---- Round 27: check an AI answer against the comparison. Every number, date and name with a digit in the answer must also stand in the
+   comparison or in the two files; what does not is listed for the person to check. It cannot judge wording or reasoning, and says so. */
+const ANS_LIMIT = "This checks only that each such value in the answer also stands in the comparison or in the two files. It cannot tell whether the wording or the reasoning is right.";
+function answerFacts(text){
+  const t = String(text == null ? "" : text), dates = [], spans = [], numbers = [], names = []; let m; DATE_RE.lastIndex = 0;
+  while((m = DATE_RE.exec(t))){
+    if(m.index > 0 && /[\d\/]/.test(t[m.index - 1])) continue;
+    const mt = dateMention(m); if(!mt || mt.mon < 1 || mt.mon > 12 || mt.day < 1 || mt.day > 31) continue;
+    dates.push({ text:m[0], mon:mt.mon, day:mt.day, year:mt.year }); spans.push([m.index, m.index + m[0].length]);
+  }
+  const token = /[A-Za-z0-9$][A-Za-z0-9.,%$-]*/g;
+  while((m = token.exec(t))){
+    const start = m.index; let w = m[0].replace(/[.,-]+$/, ""); if(!/[0-9]/.test(w)) continue;
+    const end = start + w.length; if(spans.some(sp => start < sp[1] && end > sp[0])) continue;
+    if(/^\$?[0-9][0-9,]*(?:\.[0-9]+)?%?$/.test(w)){
+      const value = Number(w.replace(/[$,%]/g, "")); if(!Number.isFinite(value)) continue;
+      if(/^[0-9]{1,2}$/.test(w) && /^[.)]/.test(t.slice(end, end + 1))){ let b = start; while(b > 0 && (t[b - 1] === " " || t[b - 1] === "\t")) b--; if(b === 0 || t[b - 1] === "\n") continue; }      /* "1." at the start of a line numbers a list */
+      numbers.push({ text:w, value });
+    } else names.push({ text:w, key:w.toLowerCase() });
+  }
+  return { dates, numbers, names };
+}
+function answerCheck(answer, factsText){
+  if(!String(answer == null ? "" : answer).trim()) return { checked:0, missing:[], lines:["Please paste the answer first."] };
+  const a = answerFacts(answer), f = answerFacts(factsText), missing = [], add = x => { if(!missing.includes(x)) missing.push(x); };
+  const nums = new Set(f.numbers.map(x => x.value)), names = new Set(f.names.map(x => x.key));
+  for(const x of a.numbers) if(!nums.has(x.value)) add(x.text);
+  for(const x of a.dates) if(!f.dates.some(d => d.mon === x.mon && d.day === x.day && (d.year === null || x.year === null || d.year === x.year))) add(x.text);
+  for(const x of a.names) if(!names.has(x.key)) add(x.text);
+  const checked = a.numbers.length + a.dates.length + a.names.length;
+  if(checked === 0) return { checked, missing, lines:["The answer holds no number, date or name with a digit to check.", ANS_LIMIT] };
+  if(missing.length === 0) return { checked, missing, lines:[`All ${checked.toLocaleString("en-US")} numbers, dates and names with digits in the answer also stand in the comparison or in the two files.`, ANS_LIMIT] };
+  const shown = missing.slice(0, 12).map(x => cmpShow(x, 40));
+  return { checked, missing, lines:[`${missing.length.toLocaleString("en-US")} of the values in the answer ${cmpPlural(missing.length, "does", "do")} not stand in the comparison or in the two files. Please check ${cmpPlural(missing.length, "it", "them")}: ${shown.join("; ")}${missing.length > 12 ? `; and ${missing.length - 12} more` : ""}.`, ANS_LIMIT] };
+}
+
+/* ---- Round 27: signs worth a second look. Not a detector: it lists wording an AI assistant often leaves behind, formatting marks that mail
+   does not use, and citations that someone should confirm. It never says who or what wrote a text. */
+const SL_PHRASES = ["as an ai language model", "as an ai assistant", "as a large language model", "as an ai,", "i am an ai", "i'm an ai", "my knowledge cutoff", "my training data",
+  "as of my last update", "i cannot browse", "i can't browse", "i don't have access to real-time", "i do not have access to real-time", "regenerate response", "certainly! here", "sure! here",
+  "sure, here is", "sure, here's", "here is a revised version", "here's a revised version", "here is a draft", "here's a draft", "i hope this helps", "let me know if you'd like me to",
+  "let me know if you would like me to", "feel free to customize", "[insert", "[your name]", "[recipient", "[company name]"];
+const SL_NOT_A_VERDICT = "These are signs worth a second look, not a verdict. This tool cannot tell who or what wrote a text, and it does not say.";
+const SL_NONE = "No leftover assistant wording, unfilled placeholders, formatting marks or citations were found. That says nothing about who or what wrote the text.";
+const SL_RESPOND = ["Whoever or whatever wrote it, the response is the same:", "1. Check each fact, date and citation against the source.", "2. Where no source is given, ask the sender for it.", "3. Follow your office's policy on AI-written content."];
+/* An optional second opinion through the person's AI, after the usual preview. The prompt asks for signs on both sides and forbids a verdict. */
+const SL_AI_TEMPLATE = "Read the text below. List up to five concrete signs, quoting the words, that it may have been drafted with an AI writing tool, and up to five signs that it was not. Do not give a verdict, a score or a percentage: say in one line that such signs are weak evidence. Then list the facts, dates and citations a careful reader should verify.\n\n{selection}";
+const SL_CITES = [/\b[0-9]{1,2} (?:CFR|C\.F\.R\.|U\.S\.C\.|USC)(?: (?:part|§+))? ?[0-9]+[A-Za-z]?(?:\.[0-9]+)?(?:\([A-Za-z0-9]+\))*/g, /\bMAPP [0-9]{4}\.[0-9]+(?: Rev\. ?[0-9]+)?/g, /\b(?:draft |final )?guidance for industry\b[^.\n]{0,80}/gi];
+function asciiLower(t){ let out = ""; for(let i = 0; i < t.length; i++){ const c = t.charCodeAt(i); out += c >= 65 && c <= 90 ? String.fromCharCode(c + 32) : c === 0x2019 ? "'" : t[i]; } return out; }      /* one character stays one character, so positions hold */
+function secondLook(text){
+  const t = String(text == null ? "" : text), items = []; if(!t.trim()) return { items, respond:false };
+  const low = asciiLower(t), seen = [];
+  for(const p of SL_PHRASES){ const at = low.indexOf(p); if(at < 0) continue; if(seen.some(s => at >= s[0] && at < s[1])) continue; seen.push([at, at + p.length]);
+    items.push(p[0] === "[" ? `“${t.slice(at, at + p.length)}”: a placeholder that was not filled in.` : `“${t.slice(at, at + p.length)}”: wording that an AI assistant often leaves behind. Please read around it.`); }
+  const marks = []; if(/\*\*[^*\n]{1,80}\*\*/.test(t)) marks.push("**"); if(/(?:^|\n)#{1,6} [^\s]/.test(t)) marks.push("#"); if(/(?:^|\n)```/.test(t)) marks.push("```");
+  if(marks.length) items.push(`Formatting marks (${marks.join(", ")}) that an email does not use. They often come with text copied from an AI assistant or a writing tool.`);
+  const cites = []; for(const re of SL_CITES){ re.lastIndex = 0; let m; while((m = re.exec(t))){ const q = m[0].replace(/\s+/g, " ").trim(); if(!cites.includes(q)) cites.push(q); } }
+  cites.slice(0, 5).forEach(q => items.push(`Cited: ${cmpShow(q, 100)}. This tool cannot confirm that the source exists or says this. Please check it.`));
+  if(cites.length > 5) items.push(`${cites.length - 5} more ${cmpPlural(cites.length - 5, "citation", "citations")} to check.`);
+  return { items, respond:items.length > 0 };
+}
+
+/* ---- Round 27: a reminder for a reply. When a draft asks for something by a date, the person can put "follow up if no reply" on the to-do
+   list for that day. The mailbox is not read: the tool cannot know whether a reply came. */
+const RB_CUE = /\b(?:respond|reply|response|answer|get back|let me know|let us know|send|provide|submit|return|confirm|feedback|comments?)\b/i;
+const RB_BY = /(?:\bby|\bbefore|\bno later than|\bon or before|\buntil)\s+(?:the\s+)?(?:(?:Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day,?\s+)?$/i;
+function replyBy(text, todayT){
+  const t = String(text == null ? "" : text), today = new Date(todayT), ty = today.getUTCFullYear(), dim = (y, mo) => new Date(Date.UTC(y, mo, 0)).getUTCDate();
+  let m; DATE_RE.lastIndex = 0;
+  while((m = DATE_RE.exec(t))){
+    if(m.index > 0 && /[\d\/]/.test(t[m.index - 1])) continue;
+    if(m[4] && !m[6]) continue;
+    if(!RB_BY.test(t.slice(Math.max(0, m.index - 48), m.index))) continue;
+    let s = m.index; while(s > 0 && !/[.!?\n]/.test(t[s - 1])) s--;
+    const sentence = t.slice(s, m.index); if(!RB_CUE.test(sentence)) continue;
+    const mt = dateMention(m); if(!mt || mt.mon < 1 || mt.mon > 12 || mt.day < 1) continue;
+    let day = null;
+    if(mt.year !== null){ if(mt.year >= 1900 && mt.year <= 2200 && mt.day <= dim(mt.year, mt.mon)) day = Date.UTC(mt.year, mt.mon - 1, mt.day); }
+    else {      /* no year: this year if the day is still to come; next year only if this year's day passed more than 180 days ago ("by Jan 5", written in December) */
+      const now = mt.day <= dim(ty, mt.mon) ? Date.UTC(ty, mt.mon - 1, mt.day) : null;
+      if(now !== null && now >= todayT) day = now;
+      else if(now !== null && todayT - now > 180 * 86400000 && mt.day <= dim(ty + 1, mt.mon)) day = Date.UTC(ty + 1, mt.mon - 1, mt.day);
+    }
+    if(day === null || day < todayT) continue;
+    const ask = (sentence + m[0]).replace(/\s+/g, " ").trim(), numbers = andaNumbers(t);
+    return { day:new Date(day).toISOString().slice(0, 10), shown:new Date(day).toLocaleDateString("en-US", { weekday:"long", month:"short", day:"numeric", year:"numeric", timeZone:"UTC" }),
+      title:"Follow up if no reply: " + cmpShow(ask, 90), number:numbers.length === 1 ? numbers[0] : null };
+  }
+  return null;
+}
+
+/* ---- Round 27: a hand-off page and a meeting page. One formatter; each program fills the entries from its own data. */
+function handoffText(title, entries, todayLong, withNotes){
+  const lines = [`${title}: ${entries.length} ${cmpPlural(entries.length, "ANDA", "ANDAs")}, as of ${todayLong}`, "From my own data and notes on this PC. It is not the system of record."];
+  if(!entries.length) lines.push("", "No ANDA to list.");
+  for(const e of entries){
+    lines.push("", e.status);
+    if(e.watch.length) lines.push("  Needs a look: " + e.watch.join("; "));
+    lines.push(e.open.length ? "  Open: " + e.open.join("; ") : "  Open: nothing in my data or my to-do lists");
+    if(withNotes) lines.push(e.notes.length ? "  Notes: " + e.notes.join(" | ") : "  Notes: none");
+  }
+  return lines;
+}
+
+/* ---- Round 27: a report checked against the person's data. Only the goal date and the forecast date are compared, for the ANDAs the report
+   names. lookup(id) gives { goal, forecast } as year-month-day text ("" when the data has none), or null when the ANDA is not in the data. */
+const CHK_ANDA = /^(?:anda|anda ?(?:number|no\.?|#)|application ?(?:number|no\.?|#)?|appl\.? ?(?:number|no\.?|#)?)$/i;
+const CHK_GOAL = /^(?:(?:gdufa )?goal(?: date)?|goal date \(gdufa\))$/i;
+const CHK_FORECAST = /^(?:forecast(?:ed)?(?: date)?|projected(?: action)? date)$/i;
+const CHK_CLOSE = "Only the goal date and the forecast date were checked. Your data is not the system of record.";
+function cmpCheckData(report, lookup){
+  const heads = cmpHeaders(report.headers || []), col = re => heads.findIndex(x => re.test(x)), ia = col(CHK_ANDA), ig = col(CHK_GOAL), ifc = col(CHK_FORECAST), name = report.name;
+  const out = { named:0, known:0, agree:0, differ:0, unknown:[], unread:0, repeated:0, diffs:[], lines:[] }, n = x => x.toLocaleString("en-US");
+  if(ia < 0){ out.lines = [`${name} has no ANDA column, so it cannot be checked against your data.`, CHK_CLOSE]; return out; }
+  if(ig < 0 && ifc < 0){ out.lines = [`${name} has no goal date or forecast date column, so there is nothing to check against your data.`, CHK_CLOSE]; return out; }
+  const seen = new Set(), at = (row, i) => i >= 0 && i < row.length ? cmpCell(row[i]) : "";
+  for(const row of report.rows || []){
+    const cell = at(row, ia), m = /(?:^|[^0-9])([0-9]{6})(?![0-9])/.exec(cell);
+    if(!m){ if(row.some(x => cmpCell(x) !== "")) out.unread++; continue; }
+    const id = m[1]; if(seen.has(id)){ out.repeated++; continue; } seen.add(id); out.named++;
+    const mine = lookup(id); if(!mine){ out.unknown.push(id); continue; } out.known++;
+    let bad = 0;
+    for(const pair of [["Goal date", ig, mine.goal], ["Forecast date", ifc, mine.forecast]]){
+      const v = at(row, pair[1]); if(pair[1] < 0 || v === "" || !pair[2]) continue;
+      const a = cmpDay(v), b = cmpDay(pair[2]);
+      if(a === null){ bad++; out.diffs.push(`ANDA ${id}: ${pair[0]}: the report says “${cmpShow(v, 40)}”, which this tool does not read as a date; your data says ${pair[2]}.`); }
+      else if(a !== b){ bad++; const k = Math.abs(b - a); out.diffs.push(`ANDA ${id}: ${pair[0]}: the report says ${v}; your data says ${pair[2]} (${k} ${cmpPlural(k, "day", "days")} ${b > a ? "later" : "earlier"}).`); }
+    }
+    if(bad) out.differ++; else out.agree++;
+  }
+  const cols = ig >= 0 && ifc >= 0 ? "the goal date and the forecast date" : ig >= 0 ? "the goal date" : "the forecast date";
+  out.lines.push(`${name} names ${n(out.named)} ${cmpPlural(out.named, "ANDA", "ANDAs")}; ${n(out.known)} ${cmpPlural(out.known, "is", "are")} in your data.`);
+  if(out.known > 0) out.lines.push(`${n(out.agree)} ${cmpPlural(out.agree, "agrees", "agree")} with your data on ${cols}, and ${n(out.differ)} ${cmpPlural(out.differ, "differs", "differ")}.`);
+  out.diffs.slice(0, 40).forEach(d => out.lines.push(d));
+  if(out.diffs.length > 40) out.lines.push(`…and ${n(out.diffs.length - 40)} more ${cmpPlural(out.diffs.length - 40, "difference", "differences")}.`);
+  if(out.unknown.length) out.lines.push(`Not in your data: ${out.unknown.slice(0, 20).join(", ")}${out.unknown.length > 20 ? `, and ${n(out.unknown.length - 20)} more` : ""}.`);
+  if(out.unread) out.lines.push(`${n(out.unread)} ${cmpPlural(out.unread, "row", "rows")} had no six-digit number in the ANDA column and ${cmpPlural(out.unread, "was", "were")} left out.`);
+  if(out.repeated) out.lines.push(`${n(out.repeated)} ${cmpPlural(out.repeated, "row repeats", "rows repeat")} an ANDA already named; the first row of each was used.`);
+  out.lines.push(CHK_CLOSE);
+  return out;
+}
+
 /* the window: the selection, what it looks like, one suggested button, quick checks, stored prompts, an instruction typed here */
 let asSuggested = null, asTimer = null, asPrompts = [];
 function openAsk(text){
@@ -3929,6 +4211,7 @@ $("asAskOwn").addEventListener("click", () => askRunOwn(2));
 const CMP_AI_TEMPLATE = "Write an executive summary of the differences between two versions of a report, for a busy manager: three to five sentences, then up to five bullets with what changed and what may need attention. Use only the facts below. Do not guess at reasons.\n\n{selection}";
 const CMP_FILE_MAX = 5 * 1024 * 1024;
 let cmpA = null, cmpB = null, cmpResult = null, cmpFresh = false;      /* cmpFresh: a new pair of files is in and has not been counted yet */
+let cmpKind = null, cmpMode = "two", cmpPrompts = [];                  /* what is compared (table, doc or data), which of the three ways, and the stored prompts on offer */
 function cmpParseCsv(text, name){       /* comma, tab or semicolon; quotes with "" inside; the first row is the headings */
   let t = String(text || ""); if(t.charCodeAt(0) === 0xFEFF) t = t.slice(1);
   const first = t.split(/\r?\n/, 1)[0] || "", count = ch => first.split(ch).length - 1;
@@ -3948,7 +4231,8 @@ function cmpParseCsv(text, name){       /* comma, tab or semicolon; quotes with 
   return { name, headers:kept[0].slice(0, 200), rows:kept.slice(1, 20001).map(r => r.slice(0, 200)) };
 }
 function cmpSay(text){ $("cmStatus").textContent = text; }
-function cmpNames(){ $("cmNameA").textContent = cmpA ? `${cmpA.name}: ${cmpA.rows.length.toLocaleString("en-US")} rows, ${cmpA.headers.length} columns` : "No file yet."; $("cmNameB").textContent = cmpB ? `${cmpB.name}: ${cmpB.rows.length.toLocaleString("en-US")} rows, ${cmpB.headers.length} columns` : "No file yet."; }
+function cmpSize(x){ return x.kind === "doc" ? `${docParas(x.text).length.toLocaleString("en-US")} paragraphs` : `${x.rows.length.toLocaleString("en-US")} rows, ${x.headers.length} columns`; }
+function cmpNames(){ $("cmNameA").textContent = cmpA ? `${cmpA.name}: ${cmpSize(cmpA)}` : "No file yet."; $("cmNameB").textContent = cmpB ? `${cmpB.name}: ${cmpSize(cmpB)}` : "No file yet."; }
 function cmpBar(parts, total){          /* one bar in parts; each part is also named with its number underneath, so nothing is said by color alone */
   const W = 560, svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"); svg.setAttribute("viewBox", `0 0 ${W} 18`); svg.setAttribute("preserveAspectRatio", "none"); svg.setAttribute("class", "cm-bar"); svg.setAttribute("role", "img");
   svg.setAttribute("aria-label", parts.map(p => `${p[0]}: ${p[1]}`).join(", "));
@@ -3958,14 +4242,7 @@ function cmpBar(parts, total){          /* one bar in parts; each part is also n
     svg.append(r); x += w; });
   return svg;
 }
-function cmpPaint(){
-  const out = $("cmOut"); out.replaceChildren(); cmpResult = null;
-  ["cmCopy", "cmCopyAll", "cmAi", "cmSave"].forEach(id => { $(id).disabled = true; });
-  const sel = $("cmKey"), wanted = sel.value;
-  if(!cmpA || !cmpB){ sel.replaceChildren(h("option", { text:"Chosen when both files are in", value:"" })); sel.disabled = true; cmpNames(); return; }
-  const r = cmpResult = cmpTables(cmpA, cmpB, wanted || null);
-  sel.replaceChildren(h("option", { text:"Suggested for you", value:"" }), ...r.shared.map(n => h("option", { text:n, value:n }))); sel.value = r.shared.includes(wanted) ? wanted : ""; sel.disabled = r.shared.length === 0;
-  cmpNames();
+function cmpPaintTable(out, r){
   const lines = cmpSummary(r, cmpA.name, cmpB.name);
   out.append(h("div", { class:"lbl", text:"SUMMARY" }), h("div", { class:"cm-sum", id:"cmSummary" }, ...lines.map((l, i) => h("p", { class:i === lines.length - 1 ? "hint" : "", text:l }))));
   const rowsTotal = r.same + r.changedRows + r.addedCount + r.removedCount, parts = [["Same", r.same, "s"], ["Changed", r.changedRows, "c"], ["New", r.addedCount, "n"], ["No longer there", r.removedCount, "g"]];
@@ -3985,25 +4262,101 @@ function cmpPaint(){
   }
   if(r.addedCount > 0) out.append(h("div", { class:"lbl", text:"NEW IN THE LATER FILE" }), h("p", { class:"cm-keys", text:r.added.join(", ") + (r.addedCount > r.added.length ? `, and ${r.addedCount - r.added.length} more` : "") }));
   if(r.removedCount > 0) out.append(h("div", { class:"lbl", text:"NO LONGER IN THE LATER FILE" }), h("p", { class:"cm-keys", text:r.removed.join(", ") + (r.removedCount > r.removed.length ? `, and ${r.removedCount - r.removed.length} more` : "") }));
-  ["cmCopy", "cmCopyAll", "cmAi", "cmSave"].forEach(id => { $(id).disabled = false; });
+}
+function cmpSummaryBox(out, lines){ out.append(h("div", { class:"lbl", text:"SUMMARY" }), h("div", { class:"cm-sum", id:"cmSummary" }, ...lines.map((l, i) => h("p", { class:i === lines.length - 1 ? "hint" : "", text:l })))); }
+function cmpLegend(parts){ return h("div", { class:"cm-legend" }, ...parts.map(p => h("span", {}, h("i", { class:p[2] }), `${p[0]} ${p[1].toLocaleString("en-US")}`))); }
+function cmpPaintDoc(out, r){            /* two documents: paragraphs the same, changed, new and no longer there */
+  cmpSummaryBox(out, docSummary(r, cmpA.name, cmpB.name));
+  const total = r.same + r.changed + r.added + r.removed, parts = [["Same", r.same, "s"], ["Changed", r.changed, "c"], ["New", r.added, "n"], ["No longer there", r.removed, "g"]];
+  if(total > 0) out.append(h("div", { class:"lbl", text:"PARAGRAPHS" }), cmpBar(parts, total), cmpLegend(parts));
+  if(r.changes.length > 0){
+    const table = h("table", { class:"cm-table" }, h("caption", { text:"What changed" }), h("thead", {}, h("tr", {}, ...["Paragraph", "What", "Earlier", "Later"].map(t => h("th", { scope:"col", text:t })))));
+    const body = h("tbody"), what = { changed:"Changed", added:"New", removed:"No longer there" };
+    r.changes.forEach(c => body.append(h("tr", {}, h("th", { scope:"row", text:String(c.at) }), h("td", { text:what[c.kind] }), h("td", { text:c.from }), h("td", { text:c.to }))));
+    table.append(body); out.append(h("div", { class:"lbl", text:"WHAT CHANGED" }), h("div", { class:"cm-scroll", tabindex:"0", role:"region", "aria-label":"What changed" }, table));
+    const all = r.changed + r.added + r.removed; if(all > r.changes.length) out.append(h("p", { class:"hint", text:`The first ${r.changes.length} of ${all.toLocaleString("en-US")} changes are shown.` }));
+  }
+}
+function cmpPaintData(out, r){           /* a report checked against the person's data */
+  cmpSummaryBox(out, r.lines.filter(l => !/^ANDA [0-9]{6}: /.test(l) && !/^…and /.test(l)));
+  const parts = [["Agree", r.agree, "s"], ["Differ", r.differ, "c"], ["Not in my data", r.unknown.length, "g"]], total = r.agree + r.differ + r.unknown.length;
+  if(total > 0) out.append(h("div", { class:"lbl", text:"ANDAS THE REPORT NAMES" }), cmpBar(parts, total), cmpLegend(parts));
+  if(r.diffs.length) out.append(h("div", { class:"lbl", text:"WHERE THE REPORT AND MY DATA DIFFER" }), h("div", { class:"cm-diffs", id:"cmDiffs" }, ...r.diffs.slice(0, 40).map(d => h("p", { text:d }))),
+    ...(r.diffs.length > 40 ? [h("p", { class:"hint", text:`The first 40 of ${r.diffs.length.toLocaleString("en-US")} differences are shown. “Copy the full report” has the count.` })] : []));
+}
+const CMP_BTNS = ["cmCopy", "cmCopyAll", "cmAi", "cmSave", "cmUse", "cmCheckBtn"];
+const cmpMine = id => { const d = DATA[id]; return d ? { goal:d.goal, forecast:d.fc || "" } : null; };      /* the person's own data, as the card shows it */
+function cmpFileText(x){ return x.kind === "doc" ? x.text : cmpTableText(x); }
+function cmpLines(full){                 /* the summary, or the whole report, of whatever is compared */
+  if(!cmpResult) return [];
+  if(cmpKind === "data") return cmpResult.lines.slice();
+  if(cmpKind === "doc") return (full ? docReport : docSummary)(cmpResult, cmpA.name, cmpB.name);
+  return (full ? cmpReport : cmpSummary)(cmpResult, cmpA.name, cmpB.name);
+}
+function cmpFacts(){ return [cmpLines(true).join("\n"), ...[cmpA, cmpB].filter(Boolean).map(x => x.name + "\n" + cmpFileText(x))].join("\n"); }      /* everything an answer may rightly quote */
+function cmpPaint(){
+  const out = $("cmOut"); out.replaceChildren(); cmpResult = null; cmpKind = null; $("cmCheckOut").replaceChildren();
+  CMP_BTNS.forEach(id => { $(id).disabled = true; });
+  const sel = $("cmKey"), wanted = sel.value, keyOff = text => { sel.replaceChildren(h("option", { text, value:"" })); sel.disabled = true; };
+  const data = cmpMode === "data", week = cmpMode === "week";
+  $("cmPick").hidden = week; $("cmPickB").hidden = data; $("cmLblA").textContent = data ? "REPORT" : "EARLIER FILE"; $("cmWeek").hidden = !week; $("cmWeekOn").checked = !!state.weekCopy;
+  $("cmSample").hidden = $("cmSampleDocs").hidden = cmpMode !== "two"; $("cmSampleReport").hidden = !data; $("cmKeyRow").hidden = data || (!!cmpA && cmpA.kind === "doc" && (!cmpB || cmpB.kind === "doc"));      /* a column is chosen for tables only */
+  cmpNames();
+  const say = text => out.append(h("p", { class:"cm-say", text }));
+  if(week && !state.weekCopy){ keyOff("Chosen when both files are in"); say("Nothing is kept yet. When this is switched on, the app keeps one copy of your sheet each week, on this PC only, so it can show what changed since the last copy."); return; }
+  if(data){
+    keyOff("Rows are matched by the ANDA number");
+    if(!cmpA) return;
+    if(cmpA.kind === "doc"){ say("A report is a table. Please choose a CSV file."); return; }
+    cmpResult = cmpCheckData(cmpA, cmpMine); cmpKind = "data"; cmpPaintData(out, cmpResult);
+  } else {
+    if(!cmpA || !cmpB){ keyOff("Chosen when both files are in"); return; }
+    if((cmpA.kind || "table") !== (cmpB.kind || "table")){ keyOff("Chosen when both files are in"); say("One file is a table and the other is a document, so they cannot be compared. Please choose two tables or two documents."); return; }
+    if(cmpA.kind === "doc"){ keyOff("Documents are compared paragraph by paragraph"); cmpResult = docCompare(cmpA.text, cmpB.text); cmpKind = "doc"; cmpPaintDoc(out, cmpResult); }
+    else {
+      const r = cmpResult = cmpTables(cmpA, cmpB, wanted || null); cmpKind = "table";
+      sel.replaceChildren(h("option", { text:"Suggested for you", value:"" }), ...r.shared.map(n => h("option", { text:n, value:n }))); sel.value = r.shared.includes(wanted) ? wanted : ""; sel.disabled = r.shared.length === 0;
+      cmpPaintTable(out, r);
+    }
+  }
+  CMP_BTNS.forEach(id => { $(id).disabled = false; }); $("cmUse").disabled = cmpPrompts.length === 0;
   if(cmpFresh){ cmpFresh = false; usageRecord("compare_files"); }      /* once for a pair of files, not again for each look at it */
 }
-function openCompare(){ closeMenus(); showApp("cmp"); $("cmp").style.zIndex = "52"; cmpPaint(); cmpSay(""); }
+function cmpSetMode(mode){               /* two files, a report against my data, or my sheet since the last kept copy */
+  cmpMode = mode; cmpA = cmpB = null; $("cmFileA").value = ""; $("cmFileB").value = ""; $("cmKey").value = ""; $("cmAnswer").value = "";
+  [["cmModeTwo", "two"], ["cmModeData", "data"], ["cmModeWeek", "week"]].forEach(([id, m]) => $(id).setAttribute("aria-pressed", String(m === mode)));
+  if(mode === "week") cmpLoadWeek();
+  cmpPaint(); cmpSay("");
+}
+function cmpLoadWeek(){                  /* simulation: two fictional versions stand in for the person's sheet and its kept copy */
+  if(state.weekCopy){ cmpA = { ...CMP_SAMPLE_A, name:"My sheet, copy kept Nov 10" }; cmpB = { ...CMP_SAMPLE_B, name:"My sheet, today" }; cmpFresh = true; } else cmpA = cmpB = null;
+}
+function openCompare(mode){
+  closeMenus();
+  cmpPrompts = state.actions.filter(a => a.enabled && (a.kind === 1 || a.kind === 2));
+  const sel = $("cmPrompt"); sel.replaceChildren();
+  if(cmpPrompts.length === 0){ sel.append(h("option", { text:"No stored prompts yet. Add one under Settings.", value:"" })); sel.disabled = true; }
+  else { sel.append(h("option", { text:"Choose one of your stored prompts…", value:"" })); cmpPrompts.forEach((a, i) => sel.append(h("option", { text:`${a.name} · ${a.kind === 2 ? "ask my AI" : "fill and show"}`, value:String(i) }))); sel.disabled = false; }
+  showApp("cmp"); $("cmp").style.zIndex = "52";
+  if(mode && mode !== cmpMode) cmpSetMode(mode); else { cmpPaint(); cmpSay(""); }
+}
 async function cmpRead(input, side){
   const f = input.files && input.files[0]; if(!f) return;
   if(f.size > CMP_FILE_MAX){ cmpSay(`${f.name} is larger than 5 MB, so it was not read.`); input.value = ""; return; }
-  if(!/\.(csv|txt|tsv)$/i.test(f.name)){ cmpSay(`${f.name} is not a CSV file. This page reads CSV; the Windows app also reads Excel workbooks (.xlsx).`); input.value = ""; return; }
-  let table = null; try{ table = cmpParseCsv(await f.text(), f.name.slice(0, 80)); }catch(e){ table = null; }
-  if(!table){ cmpSay(`${f.name} could not be read as a table.`); input.value = ""; return; }
-  if(side === "a") cmpA = table; else cmpB = table;
+  const ext = (/\.([a-z0-9]+)$/i.exec(f.name) || ["", ""])[1].toLowerCase(), isDoc = ext === "txt" || ext === "md", isTable = ext === "csv" || ext === "tsv";
+  if(!isDoc && !isTable){ cmpSay(`${f.name} is not a kind of file this page reads. It reads CSV tables and plain text (.txt, .md); the Windows app also reads Excel workbooks (.xlsx) and Word documents (.docx).`); input.value = ""; return; }
+  let item = null, why = isDoc ? `${f.name} has no text that could be read.` : `${f.name} could not be read as a table.`;
+  try{ const text = await f.text(); if(isDoc){ if(text.includes(String.fromCharCode(0))) why = `${f.name} does not look like plain text, so it was not read.`; else if(text.trim()) item = { name:f.name.slice(0, 80), kind:"doc", text }; } else item = cmpParseCsv(text, f.name.slice(0, 80)); }catch(e){ item = null; }
+  if(!item){ cmpSay(why); input.value = ""; return; }
+  if(side === "a") cmpA = item; else cmpB = item;
   cmpFresh = true;
   cmpSay(`${f.name} was read on this PC. Nothing was sent.`); $("cmKey").value = ""; cmpPaint();
 }
 function cmpHtmlReport(){               /* a one-page report to save: text only, built from escaped values */
   const e = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-  const lines = cmpReport(cmpResult, cmpA.name, cmpB.name), cut = lines.indexOf("");
+  const lines = cmpLines(true), cut = lines.indexOf(""), title = cmpKind === "data" ? `Check against my data: ${e(cmpA.name)}` : `Comparison: ${e(cmpA.name)} and ${e(cmpB.name)}`;
   const summary = (cut < 0 ? lines : lines.slice(0, cut)).map(l => `<p>${e(l)}</p>`).join(""), detail = cut < 0 ? "" : `<pre>${e(lines.slice(cut + 1).join("\n"))}</pre>`;
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'"><title>Comparison: ${e(cmpA.name)} and ${e(cmpB.name)}</title><style>body{font:15px/1.5 Segoe UI,Arial,sans-serif;max-width:820px;margin:32px auto;padding:0 16px;color:#1b2430}h1{font-size:22px}pre{white-space:pre-wrap;font:13px/1.5 Consolas,monospace;background:#f4f5f7;padding:12px;border-radius:8px}</style></head><body><h1>Comparison: ${e(cmpA.name)} and ${e(cmpB.name)}</h1>${summary}${detail}<p><small>Made on this PC by fixed rules. No AI was used and nothing was sent.</small></p></body></html>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'"><title>${title}</title><style>body{font:15px/1.5 Segoe UI,Arial,sans-serif;max-width:820px;margin:32px auto;padding:0 16px;color:#1b2430}h1{font-size:22px}pre{white-space:pre-wrap;font:13px/1.5 Consolas,monospace;background:#f4f5f7;padding:12px;border-radius:8px}</style></head><body><h1>${title}</h1>${summary}${detail}<p><small>Made on this PC by fixed rules. No AI was used and nothing was sent.</small></p></body></html>`;
 }
 /* A page can ask the browser to save a file but cannot learn whether it did (a page shown inside another page is often not allowed to). So the
    wording after a save says what was tried, as the backup in Settings does, and never claims that a file was saved. */
@@ -4011,17 +4364,103 @@ function saveTextFile(name, text, type){ try{ const a = document.createElement("
 $("cmClose").addEventListener("click", () => closeApp("cmp"));
 $("cmFileA").addEventListener("change", e => cmpRead(e.target, "a"));
 $("cmFileB").addEventListener("change", e => cmpRead(e.target, "b"));
-$("cmSample").addEventListener("click", () => { cmpA = CMP_SAMPLE_A; cmpB = CMP_SAMPLE_B; cmpFresh = true; $("cmFileA").value = ""; $("cmFileB").value = ""; $("cmKey").value = ""; cmpPaint(); cmpSay("Two fictional versions of one report are in. Change the column that matches rows if you like."); });
+$("cmModeTwo").addEventListener("click", () => cmpSetMode("two"));
+$("cmModeData").addEventListener("click", () => cmpSetMode("data"));
+$("cmModeWeek").addEventListener("click", () => cmpSetMode("week"));
+$("cmWeekOn").addEventListener("change", e => { state.weekCopy = e.target.checked; cmpLoadWeek(); cmpPaint(); cmpSay(state.weekCopy ? "From now on one copy of your sheet is kept each week, on this PC only. (Simulation: two fictional versions stand in for your sheet and its copy.)" : "No copies are kept, and the copies that were kept are deleted."); });
+const cmpUseSample = (a, b, said) => { cmpA = a; cmpB = b; cmpFresh = true; $("cmFileA").value = ""; $("cmFileB").value = ""; $("cmKey").value = ""; cmpPaint(); cmpSay(said); };
+$("cmSample").addEventListener("click", () => cmpUseSample(CMP_SAMPLE_A, CMP_SAMPLE_B, "Two fictional versions of one report are in. Change the column that matches rows if you like."));
+$("cmSampleDocs").addEventListener("click", () => cmpUseSample(DOC_SAMPLE_A, DOC_SAMPLE_B, "Two fictional versions of one letter are in. They are compared paragraph by paragraph."));
+$("cmSampleReport").addEventListener("click", () => {       /* made from the sample data at this moment, with one forecast moved and one ANDA the data does not hold */
+  const mdY = a => `${a[1]}/${a[2]}/${a[0]}`, later = a => { const d = new Date(Date.UTC(a[0], a[1] - 1, a[2]) + 14 * 86400000); return `${d.getUTCMonth() + 1}/${d.getUTCDate()}/${d.getUTCFullYear()}`; };
+  const rows = Object.keys(DATA).sort().map((id, i) => [id, DATA[id].drug, mdY(DATA[id].goalD), i === 0 ? later(DATA[id].fcD) : mdY(DATA[id].fcD)]);
+  rows.push(["220017", "Losartan Potassium Tablets, 25 mg", "4/10/2027", "4/10/2027"]);
+  cmpUseSample({ name:"Weekly report (sample)", headers:["ANDA", "Product", "Goal date", "Forecast date"], rows }, null, "A fictional weekly report is in. It is checked against the sample data the cards show.");
+});
 $("cmKey").addEventListener("change", () => { cmpPaint(); cmpSay(cmpResult && $("cmKey").value ? `Rows are now matched by “${cmpResult.key}”.` : "The suggested column is used again."); });
-$("cmCopy").addEventListener("click", () => { if(cmpResult) writeClipboard(cmpForPaste(cmpSummary(cmpResult, cmpA.name, cmpB.name)).join("\n")).then(() => cmpSay("Summary copied."), () => cmpSay("Your browser did not allow copying. Please select the summary and copy it.")); });
-$("cmCopyAll").addEventListener("click", () => { if(cmpResult) writeClipboard(cmpForPaste(cmpReport(cmpResult, cmpA.name, cmpB.name)).join("\n")).then(() => cmpSay("Full report copied."), () => cmpSay("Your browser did not allow copying. Please use “Save a report” instead.")); });
+$("cmCopy").addEventListener("click", () => { if(cmpResult) writeClipboard(cmpForPaste(cmpLines(false)).join("\n")).then(() => cmpSay("Summary copied."), () => cmpSay("Your browser did not allow copying. Please select the summary and copy it.")); });
+$("cmCopyAll").addEventListener("click", () => { if(cmpResult) writeClipboard(cmpForPaste(cmpLines(true)).join("\n")).then(() => cmpSay("Full report copied."), () => cmpSay("Your browser did not allow copying. Please use “Save a report” instead.")); });
 $("cmSave").addEventListener("click", () => { if(cmpResult) cmpSay(saveTextFile("comparison-report.html", cmpHtmlReport(), "text/html") ? "A download of the report was tried (comparison-report.html). If nothing was saved, this page is not allowed to save files where it is shown: please use “Copy the full report” instead. Nothing was sent." : "Your browser did not allow saving a file. Please use “Copy the full report” instead."); });
 $("cmAi").addEventListener("click", () => {
   if(!cmpResult) return;
   cmpSay("A window with exactly what would be sent is open. Nothing has been sent. Only the summary and the listed changes are in it, not the files.");
-  runCustomAction({ name:"Narrative of a comparison", kind:2, template:CMP_AI_TEMPLATE, enabled:true, hotkey:"", due:2, agentId:"", direct:false }, cmpDigest(cmpResult, cmpA.name, cmpB.name), { ...pointer }, true);
+  runCustomAction({ name:"Narrative of a comparison", kind:2, template:CMP_AI_TEMPLATE, enabled:true, hotkey:"", due:2, agentId:"", direct:false }, cmpKind === "table" ? cmpDigest(cmpResult, cmpA.name, cmpB.name) : cmpCutText(cmpLines(true).join("\n"), 1800), { ...pointer }, true);
   $("actwin").style.zIndex = "53";
 });
+/* One of the person's stored prompts, run on what was compared. It is given the differences the rules found; the beginning of each file goes in
+   only if the person ticks the box, and the preview shows every character and the size before anything can be sent. */
+$("cmUse").addEventListener("click", () => {
+  if(!cmpResult) return;
+  const i = $("cmPrompt").value; if(i === ""){ cmpSay("Please choose one of your stored prompts first."); return; }
+  const a = cmpPrompts[+i], whole = $("cmWhole").checked;
+  const material = cmpMaterial(cmpLines(true), cmpA.name, cmpFileText(cmpA), cmpB ? cmpB.name : null, cmpB ? cmpFileText(cmpB) : "", whole);
+  const prompt = cmpPromptFor(a.template, material), size = `${prompt.length.toLocaleString("en-US")} characters`;
+  const holds = whole ? "It holds the differences found by the rules and, because you chose so, the beginning of each file." : "It holds the differences found by the rules, not the files.";
+  if(a.kind === 1) showAction({ title:a.name, sub:"Compare two files", promptH:"YOUR PROMPT, FILLED IN", prompt, note:`Nothing was sent anywhere. ${holds} It is ${size} long. Please copy the text into the tool you use.`, send:null });
+  else if(!aiReady()) showAction({ title:a.name, sub:"Compare two files", promptH:"YOUR PROMPT, FILLED IN", prompt, note:`No AI connection is ready, so nothing can be sent. ${holds} It is ${size} long. You can set a connection up in Settings, or copy this text into the tool you use. Nothing was sent.`, send:null });
+  else showAction({ title:a.name, sub:"Compare two files", promptH:"THIS IS EXACTLY WHAT WILL BE SENT", prompt,
+    note:`Nothing has been sent yet. Pressing Send sends only the text above (${size}), with a short fixed instruction that treats it as data, to your AI connection (${connInfo().label}). ${holds} (Simulation: a labeled stand-in answers; nothing is sent.)`,
+    resultH:"THE REPLY, AS RECEIVED", send:() => simulatedAi(null) });
+  $("actwin").style.zIndex = "53"; cmpSay("A window with exactly what the prompt holds is open. Nothing has been sent.");
+});
+$("cmCheckBtn").addEventListener("click", () => {
+  if(!cmpResult) return;
+  const r = answerCheck($("cmAnswer").value, cmpFacts()), box = $("cmCheckOut");
+  box.replaceChildren(...r.lines.map((l, i) => h("p", { class:r.lines.length > 1 && i === r.lines.length - 1 ? "hint" : r.missing.length ? "cm-check miss" : "cm-check", text:l })));
+});
+
+/* ---- Round 27: the hand-off page and the meeting page. Made from the person's own data and notes by fixed rules; nothing is sent. */
+let hoMode = "all", hoIds = null;
+function handoffEntry(id){
+  const g = recallFor("ANDA " + id)[0], rows = autoRowsFor(id).filter(r => r.sev !== "info");
+  return { status:statusLine(id), watch:rows.map(r => cut(r.title.replace(`ANDA ${id}: `, ""), 140)),
+    open:(g ? g.items : []).slice(0, 5).map(i => i.title + (i.due ? ` (${i.due})` : "")), notes:(g ? g.notes : []).slice(0, 3).map(n => `${n.who}: ${cut(n.text, 160)}`) };
+}
+function handoffIds(){
+  if(hoIds) return hoIds;
+  const worst = id => Math.min(9e9, ...autoRowsFor(id).filter(r => r.sev !== "info").map(r => r.priority)), need = id => worst(id) < 9e9;      /* the ANDA that needs a look most comes first */
+  const order = Object.keys(DATA).sort((a, b) => (worst(a) - worst(b)) || (a < b ? -1 : 1));
+  return hoMode === "watch" ? order.filter(need) : order;
+}
+function handoffPaint(){
+  $("hoAll").setAttribute("aria-pressed", String(hoMode === "all")); $("hoWatch").setAttribute("aria-pressed", String(hoMode === "watch"));
+  $("hoOut").value = handoffText(hoIds ? "Meeting page" : "Hand-off", handoffIds().map(handoffEntry), longDate(demoToday()), $("hoNotes").checked).join("\n");
+}
+function openHandoff(ids){
+  closeMenus(); hoIds = ids && ids.length ? ids.slice(0, 8) : null;
+  $("hoTitle").textContent = hoIds ? "Meeting page" : "Hand-off page"; $("handoff").setAttribute("aria-label", hoIds ? "Meeting page" : "Hand-off page"); $("hoModes").hidden = !!hoIds;
+  showApp("handoff"); $("handoff").style.zIndex = "53"; handoffPaint(); $("hoStatus").textContent = "";
+}
+$("hoClose").addEventListener("click", () => closeApp("handoff"));
+$("hoAll").addEventListener("click", () => { hoMode = "all"; handoffPaint(); });
+$("hoWatch").addEventListener("click", () => { hoMode = "watch"; handoffPaint(); });
+$("hoNotes").addEventListener("change", handoffPaint);
+$("hoCopy").addEventListener("click", () => writeClipboard($("hoOut").value).then(() => { $("hoStatus").textContent = "The page was copied. Nothing was sent; you decide who gets it."; }, () => { $("hoStatus").textContent = "Your browser did not allow copying. Please select the text and copy it."; }));
+$("hoSave").addEventListener("click", () => { $("hoStatus").textContent = saveTextFile(hoIds ? "meeting-page.txt" : "hand-off.txt", $("hoOut").value, "text/plain") ? "A download of the page was tried. If nothing was saved, this page is not allowed to save files where it is shown: please use “Copy the page” instead. Nothing was sent." : "Your browser did not allow saving a file. Please use “Copy the page” instead."; });
+
+/* ---- Round 27, in Review a draft: signs worth a second look, and a follow-up when the draft asks for a reply by a date. Fixed rules, no AI. */
+function paintSigns(text){
+  const box = $("drSigns"); box.replaceChildren(); box.hidden = drView === "proof" || !text.trim(); if(box.hidden) return;
+  const r = secondLook(text);
+  box.append(h("div", { class:"lbl", text:"WORTH A SECOND LOOK · NOT A VERDICT ON WHO WROTE IT" }));
+  const second = h("button", { class:"pill quiet", type:"button", id:"drSecond", text:"Ask my AI for a second opinion…" });      /* an opinion, after a preview; never evidence */
+  second.addEventListener("click", () => { runCustomAction({ name:"Second opinion: an opinion, not evidence", kind:2, template:SL_AI_TEMPLATE, enabled:true, hotkey:"", due:2, agentId:"", direct:false }, $("drText").value, { ...pointer }, true); $("actwin").style.zIndex = "53"; });
+  const foot = h("div", { class:"prfoot" }, second, h("span", { text:"Shown to you first. An AI's view of who wrote a text is an opinion, not evidence." }));
+  if(!r.items.length){ box.append(h("div", { class:"find ok", text:SL_NONE }), foot); return; }
+  r.items.forEach(t => box.append(h("div", { class:"find note", text:t })));
+  box.append(h("div", { class:"find note", id:"drRespond" }, ...SL_RESPOND.map(l => h("div", { text:l }))), h("p", { class:"prfine", text:SL_NOT_A_VERDICT }), foot);
+}
+function paintRemind(text){
+  const box = $("drRemind"); box.replaceChildren(); const r = drView !== "proof" && text.trim() ? replyBy(text, demoToday()) : null; box.hidden = !r; if(!r) return;
+  const say = h("span", { role:"status", text:`Your draft asks for a reply by ${r.shown}.` });
+  const btn = h("button", { class:"pill quiet", type:"button", id:"drRemindBtn", text:"Put a follow-up on my to-do list for that day" });
+  btn.addEventListener("click", () => {
+    const res = todoAdd(r.title, r.number, null, Date.parse(r.day + "T00:00:00Z"), "Review a draft");
+    say.textContent = res.reason || (res.added ? `Added to your ANDA to-do list for ${r.shown}. This tool does not read your mail, so it cannot know whether a reply came.` : "That is already on your to-do list.");
+    if(res.added) btn.disabled = true;
+  });
+  box.append(h("div", { class:"prfoot" }, btn, say));
+}
 
 /* Ask: four reading prompts, a calendar invitation, and "add to the notes of an ANDA" */
 READ_PROMPTS.forEach(([name, template], i) => $("asRead" + i).addEventListener("click", () => { usageRecord("reading_prompt"); askRunPrompt({ name, kind:2, template, enabled:true, hotkey:"", due:2, agentId:"", direct:false }); }));
@@ -4040,6 +4479,7 @@ function askMore(){                      /* what else can be done with this sele
     } }));
     box.append(h("p", { class:"hint", id:"asIcsHint", text:`A date was found: ${inv.shown}. The invitation would read “${inv.title}”.` }));
   }
+  if(ids.length) acts.append(h("button", { class:"pill quiet", type:"button", id:"asMeeting", text:ids.length === 1 ? `Make a meeting page for ANDA ${ids[0]}` : `Make a meeting page for these ${ids.length} ANDAs`, onclick:() => openHandoff(knownIdsIn($("asText").value)) }));
   ids.forEach(id => acts.append(h("button", { class:"pill quiet", type:"button", "data-note-for":id, text:`Add to the notes of ANDA ${id}`, onclick:() => {
     const raw = $("asText").value, [ok, message] = addQuickNote(id, raw);
     if(ok){ usageRecord("note_added"); askStatus(`Added to your notes on ANDA ${id}.` + (raw.trim().length > QN_MAX ? ` Only the first ${QN_MAX} characters were kept.` : "") + " Open the card and press N to see it."); }
@@ -4327,7 +4767,7 @@ function setDraftView(v){
 function runDraftCheck(){
   const text = $("drText").value, r = draftReview(text, demoToday()), extra = factExtras(text), pr = proofread(text);
   $("drFactWrap").hidden = drView === "proof"; $("drProofWrap").hidden = drView === "facts"; $("drSend").hidden = drView === "proof";
-  paintBeforeSend(text, r, extra);
+  paintBeforeSend(text, r, extra); paintRemind(text); paintSigns(text);
   { const sum = $("drSummary"); sum.replaceChildren();
     if(text.trim()){
       const facts = r.findings.filter(f => f.kind === "diff" || f.kind === "unknown").length + extra.diffs.length, words = pr.total;
@@ -4596,6 +5036,7 @@ function openMenu(){
     item("Review a draft…", state.keys.draft, () => openDraft("")),
     item("Ask about a selection…", state.keys.ask || "", () => openAsk("")),
     item("Compare two files…", "", () => openCompare()),
+    item("Hand-off page…", "", () => openHandoff(null)),
     item("Watch list…", "", () => openWatchList()),
     item(alertReasons().length ? `News and alerts… (${alertReasons().length} today)` : "News and alerts…", "", () => openHub()),
     ...(state.allTools ? [item("Today…", "", () => openToday()),
