@@ -151,7 +151,7 @@ const CLIENT = '12345678-1234-1234-1234-123456789abc';
   await page.click('#bkReset');
   ok((await txt('#bkReset')) === 'Reset all settings…' && (await page.$eval('#setSignoff', e => e.value)) === '' && await page.$eval('input[name=autohide][value="10"]', e => e.checked), 'the second click resets');
   ok(!(await page.$eval('#olOn', e => e.checked)), 'Outlook is off again after a reset');
-  ok(await page.$eval('input[name=provider][value=auto]', e => e.checked), 'the connection is back to Auto');
+  ok(await page.$eval('input[name=provider][value=offline]', e => e.checked), 'the connection is back to Offline only, the default since round 28');
 
   await page.screenshot({ path: (OUT || '.') + '/r11-settings.png' });
   ok(errors.length === 0, 'no page errors: ' + errors.join(' | '));

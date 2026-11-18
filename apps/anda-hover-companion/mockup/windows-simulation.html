@@ -1179,7 +1179,7 @@ body{background:#4f9be0}
   </div>
   <button class="icon" id="deskIcon" type="button" aria-label="ANDA Companion (Notula). Launches the app.">
     <svg width="38" height="38" viewBox="0 0 38 38" fill="none"><rect x="6" y="3" width="26" height="32" rx="3" fill="#fff" stroke="#8a929b" stroke-width="1.5"/><path d="M11 12h16M11 17h16M11 22h10" stroke="#8a929b" stroke-width="1.5" stroke-linecap="round"/><circle cx="27" cy="27" r="6" fill="#3a3f8f"/><path d="M25 27l2 2 3-4" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    ANDA Companion (Notula)
+    Notula
   </button>
 
   <!-- ===== simulated apps: look-alike layouts with fictional content (no logos, no real products) ===== -->
@@ -5147,7 +5147,7 @@ addEventListener("hashchange", () => { const on = location.hash === "#all"; if(o
 function exitApp(){
   state.running = false; closeCard(); hideChip(); hideWhisper(false); closeCtx(); APP_WINS.forEach(closeApp);
   $("appIcon").style.display = "none"; $("deskIcon").classList.add("attn");
-  showKeys("look", "The app has exited. Double-click ANDA Companion (Notula) on the desktop to start it again.");
+  showKeys("look", "The app has exited. Double-click Notula on the desktop to start it again.");
 }
 $("deskIcon").addEventListener("dblclick", () => { if(state.running) showNotice("The app is already running. Click the ^ arrow near the clock to find its icon.", { x:innerWidth - 300, y:innerHeight - 140 }); else launch(); });
 $("deskIcon").addEventListener("click", e => { if(e.detail === 0 || coarse.matches) launch(); });
