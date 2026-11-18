@@ -919,6 +919,111 @@ preview, with the answer Copy only; the usage reader accepts only a date and a k
 **Still only in the simulation:** card details with Copy, notices near the clock and division news, text size and spacing, recent and kept ANDAs, One Bar and
 Today, the on-device AI option in Review, and the blur behind the glass looks. The extension has none of round 26.
 
+## 11k. Round 27: two documents and a stored prompt, a check of an AI answer, signs worth a second look, and five daily helpers
+
+The owner asked three things in a row: whether the tool could "detect any and all AI content" and say how to respond, perhaps by the model that wrote it;
+whether two documents, files or datasets could be chosen and one of the person's saved prompts run on them, to compare and contrast; and what else would make
+the tool a daily help. Each was answered with a proposal first. The owner then wrote: "Build everything and go with all of your recommendations."
+
+Three questions stayed open, and were decided as follows so that the work could go on. They are the owner's to change. **Built in the ANDA Companion only**
+(the personal app in the other repository was not touched). **The office's policy on AI-written content is not known to this project**, so the tool says
+"Follow your office's policy on AI-written content" and names no policy. **PDF files are not read**: that needs a component from outside, which is a decision
+of its own.
+
+### What was asked for and what was built instead: AI content
+
+**The tool does not detect AI-written text, and does not name a model.** No reliable way to do either exists: detectors are wrong often enough to do harm,
+both ways, and a wrong flag on a colleague's or an applicant's text is a serious thing. What was built, in Review a draft, in both programs, with no AI:
+
+1. **Signs worth a second look.** Fixed rules list four kinds of thing, each quoted from the text: wording an AI assistant often leaves behind ("As an AI
+   language model", "I hope this helps", "Here is a revised version"); placeholders that were not filled in ("[insert", "[Your Name]"); formatting marks that
+   mail does not use (`**`, `#`, code fences); and citations that someone should confirm (CFR and U.S.C. sections, MAPP numbers, "guidance for industry").
+   The list is headed "Worth a second look · not a verdict on who wrote it", and under it stands: "These are signs worth a second look, not a verdict.
+   This tool cannot tell who or what wrote a text, and it does not say." With nothing found, it says so and adds: "That says nothing about who or what
+   wrote the text."
+2. **How to respond**, the same whoever wrote it: check each fact, date and citation against the source; where no source is given, ask the sender for it;
+   follow your office's policy on AI-written content.
+3. **What a file says about itself.** For a Word document the app quotes the file's own fields (created by, last saved by, last saved on, written with) as
+   "The file says: …", followed by "Anyone can change these fields, so they prove nothing."
+4. **A second opinion, if wanted**, through the person's own AI connection after the usual preview. The stored prompt asks for up to five signs on each
+   side, quoted, forbids a verdict, a score or a percentage, and asks for the facts a careful reader should verify.
+
+### Two files, documents or datasets, and one of my prompts
+
+*Compare two files* now has three ways of working, chosen at the top of the window: **Two files**, **A report against my data** and **My sheet since last
+week**.
+
+**Two documents.** Beside tables, the window reads documents: Word (`.docx`), text and Markdown in the app; text and Markdown in the simulation. Two
+documents are compared **paragraph by paragraph, as plain text, by fixed rules**: paragraphs that are the same are matched in order; between two matches, a
+paragraph that shares at least half of its words with its neighbor is shown as *changed* (both forms, starting a little before the first difference), and
+otherwise as *no longer there* and *new*. The summary ends: "Compared as plain text, paragraph by paragraph. Formatting, tracked changes, comments, headers,
+footnotes and pictures were not compared." Of a tracked change in a Word document the inserted text is read and the deleted text is not, and the window says
+so. A table and a document cannot be compared with each other, and the window says that in words. Limits: 2,000 paragraphs are matched (beyond that the
+middle is compared in order, and the summary says so), 60 changes are listed, and the app reads a document up to 5,000,000 characters of text (the
+simulation reads a file up to 5 MB).
+
+**Ask with one of my prompts.** Under the comparison is a list of the person's own stored prompts (those that fill in a prompt or ask the AI). *Use this
+prompt…* opens the usual preview. **The rules count; the AI explains.** By default the prompt is given only the differences the rules found. The files
+themselves go in only when the person ticks "Also give it the beginning of each file (up to 6,000 characters each)", and then the preview shows them, with
+their length. The tick is taken off again whenever a file changes or another way of comparing is chosen, so it is a choice made for one pair of files. A
+prompt that fills in is shown to copy; a prompt that asks the AI is sent only after Send, and never without the preview, even when the stored prompt says
+"send without the preview".
+
+**Check an AI answer** (on the PC, no AI). The person pastes an answer about the files. Every number, date and name with a digit in it is looked up in the
+comparison and in the two files, and those that stand nowhere are listed. The line under the result states the limit: "This checks only that each such value
+in the answer also stands in the comparison or in the two files. It cannot tell whether the wording or the reasoning is right."
+
+### Five daily helpers
+
+1. **What changed since last week.** *My sheet since last week* compares the person's sheet today with a copy kept earlier. Copies are kept only after the
+   person switches it on: one for each week, the newest five, in the app's own folder on the PC. Switching it off deletes them all.
+2. **Hand-off page** (tray menu). One page of plain text for a colleague who covers: for each ANDA its status line, what needs a look, what is open, and,
+   if ticked, the latest notes. It is made from the person's own data and notes by fixed rules; the person copies or saves it and decides who gets it. Its
+   second line reads: "From my own data and notes on this PC. It is not the system of record."
+3. **Meeting page.** In Ask about a selection, when the selection names ANDAs that are in the person's data (an agenda, for instance), one button makes the
+   same kind of page for exactly those.
+4. **Waiting on a reply.** When a draft in Review asks for something by a date ("Please respond by Dec 3, 2026"), one button puts "Follow up if no reply" on
+   the to-do list for that day. The tool does not read mail, so it cannot know whether a reply came, and it says so.
+5. **A report against my data.** One file is chosen. For the ANDAs it names, the goal date and the forecast date are compared with the person's data, and
+   the differences are listed. Every result ends: "Only the goal date and the forecast date were checked. Your data is not the system of record."
+
+### How "the same in both programs" is kept true
+
+As before, the simulation writes its answers to a file, `mockup/round27-golden.json` (14 pairs of documents and one very long pair, 6 prompt materials, 8 answers, 9 texts for
+signs, 14 reminders, 4 pages and 10 reports; written by `tools/round27-golden.cjs`), and the app's tests must reproduce every answer, character for
+character.
+
+### What the security review of this round changed
+
+The same two skill sets as in round 26 supplied the checklist. Each item below was a finding, a fix and a test in both programs where it applies.
+
+1. **The tick for sending the beginning of the files stayed on** for the next pair of files. It is now taken off whenever a file changes or another way of
+   comparing is chosen.
+2. **A backup from another PC could switch the weekly copy on.** Keeping copies is now one of the choices that belong to this PC: a restored backup, a
+   backup edited by hand and a reset leave it as it is.
+3. **A small Word file can unpack to a very large text.** The reader now stops at a fixed number of characters and refuses a document with more than
+   5,000,000 characters of text, in plain words, without first holding it in memory.
+4. **The check of an answer slowed with the square of the text.** It now reads the text once: two million characters of facts and an answer at the limit
+   are checked in under a second here. Each file is searched up to its first 1,000,000 characters, and the window says when that limit was reached.
+5. **The answer box cut a long paste at 20,000 characters without saying so**, so a check could pass on half an answer. The box now takes 200,000
+   characters, and a longer answer is not checked and is said to be too long.
+6. **"Include my notes" was ticked when a hand-off or meeting page opened.** Notes are the person's own and can be candid, and the page is made to be
+   passed on. The box is now off until ticked, each time a page opens.
+
+Checked and left as they were: the new simulation code builds its windows from text nodes only; a document is read with document type definitions and
+outside entities refused; what a prompt is given is cleaned of control characters and put inside the same fence as any selection; a hand-off page is plain
+text that is never sent; the weekly copies have fixed names inside the app's own folder; no package has a known vulnerability; a build with every .NET
+security rule switched on raises none.
+
+### What this round changes in an earlier promise
+
+Round 26 said of the narrative that it holds the summary and the listed changes, "never the files". That is still true of *Write a narrative with AI…*. It is
+no longer true of the whole window: *Ask with one of my prompts* can hold the beginning of each file, when the person ticks the box for that pair of files,
+after a preview that shows every character. `SECURITY.md` states both.
+
+**Still only in the simulation:** as listed under round 26. The extension has none of rounds 26 and 27. **Only in the Windows app:** Word documents and
+Excel workbooks (the simulation reads CSV, text and Markdown), and real weekly copies (the simulation shows the feature with its sample sheets).
+
 ## 12. Engagement roadmap — seven features that make it the daily habit
 
 Engagement here means *the tool pays the user every time they touch it* — never

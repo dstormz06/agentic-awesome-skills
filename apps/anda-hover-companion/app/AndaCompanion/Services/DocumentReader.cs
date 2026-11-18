@@ -17,7 +17,9 @@ public static class DocumentReader
 {
     public const long MaxFileBytes = 25L * 1024 * 1024, MaxXmlBytes = 60L * 1024 * 1024, MaxTextBytes = 5L * 1024 * 1024;
     private const string Word = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
-    private static XmlReaderSettings Safe => new() { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null, IgnoreWhitespace = false };
+    public const int MaxChars = 5_000_000;      // the most text of one document that is compared
+    // The reader itself stops at a fixed number of characters, so a file that declares one size and unpacks to another cannot fill memory.
+    private static XmlReaderSettings Safe => new() { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null, IgnoreWhitespace = false, MaxCharactersInDocument = 80_000_000, MaxCharactersFromEntities = 0 };
 
     public static bool IsDocument(string path) => Path.GetExtension(path).ToLowerInvariant() is ".docx" or ".txt" or ".md";
 
@@ -36,13 +38,15 @@ public static class DocumentReader
                 using var r = new StreamReader(fs, Encoding.UTF8, true);
                 string text = r.ReadToEnd();
                 if (text.Contains('\0')) return (null, $"{name} does not look like plain text, so it was not read.");
+                if (text.Length > MaxChars) return (null, $"{name} holds more than 5,000,000 characters of text, which is more than this tool compares.");
                 return text.Trim().Length == 0 ? (null, $"{name} has no text that could be read.") : (new ReadDocument(name, text, Array.Empty<string>()), null);
             }
             using var zip = new ZipArchive(fs, ZipArchiveMode.Read);
             if (zip.Entries.Sum(e => e.Length) > 150L * 1024 * 1024) return (null, $"{name} expands to an unreasonable size, so it was not opened.");
             var body = zip.GetEntry("word/document.xml");
             if (body is null || body.Length > MaxXmlBytes) return (null, $"{name} does not look like a Word document this tool can read.");
-            var (paragraphs, tracked) = Body(body);
+            var (paragraphs, tracked, tooLong) = Body(body);
+            if (tooLong) return (null, $"{name} holds more than 5,000,000 characters of text, which is more than this tool compares.");
             if (paragraphs.Count == 0) return (null, $"{name} has no text that could be read.");
             var says = Properties(zip);
             if (tracked) says.Add("The document has tracked changes. Of each, the inserted text was read and the deleted text was not.");
@@ -52,16 +56,22 @@ public static class DocumentReader
         { return (null, $"{name} could not be read as a document."); }
     }
 
-    private static (List<string> Paragraphs, bool Tracked) Body(ZipArchiveEntry entry)
+    /// <summary>The paragraphs of the body. Reading stops as soon as the text passes <see cref="MaxChars"/>, so an oversized document is never held in memory.</summary>
+    private static (List<string> Paragraphs, bool Tracked, bool TooLong) Body(ZipArchiveEntry entry)
     {
-        var paragraphs = new List<string>(); var sb = new StringBuilder(); bool tracked = false;
+        var paragraphs = new List<string>(); var sb = new StringBuilder(); bool tracked = false; long total = 0;
         using var stream = entry.Open(); using var r = XmlReader.Create(stream, Safe);
         r.Read();
         while (!r.EOF)
         {
             if (r.NodeType == XmlNodeType.Element && r.NamespaceURI == Word)
             {
-                if (r.LocalName == "t") { sb.Append(r.ReadElementContentAsString()); continue; }      // the reader has already moved on
+                if (r.LocalName == "t")
+                {
+                    sb.Append(r.ReadElementContentAsString());
+                    if (total + sb.Length > MaxChars) return (paragraphs, tracked, true);
+                    continue;      // the reader has already moved on
+                }
                 if (r.LocalName == "tab") sb.Append(' ');
                 else if (r.LocalName is "br" or "cr") sb.Append(' ');
                 else if (r.LocalName is "ins" or "del") tracked = true;
@@ -69,12 +79,12 @@ public static class DocumentReader
             else if (r.NodeType == XmlNodeType.EndElement && r.NamespaceURI == Word && r.LocalName == "p")
             {
                 string p = sb.ToString().Trim(); sb.Clear();
-                if (p.Length > 0) paragraphs.Add(p);
+                if (p.Length > 0) { paragraphs.Add(p); total += p.Length; }
             }
             r.Read();
         }
         if (sb.ToString().Trim() is { Length: > 0 } last) paragraphs.Add(last);
-        return (paragraphs, tracked);
+        return (paragraphs, tracked, false);
     }
 
     /// <summary>What the file states about itself. Anyone can change these fields, so they are shown as the file's own statement and nothing more.</summary>

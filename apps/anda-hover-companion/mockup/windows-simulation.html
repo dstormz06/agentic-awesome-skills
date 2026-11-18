@@ -1768,7 +1768,7 @@ PS C:\work&gt; </div>
     <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;margin-top:8px"><input type="checkbox" id="cmWhole"><span>Also give it the beginning of each file (up to 6,000 characters each). Without this, the prompt gets only the differences the rules found.</span></label>
     <hr class="hair">
     <div class="lbl"><label for="cmAnswer">CHECK AN AI ANSWER · ON THIS PC, NO AI</label></div>
-    <textarea id="cmAnswer" rows="3" maxlength="20000" placeholder="Paste an answer about these files here. Every number, date and name with a digit in it is looked up in the comparison and in the two files."></textarea>
+    <textarea id="cmAnswer" rows="3" maxlength="200001" placeholder="Paste an answer about these files here. Every number, date and name with a digit in it is looked up in the comparison and in the two files."></textarea>
     <div class="acts"><button class="pill quiet" id="cmCheckBtn" type="button" disabled>Check the answer</button></div>
     <div id="cmCheckOut" aria-live="polite"></div>
     <p class="hint">This page reads CSV tables and plain text (.txt, .md); the Windows app also reads Excel workbooks (.xlsx) and Word documents (.docx). Nothing goes to an AI unless you press Send on a preview that shows every character.</p>
@@ -1779,7 +1779,7 @@ PS C:\work&gt; </div>
     <div class="hdr"><h2 id="hoTitle">Hand-off page</h2><button class="pill" id="hoClose" type="button">Close</button></div>
     <p class="hint">Made from your own data and notes on this PC, by fixed rules. No AI is used and nothing is sent. You decide who gets it.</p>
     <div class="acts" role="group" aria-label="Which ANDAs" id="hoModes"><button class="pill quiet" id="hoAll" type="button" aria-pressed="true">Every ANDA in my data</button><button class="pill quiet" id="hoWatch" type="button" aria-pressed="false">Only those that need a look</button></div>
-    <label style="display:flex;gap:8px;align-items:center;font-size:13px;margin-top:10px"><input type="checkbox" id="hoNotes" checked><span>Include my notes</span></label>
+    <label style="display:flex;gap:8px;align-items:center;font-size:13px;margin-top:10px"><input type="checkbox" id="hoNotes"><span>Include my notes</span></label>
     <textarea id="hoOut" readonly rows="14" aria-label="The page, as text" style="margin-top:10px"></textarea>
     <div class="acts"><button class="pill quiet" id="hoCopy" type="button">Copy the page</button><button class="pill quiet" id="hoSave" type="button">Save as a text file</button></div>
     <p class="hint" id="hoStatus" role="status"></p>
@@ -3977,6 +3977,7 @@ function cmpPromptFor(template, material){      /* the saved prompt with the mat
 /* ---- Round 27: check an AI answer against the comparison. Every number, date and name with a digit in the answer must also stand in the
    comparison or in the two files; what does not is listed for the person to check. It cannot judge wording or reasoning, and says so. */
 const ANS_LIMIT = "This checks only that each such value in the answer also stands in the comparison or in the two files. It cannot tell whether the wording or the reasoning is right.";
+const ANS_MAX = 200000;                 /* the longest answer the check reads */
 function answerFacts(text){
   const t = String(text == null ? "" : text), dates = [], spans = [], numbers = [], names = []; let m; DATE_RE.lastIndex = 0;
   while((m = DATE_RE.exec(t))){
@@ -3984,10 +3985,11 @@ function answerFacts(text){
     const mt = dateMention(m); if(!mt || mt.mon < 1 || mt.mon > 12 || mt.day < 1 || mt.day > 31) continue;
     dates.push({ text:m[0], mon:mt.mon, day:mt.day, year:mt.year }); spans.push([m.index, m.index + m[0].length]);
   }
-  const token = /[A-Za-z0-9$][A-Za-z0-9.,%$-]*/g;
+  const token = /[A-Za-z0-9$][A-Za-z0-9.,%$-]*/g; let si = 0;       /* dates and words both come in reading order, so one pointer finds a word inside a date: the time taken grows with the length of the text and no faster */
   while((m = token.exec(t))){
     const start = m.index; let w = m[0].replace(/[.,-]+$/, ""); if(!/[0-9]/.test(w)) continue;
-    const end = start + w.length; if(spans.some(sp => start < sp[1] && end > sp[0])) continue;
+    const end = start + w.length; while(si < spans.length && spans[si][1] <= start) si++;
+    if(si < spans.length && end > spans[si][0]) continue;
     if(/^\$?[0-9][0-9,]*(?:\.[0-9]+)?%?$/.test(w)){
       const value = Number(w.replace(/[$,%]/g, "")); if(!Number.isFinite(value)) continue;
       if(/^[0-9]{1,2}$/.test(w) && /^[.)]/.test(t.slice(end, end + 1))){ let b = start; while(b > 0 && (t[b - 1] === " " || t[b - 1] === "\t")) b--; if(b === 0 || t[b - 1] === "\n") continue; }      /* "1." at the start of a line numbers a list */
@@ -3998,10 +4000,14 @@ function answerFacts(text){
 }
 function answerCheck(answer, factsText){
   if(!String(answer == null ? "" : answer).trim()) return { checked:0, missing:[], lines:["Please paste the answer first."] };
-  const a = answerFacts(answer), f = answerFacts(factsText), missing = [], add = x => { if(!missing.includes(x)) missing.push(x); };
+  if(String(answer).length > ANS_MAX) return { checked:0, missing:[], lines:["The answer is longer than 200,000 characters, which is more than this check reads."] };
+  const a = answerFacts(answer), f = answerFacts(factsText), missing = [], listed = new Set(), add = x => { if(!listed.has(x)){ listed.add(x); missing.push(x); } };
   const nums = new Set(f.numbers.map(x => x.value)), names = new Set(f.names.map(x => x.key));
+  /* A date stands in the facts when the month and day agree and the years agree or one side names no year. Three sets answer that without reading the facts once per date. */
+  const anyYear = new Set(), noYear = new Set(), withYear = new Set();
+  for(const d of f.dates){ const k = d.mon * 100 + d.day; anyYear.add(k); if(d.year === null) noYear.add(k); else withYear.add(d.year * 10000 + k); }
   for(const x of a.numbers) if(!nums.has(x.value)) add(x.text);
-  for(const x of a.dates) if(!f.dates.some(d => d.mon === x.mon && d.day === x.day && (d.year === null || x.year === null || d.year === x.year))) add(x.text);
+  for(const x of a.dates){ const k = x.mon * 100 + x.day; if(!(x.year === null ? anyYear.has(k) : (noYear.has(k) || withYear.has(x.year * 10000 + k)))) add(x.text); }
   for(const x of a.names) if(!names.has(x.key)) add(x.text);
   const checked = a.numbers.length + a.dates.length + a.names.length;
   if(checked === 0) return { checked, missing, lines:["The answer holds no number, date or name with a digit to check.", ANS_LIMIT] };
@@ -4293,7 +4299,8 @@ function cmpLines(full){                 /* the summary, or the whole report, of
   if(cmpKind === "doc") return (full ? docReport : docSummary)(cmpResult, cmpA.name, cmpB.name);
   return (full ? cmpReport : cmpSummary)(cmpResult, cmpA.name, cmpB.name);
 }
-function cmpFacts(){ return [cmpLines(true).join("\n"), ...[cmpA, cmpB].filter(Boolean).map(x => x.name + "\n" + cmpFileText(x))].join("\n"); }      /* everything an answer may rightly quote */
+const CMP_FACTS_MAX = 1000000;          /* the most text of one file that an answer is checked against; a longer file is searched up to here, and the window says so */
+function cmpFacts(){ let cut = false; const text = [cmpLines(true).join("\n"), ...[cmpA, cmpB].filter(Boolean).map(x => { let t = cmpFileText(x); if(t.length > CMP_FACTS_MAX){ cut = true; t = cutAt(t, CMP_FACTS_MAX); } return x.name + "\n" + t; })].join("\n"); return { text, cut }; }      /* everything an answer may rightly quote */
 function cmpPaint(){
   const out = $("cmOut"); out.replaceChildren(); cmpResult = null; cmpKind = null; $("cmCheckOut").replaceChildren();
   CMP_BTNS.forEach(id => { $(id).disabled = true; });
@@ -4323,12 +4330,13 @@ function cmpPaint(){
   if(cmpFresh){ cmpFresh = false; usageRecord("compare_files"); }      /* once for a pair of files, not again for each look at it */
 }
 function cmpSetMode(mode){               /* two files, a report against my data, or my sheet since the last kept copy */
-  cmpMode = mode; cmpA = cmpB = null; $("cmFileA").value = ""; $("cmFileB").value = ""; $("cmKey").value = ""; $("cmAnswer").value = "";
+  cmpMode = mode; cmpA = cmpB = null; $("cmFileA").value = ""; $("cmFileB").value = ""; $("cmKey").value = ""; $("cmAnswer").value = ""; $("cmWhole").checked = false;
   [["cmModeTwo", "two"], ["cmModeData", "data"], ["cmModeWeek", "week"]].forEach(([id, m]) => $(id).setAttribute("aria-pressed", String(m === mode)));
   if(mode === "week") cmpLoadWeek();
   cmpPaint(); cmpSay("");
 }
 function cmpLoadWeek(){                  /* simulation: two fictional versions stand in for the person's sheet and its kept copy */
+  $("cmWhole").checked = false;
   if(state.weekCopy){ cmpA = { ...CMP_SAMPLE_A, name:"My sheet, copy kept Nov 10" }; cmpB = { ...CMP_SAMPLE_B, name:"My sheet, today" }; cmpFresh = true; } else cmpA = cmpB = null;
 }
 function openCompare(mode){
@@ -4349,7 +4357,7 @@ async function cmpRead(input, side){
   try{ const text = await f.text(); if(isDoc){ if(text.includes(String.fromCharCode(0))) why = `${f.name} does not look like plain text, so it was not read.`; else if(text.trim()) item = { name:f.name.slice(0, 80), kind:"doc", text }; } else item = cmpParseCsv(text, f.name.slice(0, 80)); }catch(e){ item = null; }
   if(!item){ cmpSay(why); input.value = ""; return; }
   if(side === "a") cmpA = item; else cmpB = item;
-  cmpFresh = true;
+  cmpFresh = true; $("cmWhole").checked = false;      /* giving a prompt the files themselves is a choice made anew for every pair of files */
   cmpSay(`${f.name} was read on this PC. Nothing was sent.`); $("cmKey").value = ""; cmpPaint();
 }
 function cmpHtmlReport(){               /* a one-page report to save: text only, built from escaped values */
@@ -4368,7 +4376,7 @@ $("cmModeTwo").addEventListener("click", () => cmpSetMode("two"));
 $("cmModeData").addEventListener("click", () => cmpSetMode("data"));
 $("cmModeWeek").addEventListener("click", () => cmpSetMode("week"));
 $("cmWeekOn").addEventListener("change", e => { state.weekCopy = e.target.checked; cmpLoadWeek(); cmpPaint(); cmpSay(state.weekCopy ? "From now on one copy of your sheet is kept each week, on this PC only. (Simulation: two fictional versions stand in for your sheet and its copy.)" : "No copies are kept, and the copies that were kept are deleted."); });
-const cmpUseSample = (a, b, said) => { cmpA = a; cmpB = b; cmpFresh = true; $("cmFileA").value = ""; $("cmFileB").value = ""; $("cmKey").value = ""; cmpPaint(); cmpSay(said); };
+const cmpUseSample = (a, b, said) => { cmpA = a; cmpB = b; cmpFresh = true; $("cmWhole").checked = false; $("cmFileA").value = ""; $("cmFileB").value = ""; $("cmKey").value = ""; cmpPaint(); cmpSay(said); };
 $("cmSample").addEventListener("click", () => cmpUseSample(CMP_SAMPLE_A, CMP_SAMPLE_B, "Two fictional versions of one report are in. Change the column that matches rows if you like."));
 $("cmSampleDocs").addEventListener("click", () => cmpUseSample(DOC_SAMPLE_A, DOC_SAMPLE_B, "Two fictional versions of one letter are in. They are compared paragraph by paragraph."));
 $("cmSampleReport").addEventListener("click", () => {       /* made from the sample data at this moment, with one forecast moved and one ANDA the data does not hold */
@@ -4405,8 +4413,8 @@ $("cmUse").addEventListener("click", () => {
 });
 $("cmCheckBtn").addEventListener("click", () => {
   if(!cmpResult) return;
-  const r = answerCheck($("cmAnswer").value, cmpFacts()), box = $("cmCheckOut");
-  box.replaceChildren(...r.lines.map((l, i) => h("p", { class:r.lines.length > 1 && i === r.lines.length - 1 ? "hint" : r.missing.length ? "cm-check miss" : "cm-check", text:l })));
+  const facts = cmpFacts(), r = answerCheck($("cmAnswer").value, facts.text), box = $("cmCheckOut");
+  box.replaceChildren(...(facts.cut ? [h("p", { class:"hint", text:"A file is very large: only its first 1,000,000 characters were searched, so a value from further on can be listed although it is there." })] : []), ...r.lines.map((l, i) => h("p", { class:r.lines.length > 1 && i === r.lines.length - 1 ? "hint" : r.missing.length ? "cm-check miss" : "cm-check", text:l })));
 });
 
 /* ---- Round 27: the hand-off page and the meeting page. Made from the person's own data and notes by fixed rules; nothing is sent. */
@@ -4429,6 +4437,7 @@ function handoffPaint(){
 function openHandoff(ids){
   closeMenus(); hoIds = ids && ids.length ? ids.slice(0, 8) : null;
   $("hoTitle").textContent = hoIds ? "Meeting page" : "Hand-off page"; $("handoff").setAttribute("aria-label", hoIds ? "Meeting page" : "Hand-off page"); $("hoModes").hidden = !!hoIds;
+  $("hoNotes").checked = false;      /* notes are the person's own and can be candid: a page that may go to someone else holds them only when the box is ticked, each time */
   showApp("handoff"); $("handoff").style.zIndex = "53"; handoffPaint(); $("hoStatus").textContent = "";
 }
 $("hoClose").addEventListener("click", () => closeApp("handoff"));

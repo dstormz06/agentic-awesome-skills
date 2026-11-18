@@ -318,21 +318,22 @@ public class Round27UiTests : IClassFixture<HeadlessFixture>
             ThemeManager.Apply(Appearances.Default);
             var w = new HandoffWindow("Hand-off page", chooseWhich: true, Lines) { WriteClipboard = t => { copied.Add(t); return Task.CompletedTask; }, SaveText = t => { saved.Add(t); return Task.FromResult(true); } };
             w.Show(); Settle();
-            string all = w.Page.Text ?? "";
-            w.NotesBox.IsChecked = false; Settle(); string noNotes = w.Page.Text ?? "";
-            w.NotesBox.IsChecked = true; Click(w.WatchButton); Settle(); string watch = w.Page.Text ?? "";
+            bool tickedAtFirst = w.NotesBox.IsChecked == true; string noNotes = w.Page.Text ?? "";
+            w.NotesBox.IsChecked = true; Settle(); string all = w.Page.Text ?? "";
+            Click(w.WatchButton); Settle(); string watch = w.Page.Text ?? "";
             string name = Avalonia.Automation.AutomationProperties.GetName(w.WatchButton) ?? "";
             Click(w.CopyButton); Settle(); string s1 = w.Note.Text ?? "";
             Click(w.SaveButton); Settle(); string s2 = w.Note.Text ?? "";
             w.Close();
-            return (all, noNotes, watch, name, s1, s2);
+            return (all, noNotes, watch, name, s1, s2, tickedAtFirst);
         }, CancellationToken.None);
         int count = Repo.Numbers.Count;
         Assert.StartsWith($"Hand-off: {count} ANDAs, as of Jul 16, 2026\nFrom my own data and notes on this PC. It is not the system of record.\n\n", r.all);
         Assert.Contains(StatusLine.Build(Repo.Find("216482")!), r.all); Assert.Contains(StatusLine.Build(Repo.Find("214990")!), r.all);
         Assert.Contains("<b>bold</b> note for the hand-off", r.all);                       // a note with markup is plain text on the page
         Assert.Contains("\n  Open: ", r.all); Assert.Contains("\n  Notes: ", r.all);
-        Assert.DoesNotContain("Notes:", r.noNotes);
+        Assert.False(r.tickedAtFirst);                                                       // notes go on a page that may be passed on only when the person ticks the box
+        Assert.DoesNotContain("Notes:", r.noNotes); Assert.DoesNotContain("note for the hand-off", r.noNotes); Assert.Contains("\n  Open: ", r.noNotes);
         Assert.StartsWith("Hand-off: ", r.watch); Assert.Equal("Only those that need a look, selected", r.name);
         Assert.All(HandoffData.Order(Repo, ctx, true), n => Assert.Contains($"ANDA {n} (", r.watch));
         Assert.Equal(r.watch, Assert.Single(copied)); Assert.Equal("The page was copied. Nothing was sent; you decide who gets it.", r.s1);

@@ -27,7 +27,7 @@ public static class SettingsBackup
     private static readonly JsonSerializerOptions Json = new() { WriteIndented = true };
 
     /// <summary>Settings that are tied to one PC and so are not part of a backup.</summary>
-    private static readonly string[] ThisPcOnly = { nameof(Settings.PortfolioPath), nameof(Settings.PortfolioColumns), nameof(Settings.NotesFolder), nameof(Settings.ReferenceDataPath), nameof(Settings.FirstRunDone), nameof(Settings.SectionUse) };
+    private static readonly string[] ThisPcOnly = { nameof(Settings.PortfolioPath), nameof(Settings.KeepWeeklySheetCopy), nameof(Settings.PortfolioColumns), nameof(Settings.NotesFolder), nameof(Settings.ReferenceDataPath), nameof(Settings.FirstRunDone), nameof(Settings.SectionUse) };
 
     public static string Export(Settings settings, PromptLibraryService lenses, QuickReplyService replies, DateTime? now = null)
     {

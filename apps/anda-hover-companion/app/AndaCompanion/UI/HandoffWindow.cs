@@ -46,7 +46,8 @@ public sealed class HandoffWindow : Window
         AutomationProperties.SetName(which, "Which ANDAs");
         which.Children.Add(AllButton); which.Children.Add(WatchButton);
 
-        NotesBox = new CheckBox { Content = "Include my notes", IsChecked = true };
+        // Notes are the person's own and can be candid: a page that may go to someone else holds them only when the person ticks the box, each time.
+        NotesBox = new CheckBox { Content = "Include my notes", IsChecked = false };
         NotesBox.IsCheckedChanged += (_, _) => Paint();
         Page = new TextBox { IsReadOnly = true, AcceptsReturn = true, TextWrapping = TextWrapping.Wrap, Height = 300, FontSize = 12.5, FontFamily = new FontFamily("Consolas, Menlo, monospace") };
         AutomationProperties.SetName(Page, "The page, as text");

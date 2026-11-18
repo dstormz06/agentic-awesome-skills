@@ -3,6 +3,14 @@
 A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
 **All bundled data is fictional.** Not an FDA product; a concept prototype.
 
+> **New in round 27: two documents and one of your prompts, a check of an AI answer, signs worth a second look, and five daily helpers.** *Compare two files…* now also reads documents (Word `.docx`, text, Markdown) and compares them
+> paragraph by paragraph, by fixed rules on this PC. Under the comparison, *Use this prompt…* runs one of your stored prompts on it: the prompt gets the differences the rules found and, only if you tick the box for that pair of files, the beginning of each
+> file (up to 6,000 characters each); it is always shown to you first. *Check the answer* looks up every number, date and name with a digit of a pasted AI answer in the comparison and the files, with no AI. Two more ways of working are at the top of the
+> window: *A report against my data* (goal date and forecast date, for the ANDAs the report names) and *My sheet since last week* (one copy of your sheet a week, the newest five, on this PC, only after you switch it on). Tray menu: *Hand-off page…* (plain text
+> from your own data and notes, to copy or save). In *Ask about a selection*: *Make a meeting page* when the selection names ANDAs in your data. In *Review a draft*: **Worth a second look** (leftover assistant wording, unfilled placeholders, formatting marks,
+> citations to confirm: **not a detector and never a verdict on who wrote a text**), and a follow-up on your to-do list when the draft asks for a reply by a date. The rules are the simulation's, answer for answer (`../mockup/round27-golden.json`).
+> What was decided and why, and the security review of this round, are in `../DESIGN.md` §11k and `../SECURITY.md`. PDF files are not read.
+>
 > **New in round 26: Compare two files, and more from a selection.** *Compare two files…* (tray menu) takes an earlier and a later version of one report (`.xlsx` or CSV), matches rows by the column that names them, and shows
 > a short summary, a bar of the rows, a bar for each column that changed, and the changed cells. For a workbook it reads one sheet and names it. Fixed rules on this PC: no AI, nothing sent. *Copy the summary*, *Copy the full report*, *Save a report…*; and *Write a narrative with AI…*,
 > which opens the usual preview with the summary and the listed changes only, never the files. In *Ask about a selection*: four reading prompts (*TL;DR*, *What else should I know?*, *Onboard me on this topic*, *Why does it matter?*),
@@ -267,7 +275,7 @@ dotnet test AndaCompanion.Tests                              # everything (Windo
 dotnet test AndaCompanion.Tests --filter "Category!=Windows" # what runs on Linux/macOS
 ```
 
-1,132 cross-platform tests at the time of writing, round 26 (the figure was 762 when this paragraph was first written; recognizer, status line, GDUFA rules, the federal-holiday
+1,157 cross-platform tests at the time of writing, round 27 (the figure was 762 when this paragraph was first written; recognizer, status line, GDUFA rules, the federal-holiday
 calendar against OPM's dates, watch rules, urgency, draft check, portfolio and notes readers, writing prompts,
 hotkey parsing and registration with a fake API, brief fencing and fallback, provider selection, settings,
 contrast, placement, the to-do list, custom actions, the agent connector, headless renders and interaction tests of the real windows) plus Windows-only tests that use real Win32 (clipboard snapshot/restore, hotkey registration and

@@ -80,7 +80,7 @@
           </CheckBox>
           <Border Classes="rule"/>
           <TextBlock Classes="lbl" Text="CHECK AN AI ANSWER · ON THIS PC, NO AI"/>
-          <TextBox Name="AnswerBox" AcceptsReturn="True" TextWrapping="Wrap" Height="74" MaxLength="20000" FontSize="12.5"
+          <TextBox Name="AnswerBox" AcceptsReturn="True" TextWrapping="Wrap" Height="74" MaxLength="200001" FontSize="12.5"
                    Watermark="Paste an answer about these files here. Every number, date and name with a digit in it is looked up in the comparison and in the two files."
                    AutomationProperties.Name="An AI answer to check"/>
           <WrapPanel><Button Name="CheckBtn" Content="Check the answer" IsEnabled="False"/></WrapPanel>

@@ -116,7 +116,7 @@ public partial class CompareWindow : Window
     {
         if (earlier is not null) { _a = earlier; _sheetA = null; _docA = null; }
         if (later is not null) { _b = later; _sheetB = null; _docB = null; }
-        _fresh = true;
+        NewFiles();
         Paint(null);
     }
 
@@ -125,7 +125,7 @@ public partial class CompareWindow : Window
     {
         if (earlier is not null) { _docA = earlier; _a = null; _sheetA = null; }
         if (later is not null) { _docB = later; _b = null; _sheetB = null; }
-        _fresh = true;
+        NewFiles();
         Paint(null);
     }
 
@@ -133,7 +133,7 @@ public partial class CompareWindow : Window
     public void SetMode(string mode)
     {
         _mode = mode is "data" or "week" ? mode : "two";
-        _a = _b = null; _docA = _docB = null; _sheetA = _sheetB = null; _weekProblem = null; AnswerBox.Text = "";
+        _a = _b = null; _docA = _docB = null; _sheetA = _sheetB = null; _weekProblem = null; AnswerBox.Text = ""; WholeBox.IsChecked = false;
         foreach (var (button, name, on) in new[] { (ModeTwoBtn, "Two files", _mode == "two"), (ModeDataBtn, "A report against my data", _mode == "data"), (ModeWeekBtn, "My sheet since last week", _mode == "week") })
         {
             button.Classes.Set("primary", on);
@@ -143,13 +143,16 @@ public partial class CompareWindow : Window
         Paint(null); Say("");
     }
 
+    /// <summary>A new file is in. It has not been counted yet, and giving a prompt the files themselves is a choice made anew for every pair of files.</summary>
+    private void NewFiles() { _fresh = true; WholeBox.IsChecked = false; }
+
     private void LoadWeek()
     {
         _a = _b = null; _docA = _docB = null; _weekProblem = null;
         if (WeeklyOn?.Invoke() != true || WeeklyPair is null) return;
         var (earlier, now, problem) = WeeklyPair();
         if (earlier is null || now is null) { _weekProblem = problem ?? "There is no earlier copy of your sheet yet."; return; }
-        _a = earlier; _b = now; _fresh = true;
+        _a = earlier; _b = now; NewFiles();
     }
 
     /// <summary>Fills the list of stored prompts: the ones that are switched on and that fill a prompt or ask the AI.</summary>
@@ -177,12 +180,18 @@ public partial class CompareWindow : Window
         _ => Array.Empty<string>(),
     };
 
-    /// <summary>Everything an answer may rightly quote: the report and both files.</summary>
-    public string Facts()
+    /// <summary>The most text of one file that an answer is checked against. A longer file is searched up to here, and the window says so.</summary>
+    public const int FactsMax = 1_000_000;
+
+    /// <summary>Everything an answer may rightly quote: the report and both files (the first <see cref="FactsMax"/> characters of each).</summary>
+    public string Facts() => Facts(out _);
+
+    private string Facts(out bool cut)
     {
-        var parts = new List<string> { string.Join("\n", Lines(true)) };
-        if (NameOfA.Length > 0) parts.Add(NameOfA + "\n" + TextOfA);
-        if (NameOfB.Length > 0) parts.Add(NameOfB + "\n" + TextOfB);
+        var parts = new List<string> { string.Join("\n", Lines(true)) }; bool wasCut = false;
+        void Add(string name, string text) { if (name.Length == 0) return; if (text.Length > FactsMax) { wasCut = true; text = CompareMaterial.CutAt(text, FactsMax); } parts.Add(name + "\n" + text); }
+        Add(NameOfA, TextOfA); Add(NameOfB, TextOfB);
+        cut = wasCut;
         return string.Join("\n", parts);
     }
 
@@ -206,8 +215,9 @@ public partial class CompareWindow : Window
     private void CheckAnswer()
     {
         if (Kind is null) return;
-        var r = AnswerCheck.Check(AnswerBox.Text, Facts());
+        var r = AnswerCheck.Check(AnswerBox.Text, Facts(out bool cut));
         CheckOut.Children.Clear();
+        if (cut) CheckOut.Children.Add(new TextBlock { Classes = { "hint" }, Text = "A file is very large: only its first 1,000,000 characters were searched, so a value from further on can be listed although it is there.", Tag = "cut" });
         for (int i = 0; i < r.Lines.Count; i++)
         {
             bool limit = r.Lines.Count > 1 && i == r.Lines.Count - 1, miss = !limit && r.Missing.Count > 0;
@@ -249,7 +259,7 @@ public partial class CompareWindow : Window
     private void Put(CompareTable table, string? sheet, bool earlier)
     {
         if (earlier) { _a = table; _sheetA = sheet; _docA = null; } else { _b = table; _sheetB = sheet; _docB = null; }
-        _fresh = true;
+        NewFiles();
     }
 
     /// <summary>Reads a file on this PC, as a table or as a document by its kind, and compares. Returns what went wrong in plain words, or null.</summary>
@@ -273,7 +283,7 @@ public partial class CompareWindow : Window
     private void PutDocument(ReadDocument document, bool earlier)
     {
         if (earlier) { _docA = document; _a = null; _sheetA = null; } else { _docB = document; _b = null; _sheetB = null; }
-        _fresh = true;
+        NewFiles();
     }
 
     private async Task ChooseAsync(bool earlier)

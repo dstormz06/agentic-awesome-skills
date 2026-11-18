@@ -144,7 +144,7 @@ public class ShotTests : IClassFixture<HeadlessFixture>
             Save(docs, dir, "compare-27-report");
             docs.Close();
             var handoff = new HandoffWindow("Hand-off page", true, (watchOnly, withNotes) => Handoff.Text("Hand-off", HandoffData.Entries(HandoffData.Order(repo27, ctx27, watchOnly), repo27, ctx27, null, null, null), "Jul 16, 2026", withNotes));
-            handoff.Show(); for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
+            handoff.Show(); handoff.NotesBox.IsChecked = true; for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
             Save(handoff, dir, "handoff-27");
             handoff.Close();
             var review27 = new DraftWindow("Certainly! Here is a revised version.\n\nANDA 216482: under 21 CFR 314.96(a) the amendment is minor. Please send your response by Friday, Dec 4, 2026.\n\nI hope this helps.",

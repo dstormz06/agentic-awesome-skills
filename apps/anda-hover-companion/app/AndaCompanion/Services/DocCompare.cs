@@ -212,6 +212,7 @@ public sealed record AnswerResult(int Checked, IReadOnlyList<string> Missing, IR
 /// </summary>
 public static class AnswerCheck
 {
+    public const int MaxAnswer = 200_000;      // the longest answer the check reads
     public const string Limit = "This checks only that each such value in the answer also stands in the comparison or in the two files. It cannot tell whether the wording or the reasoning is right.";
     private static readonly CultureInfo Inv = CultureInfo.InvariantCulture;
     private static readonly Regex Token = new(@"[A-Za-z0-9$][A-Za-z0-9.,%$-]*", RegexOptions.CultureInvariant, JsRegex.Limit),
@@ -230,10 +231,12 @@ public static class AnswerCheck
             if (DraftText.ToMention(m) is not { } mt || mt.Mon < 1 || mt.Mon > 12 || mt.Day < 1 || mt.Day > 31) continue;
             dates.Add(new DateFact(m.Value, mt.Mon, mt.Day, mt.Year)); spans.Add((m.Index, m.Index + m.Length));
         }
+        int si = 0;      // dates and words both come in reading order, so one pointer finds a word inside a date: the time taken grows with the length of the text and no faster
         foreach (Match m in Token.Matches(t))
         {
             int start = m.Index; string w = m.Value.TrimEnd('.', ',', '-'); if (!w.Any(c => c is >= '0' and <= '9')) continue;
-            int end = start + w.Length; if (spans.Any(sp => start < sp.Item2 && end > sp.Item1)) continue;
+            int end = start + w.Length; while (si < spans.Count && spans[si].Item2 <= start) si++;
+            if (si < spans.Count && end > spans[si].Item1) continue;
             if (Number.IsMatch(w))
             {
                 if (!double.TryParse(w.Replace("$", "").Replace(",", "").Replace("%", ""), NumberStyles.Float, Inv, out double value) || !double.IsFinite(value)) continue;
@@ -252,11 +255,18 @@ public static class AnswerCheck
     public static AnswerResult Check(string? answer, string? factsText)
     {
         if (JsRegex.Trim(answer ?? "").Length == 0) return new AnswerResult(0, Array.Empty<string>(), new[] { "Please paste the answer first." });
-        var a = Read(answer); var f = Read(factsText); var missing = new List<string>();
-        void Add(string x) { if (!missing.Contains(x)) missing.Add(x); }
+        if (answer!.Length > MaxAnswer) return new AnswerResult(0, Array.Empty<string>(), new[] { "The answer is longer than 200,000 characters, which is more than this check reads." });
+        Facts a, f;
+        try { a = Read(answer); f = Read(factsText); }
+        catch (RegexMatchTimeoutException) { return new AnswerResult(0, Array.Empty<string>(), new[] { "The answer could not be checked in the time allowed. Nothing was sent." }); }
+        var missing = new List<string>(); var listed = new HashSet<string>(StringComparer.Ordinal);
+        void Add(string x) { if (listed.Add(x)) missing.Add(x); }
         var nums = f.Numbers.Select(x => x.Value).ToHashSet(); var names = f.Names.Select(x => x.Key).ToHashSet(StringComparer.Ordinal);
+        // A date stands in the facts when the month and day agree and the years agree or one side names no year. Three sets answer that without reading the facts once per date.
+        var anyYear = new HashSet<long>(); var noYear = new HashSet<long>(); var withYear = new HashSet<long>();
+        foreach (var d in f.Dates) { long k = d.Mon * 100 + d.Day; anyYear.Add(k); if (d.Year is { } y) withYear.Add(y * 10000L + k); else noYear.Add(k); }
         foreach (var x in a.Numbers) if (!nums.Contains(x.Value)) Add(x.Text);
-        foreach (var x in a.Dates) if (!f.Dates.Any(d => d.Mon == x.Mon && d.Day == x.Day && (d.Year is null || x.Year is null || d.Year == x.Year))) Add(x.Text);
+        foreach (var x in a.Dates) { long k = x.Mon * 100 + x.Day; if (!(x.Year is { } y ? noYear.Contains(k) || withYear.Contains(y * 10000L + k) : anyYear.Contains(k))) Add(x.Text); }
         foreach (var x in a.Names) if (!names.Contains(x.Key)) Add(x.Text);
         int total = a.Numbers.Count + a.Dates.Count + a.Names.Count;
         if (total == 0) return new AnswerResult(0, missing, new[] { "The answer holds no number, date or name with a digit to check.", Limit });

@@ -46,6 +46,27 @@ public class Round27Tests
     }
 
     [Fact]
+    public void Two_documents_too_long_to_be_matched_are_compared_in_order_and_the_summary_says_so()
+    {
+        using var doc = Golden(); var bad = new List<string>(); var want = doc.RootElement.GetProperty("longDocs");
+        int n = want.GetProperty("paragraphs").GetInt32(); Assert.True(n > 2000);
+        string Make(bool later) => string.Join("\n\n", new[] { "The first paragraph is the same." }
+            .Concat(Enumerable.Range(0, n).Select(i => $"Item {i} of the {(later ? "later" : "earlier")} plan keeps most of its words.")).Append("The last paragraph is the same."));
+        var r = DocCompare.Compare(Make(false), Make(true));
+        Same(bad, "counts", string.Join(" ", want.GetProperty("counts").EnumerateArray().Select(x => x.ValueKind is JsonValueKind.True or JsonValueKind.False ? (x.GetBoolean() ? "true" : "false") : x.ToString())),
+            $"{r.ParasA} {r.ParasB} {r.Same} {r.Changed} {r.Added} {r.Removed} {(r.Skipped ? "true" : "false")}");
+        Assert.True(r.Skipped);
+        string Line(JsonElement x) => $"{x.GetProperty("kind").GetString()}|{x.GetProperty("at")}|{x.GetProperty("from").GetString()}|{x.GetProperty("to").GetString()}";
+        Same(bad, "listed", want.GetProperty("listed").ToString(), r.Changes.Count.ToString());
+        Same(bad, "first change", Line(want.GetProperty("first")), $"{r.Changes[0].Kind}|{r.Changes[0].At}|{r.Changes[0].From}|{r.Changes[0].To}");
+        Same(bad, "last change", Line(want.GetProperty("last")), $"{r.Changes[^1].Kind}|{r.Changes[^1].At}|{r.Changes[^1].From}|{r.Changes[^1].To}");
+        Same(bad, "summary", Join(Strings(want.GetProperty("summary"))), Join(DocCompare.Summary(r, "Earlier.txt", "Later.txt")));
+        Same(bad, "end of the report", want.GetProperty("reportEnd").GetString()!, DocCompare.Report(r, "Earlier.txt", "Later.txt")[^1]);
+        Assert.Contains("The files are very long. Paragraphs in the middle were compared in order, not matched, so a moved paragraph there reads as changed.", DocCompare.Summary(r, "Earlier.txt", "Later.txt"));
+        Fail(bad);
+    }
+
+    [Fact]
     public void A_stored_prompt_is_given_exactly_what_the_simulation_gives_it()
     {
         using var doc = Golden(); var bad = new List<string>(); int n = 0;

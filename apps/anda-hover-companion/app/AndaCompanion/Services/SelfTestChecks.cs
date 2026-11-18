@@ -364,7 +364,7 @@ internal static class SelfTestChecks
             var docs = DocCompare.Compare(DocCompare.SampleA, DocCompare.SampleB);
             if (docs.Same != 3 || docs.Changed != 1 || docs.Added != 1 || docs.Removed != 1) problems.Add($"comparing the two sample letters gave {docs.Same} same, {docs.Changed} changed, {docs.Added} new, {docs.Removed} gone");
             if (AnswerCheck.Check("The goal moved to Oct 17, 2026, a slip of 21 days.", string.Join("\n", DocCompare.Report(docs, "a", "b"))).Missing is not ["21"]) problems.Add("the check of an AI answer did not single out the one value that stands nowhere");
-            var signs = SecondLook.Check("Certainly! Here is a draft under 21 CFR 314.96(a).");
+            var signs = SecondLook.Check("Certainly! Here is a draft under 21 CFR 314.96(a).");      // wording-ok: a sample of the leftover wording the rule looks for
             if (signs.Items.Count != 2 || signs.Items.Any(i => i.Contains("written by", StringComparison.OrdinalIgnoreCase))) problems.Add("signs worth a second look were not listed as expected");
             if (ReplyBy.Find("Please respond by Dec 4, 2026.", new DateOnly(2026, 11, 18))?.Day != "2026-12-04") problems.Add("a reply asked for by a date was not found");
             var checkedReport = ReportCheck.Check(new CompareTable("r", new[] { "ANDA", "Goal date" }, new[] { new[] { "216482", "10/4/2026" } }), id => id == "216482" ? ("Oct 3, 2026", "") : null);
