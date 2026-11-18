@@ -856,10 +856,9 @@ with an ANDA column, otherwise the first visible sheet) and names it beside the 
 2. **Values are compared as what they are.** "1,000" equals "1000.0"; "10/3/2026" equals "Oct 3, 2026"; extra spaces do not count. A changed whole number
    shows the difference; a changed date shows the number of days earlier or later.
 3. **What is shown:** a summary of a few plain sentences (rows the same, changed, new, no longer there; the columns with the most changes; the largest date
-   change; columns only one file has; rows left out and why); one bar of the rows in four parts (rows that are the same as an outline, the three kinds of change filled); a bar for each of the eight columns that
-   changed most; a
-   table of the first 60 changed cells; and the lists of new and removed rows. Every part of each picture is also named with its number, so nothing is said
-   by color alone.
+   change; columns only one file has; rows left out and why); one bar of the rows in four parts (rows that are the same as an outline, the three kinds of
+   change filled); a bar for each of the eight columns that changed most; a table of the first 60 changed cells; and the lists of new and removed rows.
+   Every part of each picture is also named with its number, so nothing is said by color alone.
 4. **What can be taken away:** *Copy the summary*, *Copy the full report* (up to 50 changed rows and 50 names each of new and removed rows) and *Save a report*
    (one web page with no script and no outside address).
 5. **Write a narrative with AI…** opens the usual preview of exactly what would be sent. It holds the summary and the listed changes, cut at 1,800
@@ -902,9 +901,13 @@ character for character. Writing the rules a second time found a real fault in t
 
 **What the design review changed.** Measured against the accessibility checklist of the repository's *Product Design Studio* skill set: the "Same" part of
 the row bar stood about 2 to 1 against the window. It is now an outline at full strength beside three filled parts (each 5.9 to 1 or better in the looks
-measured, held by a check in each program), so the parts differ by more than color; the
-file choosers in the simulation were 20 pixels tall and are now 36; the smallest text in the app's window is 12. Buttons stay 34 pixels tall, as everywhere
-else in the product: above the 24 that WCAG 2.2 AA asks, below the 44 recommended for touch.
+measured, held by a check in each program), so the parts differ by more than color; the file choosers in the simulation were 20 pixels tall and are now
+36; the smallest text in the app's window is 12. Buttons stay 34 pixels tall, as everywhere else in the product: above the 24 that WCAG 2.2 AA asks,
+below the 44 recommended for touch.
+
+**What the simulation says after a save.** A web page can ask the browser to save a file but cannot learn whether it did, and a page shown inside another
+page, as the published link is, is not allowed to. The simulation therefore says that a download was tried and what to do if nothing was saved, as the
+backup in Settings already did, and never that a file was saved. The Windows app writes the file itself and reports a failure.
 
 **What changed in the workflow** (from the *DevOps & Cloud* skill set's security-scanning section): the Linux job now also checks the packages against the
 public advisory list and builds with every .NET security rule on; either stops the run. The shared answer files are among the paths that start it.
