@@ -285,7 +285,7 @@ dotnet test AndaCompanion.Tests                              # everything (Windo
 dotnet test AndaCompanion.Tests --filter "Category!=Windows" # what runs on Linux/macOS
 ```
 
-1,172 cross-platform tests at the time of writing, round 28 (the figure was 762 when this paragraph was first written; recognizer, status line, GDUFA rules, the federal-holiday
+1,186 cross-platform tests at the time of writing, round 29 (the figure was 762 when this paragraph was first written; recognizer, status line, GDUFA rules, the federal-holiday
 calendar against OPM's dates, watch rules, urgency, draft check, portfolio and notes readers, writing prompts,
 hotkey parsing and registration with a fake API, brief fencing and fallback, provider selection, settings,
 contrast, placement, the to-do list, custom actions, the agent connector, headless renders and interaction tests of the real windows) plus Windows-only tests that use real Win32 (clipboard snapshot/restore, hotkey registration and
