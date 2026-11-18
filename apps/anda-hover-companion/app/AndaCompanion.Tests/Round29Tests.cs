@@ -106,6 +106,12 @@ public class Round29Tests
         Assert.StartsWith("By itself when a full card opens", r.Items[1].Sends); Assert.Equal("graph.microsoft.us", r.Items[2].Where);
         Assert.DoesNotContain(r.Text, l => l.Contains("token=abc"));
 
+        // A name is the person's own text: an invisible character that could reorder the line is removed. A look-alike letter in an address shows in the form the network uses.
+        var u = new Settings();
+        u.Agents[0].Enabled = true; u.Agents[0].Name = "Alert\u202E buH\u200B"; u.Agents[0].Api.Endpoint = "https://ex\u0430mple.test/ask";
+        var v = Connections.Describe(Connections.From(u, none));
+        Assert.Equal("Switched on: Alert buH (agent)", v.Line); Assert.Equal("xn--exmple-4nf.test", v.Items[0].Where);
+
         Assert.Equal(new[] { "AI switched on", "agents switched on: 0 to 2", "Outlook switched off" },
             Connections.Changes((false, 0, true), (true, 2, false)));
         Assert.Empty(Connections.Changes((true, 1, false), (true, 1, false)));
@@ -137,6 +143,13 @@ public class Round29Tests
             var (again, total2) = EventLog.Read();
             Assert.Equal(6, total2); Assert.Equal(EventLog.Withheld, again[4].Detail); Assert.Equal(("warning", "x"), (again[5].Type, again[5].Detail));
             Assert.Equal(2, EventLog.Read(newest: 2).Entries.Count);
+            Assert.Equal((2, 6, "warning"), (EventLog.Read(newest: 2).Entries.Count, EventLog.Read(newest: 2).Total, EventLog.Read(newest: 2).Entries[1].Type));   // the newest are kept, every line is counted
+
+            // A spreadsheet would read a detail that begins with = + or - as a formula: such a detail is never written and never shown.
+            EventLog.Record("sent", "=1+1", t0.AddSeconds(4));
+            Assert.EndsWith(",sent,\"" + EventLog.Withheld + "\"\r\n", File.ReadAllText(path));
+            File.AppendAllText(path, "2026-07-16T13:08:00.000Z,sent,\"+1\"\r\n");
+            Assert.Equal(EventLog.Withheld, EventLog.Read().Entries[^1].Detail);
 
             // Where the file cannot be written, nothing is thrown.
             EventLog.Configure(Path.Combine(dir, "events.csv", "inside-a-file.csv"));

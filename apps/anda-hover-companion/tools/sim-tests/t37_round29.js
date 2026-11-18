@@ -63,6 +63,9 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   { await p.evaluate(() => openConn()); await settle(p);
     eq(await p.evaluate(() => [document.getElementById('cnList').textContent, document.getElementById('cnLogEmpty').hidden, document.getElementById('cnLogWrap').hidden, document.getElementById('cnCsv').disabled, document.getElementById('cnSave').disabled]),
       ['Nothing is switched on, so nothing leaves this PC.', false, true, true, true], 'E7 with nothing switched on and nothing logged, the window says so and offers nothing to export'); }
+  eq(await p.evaluate(() => ['=1+1', '+1', '-1', 'a=1+1-1'].map(d => eventEntry('sent', d, 0).detail === EV_WITHHELD)), [true, true, true, false], 'E8 a detail that begins like a spreadsheet formula is never kept');
+  eq(await p.evaluate(() => { state.agents[0].enabled = true; state.agents[0].name = 'Alert\u202E buH\u200B'; state.agents[0].api.endpoint = 'https://ex\u0430mple.test/ask'; const r = connections(connState()); return [r.line, r.items[0].where]; }),
+    ['Switched on: Alert buH (agent)', 'xn--exmple-4nf.test'], 'C10 an invisible character is removed from a name, and a look-alike letter in an address shows in the form the network uses');
 
   // ====================================================== A. About and what changed
   await p.evaluate(() => { closeApp('conn'); openMenu(); }); await settle(p, 200);

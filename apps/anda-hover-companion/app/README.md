@@ -3,6 +3,11 @@
 A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
 **All bundled data is fictional.** Not an FDA product; a concept prototype.
 
+> **New in round 29: you can always see what is switched on.** Every window has one line at its foot: *Offline · Local only*, or each thing that is switched on by name. Press it (or the tray menu's *Connections and event log…*) for a list of what each
+> connection sends, where it goes and what is kept, and for the **event log**: when a connection was switched on or off, when something was sent and how large it was, when a file was set aside or restored, what was deleted at your request. The log is a plain
+> file, `events.csv`, in the app's folder; it is only ever added to and never holds an ANDA number, a name, an address or any text of yours. *About and what changed…* shows the version and the changes. In *Compare two files*, switching the weekly copy off now
+> keeps the copies that exist: *Delete the kept copies…* asks twice. See `../DESIGN.md` §11m and `../SECURITY.md`.
+>
 > **New in round 28: safer by default, after an audit and an independent review.** No AI connection is on until you choose one in Settings, Connection (a key that happens to be on the PC is no longer used by itself). A settings file, a to-do list,
 > your prompts or your replies that cannot be read are set aside under a name that says when, never written over, and the app says so once at start. Finished to-do items are no longer deleted by the app: they move to an archive file beside the list.
 > A restore keeps what it replaces as a backup of its own and switches no connection on. Text that goes to an AI has characters nobody can see removed and counted in the preview. The invite can be accepted by pressing the same shortcut again.

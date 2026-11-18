@@ -66,7 +66,7 @@ public static class Connections
                 if (key) ai = new("Claude", "api.anthropic.com");
                 break;
             case ProviderChoice.MyApi:
-                if (CustomApiConfig.Inspect(s.CustomApi, env).Ok) ai = new(OneLine(s.CustomApi.Name, 60) is { Length: > 0 } n ? n : "My API", Host(s.CustomApi.Endpoint));
+                if (CustomApiConfig.Inspect(s.CustomApi, env).Ok) ai = new(Shown(s.CustomApi.Name, 60) is { Length: > 0 } n ? n : "My API", Host(s.CustomApi.Endpoint));
                 break;
             case ProviderChoice.Auto:
                 string provider = env("ANDA_COMPANION_PROVIDER")?.Trim().ToLowerInvariant() ?? "anthropic";
@@ -75,7 +75,7 @@ public static class Connections
                 break;
         }
         var agents = (s.Agents ?? new()).Where(a => a is { Enabled: true })
-            .Select(a => new ConnAgent(OneLine(a.Name, 60) is { Length: > 0 } n ? n : "Agent", Host(a.Api?.Endpoint), a.AutoRun != AgentRun.Never)).ToList();
+            .Select(a => new ConnAgent(Shown(a.Name, 60) is { Length: > 0 } n ? n : "Agent", Host(a.Api?.Endpoint), a.AutoRun != AgentRun.Never)).ToList();
         ConnOutlook? outlook = s.Outlook is { Enabled: true } o ? new(o.Cloud == OutlookCloud.UsGovernment ? "graph.microsoft.us" : "graph.microsoft.com") : null;
         return new ConnState(ai, agents, outlook);
     }
@@ -94,7 +94,10 @@ public static class Connections
     }
 
     private static string Host(string? address) =>
-        Uri.TryCreate((address ?? "").Trim(), UriKind.Absolute, out var u) && (u.Scheme == Uri.UriSchemeHttps || u.Scheme == Uri.UriSchemeHttp) ? u.Host : "";
+        Uri.TryCreate((address ?? "").Trim(), UriKind.Absolute, out var u) && (u.Scheme == Uri.UriSchemeHttps || u.Scheme == Uri.UriSchemeHttp) ? u.IdnHost : "";      // the form the network uses, so a look-alike letter shows as "xn--…"
+
+    /// <summary>A name the person typed, for the line: one line, and no invisible character that could reorder what is read.</summary>
+    private static string Shown(string? s, int max) => OneLine(ActionFill.WithoutHidden(s ?? "").Text, max);
 
     private static string OneLine(string? s, int max)
     {

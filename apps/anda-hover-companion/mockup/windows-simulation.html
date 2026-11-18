@@ -4588,10 +4588,11 @@ const evLog = [];                       /* only ever added to; in the simulation
 function logEvent(type, detail){ evLog.push(eventEntry(type, detail, Date.now())); if(isOpen("conn")) connPaint(); }
 function connState(){                   /* what this page has switched on. It contacts nothing, whatever is switched on. */
   const mine = state.provider === "myapi" && validateMyApi(state.myApi) === null;
+  const shown = (s, max) => oneLine(String(s == null ? "" : s).replace(FENCE_HIDDEN, ""), max);      /* a name is the person's own text: no invisible character may reorder the line */
   const ai = state.ai ? { name:"Sample model", where:"nowhere: this page contacts nothing" }
     : state.provider === "claude" ? { name:"Claude", where:"api.anthropic.com" }
-    : mine ? { name:oneLine(state.myApi.name || "My API", 60), where:hostOf(state.myApi.endpoint) } : null;
-  const agents = state.agents.filter(a => a.enabled).map(a => ({ name:oneLine(a.name, 60) || "Agent", where:hostOf(a.api && a.api.endpoint), auto:a.auto !== 0 }));
+    : mine ? { name:shown(state.myApi.name, 60) || "My API", where:hostOf(state.myApi.endpoint) } : null;
+  const agents = state.agents.filter(a => a.enabled).map(a => ({ name:shown(a.name, 60) || "Agent", where:hostOf(a.api && a.api.endpoint), auto:a.auto !== 0 }));
   const outlook = state.outlook.on ? { where:state.outlook.cloud === "us" ? "graph.microsoft.us" : "graph.microsoft.com" } : null;
   return { ai, agents, outlook };
 }
@@ -5423,7 +5424,7 @@ const EV_TYPES = { connection:"Connection switched on or off", sent:"Data sent",
 const EV_MAX_DETAIL = 120, EV_SAFE = /^[A-Za-z0-9 .,:;()+=/-]*$/, EV_WITHHELD = "(detail withheld: not in the allowed form)";
 function eventEntry(type, detail, whenMs){
   const d = String(detail == null ? "" : detail);
-  return { t:new Date(whenMs).toISOString(), type:Object.prototype.hasOwnProperty.call(EV_TYPES, type) ? type : "warning", detail:d.length <= EV_MAX_DETAIL && EV_SAFE.test(d) && !/[0-9]{6}/.test(d) ? d : EV_WITHHELD };      /* six digits in a row could be an ANDA number: such a detail is never kept */
+  return { t:new Date(whenMs).toISOString(), type:Object.prototype.hasOwnProperty.call(EV_TYPES, type) ? type : "warning", detail:d.length <= EV_MAX_DETAIL && EV_SAFE.test(d) && !/[0-9]{6}/.test(d) && !/^[=+-]/.test(d) ? d : EV_WITHHELD };      /* six digits in a row could be an ANDA number: such a detail is never kept */
 }
 function eventCsv(entries){ return ["time_utc,type,detail", ...entries.map(e => [e.t, e.type, '"' + e.detail.replace(/"/g, '""') + '"'].join(","))].join("\r\n") + "\r\n"; }
 /* What changed, newest first. The Windows app shows the same list. */

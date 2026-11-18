@@ -30,7 +30,7 @@ public static class EventLog
     /// <summary>One line of the log. Six digits in a row could be an ANDA number, so such a detail is never kept.</summary>
     public static EventEntry Entry(string? type, string? detail, DateTime utc)
     {
-        string d = detail ?? ""; bool ok = d.Length <= MaxDetail; int digits = 0;
+        string d = detail ?? ""; bool ok = d.Length <= MaxDetail && !(d.Length > 0 && d[0] is '=' or '+' or '-'); int digits = 0;      // a spreadsheet reads a leading = + - as a formula
         foreach (char c in d)
         {
             if (!ok) break;
@@ -79,10 +79,10 @@ public static class EventLog
     {
         lock (Gate)
         {
-            var all = new List<EventEntry>();
+            var all = new Queue<EventEntry>(); int total = 0;      // only the newest are held, so a log of any length costs the same memory
             try
             {
-                if (_path is null || !File.Exists(_path)) return (all, 0);
+                if (_path is null || !File.Exists(_path)) return (all.ToList(), 0);
                 foreach (string line in File.ReadLines(_path))
                 {
                     if (line.Length == 0 || line == Header) continue;
@@ -90,11 +90,13 @@ public static class EventLog
                     if (b < 0 || line.Length < b + 3 || line[b + 1] != '"' || line[^1] != '"') continue;
                     string t = line[..a], type = line[(a + 1)..b], detail = line[(b + 2)..^1].Replace("\"\"", "\"");
                     if (!DateTime.TryParseExact(t, "yyyy-MM-dd'T'HH:mm:ss.fff'Z'", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var when)) continue;
-                    all.Add(Entry(type, detail, when));      // read through the same rule, so a line edited by hand cannot show what the log may not hold
+                    all.Enqueue(Entry(type, detail, when));      // read through the same rule, so a line edited by hand cannot show what the log may not hold
+                    total++;
+                    if (all.Count > newest) all.Dequeue();
                 }
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { /* what was read so far is shown */ }
-            return (all.Count > newest ? all.GetRange(all.Count - newest, newest) : all, all.Count);
+            return (all.ToList(), total);
         }
     }
 

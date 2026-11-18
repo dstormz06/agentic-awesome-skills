@@ -22,6 +22,7 @@ const EVENTS = [
   ['deleted', 'kept copies of the sheet'], ['error', 'the event log could not be written'], ['warning', ''], ['not-a-kind', 'something'],
   ['sent', 'ANDA 216482 "quoted" text'], ['sent', 'a<b>c'], ['sent', 'x'.repeat(121)], ['sent', 'x'.repeat(120)], ['sent', 'line one\nline two'], ['sent', null],
   ['sent', 'about 216482'], ['sent', '99,999 characters'], ['sent', '1234567 characters'],
+  ['sent', '=1+1'], ['sent', '+1'], ['sent', '-1'], ['sent', 'a=1+1-1'],
 ];
 (async () => {
   const b = await chromium.launch(); const p = await b.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));

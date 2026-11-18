@@ -976,7 +976,7 @@ in the answer also stands in the comparison or in the two files. It cannot tell 
 ### Five daily helpers
 
 1. **What changed since last week.** *My sheet since last week* compares the person's sheet today with a copy kept earlier. Copies are kept only after the
-   person switches it on: one for each week, the newest five, in the app's own folder on the PC. Switching it off deletes them all.
+   person switches it on: one for each week, the newest five, in the app's own folder on the PC. Since round 29, switching it off keeps the copies that exist; only the person deletes them, with a second press to confirm.
 2. **Hand-off page** (tray menu). One page of plain text for a colleague who covers: for each ANDA its status line, what needs a look, what is open, and,
    if ticked, the latest notes. It is made from the person's own data and notes by fixed rules; the person copies or saves it and decides who gets it. Its
    second line reads: "From my own data and notes on this PC. It is not the system of record."
@@ -1073,6 +1073,45 @@ what was left, and why. New features were listed, not built.
 points above about the app known. JavaScript in a local HTML file is, in the owner's words, thought to be acceptable on the target computer;
 that is the owner's judgment, not a confirmation from IT, and it is recorded as such. Both published pages were republished on the owner's word.
 The standards the audit listed as not met are to be built; they are taken in rounds, the simulation first.
+
+## 11m. Round 29: what is switched on, said in every window; an event log; what changed
+
+The owner's standing rules ask every tool to show its connections at all times ("Offline · Local only", or each by name with what is sent, where
+and what is kept), to keep a local event log that is only added to, can be read and exported, and never holds the person's content, and to show its
+version and a change log. The audit of round 28 listed all three as not met. After the report the owner wrote "Do everything", so they are built,
+the simulation first. The remaining standards (backups of stored items with one-click restore and an archive window; a time-zone setting and
+freshness labels; a first-run guide) are the next rounds.
+
+**The line.** Every window carries one line at its foot. With nothing switched on it reads "Offline · Local only". Otherwise it names what is on:
+the AI connection, each agent, Outlook. More than three are counted ("and 2 more"). It follows a change in Settings at once. It is a button: one
+press opens the list.
+
+**The list** (*Connections and event log*, also in the tray menu). For each connection, three sentences: what it sends, where, and what is kept.
+They are fixed sentences, taken from what `SECURITY.md` already states and the code does; only the name and the host are filled in. For an address,
+the host alone is shown. A last sentence names the two things that reach the network only when pressed ("Update now" and "Open ANDA page"), so
+that the list is complete without calling them connections.
+
+**"Switched on" and "connected" are different words on purpose.** The line is about settings, and is true as soon as a setting changes. The card's
+label still says "connected" only after a real request succeeded, as it has since round 10. An AI connection counts as switched on only when it is
+chosen in Settings and complete.
+
+**The event log.** One line for each event: a time in UTC, one of seven kinds, and a short detail the program wrote. It records that something
+happened and how large it was, never what it was: "AI request, 1,234 characters", never the prompt; "agent request", never which agent;
+"settings restored from a backup", never from where. The rule that keeps content out is in the function that writes the line, so no caller can get
+around it: letters, digits, spaces and a few marks only, at most 120 characters, and never six digits in a row, which could be an ANDA number.
+Anything else is written as "(detail withheld: not in the allowed form)". The window shows times in the person's own time zone with its
+abbreviation and the right daylight time; the file and the export hold UTC. The window can copy or save the log and has no way to clear it.
+
+**About and what changed.** The version ("Prototype, round 29") and the changes of the last four rounds, the same list in both programs. It says
+that the tool does not update itself.
+
+**Kept copies of the sheet.** Switching the weekly copy off used to delete the copies. Now it keeps them and stops making new ones, and they can
+still be compared. "Delete the kept copies…" asks with a second press, and the deletion is written to the event log.
+
+**How the two programs are kept the same.** `mockup/round29-golden.json` (written by `tools/round29-golden.cjs`) holds the simulation's answers for
+8 states of what is switched on, 21 events, the CSV and the change list; the app's tests must reproduce them character for character.
+
+**In the app only:** the event log is a file (`events.csv`); in the simulation it lasts until the page is closed. **Not in the extension.**
 
 ## 12. Engagement roadmap — seven features that make it the daily habit
 
