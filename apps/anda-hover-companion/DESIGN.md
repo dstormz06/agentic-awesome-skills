@@ -1069,6 +1069,11 @@ what was left, and why. New features were listed, not built.
 - Still in code rather than in Settings: the default model name, the Elsa endpoint, and extra closure dates.
 - The tray count's timer is still armed from the wall clock.
 
+**The owner's answers after the report.** All three programs stay in scope (the Windows app, the simulation and the Edge extension), with the
+points above about the app known. JavaScript in a local HTML file is, in the owner's words, thought to be acceptable on the target computer;
+that is the owner's judgment, not a confirmation from IT, and it is recorded as such. Both published pages were republished on the owner's word.
+The standards the audit listed as not met are to be built; they are taken in rounds, the simulation first.
+
 ## 12. Engagement roadmap — seven features that make it the daily habit
 
 Engagement here means *the tool pays the user every time they touch it* — never
