@@ -3,6 +3,10 @@
 A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
 **All bundled data is fictional.** Not an FDA product; a concept prototype.
 
+> **New in round 32: First steps, a guide of five steps.** It opens by itself once, the first time the app starts (where the sample card used to open by itself), and never again by itself. Tray menu: *Help: first steps…* opens it at any time.
+> *Next* (Enter), *Back*, *Skip the guide*, Esc. Its three buttons open the sample card (fictional, and its card says so), Settings at *My files and writing*, and *Connections and event log*; it asks for nothing and changes nothing. If you had the app before this round, the guide does not open by itself: it is in the tray menu.
+> Also new: the Drugs@FDA reference file's line says when the file was saved and how long ago, and is marked STALE after its own number of days (45 unless you change it in Settings, *Look and feel*, *Time*). The settings file moves to version 4 by itself. See `../DESIGN.md` §11o and §11p.
+>
 > **New in round 31: every time in your time zone, and data that says how old it is.** Settings, *Look and feel*, *Time*: a clock, the time zone times are written in (this computer's own unless you choose one of ten), and the number of days after
 > which your data is marked STALE (7 unless you change it). Every time the app shows carries the zone's abbreviation (EST, EDT, …; a zone that is not among the ten is written as its difference from UTC) and follows daylight time by itself. Times are stored in UTC.
 > The line under the drug name on the card now reads, for a file of your own, *Your portfolio file · name · as of Nov 11, 2026, 3:00 PM EST (9 days ago) · STALE: older than 7 days*; it is brought up to date once a minute while the card is open, and the watch line says "stale" at the same minute.
@@ -296,7 +300,7 @@ dotnet test AndaCompanion.Tests                              # everything (Windo
 dotnet test AndaCompanion.Tests --filter "Category!=Windows" # what runs on Linux/macOS
 ```
 
-1,227 cross-platform tests at the time of writing, the first part of round 32 (the figure was 762 when this paragraph was first written; recognizer, status line, GDUFA rules, the federal-holiday
+1,231 cross-platform tests at the time of writing, round 32 (the figure was 762 when this paragraph was first written; recognizer, status line, GDUFA rules, the federal-holiday
 calendar against OPM's dates, watch rules, urgency, draft check, portfolio and notes readers, writing prompts,
 hotkey parsing and registration with a fake API, brief fencing and fallback, provider selection, settings,
 contrast, placement, the to-do list, custom actions, the agent connector, headless renders and interaction tests of the real windows) plus Windows-only tests that use real Win32 (clipboard snapshot/restore, hotkey registration and

@@ -1250,6 +1250,40 @@ programs (`refSaved` / `Clock.RefSaved`), held by `mockup/round32-golden.json` (
 usual values: the computer's zone, seven days). A value that is not one of the choices becomes the usual one. A settings backup carries
 both. The Time part is in "Look and feel", which is shown in the short edition of Settings, so the choice is reachable by default.
 
+## 11p. Round 32: first steps, a guide of five steps; and the reference file's own days
+
+The owner's standing rules ask for a first-run guide that can be skipped, has at most five steps, can be opened again from Help, and uses
+sample data that is labeled as such. The project once had a first-run panel and removed it at the owner's direction (round 17: the
+tool should work as it is, with nothing to set up first). So the owner was asked before one came back, and decided two things on Nov 19:
+**the guide opens by itself once, at the first start, and never again by itself**; and **these five steps**.
+
+1. *What this is.* What the card is for; that the tool starts with sample data, every record of which is fictional and says so on its card;
+   that nothing leaves the PC unless a connection is switched on.
+2. *Try it on a sample.* Select a number and press the person's own shortcut (the sentence names it), or press **Show the sample card**.
+3. *Use your own data.* Where the portfolio file is chosen; that it is read on this PC. **Open Settings** opens that section.
+4. *What is switched on.* The line at the foot of every window, with what it says at that moment. **Open Connections**.
+5. *Where things are.* The tray menu, and that this guide is there under *Help: first steps*.
+
+**How it behaves.** One step at a time, with its place ("Step 2 of 5"). *Next* is the default button, so Enter walks it; *Back*; *Skip the
+guide* at every step (it reads *Close* on the last, where *Next* reads *Done*); Esc closes it. The guide asks for nothing and changes
+nothing: its three buttons open a card of the bundled sample record (whatever data of the person's own is loaded), Settings at the files,
+and the list of connections, and each says in a status line what it did. The guide stays open behind what it opened.
+
+**Once.** In the app, the first start is the start at which the settings say the tool has not run before (`FirstRunDone`, which already
+existed: until this round the sample card opened by itself at that start; the guide takes its place and offers the card as its second
+step). That it was shown is saved *before* it opens, so a crash, a closed window or a second start cannot bring it up by itself again. A
+diagnostic run never opens it. The mark belongs to the PC: a settings backup does not carry it and a reset does not clear it. A person who
+had the tool before this round does not see the guide by itself; it is in the tray menu. In the simulation the mark is kept in the
+browser's storage; a browser that is being driven by a test opens the guide by itself only when the address says `first=1`, so that the
+suites written before it start as they always did.
+
+**One text in both programs.** `GUIDE_STEPS` and `guideStep` in the simulation, `Guide.Steps` and `Guide.Step` in the app, held by
+`mockup/round32-golden.json` (the five steps; 20 views of a step, with and without a shortcut, with several connection lines, and with
+step numbers outside one to five; 7 starts). The shortcut and the connection line are written into the text in one pass, so nothing in them
+is read as a mark.
+
+**The reference file's own days** are described at the end of §11o.
+
 ## 12. Engagement roadmap — seven features that make it the daily habit
 
 Engagement here means *the tool pays the user every time they touch it* — never
