@@ -26,6 +26,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .drug{margin:6px 0 0;font-size:14.5px;font-weight:600}
 .meta{color:var(--ink2)}
 .fresh{font-size:11px;color:var(--ink3);margin-top:2px}
+.fresh.stale{color:var(--warn);font-weight:650}
 .row{display:flex;gap:9px;align-items:baseline}
 .lbl{font-size:9.5px;font-weight:800;letter-spacing:.13em;color:var(--ink3);width:78px;flex:none;white-space:nowrap}
 .date{font-size:15px;font-weight:700}
@@ -125,7 +126,7 @@ button{font:inherit;color:inherit;cursor:pointer}
         h('span', { class: 'tools' },
           o.mini ? null : h('button', { type: 'button', title: o.expanded ? 'Collapse (E)' : 'Expand (E)', 'aria-label': o.expanded ? 'Collapse the card' : 'Expand the card', text: o.expanded ? '⤡' : '⤢', onclick: () => hd.onExpand && hd.onExpand() }),
           h('button', { type: 'button', title: 'Close (Esc)', 'aria-label': 'Close the card', text: '✕', onclick: () => hd.onClose && hd.onClose() }))),
-      h('h2', { class: 'drug', text: m.drug }), h('div', { class: 'meta', text: m.meta }), m.freshness ? h('div', { class: 'fresh', text: m.freshness }) : null);
+      h('h2', { class: 'drug', text: m.drug }), h('div', { class: 'meta', text: m.meta }), m.freshness ? h('div', { class: 'fresh' + (m.stale ? ' stale' : ''), text: m.freshness }) : null);
 
     const clock = h('div', { class: 'slot' },
       h('div', { class: 'row' }, h('span', { class: 'lbl', text: 'GOAL' }), h('span', { class: 'date', text: m.goalDate }), h('span', { class: 'days', text: m.goalDays }),
@@ -196,5 +197,22 @@ button{font:inherit;color:inherit;cursor:pointer}
     }
   }
 
-  root.AndaUI = { CSS, mountStyles, h, renderCard, renderChip, renderNotice, renderFindings, renderList, panel };
+  /** Writes a card's data line again without drawing the card again, so focus and the place in the card are kept. */
+  function setFresh(cardEl, text, stale) {
+    const el = cardEl && cardEl.querySelector ? cardEl.querySelector('.fresh') : null;
+    if (!el || typeof text !== 'string' || text.length === 0) return false;
+    if (el.textContent !== text) el.textContent = text;
+    el.classList.toggle('stale', !!stale);
+    return true;
+  }
+
+  /** Calls back as each minute begins, so that "3 minutes ago" is never a minute behind. Returns the function that stops it. */
+  function everyMinute(fn, nowMs = () => Date.now()) {
+    let timer = null, stopped = false;
+    const arm = () => { timer = setTimeout(() => { if (stopped) return; try { fn(); } finally { if (!stopped) arm(); } }, 60000 - (nowMs() % 60000) + 20); };
+    arm();
+    return () => { stopped = true; clearTimeout(timer); };
+  }
+
+  root.AndaUI = { CSS, mountStyles, h, renderCard, renderChip, renderNotice, renderFindings, renderList, panel, setFresh, everyMinute };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

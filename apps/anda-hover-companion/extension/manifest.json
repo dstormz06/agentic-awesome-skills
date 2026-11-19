@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "ANDA Companion (Notula): prototype",
   "short_name": "Notula",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Select an ANDA number, get its forecast, watch flags and a draft check. Offline; fictional demo data until you add your own. Prototype, not an FDA product.",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0ExgiuijsADRSzBxjZOG6nF+3KTDezWOya02YcyHs4udXsn0lTplITNLTflySawiPcJmjoSP2n4wxKSyj/8L1u8TztHxPCyQ+e2ByDV6yTJOcWLomHMNMG74/GXPlSpwUOH0+HqOADGcS0gyX6D8ESWgoz1L6gfJ3r39Hq7BSaAOQfoRqVqDqw3bi1OE0R/8vCIV2YMnlGiTd84ih4g2DbAfWn2gUnSq3bFSykvoWmqL5uBGM+AyZFvA2pVpX5UsBYCOoe9w44SXI1hY6j995ThFmrYfj6If9hfp1RhQdseQnJHCo48lfqIbx9MP1UqL24kMiGxJq1WoHEo0AlBOMwIDAQAB",
   "minimum_chrome_version": "110",

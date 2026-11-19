@@ -41,17 +41,33 @@ function servePages(pages) {
   return new Promise((resolve) => server.listen(0, '127.0.0.1', () => resolve({ server, base: `http://127.0.0.1:${server.address().port}` })));
 }
 
+/**
+ * Starts the browser with the test copy of the extension. A new profile is an installation, and after an installation the extension
+ * opens its first steps in a tab once: that tab is waited for and handed back as `first` (null when it did not open, as on a second start
+ * with the same profile). Pass keepFirst: true to look at it; otherwise it is closed here so that it is not the tab in front.
+ * opts: native, beforeLaunch, timezoneId, userData and extDir (to start again with the same profile and the same copy), keepFirst.
+ */
 async function launch(opts = {}) {
-  const extDir = buildTestExtension(opts);
-  const userData = fs.mkdtempSync(path.join(os.tmpdir(), 'anda-profile-'));
+  const extDir = opts.extDir || buildTestExtension(opts);
+  const userData = opts.userData || fs.mkdtempSync(path.join(os.tmpdir(), 'anda-profile-'));
   if (opts.beforeLaunch) opts.beforeLaunch(userData);
   const context = await chromium.launchPersistentContext(userData, {
     channel: 'chromium', headless: true, args: ['--headless=new', `--disable-extensions-except=${extDir}`, `--load-extension=${extDir}`, '--no-sandbox'],
+    // The zone is given to the whole browser. A zone set page by page is shared by every page of the extension (they run in one process) and is
+    // dropped for all of them when one of them closes, which would make a test read UTC half way through.
+    ...(opts.timezoneId ? { env: { ...process.env, TZ: opts.timezoneId } } : {}),
   });
   let worker = context.serviceWorkers()[0];
   if (!worker) worker = await context.waitForEvent('serviceworker', { timeout: 15000 });
   const id = new URL(worker.url()).host;
-  return { context, worker, id, userData, extDir };
+  const isFirst = (p) => p.url().includes('/src/options.html#first');
+  let first = context.pages().find(isFirst) || null;
+  if (!first) first = await context.waitForEvent('page', { predicate: isFirst, timeout: opts.firstWaitMs || 6000 }).catch(() => null);
+  if (first) {
+    await first.locator('#first:not([hidden])').waitFor({ timeout: 8000 });
+    if (!opts.keepFirst) { await first.close(); first = null; }
+  }
+  return { context, worker, id, userData, extDir, first };
 }
 
 /** Runs one of the extension's three requests against the tab that is in front, as its own menu or shortcut would. */

@@ -23,9 +23,11 @@
   let current = null;   // {kind, el, number, ...}
   let hideTimer = null, idleSince = 0, hovering = false, previousFocus = null;
   let autoHideSeconds = 20;
+  let stopMinute = null;   // while a card is open, its data line is written again as each minute begins
 
   const clear = (restoreFocus = true) => {
     clearInterval(hideTimer); clearTimeout(hideTimer);
+    if (stopMinute) { stopMinute(); stopMinute = null; }
     if (current && current.el.isConnected) current.el.remove();
     const had = current;
     current = null; hovering = false;
@@ -118,6 +120,18 @@
     current = { kind: 'card', el: placeholder, model: msg.card, mini, expanded: false, reason, anchor: msg.anchor, focusable: !mini };
     draw();
     armAutoHide(() => current && current.expanded);
+    stopMinute = UI.everyMinute(refreshLine);
+  }
+
+  /** Asks for the data line of the card that is open, written for now, and puts it in place. A card that has since closed or changed is left alone. */
+  async function refreshLine() {
+    if (!current || current.kind !== 'card') return;
+    const number = current.model.number;
+    let r = null;
+    try { r = await ask({ type: 'anda:fresh', number }); } catch (e) { return; }
+    if (!r || !r.ok || !current || current.kind !== 'card' || current.model.number !== number || typeof r.freshness !== 'string') return;
+    current.model.freshness = r.freshness; current.model.stale = !!r.stale;
+    UI.setFresh(current.el, r.freshness, r.stale);
   }
 
   function showInvite(msg) {

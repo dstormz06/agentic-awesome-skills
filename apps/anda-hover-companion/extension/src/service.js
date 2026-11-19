@@ -12,13 +12,24 @@ import { firstStep } from './core/watch.js';
 import { DEMO_RECORDS } from './core/demo-records.js';
 import { parseIso } from './core/calendar.js';
 import { NativeError } from './native.js';
+import { dataLine, zoneInUse, computerZone, timeKnown } from './core/time.js';
+import { connectionLine } from './core/about.js';
 
 const pad = (n) => String(n).padStart(2, '0');
 const localIso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const MAX_STORED_BYTES = 8 * 1024 * 1024;
 
-export function createService({ storage, native = null, now = () => new Date() }) {
+/** The moment a stored spreadsheet was saved. Before round 33 it was kept as the parts of this computer's wall clock; those are read once more here. */
+export function savedMsOf(imp) {
+  if (timeKnown(imp.savedMs)) return imp.savedMs;
+  const a = imp.savedAt;
+  if (a && [a.y, a.m, a.d, a.hh, a.mm].every(Number.isFinite)) return new Date(a.y, a.m - 1, a.d, a.hh, a.mm).getTime();
+  return NaN;
+}
+
+export function createService({ storage, native = null, now = () => new Date(), computer = computerZone }) {
   const todayIso = () => localIso(now());
+  const zoneOf = (settings) => zoneInUse(settings.timeZone, computer());
   const demoRepo = () => ({ find: (n) => DEMO_RECORDS.find((r) => r.number === n) ?? null, records: () => DEMO_RECORDS, label: 'Fictional demo data', kind: 'demo' });
   let appSettingsCache = null;
 
@@ -29,16 +40,16 @@ export function createService({ storage, native = null, now = () => new Date() }
     return next;
   }
 
-  async function importedRepo() {
+  async function importedRepo(settings = null) {
     const imp = await storage.get('imported');
     if (!imp) return null;
-    const p = openPortfolio({ headers: imp.headers, rows: imp.rows }, { name: imp.name, overrides: imp.overrides, savedAt: imp.savedAt });
+    const p = openPortfolio({ headers: imp.headers, rows: imp.rows }, { name: imp.name, overrides: imp.overrides, savedMs: savedMsOf(imp), zone: zoneOf(settings || await getSettings()) });
     return { find: (n) => p.find(n, todayIso()), records: () => p.records(todayIso()), label: `Your portfolio: ${imp.name}`, kind: 'imported', portfolio: p, imported: imp };
   }
 
   async function repo(settings) {
     if (settings.dataSource === 'imported') {
-      const r = await importedRepo();
+      const r = await importedRepo(settings);
       if (!r) throw new NativeError('no-import', 'No spreadsheet has been imported yet. Choose one on the extension\'s Settings page.');
       if (!r.portfolio.status.ok) throw new NativeError('bad-import', r.portfolio.status.message);
       return r;
@@ -63,7 +74,8 @@ export function createService({ storage, native = null, now = () => new Date() }
   }
 
   async function ctxFor(settings) {
-    return { today: parseIso(todayIso()), calendar: new BusinessCalendar(settings.extraClosures), lead: settings.holidayLeadDays, lateDays: settings.urgentLateDays };
+    return { today: parseIso(todayIso()), calendar: new BusinessCalendar(settings.extraClosures), lead: settings.holidayLeadDays, lateDays: settings.urgentLateDays,
+      staleDays: settings.staleAfterDays, nowMs: now().getTime(), zone: zoneOf(settings) };
   }
 
   const fail = (e) => ({ ok: false, error: e.code || 'error', message: e.message || 'Something went wrong.' });
@@ -79,8 +91,23 @@ export function createService({ storage, native = null, now = () => new Date() }
       const rec = rp.find(number);
       if (!rec) return { ok: false, error: 'not-found', message: rp.kind === 'imported' ? `${number} is not in your portfolio (${rp.imported.name})` : `${number} is not in the available records.` };
       card = buildCard(rec, ctx);
+      const line = dataLine(rec, ctx.nowMs, ctx.staleDays, ctx.zone);      // where the data is from, as of when, how long ago, and STALE past the days chosen
+      card.freshness = line.text.length > 0 ? line.text : null; card.stale = line.stale;
     }
+    if (useApp(settings)) card.stale = typeof card.freshness === 'string' && card.freshness.includes(' · STALE: ');      // the app writes its own line, in its own zone
     return { ok: true, card, step: firstStep(settings.consent, settings.escalateUrgent, card.urgency.isUrgent), settings: { consent: settings.consent, autoHideSeconds: settings.autoHideSeconds } };
+  }
+
+  /** The card's data line alone, written again for now: asked for as each minute begins while a card is open. */
+  async function fresh(text) {
+    const r = await lookup(text);
+    return r.ok ? { ok: true, number: r.card.number, freshness: r.card.freshness, stale: !!r.card.stale } : { ok: false, error: r.error, message: r.message };
+  }
+
+  /** The sample card of the guide: always the fictional record, whatever source is chosen, and never through the desktop app. */
+  async function sample(number = '216482') {
+    const settings = await getSettings(), ctx = await ctxFor(settings);
+    return lookupWith({ ...settings, dataSource: 'demo', consent: 'full' }, demoRepo(), number, ctx);
   }
 
   /** @returns {ok:true, card, step} or {ok:false, error, message} */
@@ -135,10 +162,9 @@ export function createService({ storage, native = null, now = () => new Date() }
   /** Reads a spreadsheet the person chose and keeps it in this browser profile only. */
   async function importFile(name, bytes, lastModifiedMs) {
     const table = await readTable(bytes, name);
-    const d = new Date(lastModifiedMs || Date.now());
-    const savedAt = { y: d.getFullYear(), m: d.getMonth() + 1, d: d.getDate(), hh: d.getHours(), mm: d.getMinutes() };
-    const p = openPortfolio(table, { name, overrides: null, savedAt });
-    const record = { name, savedAt, headers: table.headers, rows: table.rows, overrides: null };
+    const savedMs = timeKnown(lastModifiedMs) ? lastModifiedMs : now().getTime();      // kept as a moment in UTC; written in the zone in use when shown
+    const p = openPortfolio(table, { name, overrides: null, savedMs, zone: zoneOf(await getSettings()) });
+    const record = { name, savedMs, headers: table.headers, rows: table.rows, overrides: null };
     if (JSON.stringify(record).length > MAX_STORED_BYTES) throw new PortfolioError('That file is too large to keep in the browser. Use a smaller export, or connect the desktop app instead.');
     await storage.set('imported', record);
     return { status: p.status, headers: p.headers, mapping: p.mapping };
@@ -149,7 +175,7 @@ export function createService({ storage, native = null, now = () => new Date() }
     if (!imp) return null;
     imp.overrides = overrides;
     await storage.set('imported', imp);
-    const p = openPortfolio({ headers: imp.headers, rows: imp.rows }, { name: imp.name, overrides, savedAt: imp.savedAt });
+    const p = openPortfolio({ headers: imp.headers, rows: imp.rows }, { name: imp.name, overrides, savedMs: savedMsOf(imp), zone: zoneOf(await getSettings()) });
     return { status: p.status, headers: p.headers, mapping: p.mapping };
   }
 
@@ -169,11 +195,23 @@ export function createService({ storage, native = null, now = () => new Date() }
       catch (e) { return { kind: 'app', ok: false, label: 'Desktop app', message: e.message }; }
     }
     if (s.dataSource === 'imported') {
-      const r = await importedRepo();
+      const r = await importedRepo(s);
       return r ? { kind: 'imported', ok: r.portfolio.status.ok, label: r.label, message: r.portfolio.status.message, count: r.portfolio.status.count } : { kind: 'imported', ok: false, label: 'Imported spreadsheet', message: 'No spreadsheet has been imported yet.' };
     }
     return { kind: 'demo', ok: true, label: 'Fictional demo data', message: 'The two fictional demo ANDAs. Import your own spreadsheet or connect the desktop app on the Settings page.', count: DEMO_RECORDS.length };
   }
 
-  return { getSettings, saveSettings, effectiveSettings, lookup, draft, watchlist, scan, importFile, setOverrides, importedInfo, clearImported, status, DEFAULT_SETTINGS, findNumbers };
+  /** What is switched on, in one line and in full: see core/about.js. */
+  async function connection() { const s = await getSettings(); return connectionLine(s.dataSource, useApp(s) ? await status() : null); }
+
+  /** Whether the guide has been shown, and marking that it has. The answer to "marking" is whether the browser kept it. */
+  async function firstSteps(mark = false) {
+    let seen = false;
+    try { seen = (await storage.get('firstSteps'))?.seen === true; } catch (e) { seen = false; }
+    if (!mark || seen) return { seen, kept: true };
+    try { await storage.set('firstSteps', { seen: true, atMs: now().getTime() }); return { seen, kept: (await storage.get('firstSteps'))?.seen === true }; } catch (e) { return { seen, kept: false }; }
+  }
+
+  return { getSettings, saveSettings, effectiveSettings, lookup, fresh, sample, draft, watchlist, scan, importFile, setOverrides, importedInfo, clearImported, status, connection, firstSteps,
+    zone: async () => zoneOf(await getSettings()), DEFAULT_SETTINGS, findNumbers };
 }

@@ -50,6 +50,14 @@ async function open(text) {
   if (!r || !r.ok) { card = null; drawCard(); $('lookMsg').hidden = false; $('lookMsg').className = 'status bad'; $('lookMsg').textContent = r ? r.message : 'No answer from the extension.'; return; }
   card = r.card; expanded = false; $('num').value = r.card.number; select('look'); drawCard();
 }
+// While a card is shown, its data line is written again as each minute begins.
+UI.everyMinute(async () => {
+  if (!card) return;
+  const number = card.number, r = await ask({ type: 'anda:fresh', number });
+  if (!r || !r.ok || !card || card.number !== number || typeof r.freshness !== 'string') return;
+  card.freshness = r.freshness; card.stale = !!r.stale;
+  UI.setFresh($('cardHost'), r.freshness, r.stale);
+});
 $('lookForm').addEventListener('submit', (e) => { e.preventDefault(); open($('num').value); });
 
 // ---------- draft ----------
@@ -114,5 +122,11 @@ $('scanGo').addEventListener('click', async () => {
   if (s.kind === 'app') { const dot = document.createElement('span'); dot.className = 'dot ' + (s.ok ? 'on' : 'off'); dot.setAttribute('aria-hidden', 'true'); el.append(dot); }
   el.append(document.createTextNode(`Source: ${s.label}${s.ok ? '' : ' (not reachable)'} · No AI: this extension never calls an API`));
 })();
+(async () => {
+  const c = await ask({ type: 'svc:connection' });
+  if (!c) return;
+  $('conn').textContent = c.short; $('conn').title = c.full;
+})();
 $('openOptions').addEventListener('click', () => chrome.runtime.openOptionsPage());
+$('openHelp').addEventListener('click', () => chrome.tabs.create({ url: chrome.runtime.getURL('src/options.html#first') }));
 select('look');

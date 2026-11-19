@@ -1,6 +1,7 @@
 // The "watch your back" rules: deterministic flags with their evidence and source. They state what the data shows and where to look;
 // they never decide what a goal-date rule means. Mirrors the app's Services/WatchRules.cs and Services/UrgencyPolicy.cs.
 import { DAY, parseIso, fmtShort, fmtMonthDay, fmtLong } from './calendar.js';
+import { timeKnown, zoneClock } from './time.js';
 
 export const SEVERITY = { info: 0, warn: 1, bad: 2 };
 const RANK = { 'goal-passed': 0, 'goal-soon': 1, 'goal-date-calendar': 2, 'forecast-date-calendar': 3, 'psg-after-submission': 4, 'stale-data': 5, 'no-goal-date': 6 };
@@ -8,7 +9,8 @@ export const UNKNOWN = '—';
 export const hasForecast = (r) => r.forecastDate !== UNKNOWN;
 export const hasProgress = (r) => r.progressPct >= 0;
 
-/** @param realToday UTC midnight ms. @param cal BusinessCalendar. @param settings {lead, staleDays, goalSoonDays} */
+/** @param realToday UTC midnight ms. @param cal BusinessCalendar. @param settings {lead, staleDays, goalSoonDays, nowMs, zone}
+ *  With nowMs, and a record that carries the moment its data was taken (asOfUtc), "stale" is reckoned to the minute, as the card's own line is. */
 export function evaluateWatch(r, realToday, cal, settings = {}) {
   const lead = settings.lead ?? 3, staleDays = settings.staleDays ?? 7, goalSoonDays = settings.goalSoonDays ?? 5;
   const flags = [];
@@ -50,9 +52,15 @@ export function evaluateWatch(r, realToday, cal, settings = {}) {
   }
 
   if (!r.demo && asOf !== null) {
-    const age = Math.round((today - asOf) / DAY);
-    if (age > staleDays)
-      flags.push({ code: 'stale-data', severity: 'warn', text: `This data is ${age} days old (as of ${fmtMonthDay(asOf)}).`,
+    let age = Math.round((today - asOf) / DAY), stale = age > staleDays, taken = asOf;
+    const moment = typeof r.asOfUtc === 'string' ? Date.parse(r.asOfUtc) : NaN;
+    if (timeKnown(settings.nowMs) && timeKnown(moment)) {
+      const old = settings.nowMs - moment;
+      stale = old > staleDays * DAY; if (stale) age = Math.floor(old / DAY);
+      const c = zoneClock(moment, settings.zone); taken = Date.UTC(c.year, c.month - 1, c.day);      // the day the card's line names, in the zone in use now
+    }
+    if (stale)
+      flags.push({ code: 'stale-data', severity: 'warn', text: `This data is ${age} ${age === 1 ? 'day' : 'days'} old (as of ${fmtMonthDay(taken)}).`,
         why: 'A stale fact shown confidently is the riskiest kind. Refresh your source before relying on it.', source });
   }
 

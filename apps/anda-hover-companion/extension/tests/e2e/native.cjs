@@ -45,6 +45,18 @@ function installHost(userData, { origin = `chrome-extension://${h.EXPECTED_ID}/`
   let t = await text(popup.locator('.card'));
   h.ok(t.includes('Together drug') && t.includes('YOUR FILE') && t.includes('Oct 17, 2026') && t.includes('In review'), 'a lookup is answered by the real host from the person\'s portfolio');
   h.ok(/goal date \(Sat Oct 3\) passed/i.test(t) && t.includes('OFFLINE BRIEF'), 'with the app\'s watch rules and offline brief');
+  // round 33: the app writes the card's data line (its own zone and days), the toolbar window says what is linked, and the line can be asked for again
+  {
+    const line = await text(popup.locator('.card .fresh'));
+    h.ok(/^Your portfolio file · Together\.csv · as of [A-Z][a-z]{2} \d{1,2}, \d{4}, \d{1,2}:\d\d [AP]M \S+ \((just now|\d+ (minute|minutes) ago)\)$/.test(line), 'the card carries the app\'s own data line, with source, time, zone and age: ' + line);
+    h.ok((await popup.locator('.card .fresh.stale').count()) === 0, 'a file saved a moment ago is not drawn as stale');
+    await popup.waitForFunction(() => document.getElementById('conn').textContent.startsWith('Linked'), null, { timeout: 15000 });
+    h.ok((await text(popup.locator('#conn'))) === 'Linked: the desktop app on this PC · no network use' && (await popup.locator('#conn').getAttribute('title')).includes('Sent to it: the ANDA number or the draft text you ask about.'), 'the toolbar window names the link, and what is sent over it');
+    const again = await worker.evaluate(() => globalThis.andaTest.service.fresh('930001'));
+    h.ok(again.ok && again.freshness.startsWith('Your portfolio file · Together.csv · as of ') && again.stale === false, 'the line alone can be asked for again from the app, as is done when a minute begins');
+    const sample = await worker.evaluate(() => globalThis.andaTest.service.sample());
+    h.ok(sample.ok && sample.card.demo === true && sample.card.number === '216482', 'the guide\'s sample card is the fictional ANDA even with the app as the source');
+  }
 
   await popup.fill('#num', '216482'); await popup.keyboard.press('Enter');
   await popup.locator('#lookMsg').waitFor({ state: 'visible' });

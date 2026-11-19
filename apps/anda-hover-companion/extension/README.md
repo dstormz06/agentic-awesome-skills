@@ -16,6 +16,22 @@ Prototype, not an FDA product. It makes **no network requests and uses no AI**.
 
 It runs only when you ask: a shortcut, the right-click menu or the toolbar button. There is no script running on every page. Settings, *Ways to start it* lists each of these and the key Edge actually gave every shortcut ("not set" when Edge or another extension has it), with a button to change them. A **middle-click** trigger is not offered here on purpose, because an extension can only watch the mouse by running a script on every page; the Windows app has one. Both cards always show a **PSG** line and an **RLD LABEL** line: a date with its source, or a brief reason there is none.
 
+**Every card says how old its data is.** Under the product name: where the data is from, as of when (with the time zone, for example
+`Your portfolio file · Tracker.csv · as of Nov 18, 2026, 3:00 PM EST (21 hours ago)`), and `· STALE: older than 7 days` once it is older than the
+number of days you choose in Settings, *Time* (1, 3, 7, 14 or 30). The line is written again as each minute begins while a card is open, without the
+card being drawn again. The fictional records say `(sample data, which does not change)` and are never called stale. The time zone is this
+computer's own unless you choose another one; a time is kept as one moment (UTC) and only written differently. With the desktop app as the
+source, the app writes the line with its own zone and days. These rules are the simulation's own text (`src/core/time.js`), held to the same
+shared answers as the Windows app (`mockup/round31-golden.json`).
+
+**It says what is switched on.** The top of the Settings page and the foot of the toolbar window read `Offline · Local only`, or name the link
+to the desktop app with what is sent over it, or say that the app is chosen and not answering.
+
+**First steps.** After the extension is installed, a guide of five steps opens once in a tab (what this is, try the sample number, your own
+data, what is switched on, where things are). It opens again from **Help: first steps** on the Settings page and in the toolbar window. Its
+sample card is always the fictional ANDA 216482, whatever source is chosen. The Settings page also shows the installed version and what
+changed in it.
+
 What the extension leaves to the desktop app, on purpose: quick replies, the Outlook setting, the connection to an API and any generated text. The extension never calls an API and has no access to mail.
 
 ## Two ways to use it
@@ -68,15 +84,17 @@ and the app's test fails if the app drifts from the committed file. To change a 
 ## Tests
 
 ```bash
-node --test extension/tests/unit/parity.test.mjs extension/tests/unit/safety.test.mjs extension/tests/unit/manifest.test.mjs extension/tests/unit/service.test.mjs     # no dependencies; run in CI on Linux and Windows
+node --test extension/tests/unit/*.test.mjs     # 63 tests, no dependencies; the workflow lists the six files by name
 # end to end in a real browser engine (needs Playwright's Chromium; Edge is not available in the build environment):
 NODE_PATH=$(npm root -g) node extension/tests/e2e/standalone.cjs
+NODE_PATH=$(npm root -g) node extension/tests/e2e/round33.cjs      # the guide, the data line and its minute, the time zone; waits for a real minute to begin (about 80 s); AXE_PATH=<axe.min.js> adds the accessibility scan
 dotnet build app/AndaCompanion && NODE_PATH=$(npm root -g) node extension/tests/e2e/native.cjs   # the real .NET host over native messaging
 ```
 
 The end-to-end tests load a copy of the extension that differs from the shipped one in only these ways: it may read `127.0.0.1` without a
 user gesture, the shadow root is open so tests can look inside (the shipped file's `closed` is asserted), and the native test grants
-`nativeMessaging`.
+`nativeMessaging`. The tests give the whole browser its time zone (`TZ`), because a zone set page by page is dropped for every page of the
+extension when one of them closes.
 
 ## Limits, stated plainly
 
@@ -89,4 +107,7 @@ user gesture, the shadow root is open so tests can look inside (the shipped file
 - **Not covered by the extension:** the notes folder and the Drugs@FDA RLD line (the app provides them in "together" mode), and the Proofread, Rewrite and Fact-check actions (they need an approved model; the extension has none).
 - The extension ID is derived from the public `key` in `manifest.json`, so the app can allow exactly that ID. The matching private key is not in the repository; a
   packed or store build would get a different ID, which you then enter in the app's Settings.
+- **"Today" is this computer's day.** Choosing another time zone changes how a time is written; the day used for "days to goal" stays the computer's own, as in the Windows app.
+- **The guide opens by itself after an installation only.** Someone who already had version 0.1.0 sees it when they press *Help: first steps*, or the first time they open the Settings page.
+- **Not built in the extension:** an event log, and export, import and reset of its settings. The extension stores its settings and, if you import one, your spreadsheet; it keeps no notes or lists of its own, so there is nothing of that kind to back up.
 - Every number shown is fictional unless you import your own.

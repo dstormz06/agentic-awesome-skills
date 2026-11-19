@@ -4,6 +4,7 @@ import { parseXml } from './xml.js';
 import { listEntries, readEntry, ZipError } from './zip.js';
 import { extractNumber } from './recognizer.js';
 import { DAY, parseIso, toIso, fmtLong, monthName } from './calendar.js';
+import { timeKnown, timeLabel, zoneClock, computerZone } from './time.js';
 
 export class PortfolioError extends Error {}
 
@@ -274,22 +275,22 @@ export async function readTable(bytes, name) {
 
 // ---------------- the repository ----------------
 
-const MON_ABBR_TITLE = MONTHS_ABBR.map((m) => m[0].toUpperCase() + m.slice(1));
-const pad2 = (n) => String(n).padStart(2, '0');
 const first = (s) => (s.split(/[ ,]+/).filter((x) => x.length > 0)[0] ?? '');
 
 /**
- * @param table {headers, rows}  @param opts {name, overrides, savedAt: {y, m, d, hh, mm} (local), today: 'YYYY-MM-DD'}
+ * @param table {headers, rows}  @param opts {name, overrides, savedMs: the moment the file was saved (UTC milliseconds), zone: the time zone in use}
  * Returns {status, headers, mapping, numbers(), find(number, todayIso), records(todayIso)}.
  */
 export function openPortfolio(table, opts) {
-  const { name, overrides = null, savedAt } = opts;
+  const { name, overrides = null, savedMs, zone = computerZone() } = opts;
   const mapping = detectColumns(table.headers, overrides);
-  const savedIso = toIso(Date.UTC(savedAt.y, savedAt.m - 1, savedAt.d));
+  const known = timeKnown(savedMs), day = known ? zoneClock(savedMs, zone) : null;
+  const savedIso = known ? toIso(Date.UTC(day.year, day.month - 1, day.day)) : null;      // the day the file was saved, in the zone in use
+  const moment = { savedIso, asOfUtc: known ? new Date(savedMs).toISOString() : null };
   const result = { headers: table.headers, mapping, rowsByNumber: new Map(), status: { ok: false, count: 0, message: 'Not loaded.' } };
   if (!mapping.number) {
     result.status = { ok: false, count: 0, message: 'No column for the ANDA number was found. Please choose which column holds it in Settings.' };
-    return finish(result, name, savedIso);
+    return finish(result, name, moment);
   }
   const col = (key) => (mapping[key] !== undefined ? table.headers.indexOf(mapping[key]) : -1);
   const cell = (r, i) => (i >= 0 && i < r.length ? r[i].trim() : '');
@@ -307,17 +308,17 @@ export function openPortfolio(table, opts) {
   }
   const n = result.rowsByNumber.size;
   const missing = [['goal', 'goal date'], ['forecast', 'forecast'], ['drug', 'drug']].filter(([k]) => !mapping[k]).map(([, label]) => label).join(', ');
-  const saved = `${MON_ABBR_TITLE[savedAt.m - 1]} ${savedAt.d}, ${pad2(savedAt.hh)}:${pad2(savedAt.mm)}`;
+  const saved = timeLabel(savedMs, zone, false);      // as the app writes it: "Oct 28, 2026, 9:30 AM EDT"
   result.status = {
     ok: true, count: n,
     message: `Loaded ${n} ANDA${n === 1 ? '' : 's'} from ${name} (file saved ${saved}).` +
       (skipped > 0 ? ` ${skipped} row${skipped === 1 ? '' : 's'} without a readable ANDA number skipped.` : '') +
       (missing.length > 0 ? ` Not found in your sheet: ${missing}.` : ''),
   };
-  return finish(result, name, savedIso);
+  return finish(result, name, moment);
 }
 
-function finish(result, name, savedIso) {
+function finish(result, name, { savedIso, asOfUtc }) {
   const rows = result.rowsByNumber;
   for (const r of rows.values()) { r.ingredientKey = r.ingredient.toLowerCase(); r.drugKey = first(r.drug).toLowerCase(); }   // computed once, not on every comparison
   const sameProduct = (a, b) => {
@@ -367,7 +368,8 @@ function finish(result, name, savedIso) {
       goalDate: goalT === null ? UNKNOWN : fmtLong(goalT), goalDays, daysToGoal, forecastDeltaDays: deltaDays, progressPct: -1,
       forecastDate: forecastText, forecastDelta: delta, forecastLate: late, forecastConfidence: row.forecast === null ? '' : 'as entered in your sheet',
       attention: null, latest: row.status.length > 0 ? row.status : UNKNOWN,
-      dataAsOf: `your portfolio file, saved ${monthName(new Date(saved).getUTCMonth())} ${new Date(saved).getUTCDate()} · ${name}`,
+      dataAsOf: saved === null ? `your portfolio file · ${name}` : `your portfolio file, saved ${monthName(new Date(saved).getUTCMonth())} ${new Date(saved).getUTCDate()} · ${name}`,
+      asOfUtc, dataSource: `Your portfolio file · ${name}`,      // the moment the file was saved, and where the data is from, for the card's line
       ahead: null, pending: [], notes,
       forecastDetail: 'Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.',
       sisters, goalDateValue: row.goal, forecastDateValue: row.forecast, submittedDate: row.submitted, asOfDate: savedIso, demo: false,

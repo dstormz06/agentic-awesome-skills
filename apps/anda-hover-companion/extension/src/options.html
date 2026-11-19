@@ -10,6 +10,19 @@
 <main class="wrap">
   <h1>ANDA Companion (Notula) for Edge</h1>
   <p class="hint">Prototype, not an FDA product. It makes no network requests of its own. Everything stays in this browser profile unless you connect the desktop app on this computer.</p>
+  <p id="conn" class="conn" role="status">…</p>
+  <div class="row"><button class="btn" id="help" type="button" aria-controls="first" aria-expanded="false">Help: first steps</button><span class="hint" id="version"></span></div>
+
+  <section id="first" class="first" aria-labelledby="fsTitle" hidden>
+    <p class="place" id="fsPlace"></p>
+    <h2 id="fsTitle" tabindex="-1"></h2>
+    <div id="fsLines"></div>
+    <div class="row"><button class="btn" id="fsAct" type="button" hidden></button></div>
+    <div id="fsCard" class="k" hidden></div>
+    <p class="hint" id="fsNote" hidden></p>
+    <div class="row fsnav"><button class="btn" id="fsBack" type="button">Back</button><button class="btn primary" id="fsNext" type="button">Next</button><button class="btn" id="fsLeave" type="button">Close the guide</button></div>
+    <p class="sr" id="fsSay" role="status" aria-live="polite"></p>
+  </section>
 
   <h2>Where the data comes from</h2>
   <label class="opt"><input type="radio" name="source" value="demo"> Fictional demo records (two ANDAs, for trying it out)</label>
@@ -35,9 +48,15 @@
   <label class="opt"><input type="radio" name="consent" value="peek"> Peek first: a small card, expand for the rest</label>
   <label class="opt"><input type="radio" name="consent" value="full"> Full card</label>
   <label class="opt"><input type="checkbox" id="escalate"> In whisper mode, open a peek by itself for an at-risk or late ANDA</label>
-  <div class="row"><span>Late means a forecast at least</span><select id="late" style="width:auto"><option>3</option><option>7</option><option>14</option></select><span>days past the goal</span></div>
-  <div class="row" style="margin-top:6px"><span>Flag dates within</span><select id="lead" style="width:auto"><option>0</option><option>2</option><option>3</option><option>5</option></select><span>business days of a federal holiday</span></div>
-  <div class="row" style="margin-top:6px"><span>Hide the card after</span><select id="hide" style="width:auto"><option value="0">never</option><option value="10">10 s</option><option value="20">20 s</option><option value="40">40 s</option></select><span>idle (never while your pointer is on it)</span></div>
+  <div class="row"><span>Late means a forecast at least</span><select id="late" style="width:auto" aria-label="Late means a forecast at least this many days past the goal"><option>3</option><option>7</option><option>14</option></select><span>days past the goal</span></div>
+  <div class="row" style="margin-top:6px"><span>Flag dates within</span><select id="lead" style="width:auto" aria-label="Flag dates within this many business days of a federal holiday"><option>0</option><option>2</option><option>3</option><option>5</option></select><span>business days of a federal holiday</span></div>
+  <div class="row" style="margin-top:6px"><span>Hide the card after</span><select id="hide" style="width:auto" aria-label="Hide the card after this long idle"><option value="0">never</option><option value="10">10 s</option><option value="20">20 s</option><option value="40">40 s</option></select><span>idle (never while your pointer is on it)</span></div>
+
+  <h2 id="timeHead">Time</h2>
+  <p id="timeNow" class="hint" role="status"></p>
+  <div class="row"><label for="tz">Time zone</label><select id="tz" style="width:auto"></select></div>
+  <div class="row" style="margin-top:6px"><label for="stale">Mark data STALE when it is older than</label><select id="stale" style="width:auto"></select><span>days</span></div>
+  <p class="hint" id="timeHint">Every time is kept as one moment and written in the zone chosen here, with its abbreviation. A card says where its data is from, as of when and how long ago. With the desktop app as the source, the app writes that line with its own settings.</p>
 
   <h2>Extra closures</h2>
   <textarea id="closures" aria-label="Extra closures" placeholder="2026-12-24 Executive order closing"></textarea>
@@ -49,9 +68,13 @@
   <p class="hint" id="cmdNote">Edge leaves out a suggested shortcut that another extension or Edge itself already uses, and shows it here as not set. Choose another one in Edge's shortcut page.</p>
   <p class="hint">Other ways: the right-click menu on selected text, and the toolbar button. A middle-click trigger is not offered here on purpose: an extension can only watch the mouse by running a script on every page you open, and this one is built to run only when you ask. The Windows app offers a middle-click option.</p>
 
+  <h2>This version</h2>
+  <div id="changes"></div>
+
   <h2>What this extension can and cannot do</h2>
   <p class="hint">It runs on a page only when you press a shortcut, use the right-click menu or click its button, and only on that tab (the "active tab" permission). It has no permission to read pages you have not asked about, to use your history, or to call any website. It does not use AI.</p>
 </main>
+<script src="ui/card-ui.js"></script>
 <script type="module" src="options.js"></script>
 </body>
 </html>

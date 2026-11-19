@@ -42,10 +42,10 @@ export function referenceFor(r) {
   return { psg: psgText(r) ?? demoText(r, 0) ?? NO_PSG, rld: demoText(r, 1) ?? NO_RLD };
 }
 
-/** @param ctx {today (UTC ms), calendar, lead, lateDays} */
+/** @param ctx {today (UTC ms), calendar, lead, lateDays, and for the age of the data: staleDays, nowMs, zone} */
 export function buildCard(r, ctx) {
   const lead = ctx.lead ?? 3, lateDays = ctx.lateDays ?? 7;
-  const flags = evaluateWatch(r, ctx.today, ctx.calendar, { lead });
+  const flags = evaluateWatch(r, ctx.today, ctx.calendar, { lead, staleDays: ctx.staleDays, nowMs: ctx.nowMs, zone: ctx.zone });
   const urgent = isUrgent(r, ctx.today, ctx.calendar, lateDays);
   return {
     number: r.number, kind: r.kind, drug: r.drug, meta: r.meta, freshness: r.dataAsOf ?? null, source: r.sourceLabel ?? null, demo: !!r.demo,
@@ -69,7 +69,7 @@ export function buildWatchList(records, ctx, limit = 500) {
   let total = 0;
   for (const r of records) {
     total++;
-    const flags = evaluateWatch(r, ctx.today, ctx.calendar, { lead: ctx.lead ?? 3 });
+    const flags = evaluateWatch(r, ctx.today, ctx.calendar, { lead: ctx.lead ?? 3, staleDays: ctx.staleDays, nowMs: ctx.nowMs, zone: ctx.zone });
     const urgent = isUrgent(r, ctx.today, ctx.calendar, ctx.lateDays ?? 7);
     if (flags.length === 0 && !urgent) continue;
     const severity = flags.length === 0 ? 'info' : flags.reduce((m, f) => (SEVERITY[f.severity] > SEVERITY[m] ? f.severity : m), 'info');

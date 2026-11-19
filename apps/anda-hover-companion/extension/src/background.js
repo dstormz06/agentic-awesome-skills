@@ -15,7 +15,11 @@ const service = createService({ storage, native });
 const MENU = { peek: 'anda-peek', draft: 'anda-draft', scan: 'anda-scan' };
 
 // ---------- the right-click menu ----------
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener((details) => {
+  // First steps: shown once, when the extension is first installed (not when it is updated or the browser starts). The Settings page marks
+  // it as shown when it draws the guide, and says so if the browser would not keep the mark.
+  if (details && details.reason === 'install')
+    service.firstSteps(false).then((f) => { if (!f.seen) return chrome.tabs.create({ url: chrome.runtime.getURL('src/options.html#first') }); }).catch(() => {});
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({ id: MENU.peek, title: 'ANDA Companion (Notula): peek at “%s”', contexts: ['selection'] });
     chrome.contextMenus.create({ id: MENU.draft, title: 'ANDA Companion (Notula): check this text as a draft', contexts: ['selection', 'editable'] });
@@ -114,12 +118,15 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!own) return false;
   const answer = (p) => { p.then(sendResponse, (e) => sendResponse({ ok: false, error: 'error', message: e && e.message })); return true; };
   switch (msg.type) {
+    case 'anda:fresh': return answer(service.fresh(String(msg.number || '')));
     case 'anda:card': return answer(service.lookup(String(msg.number || '')).then((r) => (r.ok ? { ok: true, card: r.card } : r)));
     case 'svc:lookup': return answer(service.lookup(String(msg.text || '')));
     case 'svc:draft': return answer(service.draft(String(msg.text || '').slice(0, 20000)));
     case 'svc:watchlist': return answer(service.watchlist());
     case 'svc:scan': return answer(service.scan((Array.isArray(msg.numbers) ? msg.numbers : []).map(String).slice(0, 200)));
     case 'svc:status': return answer(service.status());
+    case 'svc:connection': return answer(service.connection());
+    case 'svc:sample': return answer(service.sample());
     case 'svc:settings': return answer(msg.patch ? service.saveSettings(msg.patch) : service.getSettings());
     case 'svc:disconnect-native': native.close(); sendResponse({ ok: true }); return false;
     default: return false;
