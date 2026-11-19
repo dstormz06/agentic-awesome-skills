@@ -11,14 +11,18 @@
       <StackPanel Spacing="10">
         <TextBlock FontSize="9.5" FontWeight="Bold" LetterSpacing="1.4"
                    FontFamily="{DynamicResource C.LabelFont}"
-                   Foreground="{DynamicResource C.Ink3}" Text="LOOKUP ANDA"/>
+                   Foreground="{DynamicResource C.Ink3}" Name="Caption" Text="LOOKUP ANDA"/>
         <Grid ColumnDefinitions="*,8,Auto">
           <TextBox Name="Input" Watermark="e.g. 216482" FontSize="14" AutomationProperties.Name="ANDA number"
                    FontFamily="{DynamicResource C.NumFont}"/>
           <Button Grid.Column="2" Name="GoBtn" Content="Peek" FontWeight="SemiBold"
                   Foreground="{DynamicResource C.Accent}"/>
         </Grid>
-        <TextBlock Name="ErrorText" FontSize="11.5" Foreground="{DynamicResource C.Bad}" IsVisible="False" AutomationProperties.LiveSetting="Assertive"/>
+        <TextBlock Name="ErrorText" FontSize="11.5" Foreground="{DynamicResource C.Bad}" IsVisible="False" TextWrapping="Wrap" AutomationProperties.LiveSetting="Assertive"/>
+        <!-- One Bar (round 33): what can be opened from what is typed. Rows to press; nothing opens by itself. -->
+        <StackPanel Name="RowsPanel" Spacing="2" IsVisible="False" AutomationProperties.Name="Suggestions"/>
+        <!-- The ANDAs kept in my list, then the recent ones (round 33). -->
+        <WrapPanel Name="RecentPanel" IsVisible="False"/>
       </StackPanel>
     </Border>
   </Panel>

@@ -50,6 +50,7 @@ public partial class SettingsWindow : Window
         }
 
         BuildTime();
+        BuildRound33();
         foreach (int seconds in AutoHidePolicy.Choices)
         {
             var rb = new RadioButton

@@ -70,6 +70,7 @@ public partial class App : Application
     {
         _settings = SettingsService.Load(); Clock.ZoneId = _settings.TimeZone;
         ThemeManager.Apply(Edition.Appearance(_settings), Edition.Opacity(_settings));
+        DisplayScale.Watch(); DisplayScale.Set(Display.TextScale(_settings.TextSize));      // every window of this app opens at the text size chosen
         _calendar = BusinessCalendar.FromFile(AppPaths.ClosuresFile);
         UsageLog.Configure(_settings.UsageLog && SelfTestRun is null);
         ApplyData();
@@ -233,7 +234,7 @@ public partial class App : Application
             var near = new PixelPoint(cursor.X, cursor.Y);
             if (record is null) new ChipWindow().ShowNotice(NotFoundMessage(number), near);
             else OpenCard(record, near, _settings.Consent == ConsentModel.PeekFirst);
-        }).Show();
+        }, LookupOptionsNow()).Show();
     }
 
     /// <summary>
@@ -243,6 +244,7 @@ public partial class App : Application
     public void OpenCard(AndaRecord record, PixelPoint near, bool mini)
     {
         _lastCard = (record, near, mini);
+        NoteRecent(record.Number);
         RefreshTrayState();
         if (ThemeManager.Current.IsCompact)
         {
@@ -251,6 +253,7 @@ public partial class App : Application
                 { AutoHideSeconds = _settings.AutoHideSeconds };
             compact.Closed += (_, _) => { if (ReferenceEquals(_compact, compact)) _compact = null; };
             _compact = compact;
+            DisplayScale.Apply(compact, DisplayScale.Current);
             compact.ShowNear(near);
             return;
         }
@@ -273,6 +276,7 @@ public partial class App : Application
         };
         card.Closed += (_, _) => { if (ReferenceEquals(_card, card)) _card = null; };
         _card = card;
+        JoinCard(card, own: notes);
         card.Show(record, near, mini);
     }
 
@@ -416,6 +420,9 @@ public partial class App : Application
         var watch = new NativeMenuItem("Watch list…");
         watch.Click += (_, _) => OpenWatchList();
         menu.Add(watch);
+        var today = Full(new NativeMenuItem("Today…"));
+        today.Click += (_, _) => OpenToday();
+        menu.Add(today);
         var connections = new NativeMenuItem("Connections and event log…");
         connections.Click += (_, _) => OpenConnections();
         menu.Add(connections);
@@ -547,6 +554,7 @@ public partial class App : Application
         _todo.ArchiveAfterDays = _myTodo.ArchiveAfterDays = _settings.ArchiveAfterDays;
         _backupsWindow?.Paint(); _card?.TimeChanged();      // an open window follows a new zone, or new days before "stale", at once
         ThemeManager.Apply(Edition.Appearance(_settings), Edition.Opacity(_settings));
+        DisplayScale.Set(Display.TextScale(_settings.TextSize)); _card?.ApplySpacing(Display.Spacing(_settings.Density));      // open windows follow the new text size and spacing at once
         UsageLog.Configure(_settings.UsageLog && SelfTestRun is null);
         _hotkeys?.Reconfigure(HotkeyBindings());
         RefreshTrayLabels();

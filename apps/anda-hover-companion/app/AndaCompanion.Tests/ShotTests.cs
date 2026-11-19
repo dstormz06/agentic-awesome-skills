@@ -177,6 +177,27 @@ public class ShotTests : IClassFixture<HeadlessFixture>
             guide32.Go(1); guide32.Go(1); guide32.Go(1); for (int i = 0; i < 20; i++) { Settle(); Thread.Sleep(12); }
             Save(guide32, dir, "first-steps-32-step5");
             guide32.Close();
+            // Round 33: the card's details and its list button, the card at the largest text with compact spacing, One Bar, and Today.
+            {
+                var repo33 = new Data.MockAndaRepository(); var pins33 = new List<string>();
+                CardWindow Card33() => new(new OfflineBriefService(), repo33.Find) { CloseWhenDeactivated = false, AutoHideSeconds = 0, CardFields = () => CardDetails.DefaultFields, DataFileName = () => null,
+                    IsKept = n => pins33.Contains(n), ToggleKept = n => { var (after, result) = Recents.PinAfter(pins33, n); pins33 = after; return result; } };
+                var card33 = Card33(); card33.Show(repo33.Find("214990")!, new PixelPoint(40, 40), false); for (int i = 0; i < 20; i++) { Settle(); Thread.Sleep(12); }
+                card33.KeyPress(Avalonia.Input.Key.E, Avalonia.Input.RawInputModifiers.None, Avalonia.Input.PhysicalKey.E, "e"); for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
+                Save(card33, dir, "card-33-details"); card33.Close();
+                var big33 = Card33(); big33.ApplySpacing(Display.Spacing("compact")); DisplayScale.Apply(big33, Display.TextScale("xl"));
+                big33.Show(repo33.Find("216482")!, new PixelPoint(40, 40), false); for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
+                Save(big33, dir, "card-33-largest-compact"); big33.Close();
+                var plain33 = Card33(); plain33.Show(repo33.Find("216482")!, new PixelPoint(40, 40), false); for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
+                Save(plain33, dir, "card-33-standard"); plain33.Close();
+                var bar33 = new LookupWindow(_ => { }, new LookupOptions(true, () => new[] { ("214990", true), ("216482", false) }, repo33.Find, _ => { }, _ => { }));
+                bar33.Show(); bar33.FindControl<TextBox>("Input")!.Text = "216482"; for (int i = 0; i < 20; i++) { Settle(); Thread.Sleep(12); }
+                Save(bar33, dir, "one-bar-33"); bar33.Close();
+                Today.Look? Find33(string id) => repo33.Find(id) is { } rec ? Round33Tests.Look(rec) : null;
+                var today33 = new TodayWindow(new TodayHooks(() => repo33.Numbers.Select(n => Find33(n)!).ToList(), Find33, () => new[] { "214990" }, () => new[] { "216482", "214990" }, _ => { }));
+                today33.Show(); ConnectionBar.Attach(today33); for (int i = 0; i < 20; i++) { Settle(); Thread.Sleep(12); }
+                Save(today33, dir, "today-33"); today33.Close();
+            }
             // Round 31: the card's data line, fresh and STALE, and the Time part of Settings.
             using (new ZoneScope("America/New_York"))
             {

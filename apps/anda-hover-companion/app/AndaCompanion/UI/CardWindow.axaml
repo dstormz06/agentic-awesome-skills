@@ -263,6 +263,18 @@
                            Text="Kept on this PC, in the app's own folder. Text only, 500 characters. Never sent anywhere, and your sheet and your notes folder are not changed."/>
               </StackPanel>
             </Expander>
+            <!-- Details (round 33): columns of the person's own sheet, each with Copy. Nothing is looked up anywhere. -->
+            <Expander Name="DetailsExpander" Margin="8,2,8,0" IsExpanded="True" IsVisible="False">
+              <Expander.Header><StackPanel Orientation="Horizontal" Spacing="6"><TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink2}" Text="Details"/><TextBlock Name="DetailsCount" FontSize="11.5" VerticalAlignment="Center" Foreground="{DynamicResource C.Ink3}"/></StackPanel></Expander.Header>
+              <StackPanel Margin="12,0,12,8" Spacing="4">
+                <StackPanel Name="DetailsPanel" Spacing="3"/>
+                <WrapPanel>
+                  <Button Name="DetailsAll" Classes="chip" Margin="0,4,8,0" Content="Copy all" AutomationProperties.Name="Copy all the details shown"/>
+                  <TextBlock Name="DetailsSource" FontSize="11" VerticalAlignment="Center" Margin="0,4,0,0" Foreground="{DynamicResource C.Ink3}"/>
+                </WrapPanel>
+                <TextBlock Name="DetailsMsg" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap" IsVisible="False" AutomationProperties.LiveSetting="Polite"/>
+              </StackPanel>
+            </Expander>
             <Expander Name="WatchExpander" Margin="8,2,8,0" IsVisible="False"><Expander.Header><TextBlock Name="WatchHeader" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink2}" Text="Watch list"/></Expander.Header>
               <StackPanel Name="WatchPanel" Margin="12,0,12,8"/>
             </Expander>
@@ -298,6 +310,8 @@
                       AutomationProperties.Name="Copy a quick reply"/>
               <Button Name="SisterChip" Classes="chip" Margin="0,0,7,7"/>
               <Button Name="NotesChip" Classes="chip" Margin="0,0,7,7"/>
+              <Button Name="KeepChip" Classes="chip" Margin="0,0,7,7" Content="Keep in my list" IsVisible="False"
+                      ToolTip.Tip="Keep this ANDA in a short list of your own, offered in the lookup window and in Today. Five at most."/>
               <Button Name="OpenChip" Classes="chip" Foreground="{DynamicResource C.Accent}" Content="Open ANDA page ↗"
                       ToolTip.Tip="Open this ANDA's page in your browser. The address is set in Settings, My files and writing."
                       AutomationProperties.Name="Open this ANDA's page in the browser"/>

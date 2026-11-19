@@ -78,6 +78,86 @@ public partial class CardWindow : Window
     /// screenshot paths turn this off so a stolen focus cannot close a card mid-render.</summary>
     public bool CloseWhenDeactivated { get; set; } = true;
 
+    // ----- round 33: the details of the person's own sheet, the short list of kept ANDAs, compact spacing -----
+    /// <summary>The columns chosen in Settings. Null: the card shows no details.</summary>
+    public Func<IReadOnlyList<string>>? CardFields { get; set; }
+    /// <summary>The name of the person's portfolio file, said under the details. Null or empty: the fictional records.</summary>
+    public Func<string?>? DataFileName { get; set; }
+    /// <summary>Whether an ANDA is kept in the person's short list. Null: the card offers no such button.</summary>
+    public Func<string, bool>? IsKept { get; set; }
+    /// <summary>One press of "Keep in my list" / "Remove from my list". Returns "kept", "removed", "full" or "refused".</summary>
+    public Func<string, string>? ToggleKept { get; set; }
+    /// <summary>Puts text on the clipboard and says whether it got there. Tests replace it.</summary>
+    public Func<string, Task<bool>>? CopyText { get; set; }
+
+    private readonly Dictionary<Control, (Thickness Margin, Thickness Padding)> _spacingWas = new();
+    /// <summary>Comfortable (1) or compact (0.72) spacing of the card's parts. Can be called again while the card is open.</summary>
+    /// <remarks>The parts are named one by one: a look moves some of them to another place in the card, and they are still the card's parts there.</remarks>
+    public void ApplySpacing(double spacing) =>
+        DisplayScale.Space(new Control[] { HeaderBand, ClockPanel, AttentionBox, WatchGrid, LatestGrid, AheadGrid, RefGrid, BriefPanel, ChipsWrap }, spacing, _spacingWas);
+
+    private async Task<bool> PutOnClipboard(string text)
+    {
+        if (CopyText is not null) return await CopyText(text);
+        try { if (Clipboard is null) return false; await Clipboard.SetTextAsync(text); return true; }
+        catch (Exception) { return false; }
+    }
+
+    private void SayDetails(string text) { DetailsMsg.Text = text; DetailsMsg.IsVisible = text.Length > 0; }
+
+    private async void CopyDetail(string text, string what)
+    {
+        _autoHide.Touch();
+        SayDetails(await PutOnClipboard(text) ? CardDetails.Copied(what) : "Windows did not allow copying. Please select the text and press Ctrl+C.");
+    }
+
+    /// <summary>The chosen columns of the person's own sheet for this ANDA: a value with Copy, or "not in your sheet".</summary>
+    private void PaintDetails(AndaRecord record)
+    {
+        DetailsExpander.IsVisible = CardFields is not null;
+        if (CardFields is null) return;
+        var view = CardDetails.Rows(record, CardFields());
+        DetailsPanel.Children.Clear();
+        foreach (var row in view.Rows)
+        {
+            var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("132,*,Auto") };
+            grid.Children.Add(new TextBlock { Text = row.Label, FontSize = 11.5, Foreground = Ink3(), VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center });
+            var value = new SelectableTextBlock { Text = row.Text, FontSize = 12.5, Foreground = row.Copy ? Ink2() : Ink3(), FontStyle = row.Copy ? FontStyle.Normal : FontStyle.Italic, TextWrapping = TextWrapping.Wrap, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center };
+            Grid.SetColumn(value, 1); grid.Children.Add(value);
+            if (row.Copy)
+            {
+                var copy = new Button { Content = "Copy", Classes = { "chip" }, Margin = new Thickness(8, 0, 0, 0), Tag = row.Key };
+                Avalonia.Automation.AutomationProperties.SetName(copy, row.CopyName);
+                string text = row.Value!, what = row.Label.ToLowerInvariant();
+                copy.Click += (_, _) => CopyDetail(text, what);
+                Grid.SetColumn(copy, 2); grid.Children.Add(copy);
+            }
+            DetailsPanel.Children.Add(grid);
+        }
+        if (view.Empty.Length > 0) DetailsPanel.Children.Add(new TextBlock { Text = view.Empty, FontSize = 12, Foreground = Ink3(), TextWrapping = TextWrapping.Wrap });
+        DetailsCount.Text = view.Count;
+        DetailsSource.Text = CardDetails.Source(record, DataFileName?.Invoke());
+        DetailsAll.IsVisible = view.CopyAll;
+        SayDetails("");
+    }
+
+    private void PaintKeep()
+    {
+        KeepChip.IsVisible = IsKept is not null && ToggleKept is not null && _record is not null;
+        if (!KeepChip.IsVisible) return;
+        string label = Recents.PinLabel(IsKept!(_record!.Number));
+        KeepChip.Content = label; Avalonia.Automation.AutomationProperties.SetName(KeepChip, label);
+    }
+
+    private void ToggleKeep()
+    {
+        if (_record is null || ToggleKept is null) return;
+        _autoHide.Touch();
+        string result = ToggleKept(_record.Number);
+        PaintKeep();
+        SayChip(result == "full" ? Recents.PinFull : "");
+    }
+
     /// <summary>The person's own quick notes (round 24). Null in windows that have no store (some tests): the box then says so.</summary>
     public QuickNotesService? QuickNotes { get; set; }
 
@@ -105,6 +185,8 @@ public partial class CardWindow : Window
         MoreBtn.Click += (_, _) => ExpandFromMini();
         SisterChip.Click += (_, _) => OpenFirstSister();
         NotesChip.Click += (_, _) => OpenNotes();
+        KeepChip.Click += (_, _) => ToggleKeep();
+        DetailsAll.Click += (_, _) => { if (_record is not null && CardFields is not null) CopyDetail(CardDetails.Rows(_record, CardFields()).Block, "all the details shown"); };
         OpenChip.Click += (_, _) => OpenAndaPage();
         QuickNoteSave.Click += (_, _) => SaveQuickNote();
         QuickNoteCancel.Click += (_, _) => StopEditingNote("");
@@ -824,6 +906,7 @@ public partial class CardWindow : Window
             NotesPanel.Children.Add(new TextBlock { Text = n.Text, FontSize = 12.5, Foreground = Ink2(), TextWrapping = TextWrapping.Wrap });
         }
         ForecastDetailText.Text = record.ForecastDetail;
+        PaintDetails(record); PaintKeep();
 
         SistersPanel.Children.Clear();
         foreach (var s in record.Sisters)

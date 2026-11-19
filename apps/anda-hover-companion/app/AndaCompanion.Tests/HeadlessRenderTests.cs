@@ -151,18 +151,20 @@ public class HeadlessRenderTests : IClassFixture<HeadlessFixture>
                     "EscalateCheck", "LatePanel", "HolidayPanel", "PeekKeyBox", "LookupKeyBox", "DraftKeyBox", "PortfolioBox", "NotesBox", "ReferenceBox", "InstructionsBox", "UsageCheck",
                     "ConnBanner", "MiddleCheck", "ProviderPanel", "MyApiExpander", "ApiEndpoint", "TonePanel", "SignOffBox", "RepliesManage", "ReferenceUrlBox", "ReferenceUpdate", "OutlookOn",
                     "ActionsPanel", "ActionAdd", "AgentsPanel", "AgentAdd", "TodoAutoCheck", "TodoRefreshPanel", "TodoOpen",
-                    "MyTodoKeyBox", "MyTodoModePanel", "MyTodoOpen", "AdaptiveCheck", "AllToolsCheck", "SuggestedBtn", "TrayRecountPanel" }
+                    "MyTodoKeyBox", "MyTodoModePanel", "MyTodoOpen", "AdaptiveCheck", "AllToolsCheck", "SuggestedBtn", "TrayRecountPanel",
+                    "TextSizePanel", "DensityPanel", "LookupStylePanel", "RecentsCheck", "RecentsClear", "CardFieldsPanel" }
                 .Where(n => win.FindControl<Control>(n) is not null).ToList();
             int radios = win.GetVisualDescendants().OfType<RadioButton>().Count();
             win.Close();
             return (found, radios);
         }, CancellationToken.None);
 
-        Assert.Equal(45, names.found.Count);
+        Assert.Equal(51, names.found.Count);
         // eight offered appearances + three choices for the tray count + four auto-hide choices + three consent models + three "late" choices + four holiday-lead choices
         // + four connection choices + five tones + four middle-click keys + two Outlook clouds + three Outlook message counts + five to-do refresh choices + two to-do list modes. (The four API-timeout choices sit inside the collapsed
         // "My API" expander, whose content is not part of the visual tree until it is opened.)
-        Assert.Equal(8 + 3 + 4 + 3 + 3 + 4 + 4 + 5 + 4 + 2 + 3 + 5 + 2, names.radios);
+        // Round 33 adds three text sizes, two spacings and two styles of the lookup window.
+        Assert.Equal(8 + 3 + 4 + 3 + 3 + 4 + 4 + 5 + 4 + 2 + 3 + 5 + 2 + 3 + 2 + 2, names.radios);
     }
 
     [Fact]

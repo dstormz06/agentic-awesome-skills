@@ -32,12 +32,15 @@ public static class ConnectionBar
 
     /// <summary>The windows that carry the line. Anything else (the card, a compact box, the invite, the Connections window itself) does not.</summary>
     public static bool Carries(Window w) => w is SettingsWindow or LookupWindow or DraftWindow or AskWindow or CompareWindow or HandoffWindow or TodoWindow or MyTodoWindow
-        or NotesWindow or WatchListWindow or PromptLibraryWindow or QuickRepliesWindow or ActionWindow or UsageWindow or AboutWindow or BackupsWindow or FirstStepsWindow;
+        or NotesWindow or WatchListWindow or PromptLibraryWindow or QuickRepliesWindow or ActionWindow or UsageWindow or AboutWindow or BackupsWindow or FirstStepsWindow or TodayWindow;
 
     /// <summary>Puts the line at the foot of a window, once. Returns the line's button, or null when the window carries none.</summary>
     public static Button? Attach(Window w)
     {
-        if (!Carries(w) || w.Content is not Control content || content is DockPanel { Tag: "with-onbar" }) return null;
+        if (!Carries(w) || w.Content is not Control outer) return null;
+        // A window drawn at a larger text size holds its content inside the control that enlarges it. The line goes inside as well, so that it is enlarged too.
+        var scaler = outer as LayoutTransformControl;
+        if ((scaler is not null ? scaler.Child : outer) is not Control content || content is DockPanel { Tag: "with-onbar" }) return null;
         IBrush? Res(string key) => Application.Current?.Resources.TryGetResource(key, null, out var v) == true ? v as IBrush : null;
         var bar = new Button
         {
@@ -47,11 +50,11 @@ public static class ConnectionBar
         };
         AutomationProperties.SetName(bar, Line() + Suffix);
         bar.Click += (_, _) => Open?.Invoke();
-        w.Content = null;
+        if (scaler is not null) scaler.Child = null; else w.Content = null;
         var dock = new DockPanel { Tag = "with-onbar" };
         DockPanel.SetDock(bar, Dock.Bottom);
         dock.Children.Add(bar); dock.Children.Add(content);
-        w.Content = dock;
+        if (scaler is not null) scaler.Child = dock; else w.Content = dock;
         void Update() => Dispatcher.UIThread.Post(() => { string line = Line(); bar.Content = line; AutomationProperties.SetName(bar, line + Suffix); });
         Changed += Update;
         w.Closed += (_, _) => Changed -= Update;

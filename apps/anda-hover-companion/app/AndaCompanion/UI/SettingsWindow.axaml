@@ -130,6 +130,36 @@
               <TextBlock Name="TimeHint" Classes="hint" IsVisible="False" AutomationProperties.LiveSetting="Polite"/>
               <TextBlock Classes="hint" Text="Every time the tool shows is written in this time zone, with its abbreviation, and follows daylight time by itself. Times are stored in UTC, so changing the zone changes how a time is written, never when it was. The clock above and “minutes ago” on the card are brought up to date once a minute while they are on the screen. Every piece of data says where it is from and as of when; when it is older than the days chosen here it is marked STALE. The Drugs@FDA reference file is a public file that changes about monthly, so it has a number of days of its own. Which day is “today”, for due dates and day counts, stays this computer's day."/>
             </StackPanel>
+
+            <Border Classes="hair"/>
+
+            <!-- Round 33: text size and spacing, the lookup window, recent ANDAs -->
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="DISPLAY · TEXT SIZE AND SPACING"/>
+              <WrapPanel Name="TextSizePanel" AutomationProperties.Name="Text size"/>
+              <WrapPanel Name="DensityPanel" AutomationProperties.Name="Spacing"/>
+              <TextBlock Name="DisplayHint" Classes="hint"/>
+            </StackPanel>
+
+            <Border Classes="hair"/>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="LOOKUP WINDOW"/>
+              <WrapPanel Name="LookupStylePanel" AutomationProperties.Name="Lookup window"/>
+              <TextBlock Classes="hint" Text="One Bar suggests what to open from what you type. Every suggestion is a row you press; nothing opens by itself. In this app it does not read what you have selected in another window."/>
+            </StackPanel>
+
+            <Border Classes="hair"/>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="RECENT ANDAS"/>
+              <CheckBox Name="RecentsCheck" Content="Remember the last eight ANDAs I looked up, on this PC"/>
+              <WrapPanel>
+                <Button Name="RecentsClear" Content="Clear recents" Margin="0,0,10,0"/>
+                <TextBlock Name="RecentsStatus" Classes="hint" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite"/>
+              </WrapPanel>
+              <TextBlock Classes="hint" Text="Only six-digit numbers are kept, in this PC's settings, and never sent anywhere. Turning this off clears them. ANDAs you keep with “Keep in my list” on a card stay until you remove them and are saved in a backup."/>
+            </StackPanel>
           </StackPanel>
         </Expander>
         <Expander Name="SecStart" Classes="sec" IsExpanded="False">
@@ -289,6 +319,16 @@
                 <Button Grid.Column="1" Name="RepliesManage" Content="Quick replies…" Foreground="{DynamicResource C.Accent}" Background="{DynamicResource C.Mark}"/>
               </Grid>
               <TextBlock Classes="hint" Text="Tone, style and sign-off steer Proofread, Rewrite and Fact-check (only once a model is approved). They can never override the fixed rules: no changed numbers or dates, no invented facts. Quick replies are templates filled from the card (no AI): the Quick replies button on a card copies one with its numbers and dates filled in."/>
+            </StackPanel>
+
+            <Border Classes="hair"/>
+
+            <!-- Round 33: which columns of the person's own sheet an expanded card shows under "Details" -->
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="CARD DETAILS · COLUMNS OF MY OWN SHEET"/>
+              <WrapPanel Name="CardFieldsPanel" AutomationProperties.Name="Columns shown under Details on an expanded card"/>
+              <TextBlock Name="CardFieldsStatus" Classes="hint" AutomationProperties.LiveSetting="Polite"/>
+              <TextBlock Classes="hint" Text="An expanded card shows these columns of your own sheet under “Details”, each with Copy. A column your sheet does not have reads “not in your sheet”. The columns are found by their header names (for example “US agent email”, “Team lead”, “FEI”). Nothing is looked up anywhere."/>
             </StackPanel>
           </StackPanel>
         </Expander>

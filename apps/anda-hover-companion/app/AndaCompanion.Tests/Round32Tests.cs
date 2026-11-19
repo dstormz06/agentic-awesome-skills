@@ -101,18 +101,18 @@ public class Round32Tests : IDisposable
     }
 
     [Fact]
-    public void Settings_move_to_version_4_by_themselves_and_a_backup_carries_the_new_number()
+    public void Settings_written_before_round_32_gain_the_reference_days_and_a_backup_carries_them()      // round 33 moved the form on to 5; what round 32 added is still checked here
     {
         string dir = Temp.NewDir(), path = Path.Combine(dir, "settings.json");
         File.WriteAllText(path, "{\"SchemaVersion\":3,\"Tone\":\"Warm\",\"TimeZone\":\"America/Denver\",\"StaleAfterDays\":14}");      // written by round 31
         var s = SettingsService.Load(path);
-        Assert.Equal((4, 45, "America/Denver", 14, "Warm"), (s.SchemaVersion, s.RefStaleAfterDays, s.TimeZone, s.StaleAfterDays, s.Tone));
-        Assert.Equal(4, Settings.CurrentSchema); Assert.Null(SettingsService.LoadNote);
-        SettingsService.Save(s, path); Assert.Contains("\"SchemaVersion\": 4", File.ReadAllText(path));
+        Assert.Equal((Settings.CurrentSchema, 45, "America/Denver", 14, "Warm"), (s.SchemaVersion, s.RefStaleAfterDays, s.TimeZone, s.StaleAfterDays, s.Tone));
+        Assert.True(Settings.CurrentSchema >= 4); Assert.Null(SettingsService.LoadNote);
+        SettingsService.Save(s, path); Assert.Contains($"\"SchemaVersion\": {Settings.CurrentSchema}", File.ReadAllText(path));
 
         File.WriteAllText(path, "{\"SchemaVersion\":1,\"Tone\":\"Warm\",\"Provider\":3}");                        // three versions back: each step is taken
         s = SettingsService.Load(path);
-        Assert.Equal((4, 45, "", 7, 30, 30), (s.SchemaVersion, s.RefStaleAfterDays, s.TimeZone, s.StaleAfterDays, s.BackupCopies, s.ArchiveAfterDays));
+        Assert.Equal((Settings.CurrentSchema, 45, "", 7, 30, 30), (s.SchemaVersion, s.RefStaleAfterDays, s.TimeZone, s.StaleAfterDays, s.BackupCopies, s.ArchiveAfterDays));
 
         File.WriteAllText(path, "{\"SchemaVersion\":4,\"RefStaleAfterDays\":90}"); Assert.Equal(90, SettingsService.Load(path).RefStaleAfterDays);
         File.WriteAllText(path, "{\"SchemaVersion\":4,\"RefStaleAfterDays\":7}"); Assert.Equal(45, SettingsService.Load(path).RefStaleAfterDays);          // 7 is a choice for my data, not for the reference file
