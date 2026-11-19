@@ -3,6 +3,9 @@ using System.Text.Json;
 
 namespace AndaCompanion.Services;
 
+/// <summary>A finished item that is still on its list but no longer shown there, waiting to be archived.</summary>
+public sealed record WaitingItem(string Id, string Title, string? Number, DateOnly Finished);
+
 /// <summary>
 /// Finished items are never deleted by the app on its own. When a list drops them (after the days the person chose, when the list is full, or when the person
 /// clears the finished ones), they are first added to an archive file beside the list: one line of JSON for each item, with the day and the
@@ -42,7 +45,10 @@ public static class TodoArchive
     /// <summary>A line longer than this is not one of the archive's: an item is a few hundred characters.</summary>
     private const int MaxLine = 16 * 1024;
 
-    /// <summary>The lines of the archive, oldest first. A line that is not JSON, or is far too long, is passed over. Read line by line.</summary>
+    /// <summary>
+    /// The lines of the archive, oldest first. A line that is not JSON, or is far too long, is passed over, and a line that is far too long
+    /// is never held in memory: the file is read in pieces, so one damaged line cannot take the PC's memory.
+    /// </summary>
     public static IEnumerable<JsonElement> Lines(string listPath)
     {
         string path = FileFor(listPath);
@@ -52,17 +58,33 @@ public static class TodoArchive
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { yield break; }
         using (reader)
         {
+            var line = new System.Text.StringBuilder(); bool tooLong = false; char[] buffer = new char[8192];
             while (true)
             {
-                string? line;
-                try { line = reader.ReadLine(); } catch (IOException) { yield break; }
-                if (line is null) yield break;
-                if (line.Length == 0 || line.Length > MaxLine) continue;
-                JsonElement element;
-                try { using var doc = JsonDocument.Parse(line); element = doc.RootElement.Clone(); } catch (JsonException) { continue; }
-                yield return element;
+                int read;
+                try { read = reader.Read(buffer, 0, buffer.Length); } catch (IOException) { yield break; }
+                if (read <= 0) break;
+                for (int k = 0; k < read; k++)
+                {
+                    char c = buffer[k];
+                    if (c == '\n')
+                    {
+                        if (!tooLong && Parse(line) is { } element) yield return element;
+                        line.Clear(); tooLong = false;
+                    }
+                    else if (tooLong) { }
+                    else if (line.Length >= MaxLine) { tooLong = true; line.Clear(); }
+                    else line.Append(c);
+                }
             }
+            if (!tooLong && Parse(line) is { } last) yield return last;
         }
+    }
+
+    private static JsonElement? Parse(System.Text.StringBuilder line)
+    {
+        if (line.Length == 0) return null;
+        try { using var doc = JsonDocument.Parse(line.ToString()); return doc.RootElement.Clone(); } catch (JsonException) { return null; }
     }
 
     private static JsonElement? Property(JsonElement e, string name)
@@ -76,7 +98,7 @@ public static class TodoArchive
     {
         string raw = e switch { { ValueKind: JsonValueKind.String } s => s.GetString() ?? "", { ValueKind: JsonValueKind.Number } n => n.GetRawText(), { ValueKind: JsonValueKind.True } => "true", { ValueKind: JsonValueKind.False } => "false", _ => "" };
         var sb = new System.Text.StringBuilder();
-        foreach (char c in raw) sb.Append(char.IsControl(c) ? ' ' : c);
+        foreach (char c in raw) sb.Append(char.IsControl(c) || c == (char)0xFEFF ? ' ' : c);      // the same characters as the simulation
         string t = System.Text.RegularExpressions.Regex.Replace(sb.ToString(), @"\s+", " ").Trim();
         return t.Length > max ? t[..max] : t;
     }
@@ -90,25 +112,49 @@ public static class TodoArchive
     /// </summary>
     public static (IReadOnlyList<Row> Rows, int Total, int Found) Rows(IEnumerable<JsonElement> lines, string? query, int max = 200)
     {
-        var rows = new List<Row>();
+        var (rows, total) = Read(lines);
+        var hit = Search(rows, query);
+        return (hit.Take(max > 0 ? max : 200).ToList(), total, hit.Count);
+    }
+
+    /// <summary>
+    /// Every item of the archive, oldest first, read once: the window keeps this and searches it, so that typing in the search box does not
+    /// read the file again. An item archived again before it was put back is held once, by its newest line.
+    /// </summary>
+    public static (IReadOnlyList<Row> Rows, int Total) Read(IEnumerable<JsonElement> lines)
+    {
+        var rows = new List<Row?>(); var open = new Dictionary<string, int>(StringComparer.Ordinal);      // id -> where its line that was not put back is
         foreach (var l in lines)
         {
             if (l.ValueKind != JsonValueKind.Object) continue;
             if (Property(l, "item") is { ValueKind: JsonValueKind.Object } item && Text(Property(item, "id")) is { Length: > 0 } id)
             {
-                string? number = Text(Property(item, "number")) is { } n && System.Text.RegularExpressions.Regex.IsMatch(n, "^[0-9]{6}$") ? n : null;
+                string? number = Text(Property(item, "number")) is { } n && System.Text.RegularExpressions.Regex.IsMatch(n, @"^[0-9]{6}\z") ? n : null;
+                if (open.TryGetValue(id, out int earlier)) rows[earlier] = null;
+                open[id] = rows.Count;
                 rows.Add(new Row(id, Shown(Property(item, "title"), 200), number, Shown(Property(l, "archivedOn"), 10), Shown(Property(l, "why"), 80), null));
             }
-            else if (Text(Property(l, "restoredOn")) is { } restoredOn && Text(Property(l, "id")) is { } back)
+            else if (Text(Property(l, "restoredOn")) is { } restoredOn && Text(Property(l, "id")) is { } back && open.TryGetValue(back, out int at))
             {
-                for (int k = rows.Count - 1; k >= 0; k--)
-                    if (rows[k].Id == back && rows[k].RestoredOn is null) { rows[k] = rows[k] with { RestoredOn = Shown(JsonSerializer.SerializeToElement(restoredOn), 10) }; break; }
+                rows[at] = rows[at]! with { RestoredOn = Shown(JsonSerializer.SerializeToElement(restoredOn), 10) };
+                open.Remove(back);
             }
         }
-        string q = Shown(JsonSerializer.SerializeToElement(query ?? ""), 100).ToLowerInvariant();
-        var hit = rows.Where(r => q.Length == 0 || r.Title.ToLowerInvariant().Contains(q, StringComparison.Ordinal) || (r.Number ?? "").Contains(q, StringComparison.Ordinal)).Reverse().ToList();
-        return (hit.Take(max > 0 ? max : 200).ToList(), rows.Count, hit.Count);
+        var kept = rows.Where(r => r is not null).Select(r => r!).ToList();
+        return (kept, kept.Count);
     }
+
+    /// <summary>The items that match, newest first: by words in the title or digits of the number, whatever the case of the letters.</summary>
+    public static IReadOnlyList<Row> Search(IReadOnlyList<Row> rows, string? query)
+    {
+        string q = Fold(query);
+        var hit = rows.Where(r => q.Length == 0 || r.Title.ToLowerInvariant().Contains(q, StringComparison.Ordinal) || (r.Number ?? "").Contains(q, StringComparison.Ordinal)).ToList();
+        hit.Reverse();
+        return hit;
+    }
+
+    /// <summary>A search text as it is compared: one line, small letters.</summary>
+    public static string Fold(string? query) => Shown(JsonSerializer.SerializeToElement(query ?? ""), 100).ToLowerInvariant();
 
     /// <summary>The newest archived item with this id that was not put back, or null. Read from the file each time it is asked.</summary>
     public static T? Find<T>(string listPath, string id) where T : class

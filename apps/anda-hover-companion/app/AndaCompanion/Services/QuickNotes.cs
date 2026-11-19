@@ -38,6 +38,18 @@ public sealed class QuickNotesService
         Load();
     }
 
+    /// <summary>How many notes this text holds when it is read as the notes file is, or null when it cannot be read as one.</summary>
+    public static int? CountIn(string text)
+    {
+        try
+        {
+            using (var doc = JsonDocument.Parse(text)) if (doc.RootElement.ValueKind != JsonValueKind.Object) return null;
+            var read = JsonSerializer.Deserialize<FileShape>(text);
+            return read?.Notes is null ? null : read.Notes.Where(kv => IsAndaNumber(kv.Key) && kv.Value is not null).Sum(kv => kv.Value.Count(n => n is not null && !string.IsNullOrEmpty(n.Id) && Clean(n.Text).Length > 0));
+        }
+        catch (Exception ex) when (ex is JsonException or NotSupportedException or InvalidOperationException) { return null; }
+    }
+
     /// <summary>Reads the notes from their file again: after a backup copy was restored over it.</summary>
     public void Reload() { lock (_gate) { _file = new FileShape(); Load(); } }
 
@@ -140,8 +152,8 @@ public sealed class QuickNotesService
         catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException or InvalidDataException or NotSupportedException)
         {
             // A file that cannot be read is set aside, never overwritten in place: the person's notes may still be in it.
-            Problem = "The notes file could not be read (" + ex.Message + "). It was set aside as quick-notes.unreadable.json, and new notes start a new file.";
-            try { File.Move(_path, Path.Combine(Path.GetDirectoryName(_path) ?? ".", "quick-notes.unreadable.json"), overwrite: true); } catch (Exception) { /* nothing more can be done; Save reports it */ }
+            string? aside = SafeFile.SetAside(_path);      // under a name that says when, never over a file set aside earlier
+            Problem = "The notes file could not be read (" + ex.Message + "). " + (aside is null ? "It could not be set aside" : "It was set aside as " + aside) + ", and new notes start a new file.";
             _file = new FileShape();
         }
     }

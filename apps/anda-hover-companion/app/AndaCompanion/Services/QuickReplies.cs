@@ -97,6 +97,13 @@ public sealed class QuickReplyService
         Read();
     }
 
+    /// <summary>How many replies this text holds when it is read as the replies file is, or null when it cannot be read as one.</summary>
+    public static int? CountIn(string text)
+    {
+        try { return JsonSerializer.Deserialize<List<QuickReply>>(text) is { } list ? list.Count(r => !string.IsNullOrWhiteSpace(r?.Name) && r!.Text is not null) : null; }
+        catch (Exception ex) when (ex is JsonException or NotSupportedException or InvalidOperationException) { return null; }
+    }
+
     /// <summary>Reads the replies from their file again: after a backup copy was restored over it.</summary>
     public void Reload() => Read();
 

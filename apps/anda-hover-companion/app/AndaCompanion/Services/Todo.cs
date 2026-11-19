@@ -64,6 +64,16 @@ public sealed class TodoService
 
     public static string Iso(DateOnly d) => d.ToString(DateFormat, CultureInfo.InvariantCulture);
 
+    /// <summary>
+    /// Finished items that are still on the list but no longer shown there (a finished item is shown for seven days) and not archived yet.
+    /// The Backups and archive window shows them, so that nothing is ever out of sight.
+    /// </summary>
+    public IReadOnlyList<WaitingItem> Waiting(DateOnly today)
+    {
+        lock (_gate) return _file.Items.Where(i => i.Done && ParseIso(i.DoneOn) is { } d && today.DayNumber - d.DayNumber > TodoBuilder.ShowDoneDays)
+            .Select(i => new WaitingItem(i.Id, i.Title, i.Number, ParseIso(i.DoneOn)!.Value)).ToList();
+    }
+
     /// <summary>Reads the list from its file again: after a backup copy was restored over it.</summary>
     public void Reload() { lock (_gate) _file = Load(_path); Changed?.Invoke(); }
 
@@ -81,13 +91,16 @@ public sealed class TodoService
             // The archive is a file anyone can edit: what comes back from it is cleaned as a typed item would be.
             item.Title = OneLine(item.Title, MaxTitleChars);
             if (item.Title.Length == 0) return (false, "That archived item has no title, so it cannot be put back. Nothing was changed.");
-            item.Number = item.Number is { } n && Regex.IsMatch(n, "^[0-9]{6}$") ? n : null;
+            item.Number = item.Number is { } n && Regex.IsMatch(n, @"^[0-9]{6}\z") ? n : null;
             item.Note = OneLine(item.Note, MaxNoteChars) is { Length: > 0 } note ? note : null;
             item.Due = ParseIso(item.Due) is { } due ? Iso(due) : null;
             item.Created = OneLine(item.Created, 32); item.Source = OneLine(item.Source, 60) is { Length: > 0 } src ? src : "You";
             item.Done = false; item.DoneOn = null; item.SnoozedUntil = null;
-            if (!TodoArchive.MarkPutBack(_path, item.Id, today)) return (false, "The archive could not be written just now. Nothing was changed.");
-            _file.Items.Add(item); SaveLocked(); title = item.Title;
+            // The list is written first and the archive is told second: if either cannot be written, the item is where it was and nothing says otherwise.
+            _file.Items.Add(item);
+            if (!SaveLocked()) { _file.Items.Remove(item); return (false, "The list could not be saved just now. Nothing was changed."); }
+            if (!TodoArchive.MarkPutBack(_path, item.Id, today)) { _file.Items.Remove(item); SaveLocked(); return (false, "The archive could not be written just now. Nothing was changed."); }
+            title = item.Title;
         }
         Changed?.Invoke();
         return (true, $"“{title}” is back on the ANDA to-do list, as an open item.");
@@ -277,7 +290,8 @@ public sealed class TodoService
         return gone.Count;
     }
 
-    private void SaveLocked()
+    /// <summary>Writes the list. False when it could not be written: what the person sees then lasts for this session only.</summary>
+    private bool SaveLocked()
     {
         try
         {
@@ -286,8 +300,20 @@ public sealed class TodoService
             File.WriteAllText(temp, JsonSerializer.Serialize(_file, new JsonSerializerOptions { WriteIndented = true }));
             File.Move(temp, _path, overwrite: true);       // a crash mid-write can never leave a half-written list
             SafeFile.Wrote(_path);
+            return true;
         }
-        catch { /* best effort: the list still works for this session */ }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException) { return false; /* the list still works for this session */ }
+    }
+
+    /// <summary>How many items this text holds when it is read as the list file is, or null when it cannot be read as one. A backup copy is checked with this before it is put back.</summary>
+    public static int? CountIn(string text)
+    {
+        try
+        {
+            using (var doc = JsonDocument.Parse(text)) if (doc.RootElement.ValueKind != JsonValueKind.Object || !doc.RootElement.TryGetProperty("Items", out var items) || items.ValueKind != JsonValueKind.Array) return null;
+            return Normalize(JsonSerializer.Deserialize<TodoFile>(text)).Items.Count;
+        }
+        catch (Exception ex) when (ex is JsonException or NotSupportedException or InvalidOperationException) { return null; }
     }
 }
 

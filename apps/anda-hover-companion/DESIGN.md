@@ -1140,15 +1140,32 @@ copy). A list whose text equals its newest copy is not copied again. So the newe
 **How many stay.** One number N, chosen in the window (10, 30, 60 or 100; 30 unless changed): the newest N copies, and the last copy of each of
 the newest N days that have one. The second half is the "daily" part of the rule, and it is what keeps a busy afternoon from pushing out last
 week. A day is the person's day, in their time zone: the night the clocks change is one day, 25 or 23 hours long, not two days and not none.
-Choosing a smaller number removes copies at once and the window says how many; choosing a larger one removes nothing.
+Choosing a smaller number would remove copies, and removing cannot be undone, so it is asked about first: the window says how many copies
+would go and offers one button to go ahead; until that button is pressed nothing is removed and the number is not changed. Choosing a larger
+number removes nothing. The two choices of this window belong to this PC, like the lists: a settings backup does not carry them, and a
+restore or a reset of settings leaves them alone, so neither can remove copies unasked.
 
-**Putting a copy back** is one press. Nothing is asked, because nothing is lost: the list as it was a moment before is among the copies (it
-was the newest one), the list after the restore becomes the newest, and the window says so. Undoing a restore is restoring the copy before it.
+**Putting a copy back** is one press. Nothing is asked, because nothing is lost: what was there a moment before is among the copies, what is
+there after the restore becomes the newest copy, and the window says so. Undoing a restore is restoring the copy before it. That promise is
+checked, not assumed: before anything is written, the app makes sure that what is there now is among the copies, and if it cannot be copied
+(the copies folder cannot be written, or the list has grown past what the app reads) the restore is refused and nothing is changed. A copy is
+read by the list's own reader before it is used, so a damaged copy is refused, not put in the list's place.
 
 **The archive.** Finished items leave their list after a number of days the person chooses (7, 30, 90 or 365; 30 unless changed) and are kept in
 the archive, as since round 28. The window now shows the archive of both lists, newest first, searches it by words in the title or digits of the
 number, and puts an item back on its list as an open item. The archive only ever gains lines: putting an item back adds a line that says so,
 and the item's own line stays. What comes back from the archive is cleaned the way a typed item is, because the archive is a plain file.
+
+**Nothing is out of sight.** A list shows a finished item for seven days, and it is archived after the days the person chose, which can now be
+a year. In between, the item is in the list's file but shown nowhere; the separate review found this. The window therefore also lists the
+finished items that are still on a list and no longer shown there, searches them with the archive, and opens one again with one press.
+
+**A clock that was ahead.** A copy stamped later than now was made while the PC's clock was ahead. Left alone it would stay "the newest" for
+ever and every later copy would be filed on its day. At the next change such a copy is given the latest moments before now, in its order.
+Copies are shown with their year.
+
+**After the separate review** (12 findings; `VERIFICATION.md`, round 30): everything in the four paragraphs above that says "checked",
+"asked about first" or "refused" was added or corrected then, with a test for each.
 
 **Not built, and why.** A free manual order of items ("reorder"): both lists are ordered by urgency and date on purpose, so a hand-made order
 would fight the rule that puts what is due first. An item is moved up by marking it urgent or giving it a date. This is in the report to the
@@ -1156,7 +1173,7 @@ owner as a question, not worked around. Also not built: backup copies of the wee
 
 **How the two programs are kept the same.** `mockup/round30-golden.json` (written by `tools/round30-golden.cjs`) holds the simulation's answers
 for 20 moments and the day each falls on (both clock-change nights in New York, and zones far from UTC), 12 sets of copies and which of them
-stay, and 11 views of an archive with damaged lines in it; the app's tests reproduce them.
+stay, 6 sets of copies from a clock that was ahead, and 14 views of an archive with damaged lines in it; the app's tests reproduce them.
 
 **In the app only:** the copies are files (`backups/<list>/<list>.<UTC time>.json` in the app's folder). In the simulation they last until the
 page is closed.

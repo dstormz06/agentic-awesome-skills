@@ -49,7 +49,11 @@ public class Round30Tests
             Same(bad, $"plan {n} keep", string.Join(",", c.GetProperty("result").GetProperty("keep").EnumerateArray().Select(s => s.GetInt64())), string.Join(",", keep));
             Same(bad, $"plan {n} remove", string.Join(",", c.GetProperty("result").GetProperty("remove").EnumerateArray().Select(s => s.GetInt64())), string.Join(",", remove));
         }
-        Assert.True(n >= 12, "cases are missing"); Fail(bad);
+        Assert.True(n >= 12, "cases are missing"); n = 0;
+        foreach (var c in root.GetProperty("restamps").EnumerateArray())
+            Same(bad, $"restamp {++n}", string.Join(",", c.GetProperty("moved").EnumerateArray().Select(m => m[0].GetInt64() + ">" + m[1].GetInt64())),
+                string.Join(",", Backups.Restamp(c.GetProperty("stamps").EnumerateArray().Select(t => t.GetInt64()), c.GetProperty("now").GetInt64()).Select(m => m.Old + ">" + m.New)));
+        Assert.True(n >= 6, "cases are missing"); Fail(bad);
     }
 
     [Fact]
@@ -68,7 +72,7 @@ public class Round30Tests
             var (rows, total, found) = TodoArchive.Rows(lines, c.GetProperty("query").GetString(), c.GetProperty("max").GetInt32());
             Same(bad, $"view {n}", Wanted(c.GetProperty("result")), Shape(rows, total, found));
         }
-        Assert.True(n >= 11, "cases are missing");
+        Assert.True(n >= 14, "cases are missing");
         var empty = TodoArchive.Rows(Array.Empty<JsonElement>(), "", 0);
         Same(bad, "empty", Wanted(root.GetProperty("emptyArchive")), Shape(empty.Rows, empty.Total, empty.Found));
         Fail(bad);
@@ -80,7 +84,7 @@ public class Round30Tests
     {
         string dir = Temp.NewDir(), file = Path.Combine(dir, "todo.json"); var clock = new Clock(); int[] k = { keep };
         var b = new Backups(Path.Combine(dir, "backups"), () => k[0], () => NewYork, () => clock.Now);
-        b.Register(new("todo", "ANDA to-do list", file, "item", "items", t => Backups.ItemsIn(t, "Items"), reload ?? (() => { })));
+        b.Register(new("todo", "ANDA to-do list", file, "item", "items", TodoService.CountIn, reload ?? (() => { })));
         return (b, clock, dir, file, k);
     }
 
@@ -91,9 +95,9 @@ public class Round30Tests
         Assert.False(b.Keep("todo")); Assert.Empty(b.Copies("todo"));                                         // no list yet: nothing to copy, nothing thrown
         File.WriteAllText(file, "{\"Items\":[]}");
         Assert.True(b.Keep("todo")); Assert.False(b.Keep("todo"));                                           // the same text is not copied again
-        File.WriteAllText(file, "{\"Items\":[{\"Id\":\"a\"}]}");
+        File.WriteAllText(file, "{\"Items\":[{\"Id\":\"a\",\"Title\":\"One\"}]}");
         Assert.True(b.Keep("todo"));                                                                         // the clock has not moved: the copy still gets its own name
-        clock.Tick(); File.WriteAllText(file, "{\"Items\":[{\"Id\":\"a\"},{\"Id\":\"b\"}]}"); b.Written(file);        // told by the write itself
+        clock.Tick(); File.WriteAllText(file, "{\"Items\":[{\"Id\":\"a\",\"Title\":\"One\"},{\"Id\":\"b\",\"Title\":\"Two\"}]}"); b.Written(file);        // told by the write itself
         b.Written(Path.Combine(dir, "settings.json")); b.Written(Path.Combine(dir, "other.json"));          // a file that is not one of the lists is not copied
         var copies = b.Copies("todo");
         Assert.Equal(3, copies.Count);
@@ -159,7 +163,7 @@ public class Round30Tests
         string dir = Temp.NewDir(), file = Path.Combine(dir, "todo.json"), log = Path.Combine(dir, "events.csv"); var clock = new Clock();
         var todo = new TodoService(file);
         var b = new Backups(Path.Combine(dir, "backups"), () => 30, () => NewYork, () => clock.Now);
-        b.Register(new("todo", "ANDA to-do list", file, "item", "items", t => Backups.ItemsIn(t, "Items"), () => todo.Reload()));
+        b.Register(new("todo", "ANDA to-do list", file, "item", "items", TodoService.CountIn, () => todo.Reload()));
         SafeFile.Written += b.Written;
         try
         {
@@ -171,11 +175,11 @@ public class Round30Tests
             int changed = 0; todo.Changed += () => changed++;
 
             var same = b.Restore("todo", copies[0].Utc);
-            Assert.Equal((false, "That copy is the ANDA to-do list as it is now. Nothing was changed."), same); Assert.Equal(2, todo.Items.Count);
+            Assert.Equal((false, "ANDA to-do list: that copy is what is there now. Nothing was changed."), same); Assert.Equal(2, todo.Items.Count);
 
-            var back = b.Restore("todo", copies[1].Utc, utc => EventLog.Local(utc.ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'"), NewYork));
+            var back = b.Restore("todo", copies[1].Utc);
             Assert.True(back.Ok);
-            Assert.Equal("The ANDA to-do list is as it was on Nov 18, 3:00:00 PM EST. The list as it was a moment ago is still among the copies, so this can be undone.", back.Message);
+            Assert.Equal("ANDA to-do list: restored to the copy of Nov 18, 2026, 8:00:00 PM UTC. What was there a moment ago is still among the copies, so this can be undone.", back.Message);
             Assert.Equal(new[] { "Send the meeting minutes" }, todo.Items.Select(i => i.Title)); Assert.Equal(1, changed);      // the running list follows at once
             var after = b.Copies("todo");
             Assert.Equal(new[] { "1 item", "2 items", "1 item" }, after.Select(c => b.Size(b.Lists[0], c)));   // the restored list is the newest copy; nothing was removed
@@ -251,7 +255,7 @@ public class Round30Tests
         list.ArchiveAfterDays = 7; list.Refresh(Today); Assert.Empty(list.Items);
         var row = Assert.Single(TodoArchive.Rows(TodoArchive.Lines(file), "weekly").Rows);
         Assert.Equal((id, "File the weekly report", "214990", "finished more than 7 days ago", null), (row.Id, row.Title, row.Number, row.Why, row.RestoredOn));
-        Assert.Equal((true, "“File the weekly report” is back on the My to-do list, as an open item."), list.PutBack(id, Today));
+        Assert.Equal((true, "“File the weekly report” is back on My to-do list, as an open item."), list.PutBack(id, Today));
         var item = Assert.Single(list.Items);
         Assert.Equal((id, false, null, true, "214990"), (item.Id, item.Done, item.DoneOn, item.High, item.Number));
         Assert.Equal((false, "That item was already put back."), list.PutBack(id, Today));
@@ -305,5 +309,179 @@ public class Round30Tests
             Assert.DoesNotContain(replies.Replies, r => r.Name == "Another"); Assert.Contains(replies.Replies, r => r.Name == "Mine");
         }
         finally { SafeFile.Written -= Note; }
+    }
+
+    // ---------------------------------------------------------------- after the separate review
+
+    [Fact]
+    public void A_restore_is_refused_when_what_is_there_now_cannot_be_copied_first()
+    {
+        // The reviewer's two cases. First: the list grew past what the app reads, outside the app. Nothing may be put over it.
+        var (b, clock, dir, file, _) = Make();
+        File.WriteAllText(file, "{\"Items\":[{\"Id\":\"a\",\"Title\":\"One\"}]}"); Assert.True(b.Keep("todo")); clock.Tick();
+        var copy = b.Copies("todo")[0];
+        string big = "{\"Items\":[],\"pad\":\"" + new string('x', (int)SafeFile.MaxBytes + 10) + "\"}";
+        File.WriteAllText(file, big);
+        Assert.Equal((false, "What is there now could not be read, so it could not be copied first. Nothing was changed."), b.Restore("todo", copy.Utc));
+        Assert.Equal(big.Length, new FileInfo(file).Length);
+
+        // Second: a copy of what is there now cannot be written (the place its file would take is not free). Again nothing is put over it.
+        File.WriteAllText(file, "{\"Items\":[{\"Id\":\"a\",\"Title\":\"One\"},{\"Id\":\"b\",\"Title\":\"Two\"}]}");
+        Directory.CreateDirectory(Path.Combine(dir, "backups", "todo", "todo." + clock.Now.ToString("yyyyMMdd-HHmmss-fff") + ".json"));
+        Assert.False(b.Keep("todo"));
+        Assert.Equal((false, "What is there now could not be copied first, so nothing was changed."), b.Restore("todo", copy.Utc));
+        Assert.Contains("\"Two\"", File.ReadAllText(file));
+        Assert.Empty(Directory.GetFiles(Path.Combine(dir, "backups", "todo"), "*.tmp"));                     // and a half-made copy is not left behind
+        clock.Tick();
+        var ok = b.Restore("todo", copy.Utc);                                                               // once it can be copied, it is, and the restore goes ahead
+        Assert.True(ok.Ok); Assert.DoesNotContain("\"Two\"", File.ReadAllText(file));
+        Assert.Contains(b.Copies("todo"), c => b.Read(c)!.Contains("\"Two\""));                              // what was there is among the copies: it can be undone
+    }
+
+    [Fact]
+    public void A_copy_the_list_could_not_read_is_never_put_in_its_place()
+    {
+        string dir = Temp.NewDir(), file = Path.Combine(dir, "todo.json"); var clock = new Clock();
+        var todo = new TodoService(file);
+        var b = new Backups(Path.Combine(dir, "backups"), () => 30, () => NewYork, () => clock.Now);
+        b.Register(new("todo", "ANDA to-do list", file, "item", "items", TodoService.CountIn, () => todo.Reload()));
+        todo.Add("One", null, null, null, "You", Today); b.Keep("todo"); clock.Tick();
+        todo.Add("Two", null, null, null, "You", Today); b.Keep("todo"); clock.Tick();
+        var old = b.Copies("todo")[1];
+        foreach (string damaged in new[] { "{\"Items\":[1,2,3]}", "{\"Items\":\"none\"}", "[]", "{}", "null", "", "{\"Items\":[{\"Id\":" })
+        {
+            File.WriteAllText(old.Path, damaged);
+            Assert.Equal("cannot be read", b.Size(b.Lists[0], old));                                        // the reviewer's first example was shown as "3 items"
+            Assert.Equal((false, "That copy could not be read. Nothing was changed."), b.Restore("todo", old.Utc));
+            Assert.Equal(2, todo.Items.Count); Assert.True(File.Exists(file));
+        }
+        Assert.Empty(Directory.GetFiles(dir, "todo.unreadable-*"));                                          // the list's file was never set aside by a restore
+        // The readers of the other four lists say the same of a damaged copy, and count a good one.
+        Assert.Null(MyTodoService.CountIn("{\"Items\":[1]}")); Assert.Equal(0, MyTodoService.CountIn("{\"Items\":[]}"));
+        Assert.Null(QuickNotesService.CountIn("[]")); Assert.Null(QuickNotesService.CountIn("{\"Notes\":[1]}")); Assert.Equal(1, QuickNotesService.CountIn("{\"Notes\":{\"216482\":[{\"Id\":\"n1\",\"Text\":\"A note\"}],\"not-a-number\":[{\"Id\":\"n2\",\"Text\":\"x\"}]}}"));
+        Assert.Null(PromptLibraryService.CountIn("{}")); Assert.Equal(1, PromptLibraryService.CountIn("[{\"Name\":\"Mine\",\"Text\":\"Be brief.\"},{\"Name\":\"\",\"Text\":\"x\"}]"));
+        Assert.Null(QuickReplyService.CountIn("{\"a\":1}")); Assert.Equal(1, QuickReplyService.CountIn("[{\"Name\":\"Mine\",\"Text\":\"Thank you.\"}]"));
+
+        // If the running list cannot take the copy after all, what was there is put back and the message says so.
+        var c = new Backups(Path.Combine(dir, "other"), () => 30, () => NewYork, () => clock.Now); string other = Path.Combine(dir, "other.json");
+        c.Register(new("todo", "ANDA to-do list", other, "item", "items", TodoService.CountIn, () => throw new InvalidOperationException("the list could not read it")));
+        File.WriteAllText(other, "{\"Items\":[]}"); c.Keep("todo"); clock.Tick();
+        File.WriteAllText(other, "{\"Items\":[{\"Id\":\"a\",\"Title\":\"One\"}]}"); c.Keep("todo"); clock.Tick();
+        Assert.Equal((false, "That copy could not be used by the list. What was there is back in place."), c.Restore("todo", c.Copies("todo")[1].Utc));
+        Assert.Contains("\"One\"", File.ReadAllText(other));
+    }
+
+    [Fact]
+    public void Two_changes_in_one_millisecond_get_two_copies_and_a_clock_that_was_ahead_does_not_stay_the_newest()
+    {
+        var (b, clock, dir, file, keep) = Make(keep: 10);
+        string folder = Path.Combine(dir, "backups", "todo");
+        string List(int n) => "{\"Items\":[" + string.Join(",", Enumerable.Range(0, n).Select(i => $"{{\"Id\":\"i{i}\",\"Title\":\"Item {i}\"}}")) + "]}";
+        // Within one millisecond: the names are in whole milliseconds, so the second must take the next one.
+        for (int i = 0; i < 5; i++) { clock.Now = clock.Now.AddTicks(1500); File.WriteAllText(file, List(i)); Assert.True(b.Keep("todo")); }
+        Assert.Equal(5, b.Copies("todo").Count); Assert.Empty(Directory.GetFiles(folder, "*.tmp"));
+        Assert.Equal(File.ReadAllText(file), b.Read(b.Copies("todo")[0]));                                   // the newest copy is the list as it is
+
+        // A copy from a clock that was a year ahead, and one from the end of time (the reviewer's file name): neither stays "the newest".
+        File.WriteAllText(Path.Combine(folder, "todo.20271118-200000-000.json"), List(7)); File.WriteAllText(Path.Combine(folder, "todo.99991231-235959-999.json"), List(8));
+        clock.Tick(); File.WriteAllText(file, List(9));
+        Assert.True(b.Keep("todo"));
+        var copies = b.Copies("todo");
+        Assert.All(copies, c => Assert.True(c.Utc <= clock.Now));
+        Assert.Equal(List(9), b.Read(copies[0])); Assert.Equal(List(8), b.Read(copies[1])); Assert.Equal(List(7), b.Read(copies[2]));      // kept, in their order, just before now
+        // Then one change a day for 15 days with ten kept: one copy for each of ten days, which a copy from the future used to prevent.
+        for (int d = 0; d < 15; d++) { clock.Tick(86400); File.WriteAllText(file, List(10 + d)); Assert.True(b.Keep("todo")); }
+        Assert.Equal(10, b.Copies("todo").Select(c => Backups.LocalDay((long)(c.Utc - DateTime.UnixEpoch).TotalMilliseconds, NewYork)).Distinct().Count());
+        Assert.Equal(0, b.WouldRemove(10)); Assert.Equal(0, b.WouldRemove(100)); keep[0] = 30;
+        Assert.Equal(0, b.WouldRemove(30)); Assert.Equal(b.Copies("todo").Count, 10);                       // asking how many would go removes nothing
+    }
+
+    [Fact]
+    public void Putting_an_item_back_says_it_worked_only_when_the_list_was_saved()
+    {
+        string dir = Temp.NewDir(), file = Path.Combine(dir, "todo.json");
+        var todo = new TodoService(file);
+        string id = todo.Add("Send the meeting minutes", null, null, null, "You", Today).Item!.Id;
+        todo.SetDone(id, true, Today); Assert.Equal(1, todo.ClearCompleted(Today));
+        int lines = File.ReadAllLines(todo.ArchiveFile).Length;
+        Directory.CreateDirectory(file + ".tmp");                                                          // the list cannot be written while this is in the way
+        Assert.Equal((false, "The list could not be saved just now. Nothing was changed."), todo.PutBack(id, Today));
+        Assert.Empty(todo.Items); Assert.Equal(lines, File.ReadAllLines(todo.ArchiveFile).Length);          // not on the list, and the archive does not say it was put back
+        Assert.Empty(new TodoService(file).Items);
+        Directory.Delete(file + ".tmp");
+        Assert.True(todo.PutBack(id, Today).Ok);                                                            // so it can still be put back once the list can be saved
+        Assert.Single(new TodoService(file).Items);
+
+        string mineFile = Path.Combine(dir, "mytodo.json"); var mine = new MyTodoService(mineFile);
+        string mid = mine.Add("File the weekly report", TodoCategory.Other, null, false, Repeat.None, -1, null, "You", Today).Item!.Id;
+        mine.SetDone(mid, true, Today); Assert.Equal(1, mine.ClearFinished(Today));
+        Directory.CreateDirectory(mineFile + ".tmp");
+        Assert.Equal((false, "The list could not be saved just now. Nothing was changed."), mine.PutBack(mid, Today));
+        Assert.Empty(mine.Items); Assert.Single(File.ReadAllLines(mine.ArchiveFile));
+        Directory.Delete(mineFile + ".tmp"); Assert.True(mine.PutBack(mid, Today).Ok);
+    }
+
+    [Fact]
+    public void A_finished_item_is_never_out_of_sight_between_the_day_its_list_stops_showing_it_and_the_day_it_is_archived()
+    {
+        string dir = Temp.NewDir();
+        var todo = new TodoService(Path.Combine(dir, "todo.json")) { ArchiveAfterDays = 365 };
+        string id = todo.Add("Finished ten days ago", "216482", null, null, "You", Today.AddDays(-10)).Item!.Id; todo.SetDone(id, true, Today.AddDays(-10));
+        string recent = todo.Add("Finished yesterday", null, null, null, "You", Today).Item!.Id; todo.SetDone(recent, true, Today.AddDays(-1));
+        todo.Prune(new HashSet<string>(), Today);
+        Assert.Equal(2, todo.Items.Count);                                                                   // both are on the list, neither is archived
+        Assert.Equal(new[] { new WaitingItem(id, "Finished ten days ago", "216482", Today.AddDays(-10)) }, todo.Waiting(Today));      // the one the list no longer shows is found here
+        Assert.True(todo.SetDone(id, false, Today)); Assert.Empty(todo.Waiting(Today));                     // "Open it again"
+
+        var mine = new MyTodoService(Path.Combine(dir, "mytodo.json")) { ArchiveAfterDays = 365 };
+        string mid = mine.Add("Filed the report", TodoCategory.Other, null, false, Repeat.None, -1, null, "You", Today.AddDays(-10)).Item!.Id; mine.SetDone(mid, true, Today.AddDays(-10));
+        mine.Refresh(Today);
+        var w = Assert.Single(mine.Waiting(Today)); Assert.Equal((mid, "Filed the report", Today.AddDays(-10)), (w.Id, w.Title, w.Finished));
+        Assert.DoesNotContain(MyTodoBuilder.Build(mine.Items, Today, 0, null).Groups.SelectMany(g => g.Items), i => i.Id == mid);      // the list itself no longer shows it
+    }
+
+    [Fact]
+    public void A_settings_backup_or_a_reset_cannot_lower_the_number_of_copies_kept()
+    {
+        string dir = Temp.NewDir();
+        var prompts = new PromptLibraryService(Path.Combine(dir, "prompts.json")); var replies = new QuickReplyService(Path.Combine(dir, "replies.json"));
+        var colleague = new Settings { BackupCopies = 10, ArchiveAfterDays = 7, Tone = "Warm" };
+        string backup = SettingsBackup.Export(colleague, prompts, replies);
+        Assert.DoesNotContain("\"BackupCopies\": 10", backup); Assert.DoesNotContain("\"ArchiveAfterDays\": 7", backup);      // the two choices belong to this PC, like the lists: a backup does not carry them
+        Assert.Contains("\"Tone\": \"Warm\"", backup);
+        var mine = new Settings { BackupCopies = 100, ArchiveAfterDays = 365 };
+        Assert.True(SettingsBackup.Import(backup.Replace("\"Tone\"", "\"BackupCopies\": 10, \"ArchiveAfterDays\": 7, \"Tone\""), mine, prompts, replies).Ok);
+        Assert.Equal((100, 365, "Warm"), (mine.BackupCopies, mine.ArchiveAfterDays, mine.Tone));             // even a backup that names them does not change them
+        SettingsBackup.Reset(mine, prompts, replies);
+        Assert.Equal((100, 365), (mine.BackupCopies, mine.ArchiveAfterDays));
+    }
+
+    [Fact]
+    public void A_large_or_damaged_archive_is_read_in_bounded_pieces_and_put_backs_are_matched_in_one_pass()
+    {
+        string dir = Temp.NewDir(), file = Path.Combine(dir, "todo.json"), archive = TodoArchive.FileFor(file);
+        using (var w = new StreamWriter(archive))
+        {
+            w.WriteLine("{\"archivedOn\":\"2026-11-01\",\"why\":\"x\",\"item\":{\"Id\":\"first\",\"Title\":\"Before the long line\"}}");
+            w.Write(new string('x', 3_000_000)); w.WriteLine();                                             // one line far too long: passed over, never held whole
+            w.WriteLine("{\"archivedOn\":\"2026-11-02\",\"why\":\"x\",\"item\":{\"Id\":\"second\",\"Title\":\"After the long line\"}}");
+            for (int i = 0; i < 50_000; i++) { w.WriteLine($"{{\"archivedOn\":\"2026-11-03\",\"why\":\"x\",\"item\":{{\"Id\":\"n{i}\",\"Title\":\"Item {i}\"}}}}"); w.WriteLine($"{{\"restoredOn\":\"2026-11-04\",\"id\":\"n{i}\"}}"); }
+            w.Write("{\"archivedOn\":\"2026-11-05\",\"why\":\"x\",\"item\":{\"Id\":\"last\",\"Title\":\"No line break at the end\"}}");
+        }
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+        var (rows, total) = TodoArchive.Read(TodoArchive.Lines(file));
+        Assert.Equal(50_003, total);
+        Assert.Equal(new[] { "first", "second" }, rows.Take(2).Select(r => r.Id)); Assert.Equal("last", rows[^1].Id);
+        Assert.Equal(50_000, rows.Count(r => r.RestoredOn == "2026-11-04"));
+        Assert.Equal(new[] { "last", "second", "first" }, TodoArchive.Search(rows, "line").Select(r => r.Id));      // searching what was read does not read the file again
+        Assert.True(clock.Elapsed < TimeSpan.FromSeconds(20), "reading took " + clock.Elapsed);            // the reviewer measured a minute for this before the change
+        Assert.Null(TodoArchive.Find<TodoItem>(file, "n49999")); Assert.Equal("last", TodoArchive.Find<TodoItem>(file, "last")!.Id);
+        // An item archived twice with no put-back between is one row, by its newest line; a number must be text of exactly six digits.
+        var twice = TodoArchive.Read(new[]
+        {
+            JsonSerializer.SerializeToElement(new { archivedOn = "2026-11-01", why = "a", item = new { id = "t", title = "Earlier line", number = "216482\n" } }),
+            JsonSerializer.SerializeToElement(new { archivedOn = "2026-11-02", why = "b", item = new { id = "t", title = "Newest line", number = 216482 } }),
+        });
+        Assert.Equal(new TodoArchive.Row("t", "Newest line", null, "2026-11-02", "b", null), Assert.Single(twice.Rows));
     }
 }

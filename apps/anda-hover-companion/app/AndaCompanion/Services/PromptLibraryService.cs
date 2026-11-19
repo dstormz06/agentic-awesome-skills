@@ -27,6 +27,13 @@ public sealed class PromptLibraryService
         Read();
     }
 
+    /// <summary>How many prompts this text holds when it is read as the prompts file is, or null when it cannot be read as one.</summary>
+    public static int? CountIn(string text)
+    {
+        try { return JsonSerializer.Deserialize<List<LensPrompt>>(text) is { } list ? list.Count(p => !string.IsNullOrWhiteSpace(p?.Name) && p!.Text is not null) : null; }
+        catch (Exception ex) when (ex is JsonException or NotSupportedException or InvalidOperationException) { return null; }
+    }
+
     /// <summary>Reads the prompts from their file again: after a backup copy was restored over it.</summary>
     public void Reload() => Read();
 

@@ -5,7 +5,7 @@ A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
 
 > **New in round 30: a copy of each list after every change, and one press to put a copy back.** Tray menu: *Backups and archive…*. The app keeps copies of your five lists (the two to-do lists, notes on ANDAs, the prompt library, quick replies) in
 > `backups` in its own folder, after every change. Choose a copy and press *Restore this copy*: nothing is asked, because the list as it was a moment before stays among the copies. You choose how many copies are kept (30 unless you change it); older
-> copies are removed by the app, your lists and the archive never are. The same window searches the archive of finished to-do items, puts an item back on its list, and lets you choose after how many days a finished item is archived.
+> copies are removed by the app, and a smaller number is asked about before any copy goes; your lists and the archive are never removed. A restore is refused if what is there now could not be copied first. The same window searches the archive of finished to-do items, puts an item back on its list, and lets you choose after how many days a finished item is archived.
 > See `../DESIGN.md` §11n and `../SECURITY.md`.
 >
 > **New in round 29: you can always see what is switched on.** Every window has one line at its foot: *Offline · Local only*, or each thing that is switched on by name. Press it (or the tray menu's *Connections and event log…*) for a list of what each
@@ -290,7 +290,7 @@ dotnet test AndaCompanion.Tests                              # everything (Windo
 dotnet test AndaCompanion.Tests --filter "Category!=Windows" # what runs on Linux/macOS
 ```
 
-1,186 cross-platform tests at the time of writing, round 29 (the figure was 762 when this paragraph was first written; recognizer, status line, GDUFA rules, the federal-holiday
+1,204 cross-platform tests at the time of writing, round 30 (the figure was 762 when this paragraph was first written; recognizer, status line, GDUFA rules, the federal-holiday
 calendar against OPM's dates, watch rules, urgency, draft check, portfolio and notes readers, writing prompts,
 hotkey parsing and registration with a fake API, brief fencing and fallback, provider selection, settings,
 contrast, placement, the to-do list, custom actions, the agent connector, headless renders and interaction tests of the real windows) plus Windows-only tests that use real Win32 (clipboard snapshot/restore, hotkey registration and

@@ -46,21 +46,36 @@ const ARCHIVE = [
   { restoredOn: '2026-11-12', id: 'never-archived' },
   { archivedOn: 20261113, why: 7, item: item('t4', '<b>Bold</b> & "quoted" É', '214990') },
   { restoredOn: '2026-11-14', id: 't4' }, { restoredOn: '2026-11-15', id: 't4' },
+  // archived twice with no put-back between (a restored copy of the list brought it back): shown once, by its newest line
+  { archivedOn: '2026-11-16', why: 'cleared by the person', item: item('t5', 'Shown once', null) }, { archivedOn: '2026-11-17', why: 'finished more than 30 days ago', item: item('t5', 'Shown once, newest line', null) },
+  // a number that is not text, a number with a line break after it, an invisible mark in a title
+  { archivedOn: '2026-11-18', why: 'x', item: { id: 't6', title: 'Number as a number', number: 216482 } }, { archivedOn: '2026-11-18', why: 'x', item: { id: 't7', title: 'Number with a break', number: '216482\n' } },
+  { archivedOn: '2026-11-18', why: 'x', item: { id: 't8', title: '\uFEFFMark at the start' } },
 ];
-const QUERIES = [['', 0], ['minutes', 0], ['MINUTES', 0], ['  facility   inspection ', 0], ['216482', 0], ['2149', 0], ['nothing like this', 0], ['<b>', 0], ['é', 0], ['', 2], ['e', 1]];
+// stamps and a "now": copies stamped after now were made while the clock was ahead
+const RESTAMPS = [
+  { stamps: [], now },
+  { stamps: [now - 3000, now - 2000, now - 1000], now },
+  { stamps: [now - 1000, now + 365 * D], now },
+  { stamps: [now - 2, now - 1, now, now + 5, now + 9, now + 365 * D], now },
+  { stamps: [now + 1, now + 2, now + 3], now },
+  { stamps: [now - 1, now - 3, now + 7, now + 7, now + 8], now },
+];
+const QUERIES = [['shown once', 0], ['216482', 3], ['mark at', 0], ['', 0], ['minutes', 0], ['MINUTES', 0], ['  facility   inspection ', 0], ['216482', 0], ['2149', 0], ['nothing like this', 0], ['<b>', 0], ['é', 0], ['', 2], ['e', 1]];
 (async () => {
   const b = await chromium.launch(); const p = await b.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
   await p.goto('file://' + DIR + 'windows-simulation.html?clock=fixed'); await p.waitForTimeout(300);
-  const doc = await p.evaluate(([days, plans, archive, queries]) => ({
+  const doc = await p.evaluate(([days, plans, archive, queries, restamps]) => ({
     about: 'Shared cases for round 30, written by the browser simulation. The Windows app must give the same answers.',
     keepChoices: BACKUP_KEEP_CHOICES, keepDefault: BACKUP_KEEP_DEFAULT, archiveDaysChoices: ARCHIVE_DAYS_CHOICES, archiveDaysDefault: ARCHIVE_DAYS_DEFAULT,
     days: days.map(([ms, tz]) => ({ ms, tz, day: localDay(ms, tz) })),
     plans: plans.map(c => ({ ...c, result: backupPlan(c.stamps, c.keep, c.tz) })),
+    restamps: restamps.map(c => ({ ...c, moved: backupRestamp(c.stamps, c.now) })),
     archive, archiveRows: queries.map(([query, max]) => ({ query, max, result: archiveRows(archive, query, max) })),
     emptyArchive: archiveRows([], '', 0),
-  }), [DAYS, PLANS, ARCHIVE, QUERIES]);
+  }), [DAYS, PLANS, ARCHIVE, QUERIES, RESTAMPS]);
   const text = JSON.stringify(doc) + '\n';
-  const counts = `${doc.days.length} days, ${doc.plans.length} plans, ${doc.archiveRows.length} views of the archive`;
+  const counts = `${doc.days.length} days, ${doc.plans.length} plans, ${doc.restamps.length} clocks that were ahead, ${doc.archiveRows.length} views of the archive`;
   if (process.env.WRITE === '1') { fs.writeFileSync(OUT, text); console.log(`wrote ${counts}, ${text.length} bytes; page errors: ${JSON.stringify(errs)}`); }
   else { const have = fs.existsSync(OUT) ? fs.readFileSync(OUT, 'utf8') : ''; console.log(have === text ? `${counts}, 0 mismatches; page errors: ${JSON.stringify(errs)}` : 'MISMATCH with round30-golden.json'); if (have !== text || errs.length) process.exitCode = 1; }
   await b.close();

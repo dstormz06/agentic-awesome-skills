@@ -47,6 +47,16 @@ public sealed class MyTodoService
     /// <summary>After how many days a finished item is moved to the archive. The person chooses it (see <see cref="Backups.ArchiveDaysChoices"/>).</summary>
     public int ArchiveAfterDays { get; set; } = KeepDoneDays;
 
+    /// <summary>
+    /// Finished items that are still on the list but no longer shown there (a finished item is shown for seven days) and not archived yet.
+    /// The Backups and archive window shows them, so that nothing is ever out of sight.
+    /// </summary>
+    public IReadOnlyList<WaitingItem> Waiting(DateOnly today)
+    {
+        lock (_gate) return _file.Items.Where(i => i.Done && i.Repeat == Repeat.None && ParseIso(i.DoneOn) is { } d && today.DayNumber - d.DayNumber >= MyTodoBuilder.RecentDoneDays)
+            .Select(i => new WaitingItem(i.Id, i.Title, i.Number, ParseIso(i.DoneOn)!.Value)).ToList();
+    }
+
     /// <summary>Reads the list from its file again: after a backup copy was restored over it.</summary>
     public void Reload() { lock (_gate) _file = Load(_path); Changed?.Invoke(); }
 
@@ -65,11 +75,14 @@ public sealed class MyTodoService
             if (Normalize(new MyTodoData { Items = { raw } }).Items.FirstOrDefault() is not { } item || item.Id != raw.Id)
                 return (false, "That archived item cannot be read, so it cannot be put back. Nothing was changed.");
             item.Done = false; item.DoneOn = null;
-            if (!TodoArchive.MarkPutBack(_path, item.Id, today)) return (false, "The archive could not be written just now. Nothing was changed.");
-            _file.Items.Add(item); SaveLocked(); title = item.Title;
+            // The list is written first and the archive is told second: if either cannot be written, the item is where it was and nothing says otherwise.
+            _file.Items.Add(item);
+            if (!SaveLocked()) { _file.Items.Remove(item); return (false, "The list could not be saved just now. Nothing was changed."); }
+            if (!TodoArchive.MarkPutBack(_path, item.Id, today)) { _file.Items.Remove(item); SaveLocked(); return (false, "The archive could not be written just now. Nothing was changed."); }
+            title = item.Title;
         }
         Changed?.Invoke();
-        return (true, $"“{title}” is back on the My to-do list, as an open item.");
+        return (true, $"“{title}” is back on My to-do list, as an open item.");
     }
     private readonly string _path;
     private readonly object _gate = new();
@@ -341,7 +354,8 @@ public sealed class MyTodoService
         return gone.Count;
     }
 
-    private void SaveLocked()
+    /// <summary>Writes the list. False when it could not be written: what the person sees then lasts for this session only.</summary>
+    private bool SaveLocked()
     {
         try
         {
@@ -350,8 +364,20 @@ public sealed class MyTodoService
             File.WriteAllText(temp, JsonSerializer.Serialize(_file, new JsonSerializerOptions { WriteIndented = true }));
             File.Move(temp, _path, overwrite: true);       // a crash mid-write can never leave a half-written list
             SafeFile.Wrote(_path);
+            return true;
         }
-        catch { /* best effort: the list still works for this session */ }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException) { return false; /* the list still works for this session */ }
+    }
+
+    /// <summary>How many items this text holds when it is read as the list file is, or null when it cannot be read as one. A backup copy is checked with this before it is put back.</summary>
+    public static int? CountIn(string text)
+    {
+        try
+        {
+            using (var doc = JsonDocument.Parse(text)) if (doc.RootElement.ValueKind != JsonValueKind.Object || !doc.RootElement.TryGetProperty("Items", out var items) || items.ValueKind != JsonValueKind.Array) return null;
+            return Normalize(JsonSerializer.Deserialize<MyTodoData>(text)).Items.Count;
+        }
+        catch (Exception ex) when (ex is JsonException or NotSupportedException or InvalidOperationException) { return null; }
     }
 }
 

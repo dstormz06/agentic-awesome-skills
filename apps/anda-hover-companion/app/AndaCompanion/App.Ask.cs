@@ -156,15 +156,20 @@ public partial class App
     {
         _todo.ArchiveAfterDays = _myTodo.ArchiveAfterDays = _settings.ArchiveAfterDays;
         if (SelfTestRun is not null) return;
-        var backups = new Backups(Path.Combine(AppPaths.Root, "backups"), () => _settings.BackupCopies);
-        backups.Register(new("todo", "ANDA to-do list", AppPaths.TodoFile, "item", "items", t => Backups.ItemsIn(t, "Items"), () => _todo.Reload()));
-        backups.Register(new("mytodo", "My to-do list", AppPaths.MyTodoFile, "item", "items", t => Backups.ItemsIn(t, "Items"), () => _myTodo.Reload()));
-        backups.Register(new("notes", "Notes on ANDAs", AppPaths.QuickNotesFile, "note", "notes", t => Backups.ItemsIn(t, "Notes"), () => _quickNotes.Reload()));
-        backups.Register(new("prompts", "Prompt library", AppPaths.PromptsFile, "prompt", "prompts", t => Backups.ItemsIn(t), () => { _prompts.Reload(); RefreshTrayLabels(); }));
-        backups.Register(new("replies", "Quick replies", AppPaths.RepliesFile, "reply", "replies", t => Backups.ItemsIn(t), () => _replies.Reload()));
-        _backups = backups;
-        SafeFile.Written += backups.Written;
-        backups.Sweep();
+        try
+        {
+            // Each copy is counted, and checked before it is put back, by the list's own reader: a copy the list could not read is never put in its place.
+            var backups = new Backups(Path.Combine(AppPaths.Root, "backups"), () => _settings.BackupCopies);
+            backups.Register(new("todo", "ANDA to-do list", AppPaths.TodoFile, "item", "items", TodoService.CountIn, () => _todo.Reload()));
+            backups.Register(new("mytodo", "My to-do list", AppPaths.MyTodoFile, "item", "items", MyTodoService.CountIn, () => _myTodo.Reload()));
+            backups.Register(new("notes", "Notes on ANDAs", AppPaths.QuickNotesFile, "note", "notes", QuickNotesService.CountIn, () => _quickNotes.Reload()));
+            backups.Register(new("prompts", "Prompt library", AppPaths.PromptsFile, "prompt", "prompts", PromptLibraryService.CountIn, () => { _prompts.Reload(); RefreshTrayLabels(); }));
+            backups.Register(new("replies", "Quick replies", AppPaths.RepliesFile, "reply", "replies", QuickReplyService.CountIn, () => _replies.Reload()));
+            _backups = backups;
+            SafeFile.Written += backups.Written;
+            backups.Sweep();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException) { /* copies are a help, never a reason not to start */ }
     }
 
     private void OpenBackups()
@@ -175,8 +180,8 @@ public partial class App
             () => _settings.ArchiveAfterDays, n => { _settings.ArchiveAfterDays = n; ApplySettings(); },
             new[]
             {
-                new ArchiveSource("ANDA to-do list", () => TodoArchive.Lines(AppPaths.TodoFile), id => _todo.PutBack(id, Today())),
-                new ArchiveSource("My to-do list", () => TodoArchive.Lines(AppPaths.MyTodoFile), id => _myTodo.PutBack(id, Today())),
+                new ArchiveSource("ANDA to-do list", "the ANDA to-do list", () => TodoArchive.Lines(AppPaths.TodoFile), id => _todo.PutBack(id, Today()), () => _todo.Waiting(Today()), id => _todo.SetDone(id, false, Today())),
+                new ArchiveSource("My to-do list", "My to-do list", () => TodoArchive.Lines(AppPaths.MyTodoFile), id => _myTodo.PutBack(id, Today()), () => _myTodo.Waiting(Today()), id => _myTodo.SetDone(id, false, Today())),
             });
         void Follow() => Dispatcher.UIThread.Post(() => { if (ReferenceEquals(_backupsWindow, win)) win.Paint(); });      // a copy made while the window is open shows at once
         backups.Changed += Follow;

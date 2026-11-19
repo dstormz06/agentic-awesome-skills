@@ -1844,12 +1844,12 @@ PS C:\work&gt; </div>
   <div class="app-win" id="bak" role="dialog" aria-label="Backups and archive">
     <div class="hdr"><h2>Backups and archive</h2><button class="pill" id="bkClose" type="button">Close</button></div>
     <p class="hint" style="margin:-4px 0 8px">Every change to one of your lists keeps a copy of it, on this PC only. Nothing here is sent anywhere. In this simulation the copies last until the page is closed.</p>
-    <div class="bk-set"><label for="bkKeep">Keep</label><select id="bkKeep"></select><span>copies of each list, and one copy for each of that many days.</span></div>
-    <p class="hint">Older backup copies are removed by the app. Your lists and the archive never are.</p>
+    <div class="bk-set"><label for="bkKeep">Keep</label><select id="bkKeep" aria-label="How many backup copies of each list are kept"></select><span>copies of each list, and one copy for each of that many days.</span><button class="pill quiet" id="bkKeepGo" type="button" hidden></button></div>
+    <p class="hint">Older backup copies are removed by the app, and a smaller number here is asked about first. Your lists and the archive are never removed.</p>
     <div id="bkLists"></div>
     <p class="hint" id="bkStatus" role="status"></p>
     <div class="lbl" style="margin-top:14px">ARCHIVE · FINISHED TO-DO ITEMS</div>
-    <div class="bk-set"><label for="bkDays">A finished item leaves its list after</label><select id="bkDays"></select><span>days and is kept here.</span></div>
+    <div class="bk-set"><label for="bkDays">A finished item leaves its list after</label><select id="bkDays" aria-label="After how many days a finished item is archived"></select><span>days and is kept here.</span></div>
     <input type="text" id="bkFind" maxlength="100" placeholder="Search the archive" aria-label="Search the archive" style="margin-top:8px">
     <div id="bkArchive"></div>
     <p class="hint" id="bkCount" role="status"></p>
@@ -4678,6 +4678,8 @@ $("swAi").addEventListener("change", () => setTimeout(paintConnBars, 0));
 
 /* ---------------- round 30: backup copies of the lists, one-press restore, the archive ---------------- */
 const bakStore = {};                    /* list id -> the copies, oldest first: { t, text }. In the Windows app these are files in the app's folder. */
+const bakPicked = {};                   /* list id -> the copy the person chose in the window, kept while the window repaints */
+let bakPending = null;                  /* a smaller number of copies that was chosen and not yet agreed to */
 const bakParse = text => { try{ return JSON.parse(text); }catch(e){ return null; } };
 const BAK_LISTS = [
   { id:"todo", name:"ANDA to-do list", unit:["item", "items"],
@@ -4700,7 +4702,9 @@ const BAK_LISTS = [
 function backupSweep(){
   let made = false; const now = Date.now();
   BAK_LISTS.forEach(l => {
-    const text = l.text(), list = bakStore[l.id] || (bakStore[l.id] = []);
+    const text = l.text(); let list = bakStore[l.id] || (bakStore[l.id] = []);
+    const moved = new Map(backupRestamp(list.map(v => v.t), now));      /* a copy from a clock that was ahead is not left to be "the newest" for ever */
+    if(moved.size){ list.forEach(v => { if(moved.has(v.t)) v.t = moved.get(v.t); }); list.sort((a, b) => a.t - b.t); }
     if(list.length && list[list.length - 1].text === text) return;
     list.push({ t:Math.max(now, list.length ? list[list.length - 1].t + 1 : 0), text }); made = true;
     const plan = backupPlan(list.map(v => v.t), state.backupKeep, simTz());
@@ -4708,73 +4712,122 @@ function backupSweep(){
   });
   if(made && isOpen("bak")) bakPaint();
 }
-const bakWhen = t => new Date(t).toLocaleString("en-US", { timeZone:simTz(), month:"short", day:"numeric", hour:"numeric", minute:"2-digit", second:"2-digit", timeZoneName:"short" });
+const bakWhen = t => new Date(t).toLocaleString("en-US", { timeZone:simTz(), year:"numeric", month:"short", day:"numeric", hour:"numeric", minute:"2-digit", second:"2-digit", timeZoneName:"short" });
 const bakSize = (l, text) => { const x = bakParse(text), n = x ? l.count(x) : 0; return `${n.toLocaleString("en-US")} ${n === 1 ? l.unit[0] : l.unit[1]}`; };
+const bakSay = text => { $("bkStatus").textContent = text; };
+/* After the window was painted again the keyboard is put back where the person was: never left on nothing. */
+const bakFocus = sel => { const e = typeof sel === "string" ? $("bak").querySelector(sel) : sel; if(e && isOpen("bak")){ try{ e.focus({ preventScroll:true }); }catch(x){} } };
 function bakRestore(id, t){
-  const l = BAK_LISTS.find(x => x.id === id), list = bakStore[id] || [], v = list.find(x => x.t === t), say = text => { $("bkStatus").textContent = text; };
-  if(!l || !v){ say("That copy is no longer kept. Nothing was changed."); return false; }
-  if(v.text === l.text()){ say(`That copy is the ${l.name} as it is now. Nothing was changed.`); return false; }
+  const l = BAK_LISTS.find(x => x.id === id), list = bakStore[id] || [], v = list.find(x => x.t === t);
+  if(!l || !v){ bakSay("That copy is no longer kept. Nothing was changed."); return false; }
+  if(v.text === l.text()){ bakSay(`${l.name}: that copy is what is there now. Nothing was changed.`); return false; }
   const x = bakParse(v.text);
-  if(!x){ say("That copy could not be read. Nothing was changed."); return false; }
-  l.put(x); logEvent("file", "a list was restored from a backup"); backupSweep();
-  say(`The ${l.name} is as it was on ${bakWhen(t)}. The list as it was a moment ago is still among the copies, so this can be undone.`);
-  bakPaint(); return true;
+  if(!x){ bakSay("That copy could not be read. Nothing was changed."); return false; }
+  backupSweep();                                  /* what is there now is a copy before anything is put over it */
+  if(!(bakStore[id] || []).some(c => c.text === l.text())){ bakSay("What is there now could not be copied first, so nothing was changed."); return false; }
+  l.put(x); logEvent("file", "a list was restored from a backup"); delete bakPicked[id]; backupSweep();
+  bakPaint(); bakSay(`${l.name}: restored to the copy of ${bakWhen(t)}. What was there a moment ago is still among the copies, so this can be undone.`);
+  bakFocus(`[data-list="${id}"] select`); return true;
 }
 /* An item is put back on its list as an open item. The archive keeps its line and adds one that says it was put back. */
+const bakListName = which => which === "todo" ? "the ANDA to-do list" : "My to-do list";
 function archivePutBack(which, id){
-  const store = which === "todo" ? todoStore : clStore, max = which === "todo" ? TODO_MAX : CL_MAX, say = text => { $("bkStatus").textContent = text; };
-  let line = null; const back = new Set();
-  for(let k = store.archive.length - 1; k >= 0 && !line; k--){ const a = store.archive[k]; if(a.restoredOn && a.id === id) back.add(id); else if(a.item && a.item.id === id && !back.has(id)) line = a; }
-  if(!line){ say("That item was already put back."); return false; }
-  if(store.items.some(i => i.id === id)){ say("That item is on the list already. Nothing was changed."); return false; }
-  if(store.items.length >= max){ say("The list is full. Please finish or delete some items first. Nothing was changed."); return false; }
+  const store = which === "todo" ? todoStore : clStore, max = which === "todo" ? TODO_MAX : CL_MAX;
+  let line = null;
+  for(let k = store.archive.length - 1; k >= 0; k--){ const a = store.archive[k]; if(a.restoredOn && a.id === id) break; if(a.item && a.item.id === id){ line = a; break; } }
+  if(!line){ bakSay("That item was already put back."); return false; }
+  if(store.items.some(i => i.id === id)){ bakSay("That item is on the list already. Nothing was changed."); return false; }
+  if(store.items.length >= max){ bakSay("The list is full. Please finish or delete some items first. Nothing was changed."); return false; }
   const item = JSON.parse(JSON.stringify(line.item)); item.done = false; item.doneOn = null; if(which === "todo") item.snoozedUntil = null;
   store.items.push(item); store.archive.push({ restoredOn:isoDate(demoToday()), id });
   logEvent("file", "a to-do item was put back from the archive");
   if(which === "todo") todoChanged(); else clChanged();
-  backupSweep(); say(`“${item.title}” is back on the ${which === "todo" ? "ANDA to-do list" : "My to-do list"}, as an open item.`); bakPaint(); return true;
+  backupSweep(); bakPaint(); bakSay(`“${item.title}” is back on ${bakListName(which)}, as an open item.`); bakFocus("#bkFind"); return true;
+}
+/* Finished items that are still on their list but no longer shown there: a list shows a finished item for seven days, and it is archived
+   after the days the person chose. In between it is found here, and can be opened again. */
+function bakWaiting(){
+  const today = demoToday(), out = [];
+  todoStore.items.forEach(i => { const d = parseIso(i.doneOn); if(i.done && d != null && Math.round((today - d) / DAY) > SHOW_DONE_DAYS) out.push({ which:"todo", id:i.id, title:i.title, number:i.number || null, finished:d }); });
+  clStore.items.forEach(i => { if(i.done && i.repeat === 0 && i.doneOn != null && (today - i.doneOn) / DAY >= CL_RECENT) out.push({ which:"mytodo", id:i.id, title:i.title, number:i.number || null, finished:i.doneOn }); });
+  return out.sort((a, b) => b.finished - a.finished);
+}
+function bakOpenAgain(which, id){
+  const item = (which === "todo" ? todoStore : clStore).items.find(i => i.id === id);
+  if(!item || !item.done){ bakSay("That item is open already."); return false; }
+  if(which === "todo") todoSetDone(id, false); else clSetDone(id, false, clToday());
+  backupSweep(); bakPaint(); bakSay(`“${item.title}” is open again on ${bakListName(which)}.`); bakFocus("#bkFind"); return true;
 }
 function bakPaint(){
-  $("bkKeep").value = String(state.backupKeep); $("bkDays").value = String(state.archiveDays);
+  const keepBox = $("bkKeep"), go = $("bkKeepGo");
+  keepBox.value = String(bakPending == null ? state.backupKeep : bakPending.keep); $("bkDays").value = String(state.archiveDays);
+  go.hidden = bakPending == null; go.textContent = bakPending == null ? "" : `Keep ${bakPending.keep} and remove ${bakPending.gone.toLocaleString("en-US")} older ${bakPending.gone === 1 ? "copy" : "copies"}`;
   const box = $("bkLists"); box.replaceChildren();
   BAK_LISTS.forEach(l => {
-    const list = (bakStore[l.id] || []).slice().reverse(), pick = h("select", { aria:"Copies of the " + l.name + ", newest first" });
-    list.forEach((v, k) => pick.append(h("option", { value:String(v.t), text:`${bakWhen(v.t)} · ${bakSize(l, v.text)}${k === 0 ? " (as it is now)" : ""}` })));
-    const go = h("button", { class:"pill quiet", type:"button", text:"Restore this copy", aria:"Restore this copy of the " + l.name });
-    const sync = () => { go.disabled = list.length < 2 || pick.selectedIndex <= 0; };
-    pick.addEventListener("change", sync); go.addEventListener("click", () => bakRestore(l.id, +pick.value)); sync();
-    box.append(h("div", { class:"bk-list" }, h("div", { class:"nm", text:l.name }),
-      h("div", { class:"sub", text:list.length === 0 ? "No copy yet." : `${list.length} ${list.length === 1 ? "copy" : "copies"} · newest ${bakWhen(list[0].t)}` }), h("div", { class:"pick" }, pick, go)));
+    const list = (bakStore[l.id] || []).slice().reverse(), now = l.text(), pick = h("select", { aria:"Copies of " + l.name + ", newest first" });
+    list.forEach(v => pick.append(h("option", { value:String(v.t), text:`${bakWhen(v.t)} · ${bakSize(l, v.text)}${v.text === now ? " (as it is now)" : ""}` })));
+    if(bakPicked[l.id] != null && list.some(v => v.t === bakPicked[l.id])) pick.value = String(bakPicked[l.id]); else delete bakPicked[l.id];
+    const restore = h("button", { class:"pill quiet", type:"button", text:"Restore this copy", aria:"Restore this copy of " + l.name });
+    const sync = () => { const v = list[pick.selectedIndex]; restore.disabled = !v || v.text === now; };
+    pick.addEventListener("change", () => { bakPicked[l.id] = +pick.value; sync(); }); restore.addEventListener("click", () => bakRestore(l.id, +pick.value)); sync();
+    const row = h("div", { class:"bk-list" }, h("div", { class:"nm", text:l.name }),
+      h("div", { class:"sub", text:list.length === 0 ? "No copy yet." : `${list.length} ${list.length === 1 ? "copy" : "copies"} · newest ${bakWhen(list[0].t)}` }), h("div", { class:"pick" }, pick, restore));
+    row.dataset.list = l.id; box.append(row);
   });
   const q = $("bkFind").value, a = archiveRows(todoStore.archive, q), b = archiveRows(clStore.archive, q), out = $("bkArchive"); out.replaceChildren();
+  const fold = v => String(v == null ? "" : v).toLowerCase(), needle = fold(q).replace(/\s+/g, " ").trim();
+  const waiting = bakWaiting(), waitingHit = waiting.filter(w => !needle || fold(w.title).includes(needle) || (w.number || "").includes(needle));
+  const where = which => which === "todo" ? "ANDA to-do list" : "My to-do list";
+  waitingHit.slice(0, 200).forEach(w => {
+    const line = h("div", { class:"bk-arch" }, h("div", { class:"t" }, h("span", { text:(w.number ? `ANDA ${w.number}: ` : "") + w.title }),
+      h("span", { class:"d", text:`${where(w.which)} · finished ${shortDate(w.finished)} · still on its list, no longer shown there · archived after ${state.archiveDays} days` })));
+    const open = h("button", { class:"pill quiet", type:"button", text:"Open it again", aria:"Open it again: " + w.title }); open.addEventListener("click", () => bakOpenAgain(w.which, w.id)); line.append(open);
+    out.append(line);
+  });
   const rows = [...a.rows.map(r => ({ ...r, which:"todo" })), ...b.rows.map(r => ({ ...r, which:"mytodo" }))].sort((x, y) => x.archivedOn < y.archivedOn ? 1 : x.archivedOn > y.archivedOn ? -1 : 0).slice(0, 200);
   rows.forEach(r => {
-    const where = r.which === "todo" ? "ANDA to-do list" : "My to-do list", day = parseIso(r.archivedOn);
+    const day = parseIso(r.archivedOn);
     const line = h("div", { class:"bk-arch" }, h("div", { class:"t" }, h("span", { text:(r.number ? `ANDA ${r.number}: ` : "") + r.title }),
-      h("span", { class:"d", text:`${where} · archived ${day == null ? r.archivedOn : shortDate(day)} · ${r.why}${r.restoredOn ? " · put back " + (parseIso(r.restoredOn) == null ? r.restoredOn : shortDate(parseIso(r.restoredOn))) : ""}` })));
+      h("span", { class:"d", text:`${where(r.which)} · archived ${day == null ? r.archivedOn : shortDate(day)} · ${r.why}${r.restoredOn ? " · put back " + (parseIso(r.restoredOn) == null ? r.restoredOn : shortDate(parseIso(r.restoredOn))) : ""}` })));
     if(!r.restoredOn){ const put = h("button", { class:"pill quiet", type:"button", text:"Put back on the list", aria:"Put back on the list: " + r.title }); put.addEventListener("click", () => archivePutBack(r.which, r.id)); line.append(put); }
     out.append(line);
   });
-  const total = a.total + b.total, found = a.found + b.found;
-  $("bkCount").textContent = total === 0 ? `Nothing is archived yet. A finished item is moved here after ${state.archiveDays} days, or when you clear the finished items of a list.`
-    : q.trim() ? `${found.toLocaleString("en-US")} of ${total.toLocaleString("en-US")} archived ${total === 1 ? "item" : "items"} ${found === 1 ? "matches" : "match"}.` + (found > rows.length ? ` The newest ${rows.length} are shown.` : "")
-    : `${total.toLocaleString("en-US")} archived ${total === 1 ? "item" : "items"}.` + (total > rows.length ? ` The newest ${rows.length} are shown; search to find an older one.` : "");
+  const total = a.total + b.total, found = a.found + b.found, n = waiting.length;
+  const still = n === 0 ? "" : ` ${n.toLocaleString("en-US")} finished ${n === 1 ? "item is still on its list" : "items are still on their lists"}, waiting to be archived` + (needle ? `; ${waitingHit.length.toLocaleString("en-US")} ${waitingHit.length === 1 ? "matches" : "match"}.` : ".");
+  $("bkCount").textContent = (total === 0 ? `Nothing is archived yet. A finished item is moved here after ${state.archiveDays} days, or when you clear the finished items of a list.`
+    : needle ? `${found.toLocaleString("en-US")} of ${total.toLocaleString("en-US")} archived ${total === 1 ? "item" : "items"} ${found === 1 ? "matches" : "match"}.` + (found > rows.length ? ` The newest ${rows.length} are shown.` : "")
+    : `${total.toLocaleString("en-US")} archived ${total === 1 ? "item" : "items"}.` + (total > rows.length ? ` The newest ${rows.length} are shown; search to find an older one.` : "")) + still;
 }
-function openBackups(){ closeMenus(); backupSweep(); showApp("bak"); $("bak").style.zIndex = "54"; $("bkStatus").textContent = ""; $("bkFind").value = ""; bakPaint(); }
+function openBackups(){ closeMenus(); backupSweep(); bakPending = null; Object.keys(bakPicked).forEach(k => delete bakPicked[k]); showApp("bak"); $("bak").style.zIndex = "54"; bakSay(""); $("bkFind").value = ""; bakPaint(); }
+/* How many copies would go at once if this number were chosen. */
+const bakWouldRemove = keep => BAK_LISTS.reduce((n, l) => n + backupPlan((bakStore[l.id] || []).map(v => v.t), keep, simTz()).remove.length, 0);
+function bakApplyKeep(keep){
+  state.backupKeep = keep; bakPending = null; let gone = 0;
+  BAK_LISTS.forEach(l => { const list = bakStore[l.id] || [], plan = backupPlan(list.map(v => v.t), keep, simTz()); gone += plan.remove.length; bakStore[l.id] = list.filter(v => plan.keep.includes(v.t)); });
+  bakPaint(); return gone;
+}
 /* Wired once the rest of the page's code has been read: the rules and the lists are defined further down. */
 setTimeout(() => {
   BACKUP_KEEP_CHOICES.forEach(n => $("bkKeep").append(h("option", { value:String(n), text:String(n) })));
   ARCHIVE_DAYS_CHOICES.forEach(n => $("bkDays").append(h("option", { value:String(n), text:String(n) })));
   $("bkClose").addEventListener("click", () => closeApp("bak"));
   $("bkFind").addEventListener("input", bakPaint);
+  /* A smaller number would remove copies, and removing cannot be undone: so it is asked about first. An arrow key on the box removes nothing. */
   $("bkKeep").addEventListener("change", e => {
-    state.backupKeep = BACKUP_KEEP_CHOICES.includes(+e.target.value) ? +e.target.value : BACKUP_KEEP_DEFAULT; let gone = 0;
-    BAK_LISTS.forEach(l => { const list = bakStore[l.id] || [], plan = backupPlan(list.map(v => v.t), state.backupKeep, simTz()); gone += plan.remove.length; bakStore[l.id] = list.filter(v => plan.keep.includes(v.t)); });
-    bakPaint(); $("bkStatus").textContent = gone ? `${gone.toLocaleString("en-US")} older backup ${gone === 1 ? "copy was" : "copies were"} removed. Your lists and the archive were not changed.` : `From now on ${state.backupKeep} copies of each list are kept. Nothing was removed.`;
+    const keep = BACKUP_KEEP_CHOICES.includes(+e.target.value) ? +e.target.value : BACKUP_KEEP_DEFAULT, gone = bakWouldRemove(keep);
+    if(gone === 0){ bakApplyKeep(keep); bakSay(`From now on ${keep} copies of each list are kept. Nothing was removed.`); bakFocus("#bkKeep"); return; }
+    bakPending = { keep, gone }; bakPaint();
+    bakSay(`Keeping ${keep} would remove ${gone.toLocaleString("en-US")} older backup ${gone === 1 ? "copy" : "copies"} now, and that cannot be undone. Nothing has been removed. Press “${$("bkKeepGo").textContent}” to go ahead, or choose a larger number.`);
+    bakFocus("#bkKeep");
+  });
+  $("bkKeepGo").addEventListener("click", () => {
+    if(bakPending == null) return;
+    const gone = bakApplyKeep(bakPending.keep);
+    bakSay(`${gone.toLocaleString("en-US")} older backup ${gone === 1 ? "copy was" : "copies were"} removed. Your lists and the archive were not changed.`); bakFocus("#bkKeep");
   });
   $("bkDays").addEventListener("change", e => {
     state.archiveDays = ARCHIVE_DAYS_CHOICES.includes(+e.target.value) ? +e.target.value : ARCHIVE_DAYS_DEFAULT;
-    bakPaint(); $("bkStatus").textContent = `From now on a finished item is archived after ${state.archiveDays} days. Nothing is deleted.`;
+    bakPaint(); bakSay(`From now on a finished item is archived after ${state.archiveDays} days. Nothing is deleted.`); bakFocus("#bkDays");
   });
   /* A copy is kept after every change, however the change was made: the lists tell when they change, and any press or key is looked at as well. */
   todoListeners.add(() => setTimeout(backupSweep, 0)); clListeners.add(() => setTimeout(backupSweep, 0));
@@ -5208,6 +5261,7 @@ function closeApp(id){
   /* The keyboard goes back to where it was, when that is still on the screen: never to the page body. */
   if(held && back && back.isConnected && back.getClientRects().length){ try{ back.focus({ preventScroll:true }); }catch(e){} }
   if(id === "cmp") weekDelDisarm();               /* a question that was asked does not wait behind a closed window */
+  if(id === "bak") bakPending = null;
   if(id === "todo") tdStop();                      /* nothing runs once the list is closed */
   if(id === "mytodo") clClose();                /* the same for the to-do list */
   if(id === "notes") clearTimeout(ntDebounce);
@@ -5612,20 +5666,31 @@ function backupPlan(stamps, keep, tz){
   for(const s of sorted){ const d = localDay(s, tz); if(!days.includes(d)){ days.push(d); if(days.length <= n) stay.add(s); } }
   return { keep:sorted.filter(s => stay.has(s)), remove:sorted.filter(s => !stay.has(s)) };
 }
+/* A copy stamped later than now was made while the clock was ahead. It was made before now all the same, so it is given the latest moments
+   before now, in its order; the newest copy is then the newest again and the days are counted rightly. Returns [old, new] for each that moves. */
+function backupRestamp(stamps, now){
+  const sorted = [...new Set((stamps || []).filter(Number.isFinite))].sort((a, b) => b - a), taken = new Set(sorted.filter(t => t <= now)), moved = [];
+  let next = now - 1;
+  for(const t of sorted){ if(t <= now) break; while(taken.has(next)) next--; moved.push([t, next]); taken.add(next); next--; }
+  return moved;
+}
 /* The archive as the window shows it. lines: the archive as it is kept, oldest first: { archivedOn, why, item } when an item was archived,
-   { restoredOn, id } when one was put back. Nothing is ever taken out of the archive, so an item put back is shown as put back. */
+   { restoredOn, id } when one was put back. Nothing is ever taken out of the archive, so an item put back is shown as put back. An item
+   archived again before it was put back (a restored copy of the list can bring it back) is shown once, by its newest line. */
 function archiveRows(lines, query, max){
-  const rows = [], text = (v, n) => String(v == null ? "" : v).replace(/[\u0000-\u001F\u007F-\u009F]/g, " ").replace(/\s+/g, " ").trim().slice(0, n);
+  const rows = [], open = new Map(), text = (v, n) => String(v == null ? "" : v).replace(/[\u0000-\u001F\u007F-\u009F\uFEFF]/g, " ").replace(/\s+/g, " ").trim().slice(0, n);
   (lines || []).forEach(l => {
     if(!l || typeof l !== "object") return;
-    if(l.item && typeof l.item === "object" && typeof l.item.id === "string" && l.item.id)
-      rows.push({ id:l.item.id, title:text(l.item.title, 200), number:/^[0-9]{6}$/.test(l.item.number || "") ? l.item.number : null, archivedOn:text(l.archivedOn, 10), why:text(l.why, 80), restoredOn:null });
-    else if(typeof l.restoredOn === "string" && typeof l.id === "string")
-      for(let k = rows.length - 1; k >= 0; k--) if(rows[k].id === l.id && rows[k].restoredOn == null){ rows[k].restoredOn = text(l.restoredOn, 10); break; }
+    if(l.item && typeof l.item === "object" && typeof l.item.id === "string" && l.item.id){
+      const id = l.item.id; if(open.has(id)) rows[open.get(id)] = null;
+      open.set(id, rows.length);
+      rows.push({ id, title:text(l.item.title, 200), number:typeof l.item.number === "string" && /^[0-9]{6}$/.test(l.item.number) ? l.item.number : null, archivedOn:text(l.archivedOn, 10), why:text(l.why, 80), restoredOn:null });
+    }
+    else if(typeof l.restoredOn === "string" && typeof l.id === "string" && open.has(l.id)){ rows[open.get(l.id)].restoredOn = text(l.restoredOn, 10); open.delete(l.id); }
   });
-  const q = text(query, 100).toLowerCase();
-  const hit = rows.filter(r => !q || r.title.toLowerCase().includes(q) || (r.number || "").includes(q)).reverse();
-  return { rows:hit.slice(0, max > 0 ? max : 200), total:rows.length, found:hit.length };
+  const kept = rows.filter(Boolean), q = text(query, 100).toLowerCase();
+  const hit = kept.filter(r => !q || r.title.toLowerCase().includes(q) || (r.number || "").includes(q)).reverse();
+  return { rows:hit.slice(0, max > 0 ? max : 200), total:kept.length, found:hit.length };
 }
 /* What changed, newest first. The Windows app shows the same list. */
 const APP_VERSION = "Prototype, round 30";
@@ -7400,7 +7465,7 @@ function snapSettings(){
     actions:JSON.parse(JSON.stringify(s.actions)), agents:JSON.parse(JSON.stringify(s.agents)), todoShowFromData:s.todoAuto, todoRefreshSeconds:s.todoRefresh,
     myTodoMode:s.clMode, adaptive:s.adaptive, allTools:s.allTools,
     textSize:s.ts, density:s.density, lookupStyle:s.lookupStyle, rememberRecents:s.recentsOn, pins:[...s.pins],
-    cardFields:[...s.cardFields], watchBack:s.watchOn, divisionNews:s.newsOn, noticesPerDay:s.watchCap, andaPage:s.andaUrl, trayRecount:s.trayRecount, backupCopies:s.backupKeep, archiveAfterDays:s.archiveDays };   /* the counts of opened sections belong to this PC: they are not in a backup */
+    cardFields:[...s.cardFields], watchBack:s.watchOn, divisionNews:s.newsOn, noticesPerDay:s.watchCap, andaPage:s.andaUrl, trayRecount:s.trayRecount };   /* the counts of opened sections belong to this PC: they are not in a backup */
 }
 const DEFAULT_SETTINGS = { ...snapSettings(), allTools:false }, DEFAULT_PROMPTS = prompts.map(p => [...p]), DEFAULT_REPLIES = state.replies.map(r => ({ ...r }));
 const oneOf = (v, list, fallback) => list.includes(v) ? v : fallback;
@@ -7410,7 +7475,8 @@ function applySettings(x){
   const look = oneOf(x.appearance, LOOKS.map(l => l[0]), d.appearance); if(look !== s.look) applyLook(look);
   s.autoHide = oneOf(x.autoHide, AUTO_CHOICES, d.autoHide); s.mode = oneOf(x.consent, CONSENTS.map(c => c[0]), d.consent);
   s.escalate = typeof x.escalate === "boolean" ? x.escalate : d.escalate; s.lead = oneOf(x.holidayLead, [0, 2, 3, 5], d.holidayLead);
-  s.backupKeep = oneOf(x.backupCopies, BACKUP_KEEP_CHOICES, d.backupCopies); s.archiveDays = oneOf(x.archiveAfterDays, ARCHIVE_DAYS_CHOICES, d.archiveAfterDays);
+  /* How many copies of the lists are kept, and after how many days a finished item is archived, belong to this PC like the lists themselves:
+     a settings backup does not carry them, and a restore or a reset leaves them as they are. Otherwise a backup could remove copies unasked. */
   s.capture = typeof x.capture === "boolean" ? x.capture : d.capture; s.op = x.opacity === undefined ? d.opacity : (n => isFinite(n) ? Math.min(100, Math.max(40, Math.round(n))) : 100)(+x.opacity);
   const k = x.keys || {}, three = { peek:str(k.peek, 40, ""), look:str(k.look, 40, ""), draft:str(k.draft, 40, "") };
   const okThree = ["peek", "look", "draft"].every(kind => three[kind] && !validateCombo(three[kind])) && !findDup({ ...three, list:"" });

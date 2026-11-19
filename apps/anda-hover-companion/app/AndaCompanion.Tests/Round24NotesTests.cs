@@ -98,8 +98,9 @@ public class Round24NotesTests : IClassFixture<HeadlessFixture>
         var b = new QuickNotesService(path);
         Assert.Empty(b.For("216482"));
         Assert.Contains("could not be read", b.Problem);
-        string aside = Path.Combine(Path.GetDirectoryName(path)!, "quick-notes.unreadable.json");
+        string aside = Assert.Single(Directory.GetFiles(Path.GetDirectoryName(path)!, "quick-notes.unreadable-*.json"));      // under a name that says when (round 30: never over a file set aside earlier)
         Assert.Equal("{ this is not json", File.ReadAllText(aside));      // the person's file is still there, untouched
+        Assert.Contains(Path.GetFileName(aside), b.Problem);
         Assert.True(b.Add("216482", "a new file starts").Ok);
         Assert.Null(b.Problem);
         Assert.Equal("a new file starts", new QuickNotesService(path).For("216482").Single().Text);

@@ -51,6 +51,25 @@ public sealed class Backups
     }
     public static (IReadOnlyList<long> Keep, IReadOnlyList<long> Remove) Plan(IEnumerable<long> stampsUtcMs, int keep, string? zoneId) => Plan(stampsUtcMs, keep, Zone(zoneId));
 
+    /// <summary>
+    /// A copy stamped later than now was made while the clock was ahead. It was made before now all the same, so it is given the latest
+    /// moments before now, in its order; the newest copy is then the newest again and the days are counted rightly. Returns (old, new) for
+    /// each stamp that moves, latest first. The same rule as the simulation's backupRestamp.
+    /// </summary>
+    public static IReadOnlyList<(long Old, long New)> Restamp(IEnumerable<long> stampsUtcMs, long nowUtcMs)
+    {
+        var sorted = stampsUtcMs.Distinct().OrderByDescending(t => t).ToList();
+        var taken = new HashSet<long>(sorted.Where(t => t <= nowUtcMs)); var moved = new List<(long, long)>();
+        long next = nowUtcMs - 1;
+        foreach (long t in sorted)
+        {
+            if (t <= nowUtcMs) break;
+            while (taken.Contains(next)) next--;
+            moved.Add((t, next)); taken.Add(next); next--;
+        }
+        return moved;
+    }
+
     /// <summary>How many items a copy holds: the length of the list under <paramref name="property"/>, or of the file when it is a list itself. Null when it cannot be read.</summary>
     public static int? ItemsIn(string text, string? property = null)
     {
@@ -130,6 +149,9 @@ public sealed class Backups
     /// <summary>Looks at every list once: at start, so that a list changed while the app was closed, or never copied, has a copy.</summary>
     public void Sweep() { foreach (var l in Lists) Keep(l.Id); }
 
+    private string NameFor(string id, DateTime utc) => Path.Combine(FolderFor(id), id + "." + utc.ToString(StampFormat, CultureInfo.InvariantCulture) + ".json");
+    private static DateTime FromMs(long ms) => DateTime.UnixEpoch.AddMilliseconds(ms);
+
     /// <summary>
     /// Keeps a copy of the list as it is now, unless the newest copy already holds the same text; then removes the copies beyond what the
     /// person chose to keep. True when a copy was made. Never throws: a copy that cannot be made must not stop the tool.
@@ -140,22 +162,32 @@ public sealed class Backups
         lock (_gate)
         {
             if (Find(id) is not { } list) return false;
+            string? temp = null;
             try
             {
                 if (!File.Exists(list.File) || new FileInfo(list.File).Length > SafeFile.MaxBytes) return false;
                 string text = File.ReadAllText(list.File);
+                // Whole milliseconds, as the names are: two changes within one millisecond must still get two names.
+                long nowMs = Ms(_utcNow());
                 var copies = Copies(id);
+                // A copy from a clock that was ahead is given a moment before now, so that it is not "the newest" for ever.
+                foreach (var (old, moved) in Restamp(copies.Select(c => Ms(c.Utc)), nowMs))
+                {
+                    var c = copies.First(x => Ms(x.Utc) == old);
+                    try { File.Move(c.Path, NameFor(id, FromMs(moved)), overwrite: false); } catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { /* left as it is; tried again at the next change */ }
+                }
+                copies = Copies(id);
                 if (copies.Count > 0 && Same(copies[0].Path, text)) return false;
                 Directory.CreateDirectory(FolderFor(id));
-                var now = _utcNow();
-                if (copies.Count > 0 && now <= copies[0].Utc) now = copies[0].Utc.AddMilliseconds(1);      // never the same name twice, even when the clock stands still or goes back
-                string target = Path.Combine(FolderFor(id), id + "." + now.ToString(StampFormat, CultureInfo.InvariantCulture) + ".json");
-                File.WriteAllText(target + ".tmp", text, new UTF8Encoding(false));
-                File.Move(target + ".tmp", target, overwrite: false);
-                made = true;
+                if (copies.Count > 0 && nowMs <= Ms(copies[0].Utc)) nowMs = Ms(copies[0].Utc) + 1;      // never the same name twice
+                string target = NameFor(id, FromMs(nowMs)); temp = target + ".tmp";
+                File.WriteAllText(temp, text, new UTF8Encoding(false));
+                File.Move(temp, target, overwrite: false);
+                temp = null; made = true;
                 PruneLocked(id);
             }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException) { /* the list itself was written; only the copy is missing */ }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException or ArgumentException) { /* the list itself was written; only the copy is missing */ }
+            finally { if (temp is not null) { try { File.Delete(temp); } catch (Exception) { /* nothing more can be done */ } } }      // a half-made copy is never left behind
         }
         if (made) Raise();
         return made;
@@ -188,10 +220,23 @@ public sealed class Backups
         return gone;
     }
 
+    /// <summary>How many copies would be removed at once if this number were chosen. Nothing is removed by asking.</summary>
+    public int WouldRemove(int keep)
+    {
+        lock (_gate) return _lists.Sum(l => Plan(Copies(l.Id).Select(c => Ms(c.Utc)), keep, _zone()).Remove.Count);
+    }
+
     /// <summary>The text of a copy, or null when it cannot be read.</summary>
     public string? Read(BackupCopy copy)
     {
         try { return new FileInfo(copy.Path).Length <= SafeFile.MaxBytes ? File.ReadAllText(copy.Path) : null; }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return null; }
+    }
+
+    /// <summary>The text of the list as it is now, or null when there is no file or it cannot be read.</summary>
+    public string? Now(BackupList list)
+    {
+        try { return File.Exists(list.File) && new FileInfo(list.File).Length <= SafeFile.MaxBytes ? File.ReadAllText(list.File) : null; }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return null; }
     }
 
@@ -200,8 +245,9 @@ public sealed class Backups
         Read(copy) is { } text && list.Count(text) is { } n ? $"{n.ToString("#,0", CultureInfo.InvariantCulture)} {(n == 1 ? list.One : list.Many)}" : "cannot be read";
 
     /// <summary>
-    /// Puts a copy back in place of the list. The list as it was a moment before is a copy already, so this can be undone the same way.
-    /// The message is what the window says.
+    /// Puts a copy back in place of the list. Before anything is written, what is there now must be among the copies: if it cannot be
+    /// copied (the copies folder cannot be written, the list is too large to be one of ours), nothing is changed and the message says so.
+    /// A copy is read by the list's own reader before it is used, so a damaged copy is refused, not put in place of the list.
     /// </summary>
     public (bool Ok, string Message) Restore(string id, DateTime utc, Func<DateTime, string>? when = null)
     {
@@ -213,17 +259,29 @@ public sealed class Backups
             if (list is null || copy is null) return (false, "That copy is no longer kept. Nothing was changed.");
             text = Read(copy);
             if (text is null || list.Count(text) is null) return (false, "That copy could not be read. Nothing was changed.");
-            try { now = File.Exists(list.File) && new FileInfo(list.File).Length <= SafeFile.MaxBytes ? File.ReadAllText(list.File) : null; }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { now = null; }
-            if (now == text) return (false, $"That copy is the {list.Name} as it is now. Nothing was changed.");
+            bool exists = File.Exists(list.File);
+            now = Now(list);
+            if (exists && now is null) return (false, "What is there now could not be read, so it could not be copied first. Nothing was changed.");
+            if (now == text) return (false, $"{list.Name}: that copy is what is there now. Nothing was changed.");
+            if (now is not null)
+            {
+                Keep(id);                                           // what is there now is a copy before anything is put over it
+                if (!Copies(id).Any(c => Same(c.Path, now))) return (false, "What is there now could not be copied first, so nothing was changed.");
+            }
+            if (!SafeFile.Write(list.File, text)) return (false, "The list could not be written just now. Nothing was changed.");
         }
-        Keep(id);                                                   // the list as it is now is kept first, whatever happens next
-        if (!SafeFile.Write(list.File, text)) return (false, "The list could not be written just now. Nothing was changed.");
-        Keep(id);                                                   // and the list as it is after the restore is the newest copy
-        try { list.Reload(); } catch (Exception) { /* the file is in place; the list shows it at the next start */ }
+        // The running list reads the file again. If that fails, or the list's reader sets the file aside after all, what was there is put back.
+        bool read;
+        try { list.Reload(); read = Now(list) == text; } catch (Exception) { read = false; }
+        if (!read)
+        {
+            if (now is not null) { SafeFile.Write(list.File, now); try { list.Reload(); } catch (Exception) { /* the file is back; the list shows it at the next start */ } }
+            return (false, "That copy could not be used by the list. What was there is back in place.");
+        }
+        Keep(id);                                                   // the list as it is after the restore is the newest copy
         EventLog.Record("file", "a list was restored from a backup");
-        string shown = when is null ? utc.ToString("MMM d, h:mm:ss tt 'UTC'", CultureInfo.InvariantCulture) : when(utc);
-        return (true, $"The {list.Name} is as it was on {shown}. The list as it was a moment ago is still among the copies, so this can be undone.");
+        string shown = when is null ? utc.ToString("MMM d, yyyy, h:mm:ss tt 'UTC'", CultureInfo.InvariantCulture) : when(utc);
+        return (true, $"{list.Name}: restored to the copy of {shown}. What was there a moment ago is still among the copies, so this can be undone.");
     }
 
     private void Raise() { try { Changed?.Invoke(); } catch (Exception) { /* a window that cannot follow must not stop the tool */ } }
