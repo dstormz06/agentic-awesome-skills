@@ -117,7 +117,7 @@ public sealed class Settings
     public ProviderChoice Provider { get; set; } = ProviderChoice.Offline;      // off until the person chooses a connection here; a key found on the PC is not a choice
 
     /// <summary>The version of this file's layout. A file with an older number is moved forward when it is read; see <see cref="SettingsService.Migrate"/>.</summary>
-    public const int CurrentSchema = 4;
+    public const int CurrentSchema = 5;
 
     /// <summary>How many backup copies of each list are kept (and one for each of that many days). See <see cref="Backups"/>.</summary>
     public int BackupCopies { get; set; } = Backups.KeepDefault;
@@ -133,6 +133,22 @@ public sealed class Settings
 
     /// <summary>After how many days the Drugs@FDA reference file is marked STALE. A public file that changes about monthly, so a number of its own.</summary>
     public int RefStaleAfterDays { get; set; } = Clock.RefStaleDefault;
+
+    // ----- round 33: display, the lookup window, recent and kept ANDAs, the card's details -----
+    /// <summary>"standard", "large" or "xl". Applies to the card and to this app's windows.</summary>
+    public string TextSize { get; set; } = "standard";
+    /// <summary>"comfortable" or "compact". Applies to the card.</summary>
+    public string Density { get; set; } = "comfortable";
+    /// <summary>"box" (a number and Go) or "bar" (One Bar: also offers Review and Ask).</summary>
+    public string LookupStyle { get; set; } = "box";
+    /// <summary>Remember the last eight ANDAs looked up, on this PC.</summary>
+    public bool RememberRecents { get; set; } = true;
+    /// <summary>The last ANDAs looked up, newest first. Six-digit numbers only; this PC only, never part of a backup.</summary>
+    public List<string> Recents { get; set; } = new();
+    /// <summary>The ANDAs kept with "Keep in my list" on a card, five at most. Saved in a backup.</summary>
+    public List<string> Pins { get; set; } = new();
+    /// <summary>The columns of the person's own sheet that an expanded card shows under "Details".</summary>
+    public List<string> CardFields { get; set; } = CardDetails.DefaultFields.ToList();
     public int SchemaVersion { get; set; } = CurrentSchema;
 
     /// <summary>The person's own API, described here instead of in code. Used only when Provider is MyApi.</summary>
@@ -316,6 +332,11 @@ public static class SettingsService
         if (fromVersion < 2) { s.BackupCopies = Backups.KeepDefault; s.ArchiveAfterDays = Backups.ArchiveDaysDefault; }
         if (fromVersion < 3) { s.TimeZone = ""; s.StaleAfterDays = Clock.StaleDefault; }      // this computer's zone, and stale after 7 days, as before
         if (fromVersion < 4) s.RefStaleAfterDays = Clock.RefStaleDefault;                      // the reference file: stale after 45 days
+        if (fromVersion < 5)                                                                   // round 33: everything as it looked and worked before
+        {
+            s.TextSize = "standard"; s.Density = "comfortable"; s.LookupStyle = "box"; s.RememberRecents = true;
+            s.Recents = new(); s.Pins = new(); s.CardFields = CardDetails.DefaultFields.ToList();
+        }
         return note;
     }
 
@@ -332,6 +353,11 @@ public static class SettingsService
         if (!Clock.ZoneChoices.Any(c => c.Id == loaded.TimeZone)) loaded.TimeZone = "";
         if (!Clock.StaleChoices.Contains(loaded.StaleAfterDays)) loaded.StaleAfterDays = Clock.StaleDefault;
         if (!Clock.RefStaleChoices.Contains(loaded.RefStaleAfterDays)) loaded.RefStaleAfterDays = Clock.RefStaleDefault;
+        loaded.TextSize = Display.TextSize(loaded.TextSize); loaded.Density = Display.Density(loaded.Density);
+        loaded.LookupStyle = OneBar.Styles.Contains(loaded.LookupStyle) ? loaded.LookupStyle : "box";
+        loaded.Recents = loaded.RememberRecents ? Services.Recents.Clean(loaded.Recents, Services.Recents.RecentMax) : new();
+        loaded.Pins = Services.Recents.Clean(loaded.Pins, Services.Recents.PinMax);
+        loaded.CardFields = loaded.CardFields is null ? CardDetails.DefaultFields.ToList() : CardDetails.Normalize(loaded.CardFields);
         if (!NativeHostRegistration.IsValidExtensionId(loaded.ExtensionId)) loaded.ExtensionId = NativeHostRegistration.DefaultExtensionId;
         loaded.PortfolioColumns ??= new();
         loaded.StandingInstructions ??= "";

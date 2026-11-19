@@ -51,6 +51,14 @@ public sealed class MockAndaRepository : IAndaRepository
             GoalDateValue = new DateOnly(2026, 10, 3), ForecastDateValue = new DateOnly(2026, 10, 17),
             AsOfDate = new DateOnly(2026, 7, 16), Demo = true, SourceLabel = "Fictional demo data",
             AsOfUtc = new DateTime(2026, 7, 16, 11, 12, 0, DateTimeKind.Utc), DataSource = "Fictional demo data · extract #412",      // 7:12 AM Eastern that morning
+            Details = new Dictionary<string, string>
+            {
+                ["applicant"] = "Meridian Pharmaceuticals, Inc. (fictional)", ["short"] = "Meridian", ["established"] = "metformin hydrochloride extended-release tablets, 500 mg",
+                ["project"] = "Cycle 2 review of a minor amendment; one biopharmaceutics information request is open.",
+                ["agentCo"] = "Northgate Regulatory Agents LLC (fictional)", ["agentEmail"] = "us.agent@northgate-agents.example", ["applicantEmail"] = "regulatory@meridian-pharma.example",
+                ["myNotes"] = "Ask for the dissolution table again if the response leaves it out.",
+                ["teamLead"] = "Team lead A (demo)", ["division"] = "Division of Project Management (demo)", ["fei"] = "3009990001 (fictional)",
+            },
             ActiveIngredient = "METFORMIN HYDROCHLORIDE", DosageForm = "TABLET, EXTENDED RELEASE", Strength = "500 MG",
         };
 
@@ -79,6 +87,14 @@ public sealed class MockAndaRepository : IAndaRepository
             GoalDateValue = new DateOnly(2026, 8, 15), ForecastDateValue = new DateOnly(2026, 8, 6),
             AsOfDate = new DateOnly(2026, 7, 16), Demo = true, SourceLabel = "Fictional demo data",
             AsOfUtc = new DateTime(2026, 7, 16, 11, 12, 0, DateTimeKind.Utc), DataSource = "Fictional demo data · extract #412",      // 7:12 AM Eastern that morning
+            Details = new Dictionary<string, string>
+            {
+                ["applicant"] = "Meridian Pharmaceuticals, Inc. (fictional)", ["short"] = "Meridian", ["established"] = "metformin hydrochloride extended-release tablets, 750 mg",
+                ["project"] = "Cycle 3; facility question closed, labeling in final format.",
+                ["agentCo"] = "Northgate Regulatory Agents LLC (fictional)", ["agentEmail"] = "us.agent@northgate-agents.example",
+                ["doc356h"] = @"S:\ANDA214990\356h_2026-06-12.pdf (fictional path)", ["doc32p1"] = @"S:\ANDA214990\m3\32p1_description.pdf (fictional path)",
+                ["teamLead"] = "Team lead A (demo)", ["division"] = "Division of Project Management (demo)", ["fei"] = "3009990001 (fictional)",
+            },
             ActiveIngredient = "METFORMIN HYDROCHLORIDE", DosageForm = "TABLET, EXTENDED RELEASE", Strength = "750 MG",
         };
 

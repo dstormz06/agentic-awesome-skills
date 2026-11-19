@@ -16,7 +16,7 @@ public sealed class PortfolioRepository : IAndaRepository
     private static readonly CultureInfo Inv = CultureInfo.InvariantCulture;
 
     private sealed record Row(string Number, string Drug, string Applicant, DateOnly? Goal, DateOnly? Forecast, string Status, string Notes, string Cycle,
-        DateOnly? Submitted, string Ingredient, string Form, string Strength, DateOnly? Psg);
+        DateOnly? Submitted, string Ingredient, string Form, string Strength, DateOnly? Psg, IReadOnlyDictionary<string, string>? More = null);
 
     private readonly string _path;
     private readonly IReadOnlyDictionary<string, string>? _overrides;
@@ -29,6 +29,16 @@ public sealed class PortfolioRepository : IAndaRepository
     private long _loadedLength;
     /// <summary>The day the file was saved, in the zone the tool writes in now: the same day the card's line names, also after the zone was changed.</summary>
     private DateOnly AsOfDay => DateOnly.FromDateTime(Clock.Wall(_asOfUtc));
+
+    /// <summary>What "Details" on an expanded card can show for a row: the applicant and the person's notes, and the extra columns the sheet holds.</summary>
+    private static Dictionary<string, string> DetailsOf(Row row)
+    {
+        var d = row.More is null ? new Dictionary<string, string>() : new Dictionary<string, string>(row.More);
+        if (row.Applicant.Length > 0) d["applicant"] = row.Applicant;
+        if (d.TryGetValue("myNotes", out var own)) { if (own.Length == 0) d.Remove("myNotes"); }      // the sheet's notes column is its project description: "My notes" is its own column or nothing
+        else if (row.Notes.Length > 0) d["myNotes"] = row.Notes;
+        return d;
+    }
     private DateTime _asOfUtc;
 
     /// <summary>What was read. Made when asked for, so that the time the file was saved is written in the zone in use now.</summary>
@@ -67,6 +77,7 @@ public sealed class PortfolioRepository : IAndaRepository
             int cNum = Col("number"), cDrug = Col("drug"), cApp = Col("applicant"), cGoal = Col("goal"), cFc = Col("forecast"), cStatus = Col("status"),
                 cNotes = Col("notes"), cCycle = Col("cycle"), cSub = Col("submitted"), cIng = Col("ingredient"), cForm = Col("form"), cStr = Col("strength"), cPsg = Col("psg");
 
+            var detailCols = PortfolioColumns.DetectDetails(table.Headers, map).ToDictionary(kv => kv.Key, kv => table.Headers.ToList().IndexOf(kv.Value));      // the extra columns for "Details"; -1: said not to be in the sheet
             var rows = new Dictionary<string, Row>();
             int skipped = 0;
             foreach (var r in table.Rows)
@@ -74,7 +85,8 @@ public sealed class PortfolioRepository : IAndaRepository
                 string? number = AndaValidator.Extract(Cell(r, cNum));
                 if (number is null) { skipped++; continue; }
                 rows[number] = new Row(number, Cell(r, cDrug), Cell(r, cApp), Date(r, cGoal), Date(r, cFc), Cell(r, cStatus), Cell(r, cNotes), Cell(r, cCycle),
-                    Date(r, cSub), Cell(r, cIng), Cell(r, cForm), Cell(r, cStr), Date(r, cPsg));
+                    Date(r, cSub), Cell(r, cIng), Cell(r, cForm), Cell(r, cStr), Date(r, cPsg),
+                    detailCols.Count == 0 ? null : detailCols.Select(kv => (kv.Key, Value: Cell(r, kv.Value))).Where(x => x.Value.Length > 0 || x.Key == "myNotes").ToDictionary(x => x.Key, x => x.Value));
             }
             Headers = table.Headers; Mapping = map; _rows = rows;
             _byApplicant = rows.Values.Where(r => r.Applicant.Length > 0).GroupBy(r => r.Applicant, StringComparer.OrdinalIgnoreCase)
@@ -163,6 +175,7 @@ public sealed class PortfolioRepository : IAndaRepository
             Demo = false, SourceLabel = $"Your portfolio: {FileName}",
             ActiveIngredient = row.Ingredient.Length > 0 ? row.Ingredient : null, DosageForm = row.Form.Length > 0 ? row.Form : null,
             Strength = row.Strength.Length > 0 ? row.Strength : null, PsgDateFromSheet = row.Psg,
+            Details = DetailsOf(row),
         };
     }
 

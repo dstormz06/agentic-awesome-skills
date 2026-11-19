@@ -38,6 +38,56 @@ public static class PortfolioColumns
     public static bool Looks(string header, string key) =>
         Synonyms.TryGetValue(key, out var words) && words.Contains(Normalize(header));
 
+    /// <summary>
+    /// The extra columns an expanded card can show under "Details" (round 33), found by their header names. "applicant" and "myNotes" are the
+    /// applicant and notes columns above. Kept apart from <see cref="Fields"/>, which the browser extension mirrors column for column.
+    /// </summary>
+    public static readonly IReadOnlyDictionary<string, string[]> DetailSynonyms = new Dictionary<string, string[]>
+    {
+        ["short"] = new[] { "applicant short name", "short name", "applicant short", "applicant abbreviation" },
+        ["established"] = new[] { "established name", "established", "established drug name", "generic name" },
+        ["project"] = new[] { "project description", "project", "description" },
+        ["agentCo"] = new[] { "us agent", "u s agent", "us agent company", "us agent name", "agent" },
+        ["agentEmail"] = new[] { "us agent email", "u s agent email", "agent email", "us agent e mail" },
+        ["applicantEmail"] = new[] { "applicant email", "applicant e mail", "applicant contact email", "contact email" },
+        ["doc356h"] = new[] { "latest 356h", "356h", "form 356h", "fda 356h", "356h path", "356h link" },
+        ["doc32p1"] = new[] { "module 3 2 p 1", "3 2 p 1", "32p1", "m3 2 p 1", "module 3 2 p 1 path" },
+        ["teamLead"] = new[] { "team lead", "team leader", "tl" },
+        ["division"] = new[] { "division" },
+        ["fei"] = new[] { "facility fei", "fei", "fei number", "facility fei number" },
+    };
+
+    private static readonly string[] OwnNotes = { "my notes", "notes", "rpm notes", "note", "comments" };
+
+    /// <summary>
+    /// The header for each detail column: the first header, not already used for a field above, whose name is one of the column's names.
+    /// Two columns can already be in use under another name, and are then shown under both: a column headed "Established name" that serves as
+    /// the drug or the active ingredient, and a column headed "Project description" that serves as the notes. In the second case "My notes"
+    /// is a separate column of that name when the sheet has one, and otherwise is not in the sheet.
+    /// </summary>
+    /// <param name="fields">What <see cref="Detect"/> chose for the card's own fields.</param>
+    public static Dictionary<string, string> DetectDetails(IReadOnlyList<string> headers, IReadOnlyDictionary<string, string> fields)
+    {
+        var map = new Dictionary<string, string>();
+        var used = new HashSet<string>(fields.Values);
+        foreach (var (key, words) in DetailSynonyms)
+        {
+            var hit = headers.FirstOrDefault(h => !used.Contains(h) && words.Contains(Normalize(h)));
+            if (hit is not null) { map[key] = hit; used.Add(hit); }
+        }
+        bool Named(string? header, string key) => header is not null && DetailSynonyms[key].Contains(Normalize(header));
+        if (!map.ContainsKey("established"))
+            foreach (var field in new[] { "ingredient", "drug" })
+                if (fields.TryGetValue(field, out var h) && Named(h, "established")) { map["established"] = h; break; }
+        if (!map.ContainsKey("project") && fields.TryGetValue("notes", out var notes) && Named(notes, "project"))
+        {
+            map["project"] = notes;
+            var own = headers.FirstOrDefault(h => !used.Contains(h) && OwnNotes.Contains(Normalize(h)));
+            map["myNotes"] = own ?? "";      // "" : the notes column is the project description, and the sheet has no notes column besides it
+        }
+        return map;
+    }
+
     /// <summary>The header chosen for each field: the person's override if it exists, otherwise the first header that matches.</summary>
     public static Dictionary<string, string> Detect(IReadOnlyList<string> headers, IReadOnlyDictionary<string, string>? overrides = null)
     {

@@ -80,6 +80,10 @@ public sealed record AndaRecord
     /// <summary>A PSG date the RPM keeps in their own sheet, shown as theirs. Not from an official source.</summary>
     public DateOnly? PsgDateFromSheet { get; init; }
 
+    /// <summary>More columns of the person's own sheet, by key (see <see cref="AndaCompanion.Services.CardDetails.Fields"/>, and "short" for the
+    /// applicant's short name). Shown under "Details" on an expanded card. Not part of what the browser extension is sent.</summary>
+    [System.Text.Json.Serialization.JsonIgnore] public IReadOnlyDictionary<string, string>? Details { get; init; }
+
     [System.Text.Json.Serialization.JsonIgnore] public bool HasProgress => ProgressPct >= 0;
     [System.Text.Json.Serialization.JsonIgnore] public bool HasForecast => ForecastDate != Unknown;
 }

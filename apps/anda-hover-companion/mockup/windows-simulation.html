@@ -2663,6 +2663,17 @@ function detailValue(id, key){
   if(v == null || v === "") return null;
   return key === "applicant" && d.short ? `${v} (${d.short})` : String(v);   /* the short name comes from the sheet, never from a web search */
 }
+const DETAILS_NONE_CHOSEN = "No columns are chosen. Choose them in Settings, My files and writing.";
+/* What the details of a card show: the chosen columns in the fixed order, each with its value or "not in your sheet", how many of them the
+   sheet holds, and the text that "Copy all" puts on the clipboard (only the ones that have a value). */
+function detailRows(id, fields){
+  const chosen = Array.isArray(fields) ? fields : [], keys = DETAIL_FIELDS.filter(f => chosen.includes(f[0]));
+  const rows = keys.map(([key, label]) => { const v = detailValue(id, key); return { key, label, value:v, text:v == null ? NOT_IN_SHEET : v, copy:v != null, copyName:"Copy " + label.toLowerCase() }; });
+  const have = rows.filter(r => r.copy).length;
+  return { rows, have, count:keys.length ? `· ${have} of ${keys.length} in your sheet` : "", empty:keys.length ? "" : DETAILS_NONE_CHOSEN, copyAll:have > 0,
+    block:[`ANDA ${id}`].concat(rows.filter(r => r.copy).map(r => `${r.label}: ${r.value}`)).join("\n") };
+}
+const detailCopied = what => `Copied: ${what}.`;
 function paintDetails(id){
   const box = $("x-details"); box.replaceChildren();
   const keys = DETAIL_FIELDS.filter(f => state.cardFields.includes(f[0]));
@@ -2676,17 +2687,16 @@ function paintDetails(id){
     else row.append(document.createElement("span"));
     box.append(row);
   });
-  if(!keys.length){ const e = document.createElement("div"); e.className = "drow"; e.textContent = "No columns are chosen. Choose them in Settings, My files and writing."; box.append(e); }
-  $("x-details-n").textContent = keys.length ? `· ${have} of ${keys.length} in your sheet` : "";
+  const shown = detailRows(id, state.cardFields);
+  if(!keys.length){ const e = document.createElement("div"); e.className = "drow"; e.textContent = shown.empty; box.append(e); }
+  $("x-details-n").textContent = shown.count;
   $("x-details-src").textContent = state.data && state.data.portfolio ? "From my-portfolio.xlsx (simulated)." : "From the fictional demo records.";
   $("x-details-all").hidden = have === 0; $("x-details-status").textContent = "";
 }
-function detailsBlock(id){
-  return [`ANDA ${id}`].concat(DETAIL_FIELDS.filter(f => state.cardFields.includes(f[0])).map(([key, label]) => [label, detailValue(id, key)]).filter(x => x[1] != null).map(([l, v]) => `${l}: ${v}`)).join("\n");
-}
+function detailsBlock(id){ return detailRows(id, state.cardFields).block; }
 function copyDetail(text, what){
   const st = $("x-details-status");
-  writeClipboard(text).then(() => { st.textContent = `Copied: ${what}.`; }, () => { st.textContent = "Your browser did not allow copying. Please select the text and press Ctrl+C."; });
+  writeClipboard(text).then(() => { st.textContent = detailCopied(what); }, () => { st.textContent = "Your browser did not allow copying. Please select the text and press Ctrl+C."; });
 }
 $("x-details").addEventListener("click", e => {
   const b = e.target.closest("[data-copy]"); if(!b || !current) return;
@@ -5097,22 +5107,32 @@ function applyDisplay(){
   if(state.density === "compact") root.dataset.density = "compact"; else delete root.dataset.density;
   if(state.ts === "large" || state.ts === "xl") root.dataset.ts = state.ts; else delete root.dataset.ts;
 }
-function noteRecent(id){ if(state.recentsOn && six(id)) state.recents = [id, ...state.recents.filter(x => x !== id)].slice(0, RECENT_MAX); }
-function togglePin(id){
-  if(state.pins.includes(id)){ state.pins = state.pins.filter(x => x !== id); return "removed"; }
-  if(state.pins.length >= PIN_MAX) return "full";
-  state.pins = [...state.pins, id]; return "kept";
+/* The rules, apart from where the lists are kept: the newest first and each number once, eight at most, six digits only, nothing while it is off;
+   five kept at most, and the sixth is refused, never pushed in. The lists shown: the kept ones, then the recent ones that are not kept, and
+   only numbers the data knows. */
+const recentAfter = (recents, id, on) => on && six(id) ? [id, ...recents.filter(x => x !== id)].slice(0, RECENT_MAX) : recents.slice();
+function pinAfter(pins, id){
+  if(pins.includes(id)) return { pins:pins.filter(x => x !== id), result:"removed" };
+  if(!six(id)) return { pins:pins.slice(), result:"refused" };
+  if(pins.length >= PIN_MAX) return { pins:pins.slice(), result:"full" };
+  return { pins:[...pins, id], result:"kept" };
 }
-const listedIds = () => [...state.pins, ...state.recents.filter(x => !state.pins.includes(x))].filter(x => DATA[x]);
+const listedOf = (pins, recents, known) => [...pins, ...recents.filter(x => !pins.includes(x))].filter(known);
+const pinFull = () => `Your list holds ${PIN_MAX} ANDAs. Remove one to keep another.`;
+const pinLabel = kept => kept ? "Remove from my list" : "Keep in my list";
+const recentName = (id, kept) => `ANDA ${id}${kept ? ", kept in my list" : ""}`;
+function noteRecent(id){ state.recents = recentAfter(state.recents, id, state.recentsOn); }
+function togglePin(id){ const r = pinAfter(state.pins, id); state.pins = r.pins; return r.result; }
+const listedIds = () => listedOf(state.pins, state.recents, x => DATA[x]);
 function paintPinChip(id){
   const kept = state.pins.includes(id), b = $("chipPin");
-  b.textContent = kept ? "Remove from my list" : "Keep in my list"; b.setAttribute("aria-pressed", String(kept));
+  b.textContent = pinLabel(kept); b.setAttribute("aria-pressed", String(kept));
 }
 function paintRecents(box, onPick){
   box.replaceChildren(); const ids = listedIds(); if(!ids.length) return;
   box.append(h("span", { class:"cap", text:"RECENT" }));
   ids.forEach(id => {
-    const kept = state.pins.includes(id), b = h("button", { type:"button", text:id, class:kept ? "kept" : "", aria:`ANDA ${id}${kept ? ", kept in my list" : ""}` });
+    const kept = state.pins.includes(id), b = h("button", { type:"button", text:id, class:kept ? "kept" : "", aria:recentName(id, kept) });
     b.addEventListener("click", () => onPick(id)); box.append(b);
   });
 }
@@ -5162,13 +5182,14 @@ function refreshTrayState(){
 $("chipPin").addEventListener("click", () => {
   if(!current) return;
   const r = togglePin(current); paintPinChip(current);
-  if(r === "full") showNotice(`Your list holds ${PIN_MAX} ANDAs. Remove one to keep another.`, anchorForCard());
+  if(r === "full") showNotice(pinFull(), anchorForCard());
 });
 document.querySelectorAll("input[name=ts]").forEach(r => r.addEventListener("change", () => { if(r.checked){ state.ts = r.value; applyDisplay(); } }));
 document.querySelectorAll("input[name=density]").forEach(r => r.addEventListener("change", () => { if(r.checked){ state.density = r.value; applyDisplay(); } }));
 document.querySelectorAll("input[name=lkstyle]").forEach(r => r.addEventListener("change", () => { if(r.checked) state.lookupStyle = r.value; }));
-$("setRecents").addEventListener("change", e => { state.recentsOn = e.target.checked; if(!state.recentsOn){ state.recents = []; $("recentsStatus").textContent = "Recent ANDAs are off and were cleared."; } else $("recentsStatus").textContent = ""; });
-$("recentsClear").addEventListener("click", () => { state.recents = []; $("recentsStatus").textContent = "Recent ANDAs cleared."; });
+const RECENTS_SAID = { off:"Recent ANDAs are off and were cleared.", cleared:"Recent ANDAs cleared." };
+$("setRecents").addEventListener("change", e => { state.recentsOn = e.target.checked; if(!state.recentsOn){ state.recents = []; $("recentsStatus").textContent = RECENTS_SAID.off; } else $("recentsStatus").textContent = ""; });
+$("recentsClear").addEventListener("click", () => { state.recents = []; $("recentsStatus").textContent = RECENTS_SAID.cleared; });
 
 /* One Bar: the lookup window that also offers Review and Ask. Rows to press, never actions that run alone. */
 const lkBar = () => state.lookupStyle === "bar" && !lookupHandler;
@@ -5178,17 +5199,30 @@ function heroSentence(id){
   const d = DATA[id], n = Math.abs(d.delta);
   return (d.delta === 0 ? "On the goal date" : `${n} day${n === 1 ? "" : "s"} ${d.delta > 0 ? "later than" : "ahead of"} the goal`) + (d.attn ? ` · needs you: ${d.attn.split(" — ")[0]}` : "");
 }
+/* The rows One Bar offers for what is typed and what is selected: the ANDA when a number is typed, a draft review, and Ask. Each row says what
+   pressing it opens ("act") and, for a draft, which text it would review. Rows to press; nothing here opens by itself. */
+function barRows(typed, sel){
+  const raw = String(typed == null ? "" : typed).trim(), n = extractNumber(raw), rows = []; sel = String(sel == null ? "" : sel);
+  if(n) rows.push({ ic:"6", t:DATA[n] ? `ANDA ${n} · ${DATA[n].drug}` : `ANDA ${n}`, s:DATA[n] ? heroSentence(n) : "Not in your data", act:"card", text:n });
+  const typedText = raw && !n ? raw : "", draftText = typedText || sel;
+  rows.push({ ic:"¶", t:typedText ? "Review what you typed as a draft" : sel ? "Review the selected text as a draft" : "Review a draft", s:"Checks it against the record, with no AI", act:"draft", text:draftText });
+  const kind = sel ? shClassify(sel).kind : "empty";
+  rows.push({ ic:"▦", t:kind === "table" ? "Ask about the selected cells" : sel ? "Ask about the selected text" : "Ask about a selection", s:kind === "table" ? "Duplicates, blanks, totals, compare two columns" : "Quick checks and your stored prompts", act:"ask", text:sel });
+  return rows;
+}
+/* What the lookup window says when what was typed is not an ANDA number. */
+function lookupError(typed){
+  const raw = String(typed == null ? "" : typed).trim();
+  return /^N-?\d{6}$/i.test(raw) ? `${raw.toUpperCase()} is an NDA number (N is for NDA, A is for ANDA). Please enter a six-digit ANDA number.`
+    : /^(NDA|BLA|IND|DMF|MF|NDC)\b/i.test(raw) ? "NDA, BLA, IND and similar numbers are not ANDA numbers. Please enter a six-digit ANDA number."
+    : /^\d{3}[\s-]\d{3}$/.test(raw) ? "Please enter the six digits without spaces or dashes." : "Please enter a six-digit ANDA number.";
+}
 function paintLookup(){
   $("lookup").classList.toggle("bar5", lkBar());
   paintRecents($("lookupRecent"), id => { closeApp("lookup"); openCard(id, { mini:state.mode === "peek", anchor:lookupAnchor }); });
   const sug = $("lkSug"); sug.replaceChildren();
   if(!lkBar()) return;
-  const raw = $("lookupIn").value.trim(), n = extractNumber(raw), sel = selectionText(), rows = [];
-  if(n) rows.push({ ic:"6", t:DATA[n] ? `ANDA ${n} · ${DATA[n].drug}` : `ANDA ${n}`, s:DATA[n] ? heroSentence(n) : "Not in your data", go:() => submitLookup() });
-  const typedText = raw && !n ? raw : "", draftText = typedText || sel;
-  rows.push({ ic:"¶", t:typedText ? "Review what you typed as a draft" : sel ? "Review the selected text as a draft" : "Review a draft", s:"Checks it against the record, with no AI", go:() => { closeApp("lookup"); openDraft(draftText); } });
-  const kind = sel ? shClassify(sel).kind : "empty";
-  rows.push({ ic:"▦", t:kind === "table" ? "Ask about the selected cells" : sel ? "Ask about the selected text" : "Ask about a selection", s:kind === "table" ? "Duplicates, blanks, totals, compare two columns" : "Quick checks and your stored prompts", go:() => { closeApp("lookup"); openAsk(sel); } });
+  const sel = selectionText(), rows = barRows($("lookupIn").value, sel).map(r => ({ ...r, go:r.act === "card" ? () => submitLookup() : r.act === "draft" ? () => { closeApp("lookup"); openDraft(r.text); } : () => { closeApp("lookup"); openAsk(sel); } }));
   lkRows = rows; lkIdx = Math.min(lkIdx, rows.length - 1);
   rows.forEach((r, i) => {
     const b = h("button", { type:"button", class:"lk-row", role:"option", "aria-selected":String(i === lkIdx) }, h("span", { class:"ic", text:r.ic }), h("span", {}, h("b", { text:r.t }), h("small", { text:r.s })));
@@ -5199,9 +5233,22 @@ function lkMove(dx){ if(!lkRows.length) return; lkIdx = (lkIdx + dx + lkRows.len
 
 /* Today: a small two-pane window. Left: what needs a look, the ANDAs kept in my list, recents. Right: the selected one, with Copy status. */
 let tdSel = null;
-const needLookIds = () => Object.keys(DATA).filter(id => isUrgent(id) || watchFlags(id).length || DATA[id].attn);
+/* What needs a look, the most pressing first: red before amber, and within one mark the lower number first. */
+const needLookIds = () => Object.keys(DATA).filter(id => isUrgent(id) || watchFlags(id).length || DATA[id].attn).sort((a, b) => "rwg".indexOf(tdSev(a)) - "rwg".indexOf(tdSev(b)) || (a < b ? -1 : a > b ? 1 : 0));
 function tdSev(id){ const fl = watchFlags(id); if(isUrgent(id)) return "r"; if(fl.length || DATA[id].attn || DATA[id].delta > 0) return "w"; return "g"; }
 function tdLine(id){ const d = DATA[id]; return d.delta > 0 ? `${d.delta} d later` + (d.attn ? ` · ${d.attn.split(" — ")[0]}` : "") : d.delta < 0 ? `${-d.delta} d ahead` : "On the goal date"; }
+/* Today, apart from its window: the three groups on the left, each row's mark and line, and what the right-hand side says about one ANDA. */
+const TODAY_SAID = { nothing:"Nothing needs a look. Type a number above to open an ANDA.", choose:"Choose an ANDA on the left." };
+function todayGroups(pins, recents){
+  return [{ title:"NEEDS A LOOK", ids:needLookIds() }, { title:"KEPT IN MY LIST", ids:pins.filter(x => DATA[x]) }, { title:"RECENT", ids:recents.filter(x => DATA[x] && !pins.includes(x)) }]
+    .map(g => ({ title:g.title, ids:g.ids, rows:g.ids.map(id => ({ id, mark:tdSev(id), line:tdLine(id) })) }));
+}
+function todayMain(id){
+  const d = DATA[id], n = Math.abs(d.delta), fl = watchFlags(id);
+  return { meta:`ANDA ${id} · ${d.drug}`, tone:d.delta > 0 ? "late" : "good", figure:d.delta === 0 ? "On" : String(n),
+    words:d.delta === 0 ? "the goal date" : `day${n === 1 ? "" : "s"} ${d.delta > 0 ? "later than" : "ahead of"} the goal`,
+    dates:`Goal ${d.goal} · Forecast ${d.fc} · ${d.fconf}`, attn:d.attn || null, watch:fl.length ? "Watch: " + fl[0].text : null, status:statusLine(id) };
+}
 function openToday(){
   closeMenus(); showApp("today"); $("today").style.zIndex = "52";
   tdSel = tdSel && DATA[tdSel] ? tdSel : (needLookIds()[0] || Object.keys(DATA)[0] || null);
@@ -5211,7 +5258,7 @@ function openToday(){
 function paintToday(){
   const list = $("tdList"); list.replaceChildren();
   const typed = extractNumber($("tdSearch").value.trim()); if(typed && DATA[typed]) tdSel = typed;
-  const groups = [["NEEDS A LOOK", needLookIds()], ["KEPT IN MY LIST", state.pins.filter(x => DATA[x])], ["RECENT", state.recents.filter(x => DATA[x] && !state.pins.includes(x))]];
+  const groups = todayGroups(state.pins, state.recents).map(g => [g.title, g.ids]);
   let any = false;
   groups.forEach(([title, ids]) => {
     if(!ids.length) return; any = true; list.append(h("div", { class:"td-grp", text:title }));
@@ -5220,18 +5267,18 @@ function paintToday(){
       b.addEventListener("click", () => { tdSel = id; paintToday(); }); list.append(b);
     });
   });
-  if(!any) list.append(h("div", { class:"td-empty", text:"Nothing needs a look. Type a number above to open an ANDA." }));
+  if(!any) list.append(h("div", { class:"td-empty", text:TODAY_SAID.nothing }));
   paintTodayMain();
 }
 function paintTodayMain(){
   const m = $("tdMain"); m.replaceChildren();
-  if(!tdSel || !DATA[tdSel]){ m.append(h("div", { class:"td-empty", text:"Choose an ANDA on the left." })); return; }
-  const id = tdSel, d = DATA[id], n = Math.abs(d.delta);
-  m.append(h("div", { class:"meta", text:`ANDA ${id} · ${d.drug}` }));
-  m.append(h("div", { class:"hl " + (d.delta > 0 ? "late" : "good") }, d.delta === 0 ? h("b", { class:"sm", text:"On" }) : h("b", { text:String(n) }), h("span", { text:d.delta === 0 ? "the goal date" : `day${n === 1 ? "" : "s"} ${d.delta > 0 ? "later than" : "ahead of"} the goal` })));
-  m.append(h("div", { class:"hint", text:`Goal ${d.goal} · Forecast ${d.fc} · ${d.fconf}` }));
-  if(d.attn) m.append(h("div", { class:"attn warn" }, h("span", { class:"k", text:"⚠ NEEDS YOU" }), h("span", { text:d.attn })));
-  const fl = watchFlags(id); if(fl.length) m.append(h("div", { class:"hint", text:"Watch: " + fl[0].text }));
+  if(!tdSel || !DATA[tdSel]){ m.append(h("div", { class:"td-empty", text:TODAY_SAID.choose })); return; }
+  const id = tdSel, v = todayMain(id);
+  m.append(h("div", { class:"meta", text:v.meta }));
+  m.append(h("div", { class:"hl " + v.tone }, h("b", { class:v.figure === "On" ? "sm" : "", text:v.figure }), h("span", { text:v.words })));
+  m.append(h("div", { class:"hint", text:v.dates }));
+  if(v.attn) m.append(h("div", { class:"attn warn" }, h("span", { class:"k", text:"⚠ NEEDS YOU" }), h("span", { text:v.attn })));
+  if(v.watch) m.append(h("div", { class:"hint", text:v.watch }));
   const copy = h("button", { type:"button", class:"pill", text:"Copy status" }), open = h("button", { type:"button", class:"pill quiet", text:"Open the card" });
   copy.addEventListener("click", () => {
     writeClipboard(statusLine(id)).then(() => { copy.textContent = "Copied ✓"; setTimeout(() => { copy.textContent = "Copy status"; }, 1200); }, () => showNotice("Your browser did not allow copying, so here is the status line: " + statusLine(id), pointer));
@@ -5253,10 +5300,7 @@ function openLookup(anchor, handler){
 function submitLookup(){
   const n = extractNumber($("lookupIn").value);
   if(!n){
-    const raw = $("lookupIn").value.trim();
-    $("lookupErr").textContent = /^N-?\d{6}$/i.test(raw) ? `${raw.toUpperCase()} is an NDA number (N is for NDA, A is for ANDA). Please enter a six-digit ANDA number.`
-      : /^(NDA|BLA|IND|DMF|MF|NDC)\b/i.test(raw) ? "NDA, BLA, IND and similar numbers are not ANDA numbers. Please enter a six-digit ANDA number."
-      : /^\d{3}[\s-]\d{3}$/.test(raw) ? "Please enter the six digits without spaces or dashes." : "Please enter a six-digit ANDA number.";
+    $("lookupErr").textContent = lookupError($("lookupIn").value);
     $("lookupErr").style.display = "block"; return;
   }
   const onNumber = lookupHandler; lookupHandler = null;
