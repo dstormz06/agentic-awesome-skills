@@ -1192,10 +1192,13 @@ nights the clocks change in 2026 from each side, a year's end, a leap day), 24 a
 - *The zone.* This computer's own, unless one of ten is chosen in Settings: Eastern, Central, Mountain, Arizona, Pacific, Alaska, Hawaii,
   Atlantic (Puerto Rico), UTC, or "Automatic". The choice is stored by the zone's IANA name; a name that is not one of the ten is read as
   "Automatic". The zone's rules come from the operating system (in the browser, from the browser).
-- *The abbreviation.* For the zones offered, from a small table (EST/EDT, CST/CDT, MST/MDT, MST, PST/PDT, AKST/AKDT, HST, AST, UTC):
-  summer is whatever differs from that zone's January. For any other zone the tool writes the difference from UTC ("UTC+5:30"), which is
-  always right, where a guessed abbreviation might not be. On Windows the computer's zone has a Windows name ("Eastern Standard Time");
-  the app asks .NET for its IANA name first, so "Automatic" in Washington reads EST and EDT like "Eastern" does.
+- *The abbreviation.* The tool knows the winter and summer abbreviations of 33 zones of the United States (the eight offered, and those a
+  computer set to "Automatic" may be in: Detroit, the Indiana and Kentucky zones, Boise, the Alaska zones, Adak, Guam, Samoa), and for each
+  how far its standard time is from UTC. It writes the abbreviation only when the moment is in 2007 or later and the zone is then at that
+  standard time (EST) or an hour ahead of it (EDT). In every other case (another zone, an earlier year, a zone this computer has no data
+  for) it writes the difference from UTC ("UTC+5:30"), which is always right, where a guessed abbreviation might not be. On Windows the
+  computer's zone has a Windows name ("Eastern Standard Time"); the app asks .NET for its IANA name first, so "Automatic" in Washington
+  reads EST and EDT like "Eastern" does.
 - *A moment as it is written.* "Nov 18, 2026, 3:12 PM EST", with seconds where the list is a log (the event log, the backup copies). A
   time of day alone, for something of today, is "3:12 PM EST" (the to-do list's "Updated", an agent's "Asked at", "checked" on the
   connection line). The year is always there: two copies a year apart must not read alike.
@@ -1225,6 +1228,17 @@ morning" and has an age. The app's sample records are fixed at Jul 16, 2026, and
 **What does not change with the zone.** Which day is "today", for due dates and day counts, stays this computer's day; Settings says so.
 A person who chooses a zone other than the computer's sees times in that zone and due dates by the computer's calendar. This was left as it
 is because every date rule in both programs is built on one "today", and moving it is a change to all of them, not to how a time is written.
+
+**After the separate review** (15 findings and three smaller ones; `VERIFICATION.md`, round 31). What changed in the design: the browser
+host follows both settings and gives the extension the card's own line; the hand-off and meeting pages say "made on" and carry a "Data:"
+line; a compact box writes STALE on itself and carries the line as its tooltip; the simulation has the app's stale rule in its watch list; an
+open card's watch line is reckoned again with its data line, and a tick is not counted in the usage log; the day in the watch flag and the
+portfolio's status line follow a change of zone; a zone the computer has no data for is not used and Settings says so; the computer's own
+zone is asked afresh at most once a minute, so "Automatic" follows a change made in Windows; the timer in Settings fires as each minute of
+the clock begins; a moment outside the years 1900 to 9999 is "time not known"; and backup copies are counted by the computer's days, not
+the chosen zone's, so that changing the zone (or restoring a settings backup that carries one) can never remove a copy. Left open and said
+so: the reference file's line has its year but no age and no STALE mark (asked of the owner); Windows has no zone of Puerto Rico's own, so
+"Automatic" there reads UTC-4; a compact box does not print source and "as of" on itself.
 
 **Settings.** `TimeZone` and `StaleAfterDays` are in the settings file, which moves from version 2 to 3 by itself (the two take their
 usual values: the computer's zone, seven days). A value that is not one of the choices becomes the usual one. A settings backup carries

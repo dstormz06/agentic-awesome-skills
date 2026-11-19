@@ -6,6 +6,7 @@ A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
 > **New in round 31: every time in your time zone, and data that says how old it is.** Settings, *Look and feel*, *Time*: a clock, the time zone times are written in (this computer's own unless you choose one of ten), and the number of days after
 > which your data is marked STALE (7 unless you change it). Every time the app shows carries the zone's abbreviation (EST, EDT, …; a zone that is not among the ten is written as its difference from UTC) and follows daylight time by itself. Times are stored in UTC.
 > The line under the drug name on the card now reads, for a file of your own, *Your portfolio file · name · as of Nov 11, 2026, 3:00 PM EST (9 days ago) · STALE: older than 7 days*; it is brought up to date once a minute while the card is open, and the watch line says "stale" at the same minute.
+> A compact box writes *STALE* on itself; a hand-off page says when it was made and carries the same line. A time zone this computer has no data for is not used: the computer's own is, and Settings says so.
 > The sample records say *sample data, which does not change* instead. Which day is "today", for due dates and day counts, stays this computer's day. The settings file moves from version 2 to 3 by itself. See `../DESIGN.md` §11o.
 >
 > **New in round 30: a copy of each list after every change, and one press to put a copy back.** Tray menu: *Backups and archive…*. The app keeps copies of your five lists (the two to-do lists, notes on ANDAs, the prompt library, quick replies) in
@@ -295,7 +296,7 @@ dotnet test AndaCompanion.Tests                              # everything (Windo
 dotnet test AndaCompanion.Tests --filter "Category!=Windows" # what runs on Linux/macOS
 ```
 
-1,204 cross-platform tests at the time of writing, round 30 (the figure was 762 when this paragraph was first written; recognizer, status line, GDUFA rules, the federal-holiday
+1,222 cross-platform tests at the time of writing, round 31 (the figure was 762 when this paragraph was first written; recognizer, status line, GDUFA rules, the federal-holiday
 calendar against OPM's dates, watch rules, urgency, draft check, portfolio and notes readers, writing prompts,
 hotkey parsing and registration with a fake API, brief fencing and fallback, provider selection, settings,
 contrast, placement, the to-do list, custom actions, the agent connector, headless renders and interaction tests of the real windows) plus Windows-only tests that use real Win32 (clipboard snapshot/restore, hotkey registration and
