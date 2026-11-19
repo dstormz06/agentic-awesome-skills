@@ -598,6 +598,14 @@ public partial class SettingsWindow : Window
         StaleBox.ItemsSource = Clock.StaleChoices.Select(n => $"{n} {(n == 1 ? "day" : "days")}").ToList();
         StaleBox.SelectedIndex = Math.Max(0, Clock.StaleChoices.ToList().IndexOf(_settings.StaleAfterDays));
         void Say(string text) { TimeHint.Text = text; TimeHint.IsVisible = true; }
+        RefStaleBox.ItemsSource = Clock.RefStaleChoices.Select(n => $"{n} days").ToList();
+        RefStaleBox.SelectedIndex = Math.Max(0, Clock.RefStaleChoices.ToList().IndexOf(_settings.RefStaleAfterDays));
+        RefStaleBox.SelectionChanged += (_, _) =>
+        {
+            if (_loading || RefStaleBox.SelectedIndex < 0 || RefStaleBox.SelectedIndex >= Clock.RefStaleChoices.Count) return;
+            _settings.RefStaleAfterDays = Clock.RefStaleChoices[RefStaleBox.SelectedIndex]; Apply();
+            Say(Clock.RefStaleSaid(_settings.RefStaleAfterDays));
+        };
         TimeZoneBox.SelectionChanged += (_, _) =>
         {
             if (_loading || TimeZoneBox.SelectedIndex < 0 || TimeZoneBox.SelectedIndex >= Clock.ZoneChoices.Count) return;

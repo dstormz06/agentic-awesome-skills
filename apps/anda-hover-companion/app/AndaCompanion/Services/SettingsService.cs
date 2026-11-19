@@ -117,7 +117,7 @@ public sealed class Settings
     public ProviderChoice Provider { get; set; } = ProviderChoice.Offline;      // off until the person chooses a connection here; a key found on the PC is not a choice
 
     /// <summary>The version of this file's layout. A file with an older number is moved forward when it is read; see <see cref="SettingsService.Migrate"/>.</summary>
-    public const int CurrentSchema = 3;
+    public const int CurrentSchema = 4;
 
     /// <summary>How many backup copies of each list are kept (and one for each of that many days). See <see cref="Backups"/>.</summary>
     public int BackupCopies { get; set; } = Backups.KeepDefault;
@@ -130,6 +130,9 @@ public sealed class Settings
 
     /// <summary>After how many days a piece of the person's data is marked STALE.</summary>
     public int StaleAfterDays { get; set; } = Clock.StaleDefault;
+
+    /// <summary>After how many days the Drugs@FDA reference file is marked STALE. A public file that changes about monthly, so a number of its own.</summary>
+    public int RefStaleAfterDays { get; set; } = Clock.RefStaleDefault;
     public int SchemaVersion { get; set; } = CurrentSchema;
 
     /// <summary>The person's own API, described here instead of in code. Used only when Provider is MyApi.</summary>
@@ -312,6 +315,7 @@ public static class SettingsService
         }
         if (fromVersion < 2) { s.BackupCopies = Backups.KeepDefault; s.ArchiveAfterDays = Backups.ArchiveDaysDefault; }
         if (fromVersion < 3) { s.TimeZone = ""; s.StaleAfterDays = Clock.StaleDefault; }      // this computer's zone, and stale after 7 days, as before
+        if (fromVersion < 4) s.RefStaleAfterDays = Clock.RefStaleDefault;                      // the reference file: stale after 45 days
         return note;
     }
 
@@ -327,6 +331,7 @@ public static class SettingsService
         if (!Backups.ArchiveDaysChoices.Contains(loaded.ArchiveAfterDays)) loaded.ArchiveAfterDays = Backups.ArchiveDaysDefault;
         if (!Clock.ZoneChoices.Any(c => c.Id == loaded.TimeZone)) loaded.TimeZone = "";
         if (!Clock.StaleChoices.Contains(loaded.StaleAfterDays)) loaded.StaleAfterDays = Clock.StaleDefault;
+        if (!Clock.RefStaleChoices.Contains(loaded.RefStaleAfterDays)) loaded.RefStaleAfterDays = Clock.RefStaleDefault;
         if (!NativeHostRegistration.IsValidExtensionId(loaded.ExtensionId)) loaded.ExtensionId = NativeHostRegistration.DefaultExtensionId;
         loaded.PortfolioColumns ??= new();
         loaded.StandingInstructions ??= "";

@@ -269,15 +269,15 @@ public class Round31Tests : IDisposable
         string dir = Temp.NewDir(), path = Path.Combine(dir, "settings.json");
         File.WriteAllText(path, "{\"SchemaVersion\":2,\"Tone\":\"Warm\",\"BackupCopies\":60,\"ArchiveAfterDays\":90}");      // written by round 30
         var s = SettingsService.Load(path);
-        Assert.Equal((3, "", 7, "Warm", 60, 90), (s.SchemaVersion, s.TimeZone, s.StaleAfterDays, s.Tone, s.BackupCopies, s.ArchiveAfterDays));
-        Assert.Equal(3, Settings.CurrentSchema);
+        Assert.Equal((Settings.CurrentSchema, "", 7, "Warm", 60, 90), (s.SchemaVersion, s.TimeZone, s.StaleAfterDays, s.Tone, s.BackupCopies, s.ArchiveAfterDays));
+        Assert.True(Settings.CurrentSchema >= 3);                                                                 // round 32 moved it to 4; see Round32Tests
         Assert.Null(SettingsService.LoadNote);                                                                    // nothing the person set was changed, so nothing is said
         SettingsService.Save(s, path);
-        Assert.Contains("\"SchemaVersion\": 3", File.ReadAllText(path));
+        Assert.Contains($"\"SchemaVersion\": {Settings.CurrentSchema}", File.ReadAllText(path));
 
         File.WriteAllText(path, "{\"SchemaVersion\":1,\"Tone\":\"Warm\",\"Provider\":3}");                        // two versions back: each step is taken
         s = SettingsService.Load(path);
-        Assert.Equal((3, "", 7, 30, 30, "Warm"), (s.SchemaVersion, s.TimeZone, s.StaleAfterDays, s.BackupCopies, s.ArchiveAfterDays, s.Tone));
+        Assert.Equal((Settings.CurrentSchema, "", 7, 30, 30, "Warm"), (s.SchemaVersion, s.TimeZone, s.StaleAfterDays, s.BackupCopies, s.ArchiveAfterDays, s.Tone));
 
         File.WriteAllText(path, "{\"SchemaVersion\":3,\"TimeZone\":\"America/Denver\",\"StaleAfterDays\":30}");
         s = SettingsService.Load(path);

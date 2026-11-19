@@ -192,6 +192,24 @@ public static class Clock
     public static (string Text, bool Stale) Fresh(string source, long? asOfMs, long nowMs, int staleDays, string? zoneId) =>
         TryFind(zoneId, out var zone) ? Fresh(source, asOfMs, nowMs, staleDays, zone, zoneId) : Fresh(source, asOfMs, nowMs, staleDays, TimeZoneInfo.Utc, "UTC");
 
+    public static readonly IReadOnlyList<int> RefStaleChoices = new[] { 14, 30, 45, 60, 90 };
+    public const int RefStaleDefault = 45;
+
+    /// <summary>
+    /// A reference file (Drugs@FDA) changes about monthly, so it has its own number of days: when it was saved, how long ago, and STALE once
+    /// it is older than those days. The day is the day in the zone given.
+    /// </summary>
+    public static (string Text, bool Stale) RefSaved(long? savedMs, long nowMs, int days, TimeZoneInfo zone)
+    {
+        int n = RefStaleChoices.Contains(days) ? days : RefStaleDefault;
+        if (!Known(savedMs) || !Known(nowMs)) return ("saved: time not known", false);
+        long saved = savedMs!.Value; var t = TimeZoneInfo.ConvertTimeFromUtc(FromMs(saved), zone);
+        bool stale = nowMs - saved > n * 86400000L;
+        return ($"saved {Months[t.Month - 1]} {t.Day.ToString(Inv)}, {t.Year.ToString(Inv)} ({Relative(saved, nowMs)})" + (stale ? $" · STALE: older than {n.ToString(Inv)} days" : ""), stale);
+    }
+    public static (string Text, bool Stale) RefSaved(long? savedMs, long nowMs, int days, string? zoneId) => RefSaved(savedMs, nowMs, days, Resolve(zoneId));
+    public static string RefStaleSaid(int days) => $"A Drugs@FDA file older than {days.ToString(Inv)} days is now marked STALE.";
+
     /// <summary>
     /// The line for one record. A record of the person's own says how old it is and is marked STALE in time. The sample records never change,
     /// so they say so instead of counting days. A record that carries no moment keeps the words its source gave it.

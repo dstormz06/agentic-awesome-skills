@@ -6,7 +6,11 @@ using AndaCompanion.Models;
 namespace AndaCompanion.Services;
 
 /// <summary>The two reference lines on a card. Each is either a date with its source, or a plain statement that it is not known.</summary>
-public sealed record ReferenceInfo(string? PsgText, string? RldText);
+/// <param name="RldStale">True when the reference file is older than the days the person chose for reference files; the line says so in words as well.</param>
+public sealed record ReferenceInfo(string? PsgText, string? RldText, bool RldStale = false);
+
+/// <summary>What the reference line needs to say how old the file is: now, the days chosen for reference files, and the zone in use.</summary>
+public sealed record ReferenceTime(long NowMs, int StaleDays, TimeZoneInfo Zone);
 
 /// <summary>
 /// The latest labeling date of a product's reference listed drug (RLD), read from the Drugs@FDA data files the person downloaded
@@ -28,6 +32,9 @@ public sealed class DrugsAtFdaFile
     private readonly Dictionary<string, DateOnly> _latestLabeling = new();
 
     public DateOnly FileDate { get; }
+
+    /// <summary>The moment the file was saved, in UTC.</summary>
+    public DateTime SavedUtc { get; private init; }
     public string FileName { get; }
     public int ReferenceProducts => _rlds.Count;
 
@@ -55,7 +62,7 @@ public sealed class DrugsAtFdaFile
             if (!products.Has(needP) || !submissions.Has(needS) || !classes.Has(needC))
             { message = "The Drugs@FDA file has a layout this version does not recognize, so reference dates were not checked."; return null; }
 
-            var file = new DrugsAtFdaFile(DateOnly.FromDateTime(info.LastWriteTime), info.Name);
+            var file = new DrugsAtFdaFile(DateOnly.FromDateTime(info.LastWriteTime), info.Name) { SavedUtc = info.LastWriteTimeUtc };
             foreach (var r in products.Rows)
                 if (r["ReferenceDrug"].Trim() is "1" or "Yes" or "Y")
                     file._rlds.Add(new Product(r["ApplNo"].Trim(), r["Form"].Trim(), r["Strength"].Trim(), r["ActiveIngredient"].Trim()));
@@ -95,13 +102,15 @@ public sealed class DrugsAtFdaFile
         return _latestLabeling.TryGetValue(appls[0], out var date) ? (date, "") : (null, "no approved labeling submission found for the reference listed drug");
     }
 
-    public ReferenceInfo Describe(AndaRecord r)
+    /// <param name="time">With it, the line also says how long ago the file was saved and STALE once it is older than the days chosen; without it, the day alone.</param>
+    public ReferenceInfo Describe(AndaRecord r, ReferenceTime? time = null)
     {
         var (date, message) = RldLabeling(r);
+        var saved = time is null ? ($"saved {FileDate.ToString("MMM d, yyyy", Inv)}", false) : Clock.RefSaved(Clock.Ms(SavedUtc), time.NowMs, time.StaleDays, time.Zone);
         string rld = date is { } d
-            ? $"{d.ToString("MMM d, yyyy", Inv)} · Drugs@FDA, file saved {FileDate.ToString("MMM d, yyyy", Inv)}"
+            ? $"{d.ToString("MMM d, yyyy", Inv)} · Drugs@FDA, file {saved.Item1}"
             : $"not available: {message}";
-        return new ReferenceInfo(PsgOf(r), rld);
+        return new ReferenceInfo(PsgOf(r), rld, date is not null && saved.Item2);
     }
 
     public static string? PsgOf(AndaRecord r) =>

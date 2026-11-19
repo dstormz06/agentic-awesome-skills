@@ -1052,6 +1052,7 @@ public partial class CardWindow : Window
     {
         if (_record is not { } record) return;
         PaintFresh(record);
+        if (_refShown) PaintRld(Reference?.Invoke(record) ?? ReferenceResolver.For(record, null, "", null, loading: false));      // "18 days ago" on the reference file's line keeps step as well
         // The watch line states the same age ("9 days old"), so it is reckoned again with the line and painted again when its words changed.
         var flags = WatchRules.Evaluate(record, Today(), Calendar, WatchNow());
         if (!flags.Select(f => (f.Code, f.Text)).SequenceEqual(_watchFlags.Select(f => (f.Code, f.Text)))) { ShowWatch(record, counted: false); WatchSlot.IsVisible = !_mini && _watchFlags.Count > 0; }
@@ -1098,9 +1099,19 @@ public partial class CardWindow : Window
         var info = Reference?.Invoke(record) ?? ReferenceResolver.For(record, null, "", null, loading: false);
         _refShown = true;
         PsgText.Text = info.PsgText ?? ReferenceResolver.NoPsg;
-        RldText.Text = info.RldText ?? ReferenceResolver.NoRld;
+        PaintRld(info);
         RefSlot.IsVisible = !_mini;
         RepliesChip.IsVisible = QuickReplies?.Invoke() is { Count: > 0 };
+    }
+
+    /// <summary>The reference file's line: STALE in words (the line itself says so) and by its look. Returns whether its words changed.</summary>
+    private bool PaintRld(ReferenceInfo info)
+    {
+        string text = info.RldText ?? ReferenceResolver.NoRld; bool changed = RldText.Text != text;
+        RldText.Text = text;
+        if (info.RldStale) { RldText.FontWeight = FontWeight.SemiBold; RldText.Foreground = (IBrush)Application.Current!.Resources["C.Warn"]!; }
+        else { RldText.ClearValue(TextBlock.FontWeightProperty); RldText.ClearValue(TextBlock.ForegroundProperty); }
+        return changed;
     }
 
     private (PixelRect Area, int Width, int Height)? Geometry(PixelPoint at)

@@ -267,6 +267,7 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 .app-win h2{margin:0;font-size:calc(15px*var(--ts))}
 .app-win .hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .fresh.stale{color:var(--c-warn, #8a5a00);font-weight:650}
+#c-rld.stale{color:var(--c-warn, #8a5a00);font-weight:650}
 #compact .stalemark{font-size:calc(10.5px*var(--ts));font-weight:650;color:var(--c-warn, #8a5a00);padding:1px 10px 5px;white-space:nowrap}
 .onbar{display:block;width:100%;margin:12px 0 0;padding:6px 2px 0;min-height:26px;box-sizing:border-box;border:none;border-top:1px solid var(--c-line);background:var(--c-bg);position:sticky;bottom:0;z-index:2;color:var(--c-ink2);font:inherit;font-size:calc(11.5px*var(--ts));text-align:left;cursor:pointer}
 .onbar::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;border:1.5px solid var(--c-ink2);margin-right:7px;vertical-align:baseline}
@@ -1334,6 +1335,7 @@ PS C:\work&gt; </div>
       <label class="sw"><input type="checkbox" id="swDue"> An item is due today (tray dot)</label>
       <label class="sw"><input type="checkbox" id="swFlag"> The sheet marks a service issue (tray dot)</label>
       <label class="sw"><input type="checkbox" id="swOld"> My data was last read 9 days ago (STALE label)</label>
+      <label class="sw"><input type="checkbox" id="swOldRef"> My Drugs@FDA file was saved 60 days ago (STALE label; choose a reference file first)</label>
       <label class="sw"><input type="checkbox" id="swAi"> An approved AI model is connected (sample brief)</label>
       <div class="row" style="margin-top:6px"><button class="btn" type="button" id="newsPush">Division news: a colleague adds a line</button></div>
       <label class="sw full-only"><input type="checkbox" id="swAgentFail"> An agent cannot be reached (rehearse a failure)</label>
@@ -1418,8 +1420,9 @@ PS C:\work&gt; </div>
     <p id="setNow" style="margin:0 0 8px;font-size:calc(13px*var(--ts));color:var(--c-ink)"></p>
     <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px"><label for="setTz" style="color:var(--c-ink2);font-size:12.5px">Show times in</label><select id="setTz" style="width:auto;max-width:100%"></select></div>
     <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;margin-top:8px"><label for="setStale" style="color:var(--c-ink2);font-size:12.5px">Mark my data as stale when it is older than</label><select id="setStale" style="width:auto"></select></div>
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;margin-top:8px"><label for="setRefStale" style="color:var(--c-ink2);font-size:12.5px">Mark the Drugs@FDA reference file as stale when it is older than</label><select id="setRefStale" style="width:auto"></select></div>
     <p class="hint" id="setTimeHint" role="status"></p>
-    <p class="hint">Every time the tool shows is written in this time zone, with its abbreviation, and follows daylight time by itself. Times are stored in UTC, so changing the zone changes how a time is written, never when it was. The clock above and "minutes ago" on the card are brought up to date once a minute while they are on the screen. Every piece of data says where it is from and as of when; when it is older than the days chosen here it is marked STALE. Which day is “today”, for due dates and day counts, stays this computer's day.</p>
+    <p class="hint">Every time the tool shows is written in this time zone, with its abbreviation, and follows daylight time by itself. Times are stored in UTC, so changing the zone changes how a time is written, never when it was. The clock above and "minutes ago" on the card are brought up to date once a minute while they are on the screen. Every piece of data says where it is from and as of when; when it is older than the days chosen here it is marked STALE. The Drugs@FDA reference file is a public file that changes about monthly, so it has a number of days of its own. Which day is “today”, for due dates and day counts, stays this computer's day.</p>
     </div></details>
     <details class="sec" id="secStart"><summary><h3 class="grp">How it starts</h3><span class="pillnote" id="pillStart" hidden></span></summary>
     <div class="secbody">
@@ -2212,6 +2215,15 @@ function timeOfDay(ms, zone, seconds){
   const p = zoneClock(ms, zone), two = n => String(n).padStart(2, "0");
   return `${(p.hour + 11) % 12 + 1}:${two(p.minute)}${seconds ? ":" + two(p.second) : ""} ${p.hour >= 12 ? "PM" : "AM"} ${zoneAbbr(ms, zone)}`;
 }
+/* A reference file (Drugs@FDA) changes about monthly, so it has its own number of days: when it was saved, how long ago, and STALE once it
+   is older than those days. The day is the day in the zone in use. */
+const REF_STALE_CHOICES = [14, 30, 45, 60, 90], REF_STALE_DEFAULT = 45;
+function refSaved(savedMs, nowMs, days, zone){
+  const n = REF_STALE_CHOICES.includes(days) ? days : REF_STALE_DEFAULT;
+  if(!timeKnown(savedMs) || !timeKnown(nowMs)) return { text:"saved: time not known", stale:false };
+  const c = zoneClock(savedMs, zone), stale = nowMs - savedMs > n * 86400000;
+  return { text:`saved ${TIME_MONTHS[c.month - 1]} ${c.day}, ${c.year} (${relTime(savedMs, nowMs)})` + (stale ? ` · STALE: older than ${n} days` : ""), stale };
+}
 /* What Settings says after the zone was chosen. A zone this computer does not know is said plainly: its own is used instead. */
 function zoneSaid(chosen, computer, nowMs){
   const own = `this computer's time zone (${String(computer).replace(/_/g, " ")}, ${zoneAbbr(nowMs, computer)})`, choice = TZ_CHOICES.find(c => c[0] === chosen && c[0]);
@@ -2608,7 +2620,7 @@ const noticeLifetime = text => Math.min(8, Math.max(2.5, 1.2 + text.length / 14)
 
 /* ---------------- state ---------------- */
 let keyVia = null;
-const state = { tz:"", staleDays:7, oldData:false, dataAt:{}, backupKeep:30, archiveDays:30, dir:"x", look:"x", form:"full", autoHide:10, mode:"whisper", escalate:true, lead:3, pretend:false, capture:true, op:90, lens:null, pinned:false, running:true, ai:false,
+const state = { tz:"", staleDays:7, refStaleDays:45, oldRef:false, oldData:false, dataAt:{}, backupKeep:30, archiveDays:30, dir:"x", look:"x", form:"full", autoHide:10, mode:"whisper", escalate:true, lead:3, pretend:false, capture:true, op:90, lens:null, pinned:false, running:true, ai:false,
   keys:{ peek:"Ctrl+Alt+A", look:"Ctrl+Alt+Space", draft:"Ctrl+Alt+Shift+R", ask:"Ctrl+Alt+Shift+P", list:"Ctrl+Alt+Shift+L" }, taken:{ peek:false, look:false, draft:false, ask:false, list:false },
   adaptive:true, allTools:location.hash === "#all", sectionUse:{}, clMode:0,
   middle:false, middleMod:"Ctrl", provider:"offline", tone:"", style:"", signoff:"", claudeModel:"claude-opus-4-8",
@@ -4812,7 +4824,7 @@ function paintFresh(){
 function timeTick(){
   const now = nowMs(), zone = toolTz(), c = zoneClock(now, zone), days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   if($("setNow")) $("setNow").textContent = `Now: ${days[new Date(Date.UTC(c.year, c.month - 1, c.day)).getUTCDay()]}, ${timeLabel(now, zone, false)}`;
-  if(current && card.style.display === "block"){ const was = $("c-fresh").textContent; paintFresh(); if($("c-fresh").textContent !== was) fill(current); }      /* the watch line states the same age, so the card is painted again when the line changed */
+  if(current && card.style.display === "block"){ const was = $("c-fresh").textContent + $("c-rld").textContent; paintFresh(); const r = refLines(current); if($("c-fresh").textContent + r.rld !== was) fill(current); }      /* the watch line states the same age, so the card is painted again when the line changed */
   if(compact.style.display === "block" && compactId) compactFresh();
 }
 /* The timer fires as each minute of the clock begins, so the clock in Settings is never most of a minute behind the taskbar's. */
@@ -4820,7 +4832,13 @@ function timeLoop(){ timeTick(); setTimeout(timeLoop, 60000 - (Date.now() % 6000
 setTimeout(() => {
   TZ_CHOICES.forEach(([id, name]) => $("setTz").append(h("option", { value:id, text:id ? `${name} (${id.replace(/_/g, " ")})` : name })));
   STALE_CHOICES.forEach(n => $("setStale").append(h("option", { value:String(n), text:`${n} ${n === 1 ? "day" : "days"}` })));
-  $("setTz").value = state.tz; $("setStale").value = String(state.staleDays);
+  REF_STALE_CHOICES.forEach(n => $("setRefStale").append(h("option", { value:String(n), text:`${n} days` })));
+  $("setTz").value = state.tz; $("setStale").value = String(state.staleDays); $("setRefStale").value = String(state.refStaleDays);
+  $("setRefStale").addEventListener("change", e => {
+    state.refStaleDays = REF_STALE_CHOICES.includes(+e.target.value) ? +e.target.value : REF_STALE_DEFAULT; if(current && card.style.display === "block") fill(current);
+    $("setTimeHint").textContent = `A Drugs@FDA file older than ${state.refStaleDays} days is now marked STALE.`;
+  });
+  $("swOldRef").addEventListener("change", e => { state.oldRef = e.target.checked; paintData(); if(current && card.style.display === "block") fill(current); });
   $("setTz").addEventListener("change", e => {
     state.tz = TZ_CHOICES.some(c => c[0] === e.target.value) ? e.target.value : ""; timeTick();
     if(isOpen("conn")) connPaint(); if(isOpen("bak")) bakPaint(); if(current && card.style.display === "block") fill(current);      /* everything on an open card that shows a time: its line, its notes, an agent's answer */
@@ -5748,13 +5766,17 @@ const DEMO_REF = { "216482":["Jan 14, 2026", "Mar 3, 2026"].map(redate), "214990
 function refLines(id){
   const demoData = state.data.portfolio === null, dr = DEMO_REF[id];
   const psg = !demoData ? NO_PSG : dr ? dr[0] + " · fictional demo date" : NO_PSG;
-  const rld = state.data.ref ? "Sep 17, 2025 · Drugs@FDA (simulated file), saved Nov 2, 2025"
+  const saved = state.data.ref ? refSaved(refSavedAt(), nowMs(), state.refStaleDays, toolTz()) : null;
+  const rld = saved ? "Sep 17, 2025 · Drugs@FDA (simulated file), " + saved.text
     : demoData && dr ? dr[1] + " · fictional demo date" : NO_RLD;
-  return { psg, rld };
+  return { psg, rld, rldStale:!!(saved && saved.stale) };
 }
+/* When the simulated reference file was saved: 18 days before it was chosen (60 with the what-if switch). A fixed moment, so its age grows as the clock moves. */
+function refSavedAt(){ const chosen = Number.isFinite(state.dataAt.ref) ? state.dataAt.ref : nowMs(); return chosen - (state.oldRef ? 60 : 18) * 86400000 - 5 * 3600000; }
+function refStatus(){ const c = zoneClock(refSavedAt(), toolTz()); return `Drugs@FDA file loaded (simulated: 1 reference product, file saved ${TIME_MONTHS[c.month - 1]} ${c.day}, ${c.year}).`; }
 function paintRefs(id){
   const r = refLines(id);
-  $("c-psg").textContent = r.psg; $("c-rld").textContent = r.rld;
+  $("c-psg").textContent = r.psg; $("c-rld").textContent = r.rld; $("c-rld").classList.toggle("stale", r.rldStale);
   paintFresh();
   $("chipReplies").hidden = !(state.replies && state.replies.length);
 }
@@ -5940,12 +5962,12 @@ const EXAMPLE_TEMPLATE = '{"model":"{{model}}","max_tokens":{{max_tokens}},"mess
 const PICKS = {
   portfolio:["C:\\Users\\you\\Documents\\my-portfolio.xlsx (simulated)", "Loaded 3 ANDAs from my-portfolio.xlsx (simulated). Columns matched by their headers; anything missing shows as “—”, never a guess."],
   notes:["C:\\Users\\you\\Documents\\ANDA notes (simulated)", ""],
-  ref:["C:\\Users\\you\\Downloads\\drugsatfda.zip (simulated)", "Drugs@FDA file loaded (simulated: 1 reference product, file saved Nov 2, 2025)."],
+  ref:["C:\\Users\\you\\Downloads\\drugsatfda.zip (simulated)", ""],      /* its status is made when shown: refStatus() */
 };
 function paintData(){
   $("dataPortfolio").value = state.data.portfolio || ""; $("dataNotes").value = state.data.notes || ""; $("dataRef").value = state.data.ref || "";
   $("dataPortfolioStatus").textContent = state.data.portfolio ? PICKS.portfolio[1] : "No portfolio chosen: the fictional demo records are used.";
-  if(state.data.ref) $("dataRefStatus").textContent = PICKS.ref[1];
+  if(state.data.ref) $("dataRefStatus").textContent = refStatus();
   else if(!$("dataRefStatus").dataset.keep) $("dataRefStatus").textContent = "";
   if(current && card.style.display === "block") fill(current);
 }
@@ -7623,7 +7645,7 @@ function snapSettings(){
     actions:JSON.parse(JSON.stringify(s.actions)), agents:JSON.parse(JSON.stringify(s.agents)), todoShowFromData:s.todoAuto, todoRefreshSeconds:s.todoRefresh,
     myTodoMode:s.clMode, adaptive:s.adaptive, allTools:s.allTools,
     textSize:s.ts, density:s.density, lookupStyle:s.lookupStyle, rememberRecents:s.recentsOn, pins:[...s.pins],
-    cardFields:[...s.cardFields], watchBack:s.watchOn, divisionNews:s.newsOn, noticesPerDay:s.watchCap, andaPage:s.andaUrl, trayRecount:s.trayRecount, timeZone:s.tz, staleAfterDays:s.staleDays };   /* the counts of opened sections belong to this PC: they are not in a backup */
+    cardFields:[...s.cardFields], watchBack:s.watchOn, divisionNews:s.newsOn, noticesPerDay:s.watchCap, andaPage:s.andaUrl, trayRecount:s.trayRecount, timeZone:s.tz, staleAfterDays:s.staleDays, refStaleAfterDays:s.refStaleDays };   /* the counts of opened sections belong to this PC: they are not in a backup */
 }
 const DEFAULT_SETTINGS = { ...snapSettings(), allTools:false }, DEFAULT_PROMPTS = prompts.map(p => [...p]), DEFAULT_REPLIES = state.replies.map(r => ({ ...r }));
 const oneOf = (v, list, fallback) => list.includes(v) ? v : fallback;
@@ -7633,7 +7655,7 @@ function applySettings(x){
   const look = oneOf(x.appearance, LOOKS.map(l => l[0]), d.appearance); if(look !== s.look) applyLook(look);
   s.autoHide = oneOf(x.autoHide, AUTO_CHOICES, d.autoHide); s.mode = oneOf(x.consent, CONSENTS.map(c => c[0]), d.consent);
   s.escalate = typeof x.escalate === "boolean" ? x.escalate : d.escalate; s.lead = oneOf(x.holidayLead, [0, 2, 3, 5], d.holidayLead);
-  s.tz = oneOf(x.timeZone, TZ_CHOICES.map(c => c[0]), d.timeZone); s.staleDays = oneOf(x.staleAfterDays, STALE_CHOICES, d.staleAfterDays);
+  s.tz = oneOf(x.timeZone, TZ_CHOICES.map(c => c[0]), d.timeZone); s.staleDays = oneOf(x.staleAfterDays, STALE_CHOICES, d.staleAfterDays); s.refStaleDays = oneOf(x.refStaleAfterDays, REF_STALE_CHOICES, d.refStaleAfterDays);
   /* How many copies of the lists are kept, and after how many days a finished item is archived, belong to this PC like the lists themselves:
      a settings backup does not carry them, and a restore or a reset leaves them as they are. Otherwise a backup could remove copies unasked. */
   s.capture = typeof x.capture === "boolean" ? x.capture : d.capture; s.op = x.opacity === undefined ? d.opacity : (n => isFinite(n) ? Math.min(100, Math.max(40, Math.round(n))) : 100)(+x.opacity);
@@ -7688,7 +7710,7 @@ function syncSettingsUI(){
   check("clmode", s.clMode); check("ts", s.ts); check("density", s.density); check("lkstyle", s.lookupStyle); $("setRecents").checked = s.recentsOn; syncRound19(); $("adaptCheck").checked = s.adaptive; applyEdition();
   $("todoAuto").checked = s.todoAuto; renderActions(); renderAgents(); if(isOpen("todo")){ tdApplyTimer(); tdReload(true); }
   $("setUrgent").checked = s.escalate; $("setLead").value = String(s.lead); $("setCapture").checked = s.capture;
-  $("setTz").value = s.tz; $("setStale").value = String(s.staleDays); timeTick();
+  $("setTz").value = s.tz; $("setStale").value = String(s.staleDays); $("setRefStale").value = String(s.refStaleDays); timeTick();
   $("setOp").value = s.op; $("setOpV").textContent = s.op + "%"; root.style.setProperty("--op", s.op + "%");
   $("setMiddle").checked = s.middle; $("setStyle").value = s.style; $("setSignoff").value = s.signoff; $("claudeModel").value = s.claudeModel;
   Object.entries({ apiName:"name", apiEndpoint:"endpoint", apiHeader:"header", apiScheme:"scheme", apiEnv:"env", apiModel:"model", apiTemplate:"template", apiPath:"path" })

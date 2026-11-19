@@ -1237,8 +1237,14 @@ portfolio's status line follow a change of zone; a zone the computer has no data
 zone is asked afresh at most once a minute, so "Automatic" follows a change made in Windows; the timer in Settings fires as each minute of
 the clock begins; a moment outside the years 1900 to 9999 is "time not known"; and backup copies are counted by the computer's days, not
 the chosen zone's, so that changing the zone (or restoring a settings backup that carries one) can never remove a copy. Left open and said
-so: the reference file's line has its year but no age and no STALE mark (asked of the owner); Windows has no zone of Puerto Rico's own, so
-"Automatic" there reads UTC-4; a compact box does not print source and "as of" on itself.
+so: Windows has no zone of Puerto Rico's own, so "Automatic" there reads UTC-4; a compact box does not print source and "as of" on itself.
+
+**The reference file, decided by the owner on Nov 19 and built at the start of round 32.** The Drugs@FDA file is a public file that changes
+about monthly; with the seven days of the person's own data it would read STALE nearly always, and a mark that is always on teaches people
+to ignore it. It therefore has a number of days of its own (14, 30, 45, 60 or 90; 45 unless changed, in Settings beside the other two
+choices). The card's line reads *Sep 17, 2025 · Drugs@FDA, file saved Nov 1, 2026 (18 days ago)*, and *· STALE: older than 45 days* once
+that is so, in words and by its look; it keeps step while the card is open; the app's browser host says the same. One rule in both
+programs (`refSaved` / `Clock.RefSaved`), held by `mockup/round32-golden.json` (98 files). The settings file moves to version 4 by itself.
 
 **Settings.** `TimeZone` and `StaleAfterDays` are in the settings file, which moves from version 2 to 3 by itself (the two take their
 usual values: the computer's zone, seven days). A value that is not one of the choices becomes the usual one. A settings backup carries

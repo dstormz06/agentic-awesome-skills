@@ -100,7 +100,7 @@ const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++
   ok((await txt('#dataPortfolioStatus')).includes('Loaded 3 ANDAs'), 'choosing a portfolio (simulated) shows its status');
   ok((await txt('#c-psg')).startsWith('not available: no PSG date in your data') && (await txt('#c-rld')).startsWith('not available: no Drugs@FDA file chosen'), 'with your own data and no source, both lines say briefly that the date is not available');
   await page.click('#dataRefPick'); await page.waitForTimeout(150);
-  ok((await txt('#c-rld')) === 'Sep 17, 2025 · Drugs@FDA (simulated file), saved Nov 2, 2025', 'with a Drugs@FDA file chosen the RLD line shows its date and source');
+  ok((await txt('#c-rld')) === 'Sep 17, 2025 · Drugs@FDA (simulated file), saved Jun 28, 2026 (18 days ago)', 'with a Drugs@FDA file chosen the RLD line shows its date and source');
   ok((await txt('#c-psg')).startsWith('not available'), '...while the PSG line still says it has no source');
   await page.fill('#dataUrl', 'http://insecure.example/f.zip'); await page.click('#dataUpdate');
   ok((await txt('#dataRefStatus')).includes('must start with https://'), 'Update now refuses an address that is not https');

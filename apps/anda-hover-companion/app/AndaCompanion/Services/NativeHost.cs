@@ -49,7 +49,7 @@ public sealed class NativeHostContext
             reference = r =>
             {
                 if (!tried) { tried = true; drugs = DrugsAtFdaFile.TryLoad(settings.ReferenceDataPath, out drugMessage); }
-                return ReferenceResolver.For(r, drugs, drugMessage, settings.ReferenceDataPath, loading: false);
+                return ReferenceResolver.For(r, drugs, drugMessage, settings.ReferenceDataPath, loading: false, new ReferenceTime(Clock.Ms(Clock.UtcNow()), settings.RefStaleAfterDays, Clock.Zone));      // as the app's own card
             };
         }
         else reference = r => ReferenceResolver.For(r, null, "", null, loading: false);
@@ -82,10 +82,10 @@ public static class ReferenceResolver
     /// What the card's PSG and RLD lines say, shared by the app and the extension host so the two never differ. Always two
     /// lines: a date with where it came from, or a brief reason there is none. Never null, never a guess.
     /// </summary>
-    public static ReferenceInfo For(AndaRecord record, DrugsAtFdaFile? drugs, string drugsMessage, string? referencePath, bool loading)
+    public static ReferenceInfo For(AndaRecord record, DrugsAtFdaFile? drugs, string drugsMessage, string? referencePath, bool loading, ReferenceTime? time = null)
     {
         string psg = DrugsAtFdaFile.PsgOf(record) ?? DemoText(record, psg: true) ?? NoPsg;
-        if (drugs is not null) return new ReferenceInfo(psg, drugs.Describe(record).RldText);
+        if (drugs is not null) { var described = drugs.Describe(record, time); return new ReferenceInfo(psg, described.RldText, described.RldStale); }
         string rld = string.IsNullOrWhiteSpace(referencePath)
             ? DemoText(record, psg: false) ?? NoRld
             : loading ? "reading the Drugs@FDA file…"

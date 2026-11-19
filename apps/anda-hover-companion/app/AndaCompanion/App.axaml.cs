@@ -314,7 +314,7 @@ public partial class App : Application
     }
 
     private ReferenceInfo? ReferenceFor(AndaRecord record) =>
-        ReferenceResolver.For(record, _drugs, _drugsMessage, _settings.ReferenceDataPath, _drugsLoading);
+        ReferenceResolver.For(record, _drugs, _drugsMessage, _settings.ReferenceDataPath, _drugsLoading, new ReferenceTime(Clock.Ms(Clock.UtcNow()), _settings.RefStaleAfterDays, Clock.Zone));
 
     // ---------- review a draft ----------
 
