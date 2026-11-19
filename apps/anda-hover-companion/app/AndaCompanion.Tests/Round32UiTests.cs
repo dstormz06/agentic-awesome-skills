@@ -94,7 +94,7 @@ public class Round32UiTests : IClassFixture<HeadlessFixture>
                 () => { calls.Add("settings"); return "Settings is open at “My files and writing”. This guide stays open behind it."; },
                 () => { calls.Add("connections"); return "“Connections and event log” is open. This guide stays open behind it."; });
             void Click(Button b) => b.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
-            var w = new FirstStepsWindow(hooks);
+            var w = new FirstStepsWindow(hooks, Guide.SaidNotRemembered);
             bool closed = false; w.Closed += (_, _) => closed = true;
             Button? bar = null; w.Opened += (_, _) => bar = ConnectionBar.Attach(w);      // what the app does for every window that opens
             w.Show(); Settle();
@@ -102,6 +102,7 @@ public class Round32UiTests : IClassFixture<HeadlessFixture>
                 (w.Place.Text ?? "", w.Heading.Text ?? "", w.Lines.Children.OfType<TextBlock>().Select(t => t.Text ?? "").ToArray(), w.ActionButton.IsVisible ? w.ActionButton.Content as string : null, w.BackButton.IsVisible, (string)w.NextButton.Content!, (string)w.LeaveButton.Content!, w.Status.Text ?? "");
             var seen = new List<(string Place, string Title, string[] Lines, string? Act, bool Back, string Next, string Leave, string Status)> { Look() };
             var first = (w.FocusManager?.GetFocusedElement() == w.NextButton, w.NextButton.IsDefault, AutomationProperties.GetName(w), bar is not null, AutomationProperties.GetLiveSetting(w.Place), AutomationProperties.GetLiveSetting(w.Status));
+            string note1 = w.Status.Text ?? "", placeName1 = AutomationProperties.GetName(w.Place) ?? "";
             Click(w.NextButton); Settle(); seen.Add(Look());                       // 2
             Click(w.ActionButton); Settle(); string said2 = w.Status.Text ?? "";
             Click(w.NextButton); Settle(); seen.Add(Look());                       // 3: the status of the step before is gone
@@ -111,13 +112,13 @@ public class Round32UiTests : IClassFixture<HeadlessFixture>
             Click(w.NextButton); Settle(); string line4 = w.Lines.Children.OfType<TextBlock>().First().Text ?? "";
             Click(w.ActionButton); Settle(); string said4 = w.Status.Text ?? "";
             Click(w.NextButton); Settle(); seen.Add(Look());                       // 5
-            string name5 = AutomationProperties.GetName(w) ?? "";
+            string name5 = AutomationProperties.GetName(w) ?? "", placeName5 = AutomationProperties.GetName(w.Place) ?? "";
             w.Go(1); Settle(); bool doneCloses = closed;                           // Done
             var again = new FirstStepsWindow(hooks); bool left = false; again.Closed += (_, _) => left = true;
             again.Show(); Settle(); Click(again.NextButton); Settle(); Click(again.LeaveButton); Settle();      // left at step 2
             var third = new FirstStepsWindow(hooks); bool esc = false; third.Closed += (_, _) => esc = true;
             third.Show(); Settle(); third.RaiseEvent(new Avalonia.Input.KeyEventArgs { RoutedEvent = Avalonia.Input.InputElement.KeyDownEvent, Key = Avalonia.Input.Key.Escape }); Settle();
-            return (seen, first, said2, said3, said4, backHasFocus, line4, name5, doneCloses, left, esc, calls);
+            return (seen, first, said2, said3, said4, backHasFocus, line4, name5, doneCloses, left, esc, calls, note1, placeName1, placeName5);
         }, CancellationToken.None);
 
         Assert.Equal(new[] { "Step 1 of 5: What this is", "Step 2 of 5: Try it on a sample", "Step 3 of 5: Use your own data", "Step 4 of 5: What is switched on", "Step 5 of 5: Where things are" }, r.seen.Select(s => s.Place + ": " + s.Title));
@@ -125,16 +126,18 @@ public class Round32UiTests : IClassFixture<HeadlessFixture>
         Assert.Equal(new[] { false, true, true, true, true }, r.seen.Select(s => s.Back));
         Assert.Equal(new[] { "Next", "Next", "Next", "Next", "Done" }, r.seen.Select(s => s.Next));
         Assert.Equal(new[] { "Skip the guide", "Skip the guide", "Skip the guide", "Skip the guide", "Close" }, r.seen.Select(s => s.Leave));
-        Assert.All(r.seen, s => Assert.Equal("", s.Status));                                                      // what a button said belongs to its step only
+        Assert.Equal(Guide.SaidNotRemembered, r.note1);                                                           // a first start that could not be remembered says so at step 1
+        Assert.All(r.seen.Skip(1), s => Assert.Equal("", s.Status));                                              // what a button said belongs to its step only
+        Assert.Equal(("Step 1 of 5: What this is", "Step 5 of 5: Where things are"), (r.placeName1, r.placeName5));      // what a screen reader is told as the step changes
         Assert.Equal(Guide.Step(0, "Ctrl+Alt+A", "Offline · Local only").Lines, r.seen[0].Lines);
         Assert.Equal("Select an ANDA number in any window, then press Ctrl+Alt+A. Or press the button below to open the card of the sample ANDA 216482.", r.seen[1].Lines[0]);
-        Assert.Equal("Every window says at its foot what is switched on. At the moment: Offline · Local only.", r.seen[3].Lines[0]);
+        Assert.Equal("Settings and the app's other large windows say at their foot what is switched on. At the moment: Offline · Local only.", r.seen[3].Lines[0]);
         Assert.Equal((true, true, "First steps. Step 1 of 5: What this is", true, AutomationLiveSetting.Polite, AutomationLiveSetting.Polite), r.first);
         Assert.Equal("The card of the sample ANDA 216482 is open. It is fictional, and its card says so. Press Esc to close it.", r.said2);
         Assert.Equal("Settings is open at “My files and writing”. This guide stays open behind it.", r.said3);
         Assert.Equal("“Connections and event log” is open. This guide stays open behind it.", r.said4);
         Assert.True(r.backHasFocus);
-        Assert.Equal("Every window says at its foot what is switched on. At the moment: Switched on: Claude (AI).", r.line4);      // asked each time it is painted
+        Assert.Equal("Settings and the app's other large windows say at their foot what is switched on. At the moment: Switched on: Claude (AI).", r.line4);      // asked each time it is painted
         Assert.Equal("First steps. Step 5 of 5: Where things are", r.name5);
         Assert.True(r.doneCloses); Assert.True(r.left); Assert.True(r.esc);
         Assert.Equal(new[] { "sample", "settings", "connections" }, r.calls);                                     // each button did its one thing, once, and nothing else was called
@@ -162,5 +165,55 @@ public class Round32UiTests : IClassFixture<HeadlessFixture>
         }, CancellationToken.None);
         Assert.Equal((false, true, true, false), (r.before, r.ok, r.Item3, r.Item4));
         Assert.Contains("My files and writing", r.heading);                                                       // the name the guide gives is the name on the screen
+    }
+
+    [Fact]
+    public async Task On_the_card_Enter_starts_a_note_Esc_leaves_the_note_box_and_the_next_Esc_closes_the_card()
+    {
+        // The review's finding: after Enter the caret stayed in the note box whatever was pressed, and Esc never closed the card.
+        var r = await _fx.Session.Dispatch(() =>
+        {
+            ThemeManager.Apply(Appearances.Default);
+            var repo = new Data.MockAndaRepository(); var record = repo.Find("216482")!;
+            var notes = new QuickNotesService(Path.Combine(Temp.NewDir(), "notes.json"), () => new DateTime(2026, 11, 19, 18, 0, 0, DateTimeKind.Utc));
+            var w = new CardWindow(new OfflineBriefService(), repo.Find) { CloseWhenDeactivated = false, QuickNotes = notes };
+            bool closed = false; w.Closed += (_, _) => closed = true;
+            w.Show(record, new PixelPoint(40, 40), false); Settle();
+            void Press(Avalonia.Input.Key key, Avalonia.Input.PhysicalKey physical) { w.KeyPress(key, Avalonia.Input.RawInputModifiers.None, physical, null); Settle(); }
+            Press(Avalonia.Input.Key.Enter, Avalonia.Input.PhysicalKey.Enter);
+            bool inBox = w.FocusManager?.GetFocusedElement() is TextBox;
+            Press(Avalonia.Input.Key.Escape, Avalonia.Input.PhysicalKey.Escape);
+            bool leftBox = w.FocusManager?.GetFocusedElement() is not TextBox, stillOpen = !closed;
+            Press(Avalonia.Input.Key.Escape, Avalonia.Input.PhysicalKey.Escape);
+            bool closedBySecond = closed;
+            if (!closed) w.Close();
+            Settle();
+            return (inBox, leftBox, stillOpen, closedBySecond);
+        }, CancellationToken.None);
+        Assert.Equal((true, true, true, true), r);
+    }
+
+    [Fact]
+    public async Task A_section_the_guide_opens_in_Settings_is_not_counted_as_one_the_person_uses()
+    {
+        string home = Temp.NewDir();
+        var r = await _fx.Session.Dispatch(() =>
+        {
+            using var env = new EnvScope(AppPaths.HomeEnvVar, home);
+            ThemeManager.Apply(Appearances.Default);
+            ConnectionStatus.Reset();
+            var s = new Settings { AdaptiveSettings = true };
+            var w = new SettingsWindow(s, new PromptLibraryService(Path.Combine(Temp.NewDir(), "p.json")), () => { }, null, new QuickReplyService(Path.Combine(Temp.NewDir(), "r.json")));
+            try
+            {
+                w.Show(); Settle();
+                bool opened = w.OpenSection("SecFiles"); Settle();
+                int afterGuide = s.SectionUse.Values.Sum();
+                w.FindControl<Expander>("SecLook")!.IsExpanded = true; Settle();      // the control: a section the person opens is counted
+                return (opened, afterGuide, afterPerson: s.SectionUse.Values.Sum());
+            }
+            finally { w.Close(); Settle(); }
+        }, CancellationToken.None);
+        Assert.Equal((true, 0, 1), r);
     }
 }

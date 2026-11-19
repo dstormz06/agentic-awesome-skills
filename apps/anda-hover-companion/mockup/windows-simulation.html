@@ -3521,8 +3521,10 @@ function clampCard(){
   const [x, y] = clampPos(card.offsetLeft, card.offsetTop, card.offsetWidth, card.offsetHeight, workArea());
   card.style.left = x + "px"; card.style.top = y + "px";
 }
+var sampleCard = false;       /* the card on screen was opened by the guide as the sample: it reads as sample data whatever file is chosen */
 function openCard(id, opts = {}){
   if(!DATA[id]) return;
+  sampleCard = !!opts.sample;
   noteRecent(id); refreshTrayState();
   hideChip(); closeMenus();
   if(state.form !== "full" && !opts.forceFull){ showCompact(id, opts.anchor || pointer); return; }
@@ -3540,11 +3542,12 @@ function openCard(id, opts = {}){
   else { scrim.style.display = "none"; limitHeight(); placeCard(opts.anchor || pointer); }
   if(!opts.mini && $("watchSlot").style.display !== "none") markStep("watch");
   card.focus({ preventScroll:true });
-  armAutoHide(card, () => pinnedCard || card.classList.contains("expanded"), closeCard);
+  armAutoHide(card, () => pinnedCard || card.classList.contains("expanded") || !!opts.stay, closeCard);      /* a card opened by the guide stays until the person closes it */
 }
 /* A card taller than the work area scrolls instead of running off the screen (same rule as the Windows app). */
 function limitHeight(){ const a = workArea(); card.style.maxHeight = Math.max(240, a.b - a.y - 12) + "px"; }
 function closeCard(){
+  sampleCard = false;
   clearInterval(autoTimer);
   clearInterval(streamTimer); clearTimeout(streamTimer);
   card.style.display = "none"; scrim.style.display = "none";
@@ -3716,7 +3719,8 @@ document.addEventListener("keydown", e => {
     if(menuOpen() || $("flyout").style.display === "block"){ closeMenus(); return; }
     closeCtx(); if(isOpen("mytodo") && clEditing){ clCancelEdit(); return; }
     { const open = APP_WINS.filter(id => $(id).style.display === "block");
-      if(open.length){ const z = id => parseInt(getComputedStyle($(id)).zIndex, 10) || 0, holder = open.find(id => $(id).contains(document.activeElement));
+      const cardUp = card.style.display === "block" || compact.style.display === "block";      /* "Esc closes it": the card the guide opened, before the guide */
+      if(open.length && !(cardUp && open.every(id => id === "first"))){ const z = id => parseInt(getComputedStyle($(id)).zIndex, 10) || 0, holder = open.find(id => $(id).contains(document.activeElement));
         closeApp(holder || open.slice().sort((a, b) => z(b) - z(a))[0]); return; } }
     hideChip(); if(compact.style.display === "block") closeCompact(); if(card.style.display === "block") closeCard(); return;
   }
@@ -4799,42 +4803,55 @@ function connPaint(){
 function openConn(){ closeMenus(); showApp("conn"); $("conn").style.zIndex = "54"; connPaint(); $("cnStatus").textContent = ""; }
 /* ---------------- round 32: first steps ---------------- */
 const FIRST_STORE = "anda-first-steps-seen";
-let fsAt = 0;
+let fsAt = 0, fsNote = "";
 function fsPaint(say){
-  const g = guideStep(fsAt, state.keys.peek, connections(connState()).line);
+  const g = guideStep(fsAt, guideShortcut(state.keys.peek, !state.taken.peek), connections(connState()).line);
   $("fsTitle").textContent = g.title; $("fsPlace").textContent = g.place;
   $("fsLines").replaceChildren(...g.lines.map(t => h("p", { text:t })));
   $("fsActRow").hidden = !g.action; $("fsAct").textContent = g.action || "";
   $("fsBack").hidden = !g.back; $("fsNext").textContent = g.next; $("fsLeave").textContent = g.leave;
-  $("fsStatus").textContent = "";
+  $("fsStatus").textContent = g.index === 0 ? fsNote : "";
   if(say) $("fsSay").textContent = `${g.place}: ${g.title}`;      /* a screen reader is told the step it is on */
 }
+const fsFront = () => { $("first").style.zIndex = "56"; };
 function openFirst(){
-  closeMenus(); fsAt = 0; showApp("first"); $("first").style.zIndex = "56"; fsPaint(false);
-  try{ localStorage.setItem(FIRST_STORE, "1"); }catch(e){}      /* shown once: it never opens by itself again */
+  closeMenus();
+  if(isOpen("first")){ fsFront(); try{ $("fsNext").focus({ preventScroll:true }); }catch(e){} return; }      /* already open: it keeps its place */
+  fsAt = 0; fsNote = ""; showApp("first"); fsFront();
+  /* shown once: it never opens by itself again. Where the browser refuses to remember, the guide says so instead of opening silently at every start. */
+  try{ localStorage.setItem(FIRST_STORE, "1"); if(localStorage.getItem(FIRST_STORE) !== "1") fsNote = GUIDE_SAID.notRemembered; }catch(e){ fsNote = GUIDE_SAID.notRemembered; }
+  fsPaint(false);
   try{ $("fsNext").focus({ preventScroll:true }); }catch(e){}
 }
 function fsGo(d){
   const n = GUIDE_STEPS.length;
-  if(d > 0 && fsAt >= n - 1){ closeApp("first"); return; }
+  if(d > 0 && fsAt >= n - 1){ fsClose(); return; }
   fsAt = Math.min(Math.max(0, fsAt + d), n - 1); fsPaint(true);
   try{ (d < 0 && !$("fsBack").hidden ? $("fsBack") : $("fsNext")).focus({ preventScroll:true }); }catch(e){}
+}
+/* Closing the guide never leaves the keyboard on nothing: where there is no place to go back to (a first start), it goes to the tray icon. */
+function fsClose(){ closeApp("first"); }
+function fsAfterClose(){
+  const at = document.activeElement;
+  if(at === document.body || at === null || $("first").contains(at)){ const t = document.querySelector("#trayIcon, #taskbar .tray button, #taskbar button"); if(t) try{ t.focus({ preventScroll:true }); }catch(e){} }
 }
 function fsAct(){
   const g = guideStep(fsAt, "", "");
   if(g.action === "Show the sample card"){
     const r = $("first").getBoundingClientRect();
-    openCard("216482", { anchor:{ x:Math.min(innerWidth - 40, r.right + 60), y:r.top + 80 }, forceFull:true });
-    $("fsStatus").textContent = "The card of the sample ANDA 216482 is open. It is fictional, and its card says so. Press Esc to close it.";
+    /* the full card, whatever look is chosen; it stays until it is closed; it reads as sample data whatever file is chosen */
+    openCard("216482", { anchor:{ x:Math.min(innerWidth - 40, r.right + 60), y:r.top + 80 }, forceFull:true, stay:true, sample:true });
+    $("fsStatus").textContent = GUIDE_SAID.sample;
   } else if(g.action === "Open Settings"){
     showApp("settings"); $("secFiles").open = true; try{ $("secFiles").scrollIntoView({ block:"start" }); }catch(e){}
-    $("fsStatus").textContent = "Settings is open at “My files and writing”. This guide stays open behind it.";
+    $("first").style.zIndex = "41"; $("fsStatus").textContent = GUIDE_SAID.settings;      /* the window it opened is in front; a press on the guide brings the guide forward again */
   } else if(g.action === "Open Connections"){
-    openConn(); $("fsStatus").textContent = "“Connections and event log” is open. This guide stays open behind it.";
+    openConn(); $("first").style.zIndex = "41"; $("fsStatus").textContent = GUIDE_SAID.connections;
   }
 }
 $("fsNext").addEventListener("click", () => fsGo(1)); $("fsBack").addEventListener("click", () => fsGo(-1));
-$("fsLeave").addEventListener("click", () => closeApp("first")); $("fsAct").addEventListener("click", fsAct);
+$("fsLeave").addEventListener("click", fsClose); $("fsAct").addEventListener("click", fsAct);
+$("first").addEventListener("pointerdown", fsFront, true); $("first").addEventListener("focusin", () => { if(!["settings", "conn"].some(isOpen)) fsFront(); });
 /* At the first start the guide opens by itself, once. Under automation (the test suites written before it) only when the address says first=1,
    so that those suites start as they always did; first=0 keeps it shut for anyone. */
 setTimeout(() => {
@@ -4870,13 +4887,13 @@ $("swAi").addEventListener("change", () => setTimeout(paintConnBars, 0));
 /* ---------------- round 31: time ---------------- */
 /* When the data on the card was read. The sample data is read each morning at 7:12 (the computer's time); a file of the person's own, when it was chosen. */
 function dataAsOf(){
-  if(state.data.portfolio && Number.isFinite(state.dataAt.portfolio)) return state.dataAt.portfolio - (state.oldData ? 9 * DAY : 0);
+  if(state.data.portfolio && !sampleCard && Number.isFinite(state.dataAt.portfolio)) return state.dataAt.portfolio - (state.oldData ? 9 * DAY : 0);
   const now = nowMs(), zone = simTz(), c = zoneClock(now, zone), since = (c.hour * 60 + c.minute - 432) * 60000 + c.second * 1000;
   let t = now - (since >= 0 ? since : since + DAY);
   t += (zoneClock(now, zone).offset - zoneClock(t, zone).offset) * 60000;      /* the clocks changed since then: 7:12 on the wall clock all the same */
   return t - (state.oldData ? 9 * DAY : 0);
 }
-function dataSource(){ return state.data.portfolio ? "YOUR FILE (simulated) · my-portfolio.xlsx" : "Fictional demo data · extract #412"; }
+function dataSource(){ return state.data.portfolio && !sampleCard ? "YOUR FILE (simulated) · my-portfolio.xlsx" : "Fictional demo data · extract #412"; }
 const dataLine = () => freshLine(dataSource(), dataAsOf(), nowMs(), state.staleDays, toolTz());
 function paintFresh(){
   const el = $("c-fresh"), f = dataLine();
@@ -4897,13 +4914,14 @@ setTimeout(() => {
   REF_STALE_CHOICES.forEach(n => $("setRefStale").append(h("option", { value:String(n), text:`${n} days` })));
   $("setTz").value = state.tz; $("setStale").value = String(state.staleDays); $("setRefStale").value = String(state.refStaleDays);
   $("setRefStale").addEventListener("change", e => {
-    state.refStaleDays = REF_STALE_CHOICES.includes(+e.target.value) ? +e.target.value : REF_STALE_DEFAULT; if(current && card.style.display === "block") fill(current);
+    state.refStaleDays = REF_STALE_CHOICES.includes(+e.target.value) ? +e.target.value : REF_STALE_DEFAULT; if(current && card.style.display === "block") fill(current); paintData();
     $("setTimeHint").textContent = `A Drugs@FDA file older than ${state.refStaleDays} days is now marked STALE.`;
   });
   $("swOldRef").addEventListener("change", e => { state.oldRef = e.target.checked; paintData(); if(current && card.style.display === "block") fill(current); });
   $("setTz").addEventListener("change", e => {
     state.tz = TZ_CHOICES.some(c => c[0] === e.target.value) ? e.target.value : ""; timeTick();
     if(isOpen("conn")) connPaint(); if(isOpen("bak")) bakPaint(); if(current && card.style.display === "block") fill(current);      /* everything on an open card that shows a time: its line, its notes, an agent's answer */
+    paintData();                                   /* and the day the reference file was saved, in Settings */
     $("setTimeHint").textContent = zoneSaid(state.tz, simTz(), nowMs());
   });
   $("setStale").addEventListener("change", e => {
@@ -5498,6 +5516,7 @@ function closeApp(id){
   w.style.display = "none"; if(card.style.display !== "block") scrim.style.display = "none";
   /* The keyboard goes back to where it was, when that is still on the screen: never to the page body. */
   if(held && back && back.isConnected && back.getClientRects().length){ try{ back.focus({ preventScroll:true }); }catch(e){} }
+  if(id === "first") fsAfterClose();              /* however the guide was closed (its buttons, Esc), the keyboard is not left on nothing */
   if(id === "cmp") weekDelDisarm();               /* a question that was asked does not wait behind a closed window */
   if(id === "bak") bakPending = null;
   if(id === "todo") tdStop();                      /* nothing runs once the list is closed */
@@ -5836,7 +5855,7 @@ function refLines(id){
 }
 /* When the simulated reference file was saved: 18 days before it was chosen (60 with the what-if switch). A fixed moment, so its age grows as the clock moves. */
 function refSavedAt(){ const chosen = Number.isFinite(state.dataAt.ref) ? state.dataAt.ref : nowMs(); return chosen - (state.oldRef ? 60 : 18) * 86400000 - 5 * 3600000; }
-function refStatus(){ const c = zoneClock(refSavedAt(), toolTz()); return `Drugs@FDA file loaded (simulated: 1 reference product, file saved ${TIME_MONTHS[c.month - 1]} ${c.day}, ${c.year}).`; }
+function refStatus(){ return `Drugs@FDA file loaded (simulated: 1 reference product, file ${refSaved(refSavedAt(), nowMs(), state.refStaleDays, toolTz()).text}).`; }      /* the same words as the card's line: one day, one age */
 function paintRefs(id){
   const r = refLines(id);
   $("c-psg").textContent = r.psg; $("c-rld").textContent = r.rld; $("c-rld").classList.toggle("stale", r.rldStale);
@@ -5942,15 +5961,15 @@ const GUIDE_STEPS = [
   { title:"What this is", action:null, lines:[
     "ANDA Companion (Notula) shows a short card for an ANDA number you select in an email or a document: the goal date, the forecast, what needs you, and your notes.",
     "It starts with sample data so that you can try it. Every sample record is fictional, and its card says so.",
-    "Nothing leaves this PC unless you switch a connection on."] },
+    "Nothing leaves this PC unless you switch a connection on, or press a button that says it goes online."] },
   { title:"Try it on a sample", action:"Show the sample card", lines:[
     "Select an ANDA number in any window, then press {shortcut}. Or press the button below to open the card of the sample ANDA 216482.",
-    "On the card, Enter adds a note of your own and Esc closes it."] },
+    "On the card, Enter starts a note of your own and Esc closes the card."] },
   { title:"Use your own data", action:"Open Settings", lines:[
     "In Settings, under “My files and writing”, choose your portfolio file (Excel or CSV). The card then shows your ANDAs, and says where the data is from and how old it is.",
-    "The file is read on this PC. It is not copied anywhere and not sent anywhere."] },
+    "The file is read on this PC. Nothing from it is sent anywhere unless you switch a connection on, and the app copies it only if you ask it to keep a weekly copy."] },
   { title:"What is switched on", action:"Open Connections", lines:[
-    "Every window says at its foot what is switched on. At the moment: {connections}",
+    "Settings and the app's other large windows say at their foot what is switched on. At the moment: {connections}",
     "No AI is used until you choose a connection in Settings. “Connections and event log” lists what each connection sends, where to, and what is kept."] },
   { title:"Where things are", action:null, lines:[
     "Right-click the tray icon near the clock. The menu holds Lookup, Review a draft, Connections and event log, Backups and archive, and Settings.",
@@ -5964,6 +5983,19 @@ function guideStep(i, shortcut, connections){
   const fill = t => t.replace(/\{(shortcut|connections)\}/g, (m, which) => which === "shortcut" ? key : said);      /* one pass: what is written in is never read for marks itself */
   return { index:k, place:`Step ${k + 1} of ${n}`, title:s.title, lines:s.lines.map(fill), action:s.action, back:k > 0, next:k < n - 1 ? "Next" : "Done", leave:k < n - 1 ? "Skip the guide" : "Close" };
 }
+/* How step 2 names the shortcut. One that another program holds does not work, and the guide must not teach it. */
+function guideShortcut(key, working){
+  const k = String(key == null ? "" : key).trim();
+  return !k ? "" : working === false ? `your shortcut (${k} is used by another program at the moment: please choose another in Settings)` : k;
+}
+/* What the guide says after one of its three buttons was pressed, and at a first start that could not be remembered. */
+const GUIDE_SAID = {
+  sample:"The card of the sample ANDA 216482 was opened. It is fictional, and its card says so. Esc closes it.",
+  sampleNoNotes:"The card of the sample ANDA 216482 was opened. It is fictional, and its card says so. Notes are switched off on it, because your own data is loaded. Esc closes it.",
+  settings:"Settings was opened at “My files and writing”, in front of this guide.",
+  connections:"“Connections and event log” was opened, in front of this guide.",
+  notRemembered:"This PC did not let the app remember that the guide was shown, so it will open again at the next start. You can also open it from the tray menu: Help: first steps.",
+};
 /* The guide opens by itself once, at the first start, and never again by itself. "seen" is what the PC remembers; anything but true means it has not been shown. */
 function guideOpensAtStart(seen){ return seen !== true; }
 
@@ -7750,7 +7782,10 @@ function applySettings(x){
   const look = oneOf(x.appearance, LOOKS.map(l => l[0]), d.appearance); if(look !== s.look) applyLook(look);
   s.autoHide = oneOf(x.autoHide, AUTO_CHOICES, d.autoHide); s.mode = oneOf(x.consent, CONSENTS.map(c => c[0]), d.consent);
   s.escalate = typeof x.escalate === "boolean" ? x.escalate : d.escalate; s.lead = oneOf(x.holidayLead, [0, 2, 3, 5], d.holidayLead);
-  s.tz = oneOf(x.timeZone, TZ_CHOICES.map(c => c[0]), d.timeZone); s.staleDays = oneOf(x.staleAfterDays, STALE_CHOICES, d.staleAfterDays); s.refStaleDays = oneOf(x.refStaleAfterDays, REF_STALE_CHOICES, d.refStaleAfterDays);
+  /* a backup written before one of these three existed does not hold it: what the person has now stays, it is not set back to the usual value */
+  if(x.timeZone !== undefined) s.tz = oneOf(x.timeZone, TZ_CHOICES.map(c => c[0]), d.timeZone);
+  if(x.staleAfterDays !== undefined) s.staleDays = oneOf(x.staleAfterDays, STALE_CHOICES, d.staleAfterDays);
+  if(x.refStaleAfterDays !== undefined) s.refStaleDays = oneOf(x.refStaleAfterDays, REF_STALE_CHOICES, d.refStaleAfterDays);
   /* How many copies of the lists are kept, and after how many days a finished item is archived, belong to this PC like the lists themselves:
      a settings backup does not carry them, and a restore or a reset leaves them as they are. Otherwise a backup could remove copies unasked. */
   s.capture = typeof x.capture === "boolean" ? x.capture : d.capture; s.op = x.opacity === undefined ? d.opacity : (n => isFinite(n) ? Math.min(100, Math.max(40, Math.round(n))) : 100)(+x.opacity);

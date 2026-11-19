@@ -584,7 +584,10 @@ public partial class SettingsWindow : Window
     internal bool OpenSection(string name)
     {
         if (this.FindControl<Expander>(name) is not { IsVisible: true } section) return false;
-        section.IsExpanded = true; section.BringIntoView();
+        // Opened for the person by the guide, not by the person: it is not counted as a section they use.
+        bool was = _loading; _loading = true;
+        try { section.IsExpanded = true; } finally { _loading = was; }
+        section.BringIntoView();
         return true;
     }
 

@@ -23,6 +23,8 @@ REF.push({ saved: null, now, days: 45, zone: 'UTC' }, { saved: 1e20, now, days: 
     guide: [[0, 'Ctrl+Alt+A', 'Offline · Local only'], [1, 'Ctrl+Alt+A', 'Offline · Local only'], [1, '', ''], [1, null, null], [1, '  ', 'Switched on: Claude (AI)'], [1, 'Ctrl+$&+A', 'x'], [1, '{connections}', 'x'], [3, 'k', '{shortcut}'], [2, 'k', 'c'], [3, 'k', 'Offline · Local only'],
       [3, 'k', 'Switched on: Claude (AI) · Outlook (read only)'], [3, 'k', 'A line that ends with a full stop.'], [4, 'k', 'c'], [-1, 'k', 'c'], [5, 'k', 'c'], [99, 'k', 'c'], [2.9, 'k', 'c'], ['3', 'k', 'c'], ['x', 'k', 'c'], [null, 'k', 'c']]
       .map(([i, shortcut, on]) => ({ i, shortcut, on, result: guideStep(i, shortcut, on) })),
+    said: GUIDE_SAID,
+    shortcuts: [['Ctrl+Alt+A', true], ['Ctrl+Alt+A', false], ['Ctrl+Alt+A', undefined], ['', false], [null, true], ['  Ctrl+Shift+K ', false]].map(([key, working]) => ({ key, working: working === undefined ? null : working, text: guideShortcut(key, working), line: guideStep(1, guideShortcut(key, working), '').lines[0] })),
     opensAtStart: [true, false, null, undefined, 'true', 1, 0].map(seen => ({ seen: seen === undefined ? 'undefined' : seen, opens: guideOpensAtStart(seen) })),
     ref: ref.map(c => ({ ...c, saved: Number.isFinite(c.saved) && Math.abs(c.saved) < 9e15 ? c.saved : c.saved === null ? null : 'huge', result: refSaved(c.saved, c.now, c.days, c.zone) })),
   }), REF);

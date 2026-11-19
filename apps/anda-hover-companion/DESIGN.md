@@ -457,7 +457,7 @@ Rules taken from Apple's published human-interface guidance (clarity, deference,
 - **Answer first.** A review begins with one line (what was checked, and whether anything needs a second look); detail follows.
 - **Fewer choices up front.** Five Settings groups instead of eight; one solid look; no transparency or appearance picker until asked for. Hidden is not removed.
 - **Nothing happens by itself.** A suggestion is only ever a button. Quick checks run when pressed. Nothing is sent without a preview and a press of Send.
-- **No teaching screens.** There is no *Getting started* card and no step list; the first run is the tool.
+- **No teaching screens.** There is no *Getting started* card and no step list; the first run is the tool. (Changed in round 32 by the owner's decision: a guide of five steps opens once, at the first start; see §11p.)
 
 What this does **not** prove: whether a real person finds it lighter. That is a hypothesis to time with testers, with and without the hidden tools.
 
@@ -1266,8 +1266,17 @@ tool should work as it is, with nothing to set up first). So the owner was asked
 
 **How it behaves.** One step at a time, with its place ("Step 2 of 5"). *Next* is the default button, so Enter walks it; *Back*; *Skip the
 guide* at every step (it reads *Close* on the last, where *Next* reads *Done*); Esc closes it. The guide asks for nothing and changes
-nothing: its three buttons open a card of the bundled sample record (whatever data of the person's own is loaded), Settings at the files,
-and the list of connections, and each says in a status line what it did. The guide stays open behind what it opened.
+none of the person's settings or data: its three buttons open a card of the bundled sample record (whatever data of the person's own is
+loaded), Settings at the files, and the list of connections, and each says in a status line what it did. What it opens is in front of it.
+
+**After the separate review** (15 findings; `VERIFICATION.md`, round 32). The sample card is always the full card, stays until it is closed
+(a card that hid itself after ten seconds would have made the guide's sentence false), and Esc closes it before it closes the guide. With
+the person's own data loaded, notes are off on the sample card and the guide says so, because a note is kept under the ANDA number and
+would land among their own. Four sentences of the guide were not true of the product and were rewritten (what "leaves this PC", the weekly
+copy, which windows carry the foot line, what Esc does on the card). A shortcut another program holds is not taught: step 2 says so.
+Where the PC does not let the settings be saved, the guide says it will open again. Opening Settings from the guide is not counted as a
+section the person uses. The first-start rule (`FirstStart`) and the guide's wiring (`FirstStepsWiring`) were taken out of the app's
+composition so that they can be tested; what remains there is held by reading its text, and is said to be.
 
 **Once.** In the app, the first start is the start at which the settings say the tool has not run before (`FirstRunDone`, which already
 existed: until this round the sample card opened by itself at that start; the guide takes its place and offers the card as its second

@@ -125,13 +125,10 @@ public partial class App : Application
                     desktop.Shutdown(code);
                 }, DispatcherPriority.Background);
             }
-            else if (Guide.OpensAtStart(_settings.FirstRunDone))
+            else
             {
-                // The first start: the guide of five steps opens by itself, once. That it was shown is saved before it opens, so that a crash,
-                // a closed window or a second start can never bring it up by itself again. It is opened again from the tray menu.
-                _settings.FirstRunDone = true;
-                SettingsService.Save(_settings);
-                Dispatcher.UIThread.Post(OpenFirstSteps, DispatcherPriority.Background);
+                // The first start: the guide of five steps opens by itself, once (FirstStart has the rule). It is opened again from the tray menu.
+                FirstStart.Run(_settings, s => SettingsService.Save(s), note => Dispatcher.UIThread.Post(() => OpenFirstSteps(note), DispatcherPriority.Background), diagnosticRun: false);
             }
         }
 
@@ -260,17 +257,19 @@ public partial class App : Application
         OpenFullCard(record, near, mini);
     }
 
-    private void OpenFullCard(AndaRecord record, PixelPoint near, bool mini)
+    /// <param name="stay">The card does not hide itself after a while: it was opened by the guide, which says so.</param>
+    /// <param name="notes">False for a sample card opened while the person's own data is loaded: a note typed there would be kept under a number of theirs.</param>
+    private void OpenFullCard(AndaRecord record, PixelPoint near, bool mini, bool stay = false, bool notes = true)
     {
         CloseOpenCards();
         var card = new CardWindow(_briefs, _repository.Find)
         {
-            AutoHideSeconds = _settings.AutoHideSeconds,
+            AutoHideSeconds = stay ? 0 : _settings.AutoHideSeconds,
             Calendar = _calendar, Watch = new WatchSettings(_settings.HolidayLeadDays, _settings.StaleAfterDays), StaleDays = () => _settings.StaleAfterDays,
             Today = Today, Reference = ReferenceFor, QuickReplies = () => _replies.Replies,
             Outlook = Outlook,
             Agents = _agents, AtRisk = IsAtRisk, AddTodos = AddAgentTodos,
-            QuickNotes = _quickNotes, AndaPageTemplate = () => _settings.AndaPageUrl,
+            QuickNotes = notes ? _quickNotes : null, AndaPageTemplate = () => _settings.AndaPageUrl,
         };
         card.Closed += (_, _) => { if (ReferenceEquals(_card, card)) _card = null; };
         _card = card;
@@ -316,7 +315,7 @@ public partial class App : Application
     }
 
     private ReferenceInfo? ReferenceFor(AndaRecord record) =>
-        ReferenceResolver.For(record, _drugs, _drugsMessage, _settings.ReferenceDataPath, _drugsLoading, new ReferenceTime(Clock.Ms(Clock.UtcNow()), _settings.RefStaleAfterDays, Clock.Zone));
+        ReferenceResolver.For(record, _drugs, _drugsMessage, _settings.ReferenceDataPath, _drugsLoading, ReferenceResolver.TimeFor(_settings));
 
     // ---------- review a draft ----------
 
@@ -386,7 +385,7 @@ public partial class App : Application
     {
         if (_settingsWindow is not null) { _settingsWindow.Activate(); return; }
         _settingsWindow = new SettingsWindow(_settings, _prompts, ApplySettings,
-            new SettingsHooks(() => HotkeyService.Report(_hotkeys?.Status ?? Array.Empty<HotkeyStatus>()), () => _portfolio, () => _drugsMessage, MouseStatusLine, Outlook,
+            new SettingsHooks(() => HotkeyService.Report(_hotkeys?.Status ?? Array.Empty<HotkeyStatus>()), () => _portfolio, () => _drugs?.LoadedMessage(ReferenceResolver.TimeFor(_settings)) ?? _drugsMessage, MouseStatusLine, Outlook,
                 OpenTodo: OpenTodoWindow, RunAction: RunActionFromMenu, AgentProblem: _agents.SetupProblem, ClearFinished: () => _todo.ClearCompleted(),
                 OpenMyTodo: OpenMyTodoWindow, OpenNotes: () => OpenNotes(""), ClearMyTodoFinished: () => _myTodo.ClearFinished(), Hotkeys: () => _hotkeys?.Status ?? Array.Empty<HotkeyStatus>()), _replies);
         _settingsWindow.Closed += (_, _) => _settingsWindow = null;
@@ -427,7 +426,7 @@ public partial class App : Application
         about.Click += (_, _) => OpenAbout();
         menu.Add(about);
         var help = new NativeMenuItem("Help: first steps…");
-        help.Click += (_, _) => OpenFirstSteps();
+        help.Click += (_, _) => OpenFirstSteps(null);
         menu.Add(help);
         var todo = new NativeMenuItem("ANDA to-do list…");
         todo.Click += (_, _) => OpenTodoWindow();

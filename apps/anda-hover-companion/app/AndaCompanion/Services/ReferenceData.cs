@@ -78,7 +78,7 @@ public sealed class DrugsAtFdaFile
                 string appl = r["ApplNo"].Trim(); var d = DateOnly.FromDateTime(dt);
                 if (!file._latestLabeling.TryGetValue(appl, out var cur) || d > cur) file._latestLabeling[appl] = d;
             }
-            message = $"Drugs@FDA file loaded ({file.ReferenceProducts} reference products, file saved {file.FileDate.ToString("MMM d, yyyy", Inv)}).";
+            message = file.LoadedMessage();
             return file;
         }
         catch (Exception ex) when (ex is InvalidDataException or IOException or UnauthorizedAccessException)
@@ -102,15 +102,24 @@ public sealed class DrugsAtFdaFile
         return _latestLabeling.TryGetValue(appls[0], out var date) ? (date, "") : (null, "no approved labeling submission found for the reference listed drug");
     }
 
+    /// <summary>When the file was saved, in the words every place uses: with a time, its age and STALE; without one, the day alone.</summary>
+    public (string Text, bool Stale) Saved(ReferenceTime? time) =>
+        time is null ? ($"saved {FileDate.ToString("MMM d, yyyy", Inv)}", false) : Clock.RefSaved(Clock.Ms(SavedUtc), time.NowMs, time.StaleDays, time.Zone);
+
+    /// <summary>What Settings says of the file: the same day and age as the card's line, and STALE when the card says so.</summary>
+    public string LoadedMessage(ReferenceTime? time = null) =>
+        $"Drugs@FDA file loaded ({ReferenceProducts} reference products, file {Saved(time).Text}).";
+
     /// <param name="time">With it, the line also says how long ago the file was saved and STALE once it is older than the days chosen; without it, the day alone.</param>
     public ReferenceInfo Describe(AndaRecord r, ReferenceTime? time = null)
     {
         var (date, message) = RldLabeling(r);
-        var saved = time is null ? ($"saved {FileDate.ToString("MMM d, yyyy", Inv)}", false) : Clock.RefSaved(Clock.Ms(SavedUtc), time.NowMs, time.StaleDays, time.Zone);
+        var saved = Saved(time);
+        // Where the file has no date for this ANDA, an old file is still said to be old: a newer one might have the date.
         string rld = date is { } d
-            ? $"{d.ToString("MMM d, yyyy", Inv)} · Drugs@FDA, file {saved.Item1}"
-            : $"not available: {message}";
-        return new ReferenceInfo(PsgOf(r), rld, date is not null && saved.Item2);
+            ? $"{d.ToString("MMM d, yyyy", Inv)} · Drugs@FDA, file {saved.Text}"
+            : $"not available: {message}" + (saved.Stale ? $" · Drugs@FDA, file {saved.Text}" : "");
+        return new ReferenceInfo(PsgOf(r), rld, saved.Stale);
     }
 
     public static string? PsgOf(AndaRecord r) =>

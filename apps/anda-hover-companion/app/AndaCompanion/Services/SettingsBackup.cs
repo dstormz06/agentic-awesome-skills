@@ -43,6 +43,19 @@ public static class SettingsBackup
         }, Json);
     }
 
+    /// <summary>The settings this version knows that the backup's text does not hold.</summary>
+    internal static IReadOnlyList<string> Absent(string json)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            if (!doc.RootElement.TryGetProperty(nameof(Backup.Settings), out var held) || held.ValueKind != JsonValueKind.Object) return Array.Empty<string>();
+            var present = held.EnumerateObject().Select(p => p.Name).ToHashSet(StringComparer.Ordinal);
+            return typeof(Settings).GetProperties().Where(p => p.CanRead && p.CanWrite && !present.Contains(p.Name)).Select(p => p.Name).ToList();
+        }
+        catch (JsonException) { return Array.Empty<string>(); }
+    }
+
     /// <summary>Applies a backup to the running settings. Returns a plain sentence either way. A refused file changes nothing.</summary>
     public static (bool Ok, string Message) Import(string json, Settings target, PromptLibraryService lenses, QuickReplyService replies, string? keepBeforeIn = null)
     {
@@ -61,7 +74,8 @@ public static class SettingsBackup
             before = SafeFile.Write(Path.Combine(keepBeforeIn, name), Export(target, lenses, replies)) ? $" What you had before was kept as {name}." : " What you had before could not be kept as a file.";
         }
         var clean = SettingsService.Normalize(backup.Settings);
-        CopyFrom(target, clean, skip: ThisPcOnly);
+        // A backup written before a setting existed does not hold it. What the person has now stays: it is not set back to the usual value.
+        CopyFrom(target, clean, skip: ThisPcOnly.Concat(Absent(json)).ToArray());
         // A backup that holds no list of prompts or replies leaves the person's own alone: an absent list is not an empty one.
         if (backup.Lenses is not null) lenses.ReplaceAll(backup.Lenses);
         if (backup.Replies is not null) replies.ReplaceAll(backup.Replies);

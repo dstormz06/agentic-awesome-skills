@@ -49,7 +49,7 @@ public sealed class NativeHostContext
             reference = r =>
             {
                 if (!tried) { tried = true; drugs = DrugsAtFdaFile.TryLoad(settings.ReferenceDataPath, out drugMessage); }
-                return ReferenceResolver.For(r, drugs, drugMessage, settings.ReferenceDataPath, loading: false, new ReferenceTime(Clock.Ms(Clock.UtcNow()), settings.RefStaleAfterDays, Clock.Zone));      // as the app's own card
+                return ReferenceResolver.For(r, drugs, drugMessage, settings.ReferenceDataPath, loading: false, ReferenceResolver.TimeFor(settings));      // as the app's own card
             };
         }
         else reference = r => ReferenceResolver.For(r, null, "", null, loading: false);
@@ -82,6 +82,9 @@ public static class ReferenceResolver
     /// What the card's PSG and RLD lines say, shared by the app and the extension host so the two never differ. Always two
     /// lines: a date with where it came from, or a brief reason there is none. Never null, never a guess.
     /// </summary>
+    /// <summary>Now, the days the person chose for reference files, and the zone in use: what the app's card and the browser host both pass.</summary>
+    public static ReferenceTime TimeFor(Settings settings) => new(Clock.Ms(Clock.UtcNow()), settings.RefStaleAfterDays, Clock.Zone);
+
     public static ReferenceInfo For(AndaRecord record, DrugsAtFdaFile? drugs, string drugsMessage, string? referencePath, bool loading, ReferenceTime? time = null)
     {
         string psg = DrugsAtFdaFile.PsgOf(record) ?? DemoText(record, psg: true) ?? NoPsg;

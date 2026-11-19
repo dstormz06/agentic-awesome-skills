@@ -357,14 +357,15 @@ public static class SettingsService
         return loaded;
     }
 
-    public static void Save(Settings s, string? path = null)
+    /// <returns>Whether the file was written. A PC that does not let it be written loses nothing but the change; who needs to know can ask.</returns>
+    public static bool Save(Settings s, string? path = null)
     {
         path ??= AppPaths.SettingsFile;
         try
         {
             s.SchemaVersion = Settings.CurrentSchema;
-            SafeFile.Write(path, JsonSerializer.Serialize(s, new JsonSerializerOptions { WriteIndented = true }));      // beside the file, then moved over it
+            return SafeFile.Write(path, JsonSerializer.Serialize(s, new JsonSerializerOptions { WriteIndented = true }));      // beside the file, then moved over it
         }
-        catch (Exception ex) when (ex is JsonException or NotSupportedException) { /* best effort */ }
+        catch (Exception ex) when (ex is JsonException or NotSupportedException) { return false; }
     }
 }

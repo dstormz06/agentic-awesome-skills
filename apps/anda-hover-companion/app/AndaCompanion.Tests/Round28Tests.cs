@@ -164,7 +164,9 @@ public class Round28Tests
         lenses.Upsert(new LensPrompt("My own lens", "Mine.")); int lensCount = lenses.Prompts.Count, replyCount = replies.Replies.Count;
         var target = new Settings { Tone = "Warm" };
 
-        var (ok, message) = SettingsBackup.Import("{\"Version\":1,\"Settings\":{}}", target, lenses, replies, keepBeforeIn: dir);
+        // Round 32: a setting the backup does not hold is left as it is, as a list it does not hold always was: absent is not "the usual value".
+        Assert.True(SettingsBackup.Import("{\"Version\":1,\"Settings\":{}}", target, lenses, replies).Ok); Assert.Equal("Warm", target.Tone);
+        var (ok, message) = SettingsBackup.Import("{\"Version\":1,\"Settings\":{\"Tone\":\"\"}}", target, lenses, replies, keepBeforeIn: dir);
         Assert.True(ok, message);
         Assert.Equal(lensCount, lenses.Prompts.Count); Assert.Equal(replyCount, replies.Replies.Count); Assert.NotNull(lenses.GetText("My own lens"));
         Assert.Contains("The backup held no prompts or quick replies, so yours were kept.", message);

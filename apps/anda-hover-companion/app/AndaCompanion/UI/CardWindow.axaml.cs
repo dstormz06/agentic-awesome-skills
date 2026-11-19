@@ -114,7 +114,7 @@ public partial class CardWindow : Window
         QuickNoteBox.AddHandler(KeyDownEvent, (_, e) =>
         {
             if (e.Key == Key.Enter && e.KeyModifiers.HasFlag(KeyModifiers.Control)) { SaveQuickNote(); e.Handled = true; }
-            else if (e.Key == Key.Escape) { Root.Focus(); Focus(); e.Handled = true; }
+            else if (e.Key == Key.Escape) { LeaveNoteBox(); e.Handled = true; }
         }, Avalonia.Interactivity.RoutingStrategies.Tunnel);
         QuickNoteBox.PropertyChanged += (_, e) => { if (e.Property == TextBox.TextProperty) QuickNoteCount.Text = $"{(QuickNoteBox.Text ?? "").Length} / {QuickNotesService.MaxLength}"; };
         // A click elsewhere closes the card, unless it is pinned or a note is half typed: a person reads the email while writing the note.
@@ -156,6 +156,16 @@ public partial class CardWindow : Window
             Root.Opacity = 1; scale.ScaleX = 1; scale.ScaleY = 1;
             _autoHide.Start(AutoHideSeconds);
         };
+    }
+
+    /// <summary>
+    /// Takes the keyboard out of the note box and gives it to the card itself, so that the card's own keys work again: the next Esc closes
+    /// the card. (Until round 32 this asked two things that cannot take the keyboard to take it, so the caret stayed and Esc did nothing.)
+    /// </summary>
+    private void LeaveNoteBox()
+    {
+        Root.Focusable = true; KeyboardNavigation.SetIsTabStop(Root, false);      // it can hold the keyboard, and is not a stop of its own for Tab
+        Root.Focus(NavigationMethod.Pointer);                                      // without a focus ring: nothing was chosen, the box was left
     }
 
     private void OnKey(object? sender, KeyEventArgs e)
