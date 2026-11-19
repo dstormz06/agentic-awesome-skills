@@ -3,6 +3,11 @@
 A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
 **All bundled data is fictional.** Not an FDA product; a concept prototype.
 
+> **New in round 30: a copy of each list after every change, and one press to put a copy back.** Tray menu: *Backups and archive…*. The app keeps copies of your five lists (the two to-do lists, notes on ANDAs, the prompt library, quick replies) in
+> `backups` in its own folder, after every change. Choose a copy and press *Restore this copy*: nothing is asked, because the list as it was a moment before stays among the copies. You choose how many copies are kept (30 unless you change it); older
+> copies are removed by the app, your lists and the archive never are. The same window searches the archive of finished to-do items, puts an item back on its list, and lets you choose after how many days a finished item is archived.
+> See `../DESIGN.md` §11n and `../SECURITY.md`.
+>
 > **New in round 29: you can always see what is switched on.** Every window has one line at its foot: *Offline · Local only*, or each thing that is switched on by name. Press it (or the tray menu's *Connections and event log…*) for a list of what each
 > connection sends, where it goes and what is kept, and for the **event log**: when a connection was switched on or off, when something was sent and how large it was, when a file was set aside or restored, what was deleted at your request. The log is a plain
 > file, `events.csv`, in the app's folder; it is only ever added to and can hold nothing but its own fixed sentences and counts: never an ANDA number, a name, an address or any text of yours. A request is written before it leaves. *About and what changed…* shows the version and the changes. In *Compare two files*, switching the weekly copy off now

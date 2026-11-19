@@ -1122,6 +1122,45 @@ in the list were corrected to what the code does (the whole record goes to the A
 the app closes; Outlook's sign-in address is named); the Connections list scrolls; and in the simulation the line stays in sight at the foot of
 a window that scrolls.
 
+## 11n. Round 30: a copy of each list after every change, one press to put a copy back, the archive searched and put back from
+
+The owner's standing rules ask that stored items get a local backup on every change and daily, with a number of versions the person sets and
+one-click restore; that finished items are archived after a number of days the person sets, and can be searched and restored; and that nothing
+is deleted by the tool on its own. Round 28 stopped the deleting; this round builds the rest. Before it started the owner was asked one question,
+because two of the rules pull against each other: a set number of versions means older copies go, and "no automatic deletion" means nothing goes.
+The answer: **backup copies follow the number the person sets, and the screen says that older copies are removed; the lists and the archive
+themselves are never removed by the app.**
+
+**What is copied.** The five lists the person keeps in the tool: the ANDA to-do list, My to-do list, notes on ANDAs, the prompt library, and
+quick replies. Settings are not among them: they have their own last good copy, their own export and their own copy before a restore (round 28).
+
+**When.** After every change that is written, and once at start (so a list that was never copied, or changed while the app was closed, has a
+copy). A list whose text equals its newest copy is not copied again. So the newest copy is always the list as it is now.
+
+**How many stay.** One number N, chosen in the window (10, 30, 60 or 100; 30 unless changed): the newest N copies, and the last copy of each of
+the newest N days that have one. The second half is the "daily" part of the rule, and it is what keeps a busy afternoon from pushing out last
+week. A day is the person's day, in their time zone: the night the clocks change is one day, 25 or 23 hours long, not two days and not none.
+Choosing a smaller number removes copies at once and the window says how many; choosing a larger one removes nothing.
+
+**Putting a copy back** is one press. Nothing is asked, because nothing is lost: the list as it was a moment before is among the copies (it
+was the newest one), the list after the restore becomes the newest, and the window says so. Undoing a restore is restoring the copy before it.
+
+**The archive.** Finished items leave their list after a number of days the person chooses (7, 30, 90 or 365; 30 unless changed) and are kept in
+the archive, as since round 28. The window now shows the archive of both lists, newest first, searches it by words in the title or digits of the
+number, and puts an item back on its list as an open item. The archive only ever gains lines: putting an item back adds a line that says so,
+and the item's own line stays. What comes back from the archive is cleaned the way a typed item is, because the archive is a plain file.
+
+**Not built, and why.** A free manual order of items ("reorder"): both lists are ordered by urgency and date on purpose, so a hand-made order
+would fight the rule that puts what is due first. An item is moved up by marking it urgent or giving it a date. This is in the report to the
+owner as a question, not worked around. Also not built: backup copies of the weekly sheet copies or of the event log; the extension.
+
+**How the two programs are kept the same.** `mockup/round30-golden.json` (written by `tools/round30-golden.cjs`) holds the simulation's answers
+for 20 moments and the day each falls on (both clock-change nights in New York, and zones far from UTC), 12 sets of copies and which of them
+stay, and 11 views of an archive with damaged lines in it; the app's tests reproduce them.
+
+**In the app only:** the copies are files (`backups/<list>/<list>.<UTC time>.json` in the app's folder). In the simulation they last until the
+page is closed.
+
 ## 12. Engagement roadmap — seven features that make it the daily habit
 
 Engagement here means *the tool pays the user every time they touch it* — never
