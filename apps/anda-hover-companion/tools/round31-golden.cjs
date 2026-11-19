@@ -9,10 +9,10 @@ const OUT = DIR + 'round31-golden.json';
 const Z = s => Date.parse(s);
 const M = 60000, H = 60 * M, D = 24 * H;
 const ZONES = ['America/New_York', 'America/Chicago', 'America/Denver', 'America/Phoenix', 'America/Los_Angeles', 'America/Anchorage', 'Pacific/Honolulu', 'America/Puerto_Rico', 'UTC', 'Etc/UTC',
-  'Europe/Berlin', 'Asia/Kolkata', 'America/St_Johns', 'Pacific/Kiritimati', 'Not/AZone'];
+  'Europe/Berlin', 'Asia/Kolkata', 'America/St_Johns', 'Pacific/Kiritimati', 'Not/AZone', 'America/Detroit', 'America/Indiana/Indianapolis', 'America/Boise', 'America/Juneau', 'America/Adak', 'Pacific/Guam', 'Australia/Sydney'];
 // Both nights the clocks change in the United States in 2026 (Mar 8 and Nov 1), each side of them; noon, midnight, a year's end, a leap day.
 const MOMENTS = ['2026-03-08T06:59:59Z', '2026-03-08T07:00:00Z', '2026-03-08T09:59:59Z', '2026-03-08T10:00:00Z', '2026-11-01T05:59:59Z', '2026-11-01T06:00:00Z', '2026-11-01T08:59:59Z', '2026-11-01T09:00:00Z',
-  '2026-07-16T14:42:05Z', '2026-07-16T16:00:00Z', '2026-07-16T04:00:00Z', '2026-12-31T23:59:59Z', '2027-01-01T00:00:00Z', '2028-02-29T12:34:56Z', '2026-01-15T00:05:09Z'].map(Z);
+  '2026-07-16T14:42:05Z', '2026-07-16T16:00:00Z', '2026-07-16T04:00:00Z', '2026-12-31T23:59:59Z', '2027-01-01T00:00:00Z', '2028-02-29T12:34:56Z', '2026-01-15T00:05:09Z', '1967-07-04T18:00:00Z', '1980-01-15T18:00:00Z', '1943-01-15T18:00:00Z', '1969-12-31T23:59:59.500Z', '2006-12-31T23:59:59Z', '2007-01-01T00:00:00Z', '2007-03-11T07:00:00Z', '2007-11-04T06:00:00Z'].map(Z);
 const now = Z('2026-11-18T20:00:00Z');
 const AGO = [0, 1, 59 * 1000, 60 * 1000, 61 * 1000, 59 * M + 59000, H, H + 1, 119 * M, 2 * H, 23 * H + 59 * M, D, D + H, 2 * D - 1, 2 * D, 6 * D + 23 * H, 7 * D, 30 * D, 365 * D, -1000, -59 * 1000, -60 * 1000, -61 * 1000, -D];
 const FRESH = [];
@@ -27,11 +27,15 @@ FRESH.push({ source: 'Fictional demo data · extract #412', asOf: null, now, day
     zoneChoices: TZ_CHOICES, abbreviations: TZ_ABBR, staleChoices: STALE_CHOICES, staleDefault: STALE_DEFAULT,
     labels: zones.flatMap(zone => moments.map(ms => ({ zone, ms, offset: zoneClock(ms, zone).offset, abbr: zoneAbbr(ms, zone), label: timeLabel(ms, zone, false), withSeconds: timeLabel(ms, zone, true), time: timeOfDay(ms, zone, false), timeWithSeconds: timeOfDay(ms, zone, true) }))),
     unknown: [timeLabel(null, 'UTC', false), timeLabel(NaN, 'UTC', true), relTime(null, 5), relTime(5, NaN), timeOfDay(null, 'UTC', true)],
+    bounds: [TIME_MIN, TIME_MAX, TIME_MIN - 1, TIME_MAX + 1, 9e15, -9e15, 1e20, -1e20, Infinity].map(ms => ({ ms: Number.isFinite(ms) ? ms : null, known: timeKnown(ms), label: timeLabel(ms, 'America/New_York', true), time: timeOfDay(ms, 'UTC', false), ago: relTime(ms, 0), fresh: freshLine('X', ms, 0, 7, 'UTC') })),
+    said: [['', 'America/New_York'], ['', 'Asia/Kolkata'], ['America/Chicago', 'America/New_York'], ['Pacific/Honolulu', 'UTC'], ['UTC', 'America/Denver'], ['Mars/Olympus', 'America/New_York']].flatMap(([chosen, computer]) => [now, moments[8]].map(ms => ({ chosen, computer, ms, text: zoneSaid(chosen, computer, ms) }))),
+    pages: [['Hand-off', [], 'Nov 19, 2026', false, undefined], ['Hand-off', [{ status: 'ANDA 216482: goal Jan 30, 2027.', watch: ['This data is 9 days old (as of Nov 10).'], open: [], notes: [] }], 'Nov 19, 2026', true, 'Your portfolio file · my sheet.csv · as of Nov 10, 2026, 2:12 AM HST (9 days ago) · STALE: older than 7 days'],
+      ['Meeting page', [{ status: 'ANDA 214990: goal Aug 15, 2026.', watch: [], open: ['Send the minutes (Nov 20)'], notes: ['You · Nov 18, 2026, 3:12 PM EST: called the agent'] }], 'Nov 19, 2026', false, 'Fictional demo data · extract #412 · as of Jul 16, 2026, 7:12 AM EDT (sample data, which does not change)']].map(([title, entries, today, notes, line]) => ({ title, entries, today, notes, line: line ?? null, lines: handoffText(title, entries, today, notes, line) })),
     relative: ago.map(a => ({ then: now - a, now, text: relTime(now - a, now) })),
     fresh: fresh.map(c => ({ ...c, result: freshLine(c.source, c.asOf, c.now, c.days, c.zone) })),
   }), [ZONES, MOMENTS, now, AGO, FRESH]);
   const text = JSON.stringify(doc) + '\n';
-  const counts = `${doc.labels.length} moments in ${ZONES.length} zones, ${doc.relative.length} ages, ${doc.fresh.length} data lines`;
+  const counts = `${doc.labels.length} moments in ${ZONES.length} zones, ${doc.relative.length} ages, ${doc.fresh.length} data lines, ${doc.bounds.length} moments at and past the ends, ${doc.said.length} sentences of Settings, ${doc.pages.length} pages`;
   if (process.env.WRITE === '1') { fs.writeFileSync(OUT, text); console.log(`wrote ${counts}, ${text.length} bytes; page errors: ${JSON.stringify(errs)}`); }
   else { const have = fs.existsSync(OUT) ? fs.readFileSync(OUT, 'utf8') : ''; console.log(have === text ? `${counts}, 0 mismatches; page errors: ${JSON.stringify(errs)}` : 'MISMATCH with round31-golden.json'); if (have !== text || errs.length) process.exitCode = 1; }
   await b.close();

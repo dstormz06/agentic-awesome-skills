@@ -237,7 +237,8 @@ public partial class App
             var ctx = CardCtx();
             var which = meeting ? numbers! : HandoffData.Order(_repository, ctx, onlyNeedALook);
             return Handoff.Text(meeting ? "Meeting page" : "Hand-off", HandoffData.Entries(which, _repository, ctx, _quickNotes, _todo.Items, _myTodo.Items),
-                ctx.Today.ToString("MMM d, yyyy", System.Globalization.CultureInfo.InvariantCulture), withNotes);
+                ctx.Today.ToString("MMM d, yyyy", System.Globalization.CultureInfo.InvariantCulture), withNotes,
+                HandoffData.DataLine(which, _repository, Clock.Ms(Clock.UtcNow()), _settings.StaleAfterDays, Clock.Zone));
         });
         win.Closed += (_, _) => { if (ReferenceEquals(_handoffWindow, win)) _handoffWindow = null; };
         _handoffWindow = win;

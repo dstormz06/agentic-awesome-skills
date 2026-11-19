@@ -94,6 +94,9 @@ public sealed class Backups
     private readonly string _dir;
     private readonly Func<int> _keep;
     private readonly Func<TimeZoneInfo> _zone;
+
+    /// <summary>The zone whose days the copies are counted by.</summary>
+    internal TimeZoneInfo DayZone => _zone();
     private readonly Func<DateTime> _utcNow;
     private readonly object _gate = new();
     private readonly List<BackupList> _lists = new();
@@ -102,7 +105,8 @@ public sealed class Backups
     /// <param name="keep">How many copies the person chose to keep, asked each time.</param>
     public Backups(string dir, Func<int> keep, Func<TimeZoneInfo>? zone = null, Func<DateTime>? utcNow = null)
     {
-        _dir = dir; _keep = keep; _zone = zone ?? (() => Clock.Zone); _utcNow = utcNow ?? (() => DateTime.UtcNow);
+        _dir = dir; _keep = keep; _utcNow = utcNow ?? (() => DateTime.UtcNow);
+        _zone = zone ?? (() => Clock.Local);      // the computer's day, not the zone chosen for writing times: a change of zone must never remove a copy
     }
 
     public IReadOnlyList<BackupList> Lists { get { lock (_gate) return _lists.ToList(); } }

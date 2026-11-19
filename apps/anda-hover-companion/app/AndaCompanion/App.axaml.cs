@@ -248,7 +248,7 @@ public partial class App : Application
         if (ThemeManager.Current.IsCompact)
         {
             CloseOpenCards();
-            var compact = new CompactCardWindow(record, () => OpenFullCard(record, near, mini: false))
+            var compact = new CompactCardWindow(record, () => OpenFullCard(record, near, mini: false), () => Clock.DataLine(record, Clock.Ms(Clock.UtcNow()), _settings.StaleAfterDays, Clock.Zone))
                 { AutoHideSeconds = _settings.AutoHideSeconds };
             compact.Closed += (_, _) => { if (ReferenceEquals(_compact, compact)) _compact = null; };
             _compact = compact;
@@ -541,7 +541,7 @@ public partial class App : Application
         Clock.ZoneId = _settings.TimeZone;      // first: what follows writes times
         ConnectionsChanged();
         _todo.ArchiveAfterDays = _myTodo.ArchiveAfterDays = _settings.ArchiveAfterDays;
-        _backupsWindow?.Paint(); _card?.MinutePassed();      // an open window follows a new zone, or new days before "stale", at once
+        _backupsWindow?.Paint(); _card?.TimeChanged();      // an open window follows a new zone, or new days before "stale", at once
         ThemeManager.Apply(Edition.Appearance(_settings), Edition.Opacity(_settings));
         UsageLog.Configure(_settings.UsageLog && SelfTestRun is null);
         _hotkeys?.Reconfigure(HotkeyBindings());

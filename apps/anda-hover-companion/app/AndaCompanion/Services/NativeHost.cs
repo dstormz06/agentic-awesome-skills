@@ -25,7 +25,10 @@ public sealed class NativeHostContext
     public string DataFile { get; init; } = "";
     public Func<AndaRecord, ReferenceInfo?>? Reference { get; init; }
 
-    public CardContext Card() => new(Today(), Calendar, Settings.HolidayLeadDays, Settings.UrgentLateDays, Reference);
+    public CardContext Card() => new(Today(), Calendar, Settings.HolidayLeadDays, Settings.UrgentLateDays, Reference, Settings.StaleAfterDays, Clock.Ms(Clock.UtcNow()));
+
+    /// <summary>The card's data line as the app writes it: source, as of, how long ago, STALE. The browser shows the app's words, so the two never disagree.</summary>
+    public string Freshness(AndaRecord r) => Clock.DataLine(r, Clock.Ms(Clock.UtcNow()), Settings.StaleAfterDays, Clock.Zone).Text;
 
     /// <summary>Builds the context the way the app does: the person's portfolio if one is set and readable, otherwise the demo records.</summary>
     public static NativeHostContext Create(Settings settings, bool useRealFiles = true)
@@ -149,7 +152,7 @@ public sealed class NativeHostSession(NativeHostContext ctx)
         if (number is null) return Err("bad-number", "That is not an ANDA number.");
         if (ctx.Repository.Find(number) is not { } record)
             return Err("not-found", ctx.DataKind == "portfolio" ? $"{number} is not in your portfolio ({ctx.DataFile})" : $"{number} is not in the available records.");
-        var card = CardModels.Build(record, ctx.Card());
+        var card = CardModels.Build(record, ctx.Card()) with { Freshness = ctx.Freshness(record) };
         return new JsonObject { ["ok"] = true, ["card"] = JsonSerializer.SerializeToNode(card, CardModels.Json) };
     }
 
@@ -252,7 +255,9 @@ public static class NativeHost
     public static int Run(string[] args)
     {
         NativeHostRegistration.AdoptInstalledHome();
-        var ctx = NativeHostContext.Create(SettingsService.Load());
+        var settings = SettingsService.Load();
+        Clock.ZoneId = settings.TimeZone;      // the browser's card is written in the zone chosen in the app
+        var ctx = NativeHostContext.Create(settings);
         using var input = Console.OpenStandardInput();
         using var output = Console.OpenStandardOutput();
         return Serve(input, output, ctx);

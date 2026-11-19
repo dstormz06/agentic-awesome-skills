@@ -17,7 +17,8 @@ public class Round31Tests : IDisposable
 {
     private readonly string _zoneBefore = Clock.ZoneId;
     private readonly Func<DateTime> _nowBefore = Clock.UtcNow;
-    public void Dispose() { Clock.ZoneId = _zoneBefore; Clock.UtcNow = _nowBefore; }
+    private readonly Func<string, TimeZoneInfo?> _findBefore = Clock.Find;
+    public void Dispose() { Clock.ZoneId = _zoneBefore; Clock.UtcNow = _nowBefore; Clock.Find = _findBefore; }
 
     private static string Folder(params string[] parts)
     {
@@ -51,7 +52,8 @@ public class Round31Tests : IDisposable
     {
         using var doc = Golden(); var bad = new List<string>(); var root = doc.RootElement; int n = 0;
         Same(bad, "zones offered", JsonSerializer.Serialize(root.GetProperty("zoneChoices")), JsonSerializer.Serialize(Clock.ZoneChoices.Select(c => new[] { c.Id, c.Name })));
-        Same(bad, "abbreviations", JsonSerializer.Serialize(root.GetProperty("abbreviations")), JsonSerializer.Serialize(Clock.Abbreviations.ToDictionary(p => p.Key, p => new[] { p.Value.Standard, p.Value.Daylight })));
+        Same(bad, "abbreviations", JsonSerializer.Serialize(root.GetProperty("abbreviations")), JsonSerializer.Serialize(root.GetProperty("abbreviations").EnumerateObject().ToDictionary(p => p.Name, p => new object[] { Clock.Abbreviations[p.Name].Standard, Clock.Abbreviations[p.Name].Daylight, Clock.Abbreviations[p.Name].Offset })));
+        Same(bad, "abbreviations: how many", root.GetProperty("abbreviations").EnumerateObject().Count().ToString(), Clock.Abbreviations.Count.ToString());
         Same(bad, "days", JsonSerializer.Serialize(new { c = root.GetProperty("staleChoices"), d = root.GetProperty("staleDefault") }), JsonSerializer.Serialize(new { c = Clock.StaleChoices, d = Clock.StaleDefault }));
         foreach (var c in root.GetProperty("labels").EnumerateArray())
         {
@@ -63,7 +65,30 @@ public class Round31Tests : IDisposable
             Same(bad, what + " time of day", c.GetProperty("time").GetString()!, Clock.Time(ms, zone, false));
             Same(bad, what + " time of day with seconds", c.GetProperty("timeWithSeconds").GetString()!, Clock.Time(ms, zone, true));
         }
-        Assert.True(n >= 225, "cases are missing");
+        Assert.True(n >= 506, "cases are missing"); n = 0;
+        foreach (var c in root.GetProperty("bounds").EnumerateArray())
+        {
+            n++; long? ms = c.GetProperty("ms").ValueKind == JsonValueKind.Null ? null : (long)c.GetProperty("ms").GetDouble() is var v && c.GetProperty("ms").GetDouble() is > -9.3e18 and < 9.3e18 ? v : null;
+            if (ms is null && c.GetProperty("ms").ValueKind != JsonValueKind.Null) ms = c.GetProperty("ms").GetDouble() > 0 ? long.MaxValue : long.MinValue;      // a number too large for the app's own kind of number is still "not known"
+            Same(bad, $"end {n} known", c.GetProperty("known").GetBoolean().ToString(), Clock.Known(ms).ToString());
+            Same(bad, $"end {n} label", c.GetProperty("label").GetString()!, Clock.Label(ms, "America/New_York", true));
+            Same(bad, $"end {n} time", c.GetProperty("time").GetString()!, Clock.Time(ms, "UTC", false));
+            Same(bad, $"end {n} ago", c.GetProperty("ago").GetString()!, Clock.Relative(ms, 0));
+            var fresh = ms is { } known ? Clock.Fresh("X", known, 0, 7, "UTC") : Clock.Fresh("X", null, 0, 7, "UTC");
+            Same(bad, $"end {n} data line", c.GetProperty("fresh").GetProperty("text").GetString()! + "|" + c.GetProperty("fresh").GetProperty("stale").GetBoolean(), fresh.Text + "|" + fresh.Stale);
+        }
+        Assert.True(n >= 9, "cases are missing"); n = 0;
+        foreach (var c in root.GetProperty("said").EnumerateArray())
+            Same(bad, $"sentence {++n}", c.GetProperty("text").GetString()!, Clock.ZoneSaid(c.GetProperty("chosen").GetString()!, c.GetProperty("computer").GetString()!, c.GetProperty("ms").GetInt64()));
+        Assert.True(n >= 12, "cases are missing"); n = 0;
+        foreach (var c in root.GetProperty("pages").EnumerateArray())
+        {
+            n++;
+            var entries = c.GetProperty("entries").EnumerateArray().Select(e => new HandoffEntry(e.GetProperty("status").GetString()!, e.GetProperty("watch").EnumerateArray().Select(x => x.GetString()!).ToList(),
+                e.GetProperty("open").EnumerateArray().Select(x => x.GetString()!).ToList(), e.GetProperty("notes").EnumerateArray().Select(x => x.GetString()!).ToList())).ToList();
+            Same(bad, $"page {n}", string.Join("\n", c.GetProperty("lines").EnumerateArray().Select(x => x.GetString())), string.Join("\n", Handoff.Text(c.GetProperty("title").GetString()!, entries, c.GetProperty("today").GetString()!, c.GetProperty("notes").GetBoolean(), c.GetProperty("line").GetString())));
+        }
+        Assert.True(n >= 3, "cases are missing");
         Same(bad, "a time that is not known", JsonSerializer.Serialize(root.GetProperty("unknown")),
             JsonSerializer.Serialize(new[] { Clock.Label(null, "UTC", false), Clock.Label(null, "UTC", true), Clock.Relative(null, 5), Clock.Relative(5, null), Clock.Time(null, "UTC", true) }));
         Fail(bad);
@@ -139,7 +164,7 @@ public class Round31Tests : IDisposable
         Clock.ZoneId = "UTC";
         Assert.Equal("Jul 16, 2026, 1:05:07 PM UTC", EventLog.Local("2026-07-16T13:05:07.042Z"));
         Clock.ZoneId = "Mars/Olympus";                                                                            // not one of the choices: this computer's own zone
-        Assert.Equal("", Clock.ZoneId); Assert.Same(TimeZoneInfo.Local, Clock.Zone);
+        Assert.Equal("", Clock.ZoneId); Assert.Equal(TimeZoneInfo.Local.Id, Clock.Zone.Id);
         Clock.ZoneId = null!; Assert.Equal("", Clock.ZoneId);
         Assert.Equal("not a time", EventLog.Local("not a time"));
 
@@ -148,6 +173,92 @@ public class Round31Tests : IDisposable
         Assert.StartsWith("Times are now written in this computer's time zone (", Clock.ZoneSaid("", Ms("2026-07-16T14:42:00Z")));
         Assert.Equal("Data older than 1 day is now marked STALE.", Clock.StaleSaid(1));
         Assert.Equal("Data older than 14 days is now marked STALE.", Clock.StaleSaid(14));
+    }
+
+    [Fact]
+    public void A_zone_this_computer_has_no_data_for_is_never_used_under_its_name()
+    {
+        // The review's finding: where .NET cannot find the zone, the app wrote UTC times under "EST" and Settings said "Eastern time".
+        Clock.Find = id => id == "America/New_York" ? null : Clock.FindOnThisComputer(id);
+        long july = Ms("2026-07-16T14:42:00Z");
+        Assert.Equal("Jul 16, 2026, 2:42 PM UTC", Clock.Label(july, "America/New_York", false));                 // read as UTC, and says UTC
+        Assert.Equal("2:42 PM UTC", Clock.Time(july, "America/New_York", false));
+        Assert.Equal("X · as of Jul 16, 2026, 2:42 PM UTC (just now)", Clock.Fresh("X", july, july, 7, "America/New_York").Text);
+        Clock.ZoneId = "America/New_York";
+        Assert.Equal(TimeZoneInfo.Local.Id, Clock.Zone.Id);                                                       // the computer's own zone is used instead
+        string said = Clock.ZoneSaid("America/New_York", july);
+        Assert.StartsWith("This computer has no data for Eastern time, so times are written in this computer's time zone (", said);
+        Assert.EndsWith("). No stored time was changed.", said);
+        Assert.Equal("This computer has no data for Eastern time, so times are written in this computer's time zone (America/Chicago, CDT). No stored time was changed.", Clock.ZoneSaid("America/New_York", "America/Chicago", july));
+        Clock.ZoneId = "America/Chicago";                                                                         // a zone it does have is used as before
+        Assert.Equal("Jul 16, 2026, 9:42 AM CDT", Clock.Label(Utc("2026-07-16T14:42:00Z"), seconds: false));
+
+        // a number that is no date, and years a zone kept other hours than it keeps now
+        Clock.Find = Clock.FindOnThisComputer;
+        Assert.Equal("time not known", Clock.Label(long.MaxValue, "UTC", true));
+        Assert.Equal("time not known", Clock.Label(Clock.TimeMin - 1, "UTC", true));
+        Assert.Equal(("X · time not known", false), Clock.Fresh("X", long.MinValue, 0, 7, "UTC"));
+        Assert.Equal("Jul 4, 1967, 12:00 PM UTC-6", Clock.Label(Ms("1967-07-04T18:00:00Z"), "America/Phoenix", false));          // Arizona kept daylight time that year: not "MST"
+        Assert.Equal("Jan 15, 1980, 10:00 AM UTC-8", Clock.Label(Ms("1980-01-15T18:00:00Z"), "America/Juneau", false));          // Juneau was on Pacific time: not "AKDT"
+        Assert.Equal("Jul 16, 2026, 10:42 AM EDT", Clock.Label(july, "America/Detroit", false));                                 // a computer in Michigan set to "Automatic"
+        Assert.Equal("Jul 16, 2026, 10:42 AM UTC-4", Clock.Label(july, "America/La_Paz", false));                                // what Windows calls Puerto Rico's zone: right, without an abbreviation
+    }
+
+    [Fact]
+    public void Backup_copies_are_counted_by_this_computers_days_whatever_zone_times_are_written_in()
+    {
+        Clock.ZoneId = "Pacific/Honolulu";
+        var b = new Backups(Path.Combine(Temp.NewDir(), "backups"), () => 30);
+        Assert.Equal(TimeZoneInfo.Local.Id, b.DayZone.Id);                                                        // so that changing the zone can never remove a copy
+        Clock.ZoneId = "UTC";
+        Assert.Equal(TimeZoneInfo.Local.Id, b.DayZone.Id);
+    }
+
+    [Fact]
+    public void The_browser_is_told_what_the_app_shows_and_a_page_for_a_colleague_says_how_old_its_data_is()
+    {
+        string dir = Temp.NewDir(), path = Path.Combine(dir, "my sheet.csv");
+        File.WriteAllText(path, "ANDA,Drug,Goal date\n123456,Testazole tablets,3/3/2027\n");
+        var saved = new DateTime(2026, 11, 10, 12, 12, 0, DateTimeKind.Utc); File.SetLastWriteTimeUtc(path, saved);
+        Clock.UtcNow = () => saved.AddDays(9);
+        var repo = new PortfolioRepository(path, today: () => new DateOnly(2026, 11, 19));
+        var r = repo.Find("123456")!; var cal = new BusinessCalendar();
+
+        // the browser host: the chosen zone and the chosen days, as in the app's own card
+        Clock.ZoneId = "Pacific/Honolulu";
+        NativeHostContext Host(int days) => new() { Settings = new Settings { TimeZone = "Pacific/Honolulu", StaleAfterDays = days }, Repository = repo, Calendar = cal, Today = () => new DateOnly(2026, 11, 19), DataKind = "portfolio" };
+        var host = Host(30);
+        Assert.Equal("Your portfolio file · my sheet.csv · as of Nov 10, 2026, 2:12 AM HST (9 days ago)", host.Freshness(r));
+        Assert.DoesNotContain(CardModels.Build(r, host.Card()).Watch, f => f.Code == "stale-data");
+        var reply = System.Text.Json.Nodes.JsonNode.Parse(new NativeHostSession(host).Handle("{\"id\":1,\"type\":\"lookup\",\"number\":\"ANDA 123456\"}"))!;
+        Assert.Equal("Your portfolio file · my sheet.csv · as of Nov 10, 2026, 2:12 AM HST (9 days ago)", reply["card"]!["freshness"]!.GetValue<string>());
+        Assert.DoesNotContain("days old", reply.ToJsonString());
+        host = Host(7);
+        Assert.EndsWith("(9 days ago) · STALE: older than 7 days", host.Freshness(r));
+        Assert.Contains(CardModels.Build(r, host.Card()).Watch, f => f.Code == "stale-data" && f.Text == "This data is 9 days old (as of Nov 10).");
+
+        // the watch flag names the day the card's line names, also after the zone was changed; and the status line follows
+        Clock.ZoneId = "America/New_York";
+        File.SetLastWriteTimeUtc(path, new DateTime(2026, 11, 10, 3, 0, 0, DateTimeKind.Utc));
+        repo = new PortfolioRepository(path, today: () => new DateOnly(2026, 11, 19)); r = repo.Find("123456")!;
+        string Flag() => WatchRules.Evaluate(repo.Find("123456")!, new DateOnly(2026, 11, 19), cal, new WatchSettings(3, 7, NowMs: Clock.Ms(Clock.UtcNow()))).Single(f => f.Code == "stale-data").Text;
+        Assert.Equal("This data is 9 days old (as of Nov 9).", Flag()); Assert.Contains("(file saved Nov 9, 2026, 10:00 PM EST)", repo.Status.Message);
+        Assert.Contains("as of Nov 9, 2026, 10:00 PM EST", Clock.DataLine(r, Clock.Ms(Clock.UtcNow()), 7, Clock.Zone).Text);
+        Clock.ZoneId = "UTC";
+        Assert.Equal("This data is 9 days old (as of Nov 10).", Flag()); Assert.Contains("(file saved Nov 10, 2026, 3:00 AM UTC)", repo.Status.Message);
+        Assert.Contains("as of Nov 10, 2026, 3:00 AM UTC", Clock.DataLine(r, Clock.Ms(Clock.UtcNow()), 7, Clock.Zone).Text);
+        Assert.Equal("This data is 9 days old (as of Nov 10).", WatchRules.Evaluate(r, new DateOnly(2026, 11, 19), cal, new WatchSettings(3, 7, NowMs: Clock.Ms(Clock.UtcNow()))).Single(f => f.Code == "stale-data").Text);      // a record read before the change says the same
+
+        // the hand-off page
+        Clock.ZoneId = "America/New_York";
+        var ctx = new CardContext(new DateOnly(2026, 11, 19), cal, 3, 7, null, 7, Clock.Ms(Clock.UtcNow()));
+        string line = HandoffData.DataLine(new[] { "123456" }, repo, Clock.Ms(Clock.UtcNow()), 7, Clock.Zone);
+        Assert.Equal("Your portfolio file · my sheet.csv · as of Nov 9, 2026, 10:00 PM EST (9 days ago) · STALE: older than 7 days", line);
+        var page = Handoff.Text("Hand-off", HandoffData.Entries(new[] { "123456" }, repo, ctx, null, null, null), "Nov 19, 2026", false, line);
+        Assert.Equal(new[] { "Hand-off: 1 ANDA, made on Nov 19, 2026", "From my own data and notes on this PC. It is not the system of record.", "Data: " + line }, page.Take(3));
+        Assert.Contains(page, l => l.Contains("This data is 9 days old (as of Nov 9)."));
+        Assert.Equal(line, HandoffData.DataLine(Array.Empty<string>(), repo, Clock.Ms(Clock.UtcNow()), 7, Clock.Zone));      // a page that lists no ANDA still says where the data is from
+        Assert.DoesNotContain(Handoff.Text("Hand-off", Array.Empty<HandoffEntry>(), "Nov 19, 2026", false), l => l.StartsWith("Data:"));
     }
 
     // ---------------------------------------------------------------- settings: a new version of the file

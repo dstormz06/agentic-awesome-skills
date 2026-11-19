@@ -136,13 +136,16 @@ public sealed record HandoffEntry(string Status, IReadOnlyList<string> Watch, IR
 /// </summary>
 public static class Handoff
 {
-    public static IReadOnlyList<string> Text(string title, IReadOnlyList<HandoffEntry> entries, string todayLong, bool withNotes)
+    /// <param name="dataLine">Where the data is from, as of when and whether it is STALE, in the words of the card (<see cref="Clock.DataLine"/>).</param>
+    public static IReadOnlyList<string> Text(string title, IReadOnlyList<HandoffEntry> entries, string todayLong, bool withNotes, string? dataLine = null)
     {
+        // "made on": the day the page was written. How old the data is stands on its own line.
         var lines = new List<string>
         {
-            $"{title}: {entries.Count.ToString(CultureInfo.InvariantCulture)} {DocCompare.Pl(entries.Count, "ANDA", "ANDAs")}, as of {todayLong}",
+            $"{title}: {entries.Count.ToString(CultureInfo.InvariantCulture)} {DocCompare.Pl(entries.Count, "ANDA", "ANDAs")}, made on {todayLong}",
             "From my own data and notes on this PC. It is not the system of record.",
         };
+        if (!string.IsNullOrEmpty(dataLine)) lines.Add("Data: " + dataLine);
         if (entries.Count == 0) { lines.Add(""); lines.Add("No ANDA to list."); }
         foreach (var e in entries)
         {

@@ -179,6 +179,15 @@ public class ShotTests : IClassFixture<HeadlessFixture>
                 card31.Show(mine31, new PixelPoint(40, 40), false); for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
                 Save(card31, dir, "card-stale-31");
                 card31.Close();
+                foreach (var look31 in new[] { AppearanceId.L, AppearanceId.O })
+                {
+                    ThemeManager.Apply(look31);
+                    var box31 = new CompactCardWindow(mine31, () => { }, () => Clock.DataLine(mine31, Clock.Ms(now31), 7, Clock.Zone)) { CloseWhenDeactivated = false };
+                    box31.Show(); for (int i = 0; i < 20; i++) { Settle(); Thread.Sleep(12); }
+                    Save(box31, dir, "compact-stale-31-" + look31);
+                    box31.Close();
+                }
+                ThemeManager.Apply(Appearances.Default);
                 var set31 = new SettingsWindow(new Settings { TimeZone = "America/New_York", StaleAfterDays = 7 }, new PromptLibraryService(Path.Combine(Temp.NewDir(), "p31.json")), () => { }) { UtcNow = () => now31 };
                 set31.Show(); Settle(); set31.FindControl<Expander>("SecLook")!.IsExpanded = true; for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
                 set31.FindControl<TextBlock>("TimeHint")!.IsVisible = true; set31.FindControl<TextBlock>("TimeHint")!.Text = Clock.ZoneSaid("America/New_York", Clock.Ms(now31));

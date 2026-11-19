@@ -59,6 +59,8 @@ public class Round31UiTests : IClassFixture<HeadlessFixture>
                 Clock.ZoneId = "UTC"; w.MinutePassed(); Look();                           // 6: the zone chosen in Settings is followed
                 Clock.ZoneId = "America/New_York";
                 now = AsOf.AddHours(-2); days = 7; w.MinutePassed(); Look();              // 7: a file from a clock that was ahead
+                now = AsOf.AddDays(9); w.MinutePassed(); Look();                          // 8: stale
+                now = AsOf.AddDays(12).AddHours(3); w.MinutePassed(); Look();             // 9: three days on, the card still open: no flip, but the age moved
                 return seen;
             }
             finally { w.Close(); Settle(); }
@@ -76,6 +78,75 @@ public class Round31UiTests : IClassFixture<HeadlessFixture>
         Assert.Equal(($"{head} (7 days ago) · STALE: older than 1 day", true), (r[5].Line, r[5].Bold));
         Assert.Equal("Your portfolio file · P.xlsx · as of Nov 11, 2026, 8:00 PM UTC (7 days ago) · STALE: older than 1 day", r[6].Line);
         Assert.Equal(($"{head} (later than now: please check this computer's clock)", false), (r[7].Line, r[7].Bold));
+        Assert.EndsWith("(9 days ago) · STALE: older than 7 days", r[8].Line); Assert.StartsWith("This data is 9 days old (as of Nov 11).", r[8].Watch);
+        Assert.EndsWith("(12 days ago) · STALE: older than 7 days", r[9].Line); Assert.StartsWith("This data is 12 days old (as of Nov 11).", r[9].Watch);      // the two lines never state different ages
+    }
+
+    [Fact]
+    public async Task A_change_of_zone_in_Settings_rewrites_the_notes_on_an_open_card_and_a_minute_does_not_count_as_a_card_shown()
+    {
+        string dir = Temp.NewDir(), usage = Path.Combine(dir, "usage.csv");
+        var r = await _fx.Session.Dispatch(() =>
+        {
+            using var zone = new ZoneScope("America/New_York");
+            ThemeManager.Apply(Appearances.Default);
+            var now = AsOf.AddDays(9); var record = Mine();
+            var notes = new QuickNotesService(Path.Combine(dir, "notes.json"), () => new DateTime(2026, 11, 18, 20, 12, 0, DateTimeKind.Utc));
+            notes.Add("123456", "Called the US agent.");
+            var w = new CardWindow(new OfflineBriefService(), _ => record) { CloseWhenDeactivated = false, Today = () => DateOnly.FromDateTime(now), UtcNow = () => now, StaleDays = () => 7, QuickNotes = notes };
+            try
+            {
+                w.Show(record, new PixelPoint(40, 40), false); Settle();
+                string[] Times() => Avalonia.LogicalTree.LogicalExtensions.GetLogicalDescendants(w.FindControl<StackPanel>("QuickNotesList")!).OfType<TextBlock>().Select(t => t.Text ?? "").Where(t => t.StartsWith("Nov 18, 2026, ")).ToArray();
+                w.TimeChanged(); Settle(); var eastern = Times();
+                Clock.ZoneId = "Pacific/Honolulu"; w.TimeChanged(); Settle();
+                var hawaii = Times(); string line = w.FindControl<TextBlock>("FreshnessText")!.Text ?? "";
+                UsageLog.Configure(true, usage);
+                int before = File.Exists(usage) ? File.ReadAllLines(usage).Length : 0;
+                for (int i = 1; i <= 5; i++) { now = now.AddDays(1); w.MinutePassed(); Settle(); }      // the watch line is painted again five times
+                int after = File.Exists(usage) ? File.ReadAllLines(usage).Count(l => l.Contains("watch_flag_shown")) : 0;
+                UsageLog.Record("watch_flag_shown");                                       // the control: the log is on, and one event is one line
+                int control = File.ReadAllLines(usage).Count(l => l.Contains("watch_flag_shown"));
+                return (eastern, hawaii, line, counted: after, control, before);
+            }
+            finally { UsageLog.Configure(false); w.Close(); Settle(); }
+        }, CancellationToken.None);
+        Assert.Contains("Nov 18, 2026, 3:12 PM EST", r.eastern);
+        Assert.Contains("Nov 18, 2026, 10:12 AM HST", r.hawaii); Assert.DoesNotContain("Nov 18, 2026, 3:12 PM EST", r.hawaii);
+        Assert.Contains("as of Nov 11, 2026, 10:00 AM HST", r.line);
+        Assert.Equal((0, 1, 0), (r.counted, r.control, r.before));
+    }
+
+    [Fact]
+    public async Task A_compact_box_writes_STALE_on_itself_and_carries_the_whole_data_line()
+    {
+        var r = await _fx.Session.Dispatch(() =>
+        {
+            using var zone = new ZoneScope("America/New_York");
+            var seen = new List<(AppearanceId Look, string? Mark, string Line, string? Tip, string? Help, bool FreshHasMark)>();
+            try
+            {
+                foreach (var look in new[] { AppearanceId.L, AppearanceId.O })
+                {
+                    ThemeManager.Apply(look);
+                    var record = Mine(); long now = Clock.Ms(AsOf.AddDays(9));
+                    var stale = new CompactCardWindow(record, () => { }, () => Clock.DataLine(record, now, 7, Clock.Zone)) { CloseWhenDeactivated = false };
+                    stale.Show(); Settle();
+                    var root = stale.GetVisualDescendants().OfType<Border>().First(b => AutomationProperties.GetName(b)?.Contains("compact status") == true);
+                    string? mark = stale.GetVisualDescendants().OfType<TextBlock>().FirstOrDefault(t => t.Name == "StaleMark" && t.IsEffectivelyVisible)?.Text;
+                    var fresh = new CompactCardWindow(record, () => { }, () => Clock.DataLine(record, Clock.Ms(AsOf.AddHours(2)), 7, Clock.Zone)) { CloseWhenDeactivated = false };
+                    fresh.Show(); Settle();
+                    seen.Add((look, mark, stale.DataLine, ToolTip.GetTip(root) as string, AutomationProperties.GetHelpText(root), fresh.GetVisualDescendants().OfType<TextBlock>().Any(t => t.Name == "StaleMark")));
+                    stale.Close(); fresh.Close(); Settle();
+                }
+                return seen;
+            }
+            finally { ThemeManager.Apply(Appearances.Default); }
+        }, CancellationToken.None);
+        const string line = "Your portfolio file · P.xlsx · as of Nov 11, 2026, 3:00 PM EST (9 days ago) · STALE: older than 7 days";
+        Assert.Equal(2, r.Count);
+        foreach (var box in r)
+            Assert.Equal(("STALE: older than 7 days", line, line, line, false), (box.Mark, box.Line, box.Tip, box.Help, box.FreshHasMark));
     }
 
     [Fact]
@@ -142,6 +213,7 @@ public class Round31UiTests : IClassFixture<HeadlessFixture>
                 w.Show(); Settle();
                 w.FindControl<Expander>("SecLook")!.IsExpanded = true; Settle();
                 var clock = w.FindControl<TextBlock>("TimeNow")!; var zoneBox = w.FindControl<ComboBox>("TimeZoneBox")!; var staleBox = w.FindControl<ComboBox>("StaleBox")!; var hint = w.FindControl<TextBlock>("TimeHint")!;
+                (string Hint, bool OwnClock) lacking = ("", false); (double Widest, double Box) fits = (0, 0);
                 var names = (AutomationProperties.GetName(zoneBox), AutomationProperties.GetName(staleBox), AutomationProperties.GetLiveSetting(hint));
                 var choices = (zoneBox.Items.Cast<string>().ToArray(), staleBox.Items.Cast<string>().ToArray(), zoneBox.SelectedIndex, staleBox.SelectedIndex, hint.IsVisible);
                 bool onScreen = clock.IsEffectivelyVisible && zoneBox.IsEffectivelyVisible && staleBox.IsEffectivelyVisible;
@@ -165,13 +237,24 @@ public class Round31UiTests : IClassFixture<HeadlessFixture>
                 string after = clock.Text ?? "";
                 zoneBox.SelectedIndex = 0; Settle();                                       // back to this computer's zone
                 var auto = (s.TimeZone, hint.Text ?? "");
-                return (names, choices, onScreen, atOpen, central, hawaii, utc, one, thirty, before, after, auto);
+                var find = Clock.Find;
+                try
+                {
+                    Clock.Find = id => id == "America/Denver" ? null : Clock.FindOnThisComputer(id);       // a computer with no data for Mountain time
+                    zoneBox.SelectedIndex = 3; Settle();
+                    lacking = (hint.Text ?? "", clock.Text == Clock.NowLine(Clock.Ms(now), TimeZoneInfo.Local));
+                }
+                finally { Clock.Find = find; }
+                zoneBox.SelectedIndex = 0; Settle();
+                double widest = zoneBox.Items.Cast<string>().Max(t => { var tb = new TextBlock { Text = t, FontSize = zoneBox.FontSize, FontFamily = zoneBox.FontFamily }; tb.Measure(Size.Infinity); return tb.DesiredSize.Width; });
+                fits = (widest, zoneBox.Bounds.Width);
+                return (names, choices, onScreen, atOpen, central, hawaii, utc, one, thirty, before, after, auto, lacking, fits);
             }
             finally { w.Close(); Settle(); }
         }, CancellationToken.None);
 
         Assert.Equal(("Show times in", "Mark my data as stale when it is older than", AutomationLiveSetting.Polite), r.names);
-        Assert.Equal(new[] { "Automatic: this computer's time zone", "Eastern (America/New York)", "Central (America/Chicago)", "Mountain (America/Denver)", "Arizona (Mountain, no daylight time) (America/Phoenix)",
+        Assert.Equal(new[] { "Automatic: this computer's time zone", "Eastern (America/New York)", "Central (America/Chicago)", "Mountain (America/Denver)", "Arizona (no daylight time) (America/Phoenix)",
             "Pacific (America/Los Angeles)", "Alaska (America/Anchorage)", "Hawaii (Pacific/Honolulu)", "Atlantic (Puerto Rico) (America/Puerto Rico)", "UTC (UTC)" }, r.choices.Item1);
         Assert.Equal(new[] { "1 day", "3 days", "7 days", "14 days", "30 days" }, r.choices.Item2);
         Assert.Equal((0, 2, false), (r.choices.Item3, r.choices.Item4, r.choices.Item5));
@@ -185,5 +268,8 @@ public class Round31UiTests : IClassFixture<HeadlessFixture>
         Assert.Equal("Now: Thursday, Jul 16, 2026, 10:42 AM EDT", r.before);
         Assert.Equal("Now: Thursday, Jul 16, 2026, 10:43 AM EDT", r.after);
         Assert.Equal("", r.auto.Item1); Assert.StartsWith("Times are now written in this computer's time zone (", r.auto.Item2);
+        Assert.StartsWith("This computer has no data for Mountain time, so times are written in this computer's time zone (", r.lacking.Hint);      // said plainly, and the clock shows the computer's own time
+        Assert.True(r.lacking.OwnClock);
+        Assert.True(r.fits.Widest + 44 <= r.fits.Box, $"the longest choice needs {r.fits.Widest:0} px and the box is {r.fits.Box:0} px wide");
     }
 }

@@ -611,7 +611,14 @@ public partial class SettingsWindow : Window
             _settings.StaleAfterDays = Clock.StaleChoices[StaleBox.SelectedIndex]; Apply();
             Say(Clock.StaleSaid(_settings.StaleAfterDays));
         };
-        Opened += (_, _) => { PaintNow(); _minute ??= new Avalonia.Threading.DispatcherTimer(MinuteEvery, Avalonia.Threading.DispatcherPriority.Background, (_, _) => PaintNow()); _minute.Start(); };
+        // The timer fires as each minute of the clock begins, so this clock is never most of a minute behind the taskbar's.
+        TimeSpan Next() => MinuteEvery != TimeSpan.FromSeconds(60) ? MinuteEvery : TimeSpan.FromMilliseconds(60000 - Clock.Ms(UtcNow()) % 60000 + 15);
+        Opened += (_, _) =>
+        {
+            PaintNow();
+            _minute ??= new Avalonia.Threading.DispatcherTimer(Next(), Avalonia.Threading.DispatcherPriority.Background, (_, _) => { PaintNow(); _minute!.Interval = Next(); });
+            _minute.Start();
+        };
         Closed += (_, _) => _minute?.Stop();
         PaintNow();
     }

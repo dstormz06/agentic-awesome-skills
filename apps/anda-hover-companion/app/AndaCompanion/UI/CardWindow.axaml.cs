@@ -1050,12 +1050,27 @@ public partial class CardWindow : Window
     /// <summary>What the minute timer does. Internal so a test can pass a minute without waiting for one.</summary>
     internal void MinutePassed()
     {
-        if (_record is { } record && PaintFresh(record)) { ShowWatch(record); WatchSlot.IsVisible = !_mini && _watchFlags.Count > 0; }      // the watch line says "stale" by the same rule, so it follows
+        if (_record is not { } record) return;
+        PaintFresh(record);
+        // The watch line states the same age ("9 days old"), so it is reckoned again with the line and painted again when its words changed.
+        var flags = WatchRules.Evaluate(record, Today(), Calendar, WatchNow());
+        if (!flags.Select(f => (f.Code, f.Text)).SequenceEqual(_watchFlags.Select(f => (f.Code, f.Text)))) { ShowWatch(record, counted: false); WatchSlot.IsVisible = !_mini && _watchFlags.Count > 0; }
     }
 
-    private void ShowWatch(AndaRecord record)
+    /// <summary>The zone, or the days before "stale", were changed in Settings: everything on this card that shows a time is written again.</summary>
+    internal void TimeChanged()
     {
-        _watchFlags = WatchRules.Evaluate(record, Today(), Calendar, Watch with { StaleDataDays = StaleDays?.Invoke() ?? Watch.StaleDataDays, NowMs = Clock.Ms(UtcNow()) });
+        MinutePassed();
+        if (_record is null) return;
+        PaintQuickNotes(); PaintAgents();
+    }
+
+    private WatchSettings WatchNow() => Watch with { StaleDataDays = StaleDays?.Invoke() ?? Watch.StaleDataDays, NowMs = Clock.Ms(UtcNow()) };
+
+    /// <param name="counted">False when the minute timer repaints: the usage count is of cards shown, not of minutes passed.</param>
+    private void ShowWatch(AndaRecord record, bool counted = true)
+    {
+        _watchFlags = WatchRules.Evaluate(record, Today(), Calendar, WatchNow());
         WatchPanel.Children.Clear();
         WatchExpander.IsVisible = _watchFlags.Count > 0;
         WatchHeader.Text = $"Watch list · {_watchFlags.Count}";
@@ -1066,7 +1081,7 @@ public partial class CardWindow : Window
         WatchText.Text = top.Text + (_watchFlags.Count > 1 ? $"  (+{_watchFlags.Count - 1} more in the drawer)" : "");
         WatchText.Foreground = (IBrush)Application.Current!.Resources[tone]!;
         ToolTip.SetTip(WatchText, top.Why);
-        UsageLog.Record("watch_flag_shown");
+        if (counted) UsageLog.Record("watch_flag_shown");
 
         foreach (var f in _watchFlags)
         {

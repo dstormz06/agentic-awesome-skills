@@ -74,7 +74,11 @@ public sealed class CompactCardWindow : Window
 
     internal string PlacementTrace { get; private set; } = "not placed yet";
 
-    public CompactCardWindow(AndaRecord record, Action expand)
+    /// <summary>The data line this box carries as its tooltip.</summary>
+    internal string DataLine { get; private set; } = "";
+
+    /// <param name="dataLine">Where the data is from, as of when and whether it is STALE. The app gives the person's choice of days; without it the usual seven are used.</param>
+    public CompactCardWindow(AndaRecord record, Action expand, Func<(string Text, bool Stale)>? dataLine = null)
     {
         _record = record;
         _expand = expand;
@@ -107,6 +111,24 @@ public sealed class CompactCardWindow : Window
             },
         };
         Content = new Panel { Margin = new Thickness(14), Children = { _root } };
+
+        // The box is too small for the whole data line: the line is its tooltip and what a screen reader is told, and STALE is written on the box itself.
+        var line = dataLine?.Invoke() ?? Services.Clock.DataLine(record, Services.Clock.Ms(Services.Clock.UtcNow()), Services.Clock.StaleDefault, Services.Clock.Zone);
+        DataLine = line.Text;
+        if (line.Text.Length > 0) { ToolTip.SetTip(_root, line.Text); AutomationProperties.SetHelpText(_root, line.Text); }
+        if (line.Stale && _root.Child is { } body)
+        {
+            int at = line.Text.LastIndexOf("STALE:", StringComparison.Ordinal);
+            _root.Child = null;
+            _root.Child = new StackPanel
+            {
+                Children =
+                {
+                    body,
+                    new TextBlock { Name = "StaleMark", Text = at >= 0 ? line.Text[at..] : "STALE", FontSize = 10.5, FontWeight = FontWeight.SemiBold, Foreground = Res("C.Warn"), Margin = new Thickness(look.Form == CardForm.Badge ? 14 : 10, 0, 10, 5) },
+                },
+            };
+        }
 
         string status = record.ForecastLate ? $"forecast {CompactText.ShortDelta(record.ForecastDelta)} late" : "on track";
         AutomationProperties.SetName(this, $"{record.Kind} {record.Number}, {status}. Press Enter to open the full card.");

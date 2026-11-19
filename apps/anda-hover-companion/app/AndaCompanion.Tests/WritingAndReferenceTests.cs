@@ -148,7 +148,7 @@ public class DrugsAtFdaFileTests
         var (date, why) = f.RldLabeling(Rec());
         Assert.Equal(new DateOnly(2025, 9, 17), date);
         Assert.Equal("", why);
-        Assert.Contains("Sep 17, 2025 · Drugs@FDA, file saved Nov 1", f.Describe(Rec()).RldText);
+        Assert.Contains("Sep 17, 2025 · Drugs@FDA, file saved Nov 1, 2026", f.Describe(Rec()).RldText);
     }
 
     [Fact]

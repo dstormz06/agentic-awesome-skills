@@ -35,6 +35,16 @@ public static class HandoffData
         return new HandoffEntry(StatusLine.Build(r), watch, open, notes);
     }
 
+    /// <summary>
+    /// Where the data of a page is from, as of when and whether it is STALE: the card's own line, taken from the first ANDA listed (one file
+    /// feeds them all), or from any ANDA in the data when the page lists none.
+    /// </summary>
+    public static string DataLine(IEnumerable<string> numbers, IAndaRepository repo, long nowMs, int staleDays, TimeZoneInfo zone)
+    {
+        var record = numbers.Concat(repo.Numbers).Select(repo.Find).FirstOrDefault(r => r is not null);
+        return record is null ? "" : Clock.DataLine(record, nowMs, staleDays, zone).Text;
+    }
+
     public static IReadOnlyList<HandoffEntry> Entries(IEnumerable<string> numbers, IAndaRepository repo, CardContext ctx, QuickNotesService? quick, IEnumerable<TodoItem>? andaTodo, IEnumerable<MyTodoItem>? myTodo) =>
         numbers.Select(n => Entry(n, repo, ctx, quick, andaTodo?.ToList(), myTodo?.ToList())).Where(e => e is not null).Select(e => e!).ToList();
 }

@@ -350,7 +350,7 @@ public class Round27UiTests : IClassFixture<HeadlessFixture>
             return (all, noNotes, watch, name, s1, s2, tickedAtFirst);
         }, CancellationToken.None);
         int count = Repo.Numbers.Count;
-        Assert.StartsWith($"Hand-off: {count} ANDAs, as of Jul 16, 2026\nFrom my own data and notes on this PC. It is not the system of record.\n\n", r.all);
+        Assert.StartsWith($"Hand-off: {count} ANDAs, made on Jul 16, 2026\nFrom my own data and notes on this PC. It is not the system of record.\n\n", r.all);
         Assert.Contains(StatusLine.Build(Repo.Find("216482")!), r.all); Assert.Contains(StatusLine.Build(Repo.Find("214990")!), r.all);
         Assert.Contains("<b>bold</b> note for the hand-off", r.all);                       // a note with markup is plain text on the page
         Assert.Contains("\n  Open: ", r.all); Assert.Contains("\n  Notes: ", r.all);
@@ -393,7 +393,7 @@ public class Round27UiTests : IClassFixture<HeadlessFixture>
         Assert.Equal(new[] { "216482" }, pages[0]); Assert.Equal(new[] { "216482", "214990" }, pages[1]);
         var ctx = new CardContext(Today, new BusinessCalendar());
         var page = Handoff.Text("Meeting page", HandoffData.Entries(pages[0], Repo, ctx, null, null, null), "Jul 16, 2026", true);
-        Assert.Equal("Meeting page: 1 ANDA, as of Jul 16, 2026", page[0]); Assert.DoesNotContain(page, l => l.StartsWith("ANDA 214990", StringComparison.Ordinal));
+        Assert.Equal("Meeting page: 1 ANDA, made on Jul 16, 2026", page[0]); Assert.DoesNotContain(page, l => l.StartsWith("ANDA 214990", StringComparison.Ordinal));
     }
 
     // ---------------------------------------------------------------- Review a draft

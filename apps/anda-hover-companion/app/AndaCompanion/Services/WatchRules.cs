@@ -80,6 +80,7 @@ public static class WatchRules
             {
                 long old = now - Clock.Ms(moment);
                 stale = old > settings.StaleDataDays * 86400000L; if (stale) age = (int)Math.Min(int.MaxValue, old / 86400000L);
+                taken = DateOnly.FromDateTime(Clock.Wall(moment));      // the day the card's line names, in the zone in use now
             }
             if (stale)
                 flags.Add(new WatchFlag("stale-data", WatchSeverity.Warn,

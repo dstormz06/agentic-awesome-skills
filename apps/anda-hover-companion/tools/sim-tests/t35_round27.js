@@ -164,12 +164,12 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   ok(await p.evaluate(() => [...document.querySelectorAll('#menu button')].some(x => x.textContent.startsWith('Hand-off page…'))), 'H1 the tray menu offers "Hand-off page…"');
   await p.evaluate(() => { closeMenus(); addQuickNote('216482', '<b>bold</b> note for the hand-off'); openHandoff(null); }); await settle(p, 200);
   const page1 = await p.$eval('#hoOut', e => e.value);
-  ok(page1.startsWith('Hand-off: 2 ANDAs, as of Jul 16, 2026\nFrom my own data and notes on this PC. It is not the system of record.\n\nANDA 216482 (Metformin HCl ER Tablets, 500 mg): Cycle 2, 62% through review; goal Oct 3, 2026;') && page1.indexOf('ANDA 216482 (') < page1.indexOf('ANDA 214990 ('), 'H2 the page lists every ANDA in the data, the one that needs a look most first');
+  ok(/^Hand-off: 2 ANDAs, made on Jul 16, 2026\nFrom my own data and notes on this PC\. It is not the system of record\.\nData: Fictional demo data · extract #412 · as of Jul 16, 2026, 7:12 AM [A-Z0-9+:-]+ \(\d+ hours ago\)\n\nANDA 216482 \(Metformin HCl ER Tablets, 500 mg\): Cycle 2, 62% through review; goal Oct 3, 2026;/.test(page1) && page1.indexOf('ANDA 216482 (') < page1.indexOf('ANDA 214990 ('), 'H2 the page lists every ANDA in the data, the one that needs a look most first');
   ok(/\n  Needs a look: /.test(page1) && /\n  Open: IR response/.test(page1) && !page1.includes('Notes:') && !page1.includes('note for the hand-off') && !(await p.$eval('#hoNotes', e => e.checked)), 'H4 each ANDA has what needs a look and what is open; my notes are not on the page until I tick the box');
   await p.check('#hoNotes'); await settle(p, 100);
   ok((await p.$eval('#hoOut', e => e.value)).includes('\n  Notes: ') && (await p.$eval('#hoOut', e => e.value)).includes('<b>bold</b> note for the hand-off'), 'H3 with the box ticked the latest notes are on the page; a note with markup is plain text');
   await p.click('#hoWatch'); await settle(p, 100);
-  eq(await p.evaluate(() => [document.getElementById('hoWatch').getAttribute('aria-pressed'), document.getElementById('hoAll').getAttribute('aria-pressed'), document.getElementById('hoOut').value.split('\n')[0]]), ['true', 'false', 'Hand-off: 2 ANDAs, as of Jul 16, 2026'], 'H5 "Only those that need a look" is a choice, and the page says how many it holds');
+  eq(await p.evaluate(() => [document.getElementById('hoWatch').getAttribute('aria-pressed'), document.getElementById('hoAll').getAttribute('aria-pressed'), document.getElementById('hoOut').value.split('\n')[0]]), ['true', 'false', 'Hand-off: 2 ANDAs, made on Jul 16, 2026'], 'H5 "Only those that need a look" is a choice, and the page says how many it holds');
   await p.click('#hoCopy'); await settle(p, 200);
   eq([await clip(p) === await p.$eval('#hoOut', e => e.value), await txt(p, '#hoStatus')], [true, 'The page was copied. Nothing was sent; you decide who gets it.'], 'H6 Copy takes exactly the page');
   const saved = await download(p, () => p.click('#hoSave'));
@@ -177,7 +177,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   eq(await axe(p, '#handoff'), [], 'H8 accessibility scan of the hand-off page');
   await p.evaluate(() => { closeApp('handoff'); openAsk('Thursday huddle: ANDA 216482 and the labeling item.'); }); await settle(p, 250);
   await p.click('#asMeeting'); await settle(p, 200);
-  eq(await p.evaluate(() => [document.getElementById('hoTitle').textContent, document.getElementById('hoModes').hidden, document.getElementById('hoOut').value.split('\n')[0], document.getElementById('hoOut').value.includes('ANDA 214990 (')]), ['Meeting page', true, 'Meeting page: 1 ANDA, as of Jul 16, 2026', false], 'H9 from a selection that names an ANDA, a meeting page holds only that ANDA');
+  eq(await p.evaluate(() => [document.getElementById('hoTitle').textContent, document.getElementById('hoModes').hidden, document.getElementById('hoOut').value.split('\n')[0], document.getElementById('hoOut').value.includes('ANDA 214990 (')]), ['Meeting page', true, 'Meeting page: 1 ANDA, made on Jul 16, 2026', false], 'H9 from a selection that names an ANDA, a meeting page holds only that ANDA');
   eq(await p.evaluate(() => [document.getElementById('hoNotes').checked, document.getElementById('hoOut').value.includes('Notes:')]), [false, false], 'H12 the box for notes, ticked for the page before, is unticked again for the next page');
   await p.close();
   p = await fresh({ viewport: { width: 390, height: 780 } });

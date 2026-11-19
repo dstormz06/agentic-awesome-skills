@@ -27,10 +27,13 @@ public sealed class PortfolioRepository : IAndaRepository
     private Dictionary<string, List<NoteSnippet>> _notes = new();
     private DateTime _loadedWrite;
     private long _loadedLength;
-    private DateOnly _asOf;
+    /// <summary>The day the file was saved, in the zone the tool writes in now: the same day the card's line names, also after the zone was changed.</summary>
+    private DateOnly AsOfDay => DateOnly.FromDateTime(Clock.Wall(_asOfUtc));
     private DateTime _asOfUtc;
 
-    public PortfolioStatus Status { get; private set; } = new(false, 0, "Not loaded.");
+    /// <summary>What was read. Made when asked for, so that the time the file was saved is written in the zone in use now.</summary>
+    public PortfolioStatus Status => _status();
+    private Func<PortfolioStatus> _status = () => new(false, 0, "Not loaded.");
     public IReadOnlyList<string> Headers { get; private set; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, string> Mapping { get; private set; } = new Dictionary<string, string>();
     public string FileName => Path.GetFileName(_path);
@@ -54,7 +57,7 @@ public sealed class PortfolioRepository : IAndaRepository
             if (!map.ContainsKey("number"))
             {
                 Headers = table.Headers; Mapping = map; _rows = new(); _byApplicant = new(StringComparer.OrdinalIgnoreCase);
-                Status = new(false, 0, "No column for the ANDA number was found. Please choose which column holds it in Settings.");
+                _status = () => new(false, 0, "No column for the ANDA number was found. Please choose which column holds it in Settings.");
                 return;
             }
             int Col(string key) => map.TryGetValue(key, out var h) ? table.Headers.ToList().IndexOf(h) : -1;
@@ -77,20 +80,21 @@ public sealed class PortfolioRepository : IAndaRepository
             _byApplicant = rows.Values.Where(r => r.Applicant.Length > 0).GroupBy(r => r.Applicant, StringComparer.OrdinalIgnoreCase)
                 .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
             _loadedWrite = info.LastWriteTime; _loadedLength = info.Length;
-            _asOfUtc = info.LastWriteTimeUtc; _asOf = DateOnly.FromDateTime(Clock.Wall(_asOfUtc));      // the day it was saved, in the zone the tool writes in: the same day the card names
+            _asOfUtc = info.LastWriteTimeUtc;
             _notes = NotesIndex.Build(_notesFolder);
             string missing = string.Join(", ", new[] { ("goal", "goal date"), ("forecast", "forecast"), ("drug", "drug") }.Where(x => !map.ContainsKey(x.Item1)).Select(x => x.Item2));
-            Status = new(true, rows.Count,
-                $"Loaded {rows.Count} ANDA{(rows.Count == 1 ? "" : "s")} from {Path.GetFileName(_path)} (file saved {Clock.Label(info.LastWriteTimeUtc, seconds: false)})." +
+            var savedUtc = info.LastWriteTimeUtc; int count = rows.Count;
+            _status = () => new(true, count,
+                $"Loaded {count} ANDA{(count == 1 ? "" : "s")} from {Path.GetFileName(_path)} (file saved {Clock.Label(savedUtc, seconds: false)})." +
                 (skipped > 0 ? $" {skipped} row{(skipped == 1 ? "" : "s")} without a readable ANDA number skipped." : "") +
                 (missing.Length > 0 ? $" Not found in your sheet: {missing}." : ""));
         }
-        catch (PortfolioException ex) { _rows = new(); Status = new(false, 0, ex.Message); }
+        catch (PortfolioException ex) { _rows = new(); _status = () => new(false, 0, ex.Message); }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
             // This runs at every start. Whatever a file does to the reader, the app starts, says so, and shows no rows from that file.
             _rows = new(); _byApplicant = new(StringComparer.OrdinalIgnoreCase);
-            Status = new(false, 0, "The file could not be read. It may be damaged or hold a value this app does not expect. Nothing was changed in it.");
+            _status = () => new(false, 0, "The file could not be read. It may be damaged or hold a value this app does not expect. Nothing was changed in it.");
         }
     }
 
@@ -150,11 +154,11 @@ public sealed class PortfolioRepository : IAndaRepository
             ForecastConfidence = row.Forecast is null ? "" : "as entered in your sheet",
             Attention = null,
             Latest = row.Status.Length > 0 ? row.Status : AndaRecord.Unknown,
-            DataAsOf = $"your portfolio file, saved {_asOf.ToString("MMM d", Inv)} · {FileName}",
+            DataAsOf = $"your portfolio file, saved {AsOfDay.ToString("MMM d", Inv)} · {FileName}",
             Ahead = null, Pending = Array.Empty<PendingItem>(), Notes = notes,
             ForecastDetail = "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
             Sisters = sisters,
-            GoalDateValue = row.Goal, ForecastDateValue = row.Forecast, SubmittedDate = row.Submitted, AsOfDate = _asOf,
+            GoalDateValue = row.Goal, ForecastDateValue = row.Forecast, SubmittedDate = row.Submitted, AsOfDate = AsOfDay,
             AsOfUtc = _asOfUtc, DataSource = $"Your portfolio file · {FileName}",
             Demo = false, SourceLabel = $"Your portfolio: {FileName}",
             ActiveIngredient = row.Ingredient.Length > 0 ? row.Ingredient : null, DosageForm = row.Form.Length > 0 ? row.Form : null,

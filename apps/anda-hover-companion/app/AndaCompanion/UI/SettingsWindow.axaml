@@ -117,7 +117,7 @@
               <TextBlock Name="TimeNow" FontSize="13" Foreground="{DynamicResource C.Ink}" TextWrapping="Wrap"/>
               <WrapPanel>
                 <TextBlock Text="Show times in" FontSize="12.5" Foreground="{DynamicResource C.Ink2}" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                <ComboBox Name="TimeZoneBox" MinHeight="28" MinWidth="260" AutomationProperties.Name="Show times in"/>
+                <ComboBox Name="TimeZoneBox" MinHeight="28" Width="350" HorizontalAlignment="Left" AutomationProperties.Name="Show times in"/>
               </WrapPanel>
               <WrapPanel>
                 <TextBlock Text="Mark my data as stale when it is older than" FontSize="12.5" Foreground="{DynamicResource C.Ink2}" VerticalAlignment="Center" Margin="0,0,10,0"/>
