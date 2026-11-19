@@ -124,4 +124,59 @@ public class Round32Tests : IDisposable
         Assert.True(SettingsBackup.Import(backup, other, lenses, replies).Ok); Assert.Equal(90, other.RefStaleAfterDays);
         SettingsBackup.Reset(other, lenses, replies); Assert.Equal(45, other.RefStaleAfterDays);
     }
+
+    // ---------------------------------------------------------------- first steps
+
+    [Fact]
+    public void The_five_steps_of_the_guide_and_how_each_is_shown_are_the_simulations()
+    {
+        using var doc = JsonDocument.Parse(File.ReadAllText(Folder("mockup", "round32-golden.json"))); var root = doc.RootElement; var bad = new List<string>(); int n = 0;
+        string Shape(GuideView g) => $"{g.Index}|{g.Place}|{g.Title}|{string.Join(" / ", g.Lines)}|{g.Action ?? "(none)"}|{g.Back}|{g.Next}|{g.Leave}";
+        Assert.Equal(5, Guide.Steps.Count);                                                                       // the owner's rule: at most five
+        Assert.Equal(JsonSerializer.Serialize(root.GetProperty("guideSteps").EnumerateArray().Select(s => new { t = s.GetProperty("title").GetString(), a = s.GetProperty("action").GetString(), l = s.GetProperty("lines").EnumerateArray().Select(x => x.GetString()).ToArray() })),
+            JsonSerializer.Serialize(Guide.Steps.Select(s => new { t = s.Title, a = s.Action, l = s.Lines.ToArray() })));
+        foreach (var c in root.GetProperty("guide").EnumerateArray())
+        {
+            n++; var at = c.GetProperty("i");
+            double? i = at.ValueKind switch { JsonValueKind.Number => at.GetDouble(), JsonValueKind.String => double.TryParse(at.GetString(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double d) ? d : double.NaN, _ => null };
+            var r = c.GetProperty("result");
+            string want = $"{r.GetProperty("index").GetInt32()}|{r.GetProperty("place").GetString()}|{r.GetProperty("title").GetString()}|{string.Join(" / ", r.GetProperty("lines").EnumerateArray().Select(x => x.GetString()))}|{r.GetProperty("action").GetString() ?? "(none)"}|{r.GetProperty("back").GetBoolean()}|{r.GetProperty("next").GetString()}|{r.GetProperty("leave").GetString()}";
+            string have = Shape(Guide.Step(i, c.GetProperty("shortcut").GetString(), c.GetProperty("on").GetString()));
+            if (want != have) bad.Add($"view {n}:\n  expected {want}\n  actual   {have}");
+        }
+        Assert.True(n >= 20, "cases are missing");
+        foreach (var c in root.GetProperty("opensAtStart").EnumerateArray())
+        {
+            bool? seen = c.GetProperty("seen").ValueKind switch { JsonValueKind.True => true, JsonValueKind.False => false, _ => null };      // anything but a plain "yes" means it has not been shown
+            if (c.GetProperty("opens").GetBoolean() != Guide.OpensAtStart(seen)) bad.Add($"start with {c.GetProperty("seen")}");
+        }
+        Assert.True(bad.Count == 0, bad.Count + " differences from the simulation:\n" + string.Join("\n", bad.Take(6)));
+
+        // every button a step names is one the window knows; no line is left with a mark in it
+        Assert.All(Guide.Steps, s => Assert.Contains(s.Action, new[] { null, Guide.ShowSample, Guide.OpenSettings, Guide.OpenConnections }));
+        for (int k = 0; k < 5; k++) Assert.All(Guide.Step(k, "Ctrl+Alt+A", "Offline · Local only").Lines, l => Assert.DoesNotContain("{", l));
+        Assert.Equal("Select an ANDA number in any window, then press {connections}. Or press the button below to open the card of the sample ANDA 216482.", Guide.Step(1, "{connections}", "x").Lines[0]);      // what is written in is not read for marks
+    }
+
+    [Fact]
+    public void At_the_first_start_the_app_saves_that_the_guide_was_shown_before_it_opens_it_and_a_backup_does_not_carry_that()
+    {
+        string src = File.ReadAllText(Folder("app", "AndaCompanion", "App.axaml.cs"));
+        int rule = src.IndexOf("Guide.OpensAtStart(_settings.FirstRunDone)", StringComparison.Ordinal);
+        Assert.True(rule > 0, "the app no longer asks the shared rule whether the guide opens at start");
+        string then = src.Substring(rule, 900);
+        int mark = then.IndexOf("_settings.FirstRunDone = true;", StringComparison.Ordinal), save = then.IndexOf("SettingsService.Save(_settings);", StringComparison.Ordinal), open = then.IndexOf("OpenFirstSteps", StringComparison.Ordinal);
+        Assert.True(mark > 0 && save > mark && open > save, "shown must be saved before the guide opens, so that it can never open by itself twice");
+        Assert.Contains("SelfTestRun is { } selfTest", src.Substring(Math.Max(0, rule - 1400), 1400));      // a diagnostic run never opens it: this branch is the other one
+        Assert.Contains("new NativeMenuItem(\"Help: first steps…\")", src);
+
+        string dir = Temp.NewDir();
+        var lenses = new PromptLibraryService(Path.Combine(dir, "p.json")); var replies = new QuickReplyService(Path.Combine(dir, "r.json"));
+        string backup = SettingsBackup.Export(new Settings { FirstRunDone = true }, lenses, replies, new DateTime(2026, 11, 19, 18, 0, 0, DateTimeKind.Utc));
+        var fresh = new Settings();
+        Assert.True(SettingsBackup.Import(backup, fresh, lenses, replies).Ok); Assert.False(fresh.FirstRunDone);      // a colleague's backup does not decide whether my PC has shown it
+        var mine = new Settings { FirstRunDone = true };
+        SettingsBackup.Reset(mine, lenses, replies); Assert.True(mine.FirstRunDone);                                 // and a reset does not bring it up again by itself
+        Assert.False(new Settings().FirstRunDone);
+    }
 }

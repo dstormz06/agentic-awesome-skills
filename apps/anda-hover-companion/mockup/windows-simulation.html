@@ -268,6 +268,12 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 .app-win .hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .fresh.stale{color:var(--c-warn, #8a5a00);font-weight:650}
 #c-rld.stale{color:var(--c-warn, #8a5a00);font-weight:650}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+#first{width:460px;max-width:calc(100vw - 24px);padding:18px 20px;left:24px;top:calc(var(--banner-h) + 20px);max-height:calc(100% - var(--tb-h) - var(--banner-h) - 36px);overflow:auto;z-index:56}
+#first .hdr{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 4px}
+#first .acts{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+#first [hidden]{display:none !important}      /* a hidden row or button is not shown, whatever its class says about display */
+#first #fsLines p{font-size:13.5px;line-height:1.5;margin:0 0 8px}
 #compact .stalemark{font-size:calc(10.5px*var(--ts));font-weight:650;color:var(--c-warn, #8a5a00);padding:1px 10px 5px;white-space:nowrap}
 .onbar{display:block;width:100%;margin:12px 0 0;padding:6px 2px 0;min-height:26px;box-sizing:border-box;border:none;border-top:1px solid var(--c-line);background:var(--c-bg);position:sticky;bottom:0;z-index:2;color:var(--c-ink2);font:inherit;font-size:calc(11.5px*var(--ts));text-align:left;cursor:pointer}
 .onbar::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;border:1.5px solid var(--c-ink2);margin-right:7px;vertical-align:baseline}
@@ -1870,6 +1876,16 @@ PS C:\work&gt; </div>
   </div>
 
   <!-- ===== About and what changed (round 29) ===== -->
+  <div class="app-win" id="first" role="dialog" aria-labelledby="fsTitle" aria-describedby="fsPlace">
+    <div class="hdr"><h2 id="fsTitle"></h2><button class="pill quiet" id="fsLeave" type="button">Skip the guide</button></div>
+    <p class="hint" id="fsPlace" style="margin:0 0 8px"></p>
+    <div id="fsLines"></div>
+    <div class="acts" id="fsActRow"><button class="pill quiet" id="fsAct" type="button"></button></div>
+    <p class="hint" id="fsStatus" role="status" style="min-height:1.2em"></p>
+    <div class="acts" style="justify-content:space-between"><button class="pill quiet" id="fsBack" type="button">Back</button><button class="pill" id="fsNext" type="button">Next</button></div>
+    <p class="sr-only" id="fsSay" role="status"></p>
+  </div>
+
   <div class="app-win" id="about" role="dialog" aria-label="About and what changed">
     <div class="hdr"><h2>About and what changed</h2><button class="pill" id="abClose" type="button">Close</button></div>
     <p style="font-size:13.5px;margin:0 0 4px"><strong>ANDA Companion (Notula)</strong> · <span id="abVersion"></span></p>
@@ -2632,7 +2648,7 @@ const state = { tz:"", staleDays:7, refStaleDays:45, oldRef:false, oldData:false
   cardFields:["applicant", "established", "project", "agentCo", "agentEmail", "applicantEmail", "myNotes", "doc356h", "doc32p1"],
   watchOn:false, newsOn:false, newsFile:"", watchCap:3, trayRecount:"daily", wDay:null, wCount:0, wSeen:new Set(), wSnoozed:new Set(), hubSeen:new Set() };
 const steps = {};
-const APP_WINS = ["lookup", "plib", "settings", "draft", "wlist", "replies", "actwin", "todo", "mytodo", "notes", "ask", "today", "hub", "cmp", "usage", "handoff", "conn", "about", "bak"];
+const APP_WINS = ["lookup", "plib", "settings", "draft", "wlist", "replies", "actwin", "todo", "mytodo", "notes", "ask", "today", "hub", "cmp", "usage", "handoff", "conn", "about", "bak", "first"];
 
 /* ================= round 19 =================
    1. Card details: columns of the person's own sheet, shown when a card is expanded, each with Copy. Nothing is looked up anywhere.
@@ -4781,6 +4797,52 @@ function connPaint(){
   $("cnCount").textContent = evLog.length === 0 ? "" : `${evLog.length.toLocaleString("en-US")} ${evLog.length === 1 ? "event" : "events"}${evLog.length > 200 ? "; the newest 200 are shown, and the export holds them all" : ""}.`;
 }
 function openConn(){ closeMenus(); showApp("conn"); $("conn").style.zIndex = "54"; connPaint(); $("cnStatus").textContent = ""; }
+/* ---------------- round 32: first steps ---------------- */
+const FIRST_STORE = "anda-first-steps-seen";
+let fsAt = 0;
+function fsPaint(say){
+  const g = guideStep(fsAt, state.keys.peek, connections(connState()).line);
+  $("fsTitle").textContent = g.title; $("fsPlace").textContent = g.place;
+  $("fsLines").replaceChildren(...g.lines.map(t => h("p", { text:t })));
+  $("fsActRow").hidden = !g.action; $("fsAct").textContent = g.action || "";
+  $("fsBack").hidden = !g.back; $("fsNext").textContent = g.next; $("fsLeave").textContent = g.leave;
+  $("fsStatus").textContent = "";
+  if(say) $("fsSay").textContent = `${g.place}: ${g.title}`;      /* a screen reader is told the step it is on */
+}
+function openFirst(){
+  closeMenus(); fsAt = 0; showApp("first"); $("first").style.zIndex = "56"; fsPaint(false);
+  try{ localStorage.setItem(FIRST_STORE, "1"); }catch(e){}      /* shown once: it never opens by itself again */
+  try{ $("fsNext").focus({ preventScroll:true }); }catch(e){}
+}
+function fsGo(d){
+  const n = GUIDE_STEPS.length;
+  if(d > 0 && fsAt >= n - 1){ closeApp("first"); return; }
+  fsAt = Math.min(Math.max(0, fsAt + d), n - 1); fsPaint(true);
+  try{ (d < 0 && !$("fsBack").hidden ? $("fsBack") : $("fsNext")).focus({ preventScroll:true }); }catch(e){}
+}
+function fsAct(){
+  const g = guideStep(fsAt, "", "");
+  if(g.action === "Show the sample card"){
+    const r = $("first").getBoundingClientRect();
+    openCard("216482", { anchor:{ x:Math.min(innerWidth - 40, r.right + 60), y:r.top + 80 }, forceFull:true });
+    $("fsStatus").textContent = "The card of the sample ANDA 216482 is open. It is fictional, and its card says so. Press Esc to close it.";
+  } else if(g.action === "Open Settings"){
+    showApp("settings"); $("secFiles").open = true; try{ $("secFiles").scrollIntoView({ block:"start" }); }catch(e){}
+    $("fsStatus").textContent = "Settings is open at “My files and writing”. This guide stays open behind it.";
+  } else if(g.action === "Open Connections"){
+    openConn(); $("fsStatus").textContent = "“Connections and event log” is open. This guide stays open behind it.";
+  }
+}
+$("fsNext").addEventListener("click", () => fsGo(1)); $("fsBack").addEventListener("click", () => fsGo(-1));
+$("fsLeave").addEventListener("click", () => closeApp("first")); $("fsAct").addEventListener("click", fsAct);
+/* At the first start the guide opens by itself, once. Under automation (the test suites written before it) only when the address says first=1,
+   so that those suites start as they always did; first=0 keeps it shut for anyone. */
+setTimeout(() => {
+  const q = location.search.slice(1), asked = /(?:^|&)first=1(?:&|$)/.test(q), refused = /(?:^|&)first=0(?:&|$)/.test(q);
+  let seen = false; try{ seen = localStorage.getItem(FIRST_STORE) === "1"; }catch(e){}
+  if(!refused && guideOpensAtStart(seen) && (asked || !navigator.webdriver)) openFirst();
+}, 0);
+
 function openAbout(){
   closeMenus(); showApp("about"); $("about").style.zIndex = "54";
   $("abVersion").textContent = APP_VERSION; const box = $("abList"); box.replaceChildren();
@@ -5567,6 +5629,7 @@ function openMenu(){
     item("Connections and event log…", "", () => openConn()),
     item("Backups and archive…", "", () => openBackups()),
     item("About and what changed…", "", () => openAbout()),
+    item("Help: first steps…", "", () => openFirst()),
     item(alertReasons().length ? `News and alerts… (${alertReasons().length} today)` : "News and alerts…", "", () => openHub()),
     ...(state.allTools ? [item("Today…", "", () => openToday()),
     item("ANDA to-do list…", "", () => openTodo()),
@@ -5873,8 +5936,40 @@ function archiveRows(lines, query, max){
   return { rows:hit.slice(0, max > 0 ? max : 200), total:kept.length, found:hit.length };
 }
 /* What changed, newest first. The Windows app shows the same list. */
-const APP_VERSION = "Prototype, round 31";
+/* ---------------- Round 32: first steps. A guide of five short steps: it opens by itself once, at the first start, can be left at any step,
+   and is opened again from the tray menu (Help: first steps). The same words as the Windows app's (mockup/round32-golden.json). ---------------- */
+const GUIDE_STEPS = [
+  { title:"What this is", action:null, lines:[
+    "ANDA Companion (Notula) shows a short card for an ANDA number you select in an email or a document: the goal date, the forecast, what needs you, and your notes.",
+    "It starts with sample data so that you can try it. Every sample record is fictional, and its card says so.",
+    "Nothing leaves this PC unless you switch a connection on."] },
+  { title:"Try it on a sample", action:"Show the sample card", lines:[
+    "Select an ANDA number in any window, then press {shortcut}. Or press the button below to open the card of the sample ANDA 216482.",
+    "On the card, Enter adds a note of your own and Esc closes it."] },
+  { title:"Use your own data", action:"Open Settings", lines:[
+    "In Settings, under “My files and writing”, choose your portfolio file (Excel or CSV). The card then shows your ANDAs, and says where the data is from and how old it is.",
+    "The file is read on this PC. It is not copied anywhere and not sent anywhere."] },
+  { title:"What is switched on", action:"Open Connections", lines:[
+    "Every window says at its foot what is switched on. At the moment: {connections}",
+    "No AI is used until you choose a connection in Settings. “Connections and event log” lists what each connection sends, where to, and what is kept."] },
+  { title:"Where things are", action:null, lines:[
+    "Right-click the tray icon near the clock. The menu holds Lookup, Review a draft, Connections and event log, Backups and archive, and Settings.",
+    "This guide is there as well, under “Help: first steps”. Notices and the tray dot appear only while the app is running."] },
+];
+/* One step as it is shown: its place, its title, its lines with the person's own shortcut and what is switched on written in, and its buttons. */
+function guideStep(i, shortcut, connections){
+  const n = GUIDE_STEPS.length, k = Math.min(Math.max(0, Math.floor(Number(i)) || 0), n - 1), s = GUIDE_STEPS[k];
+  const key = String(shortcut == null ? "" : shortcut).trim() || "the shortcut you chose in Settings", on = String(connections == null ? "" : connections).trim() || "Offline · Local only";
+  const said = /[.!?]$/.test(on) ? on : on + ".";
+  const fill = t => t.replace(/\{(shortcut|connections)\}/g, (m, which) => which === "shortcut" ? key : said);      /* one pass: what is written in is never read for marks itself */
+  return { index:k, place:`Step ${k + 1} of ${n}`, title:s.title, lines:s.lines.map(fill), action:s.action, back:k > 0, next:k < n - 1 ? "Next" : "Done", leave:k < n - 1 ? "Skip the guide" : "Close" };
+}
+/* The guide opens by itself once, at the first start, and never again by itself. "seen" is what the PC remembers; anything but true means it has not been shown. */
+function guideOpensAtStart(seen){ return seen !== true; }
+
+const APP_VERSION = "Prototype, round 32";
 const CHANGES = [
+  { round:32, items:["A guide of five short steps opens once, at the first start. You can leave it at any step and open it again from the tray menu: Help: first steps.", "The Drugs@FDA reference file says when it was saved and how long ago, and is marked STALE after a number of days of its own."] },
   { round:31, items:["Every time is written in your time zone, with its abbreviation and the right daylight time. You can choose another zone.", "Every piece of data says where it is from and as of when, and how long ago.", "Data older than the days you choose is marked STALE.", "A clock in Settings, and “minutes ago” on the card, are brought up to date once a minute."] },
   { round:30, items:["Every change to a list keeps a copy of it, and one press brings a copy back.", "You choose how many copies are kept.", "Finished to-do items can be searched in the archive and put back.", "You choose after how many days a finished item is archived."] },
   { round:29, items:["Every window says what is switched on, or “Offline · Local only”.", "A list of the connections: what each one sends, where, and what is kept.", "An event log you can read and export. It holds times, kinds and counts only.", "This page.", "Kept copies of your sheet are deleted only when you ask and confirm."] },

@@ -580,6 +580,14 @@ public partial class SettingsWindow : Window
         _loading = false;
     }
 
+    /// <summary>Opens one section by its name ("SecFiles") and brings it into view. A name that is not a section does nothing.</summary>
+    internal bool OpenSection(string name)
+    {
+        if (this.FindControl<Expander>(name) is not { IsVisible: true } section) return false;
+        section.IsExpanded = true; section.BringIntoView();
+        return true;
+    }
+
     /// <summary>Now, in UTC. Overridable so a test is never at the mercy of the real clock.</summary>
     public Func<DateTime> UtcNow { get; set; } = () => Clock.UtcNow();
     private Avalonia.Threading.DispatcherTimer? _minute;

@@ -3,10 +3,11 @@ namespace AndaCompanion.Services;
 /// <summary>The version the tool shows, and what changed, newest first. The same list as the simulation's (mockup/round29-golden.json).</summary>
 public static class ChangeLog
 {
-    public const string Version = "Prototype, round 31";
+    public const string Version = "Prototype, round 32";
 
     public static readonly IReadOnlyList<(int Round, IReadOnlyList<string> Items)> Entries = new (int, IReadOnlyList<string>)[]
     {
+        (32, new[] { "A guide of five short steps opens once, at the first start. You can leave it at any step and open it again from the tray menu: Help: first steps.", "The Drugs@FDA reference file says when it was saved and how long ago, and is marked STALE after a number of days of its own." }),
         (31, new[] { "Every time is written in your time zone, with its abbreviation and the right daylight time. You can choose another zone.", "Every piece of data says where it is from and as of when, and how long ago.", "Data older than the days you choose is marked STALE.", "A clock in Settings, and “minutes ago” on the card, are brought up to date once a minute." }),
         (30, new[] { "Every change to a list keeps a copy of it, and one press brings a copy back.", "You choose how many copies are kept.", "Finished to-do items can be searched in the archive and put back.", "You choose after how many days a finished item is archived." }),
         (29, new[] { "Every window says what is switched on, or “Offline · Local only”.", "A list of the connections: what each one sends, where, and what is kept.", "An event log you can read and export. It holds times, kinds and counts only.", "This page.", "Kept copies of your sheet are deleted only when you ask and confirm." }),

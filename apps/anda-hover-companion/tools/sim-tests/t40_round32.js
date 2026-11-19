@@ -1,7 +1,8 @@
 // Paths are found from this file's place in the repository, so the suite runs from any folder. See README.md in this folder.
 const SIMROOT = require('path').resolve(__dirname, '..', '..'), SIMURL = require('url').pathToFileURL(SIMROOT).href;
 const AXE_FILE = process.env.AXE_PATH || (() => { try { return require.resolve('axe-core/axe.min.js'); } catch (e) { return ''; } })();
-// Round 32 in the browser simulation. Part A: the Drugs@FDA reference file says when it was saved and how long ago, and is marked STALE
+// Round 32 in the browser simulation. Part B: a guide of five short steps that opens once at the first start, can be left at any step and
+// is opened again from the tray menu. Part A: the Drugs@FDA reference file says when it was saved and how long ago, and is marked STALE
 // after a number of days of its own (45 unless the person changes it), separate from the days for the person's own data.
 const { chromium } = require('playwright');
 const SIM = SIMURL + '/mockup/windows-simulation.html?clock=fixed';
@@ -58,6 +59,79 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   { const ctx = await b.newContext({ viewport: { width: 390, height: 780 }, timezoneId: 'America/New_York', reducedMotion: 'reduce' }); const q = await ctx.newPage(); q.on('pageerror', e => errs.push(e.message));
     await q.goto(SIM); await q.waitForTimeout(300); await look(q); await settle(q, 250);
     eq(await q.evaluate(() => { const w = document.getElementById('settings'); return [document.documentElement.scrollWidth <= innerWidth + 1, w.scrollWidth <= w.clientWidth + 1, document.getElementById('setRefStale').getBoundingClientRect().right <= innerWidth]; }), [true, true, true], 'A16 nothing runs off the side at phone width');
+    await q.close(); }
+
+  // ====================================================== B. First steps: a guide of five steps
+  const open = async (query, init) => {
+    const ctx = await b.newContext({ viewport: { width: 1366, height: 768 }, timezoneId: 'America/New_York', reducedMotion: 'reduce' });
+    if (init) await ctx.addInitScript(init);
+    const q = await ctx.newPage(); q.on('pageerror', e => errs.push(e.message));
+    q.on('console', m => { if (m.type() === 'error' || m.type() === 'warning') errs.push(m.type() + ': ' + m.text()); });
+    await q.goto(SIM + query); await q.waitForTimeout(350); return q;
+  };
+  const shown = q => q.evaluate(() => { const w = document.getElementById('first'); return w.style.display === 'block' ? [document.getElementById('fsPlace').textContent, document.getElementById('fsTitle').textContent] : null; });
+  p = await open('');
+  eq(await shown(p), null, 'B1 the suites written before the guide start as they always did: under automation it does not open by itself');
+  await p.close();
+  // a real first start: a browser that is not driven, with nothing remembered
+  p = await open('', () => { Object.defineProperty(Navigator.prototype, 'webdriver', { get: () => false }); });
+  eq(await shown(p), ['Step 1 of 5', 'What this is'], 'B2 at the first start the guide opens by itself, at its first step');
+  eq(await p.evaluate(() => [document.activeElement.id, document.getElementById('first').getAttribute('role'), document.getElementById('first').getAttribute('aria-labelledby'), localStorage.getItem('anda-first-steps-seen')]), ['fsNext', 'dialog', 'fsTitle', '1'], 'B3 the keyboard is on Next, the window is named by its title, and the PC remembers that the guide was shown');
+  await p.reload(); await p.waitForTimeout(350);
+  eq(await shown(p), null, 'B4 at the next start it does not open by itself again');
+  await p.close();
+  p = await open('&first=0', () => { Object.defineProperty(Navigator.prototype, 'webdriver', { get: () => false }); });
+  eq(await shown(p), null, 'B5 an address that says first=0 keeps it shut');
+  await p.close();
+
+  p = await open('&first=1');
+  eq(await shown(p), ['Step 1 of 5', 'What this is'], 'B6 with first=1 a suite gets the first start');
+  eq(await p.evaluate(() => [[...document.querySelectorAll('#fsLines p')].map(x => x.textContent), document.getElementById('fsActRow').hidden, document.getElementById('fsBack').hidden, document.getElementById('fsNext').textContent, document.getElementById('fsLeave').textContent]),
+    [['ANDA Companion (Notula) shows a short card for an ANDA number you select in an email or a document: the goal date, the forecast, what needs you, and your notes.', 'It starts with sample data so that you can try it. Every sample record is fictional, and its card says so.', 'Nothing leaves this PC unless you switch a connection on.'], true, true, 'Next', 'Skip the guide'],
+    'B7 step 1 says what the tool is, that the sample data is fictional, and that nothing leaves the PC; it can be left at once');
+  eq(await axe(p, '#first'), [], 'B8 accessibility scan of the guide');
+  eq(await p.evaluate(() => ['fsActRow', 'fsAct', 'fsBack'].map(id => document.getElementById(id).getClientRects().length)), [0, 0, 0], 'B8b at step 1 the button of a later step and Back are not on the screen at all');
+  const titles = [];
+  for (let i = 0; i < 4; i++) { await p.keyboard.press('Enter'); await settle(p, 80); titles.push((await shown(p)).join(': ')); }
+  eq(titles, ['Step 2 of 5: Try it on a sample', 'Step 3 of 5: Use your own data', 'Step 4 of 5: What is switched on', 'Step 5 of 5: Where things are'], 'B9 Enter on Next walks the five steps, and no more than five');
+  eq(await p.evaluate(() => [document.getElementById('fsNext').textContent, document.getElementById('fsLeave').textContent, document.getElementById('fsBack').hidden, document.getElementById('fsSay').textContent, document.activeElement.id, GUIDE_STEPS.length]), ['Done', 'Close', false, 'Step 5 of 5: Where things are', 'fsNext', 5],
+    'B10 the last step says Done and Close; each step is announced; the keyboard stays on Next');
+  await p.click('#fsBack'); await settle(p, 80);
+  eq([await shown(p), await p.evaluate(() => document.activeElement.id)], [['Step 4 of 5', 'What is switched on'], 'fsBack'], 'B11 Back goes back, and the keyboard stays on Back');
+  eq(await p.evaluate(() => document.querySelector('#fsLines p').textContent), 'Every window says at its foot what is switched on. At the moment: Offline · Local only.', 'B12 step 4 says what is switched on now');
+  await p.evaluate(() => { document.getElementById('swAi').click(); }); await settle(p, 150);
+  await p.click('#fsBack'); await p.click('#fsNext'); await settle(p, 80);
+  ok(/^Every window says at its foot what is switched on\. At the moment: Switched on: .+\.$/.test(await p.evaluate(() => document.querySelector('#fsLines p').textContent)), 'B13 and follows what is switched on: ' + await p.evaluate(() => document.querySelector('#fsLines p').textContent));
+  await p.evaluate(() => { document.getElementById('swAi').click(); }); await settle(p, 100);
+  await p.click('#fsAct'); await settle(p, 200);
+  eq(await p.evaluate(() => [document.getElementById('conn').style.display, document.getElementById('first').style.display, document.getElementById('fsStatus').textContent]), ['block', 'block', '“Connections and event log” is open. This guide stays open behind it.'], 'B14 its button opens Connections and says so; the guide stays');
+  await p.evaluate(() => closeApp('conn')); await p.click('#fsBack'); await settle(p, 80);
+  await p.click('#fsAct'); await settle(p, 200);
+  eq(await p.evaluate(() => [document.getElementById('settings').style.display, document.getElementById('secFiles').open, document.getElementById('fsStatus').textContent]), ['block', true, 'Settings is open at “My files and writing”. This guide stays open behind it.'], 'B15 step 3 opens Settings where the file is chosen');
+  await p.evaluate(() => closeApp('settings')); await p.click('#fsBack'); await settle(p, 80);
+  eq(await p.evaluate(() => document.querySelector('#fsLines p').textContent), 'Select an ANDA number in any window, then press Ctrl+Alt+A. Or press the button below to open the card of the sample ANDA 216482.', 'B16 step 2 names the person' + "'" + 's own shortcut');
+  await p.click('#fsAct'); await settle(p, 400);
+  eq(await p.evaluate(() => [document.getElementById('card').style.display, document.getElementById('c-fresh').textContent.startsWith('Fictional demo data'), /fictional/i.test(document.getElementById('card').textContent), document.getElementById('first').style.display, document.getElementById('fsStatus').textContent]),
+    ['block', true, true, 'block', 'The card of the sample ANDA 216482 is open. It is fictional, and its card says so. Press Esc to close it.'], 'B17 its button opens the sample card, which says it is fictional sample data; the guide stays and says what happened');
+  await p.evaluate(() => closeCard()); await settle(p, 100);
+  await p.click('#fsLeave'); await settle(p, 100);
+  eq(await shown(p), null, 'B18 "Skip the guide" leaves it at any step');
+  // from Help, as often as wanted
+  await p.evaluate(() => openMenu()); await settle(p, 100);
+  ok(await p.evaluate(() => [...document.querySelectorAll('#menu button')].some(x => x.textContent.startsWith('Help: first steps…'))), 'B19 the tray menu offers "Help: first steps…"');
+  await p.evaluate(() => [...document.querySelectorAll('#menu button')].find(x => x.textContent.startsWith('Help: first steps…')).click()); await settle(p, 150);
+  eq(await shown(p), ['Step 1 of 5', 'What this is'], 'B20 which opens the guide again, at its first step');
+  for (let i = 0; i < 5; i++) { await p.click('#fsNext'); await settle(p, 60); }
+  eq(await shown(p), null, 'B21 Done on the last step closes it');
+  await p.evaluate(() => openFirst()); await settle(p, 100); await p.keyboard.press('Escape'); await settle(p, 100);
+  eq(await shown(p), null, 'B22 Esc closes it as it closes the other windows');
+  eq(await p.evaluate(() => { state.keys.peek = ''; openFirst(); fsGo(1); const t = document.querySelector('#fsLines p').textContent; closeApp('first'); state.keys.peek = 'Ctrl+Alt+A'; return t; }), 'Select an ANDA number in any window, then press the shortcut you chose in Settings. Or press the button below to open the card of the sample ANDA 216482.', 'B23 with no shortcut set the sentence still reads');
+  eq(await p.evaluate(() => { const b = JSON.parse(backupText()); return ['firstStepsSeen' in b.settings, JSON.stringify(b).includes('first-steps')]; }), [false, false], 'B24 that the guide was shown belongs to this PC: a settings backup does not carry it');
+  await p.close();
+  { const ctx = await b.newContext({ viewport: { width: 390, height: 780 }, timezoneId: 'America/New_York', reducedMotion: 'reduce' }); const q = await ctx.newPage(); q.on('pageerror', e => errs.push(e.message));
+    await q.goto(SIM + '&first=1'); await q.waitForTimeout(350);
+    for (let i = 0; i < 3; i++) { await q.click('#fsNext'); await q.waitForTimeout(60); }
+    eq(await q.evaluate(() => { const w = document.getElementById('first'), r = w.getBoundingClientRect(); return [document.documentElement.scrollWidth <= innerWidth + 1, w.scrollWidth <= w.clientWidth + 1, r.left >= 0 && r.right <= innerWidth + 1, [...w.querySelectorAll('button')].filter(x => x.getClientRects().length).every(x => x.getBoundingClientRect().height >= 24)]; }), [true, true, true, true], 'B25 at phone width the guide fits and its buttons can be pressed');
     await q.close(); }
 
   eq(errs, [], 'Z no page error or warning in the whole run');

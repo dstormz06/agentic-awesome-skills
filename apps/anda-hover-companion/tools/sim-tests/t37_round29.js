@@ -85,7 +85,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   eq(await p.evaluate(() => ['Connections and event log…', 'About and what changed…'].map(t => [...document.querySelectorAll('#menu button')].some(x => x.textContent.startsWith(t)))), [true, true], 'A1 the tray menu offers both new windows');
   await p.evaluate(() => { closeMenus(); openAbout(); }); await settle(p);
   { const v = await p.evaluate(() => [document.getElementById('abVersion').textContent, [...document.querySelectorAll('#abList .lbl')].map(x => x.textContent), document.querySelectorAll('#abList li').length, document.getElementById('about').innerText.includes('It does not update itself.')]);
-    eq(v, ['Prototype, round 31', ['ROUND 31', 'ROUND 30', 'ROUND 29', 'ROUND 28', 'ROUND 27', 'ROUND 26'], await p.evaluate(() => CHANGES.reduce((n, c) => n + c.items.length, 0)), true], 'A2 the page names the version and what changed, newest first, and says the tool does not update itself'); }
+    eq(v, ['Prototype, round 32', ['ROUND 32', 'ROUND 31', 'ROUND 30', 'ROUND 29', 'ROUND 28', 'ROUND 27', 'ROUND 26'], await p.evaluate(() => CHANGES.reduce((n, c) => n + c.items.length, 0)), true], 'A2 the page names the version and what changed, newest first, and says the tool does not update itself'); }
   await p.click('#abCopy'); await settle(p, 200);
   eq(await clip(p) === await p.evaluate(() => changesText().join('\n')), true, 'A3 the page can be copied');
   eq(await axe(p, '#about'), [], 'A4 accessibility scan of the About window');

@@ -170,6 +170,13 @@ public class ShotTests : IClassFixture<HeadlessFixture>
             bak30.Show(); ConnectionBar.Attach(bak30); for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
             Save(bak30, dir, "backups-30");
             bak30.Close();
+            // Round 32: the guide of five steps, at its second step and at its last.
+            var guide32 = new FirstStepsWindow(new FirstStepsHooks(() => "Ctrl+Alt+A", () => "Offline · Local only", () => "The card of the sample ANDA 216482 is open. It is fictional, and its card says so. Press Esc to close it.", () => null, () => null));
+            guide32.Show(); ConnectionBar.Attach(guide32); guide32.Go(1); guide32.ActionButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); for (int i = 0; i < 20; i++) { Settle(); Thread.Sleep(12); }
+            Save(guide32, dir, "first-steps-32-step2");
+            guide32.Go(1); guide32.Go(1); guide32.Go(1); for (int i = 0; i < 20; i++) { Settle(); Thread.Sleep(12); }
+            Save(guide32, dir, "first-steps-32-step5");
+            guide32.Close();
             // Round 31: the card's data line, fresh and STALE, and the Time part of Settings.
             using (new ZoneScope("America/New_York"))
             {

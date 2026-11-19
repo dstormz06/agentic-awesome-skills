@@ -125,11 +125,13 @@ public partial class App : Application
                     desktop.Shutdown(code);
                 }, DispatcherPriority.Background);
             }
-            else if (!_settings.FirstRunDone)
+            else if (Guide.OpensAtStart(_settings.FirstRunDone))
             {
+                // The first start: the guide of five steps opens by itself, once. That it was shown is saved before it opens, so that a crash,
+                // a closed window or a second start can never bring it up by itself again. It is opened again from the tray menu.
                 _settings.FirstRunDone = true;
                 SettingsService.Save(_settings);
-                DemoCard("216482");      // see the product immediately; nothing has to be set up first
+                Dispatcher.UIThread.Post(OpenFirstSteps, DispatcherPriority.Background);
             }
         }
 
@@ -424,6 +426,9 @@ public partial class App : Application
         var about = new NativeMenuItem("About and what changed…");
         about.Click += (_, _) => OpenAbout();
         menu.Add(about);
+        var help = new NativeMenuItem("Help: first steps…");
+        help.Click += (_, _) => OpenFirstSteps();
+        menu.Add(help);
         var todo = new NativeMenuItem("ANDA to-do list…");
         todo.Click += (_, _) => OpenTodoWindow();
         menu.Add(Full(todo));

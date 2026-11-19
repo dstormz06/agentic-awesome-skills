@@ -190,6 +190,29 @@ public partial class App
         win.Show();
     }
 
+    private FirstStepsWindow? _firstStepsWindow;
+
+    /// <summary>The guide of five steps. Its buttons open a card of sample data, Settings at the files, and the list of connections; nothing else.</summary>
+    private void OpenFirstSteps()
+    {
+        if (_firstStepsWindow is not null) { _firstStepsWindow.Activate(); return; }
+        var win = new FirstStepsWindow(new FirstStepsHooks(
+            () => _settings.PeekHotkey,
+            () => Connections.Describe(Connections.From(_settings)).Line,
+            () =>
+            {
+                if (_demo.Find("216482") is not { } sample) return "The sample card could not be opened.";
+                var at = _firstStepsWindow is { } w ? new PixelPoint(w.Position.X + (int)w.Bounds.Width + 40, w.Position.Y + 40) : new PixelPoint(200, 200);
+                OpenCard(sample, at, mini: false);      // the bundled sample record, whatever data of the person's own is loaded
+                return "The card of the sample ANDA 216482 is open. It is fictional, and its card says so. Press Esc to close it.";
+            },
+            () => { OpenSettings(); _settingsWindow?.OpenSection("SecFiles"); return "Settings is open at “My files and writing”. This guide stays open behind it."; },
+            () => { OpenConnections(); return "“Connections and event log” is open. This guide stays open behind it."; }));
+        win.Closed += (_, _) => { if (ReferenceEquals(_firstStepsWindow, win)) _firstStepsWindow = null; };
+        _firstStepsWindow = win;
+        win.Show();
+    }
+
     private void OpenAbout()
     {
         if (_aboutWindow is not null) { _aboutWindow.Activate(); return; }
