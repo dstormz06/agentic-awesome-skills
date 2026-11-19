@@ -26,6 +26,17 @@ public static class Temp
 }
 
 /// <summary>Sets an environment variable for the duration of a test and restores it after.</summary>
+/// <summary>
+/// Sets the time zone the tool writes times in for the length of a test, and puts back what was there. A test that reads a time off the
+/// screen names its zone, so it gives the same answer on any computer. Only for tests in the "Global state" collection.
+/// </summary>
+public sealed class ZoneScope : IDisposable
+{
+    private readonly string _before = AndaCompanion.Services.Clock.ZoneId;
+    public ZoneScope(string zoneId) => AndaCompanion.Services.Clock.ZoneId = zoneId;
+    public void Dispose() => AndaCompanion.Services.Clock.ZoneId = _before;
+}
+
 public sealed class EnvScope : IDisposable
 {
     private readonly string _name;

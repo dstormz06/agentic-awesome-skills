@@ -22,7 +22,7 @@ public sealed record ConnectionSnapshot(ConnectionState State, string Provider, 
     {
         ConnectionState.Offline => "OFFLINE · no API connected",
         ConnectionState.SetUp => $"{Provider.ToUpperInvariant()} · set up, not tested",
-        ConnectionState.Connected => $"CONNECTED · {Provider}" + (At is { } t ? $" · checked {t.ToLocalTime():h:mm tt}" : ""),
+        ConnectionState.Connected => $"CONNECTED · {Provider}" + (At is { } t ? $" · checked {Clock.Time(t)}" : ""),
         _ => $"NOT REACHABLE · {Provider} · showing the offline brief",
     };
 
@@ -31,7 +31,7 @@ public sealed record ConnectionSnapshot(ConnectionState State, string Provider, 
     {
         ConnectionState.Offline => "Not connected to any API. Briefs are assembled from the record on this PC and nothing is sent anywhere.",
         ConnectionState.SetUp => $"{Provider} is set up, but no request has been made yet, so it is not known to work. Press Test.",
-        ConnectionState.Connected => $"Connected to {Provider}. The last request succeeded" + (At is { } t ? $" at {t.ToLocalTime():h:mm tt}." : "."),
+        ConnectionState.Connected => $"Connected to {Provider}. The last request succeeded" + (At is { } t ? $" at {Clock.Time(t)}." : "."),
         _ => $"{Provider} did not answer{(Detail.Length > 0 ? ": " + Detail : "")}. Briefs fall back to the offline version.",
     };
 }

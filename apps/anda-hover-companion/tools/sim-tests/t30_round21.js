@@ -102,7 +102,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
     await openFull(q, '216482');
     ok(/Goal date falls on a weekend: Sat Jan 30/.test(await txt(q, '#card')), 'C7 the weekend warning is still on the card');
     await q.keyboard.press('Enter'); await q.keyboard.type('live note'); await q.keyboard.press('Control+Enter'); await settle(q, 200);
-    ok(/^You · Nov 18, 12:00 AM$/.test(await q.$eval('#x-notes .notei .who', e => e.textContent)), 'C8 a new note carries the real date and time');
+    ok(/^You · Nov 18, 2026, 12:00 AM EST$/.test(await q.$eval('#x-notes .notei .who', e => e.textContent)), 'C8 a new note carries the real date and time');
     await q.close(); }
   for (const [tz, at, want] of [['America/Los_Angeles', '2027-01-02T06:30:00-08:00', ['6:30:01 AM | 1/2/2027', 'data as of Jan 1']], ['Europe/Berlin', '2026-12-31T23:30:00+01:00', ['11:30:01 PM | 12/31/2026', 'data as of Dec 31']], ['Asia/Tokyo', '2028-02-29T09:00:00+09:00', ['9:00:01 AM | 2/29/2028', 'data as of Feb 29']]]) {
     const q = await fresh({ live: true, tz, at });

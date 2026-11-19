@@ -109,6 +109,23 @@
               <WrapPanel Name="AutoHidePanel"/>
               <TextBlock Classes="hint" Text="Hides a card or box after this long with no mouse or key activity. It never hides while your pointer is over it, while it is pinned, or while the drawer is open."/>
             </StackPanel>
+
+            <Border Classes="hair"/>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="TIME"/>
+              <TextBlock Name="TimeNow" FontSize="13" Foreground="{DynamicResource C.Ink}" TextWrapping="Wrap"/>
+              <WrapPanel>
+                <TextBlock Text="Show times in" FontSize="12.5" Foreground="{DynamicResource C.Ink2}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <ComboBox Name="TimeZoneBox" MinHeight="28" MinWidth="260" AutomationProperties.Name="Show times in"/>
+              </WrapPanel>
+              <WrapPanel>
+                <TextBlock Text="Mark my data as stale when it is older than" FontSize="12.5" Foreground="{DynamicResource C.Ink2}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <ComboBox Name="StaleBox" MinHeight="28" MinWidth="110" AutomationProperties.Name="Mark my data as stale when it is older than"/>
+              </WrapPanel>
+              <TextBlock Name="TimeHint" Classes="hint" IsVisible="False" AutomationProperties.LiveSetting="Polite"/>
+              <TextBlock Classes="hint" Text="Every time the tool shows is written in this time zone, with its abbreviation, and follows daylight time by itself. Times are stored in UTC, so changing the zone changes how a time is written, never when it was. The clock above and “minutes ago” on the card are brought up to date once a minute while they are on the screen. Every piece of data says where it is from and as of when; when it is older than the days chosen here it is marked STALE. Which day is “today”, for due dates and day counts, stays this computer's day."/>
+            </StackPanel>
           </StackPanel>
         </Expander>
         <Expander Name="SecStart" Classes="sec" IsExpanded="False">

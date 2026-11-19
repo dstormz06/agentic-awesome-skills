@@ -33,6 +33,20 @@ public partial class CardWindow : Window
     public BusinessCalendar Calendar { get; set; } = new();
     public WatchSettings Watch { get; set; } = new();
 
+    /// <summary>After how many days the person's data is marked STALE; the app sets it from Settings. Asked each time, so a change shows at once.</summary>
+    public Func<int>? StaleDays { get; set; }
+
+    /// <summary>Now, in UTC. Overridable so a test is never at the mercy of the real clock.</summary>
+    public Func<DateTime> UtcNow { get; set; } = () => Clock.UtcNow();
+
+    /// <summary>The zone the data line is written in. Null: the zone the tool writes in, asked each time.</summary>
+    public TimeZoneInfo? Zone { get; set; }
+    private Avalonia.Threading.DispatcherTimer? _minute;
+    private bool _stale;
+
+    /// <summary>How often the data line is brought up to date while the card is open. A test shortens it; the app leaves it at a minute.</summary>
+    internal TimeSpan MinuteEvery { get; set; } = TimeSpan.FromSeconds(60);
+
     /// <summary>Today's date for the watch rules. Overridable so a test is never at the mercy of the real clock.</summary>
     public Func<DateOnly> Today { get; set; } = () => DateOnly.FromDateTime(DateTime.Now);
 
@@ -113,7 +127,9 @@ public partial class CardWindow : Window
         Root.PointerExited += (_, _) => _autoHide.PointerInside = false;
         Root.PointerMoved += (_, _) => _autoHide.Touch();
         Root.PointerPressed += (_, _) => _autoHide.Touch();
-        Closed += (_, _) => _autoHide.Stop();
+        Closed += (_, _) => { _autoHide.Stop(); _minute?.Stop(); };
+        // Once a minute, while the card is open: "minutes ago" on the data line, and STALE the minute it becomes true. Nothing else is done by this timer.
+        Opened += (_, _) => { _minute ??= new Avalonia.Threading.DispatcherTimer(MinuteEvery, Avalonia.Threading.DispatcherPriority.Background, (_, _) => MinutePassed()); _minute.Start(); };
 
         // Apple-style entrance: quick fade + settle from 97% scale (no bounce, no delay).
         var scale = new ScaleTransform(0.97, 0.97)
@@ -302,7 +318,7 @@ public partial class CardWindow : Window
         foreach (var note in notes)
         {
             var text = new TextBlock { Text = note.Text, FontSize = 12.5, Foreground = Ink2(), TextWrapping = TextWrapping.Wrap };
-            var when = new TextBlock { Text = note.When.ToString("MMM d, h:mm tt", System.Globalization.CultureInfo.InvariantCulture), FontSize = 11, Foreground = Ink3(), VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center, Margin = new Thickness(0, 0, 10, 0) };
+            var when = new TextBlock { Text = Clock.Label(Clock.Ms(note.When), Clock.Zone, false), FontSize = 11, Foreground = Ink3(), VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center, Margin = new Thickness(0, 0, 10, 0) };
             Button Small(string label, string name, Action act)
             {
                 var b = new Button { Content = label, FontSize = 11, Padding = new Thickness(4, 1), MinHeight = 24, Background = Brushes.Transparent, BorderThickness = new Thickness(0), Foreground = Ink2(), Margin = new Thickness(0, 0, 8, 0) };
@@ -768,8 +784,7 @@ public partial class CardWindow : Window
         PrepareMail();
         PrepareAgents();
         ShowReference(record);
-        FreshnessText.Text = record.DataAsOf ?? "";
-        FreshnessText.IsVisible = record.DataAsOf is not null;
+        PaintFresh(record);
         AutomationProperties.SetName(this, $"{record.Kind} {record.Number} quick brief");
 
         // expanded drawer content
@@ -945,7 +960,7 @@ public partial class CardWindow : Window
                     AgentsPanel.Children.Add(row);
                 }
             if (last is { State: AgentState.Done } d2)
-                AgentsPanel.Children.Add(MailLine($"{d2.Message} Asked at {d2.At:h:mm tt}.", 10.5, brush: Ink3(), margin: new Thickness(0, 4, 0, 0)));
+                AgentsPanel.Children.Add(MailLine($"{d2.Message} Asked at {Clock.Time(d2.At)}.", 10.5, brush: Ink3(), margin: new Thickness(0, 4, 0, 0)));
         }
         AgentsPanel.Children.Add(MailLine("These are the agents' own words, shown as received, not facts from the record. They are never run or passed on, and nothing is added to your to-do list until you press its button.", 10.5, brush: Ink3(), margin: new Thickness(0, 8, 0, 0)));
         AgentsHeader.Text = answered > 0 ? $"Agent findings · {answered}" : "Agent findings";
@@ -1021,9 +1036,26 @@ public partial class CardWindow : Window
     private bool _refShown;
 
     /// <summary>The watch layer: the most important flag on the card, the full list with evidence in the drawer.</summary>
+    /// <summary>The data line: where the record is from, as of when, how long ago, and STALE in words and by its look. Returns whether "stale" changed.</summary>
+    private bool PaintFresh(AndaRecord record)
+    {
+        var (text, stale) = Clock.DataLine(record, Clock.Ms(UtcNow()), StaleDays?.Invoke() ?? Watch.StaleDataDays, Zone ?? Clock.Zone);
+        FreshnessText.Text = text; FreshnessText.IsVisible = text.Length > 0;
+        FreshnessText.FontWeight = stale ? FontWeight.SemiBold : FontWeight.Normal;
+        FreshnessText.Foreground = (IBrush)Application.Current!.Resources[stale ? "C.Warn" : "C.Ink3"]!;
+        bool changed = stale != _stale; _stale = stale;
+        return changed;
+    }
+
+    /// <summary>What the minute timer does. Internal so a test can pass a minute without waiting for one.</summary>
+    internal void MinutePassed()
+    {
+        if (_record is { } record && PaintFresh(record)) { ShowWatch(record); WatchSlot.IsVisible = !_mini && _watchFlags.Count > 0; }      // the watch line says "stale" by the same rule, so it follows
+    }
+
     private void ShowWatch(AndaRecord record)
     {
-        _watchFlags = WatchRules.Evaluate(record, Today(), Calendar, Watch);
+        _watchFlags = WatchRules.Evaluate(record, Today(), Calendar, Watch with { StaleDataDays = StaleDays?.Invoke() ?? Watch.StaleDataDays, NowMs = Clock.Ms(UtcNow()) });
         WatchPanel.Children.Clear();
         WatchExpander.IsVisible = _watchFlags.Count > 0;
         WatchHeader.Text = $"Watch list · {_watchFlags.Count}";

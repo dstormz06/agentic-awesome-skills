@@ -25,7 +25,11 @@ public sealed record CardModel(
 
 public sealed record CardContext(
     DateOnly Today, BusinessCalendar Calendar, int HolidayLeadDays = 3, int UrgentLateDays = 7,
-    Func<AndaRecord, ReferenceInfo?>? Reference = null);
+    Func<AndaRecord, ReferenceInfo?>? Reference = null, int StaleDays = Clock.StaleDefault, long? NowMs = null)
+{
+    /// <summary>The watch rules' settings, as the person chose them: one place, so that the card, the watch list, the to-do list and a hand-off agree.</summary>
+    public WatchSettings Watch => new(HolidayLeadDays, StaleDays, NowMs: NowMs);
+}
 
 public static class CardModels
 {
@@ -41,7 +45,7 @@ public static class CardModels
 
     public static CardModel Build(AndaRecord r, CardContext ctx)
     {
-        var flags = WatchRules.Evaluate(r, ctx.Today, ctx.Calendar, new WatchSettings(HolidayLeadBusinessDays: ctx.HolidayLeadDays));
+        var flags = WatchRules.Evaluate(r, ctx.Today, ctx.Calendar, ctx.Watch);
         // Always two lines: the PSG date and the RLD labeling date, or a brief reason there is none.
         var info = ctx.Reference?.Invoke(r) ?? ReferenceResolver.For(r, null, "", null, loading: false);
         var reference = new CardReference(info.PsgText ?? ReferenceResolver.NoPsg, info.RldText ?? ReferenceResolver.NoRld);

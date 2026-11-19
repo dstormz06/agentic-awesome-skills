@@ -59,6 +59,12 @@ public sealed record AndaRecord
     /// <summary>When the underlying data was taken (a file's modified date, or an extract date).</summary>
     public DateOnly? AsOfDate { get; init; }
 
+    /// <summary>The moment the underlying data was taken, in UTC (a file's last save, or the extract's time). The card writes it in the person's time zone.</summary>
+    public DateTime? AsOfUtc { get; init; }
+
+    /// <summary>Where the data is from, as the card's data line names it: "Your portfolio file · Portfolio.xlsx".</summary>
+    public string? DataSource { get; init; }
+
     /// <summary>True for the bundled fictional records. Watch rules then treat <see cref="AsOfDate"/> as "today",
     /// so the demo never shows "stale" or "overdue" just because the calendar moved on.</summary>
     public bool Demo { get; init; }

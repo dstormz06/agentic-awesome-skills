@@ -89,8 +89,8 @@ public class Round29UiTests : IClassFixture<HeadlessFixture>
         Assert.Contains("<b>Alert</b> Hub (agent)", r.list);                                                        // a name with markup is text
         Assert.Contains("To: no address yet, so nothing can be sent", r.list); Assert.Contains("Outlook (read-only)", r.list);
         Assert.Contains("Kept: Mail is shown, never stored. The sign-in is held in memory until you sign out or close the app.", r.list);
-        Assert.Equal(new[] { "Jul 16, 9:07:07 AM EDT", "Data sent", EventLog.Withheld }, r.rows[0]);                // newest first, in the person's zone, and never an ANDA number
-        Assert.Equal(new[] { "Jul 16, 9:05:07 AM EDT", "Connection switched on, off or changed", "AI switched on" }, r.rows[2]);
+        Assert.Equal(new[] { "Jul 16, 2026, 9:07:07 AM EDT", "Data sent", EventLog.Withheld }, r.rows[0]);                // newest first, in the person's zone, and never an ANDA number
+        Assert.Equal(new[] { "Jul 16, 2026, 9:05:07 AM EDT", "Connection switched on, off or changed", "AI switched on" }, r.rows[2]);
         Assert.Equal("250 events; the newest 3 are shown, and the export holds them all. 2 lines of the file are not lines of the log and are left out.", r.count);
         Assert.Contains("Sends: When you sign in: this app's ID and the read-only permission it asks for. After that, only a search for the six-digit number of the open ANDA.", r.list);
         Assert.Contains("Kept: Its answer is kept in memory until you close the app, and counts as fresh for the minutes you chose. It is never written to a file.", r.list);
@@ -130,9 +130,9 @@ public class Round29UiTests : IClassFixture<HeadlessFixture>
             var texts = Texts(w); Click(w.CopyButton); Settle(); string note = w.Note.Text ?? "";
             w.Close(); return (texts, note);
         }, CancellationToken.None);
-        Assert.Contains("ANDA Companion (Notula) · " + ChangeLog.Version, r.texts); Assert.Equal("Prototype, round 30", ChangeLog.Version);
+        Assert.Contains("ANDA Companion (Notula) · " + ChangeLog.Version, r.texts); Assert.Equal("Prototype, round 31", ChangeLog.Version);
         Assert.Contains("A prototype with fictional data. Not an FDA product. It does not update itself.", r.texts);
-        Assert.Equal(new[] { "ROUND 30", "ROUND 29", "ROUND 28", "ROUND 27", "ROUND 26" }, r.texts.Where(t => t.StartsWith("ROUND ")));
+        Assert.Equal(new[] { "ROUND 31", "ROUND 30", "ROUND 29", "ROUND 28", "ROUND 27", "ROUND 26" }, r.texts.Where(t => t.StartsWith("ROUND ")));
         Assert.All(ChangeLog.Entries.SelectMany(e => e.Items), i => Assert.Contains("• " + i, r.texts));
         Assert.Equal(string.Join("\n", ChangeLog.Text()), Assert.Single(copied)); Assert.Equal("Copied.", r.note);
     }

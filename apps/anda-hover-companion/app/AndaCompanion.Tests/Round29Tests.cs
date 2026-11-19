@@ -195,13 +195,13 @@ public class Round29Tests
     public void A_time_of_the_log_is_shown_in_the_persons_time_zone_with_its_abbreviation_and_the_right_daylight_time()
     {
         var eastern = TimeZoneInfo.FindSystemTimeZoneById("America/New_York");
-        Assert.Equal("Jul 16, 9:05:07 AM EDT", EventLog.Local("2026-07-16T13:05:07.042Z", eastern));
-        Assert.Equal("Nov 18, 2:03:59 PM EST", EventLog.Local("2026-11-18T19:03:59.000Z", eastern));
-        Assert.Equal("Nov 1, 1:30:00 AM EDT", EventLog.Local("2026-11-01T05:30:00.000Z", eastern));              // the hour before the clocks go back
-        Assert.Equal("Nov 1, 1:30:00 AM EST", EventLog.Local("2026-11-01T06:30:00.000Z", eastern));              // and the same wall time an hour later
-        Assert.Equal("Jul 16, 1:05:07 PM UTC", EventLog.Local("2026-07-16T13:05:07.042Z", TimeZoneInfo.Utc));
+        Assert.Equal("Jul 16, 2026, 9:05:07 AM EDT", EventLog.Local("2026-07-16T13:05:07.042Z", eastern));
+        Assert.Equal("Nov 18, 2026, 2:03:59 PM EST", EventLog.Local("2026-11-18T19:03:59.000Z", eastern));
+        Assert.Equal("Nov 1, 2026, 1:30:00 AM EDT", EventLog.Local("2026-11-01T05:30:00.000Z", eastern));              // the hour before the clocks go back
+        Assert.Equal("Nov 1, 2026, 1:30:00 AM EST", EventLog.Local("2026-11-01T06:30:00.000Z", eastern));              // and the same wall time an hour later
+        Assert.Equal("Jul 16, 2026, 1:05:07 PM UTC", EventLog.Local("2026-07-16T13:05:07.042Z", TimeZoneInfo.Utc));
         var odd = TimeZoneInfo.CreateCustomTimeZone("Somewhere", new TimeSpan(5, 30, 0), "Somewhere", "A zone with a long name that is no abbreviation");
-        Assert.Equal("Jul 16, 6:35:07 PM UTC+5:30", EventLog.Local("2026-07-16T13:05:07.042Z", odd));
+        Assert.Equal("Jul 16, 2026, 6:35:07 PM UTC+5:30", EventLog.Local("2026-07-16T13:05:07.042Z", odd));
         Assert.Equal("not a time", EventLog.Local("not a time", eastern));
     }
 }

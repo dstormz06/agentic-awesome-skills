@@ -13,7 +13,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   const b = await chromium.launch();
   const errs = [];
   const fresh = async (opts = {}) => {
-    const ctx = await b.newContext({ viewport: opts.viewport || { width: 1366, height: 800 }, permissions: opts.noClip ? [] : ['clipboard-read', 'clipboard-write'] });
+    const ctx = await b.newContext({ viewport: opts.viewport || { width: 1366, height: 800 }, permissions: opts.noClip ? [] : ['clipboard-read', 'clipboard-write'], timezoneId: 'America/New_York' });      // a note's time is written in the computer's zone, so the suite names one
     const p = await ctx.newPage();
     p.on('pageerror', e => errs.push(e.message));
     p.on('console', m => { if (m.type() === 'error' || m.type() === 'warning') errs.push(m.type() + ': ' + m.text()); });
@@ -69,7 +69,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   await p.keyboard.press('Control+Enter'); await settle(p, 200);
   eq([await txt(p, '#chipNotes'), await txt(p, '#x-notes-n'), await txt(p, '#qnMsg'), await p.inputValue('#qnText')], ['Add a note · 4 notes', '· 4', 'Note saved.', ''], 'N8 Ctrl+Enter saves: the counts go up, the box empties, and it says so');
   eq(await p.$eval('#x-notes .notei', e => [e.classList.contains('mine'), e.querySelector('.who').textContent, e.querySelector('.txt').textContent, e.querySelector('.txt').children.length]),
-     [true, 'You · Jul 16, 10:42 AM', 'Called the US agent; <b>response</b> will come Jul 28.', 0], 'N9 the note is first, dated by the clock, and markup in it is shown as text');
+     [true, 'You · Jul 16, 2026, 10:42 AM EDT', 'Called the US agent; <b>response</b> will come Jul 28.', 0], 'N9 the note is first, dated by the clock, and markup in it is shown as text');
   eq(await p.$$eval('#x-notes .notei', n => n.length), 4, 'N10 the three project notes are still below it');
   eq(await p.$$eval('#x-notes .notei:not(.mine) .nact button', n => n.map(x => x.textContent)), ['Copy', 'Copy', 'Copy'], 'N11 a project note can be copied but not changed');
   await p.click('#x-notes .notei.mine .nact button:has-text("Copy")'); await settle(p, 150);
@@ -173,7 +173,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
     ['diff', 'ANDA 216482: the draft says 750 mg, but your data says Metformin HCl ER Tablets, 500 mg.'],
     ['diff', 'ANDA 216482: the draft says cycle 3, but your data says cycle 2.'],
     ['diff', 'ANDA 216482: the draft gives a due date of Jul 28, but your data says the IR response is due Jul 21, 2026.'],
-    ['note', '“Jul 28” is also in your note of Jul 16, 10:42 AM on ANDA 216482: “Called the US agent: the response will come Jul 28, not Jul 21.”']], 'F2 strength, cycle and due date are checked against the sheet, and a date is traced to the note it came from');
+    ['note', '“Jul 28” is also in your note of Jul 16, 2026, 10:42 AM EDT on ANDA 216482: “Called the US agent: the response will come Jul 28, not Jul 21.”']], 'F2 strength, cycle and due date are checked against the sheet, and a date is traced to the note it came from');
   const fx = t => p.evaluate(x => { const r = factExtras(x); return [r.diffs.map(d => d.text), factExtrasSummary(r)]; }, t);
   eq(await fx('ANDA 216482 (500 mg, cycle 2): the IR response is due Jul 21.'), [[], 'Also checked 1 strength, 1 review cycle and 1 due date against your sheet: no difference.'], 'F3 a draft that agrees with the sheet says so');
   eq(await fx('2. ANDA 214990 - the 750 mg strength from the same applicant. It shares a manufacturing site with the 500 mg application, so any facility finding on one matters to both.'), [[], 'Also checked 1 strength against your sheet: no difference.'], 'F4 the demo email, which names both strengths in one thought, raises nothing');
@@ -188,7 +188,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   // ====================================================== R. notes and open items for recall, closed, at the bottom
   await p.click('#drCheck'); await settle(p);
   eq(await p.$$eval('#drRecall details', n => n.map(d => [d.dataset.anda, d.open, d.querySelector('summary').textContent])),
-     [['216482', false, 'ANDA 216482 · 5 notes (latest Jul 16, 10:42 AM) · 2 open items'], ['214990', false, 'ANDA 214990 · 52 notes (latest Jul 16, 10:42 AM) · no open items']], 'R1 one closed row for each ANDA the draft names, with counts');
+     [['216482', false, 'ANDA 216482 · 5 notes (latest Jul 16, 2026, 10:42 AM EDT) · 2 open items'], ['214990', false, 'ANDA 214990 · 52 notes (latest Jul 16, 2026, 10:42 AM EDT) · no open items']], 'R1 one closed row for each ANDA the draft names, with counts');
   ok(await p.evaluate(() => { const r = document.getElementById('drRecall'), d = document.getElementById('draft'); return r.parentElement === d && r.nextElementSibling.id === 'drAiBox' && r.nextElementSibling.nextElementSibling === d.lastElementChild && d.lastElementChild.classList.contains('onbar') && !r.nextElementSibling.open; }), 'R2 it is the last thing in the window but the folded AI options and, since round 29, the line that says what is switched on');
   await p.click('#drRecall details[data-anda="216482"] summary'); await settle(p);
   const rn = await p.$$eval('#drRecall details[data-anda="216482"] .rn', n => n.map(x => x.textContent));

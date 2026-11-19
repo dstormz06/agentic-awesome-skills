@@ -38,7 +38,7 @@ public sealed class BackupsWindow : Window
     private readonly Func<int> _keep, _days;
     private readonly Action<int> _setKeep, _setDays;
     private readonly IReadOnlyList<ArchiveSource> _archives;
-    private readonly TimeZoneInfo _zone;
+    private readonly TimeZoneInfo? _zone;      // a test may fix it; otherwise the zone the tool writes in, asked each time
     private readonly ScrollViewer _scroll;
     private readonly Dictionary<string, DateTime> _picked = new();      // list id -> the copy the person chose, kept while the window repaints
     private List<(ArchiveSource Source, IReadOnlyList<TodoArchive.Row> Rows, int Total)> _read = new();      // the archives, read once for each paint
@@ -47,7 +47,7 @@ public sealed class BackupsWindow : Window
 
     public BackupsWindow(Backups backups, Func<int> keep, Action<int> setKeep, Func<int> archiveDays, Action<int> setArchiveDays, IReadOnlyList<ArchiveSource> archives, TimeZoneInfo? zone = null)
     {
-        _backups = backups; _keep = keep; _setKeep = setKeep; _days = archiveDays; _setDays = setArchiveDays; _archives = archives; _zone = zone ?? TimeZoneInfo.Local;
+        _backups = backups; _keep = keep; _setKeep = setKeep; _days = archiveDays; _setDays = setArchiveDays; _archives = archives; _zone = zone;
         Title = "ANDA Companion (Notula) — Backups and archive"; Width = 680; SizeToContent = SizeToContent.Height; CanResize = false; Topmost = true; ShowInTaskbar = false;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         Background = Res("C.Bg");
@@ -139,7 +139,7 @@ public sealed class BackupsWindow : Window
     internal string When(DateTime utc)
     {
         utc = DateTime.SpecifyKind(utc, DateTimeKind.Utc);
-        return TimeZoneInfo.ConvertTimeFromUtc(utc, _zone).ToString("MMM d, yyyy, h:mm:ss tt", CultureInfo.InvariantCulture) + " " + EventLog.Abbreviation(_zone, utc);
+        return Clock.Label(Clock.Ms(DateTime.SpecifyKind(utc, DateTimeKind.Utc)), _zone ?? Clock.Zone, true);
     }
     private static string Day(string iso) => DateOnly.TryParseExact(iso, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) ? d.ToString("MMM d", CultureInfo.InvariantCulture) : iso;
     private ComboBox? PickFor(string id) => Lists.Children.OfType<Border>().FirstOrDefault(b => (b.Tag as string) == id)?.Child is StackPanel box ? box.Children.OfType<Grid>().FirstOrDefault()?.Children.OfType<ComboBox>().FirstOrDefault() : null;

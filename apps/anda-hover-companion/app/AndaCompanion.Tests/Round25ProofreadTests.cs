@@ -11,6 +11,7 @@ namespace AndaCompanion.Tests;
 /// The simulation wrote mockup/proofread-golden.json (and the larger proofread-stress-golden.json) with its clock fixed at Jul 16, 2026;
 /// the app must give the same answer for every case, character for character.
 /// </summary>
+[Collection("Global state")]
 public class Round25ProofreadTests
 {
     private static readonly MockAndaRepository Repo = new();
@@ -81,7 +82,8 @@ public class Round25ProofreadTests
     {
         using var doc = JsonDocument.Parse(File.ReadAllText(Folder("mockup", "proofread-stress-golden.json")));
         var noted = doc.RootElement.GetProperty("noted");
-        var quick = new QuickNotesService(Path.Combine(Temp.NewDir(), "quick-notes.json"), () => new DateTime(2026, 7, 16, 10, 42, 0));
+        using var zone = new ZoneScope("America/New_York");                                                      // the simulation wrote its cases on a computer in Eastern time
+        var quick = new QuickNotesService(Path.Combine(Temp.NewDir(), "quick-notes.json"), () => new DateTime(2026, 7, 16, 14, 42, 0, DateTimeKind.Utc));
         Assert.True(quick.Add(noted.GetProperty("number").GetString(), noted.GetProperty("note").GetString()).Ok);
         IReadOnlyList<DraftNote> NotesOf(AndaRecord r) => DraftNotes.For(r, quick, Today);
         Assert.Equal(noted.GetProperty("who").GetString(), NotesOf(Repo.Find("216482")!)[0].Who);

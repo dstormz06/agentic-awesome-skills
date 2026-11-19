@@ -182,11 +182,12 @@ public class Round25UiTests : IClassFixture<HeadlessFixture>
         Assert.Equal(new DateTime(2026, 7, 17), DateTime.UnixEpoch.AddMilliseconds(DraftNotes.NoteTime("You · Jul 17", Today)));        // tomorrow is allowed for a clock that is a little off
         Assert.Equal(0, DraftNotes.NoteTime("Your sheet", Today));
         Assert.Equal(0, DraftNotes.NoteTime(null, Today));
-        var quick = new QuickNotesService(Path.Combine(Temp.NewDir(), "q.json"), () => new DateTime(2026, 7, 16, 9, 5, 0));
+        using var zone = new ZoneScope("America/New_York");
+        var quick = new QuickNotesService(Path.Combine(Temp.NewDir(), "q.json"), () => new DateTime(2026, 7, 16, 13, 5, 0, DateTimeKind.Utc));
         quick.Add("216482", "Mine, today.");
         var notes = DraftNotes.For(Repo.Find("216482")!, quick, Today);
-        Assert.Equal(new[] { "You · Jul 16, 9:05 AM", "You · Jul 8", "You · Jun 30", "Team lead · Jun 12" }, notes.Select(n => n.Who));
-        Assert.True(notes[0].Mine); Assert.Equal("Jul 16, 9:05 AM", notes[0].When);
+        Assert.Equal(new[] { "You · Jul 16, 2026, 9:05 AM EDT", "You · Jul 8", "You · Jun 30", "Team lead · Jun 12" }, notes.Select(n => n.Who));
+        Assert.True(notes[0].Mine); Assert.Equal("Jul 16, 2026, 9:05 AM EDT", notes[0].When);
     }
 
     [Fact]
@@ -360,7 +361,8 @@ public class Round25UiTests : IClassFixture<HeadlessFixture>
     [Fact]
     public async Task Recall_shows_the_persons_own_note_first_and_opens_the_card_that_was_asked_for()
     {
-        var quick = new QuickNotesService(Path.Combine(Temp.NewDir(), "q.json"), () => new DateTime(2026, 7, 16, 10, 42, 0));
+        using var zone = new ZoneScope("America/New_York");
+        var quick = new QuickNotesService(Path.Combine(Temp.NewDir(), "q.json"), () => new DateTime(2026, 7, 16, 14, 42, 0, DateTimeKind.Utc));
         quick.Add("216482", "Call with the applicant on Jul 21 about the IR response.");
         var opened = new List<string>();
         var r = await _fx.Session.Dispatch(() =>
@@ -376,12 +378,12 @@ public class Round25UiTests : IClassFixture<HeadlessFixture>
             w.Close();
             return res;
         }, CancellationToken.None);
-        Assert.Equal("ANDA 216482 · 4 notes (latest Jul 16, 10:42 AM) · 2 open items", r.Head);
-        Assert.Contains("You · Jul 16, 10:42 AM · quick note · also in your draft: Jul 21, response", r.texts);
+        Assert.Equal("ANDA 216482 · 4 notes (latest Jul 16, 2026, 10:42 AM EDT) · 2 open items", r.Head);
+        Assert.Contains("You · Jul 16, 2026, 10:42 AM EDT · quick note · also in your draft: Jul 21, response", r.texts);
         Assert.Contains("IR response — Biopharmaceutics", r.texts); Assert.Contains("due Jul 21", r.texts);
         Assert.Equal("Open the card of ANDA 216482", r.name);
         Assert.Equal(new[] { "216482" }, opened);
-        Assert.Contains("“Jul 21” is also in your note of Jul 16, 10:42 AM on ANDA 216482: “Call with the applicant on Jul 21 about the IR response.”", r.Facts);
+        Assert.Contains("“Jul 21” is also in your note of Jul 16, 2026, 10:42 AM EDT on ANDA 216482: “Call with the applicant on Jul 21 about the IR response.”", r.Facts);
         Assert.Contains("Also checked 1 due date against your sheet: no difference.", r.Facts);
     }
 }

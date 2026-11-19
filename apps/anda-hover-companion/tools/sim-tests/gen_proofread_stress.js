@@ -35,7 +35,8 @@ for (let i = 0; i < 360; i++) drafts.push(mutate(i % 6 === 5 ? pick(BITS) + pick
 drafts.push('i '.repeat(30), 'word '.repeat(50) + 'end.', 'a  b  c  d  e '.repeat(12), '(((', 'x ,'.repeat(9), 'Hello,world;next,one;two,three,four', 'ok.Next one.Then two.And three.Four',
   'the the and and of of to to in in', 'TBD TBC XXX [TODO] ??? {{a}} <<b>> lorem ipsum tbd', '   ', '\n\n', 'ANDA 216482 is due Feb 29. ANDA 216482 cycle 0. ANDA 214990 first cycle.');
 (async () => {
-  const b = await chromium.launch(); const p = await b.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
+  const b = await chromium.launch(); const p = await b.newPage({ timezoneId: 'America/New_York' }); const errs = [];      // a note's time is written in the computer's zone, so the cases name one
+  p.on('pageerror', e => errs.push(e.message));
   await p.goto(SIM); await p.waitForTimeout(300);
   const cases = await p.evaluate(list => list.map(draft => { const pr = proofread(draft), fx = factExtras(draft), rv = draftReview(draft, demoToday()), q = beforeSend(draft, rv, fx); return { draft, proofread: { items: pr.items.map(i => i.text), corrected: pr.corrected, fixes: pr.fixes }, facts: { differences: fx.diffs.map(d => d.text), notes: fx.notes.map(n => n.text), alsoChecked: factExtrasSummary(fx) }, review: rv.findings.map(f => f.kind + ' | ' + f.text), question: q ? (q.gap ? 'gap | ' : 'none | ') + q.text : null }; }), drafts);
   // The same checks with one quick note of the person's own on ANDA 216482, so that "also in your note" and the recall row are covered.

@@ -102,7 +102,7 @@ public sealed class Backups
     /// <param name="keep">How many copies the person chose to keep, asked each time.</param>
     public Backups(string dir, Func<int> keep, Func<TimeZoneInfo>? zone = null, Func<DateTime>? utcNow = null)
     {
-        _dir = dir; _keep = keep; _zone = zone ?? (() => TimeZoneInfo.Local); _utcNow = utcNow ?? (() => DateTime.UtcNow);
+        _dir = dir; _keep = keep; _zone = zone ?? (() => Clock.Zone); _utcNow = utcNow ?? (() => DateTime.UtcNow);
     }
 
     public IReadOnlyList<BackupList> Lists { get { lock (_gate) return _lists.ToList(); } }

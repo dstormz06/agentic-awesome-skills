@@ -66,7 +66,12 @@ test('portfolio files: CSV and the xlsx read to the same status, columns, cards 
     } catch (e) { assert.fail(`${p.name}: ${e.message}`); }
     const repo = openPortfolio(table, { name: p.name, overrides: p.overrides, savedAt: p.savedAt });
     const e = p.expected;
-    assert.deepEqual({ ok: repo.status.ok, count: repo.status.count, message: repo.status.message }, { ok: e.ok, count: e.count, message: e.message }, `${p.name} status`);
+    // Round 31 of the Windows app writes the time a file was saved in the person's time zone, with its abbreviation ("Oct 28, 2026, 9:30 AM UTC").
+    // The extension has not had that round yet and still writes "Oct 28, 09:30", so the two are compared without that clause, and the
+    // extension's own form is pinned below until it is brought level.
+    const noSaved = (m) => String(m).replace(/ \(file saved [^)]*\)/, ' (file saved …)');
+    assert.deepEqual({ ok: repo.status.ok, count: repo.status.count, message: noSaved(repo.status.message) }, { ok: e.ok, count: e.count, message: noSaved(e.message) }, `${p.name} status`);
+    if (repo.status.ok) { assert.match(repo.status.message, / \(file saved Oct 28, 09:30\)/, `${p.name}: the extension's own saved time`); assert.match(e.message, / \(file saved Oct 28, 2026, 9:30 AM UTC\)/, `${p.name}: the app's saved time`); }
     assert.deepEqual(repo.headers, e.headers, `${p.name} headers`);
     assert.deepEqual(repo.mapping, e.mapping, `${p.name} mapping`);
     assert.deepEqual(repo.numbers(), e.numbers, `${p.name} numbers`);

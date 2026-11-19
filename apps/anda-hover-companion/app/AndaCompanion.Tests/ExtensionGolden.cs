@@ -161,11 +161,12 @@ internal static class GoldenFixture
             ("Tabs.csv", "﻿ANDA\tDrug\tGoal\tForecast\r\n600001\tTab drug\t2026-12-01\t2026-11-20\r\n\r\n", null),
         };
         var portfolios = new JsonArray();
-        var savedAt = new DateTime(2026, 10, 28, 9, 30, 0, DateTimeKind.Local);
+        using var zone = new ZoneScope("UTC");                                           // the fixture names its zone, so it is the same on any computer
+        var savedAt = new DateTime(2026, 10, 28, 9, 30, 0, DateTimeKind.Utc);
         var ctx0 = Ctx(Today, 3, 7);
         JsonObject PortfolioCase(string name, string source, string? text, string? xlsxBase64, Dictionary<string, string>? ov, string path)
         {
-            File.SetLastWriteTime(path, savedAt);
+            File.SetLastWriteTimeUtc(path, savedAt);
             var repo = new PortfolioRepository(path, ov, null, () => Today);
             var numbers = repo.Numbers.OrderBy(n => n, StringComparer.Ordinal).ToList();
             var o = new JsonObject
@@ -214,6 +215,7 @@ internal static class GoldenFixture
         "export const DEMO_RECORDS = " + records.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + ";\n";
 }
 
+[Collection("Global state")]
 public class ExtensionGoldenTests
 {
     private static string Norm(string s) => s.Replace("\r\n", "\n");

@@ -270,9 +270,9 @@ public class Round30Tests
         string path = Path.Combine(Temp.NewDir(), "settings.json");
         File.WriteAllText(path, "{\"SchemaVersion\":1,\"Tone\":\"Warm\",\"Provider\":3}");                    // written by round 28 or 29
         var s = SettingsService.Load(path);
-        Assert.Equal((2, 30, 30, "Warm"), (s.SchemaVersion, s.BackupCopies, s.ArchiveAfterDays, s.Tone));
+        Assert.Equal((Settings.CurrentSchema, 30, 30, "Warm"), (s.SchemaVersion, s.BackupCopies, s.ArchiveAfterDays, s.Tone));
         Assert.Null(SettingsService.LoadNote);                                                               // nothing the person set was changed, so nothing is said
-        Assert.Equal(2, Settings.CurrentSchema);
+        Assert.True(Settings.CurrentSchema >= 2);                                                            // round 31 moved it to 3; see Round31Tests
         s.BackupCopies = 100; s.ArchiveAfterDays = 365; SettingsService.Save(s, path);
         var again = SettingsService.Load(path);
         Assert.Equal((100, 365), (again.BackupCopies, again.ArchiveAfterDays));

@@ -266,6 +266,7 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
          border-radius:var(--c-radius);box-shadow:var(--c-shadow);font-family:var(--c-font);font-size:calc(13px*var(--ts))}
 .app-win h2{margin:0;font-size:calc(15px*var(--ts))}
 .app-win .hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.fresh.stale{color:var(--c-warn, #8a5a00);font-weight:650}
 .onbar{display:block;width:100%;margin:12px 0 0;padding:6px 2px 0;min-height:26px;box-sizing:border-box;border:none;border-top:1px solid var(--c-line);background:var(--c-bg);position:sticky;bottom:0;z-index:2;color:var(--c-ink2);font:inherit;font-size:calc(11.5px*var(--ts));text-align:left;cursor:pointer}
 .onbar::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;border:1.5px solid var(--c-ink2);margin-right:7px;vertical-align:baseline}
 .onbar.still{cursor:default}
@@ -1331,6 +1332,7 @@ PS C:\work&gt; </div>
       <label class="sw"><input type="checkbox" id="swToday"> Pretend today is Oct 1, 2026 (goal dates get close)</label>
       <label class="sw"><input type="checkbox" id="swDue"> An item is due today (tray dot)</label>
       <label class="sw"><input type="checkbox" id="swFlag"> The sheet marks a service issue (tray dot)</label>
+      <label class="sw"><input type="checkbox" id="swOld"> My data was last read 9 days ago (STALE label)</label>
       <label class="sw"><input type="checkbox" id="swAi"> An approved AI model is connected (sample brief)</label>
       <div class="row" style="margin-top:6px"><button class="btn" type="button" id="newsPush">Division news: a colleague adds a line</button></div>
       <label class="sw full-only"><input type="checkbox" id="swAgentFail"> An agent cannot be reached (rehearse a failure)</label>
@@ -1410,6 +1412,13 @@ PS C:\work&gt; </div>
     <div class="lbl">AUTO-HIDE</div>
     <div class="wrap" id="setAuto"></div>
     <p class="hint">Hides a card or box after this long with no mouse or key activity. Never while your pointer is over it, while it is pinned, or while the drawer is open.</p>
+    <hr class="hair">
+    <div class="lbl">TIME</div>
+    <p id="setNow" style="margin:0 0 8px;font-size:calc(13px*var(--ts));color:var(--c-ink)"></p>
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px"><label for="setTz" style="color:var(--c-ink2);font-size:12.5px">Show times in</label><select id="setTz" style="width:auto;max-width:100%"></select></div>
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;margin-top:8px"><label for="setStale" style="color:var(--c-ink2);font-size:12.5px">Mark my data as stale when it is older than</label><select id="setStale" style="width:auto"></select></div>
+    <p class="hint" id="setTimeHint" role="status"></p>
+    <p class="hint">Every time the tool shows is written in this time zone, with its abbreviation, and follows daylight time by itself. Times are stored in UTC, so changing the zone changes how a time is written, never when it was. The clock above and "minutes ago" on the card are brought up to date once a minute while they are on the screen. Every piece of data says where it is from and as of when; when it is older than the days chosen here it is marked STALE. Which day is “today”, for due dates and day counts, stays this computer's day.</p>
     </div></details>
     <details class="sec" id="secStart"><summary><h3 class="grp">How it starts</h3><span class="pillnote" id="pillStart" hidden></span></summary>
     <div class="secbody">
@@ -2151,6 +2160,13 @@ const RANK = { "sheet-flag":-1, "goal-passed":0, "goal-soon":1, "goal-date-calen
    With ?clock=fixed in the address the page stays at Jul 16, 2026, 10:42 AM: the test suites use that so their expected dates never go stale. */
 const CLOCK_FIXED = /(?:^|&)clock=fixed(?:&|$)/.test(location.search.slice(1));
 const simTz = () => { try{ return Intl.DateTimeFormat().resolvedOptions().timeZone || "America/New_York"; }catch(e){ return "America/New_York"; } };      /* asked each time: the zone can change while the page is open */
+/* The zone the tool writes times in: the one chosen in Settings, or the computer's. The taskbar clock is Windows' own and stays the computer's. */
+const toolTz = () => { let chosen = ""; try{ chosen = state.tz || ""; }catch(e){} return chosen || simTz(); };
+/* Now, for everything the tool says about time. With the clock fixed for the tests it is Jul 16, 2026, 10:42 AM Eastern; a test may move it. */
+const FIXED_NOW = Date.UTC(2026, 6, 16, 14, 42, 0);
+const nowMs = () => typeof window.__now === "number" ? window.__now : CLOCK_FIXED ? FIXED_NOW : Date.now();
+/* The same to the second, for a label that shows seconds. With the clock fixed for the tests it still runs from 10:42:00 AM, as the taskbar clock does. */
+const tickMs = () => typeof window.__now === "number" ? window.__now : CLOCK_FIXED ? FIXED_NOW + Math.floor((Date.now() - SIM_START) / 1000) * 1000 : Date.now();
 const BASE_DAY = ymd(2026, 7, 16);
 function wallNow(){     /* the wall clock of that time zone, as numbers */
   const out = {}; try{
@@ -2502,7 +2518,7 @@ const noticeLifetime = text => Math.min(8, Math.max(2.5, 1.2 + text.length / 14)
 
 /* ---------------- state ---------------- */
 let keyVia = null;
-const state = { backupKeep:30, archiveDays:30, dir:"x", look:"x", form:"full", autoHide:10, mode:"whisper", escalate:true, lead:3, pretend:false, capture:true, op:90, lens:null, pinned:false, running:true, ai:false,
+const state = { tz:"", staleDays:7, oldData:false, dataAt:{}, backupKeep:30, archiveDays:30, dir:"x", look:"x", form:"full", autoHide:10, mode:"whisper", escalate:true, lead:3, pretend:false, capture:true, op:90, lens:null, pinned:false, running:true, ai:false,
   keys:{ peek:"Ctrl+Alt+A", look:"Ctrl+Alt+Space", draft:"Ctrl+Alt+Shift+R", ask:"Ctrl+Alt+Shift+P", list:"Ctrl+Alt+Shift+L" }, taken:{ peek:false, look:false, draft:false, ask:false, list:false },
   adaptive:true, allTools:location.hash === "#all", sectionUse:{}, clMode:0,
   middle:false, middleMod:"Ctrl", provider:"offline", tone:"", style:"", signoff:"", claudeModel:"claude-opus-4-8",
@@ -3134,7 +3150,7 @@ function qnLoad(){
     const x = JSON.parse(raw); if(!x || typeof x.notes !== "object" || !x.notes) return;
     for(const id of Object.keys(x.notes)){
       if(!/^[0-9]{6}$/.test(id) || !Array.isArray(x.notes[id])) continue;
-      const list = x.notes[id].slice(0, 50).map(n => n && typeof n.text === "string" && typeof n.when === "string" && Number.isFinite(n.t) ? { id:"q" + (++qnSeq), text:n.text.slice(0, 500), when:n.when.slice(0, 40), t:n.t } : null).filter(Boolean);
+      const list = x.notes[id].slice(0, 50).map(n => n && typeof n.text === "string" && typeof n.when === "string" && Number.isFinite(n.t) ? { id:"q" + (++qnSeq), text:n.text.slice(0, 500), when:n.when.slice(0, 40), t:n.t, ...(Number.isFinite(n.at) ? { at:n.at } : {}) } : null).filter(Boolean);
       if(list.length) state.quickNotes[id] = list;
     }
   }catch(e){ qnStored = false; }
@@ -3149,7 +3165,7 @@ function noteTime(who){     /* "You · Jul 8" gives the day in the demo year; a 
 }
 function notesFor(id){      /* a person's quick notes and the project notes of the record, newest first */
   const d = DATA[id]; if(!d) return [];
-  const mine = (state.quickNotes[id] || []).map(n => ({ who:"You · " + n.when, text:n.text, mine:true, id:n.id, t:n.t }));
+  const mine = (state.quickNotes[id] || []).map(n => ({ who:"You · " + (Number.isFinite(n.at) ? timeLabel(n.at, toolTz(), false) : n.when), text:n.text, mine:true, id:n.id, t:n.t }));
   const project = d.notes.map(([who, text], i) => ({ who, text, mine:false, t:noteTime(who) - i }));
   return [...mine, ...project].sort((a, b) => b.t - a.t);
 }
@@ -3160,7 +3176,7 @@ function addQuickNote(id, text){
   const list = state.quickNotes[id] || (state.quickNotes[id] = []);
   if(list.length >= QN_PER_ANDA) return [false, `This ANDA already has ${QN_PER_ANDA} quick notes. Delete one to add another.`];
   const day = new Date(demoToday());
-  list.push({ id:"q" + (++qnSeq), text:clean, when:`${QN_MON[day.getUTCMonth()]} ${day.getUTCDate()}, ${simClock(false)}`, t:demoToday() + 43200000 + qnSeq });
+  list.push({ id:"q" + (++qnSeq), text:clean, when:`${QN_MON[day.getUTCMonth()]} ${day.getUTCDate()}, ${simClock(false)}`, t:demoToday() + 43200000 + qnSeq, at:tickMs() });      /* at: the moment, in UTC, so it can be written in whatever zone is chosen */
   qnSave();
   return [true, "Note saved."];
 }
@@ -3290,7 +3306,7 @@ function paintRibbon(d){
 function fill(id){
   const d = DATA[id];
   $("c-id").textContent = "ANDA " + id;
-  $("c-drug").textContent = d.drug; $("c-meta").textContent = d.meta; $("c-fresh").textContent = d.asOf;
+  $("c-drug").textContent = d.drug; $("c-meta").textContent = d.meta; paintFresh();
   $("c-goal").textContent = d.goal; $("c-days").textContent = d.days;
   $("c-fc").textContent = d.fc;
   const fd = $("c-fdelta"); fd.textContent = d.fdelta; fd.className = "fdelta " + (d.late ? "warn" : "good");
@@ -4646,7 +4662,7 @@ function connPaint(){
   r.items.forEach(i => list.append(h("div", { class:"find note" }, h("div", { style:"font-weight:650", text:i.name }), h("div", { text:"Sends: " + i.sends }), h("div", { text:"To: " + i.where }), h("div", { text:"Kept: " + i.kept }))));
   $("cnLine").textContent = r.line;
   const body = $("cnLog"); body.replaceChildren();
-  const when = t => new Date(t).toLocaleString("en-US", { timeZone:simTz(), month:"short", day:"numeric", hour:"numeric", minute:"2-digit", second:"2-digit", timeZoneName:"short" });
+  const when = t => timeLabel(Date.parse(t), toolTz(), true);
   evLog.slice(-200).reverse().forEach(e => body.append(h("tr", {}, h("td", { text:when(e.t) }), h("td", { text:EV_TYPES[e.type] }), h("td", { text:e.detail }))));
   $("cnLogEmpty").hidden = evLog.length > 0; $("cnLogWrap").hidden = evLog.length === 0; $("cnCsv").disabled = $("cnSave").disabled = evLog.length === 0;
   $("cnCount").textContent = evLog.length === 0 ? "" : `${evLog.length.toLocaleString("en-US")} ${evLog.length === 1 ? "event" : "events"}${evLog.length > 200 ? "; the newest 200 are shown, and the export holds them all" : ""}.`;
@@ -4675,6 +4691,41 @@ $("settings").addEventListener("change", () => setTimeout(paintConnBars, 0), tru
 $("settings").addEventListener("click", () => setTimeout(paintConnBars, 0), true);
 $("swAi").addEventListener("change", () => setTimeout(paintConnBars, 0));
 
+
+/* ---------------- round 31: time ---------------- */
+/* When the data on the card was read. The sample data is read each morning at 7:12 (the computer's time); a file of the person's own, when it was chosen. */
+function dataAsOf(){
+  if(state.data.portfolio && Number.isFinite(state.dataAt.portfolio)) return state.dataAt.portfolio - (state.oldData ? 9 * DAY : 0);
+  const now = nowMs(), c = zoneClock(now, simTz()), since = (c.hour * 60 + c.minute - 432) * 60000 + c.second * 1000;
+  return now - (since >= 0 ? since : since + DAY) - (state.oldData ? 9 * DAY : 0);
+}
+const dataSource = () => state.data.portfolio ? "YOUR FILE (simulated) · my-portfolio.xlsx" : "Fictional demo data · extract #412";
+function paintFresh(){
+  const el = $("c-fresh"), f = freshLine(dataSource(), dataAsOf(), nowMs(), state.staleDays, toolTz());
+  el.textContent = f.text; el.classList.toggle("stale", f.stale);
+}
+/* Once a minute, while they are on the screen: the clock in Settings and "minutes ago" on the card. Nothing else is done by this timer. */
+function timeTick(){
+  const now = nowMs(), zone = toolTz(), c = zoneClock(now, zone), days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  if($("setNow")) $("setNow").textContent = `Now: ${days[new Date(Date.UTC(c.year, c.month - 1, c.day)).getUTCDay()]}, ${timeLabel(now, zone, false)}`;
+  if(current && card.style.display === "block") paintFresh();
+}
+setTimeout(() => {
+  TZ_CHOICES.forEach(([id, name]) => $("setTz").append(h("option", { value:id, text:id ? `${name} (${id.replace(/_/g, " ")})` : name })));
+  STALE_CHOICES.forEach(n => $("setStale").append(h("option", { value:String(n), text:`${n} ${n === 1 ? "day" : "days"}` })));
+  $("setTz").value = state.tz; $("setStale").value = String(state.staleDays);
+  $("setTz").addEventListener("change", e => {
+    state.tz = TZ_CHOICES.some(c => c[0] === e.target.value) ? e.target.value : ""; timeTick();
+    if(isOpen("conn")) connPaint(); if(isOpen("bak")) bakPaint();
+    $("setTimeHint").textContent = state.tz ? `Times are now written in ${TZ_CHOICES.find(c => c[0] === state.tz)[1]} time (${zoneAbbr(nowMs(), state.tz)}). No stored time was changed.` : `Times are now written in this computer's time zone (${simTz().replace(/_/g, " ")}, ${zoneAbbr(nowMs(), simTz())}). No stored time was changed.`;
+  });
+  $("setStale").addEventListener("change", e => {
+    state.staleDays = STALE_CHOICES.includes(+e.target.value) ? +e.target.value : STALE_DEFAULT; timeTick();
+    $("setTimeHint").textContent = `Data older than ${state.staleDays} ${state.staleDays === 1 ? "day" : "days"} is now marked STALE.`;
+  });
+  $("swOld").addEventListener("change", e => { state.oldData = e.target.checked; timeTick(); });
+  timeTick(); setInterval(timeTick, 60000);
+}, 0);
 
 /* ---------------- round 30: backup copies of the lists, one-press restore, the archive ---------------- */
 const bakStore = {};                    /* list id -> the copies, oldest first: { t, text }. In the Windows app these are files in the app's folder. */
@@ -4707,12 +4758,12 @@ function backupSweep(){
     if(moved.size){ list.forEach(v => { if(moved.has(v.t)) v.t = moved.get(v.t); }); list.sort((a, b) => a.t - b.t); }
     if(list.length && list[list.length - 1].text === text) return;
     list.push({ t:Math.max(now, list.length ? list[list.length - 1].t + 1 : 0), text }); made = true;
-    const plan = backupPlan(list.map(v => v.t), state.backupKeep, simTz());
+    const plan = backupPlan(list.map(v => v.t), state.backupKeep, toolTz());
     bakStore[l.id] = list.filter(v => plan.keep.includes(v.t));
   });
   if(made && isOpen("bak")) bakPaint();
 }
-const bakWhen = t => new Date(t).toLocaleString("en-US", { timeZone:simTz(), year:"numeric", month:"short", day:"numeric", hour:"numeric", minute:"2-digit", second:"2-digit", timeZoneName:"short" });
+const bakWhen = t => timeLabel(t, toolTz(), true);
 const bakSize = (l, text) => { const x = bakParse(text), n = x ? l.count(x) : 0; return `${n.toLocaleString("en-US")} ${n === 1 ? l.unit[0] : l.unit[1]}`; };
 const bakSay = text => { $("bkStatus").textContent = text; };
 /* After the window was painted again the keyboard is put back where the person was: never left on nothing. */
@@ -4800,10 +4851,10 @@ function bakPaint(){
 }
 function openBackups(){ closeMenus(); backupSweep(); bakPending = null; Object.keys(bakPicked).forEach(k => delete bakPicked[k]); showApp("bak"); $("bak").style.zIndex = "54"; bakSay(""); $("bkFind").value = ""; bakPaint(); }
 /* How many copies would go at once if this number were chosen. */
-const bakWouldRemove = keep => BAK_LISTS.reduce((n, l) => n + backupPlan((bakStore[l.id] || []).map(v => v.t), keep, simTz()).remove.length, 0);
+const bakWouldRemove = keep => BAK_LISTS.reduce((n, l) => n + backupPlan((bakStore[l.id] || []).map(v => v.t), keep, toolTz()).remove.length, 0);
 function bakApplyKeep(keep){
   state.backupKeep = keep; bakPending = null; let gone = 0;
-  BAK_LISTS.forEach(l => { const list = bakStore[l.id] || [], plan = backupPlan(list.map(v => v.t), keep, simTz()); gone += plan.remove.length; bakStore[l.id] = list.filter(v => plan.keep.includes(v.t)); });
+  BAK_LISTS.forEach(l => { const list = bakStore[l.id] || [], plan = backupPlan(list.map(v => v.t), keep, toolTz()); gone += plan.remove.length; bakStore[l.id] = list.filter(v => plan.keep.includes(v.t)); });
   bakPaint(); return gone;
 }
 /* Wired once the rest of the page's code has been read: the rules and the lists are defined further down. */
@@ -5597,7 +5648,7 @@ function refLines(id){
 function paintRefs(id){
   const r = refLines(id);
   $("c-psg").textContent = r.psg; $("c-rld").textContent = r.rld;
-  $("c-fresh").textContent = state.data.portfolio ? "YOUR FILE (simulated) · my-portfolio.xlsx · the same fictional records" : DATA[id].asOf;
+  paintFresh();
   $("chipReplies").hidden = !(state.replies && state.replies.length);
 }
 
@@ -5650,6 +5701,58 @@ function connChanges(before, now){
   return lines;
 }
 function eventCsv(entries){ return ["time_utc,type,detail", ...entries.map(e => [e.t, e.type, '"' + e.detail.replace(/"/g, '""') + '"'].join(","))].join("\r\n") + "\r\n"; }
+/* ---------------- Round 31: time. The person's time zone, a time as it is written, how long ago, and how fresh a piece of data is ---------------- */
+/* The zones offered, and their abbreviations in winter and in summer. "" is the computer's own zone. */
+const TZ_CHOICES = [["", "Automatic: this computer's time zone"], ["America/New_York", "Eastern"], ["America/Chicago", "Central"], ["America/Denver", "Mountain"],
+  ["America/Phoenix", "Arizona (Mountain, no daylight time)"], ["America/Los_Angeles", "Pacific"], ["America/Anchorage", "Alaska"], ["Pacific/Honolulu", "Hawaii"], ["America/Puerto_Rico", "Atlantic (Puerto Rico)"], ["UTC", "UTC"]];
+const TZ_ABBR = { "America/New_York":["EST", "EDT"], "America/Chicago":["CST", "CDT"], "America/Denver":["MST", "MDT"], "America/Phoenix":["MST", "MST"], "America/Los_Angeles":["PST", "PDT"],
+  "America/Anchorage":["AKST", "AKDT"], "Pacific/Honolulu":["HST", "HST"], "America/Puerto_Rico":["AST", "AST"], "UTC":["UTC", "UTC"], "Etc/UTC":["UTC", "UTC"] };
+const STALE_CHOICES = [1, 3, 7, 14, 30], STALE_DEFAULT = 7, TIME_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+/* The wall clock of a zone at a moment, as numbers, and how far that zone is from UTC then, in minutes. A zone that is not known is read as UTC. */
+function zoneClock(ms, zone){
+  const read = z => { const o = {}; new Intl.DateTimeFormat("en-US", { timeZone:z, hourCycle:"h23", year:"numeric", month:"numeric", day:"numeric", hour:"numeric", minute:"numeric", second:"numeric" })
+    .formatToParts(new Date(ms)).forEach(x => { if(x.type !== "literal") o[x.type] = +x.value; }); return o; };
+  let p; try{ p = read(zone || "UTC"); }catch(e){ p = read("UTC"); }
+  p.offset = Math.round((Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second) - Math.floor(ms / 1000) * 1000) / 60000);
+  return p;
+}
+/* "EST" or "EDT" for the zones offered; for any other zone the difference from UTC ("UTC+5:30"), which is always right. */
+function zoneAbbr(ms, zone){
+  const now = zoneClock(ms, zone), pair = TZ_ABBR[zone];
+  if(pair) return pair[now.offset !== zoneClock(Date.UTC(now.year, 0, 1, 12), zone).offset ? 1 : 0];      /* summer time is whatever differs from January */
+  const m = Math.abs(now.offset);
+  return now.offset === 0 ? "UTC" : "UTC" + (now.offset < 0 ? "-" : "+") + Math.floor(m / 60) + (m % 60 ? ":" + String(m % 60).padStart(2, "0") : "");
+}
+/* A moment as it is written everywhere in the tool: "Nov 18, 2026, 3:12 PM EST". */
+function timeLabel(ms, zone, seconds){
+  if(!Number.isFinite(ms)) return "time not known";
+  const p = zoneClock(ms, zone), two = n => String(n).padStart(2, "0");
+  return `${TIME_MONTHS[p.month - 1]} ${p.day}, ${p.year}, ${(p.hour + 11) % 12 + 1}:${two(p.minute)}${seconds ? ":" + two(p.second) : ""} ${p.hour >= 12 ? "PM" : "AM"} ${zoneAbbr(ms, zone)}`;
+}
+/* A time of day alone, for a moment of today: "3:12 PM EST". */
+function timeOfDay(ms, zone, seconds){
+  if(!Number.isFinite(ms)) return "time not known";
+  const p = zoneClock(ms, zone), two = n => String(n).padStart(2, "0");
+  return `${(p.hour + 11) % 12 + 1}:${two(p.minute)}${seconds ? ":" + two(p.second) : ""} ${p.hour >= 12 ? "PM" : "AM"} ${zoneAbbr(ms, zone)}`;
+}
+/* How long ago, in whole units, never rounded up: 59 seconds is "just now", 119 minutes is "1 hour ago". */
+function relTime(thenMs, nowMs){
+  if(!Number.isFinite(thenMs) || !Number.isFinite(nowMs)) return "time not known";
+  const d = nowMs - thenMs, n = (count, unit) => `${count} ${unit}${count === 1 ? "" : "s"} ago`;
+  if(d < -60000) return "later than now: please check this computer's clock";
+  if(d < 60000) return "just now";
+  const minutes = Math.floor(d / 60000); if(minutes < 60) return n(minutes, "minute");
+  const hours = Math.floor(minutes / 60); if(hours < 24) return n(hours, "hour");
+  return n(Math.floor(hours / 24), "day");
+}
+/* One line for a piece of data: where it is from, as of when, how long ago, and STALE once it is older than the days the person chose. */
+function freshLine(source, asOfMs, nowMs, staleDays, zone){
+  const days = STALE_CHOICES.includes(staleDays) ? staleDays : STALE_DEFAULT;
+  if(!Number.isFinite(asOfMs)) return { text:`${source} · time not known`, stale:false };
+  const stale = nowMs - asOfMs > days * 86400000;
+  return { text:`${source} · as of ${timeLabel(asOfMs, zone, false)} (${relTime(asOfMs, nowMs)})` + (stale ? ` · STALE: older than ${days} ${days === 1 ? "day" : "days"}` : ""), stale };
+}
+
 /* ---------------- Round 30: backup copies of the lists, and the archive of finished to-do items ---------------- */
 const BACKUP_KEEP_CHOICES = [10, 30, 60, 100], BACKUP_KEEP_DEFAULT = 30, ARCHIVE_DAYS_CHOICES = [7, 30, 90, 365], ARCHIVE_DAYS_DEFAULT = 30;
 /* The day a moment falls on for the person: in their time zone, whatever the clocks did that night. A zone that is not known is read as UTC. */
@@ -5693,8 +5796,9 @@ function archiveRows(lines, query, max){
   return { rows:hit.slice(0, max > 0 ? max : 200), total:kept.length, found:hit.length };
 }
 /* What changed, newest first. The Windows app shows the same list. */
-const APP_VERSION = "Prototype, round 30";
+const APP_VERSION = "Prototype, round 31";
 const CHANGES = [
+  { round:31, items:["Every time is written in your time zone, with its abbreviation and the right daylight time. You can choose another zone.", "Every piece of data says where it is from and as of when, and how long ago.", "Data older than the days you choose is marked STALE.", "A clock in Settings, and “minutes ago” on the card, are brought up to date once a minute."] },
   { round:30, items:["Every change to a list keeps a copy of it, and one press brings a copy back.", "You choose how many copies are kept.", "Finished to-do items can be searched in the archive and put back.", "You choose after how many days a finished item is archived."] },
   { round:29, items:["Every window says what is switched on, or “Offline · Local only”.", "A list of the connections: what each one sends, where, and what is kept.", "An event log you can read and export. It holds times, kinds and counts only.", "This page.", "Kept copies of your sheet are deleted only when you ask and confirm."] },
   { round:28, items:["No AI connection is on until you choose one.", "A file of yours that cannot be read is set aside, never written over.", "Finished to-do items are archived, not deleted.", "The invite can be accepted by pressing the same shortcut again.", "No launcher script."] },
@@ -5791,7 +5895,7 @@ function paintData(){
   if(current && card.style.display === "block") fill(current);
 }
 [["portfolio", "dataPortfolioPick", "dataPortfolioClear"], ["notes", "dataNotesPick", "dataNotesClear"], ["ref", "dataRefPick", "dataRefClear"]].forEach(([k, pick, clear]) => {
-  $(pick).addEventListener("click", () => { state.data[k] = PICKS[k][0]; $("dataRefStatus").dataset.keep = ""; paintData(); });
+  $(pick).addEventListener("click", () => { state.data[k] = PICKS[k][0]; state.dataAt[k] = nowMs(); $("dataRefStatus").dataset.keep = ""; paintData(); });
   $(clear).addEventListener("click", () => { state.data[k] = null; paintData(); });
 });
 $("dataUpdate").addEventListener("click", () => {
@@ -6248,7 +6352,7 @@ function tdReload(force){
   const sig = v.rows.map(r => `${r.key}|${r.done}|${r.priority}|${r.title}|${r.snoozedUntil}`).join("\n") + "#" + v.open;
   $("tdSummary").textContent = v.rows.length === 0 ? "Nothing on your list, and nothing in your data needs a look."
     : `${v.open} open · ${v.now} ${v.now === 1 ? "needs" : "need"} a look now` + (v.snoozed > 0 ? ` · ${v.snoozed} snoozed` : "") + (v.auto > 0 ? ` · ${v.auto} from your data` : "");
-  $("tdFooter").textContent = `Updated ${simClock(true)}. ${state.data.portfolio ? "Using my-portfolio.xlsx (simulated)." : "Using the fictional demo records."} Items from your data follow the same rules as the card and the watch list; they say what the data shows and decide nothing. Click a number to open its card.`;
+  $("tdFooter").textContent = `Updated ${timeOfDay(tickMs(), toolTz(), true)}. ${state.data.portfolio ? "Using my-portfolio.xlsx (simulated)." : "Using the fictional demo records."} Items from your data follow the same rules as the card and the watch list; they say what the data shows and decide nothing. Click a number to open its card.`;
   if(!force && sig === tdSig) return;
   tdSig = sig; tdDraw(v);
 }
@@ -6474,7 +6578,6 @@ function actionHotkey(a, source){
 
 /* ---- the agents drawer on the card (CardWindow.PrepareAgents / PaintAgents) ---- */
 const enabledAgents = () => state.agents.filter(a => a.enabled);
-const timeText = t => new Date(t).toLocaleTimeString("en-US", { hour:"numeric", minute:"2-digit" });
 function latestFinding(ag, id){
   const done = agentCache[ag.id + "|" + id], failed = agentFailed[ag.id + "|" + id];
   return failed && (!done || failed.at >= done.at) ? failed : done || null;
@@ -6510,7 +6613,7 @@ function paintAgents(){
         add.addEventListener("click", () => { const n = addLines([item], id, ag.name); add.textContent = n > 0 ? "Added ✓" : "On your list"; add.disabled = true; });
         box.append(h("div", { class:"it" }, h("span", { class:"st", text:"• " + item }), add));
       });
-      box.append(h("div", { class:"fine", text:`${last.message} Asked at ${timeText(last.at)}.` }));
+      box.append(h("div", { class:"fine", text:`${last.message} Asked at ${timeOfDay(last.at, toolTz(), false)}.` }));
     }
   });
   box.append(h("div", { class:"fine", text:"These are the agents' own words, shown as received, not facts from the record. They are never run or passed on, and nothing is added to your to-do list until you press its button." }));
@@ -7465,7 +7568,7 @@ function snapSettings(){
     actions:JSON.parse(JSON.stringify(s.actions)), agents:JSON.parse(JSON.stringify(s.agents)), todoShowFromData:s.todoAuto, todoRefreshSeconds:s.todoRefresh,
     myTodoMode:s.clMode, adaptive:s.adaptive, allTools:s.allTools,
     textSize:s.ts, density:s.density, lookupStyle:s.lookupStyle, rememberRecents:s.recentsOn, pins:[...s.pins],
-    cardFields:[...s.cardFields], watchBack:s.watchOn, divisionNews:s.newsOn, noticesPerDay:s.watchCap, andaPage:s.andaUrl, trayRecount:s.trayRecount };   /* the counts of opened sections belong to this PC: they are not in a backup */
+    cardFields:[...s.cardFields], watchBack:s.watchOn, divisionNews:s.newsOn, noticesPerDay:s.watchCap, andaPage:s.andaUrl, trayRecount:s.trayRecount, timeZone:s.tz, staleAfterDays:s.staleDays };   /* the counts of opened sections belong to this PC: they are not in a backup */
 }
 const DEFAULT_SETTINGS = { ...snapSettings(), allTools:false }, DEFAULT_PROMPTS = prompts.map(p => [...p]), DEFAULT_REPLIES = state.replies.map(r => ({ ...r }));
 const oneOf = (v, list, fallback) => list.includes(v) ? v : fallback;
@@ -7475,6 +7578,7 @@ function applySettings(x){
   const look = oneOf(x.appearance, LOOKS.map(l => l[0]), d.appearance); if(look !== s.look) applyLook(look);
   s.autoHide = oneOf(x.autoHide, AUTO_CHOICES, d.autoHide); s.mode = oneOf(x.consent, CONSENTS.map(c => c[0]), d.consent);
   s.escalate = typeof x.escalate === "boolean" ? x.escalate : d.escalate; s.lead = oneOf(x.holidayLead, [0, 2, 3, 5], d.holidayLead);
+  s.tz = oneOf(x.timeZone, TZ_CHOICES.map(c => c[0]), d.timeZone); s.staleDays = oneOf(x.staleAfterDays, STALE_CHOICES, d.staleAfterDays);
   /* How many copies of the lists are kept, and after how many days a finished item is archived, belong to this PC like the lists themselves:
      a settings backup does not carry them, and a restore or a reset leaves them as they are. Otherwise a backup could remove copies unasked. */
   s.capture = typeof x.capture === "boolean" ? x.capture : d.capture; s.op = x.opacity === undefined ? d.opacity : (n => isFinite(n) ? Math.min(100, Math.max(40, Math.round(n))) : 100)(+x.opacity);
@@ -7529,6 +7633,7 @@ function syncSettingsUI(){
   check("clmode", s.clMode); check("ts", s.ts); check("density", s.density); check("lkstyle", s.lookupStyle); $("setRecents").checked = s.recentsOn; syncRound19(); $("adaptCheck").checked = s.adaptive; applyEdition();
   $("todoAuto").checked = s.todoAuto; renderActions(); renderAgents(); if(isOpen("todo")){ tdApplyTimer(); tdReload(true); }
   $("setUrgent").checked = s.escalate; $("setLead").value = String(s.lead); $("setCapture").checked = s.capture;
+  $("setTz").value = s.tz; $("setStale").value = String(s.staleDays); timeTick();
   $("setOp").value = s.op; $("setOpV").textContent = s.op + "%"; root.style.setProperty("--op", s.op + "%");
   $("setMiddle").checked = s.middle; $("setStyle").value = s.style; $("setSignoff").value = s.signoff; $("claudeModel").value = s.claudeModel;
   Object.entries({ apiName:"name", apiEndpoint:"endpoint", apiHeader:"header", apiScheme:"scheme", apiEnv:"env", apiModel:"model", apiTemplate:"template", apiPath:"path" })

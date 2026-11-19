@@ -50,6 +50,7 @@ public sealed class MockAndaRepository : IAndaRepository
             Sisters = new[] { new SisterRef("214990", "Metformin HCl ER Tablets, 750 mg — same applicant, same facility") },
             GoalDateValue = new DateOnly(2026, 10, 3), ForecastDateValue = new DateOnly(2026, 10, 17),
             AsOfDate = new DateOnly(2026, 7, 16), Demo = true, SourceLabel = "Fictional demo data",
+            AsOfUtc = new DateTime(2026, 7, 16, 11, 12, 0, DateTimeKind.Utc), DataSource = "Fictional demo data · extract #412",      // 7:12 AM Eastern that morning
             ActiveIngredient = "METFORMIN HYDROCHLORIDE", DosageForm = "TABLET, EXTENDED RELEASE", Strength = "500 MG",
         };
 
@@ -77,6 +78,7 @@ public sealed class MockAndaRepository : IAndaRepository
             Sisters = new[] { new SisterRef("216482", "Metformin HCl ER Tablets, 500 mg — same applicant, same facility") },
             GoalDateValue = new DateOnly(2026, 8, 15), ForecastDateValue = new DateOnly(2026, 8, 6),
             AsOfDate = new DateOnly(2026, 7, 16), Demo = true, SourceLabel = "Fictional demo data",
+            AsOfUtc = new DateTime(2026, 7, 16, 11, 12, 0, DateTimeKind.Utc), DataSource = "Fictional demo data · extract #412",      // 7:12 AM Eastern that morning
             ActiveIngredient = "METFORMIN HYDROCHLORIDE", DosageForm = "TABLET, EXTENDED RELEASE", Strength = "750 MG",
         };
 

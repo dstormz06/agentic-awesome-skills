@@ -49,6 +49,7 @@ public partial class SettingsWindow : Window
             (a.IsCompact ? CompactPanel : AppearancePanel).Children.Add(rb);
         }
 
+        BuildTime();
         foreach (int seconds in AutoHidePolicy.Choices)
         {
             var rb = new RadioButton
@@ -577,6 +578,42 @@ public partial class SettingsWindow : Window
             ? 0
             : Math.Max(0, items.FindIndex(n => n == _settings.ActiveLens));
         _loading = false;
+    }
+
+    /// <summary>Now, in UTC. Overridable so a test is never at the mercy of the real clock.</summary>
+    public Func<DateTime> UtcNow { get; set; } = () => Clock.UtcNow();
+    private Avalonia.Threading.DispatcherTimer? _minute;
+
+    /// <summary>How often the clock in the Time part is brought up to date while this window is open. A test shortens it; the app leaves it at a minute.</summary>
+    internal TimeSpan MinuteEvery { get; set; } = TimeSpan.FromSeconds(60);
+
+    /// <summary>The clock line of the Time part. Internal so a test can pass a minute without waiting for one.</summary>
+    internal void PaintNow() => TimeNow.Text = Clock.NowLine(Clock.Ms(UtcNow()), Clock.Zone);
+
+    /// <summary>Time: a clock in the zone chosen, brought up to date once a minute while this window is open; the zone; and the days after which data is STALE.</summary>
+    private void BuildTime()
+    {
+        TimeZoneBox.ItemsSource = Clock.ZoneChoices.Select(c => c.Id.Length == 0 ? c.Name : $"{c.Name} ({c.Id.Replace('_', ' ')})").ToList();
+        TimeZoneBox.SelectedIndex = Math.Max(0, Clock.ZoneChoices.ToList().FindIndex(c => c.Id == _settings.TimeZone));
+        StaleBox.ItemsSource = Clock.StaleChoices.Select(n => $"{n} {(n == 1 ? "day" : "days")}").ToList();
+        StaleBox.SelectedIndex = Math.Max(0, Clock.StaleChoices.ToList().IndexOf(_settings.StaleAfterDays));
+        void Say(string text) { TimeHint.Text = text; TimeHint.IsVisible = true; }
+        TimeZoneBox.SelectionChanged += (_, _) =>
+        {
+            if (_loading || TimeZoneBox.SelectedIndex < 0 || TimeZoneBox.SelectedIndex >= Clock.ZoneChoices.Count) return;
+            _settings.TimeZone = Clock.ZoneChoices[TimeZoneBox.SelectedIndex].Id; Apply();      // Apply sets the zone the tool writes in
+            Clock.ZoneId = _settings.TimeZone;                                                 // and here as well, for a window opened without the app (a test)
+            PaintNow(); Say(Clock.ZoneSaid(_settings.TimeZone, Clock.Ms(UtcNow())));
+        };
+        StaleBox.SelectionChanged += (_, _) =>
+        {
+            if (_loading || StaleBox.SelectedIndex < 0 || StaleBox.SelectedIndex >= Clock.StaleChoices.Count) return;
+            _settings.StaleAfterDays = Clock.StaleChoices[StaleBox.SelectedIndex]; Apply();
+            Say(Clock.StaleSaid(_settings.StaleAfterDays));
+        };
+        Opened += (_, _) => { PaintNow(); _minute ??= new Avalonia.Threading.DispatcherTimer(MinuteEvery, Avalonia.Threading.DispatcherPriority.Background, (_, _) => PaintNow()); _minute.Start(); };
+        Closed += (_, _) => _minute?.Stop();
+        PaintNow();
     }
 
     private void Apply()

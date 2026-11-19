@@ -170,6 +170,23 @@ public class ShotTests : IClassFixture<HeadlessFixture>
             bak30.Show(); ConnectionBar.Attach(bak30); for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
             Save(bak30, dir, "backups-30");
             bak30.Close();
+            // Round 31: the card's data line, fresh and STALE, and the Time part of Settings.
+            using (new ZoneScope("America/New_York"))
+            {
+                var asOf31 = new DateTime(2026, 11, 11, 20, 0, 0, DateTimeKind.Utc); var now31 = asOf31.AddDays(9).AddHours(2);
+                var mine31 = new Data.MockAndaRepository().Find("216482")! with { Demo = false, AsOfUtc = asOf31, AsOfDate = new DateOnly(2026, 11, 11), DataSource = "Your portfolio file · my-portfolio.xlsx", SourceLabel = "Your portfolio: my-portfolio.xlsx" };
+                var card31 = new CardWindow(new OfflineBriefService(), _ => mine31) { CloseWhenDeactivated = false, Today = () => new DateOnly(2026, 11, 20), UtcNow = () => now31, StaleDays = () => 7 };
+                card31.Show(mine31, new PixelPoint(40, 40), false); for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
+                Save(card31, dir, "card-stale-31");
+                card31.Close();
+                var set31 = new SettingsWindow(new Settings { TimeZone = "America/New_York", StaleAfterDays = 7 }, new PromptLibraryService(Path.Combine(Temp.NewDir(), "p31.json")), () => { }) { UtcNow = () => now31 };
+                set31.Show(); Settle(); set31.FindControl<Expander>("SecLook")!.IsExpanded = true; for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
+                set31.FindControl<TextBlock>("TimeHint")!.IsVisible = true; set31.FindControl<TextBlock>("TimeHint")!.Text = Clock.ZoneSaid("America/New_York", Clock.Ms(now31));
+                foreach (var sv31 in set31.GetVisualDescendants().OfType<ScrollViewer>().Where(v => v.Extent.Height > v.Viewport.Height + 200).Take(1)) sv31.Offset = new Vector(0, 540);
+                for (int i = 0; i < 10; i++) { Settle(); Thread.Sleep(12); }
+                Save(set31, dir, "settings-time-31");
+                set31.Close();
+            }
             handoff.Close();
             var review27 = new DraftWindow("Certainly! Here is a revised version.\n\nANDA 216482: under 21 CFR 314.96(a) the amendment is minor. Please send your response by Friday, Dec 4, 2026.\n\nI hope this helps.",
                 repo27.Find, new WritingService(null), new Settings(), new PromptLibraryService(Path.Combine(Temp.NewDir(), "p5.json")), () => day27)

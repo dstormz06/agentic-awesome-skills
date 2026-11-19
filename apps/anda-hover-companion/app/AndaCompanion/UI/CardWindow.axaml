@@ -106,7 +106,7 @@
                        FontFamily="{DynamicResource C.DrugFont}" FontStyle="{DynamicResource C.DrugStyle}"
                        Foreground="{DynamicResource C.Ink}" TextWrapping="Wrap"/>
             <TextBlock Name="MetaText" FontSize="12" Foreground="{DynamicResource C.Ink2}" Margin="0,2,0,0"/>
-            <TextBlock Name="FreshnessText" FontSize="10.5" Foreground="{DynamicResource C.Ink3}" Margin="0,3,0,0"/>
+            <TextBlock Name="FreshnessText" FontSize="10.5" Foreground="{DynamicResource C.Ink3}" Margin="0,3,0,0" TextWrapping="Wrap"/>
           </StackPanel>
           </Border>
           <Border Height="1" Background="{DynamicResource C.Hair}"/>

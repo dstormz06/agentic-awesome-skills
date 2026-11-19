@@ -8,7 +8,9 @@ public enum WatchSeverity { Info, Warn, Bad }
 /// <summary>One thing worth a second look, with the evidence behind it. Never an instruction, never a conclusion.</summary>
 public sealed record WatchFlag(string Code, WatchSeverity Severity, string Text, string Why, string Source);
 
-public sealed record WatchSettings(int HolidayLeadBusinessDays = 3, int StaleDataDays = 7, int GoalSoonDays = 5);
+/// <param name="NowMs">Now, in UTC milliseconds. With it, and a record that carries the moment its data was taken, "stale" is reckoned to the
+/// minute, exactly as the card's data line reckons it; without it, by whole days.</param>
+public sealed record WatchSettings(int HolidayLeadBusinessDays = 3, int StaleDataDays = 7, int GoalSoonDays = 5, long? NowMs = null);
 
 /// <summary>
 /// The "watch your back" layer: deterministic checks over a record, each one carrying its evidence and source.
@@ -73,10 +75,15 @@ public static class WatchRules
 
         if (!r.Demo && r.AsOfDate is { } taken)
         {
-            int age = today.DayNumber - taken.DayNumber;
-            if (age > settings.StaleDataDays)
+            int age = today.DayNumber - taken.DayNumber; bool stale = age > settings.StaleDataDays;
+            if (settings.NowMs is { } now && r.AsOfUtc is { } moment)
+            {
+                long old = now - Clock.Ms(moment);
+                stale = old > settings.StaleDataDays * 86400000L; if (stale) age = (int)Math.Min(int.MaxValue, old / 86400000L);
+            }
+            if (stale)
                 flags.Add(new WatchFlag("stale-data", WatchSeverity.Warn,
-                    $"This data is {age} days old (as of {taken.ToString("MMM d", Inv)}).",
+                    $"This data is {age} {(age == 1 ? "day" : "days")} old (as of {taken.ToString("MMM d", Inv)}).",
                     "A stale fact shown confidently is the riskiest kind. Refresh your source before relying on it.", source));
         }
 

@@ -136,7 +136,7 @@ public class Phase1UiTests : IClassFixture<HeadlessFixture>
         Assert.Equal(AndaRecord.Unknown, r.Item3);
         Assert.Equal("no forecast in your sheet", r.Item4);
         Assert.False(r.Item5);
-        Assert.Contains("your portfolio file", r.Item6);
+        Assert.StartsWith("Your portfolio file · ", r.Item6); Assert.Contains(" · as of ", r.Item6);      // where the data is from, and as of when
     }
 
     [Fact]

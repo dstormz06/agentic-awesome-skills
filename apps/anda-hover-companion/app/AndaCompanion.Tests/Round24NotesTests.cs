@@ -182,7 +182,8 @@ public class Round24NotesTests : IClassFixture<HeadlessFixture>
         return await _fx.Session.Dispatch(() =>
         {
             ThemeManager.Apply(id);
-            var notes = new QuickNotesService(NewStore(), () => new DateTime(2026, 11, 12, 9, 30, 0));
+            using var zone = new ZoneScope("America/New_York");
+            var notes = new QuickNotesService(NewStore(), () => new DateTime(2026, 11, 12, 14, 30, 0, DateTimeKind.Utc));
             var opened = new List<string>();
             var w = new CardWindow(new OfflineBriefService(), new MockAndaRepository().Find)
             {
@@ -224,7 +225,7 @@ public class Round24NotesTests : IClassFixture<HeadlessFixture>
         Assert.Equal("Note saved.", r.message);
         Assert.Equal("My notes · 1", r.header);
         Assert.Contains("Called the US agent: the response will come next Tuesday.", r.listed);
-        Assert.Contains("Nov 12, 9:30 AM", r.listed);
+        Assert.Contains("Nov 12, 2026, 9:30 AM EST", r.listed);
         Assert.Equal("Enter adds a note · S or Copy status copies the status line", r.hint);
     }
 

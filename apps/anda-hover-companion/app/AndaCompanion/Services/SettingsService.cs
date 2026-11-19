@@ -117,13 +117,19 @@ public sealed class Settings
     public ProviderChoice Provider { get; set; } = ProviderChoice.Offline;      // off until the person chooses a connection here; a key found on the PC is not a choice
 
     /// <summary>The version of this file's layout. A file with an older number is moved forward when it is read; see <see cref="SettingsService.Migrate"/>.</summary>
-    public const int CurrentSchema = 2;
+    public const int CurrentSchema = 3;
 
     /// <summary>How many backup copies of each list are kept (and one for each of that many days). See <see cref="Backups"/>.</summary>
     public int BackupCopies { get; set; } = Backups.KeepDefault;
 
     /// <summary>After how many days a finished to-do item is moved to the archive.</summary>
     public int ArchiveAfterDays { get; set; } = Backups.ArchiveDaysDefault;
+
+    /// <summary>The time zone every time is written in, by its IANA name; "" for this computer's own. See <see cref="Clock"/>.</summary>
+    public string TimeZone { get; set; } = "";
+
+    /// <summary>After how many days a piece of the person's data is marked STALE.</summary>
+    public int StaleAfterDays { get; set; } = Clock.StaleDefault;
     public int SchemaVersion { get; set; } = CurrentSchema;
 
     /// <summary>The person's own API, described here instead of in code. Used only when Provider is MyApi.</summary>
@@ -305,6 +311,7 @@ public static class SettingsService
             note = "The AI connection is now off until you choose one in Settings, Connection. Earlier versions used a key found on this PC without asking.";
         }
         if (fromVersion < 2) { s.BackupCopies = Backups.KeepDefault; s.ArchiveAfterDays = Backups.ArchiveDaysDefault; }
+        if (fromVersion < 3) { s.TimeZone = ""; s.StaleAfterDays = Clock.StaleDefault; }      // this computer's zone, and stale after 7 days, as before
         return note;
     }
 
@@ -318,6 +325,8 @@ public static class SettingsService
         if (!Settings.HolidayLeadChoices.Contains(loaded.HolidayLeadDays)) loaded.HolidayLeadDays = 3;
         if (!Backups.KeepChoices.Contains(loaded.BackupCopies)) loaded.BackupCopies = Backups.KeepDefault;
         if (!Backups.ArchiveDaysChoices.Contains(loaded.ArchiveAfterDays)) loaded.ArchiveAfterDays = Backups.ArchiveDaysDefault;
+        if (!Clock.ZoneChoices.Any(c => c.Id == loaded.TimeZone)) loaded.TimeZone = "";
+        if (!Clock.StaleChoices.Contains(loaded.StaleAfterDays)) loaded.StaleAfterDays = Clock.StaleDefault;
         if (!NativeHostRegistration.IsValidExtensionId(loaded.ExtensionId)) loaded.ExtensionId = NativeHostRegistration.DefaultExtensionId;
         loaded.PortfolioColumns ??= new();
         loaded.StandingInstructions ??= "";

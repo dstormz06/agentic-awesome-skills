@@ -24,7 +24,7 @@ public static class HandoffData
         if (repo.Find(number) is not { } r) return null;
         var watch = new List<string>();
         if (UrgencyPolicy.IsUrgent(r, ctx.Today, ctx.Calendar, ctx.UrgentLateDays)) watch.Add(Cut("at risk. " + UrgencyPolicy.Reason(r, ctx.Today, ctx.Calendar, ctx.UrgentLateDays), 140));
-        foreach (var f in WatchRules.Evaluate(r, ctx.Today, ctx.Calendar, new WatchSettings(HolidayLeadBusinessDays: ctx.HolidayLeadDays)).Where(f => f.Severity != WatchSeverity.Info))
+        foreach (var f in WatchRules.Evaluate(r, ctx.Today, ctx.Calendar, ctx.Watch).Where(f => f.Severity != WatchSeverity.Info))
         {
             string text = Cut(f.Text, 140);
             if (!watch.Any(w => w.Contains(text, StringComparison.Ordinal))) watch.Add(text);

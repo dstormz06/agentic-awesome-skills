@@ -38,7 +38,7 @@ public static class SettingsBackup
         CopyFrom(copy, settings, skip: ThisPcOnly);
         return JsonSerializer.Serialize(new Backup
         {
-            Version = Version, SavedAt = now ?? DateTime.Now, Settings = copy,
+            Version = Version, SavedAt = now ?? DateTime.UtcNow, Settings = copy,
             Lenses = lenses.Prompts.ToList(), Replies = replies.Replies.ToList(),
         }, Json);
     }

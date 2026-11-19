@@ -147,30 +147,11 @@ public static class EventLog
         return n;
     }
 
-    /// <summary>A time of the log in the person's own time zone, with the zone's abbreviation: "Nov 18, 7:03:59 PM EST".</summary>
+    /// <summary>A time of the log in the time zone the tool writes in, with the zone's abbreviation: "Nov 18, 2026, 7:03:59 PM EST". See <see cref="Clock"/>.</summary>
     public static string Local(string utcText, TimeZoneInfo? zone = null)
     {
         if (!DateTime.TryParseExact(utcText, "yyyy-MM-dd'T'HH:mm:ss.fff'Z'", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var utc)) return utcText;
-        zone ??= TimeZoneInfo.Local;
-        var local = TimeZoneInfo.ConvertTimeFromUtc(utc, zone);
-        return local.ToString("MMM d, h:mm:ss tt", CultureInfo.InvariantCulture) + " " + Abbreviation(zone, utc);
+        return Clock.Label(Clock.Ms(utc), zone ?? Clock.Zone, true);
     }
 
-    /// <summary>
-    /// "EST" or "EDT" from the name Windows gives a zone ("Eastern Standard Time"), the name itself when it is already short, and otherwise the
-    /// difference from UTC ("UTC-5"), which is always right.
-    /// </summary>
-    /// <param name="utc">The moment in UTC. The hour that occurs twice when the clocks go back can only be told apart this way.</param>
-    public static string Abbreviation(TimeZoneInfo zone, DateTime utc)
-    {
-        utc = DateTime.SpecifyKind(utc, DateTimeKind.Utc);
-        if (zone.Id is "UTC" or "Etc/UTC" || zone.BaseUtcOffset == TimeSpan.Zero && !zone.SupportsDaylightSavingTime) return "UTC";
-        string name = zone.IsDaylightSavingTime(utc) ? zone.DaylightName : zone.StandardName;
-        string[] words = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (words.Length == 1 && name.Length is >= 2 and <= 5 && name.All(char.IsLetter)) return name.ToUpperInvariant();
-        if (words.Length is >= 3 and <= 4 && words[^1] == "Time" && words.All(w => char.IsLetter(w[0])))
-            return string.Concat(words.Select(w => char.ToUpperInvariant(w[0])));
-        var off = zone.GetUtcOffset(utc);
-        return "UTC" + (off < TimeSpan.Zero ? "-" : "+") + Math.Abs(off.Hours).ToString(CultureInfo.InvariantCulture) + (off.Minutes != 0 ? ":" + Math.Abs(off.Minutes).ToString("00", CultureInfo.InvariantCulture) : "");
-    }
 }

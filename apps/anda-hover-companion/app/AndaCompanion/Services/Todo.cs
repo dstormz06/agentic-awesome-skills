@@ -413,7 +413,7 @@ public static class TodoBuilder
                 $"ANDA {n}: at risk. {urgentReason}",
                 "From your data: a forecast well after the goal, a serious action item, or a passed goal date.", r.GoalDateValue, "bad", "Your data");
 
-        foreach (var f in WatchRules.Evaluate(r, today, ctx.Calendar, new WatchSettings(HolidayLeadBusinessDays: ctx.HolidayLeadDays)).Where(f => f.Severity != WatchSeverity.Info))
+        foreach (var f in WatchRules.Evaluate(r, today, ctx.Calendar, ctx.Watch).Where(f => f.Severity != WatchSeverity.Info))
         {
             if (urgentReason is not null && f.Text == urgentReason) continue;   // the at-risk row already says this: never list one fact twice
             DateOnly? date = f.Code switch

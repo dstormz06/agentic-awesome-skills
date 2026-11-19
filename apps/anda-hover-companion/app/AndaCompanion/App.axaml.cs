@@ -68,7 +68,7 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        _settings = SettingsService.Load();
+        _settings = SettingsService.Load(); Clock.ZoneId = _settings.TimeZone;
         ThemeManager.Apply(Edition.Appearance(_settings), Edition.Opacity(_settings));
         _calendar = BusinessCalendar.FromFile(AppPaths.ClosuresFile);
         UsageLog.Configure(_settings.UsageLog && SelfTestRun is null);
@@ -264,7 +264,7 @@ public partial class App : Application
         var card = new CardWindow(_briefs, _repository.Find)
         {
             AutoHideSeconds = _settings.AutoHideSeconds,
-            Calendar = _calendar, Watch = new WatchSettings(HolidayLeadBusinessDays: _settings.HolidayLeadDays),
+            Calendar = _calendar, Watch = new WatchSettings(_settings.HolidayLeadDays, _settings.StaleAfterDays), StaleDays = () => _settings.StaleAfterDays,
             Today = Today, Reference = ReferenceFor, QuickReplies = () => _replies.Replies,
             Outlook = Outlook,
             Agents = _agents, AtRisk = IsAtRisk, AddTodos = AddAgentTodos,
@@ -366,7 +366,7 @@ public partial class App : Application
 
     private WatchListWindow? _watchWindow;
 
-    private CardContext CardCtx() => new(Today(), _calendar, _settings.HolidayLeadDays, _settings.UrgentLateDays, ReferenceFor);
+    private CardContext CardCtx() => new(Today(), _calendar, _settings.HolidayLeadDays, _settings.UrgentLateDays, ReferenceFor, _settings.StaleAfterDays, Clock.Ms(Clock.UtcNow()));
 
     private void OpenWatchList()
     {
@@ -538,8 +538,10 @@ public partial class App : Application
     private void ApplySettings()
     {
         SettingsService.Save(_settings);
+        Clock.ZoneId = _settings.TimeZone;      // first: what follows writes times
         ConnectionsChanged();
         _todo.ArchiveAfterDays = _myTodo.ArchiveAfterDays = _settings.ArchiveAfterDays;
+        _backupsWindow?.Paint(); _card?.MinutePassed();      // an open window follows a new zone, or new days before "stale", at once
         ThemeManager.Apply(Edition.Appearance(_settings), Edition.Opacity(_settings));
         UsageLog.Configure(_settings.UsageLog && SelfTestRun is null);
         _hotkeys?.Reconfigure(HotkeyBindings());

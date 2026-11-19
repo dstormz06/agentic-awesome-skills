@@ -22,7 +22,7 @@ public static class DraftNotes
         var all = new List<DraftNote>();
         if (quick is not null)
             foreach (var n in quick.For(record.Number))
-                all.Add(new DraftNote("You · " + n.When.ToString("MMM d, h:mm tt", CultureInfo.InvariantCulture), n.Text, true, Ms(n.When)));
+                all.Add(new DraftNote("You · " + Clock.Label(Clock.Ms(n.When), Clock.Zone, false), n.Text, true, Ms(Clock.Wall(n.When))));      // ordered by the day and hour it was for the person, as the record's own notes are
         for (int i = 0; i < record.Notes.Count; i++)
             all.Add(new DraftNote(record.Notes[i].Who, record.Notes[i].Text, false, NoteTime(record.Notes[i].Who, today) - i));
         return all.OrderByDescending(n => n.T).ToList();

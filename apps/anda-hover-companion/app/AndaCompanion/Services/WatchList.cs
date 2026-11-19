@@ -23,7 +23,7 @@ public static class WatchList
         {
             if (repo.Find(number) is not { } r) continue;
             total++;
-            var flags = WatchRules.Evaluate(r, ctx.Today, ctx.Calendar, new WatchSettings(HolidayLeadBusinessDays: ctx.HolidayLeadDays));
+            var flags = WatchRules.Evaluate(r, ctx.Today, ctx.Calendar, ctx.Watch);
             bool urgent = UrgencyPolicy.IsUrgent(r, ctx.Today, ctx.Calendar, ctx.UrgentLateDays);
             if (flags.Count == 0 && !urgent) continue;
             string sev = flags.Count == 0 ? "info" : CardModels.Severity(flags.Max(f => f.Severity));

@@ -33,14 +33,14 @@ public sealed class ConnectionsWindow : Window
 
     /// <summary>Writes the whole log to a file, line by line. When set, saving uses it off the UI thread, so a long log never holds the window.</summary>
     public Func<TextWriter, int>? WriteAll { get; set; }
-    private readonly TimeZoneInfo _zone;
+    private readonly TimeZoneInfo? _zone;      // a test may fix it; otherwise the zone the tool writes in, asked each time
     private readonly ScrollViewer _logScroll;
     private readonly TextBlock _logEmpty;
 
     /// <param name="csv">The whole log as CSV for the clipboard, or null when it is too long to copy.</param>
     public ConnectionsWindow(Func<ConnResult> describe, Func<(IReadOnlyList<EventEntry> Entries, int Total, int Unreadable)> read, Func<string?> csv, string? file, TimeZoneInfo? zone = null)
     {
-        _describe = describe; _read = read; _csv = csv; _zone = zone ?? TimeZoneInfo.Local;
+        _describe = describe; _read = read; _csv = csv; _zone = zone;
         Title = "ANDA Companion (Notula) — Connections and event log"; Width = 680; SizeToContent = SizeToContent.Height; CanResize = false; Topmost = true; ShowInTaskbar = false;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         IBrush Res(string key) => (IBrush)Application.Current!.Resources[key]!;

@@ -28,6 +28,7 @@ public sealed class PortfolioRepository : IAndaRepository
     private DateTime _loadedWrite;
     private long _loadedLength;
     private DateOnly _asOf;
+    private DateTime _asOfUtc;
 
     public PortfolioStatus Status { get; private set; } = new(false, 0, "Not loaded.");
     public IReadOnlyList<string> Headers { get; private set; } = Array.Empty<string>();
@@ -76,11 +77,11 @@ public sealed class PortfolioRepository : IAndaRepository
             _byApplicant = rows.Values.Where(r => r.Applicant.Length > 0).GroupBy(r => r.Applicant, StringComparer.OrdinalIgnoreCase)
                 .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
             _loadedWrite = info.LastWriteTime; _loadedLength = info.Length;
-            _asOf = DateOnly.FromDateTime(info.LastWriteTime);
+            _asOfUtc = info.LastWriteTimeUtc; _asOf = DateOnly.FromDateTime(Clock.Wall(_asOfUtc));      // the day it was saved, in the zone the tool writes in: the same day the card names
             _notes = NotesIndex.Build(_notesFolder);
             string missing = string.Join(", ", new[] { ("goal", "goal date"), ("forecast", "forecast"), ("drug", "drug") }.Where(x => !map.ContainsKey(x.Item1)).Select(x => x.Item2));
             Status = new(true, rows.Count,
-                $"Loaded {rows.Count} ANDA{(rows.Count == 1 ? "" : "s")} from {Path.GetFileName(_path)} (file saved {info.LastWriteTime.ToString("MMM d, HH:mm", Inv)})." +
+                $"Loaded {rows.Count} ANDA{(rows.Count == 1 ? "" : "s")} from {Path.GetFileName(_path)} (file saved {Clock.Label(info.LastWriteTimeUtc, seconds: false)})." +
                 (skipped > 0 ? $" {skipped} row{(skipped == 1 ? "" : "s")} without a readable ANDA number skipped." : "") +
                 (missing.Length > 0 ? $" Not found in your sheet: {missing}." : ""));
         }
@@ -154,6 +155,7 @@ public sealed class PortfolioRepository : IAndaRepository
             ForecastDetail = "Dates and notes come from your portfolio file, as you entered them. This tool does not compute a forecast for your data.",
             Sisters = sisters,
             GoalDateValue = row.Goal, ForecastDateValue = row.Forecast, SubmittedDate = row.Submitted, AsOfDate = _asOf,
+            AsOfUtc = _asOfUtc, DataSource = $"Your portfolio file · {FileName}",
             Demo = false, SourceLabel = $"Your portfolio: {FileName}",
             ActiveIngredient = row.Ingredient.Length > 0 ? row.Ingredient : null, DosageForm = row.Form.Length > 0 ? row.Form : null,
             Strength = row.Strength.Length > 0 ? row.Strength : null, PsgDateFromSheet = row.Psg,

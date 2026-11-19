@@ -83,7 +83,7 @@ public sealed class QuickNotesService
         {
             if (!_file.Notes.TryGetValue(number!, out var list)) _file.Notes[number!] = list = new();
             if (list.Count >= PerAnda) return (false, $"This ANDA already has {PerAnda} quick notes. Delete one to add another.");
-            list.Add(new QuickNote("q" + _now().ToString("yyyyMMddHHmmss", System.Globalization.CultureInfo.InvariantCulture) + "-" + (++_seq), clean, _now()));
+            list.Add(new QuickNote("q" + _now().ToString("yyyyMMddHHmmss", System.Globalization.CultureInfo.InvariantCulture) + "-" + (++_seq), clean, _now().ToUniversalTime()));      // kept as the moment, in UTC; written in the zone chosen when it is shown
             return Save() ? (true, "Note saved.") : (true, "Note added, but it could not be saved to this PC: " + Problem);
         }
     }
