@@ -43,6 +43,34 @@ public sealed record MyTodoAddResult(MyTodoItem? Item, bool Added, string? Reaso
 public sealed class MyTodoService
 {
     public const int MaxItems = 500, MaxTitleChars = 200, KeepDoneDays = 30, KeepCountDays = 60;
+
+    /// <summary>After how many days a finished item is moved to the archive. The person chooses it (see <see cref="Backups.ArchiveDaysChoices"/>).</summary>
+    public int ArchiveAfterDays { get; set; } = KeepDoneDays;
+
+    /// <summary>Reads the list from its file again: after a backup copy was restored over it.</summary>
+    public void Reload() { lock (_gate) _file = Load(_path); Changed?.Invoke(); }
+
+    /// <summary>
+    /// Puts an archived item back on the list as an open item. The archive keeps its line and gets one more that says the item was put back.
+    /// </summary>
+    public (bool Ok, string Message) PutBack(string id, DateOnly today)
+    {
+        string title;
+        lock (_gate)
+        {
+            if (TodoArchive.Find<MyTodoItem>(_path, id) is not { } raw || string.IsNullOrEmpty(raw.Id)) return (false, "That item was already put back.");
+            if (_file.Items.Any(i => i.Id == raw.Id)) return (false, "That item is on the list already. Nothing was changed.");
+            if (_file.Items.Count >= MaxItems) return (false, "The list is full. Please finish or delete some items first. Nothing was changed.");
+            // The archive is a file anyone can edit: what comes back from it is cleaned as a loaded item is.
+            if (Normalize(new MyTodoData { Items = { raw } }).Items.FirstOrDefault() is not { } item || item.Id != raw.Id)
+                return (false, "That archived item cannot be read, so it cannot be put back. Nothing was changed.");
+            item.Done = false; item.DoneOn = null;
+            if (!TodoArchive.MarkPutBack(_path, item.Id, today)) return (false, "The archive could not be written just now. Nothing was changed.");
+            _file.Items.Add(item); SaveLocked(); title = item.Title;
+        }
+        Changed?.Invoke();
+        return (true, $"“{title}” is back on the My to-do list, as an open item.");
+    }
     private readonly string _path;
     private readonly object _gate = new();
     private MyTodoData _file;
@@ -293,7 +321,7 @@ public sealed class MyTodoService
                 if (i.Done && ParseIso(i.DoneOn) is { } doneOn && doneOn < today) { i.Due = Iso(NextDue(i, today)); i.Done = false; i.DoneOn = null; changed = true; }
                 else if (!i.Done && ParseIso(i.Due) is { } due && due < today) { i.Due = Iso(NoteParser.OnOrAfter(i.Repeat, i.RepeatDay, today)); changed = true; }
             }
-            changed |= ArchiveLocked(i => i.Done && i.Repeat == Repeat.None && ParseIso(i.DoneOn) is { } d && today.DayNumber - d.DayNumber > KeepDoneDays, today, $"finished more than {KeepDoneDays} days ago") > 0;
+            changed |= ArchiveLocked(i => i.Done && i.Repeat == Repeat.None && ParseIso(i.DoneOn) is { } d && today.DayNumber - d.DayNumber > ArchiveAfterDays, today, $"finished more than {ArchiveAfterDays.ToString(CultureInfo.InvariantCulture)} days ago") > 0;
             changed |= _file.DoneByDay.Keys.Where(k => ParseIso(k) is not { } d || today.DayNumber - d.DayNumber > KeepCountDays).ToList().Select(k => _file.DoneByDay.Remove(k)).Any();
             if (changed) SaveLocked();
         }
@@ -321,6 +349,7 @@ public sealed class MyTodoService
             string temp = _path + ".tmp";
             File.WriteAllText(temp, JsonSerializer.Serialize(_file, new JsonSerializerOptions { WriteIndented = true }));
             File.Move(temp, _path, overwrite: true);       // a crash mid-write can never leave a half-written list
+            SafeFile.Wrote(_path);
         }
         catch { /* best effort: the list still works for this session */ }
     }

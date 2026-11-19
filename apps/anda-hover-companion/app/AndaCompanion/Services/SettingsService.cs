@@ -117,7 +117,13 @@ public sealed class Settings
     public ProviderChoice Provider { get; set; } = ProviderChoice.Offline;      // off until the person chooses a connection here; a key found on the PC is not a choice
 
     /// <summary>The version of this file's layout. A file with an older number is moved forward when it is read; see <see cref="SettingsService.Migrate"/>.</summary>
-    public const int CurrentSchema = 1;
+    public const int CurrentSchema = 2;
+
+    /// <summary>How many backup copies of each list are kept (and one for each of that many days). See <see cref="Backups"/>.</summary>
+    public int BackupCopies { get; set; } = Backups.KeepDefault;
+
+    /// <summary>After how many days a finished to-do item is moved to the archive.</summary>
+    public int ArchiveAfterDays { get; set; } = Backups.ArchiveDaysDefault;
     public int SchemaVersion { get; set; } = CurrentSchema;
 
     /// <summary>The person's own API, described here instead of in code. Used only when Provider is MyApi.</summary>
@@ -287,6 +293,8 @@ public static class SettingsService
     /// Moves settings written by an earlier version forward, one step for each version, and says what changed in plain words.
     /// Version 0 (no version in the file) to 1: the AI connection "Auto", which used a key found on the PC without being chosen here, becomes
     /// "Offline only". An AI connection is something the person switches on in Settings.
+    /// Version 1 to 2: two new choices take their usual values (30 backup copies of each list; a finished item is archived after 30 days,
+    /// as before). Nothing the person set is changed, so nothing is said.
     /// </summary>
     public static string? Migrate(Settings s, int fromVersion)
     {
@@ -296,6 +304,7 @@ public static class SettingsService
             s.Provider = ProviderChoice.Offline;
             note = "The AI connection is now off until you choose one in Settings, Connection. Earlier versions used a key found on this PC without asking.";
         }
+        if (fromVersion < 2) { s.BackupCopies = Backups.KeepDefault; s.ArchiveAfterDays = Backups.ArchiveDaysDefault; }
         return note;
     }
 
@@ -307,6 +316,8 @@ public static class SettingsService
         loaded.TrayRecount = Services.TrayRecount.Normalize(loaded.TrayRecount);
         loaded.AndaPageUrl = (loaded.AndaPageUrl ?? "").Trim(); if (loaded.AndaPageUrl.Length > AndaPage.MaxLength) loaded.AndaPageUrl = loaded.AndaPageUrl[..AndaPage.MaxLength];
         if (!Settings.HolidayLeadChoices.Contains(loaded.HolidayLeadDays)) loaded.HolidayLeadDays = 3;
+        if (!Backups.KeepChoices.Contains(loaded.BackupCopies)) loaded.BackupCopies = Backups.KeepDefault;
+        if (!Backups.ArchiveDaysChoices.Contains(loaded.ArchiveAfterDays)) loaded.ArchiveAfterDays = Backups.ArchiveDaysDefault;
         if (!NativeHostRegistration.IsValidExtensionId(loaded.ExtensionId)) loaded.ExtensionId = NativeHostRegistration.DefaultExtensionId;
         loaded.PortfolioColumns ??= new();
         loaded.StandingInstructions ??= "";

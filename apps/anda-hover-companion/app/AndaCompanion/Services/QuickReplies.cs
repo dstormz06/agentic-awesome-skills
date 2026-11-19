@@ -94,6 +94,14 @@ public sealed class QuickReplyService
     public QuickReplyService(string? path = null)
     {
         _path = path ?? AppPaths.RepliesFile;
+        Read();
+    }
+
+    /// <summary>Reads the replies from their file again: after a backup copy was restored over it.</summary>
+    public void Reload() => Read();
+
+    private void Read()
+    {
         _replies = Starters.ToList();
         if (!File.Exists(_path)) return;
         var (text, why) = SafeFile.Read(_path);

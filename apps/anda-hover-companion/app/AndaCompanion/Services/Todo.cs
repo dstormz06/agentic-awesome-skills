@@ -45,6 +45,9 @@ public sealed record TodoAddResult(TodoItem? Item, bool Added, string? Reason);
 public sealed class TodoService
 {
     public const int MaxItems = 500, MaxTitleChars = 200, MaxNoteChars = 500, KeepDoneDays = 30;
+
+    /// <summary>After how many days a finished item is moved to the archive. The person chooses it (see <see cref="Backups.ArchiveDaysChoices"/>).</summary>
+    public int ArchiveAfterDays { get; set; } = KeepDoneDays;
     public const string DateFormat = "yyyy-MM-dd";
 
     private readonly object _gate = new();
@@ -60,6 +63,35 @@ public sealed class TodoService
     }
 
     public static string Iso(DateOnly d) => d.ToString(DateFormat, CultureInfo.InvariantCulture);
+
+    /// <summary>Reads the list from its file again: after a backup copy was restored over it.</summary>
+    public void Reload() { lock (_gate) _file = Load(_path); Changed?.Invoke(); }
+
+    /// <summary>
+    /// Puts an archived item back on the list as an open item. The archive keeps its line and gets one more that says the item was put back.
+    /// </summary>
+    public (bool Ok, string Message) PutBack(string id, DateOnly today)
+    {
+        string title;
+        lock (_gate)
+        {
+            if (TodoArchive.Find<TodoItem>(_path, id) is not { } item || string.IsNullOrEmpty(item.Id)) return (false, "That item was already put back.");
+            if (_file.Items.Any(i => i.Id == item.Id)) return (false, "That item is on the list already. Nothing was changed.");
+            if (_file.Items.Count >= MaxItems) return (false, "The list is full. Please finish or delete some items first. Nothing was changed.");
+            // The archive is a file anyone can edit: what comes back from it is cleaned as a typed item would be.
+            item.Title = OneLine(item.Title, MaxTitleChars);
+            if (item.Title.Length == 0) return (false, "That archived item has no title, so it cannot be put back. Nothing was changed.");
+            item.Number = item.Number is { } n && Regex.IsMatch(n, "^[0-9]{6}$") ? n : null;
+            item.Note = OneLine(item.Note, MaxNoteChars) is { Length: > 0 } note ? note : null;
+            item.Due = ParseIso(item.Due) is { } due ? Iso(due) : null;
+            item.Created = OneLine(item.Created, 32); item.Source = OneLine(item.Source, 60) is { Length: > 0 } src ? src : "You";
+            item.Done = false; item.DoneOn = null; item.SnoozedUntil = null;
+            if (!TodoArchive.MarkPutBack(_path, item.Id, today)) return (false, "The archive could not be written just now. Nothing was changed.");
+            _file.Items.Add(item); SaveLocked(); title = item.Title;
+        }
+        Changed?.Invoke();
+        return (true, $"“{title}” is back on the ANDA to-do list, as an open item.");
+    }
     public static DateOnly? ParseIso(string? s) =>
         DateOnly.TryParseExact(s, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) ? d : null;
 
@@ -227,7 +259,7 @@ public sealed class TodoService
             foreach (var k in _file.AutoDone.Keys.Where(k => !liveAutoKeys.Contains(k)).ToList()) { _file.AutoDone.Remove(k); changed = true; }
             foreach (var (k, v) in _file.AutoSnoozed.ToList())
                 if (!liveAutoKeys.Contains(k) || ParseIso(v) is not { } until || until <= today) { _file.AutoSnoozed.Remove(k); changed = true; }
-            changed |= ArchiveLocked(i => i.Done && ParseIso(i.DoneOn) is { } d && today.DayNumber - d.DayNumber > KeepDoneDays, today, $"finished more than {KeepDoneDays} days ago") > 0;
+            changed |= ArchiveLocked(i => i.Done && ParseIso(i.DoneOn) is { } d && today.DayNumber - d.DayNumber > ArchiveAfterDays, today, $"finished more than {ArchiveAfterDays.ToString(CultureInfo.InvariantCulture)} days ago") > 0;
             foreach (var i in _file.Items.Where(i => i.SnoozedUntil is not null && (ParseIso(i.SnoozedUntil) is not { } u || u <= today))) { i.SnoozedUntil = null; changed = true; }
             if (changed) SaveLocked();
         }
@@ -253,6 +285,7 @@ public sealed class TodoService
             string temp = _path + ".tmp";
             File.WriteAllText(temp, JsonSerializer.Serialize(_file, new JsonSerializerOptions { WriteIndented = true }));
             File.Move(temp, _path, overwrite: true);       // a crash mid-write can never leave a half-written list
+            SafeFile.Wrote(_path);
         }
         catch { /* best effort: the list still works for this session */ }
     }

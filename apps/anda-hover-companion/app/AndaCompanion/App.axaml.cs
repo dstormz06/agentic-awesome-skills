@@ -88,6 +88,7 @@ public partial class App : Application
             ConnectionBar.Line = () => Connections.Describe(Connections.From(_settings)).Line;
             ConnectionBar.Open = OpenConnections;
             Window.WindowOpenedEvent.AddClassHandler<Window>((w, _) => ConnectionBar.Attach(w));
+            StartBackups();
 
             // Hotkeys first, so the tray menu can state truthfully which ones are live.
             _hotkeys = new HotkeyService(
@@ -417,6 +418,9 @@ public partial class App : Application
         var connections = new NativeMenuItem("Connections and event log…");
         connections.Click += (_, _) => OpenConnections();
         menu.Add(connections);
+        var backups = new NativeMenuItem("Backups and archive…");
+        backups.Click += (_, _) => OpenBackups();
+        menu.Add(backups);
         var about = new NativeMenuItem("About and what changed…");
         about.Click += (_, _) => OpenAbout();
         menu.Add(about);
@@ -535,6 +539,7 @@ public partial class App : Application
     {
         SettingsService.Save(_settings);
         ConnectionsChanged();
+        _todo.ArchiveAfterDays = _myTodo.ArchiveAfterDays = _settings.ArchiveAfterDays;
         ThemeManager.Apply(Edition.Appearance(_settings), Edition.Opacity(_settings));
         UsageLog.Configure(_settings.UsageLog && SelfTestRun is null);
         _hotkeys?.Reconfigure(HotkeyBindings());

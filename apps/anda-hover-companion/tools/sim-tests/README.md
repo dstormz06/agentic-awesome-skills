@@ -1,6 +1,6 @@
 # Browser suites for the simulation
 
-These 41 scripts drive `mockup/windows-simulation.html` in a real browser and check what it does: every window, the keyboard, the
+These 42 scripts drive `mockup/windows-simulation.html` in a real browser and check what it does: every window, the keyboard, the
 accessibility scan, phone width, and the rules the Windows app and the extension must answer the same way. They were kept outside the
 repository until round 28; they are here so that they cannot be lost and so that anyone can run them.
 

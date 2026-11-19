@@ -22,10 +22,17 @@ public static class SafeFile
             string temp = path + ".tmp";
             File.WriteAllText(temp, text, new UTF8Encoding(false));
             File.Move(temp, path, overwrite: true);
+            Wrote(path);
             return true;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException) { return false; }
     }
+
+    /// <summary>Raised after one of the app's own files was written, with its path. The backup copies follow it (see <see cref="Backups"/>).</summary>
+    public static event Action<string>? Written;
+
+    /// <summary>Tells whoever keeps copies that this file was just written. Never throws: a copy that cannot be made must not stop the tool.</summary>
+    public static void Wrote(string path) { try { Written?.Invoke(path); } catch (Exception) { /* the write itself succeeded */ } }
 
     /// <summary>
     /// Sets a file aside, or keeps a copy of it, under "name.{why}-yyyyMMdd-HHmmss.ext" (UTC), never over an earlier one.

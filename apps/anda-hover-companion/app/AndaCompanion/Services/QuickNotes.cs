@@ -38,6 +38,9 @@ public sealed class QuickNotesService
         Load();
     }
 
+    /// <summary>Reads the notes from their file again: after a backup copy was restored over it.</summary>
+    public void Reload() { lock (_gate) { _file = new FileShape(); Load(); } }
+
     /// <summary>The same cleaning as the simulation: Windows line ends become plain ones, control characters go, three or more line breaks
     /// become two, the ends are trimmed, and the text is cut at 500 characters (never in the middle of a character pair).</summary>
     public static string Clean(string? text)
@@ -151,6 +154,7 @@ public sealed class QuickNotesService
             string temp = _path + ".tmp";
             File.WriteAllText(temp, JsonSerializer.Serialize(_file, new JsonSerializerOptions { WriteIndented = true }));
             File.Move(temp, _path, overwrite: true);       // a crash mid-write can never leave a half-written file
+            SafeFile.Wrote(_path);
             Problem = null;
             return true;
         }

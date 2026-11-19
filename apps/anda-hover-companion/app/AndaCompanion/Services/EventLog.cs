@@ -36,7 +36,7 @@ public static class EventLog
         "AI switched on", "AI switched off", "AI connection changed", "agents switched on: # to #", "agents changed", "Outlook switched on", "Outlook switched off", "Outlook connection changed",
         "AI request, # characters", "AI request (simulated), # characters", "agent request, # characters", "agent request (simulated)", "connection test", "Outlook sign-in request", "Outlook search for one number", "request for the Drugs at FDA file",
         "AI request: no answer", "AI request: timed out or canceled", "AI request (simulated): no answer", "agent request: no answer", "agent request (simulated): no answer",
-        "settings restored from a backup", "weekly copy of the sheet switched on", "weekly copy of the sheet switched off",
+        "settings restored from a backup", "a list was restored from a backup", "a to-do item was put back from the archive", "weekly copy of the sheet switched on", "weekly copy of the sheet switched off",
         "settings file could not be used as it was at start", "ANDA to-do list could not be used as it was at start", "to-do list could not be used as it was at start", "prompt library could not be used as it was at start", "quick replies could not be used as it was at start",
         "kept copies of the sheet",
     };

@@ -32,7 +32,7 @@ public static class ConnectionBar
 
     /// <summary>The windows that carry the line. Anything else (the card, a compact box, the invite, the Connections window itself) does not.</summary>
     public static bool Carries(Window w) => w is SettingsWindow or LookupWindow or DraftWindow or AskWindow or CompareWindow or HandoffWindow or TodoWindow or MyTodoWindow
-        or NotesWindow or WatchListWindow or PromptLibraryWindow or QuickRepliesWindow or ActionWindow or UsageWindow or AboutWindow;
+        or NotesWindow or WatchListWindow or PromptLibraryWindow or QuickRepliesWindow or ActionWindow or UsageWindow or AboutWindow or BackupsWindow;
 
     /// <summary>Puts the line at the foot of a window, once. Returns the line's button, or null when the window carries none.</summary>
     public static Button? Attach(Window w)

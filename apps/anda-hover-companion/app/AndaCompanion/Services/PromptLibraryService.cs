@@ -24,6 +24,15 @@ public sealed class PromptLibraryService
     public PromptLibraryService(string? path = null)
     {
         _path = path ?? AppPaths.PromptsFile;
+        Read();
+    }
+
+    /// <summary>Reads the prompts from their file again: after a backup copy was restored over it.</summary>
+    public void Reload() => Read();
+
+    private void Read()
+    {
+        _prompts = new();
         // A file that cannot be read is set aside, never overwritten by the three starters below. Entries with no name or no text are left out.
         if (File.Exists(_path))
         {

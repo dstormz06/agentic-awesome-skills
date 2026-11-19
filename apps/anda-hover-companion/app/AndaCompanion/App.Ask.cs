@@ -146,6 +146,45 @@ public partial class App
         win.Show();
     }
 
+    private Backups? _backups;
+    private BackupsWindow? _backupsWindow;
+
+    /// <summary>
+    /// Backup copies of the person's lists: a copy after every change, and one look at start. Not in a self-test, which must leave nothing behind.
+    /// </summary>
+    private void StartBackups()
+    {
+        _todo.ArchiveAfterDays = _myTodo.ArchiveAfterDays = _settings.ArchiveAfterDays;
+        if (SelfTestRun is not null) return;
+        var backups = new Backups(Path.Combine(AppPaths.Root, "backups"), () => _settings.BackupCopies);
+        backups.Register(new("todo", "ANDA to-do list", AppPaths.TodoFile, "item", "items", t => Backups.ItemsIn(t, "Items"), () => _todo.Reload()));
+        backups.Register(new("mytodo", "My to-do list", AppPaths.MyTodoFile, "item", "items", t => Backups.ItemsIn(t, "Items"), () => _myTodo.Reload()));
+        backups.Register(new("notes", "Notes on ANDAs", AppPaths.QuickNotesFile, "note", "notes", t => Backups.ItemsIn(t, "Notes"), () => _quickNotes.Reload()));
+        backups.Register(new("prompts", "Prompt library", AppPaths.PromptsFile, "prompt", "prompts", t => Backups.ItemsIn(t), () => { _prompts.Reload(); RefreshTrayLabels(); }));
+        backups.Register(new("replies", "Quick replies", AppPaths.RepliesFile, "reply", "replies", t => Backups.ItemsIn(t), () => _replies.Reload()));
+        _backups = backups;
+        SafeFile.Written += backups.Written;
+        backups.Sweep();
+    }
+
+    private void OpenBackups()
+    {
+        if (_backups is not { } backups) return;
+        if (_backupsWindow is not null) { _backupsWindow.Paint(); _backupsWindow.Activate(); return; }
+        var win = new BackupsWindow(backups, () => _settings.BackupCopies, n => { _settings.BackupCopies = n; ApplySettings(); },
+            () => _settings.ArchiveAfterDays, n => { _settings.ArchiveAfterDays = n; ApplySettings(); },
+            new[]
+            {
+                new ArchiveSource("ANDA to-do list", () => TodoArchive.Lines(AppPaths.TodoFile), id => _todo.PutBack(id, Today())),
+                new ArchiveSource("My to-do list", () => TodoArchive.Lines(AppPaths.MyTodoFile), id => _myTodo.PutBack(id, Today())),
+            });
+        void Follow() => Dispatcher.UIThread.Post(() => { if (ReferenceEquals(_backupsWindow, win)) win.Paint(); });      // a copy made while the window is open shows at once
+        backups.Changed += Follow;
+        win.Closed += (_, _) => { backups.Changed -= Follow; if (ReferenceEquals(_backupsWindow, win)) _backupsWindow = null; };
+        _backupsWindow = win;
+        win.Show();
+    }
+
     private void OpenAbout()
     {
         if (_aboutWindow is not null) { _aboutWindow.Activate(); return; }

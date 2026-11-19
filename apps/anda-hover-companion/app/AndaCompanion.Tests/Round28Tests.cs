@@ -70,7 +70,7 @@ public class Round28Tests
         Assert.Equal(ProviderChoice.Offline, s.Provider); Assert.Equal("Warm", s.Tone); Assert.Equal(Settings.CurrentSchema, s.SchemaVersion);
         Assert.Equal("The AI connection is now off until you choose one in Settings, Connection. Earlier versions used a key found on this PC without asking.", SettingsService.LoadNote);
         SettingsService.Save(s, path);
-        Assert.Contains("\"SchemaVersion\": 1", File.ReadAllText(path));
+        Assert.Contains($"\"SchemaVersion\": {Settings.CurrentSchema}", File.ReadAllText(path));
         Assert.Equal(ProviderChoice.Offline, SettingsService.Load(path).Provider); Assert.Null(SettingsService.LoadNote);      // moved forward once
 
         File.WriteAllText(path, "{\"Provider\":2,\"Tone\":\"Warm\"}");                                        // a connection the person chose is left as chosen

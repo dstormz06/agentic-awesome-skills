@@ -159,6 +159,17 @@ public class ShotTests : IClassFixture<HeadlessFixture>
             Save(about29, dir, "about-29");
             ConnectionBar.Line = keepLine29;
             conn29.Close(); about29.Close();
+            // Round 30: Backups and archive, on files in a folder of the test's own.
+            string dir30 = Temp.NewDir(), file30 = Path.Combine(dir30, "todo.json"); var now30 = new DateTime(2026, 11, 18, 20, 0, 0, DateTimeKind.Utc); var day30 = new DateOnly(2026, 11, 18);
+            var todo30 = new TodoService(file30); var zone30 = TimeZoneInfo.FindSystemTimeZoneById("America/New_York");
+            var b30 = new Backups(Path.Combine(dir30, "backups"), () => 30, () => zone30, () => now30);
+            b30.Register(new("todo", "ANDA to-do list", file30, "item", "items", t => Backups.ItemsIn(t, "Items"), () => todo30.Reload()));
+            b30.Register(new("notes", "Notes on ANDAs", Path.Combine(dir30, "quick-notes.json"), "note", "notes", t => Backups.ItemsIn(t, "Notes"), () => { }));
+            foreach (string title in new[] { "Send the meeting minutes", "Ask about the facility inspection", "File the weekly report" }) { string id30 = todo30.Add(title, title.StartsWith("Send") ? "216482" : null, null, null, "You", day30).Item!.Id; b30.Keep("todo"); now30 = now30.AddMinutes(7); if (title.StartsWith("Send")) { todo30.SetDone(id30, true, day30); todo30.ClearCompleted(day30); b30.Keep("todo"); now30 = now30.AddMinutes(3); } }
+            var bak30 = new BackupsWindow(b30, () => 30, _ => { }, () => 30, _ => { }, new[] { new ArchiveSource("ANDA to-do list", () => TodoArchive.Lines(file30), id => todo30.PutBack(id, day30)) }, zone30);
+            bak30.Show(); ConnectionBar.Attach(bak30); for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
+            Save(bak30, dir, "backups-30");
+            bak30.Close();
             handoff.Close();
             var review27 = new DraftWindow("Certainly! Here is a revised version.\n\nANDA 216482: under 21 CFR 314.96(a) the amendment is minor. Please send your response by Friday, Dec 4, 2026.\n\nI hope this helps.",
                 repo27.Find, new WritingService(null), new Settings(), new PromptLibraryService(Path.Combine(Temp.NewDir(), "p5.json")), () => day27)
