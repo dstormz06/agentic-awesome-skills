@@ -1178,6 +1178,58 @@ stay, 6 sets of copies from a clock that was ahead, and 14 views of an archive w
 **In the app only:** the copies are files (`backups/<list>/<list>.<UTC time>.json` in the app's folder). In the simulation they last until the
 page is closed.
 
+## 11o. Round 31: every time in the person's time zone, and data that says how old it is
+
+The owner's standing rules ask for a live clock; a time zone that is found by itself and can be changed, shown with its abbreviation and
+the right daylight time; storage in UTC; "how long ago" that is brought up to date every minute; and, for every piece of data, its source,
+its "as of" time and a stale label after a period the person sets. Before this round the app wrote times in three different forms, one of
+them (the event log) with an abbreviation built from the words of the zone's Windows name, and the card said only "saved Nov 11".
+
+**One clock, in both programs.** Six rules, the same in the simulation (`zoneClock`, `zoneAbbr`, `timeLabel`, `timeOfDay`, `relTime`,
+`freshLine`) and in the app (`Services/Clock.cs`), held together by `mockup/round31-golden.json`: 225 moments written in 15 zones (both
+nights the clocks change in 2026 from each side, a year's end, a leap day), 24 ages, 88 data lines.
+
+- *The zone.* This computer's own, unless one of ten is chosen in Settings: Eastern, Central, Mountain, Arizona, Pacific, Alaska, Hawaii,
+  Atlantic (Puerto Rico), UTC, or "Automatic". The choice is stored by the zone's IANA name; a name that is not one of the ten is read as
+  "Automatic". The zone's rules come from the operating system (in the browser, from the browser).
+- *The abbreviation.* For the zones offered, from a small table (EST/EDT, CST/CDT, MST/MDT, MST, PST/PDT, AKST/AKDT, HST, AST, UTC):
+  summer is whatever differs from that zone's January. For any other zone the tool writes the difference from UTC ("UTC+5:30"), which is
+  always right, where a guessed abbreviation might not be. On Windows the computer's zone has a Windows name ("Eastern Standard Time");
+  the app asks .NET for its IANA name first, so "Automatic" in Washington reads EST and EDT like "Eastern" does.
+- *A moment as it is written.* "Nov 18, 2026, 3:12 PM EST", with seconds where the list is a log (the event log, the backup copies). A
+  time of day alone, for something of today, is "3:12 PM EST" (the to-do list's "Updated", an agent's "Asked at", "checked" on the
+  connection line). The year is always there: two copies a year apart must not read alike.
+- *How long ago.* Whole units, never rounded up: under a minute is "just now"; then minutes, hours, days. A day is 24 hours of real
+  time, so the week in which the clocks go back is still seven days. A time more than a minute later than now is not given an age at
+  all: "later than now: please check this computer's clock".
+- *The data line.* `source · as of <moment> (<how long ago>)`, and, once the data is older than the days chosen, ` · STALE: older than
+  N days`. Exactly N days is not older than N days. A piece of data whose time is not known says "time not known" and is not called stale.
+
+**Stored in UTC.** The event log and the names of backup copies already were. A note on an ANDA is now kept as its moment in UTC (a note
+written by an earlier version, with its difference from UTC, is read as the same moment), and so is the time a settings backup was saved.
+Changing the zone therefore changes how a time is written and never when it was; Settings says so in those words.
+
+**Stale by one rule.** The card's line and the watch rule `stale-data` used to count differently (the rule in whole calendar days). They now
+share one reckoning, to the minute, wherever the record carries the moment its data was taken and the caller knows the time
+(`CardContext.Watch`, used by the card, the watch list, the to-do list and the hand-off page): the watch line appears at the minute the
+card's line turns. Where a record has only a date, the rule counts whole days as before.
+
+**The two timers.** The card and Settings each start a timer when they open and stop it when they close. Once a minute it reads the clock
+and repaints one line (on the card also the watch line, when "stale" changed). Nothing else is done by them. A change of zone or of the
+days in Settings repaints an open card, the Connections window and the Backups window at once.
+
+**Where the two programs differ, on purpose.** The simulation's sample data is moved forward to stay current, so it is "read at 7:12 this
+morning" and has an age. The app's sample records are fixed at Jul 16, 2026, and their rules treat that day as today, so the app says
+*sample data, which does not change* in place of an age and never calls them stale. A file of the person's own behaves the same in both.
+
+**What does not change with the zone.** Which day is "today", for due dates and day counts, stays this computer's day; Settings says so.
+A person who chooses a zone other than the computer's sees times in that zone and due dates by the computer's calendar. This was left as it
+is because every date rule in both programs is built on one "today", and moving it is a change to all of them, not to how a time is written.
+
+**Settings.** `TimeZone` and `StaleAfterDays` are in the settings file, which moves from version 2 to 3 by itself (the two take their
+usual values: the computer's zone, seven days). A value that is not one of the choices becomes the usual one. A settings backup carries
+both. The Time part is in "Look and feel", which is shown in the short edition of Settings, so the choice is reachable by default.
+
 ## 12. Engagement roadmap — seven features that make it the daily habit
 
 Engagement here means *the tool pays the user every time they touch it* — never

@@ -3,6 +3,11 @@
 A .NET 8 / Avalonia tray application implementing the design in `../DESIGN.md`.
 **All bundled data is fictional.** Not an FDA product; a concept prototype.
 
+> **New in round 31: every time in your time zone, and data that says how old it is.** Settings, *Look and feel*, *Time*: a clock, the time zone times are written in (this computer's own unless you choose one of ten), and the number of days after
+> which your data is marked STALE (7 unless you change it). Every time the app shows carries the zone's abbreviation (EST, EDT, …; a zone that is not among the ten is written as its difference from UTC) and follows daylight time by itself. Times are stored in UTC.
+> The line under the drug name on the card now reads, for a file of your own, *Your portfolio file · name · as of Nov 11, 2026, 3:00 PM EST (9 days ago) · STALE: older than 7 days*; it is brought up to date once a minute while the card is open, and the watch line says "stale" at the same minute.
+> The sample records say *sample data, which does not change* instead. Which day is "today", for due dates and day counts, stays this computer's day. The settings file moves from version 2 to 3 by itself. See `../DESIGN.md` §11o.
+>
 > **New in round 30: a copy of each list after every change, and one press to put a copy back.** Tray menu: *Backups and archive…*. The app keeps copies of your five lists (the two to-do lists, notes on ANDAs, the prompt library, quick replies) in
 > `backups` in its own folder, after every change. Choose a copy and press *Restore this copy*: nothing is asked, because the list as it was a moment before stays among the copies. You choose how many copies are kept (30 unless you change it); older
 > copies are removed by the app, and a smaller number is asked about before any copy goes; your lists and the archive are never removed. A restore is refused if what is there now could not be copied first. The same window searches the archive of finished to-do items, puts an item back on its list, and lets you choose after how many days a finished item is archived.
