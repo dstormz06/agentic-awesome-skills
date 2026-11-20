@@ -1469,7 +1469,7 @@ PS C:\work&gt; </div>
     <p class="hint">Only six-digit numbers are kept, in this PC's settings, and never sent anywhere. Turning this off clears them. ANDAs you keep with “Keep in my list” on a card stay until you remove them and are saved in a backup.</p>
     <hr class="hair">
     <div class="lbl">TODAY · SINCE YOU LAST LOOKED</div>
-    <label class="opt"><input type="checkbox" id="setLastLook" checked> List what moved in my data since I last closed Today</label>
+    <label class="opt"><input type="checkbox" id="setLastLook" checked aria-describedby="lastLookHint"> List what moved in my data since I last closed Today</label>
     <span class="hint" id="lastLookStatus" role="status" style="margin:0"></span>
     <p class="hint" id="lastLookHint"></p>
     <hr class="hair">
@@ -5228,7 +5228,7 @@ const RECENTS_SAID = { off:"Recent ANDAs are off and were cleared.", cleared:"Re
 $("setLastLook").addEventListener("change", e => {
   state.lastLookOn = e.target.checked; state.lastLook = null; state.shownLook = null;      /* off removes what is kept; on starts again from nothing */
   $("lastLookStatus").textContent = state.lastLookOn ? LOOK_SAID.on : LOOK_SAID.off;
-  if($("today").style.display !== "none" && !$("today").hidden) paintToday();
+  if(isOpen("today")) paintToday();      /* an open Today follows at once; a closed one is not painted */
 });
 $("setRecents").addEventListener("change", e => { state.recentsOn = e.target.checked; if(!state.recentsOn){ state.recents = []; $("recentsStatus").textContent = RECENTS_SAID.off; } else $("recentsStatus").textContent = ""; });
 $("recentsClear").addEventListener("click", () => { state.recents = []; $("recentsStatus").textContent = RECENTS_SAID.cleared; });
@@ -5332,7 +5332,10 @@ function changesSince(before, now, itemText){
 }
 /* Next week, from Thursday noon to Sunday: the goal and forecast dates that fall from Monday to Friday of the coming week, by date, and the
    federal holidays in it. hour is the hour of the day in the person's time zone. */
-function nextWeek(todayT, hour, data){
+/* Round 38: tasks are the person's unfinished to-do items that have a due date, as [{ list, title, due:"yyyy-mm-dd" }], from both lists. Those
+   due Monday to Friday of next week are listed after the ANDAs' dates, by date, then list, then title; at most WEEK_TASK_MAX, then how many more. */
+const WEEK_TASK_MAX = 20, weekTasksMore = n => `${n} more to-do item${n === 1 ? "" : "s"} due next week; the to-do lists show them all.`;
+function nextWeek(todayT, hour, data, tasks){
   const dow = dowOf(todayT);
   if(!(dow === 5 || dow === 6 || dow === 0 || (dow === 4 && hour >= 12))) return null;
   const mon = todayT + ((8 - dow) % 7 || 7) * DAY, fri = mon + 4 * DAY, rows = [], holidays = [];
@@ -5342,13 +5345,18 @@ function nextWeek(todayT, hour, data){
     [["Goal date", d.goalD], ["Forecast", d.fcD]].forEach(([what, parts]) => { if(!parts) return; const t = ymd(...parts); if(t >= mon && t <= fri) rows.push({ id, t, text:`${what} ${shortDate(t)}` }); });
   });
   rows.sort((a, b) => a.t - b.t || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
-  return { title:`NEXT WEEK · ${shortDate(mon)} TO ${shortDate(fri)}`.toUpperCase(), rows:rows.map(({ id, text }) => ({ id, text })), holidays, empty:rows.length ? null : "Nothing of yours falls due next week." };
+  const cmp = (a, b) => a < b ? -1 : a > b ? 1 : 0;
+  const due = (tasks || []).map(k => ({ ...k, t:dayOfIso(k.due) })).filter(k => k.t !== null && isoDay(k.t) === k.due && k.t >= mon && k.t <= fri && typeof k.title === "string" && k.title.trim())
+    .sort((a, b) => a.t - b.t || cmp(a.list, b.list) || cmp(a.title.toLowerCase(), b.title.toLowerCase()));
+  const shown = due.slice(0, WEEK_TASK_MAX).map(k => ({ list:k.list, text:`${shortDate(k.t)} · ${k.list}: ${k.title.trim()}` }));
+  return { title:`NEXT WEEK · ${shortDate(mon)} TO ${shortDate(fri)}`.toUpperCase(), rows:rows.map(({ id, text }) => ({ id, text })), holidays,
+    tasks:shown, tasksMore:due.length - shown.length, empty:rows.length || due.length ? null : "Nothing of yours falls due next week." };
 }
 const LOOK_SAID = { first:"From now on, what moves in your data between two looks is listed here.", none:"Nothing has moved since you last looked.",
   note:(atMs, zone) => `Compared with what this PC kept when you last closed Today: ${timeLabel(atMs, zone)}.`,
   undated:"Compared with what this PC kept when you last closed Today.",
   /* round 37: the switch in Settings, beside Recent ANDAs */
-  hint:"Kept on this PC when you close Today, and never sent anywhere: for each ANDA its number, goal date, forecast date and a short fingerprint of its open item (never the item's words). Turning this off removes what is kept, and Today keeps nothing for it.",
+  hint:"Kept on this PC when you close Today, and never sent anywhere: for each ANDA its number, goal date, forecast date and a short fingerprint of its open item (never the item's words), and when it was kept. Turning this off removes what is kept, and Today keeps nothing for it.",
   off:"Since you last looked is off. What this PC kept for it was removed.", on:"Since you last looked is on. The next time you close Today is the first look kept.", more:n => `${n} more change${n === 1 ? "" : "s"}; the card of each ANDA shows its own.` };
 $("lastLookHint").textContent = LOOK_SAID.hint;      /* round 37: the switch's hint, in the words the app is held to */
 /* The demo starts with a fictional earlier look, so the group can be seen: the forecast of 216482 a week earlier, and one ANDA since gone. */
@@ -5357,6 +5365,11 @@ function sampleLastLook(){
   look.items["216482"] = { ...look.items["216482"], forecast:"2026-10-10", item:null };
   look.items["209998"] = { goal:"2026-09-01", forecast:"2026-09-01", item:null };
   return look;
+}
+/* Round 38: the person's unfinished to-do items with a due date, from both lists, for next week. Only on this screen; nothing is kept. */
+function weekTasksNow(){
+  return [...todoStore.items.filter(i => !i.done && i.due).map(i => ({ list:"ANDA to-do list", title:i.title, due:i.due })),
+    ...clStore.items.filter(i => !i.done && i.due != null).map(i => ({ list:"My to-do list", title:i.title, due:isoDate(i.due) }))];
 }
 /* undefined: the demo's sample look; null: nothing kept yet (a first start); otherwise the look kept when Today was last closed */
 function lastLookKept(){ return state.lastLook === undefined ? sampleLastLook() : state.lastLook; }
@@ -5401,12 +5414,14 @@ function paintToday(){
   if(since && since.more) list.append(h("div", { class:"td-note", text:LOOK_SAID.more(since.more) }));
   }
   /* Round 36: from Thursday noon, next week */
-  const wc = zoneClock(nowMs(), toolTz()), week = nextWeek(state.pretend ? demoToday() : ymd(wc.year, wc.month, wc.day), wc.hour, DATA);   /* the page's own clock, in the person's zone */
+  const wc = zoneClock(nowMs(), toolTz()), week = nextWeek(state.pretend ? demoToday() : ymd(wc.year, wc.month, wc.day), wc.hour, DATA, weekTasksNow());   /* the page's own clock, in the person's zone */
   if(week){
     list.append(h("div", { class:"td-grp", text:week.title }));
     week.holidays.forEach(t => list.append(h("div", { class:"td-note", text:t })));
     if(week.empty) list.append(h("div", { class:"td-note", text:week.empty }));
     byId(week.rows).forEach(([id, line]) => row("week", id, line));
+    week.tasks.forEach(k => list.append(h("div", { class:"td-note td-task", text:k.text })));      /* round 38: to-do items due next week, as text */
+    if(week.tasksMore) list.append(h("div", { class:"td-note", text:weekTasksMore(week.tasksMore) }));
   }
   todayGroups(state.pins, state.recentsOn ? state.recents : []).forEach(g => {
     if(!g.ids.length) return; any = true; list.append(h("div", { class:"td-grp", text:g.title }));
@@ -6202,8 +6217,9 @@ const GUIDE_SAID = {
 /* The guide opens by itself once, at the first start, and never again by itself. "seen" is what the PC remembers; anything but true means it has not been shown. */
 function guideOpensAtStart(seen){ return seen !== true; }
 
-const APP_VERSION = "Prototype, round 37";
+const APP_VERSION = "Prototype, round 38";
 const CHANGES = [
+  { round:38, items:["From Thursday noon to Sunday, Today's next week also lists your to-do items due Monday to Friday, from both to-do lists: unfinished items only, by date, at most twenty, then how many more.", "Today opens faster with a large sheet: the ANDAs of the same applicant and product are found from an index, not by reading every row."] },
   { round:37, items:["Settings has a switch for Today's “Since you last looked” (beside Recent ANDAs). Turned off, Today does not list what moved and keeps nothing for it on this PC, and what was kept is removed."] },
   { round:36, items:["Today begins with what has moved since you last looked: forecasts and goal dates that changed, ANDAs added or gone, and a new item that needs you (items come from the sample records; a sheet has no item column yet). This PC keeps only each ANDA's two dates and a fingerprint of its open item, from when you last closed Today.", "From Thursday noon to Sunday, Today also shows next week: the goal and forecast dates that fall in it, and the federal holidays."] },
   { round:35, items:["The tray menu is shorter: Lookup, Today, Review a draft, Ask, More, Settings and Help. With all tools on, Lists holds the two to-do lists, the notes and your usage. More holds the rest (with all tools on, also the prompt library and My actions); Help holds first steps and what changed.", "Text in the Windows app uses one scale of six sizes, so pages read calmer and larger text grows them together."] },
@@ -8023,7 +8039,10 @@ function applySettings(x){
   s.watchOn = typeof x.watchBack === "boolean" ? x.watchBack : d.watchBack; s.watchCap = oneOf(x.noticesPerDay, WATCH_CAPS, d.noticesPerDay); s.trayRecount = oneOf(x.trayRecount, ["use", "daily", "hourly"], d.trayRecount);
   s.newsOn = x.divisionNews === true && !!s.newsFile;   /* the document's location belongs to this PC and is never in a backup */
   s.recentsOn = typeof x.rememberRecents === "boolean" ? x.rememberRecents : d.rememberRecents; if(!s.recentsOn) s.recents = [];
-  s.lastLookOn = typeof x.sinceLastLook === "boolean" ? x.sinceLastLook : d.sinceLastLook; if(!s.lastLookOn){ s.lastLook = null; s.shownLook = null; }
+  /* a backup written before round 37 does not hold the switch: what the person has now stays, as in the app (round 37 review) */
+  if(typeof x.sinceLastLook === "boolean") s.lastLookOn = x.sinceLastLook;
+  if(!s.lastLookOn){ s.lastLook = null; s.shownLook = null; }
+  $("lastLookStatus").textContent = ""; if(isOpen("today")) paintToday();
   s.pins = Array.isArray(x.pins) ? [...new Set(x.pins.filter(six))].slice(0, PIN_MAX) : []; applyDisplay();
   s.actions = x.actions === undefined ? starterActions() : normActions(x.actions, Object.values(s.keys));
   s.agents = normAgents(x.agents); clearAgentCache();
@@ -8127,7 +8146,7 @@ $("bkReset").addEventListener("click", () => {
   }
   clearTimeout(resetTimer); b.dataset.armed = ""; b.textContent = "Reset all settings…";
   prompts.splice(0, prompts.length, ...DEFAULT_PROMPTS.map(p => [...p])); state.replies = DEFAULT_REPLIES.map(r => ({ ...r }));
-  state.newsFile = ""; state.wSeen.clear(); state.wSnoozed.clear(); state.hubSeen.clear(); state.wCount = 0; hideWhisper(false); applySettings(DEFAULT_SETTINGS); state.sectionUse = {}; state.recents = []; applyEdition();
+  state.newsFile = ""; state.wSeen.clear(); state.wSnoozed.clear(); state.hubSeen.clear(); state.wCount = 0; hideWhisper(false); applySettings(DEFAULT_SETTINGS); state.lastLook = null; state.shownLook = null; state.sectionUse = {}; state.recents = []; applyEdition();
   $("bkStatus").textContent = "All settings are back to their defaults. File locations on this PC were kept."; $("bkStatus").style.color = "var(--c-ink2)";
 });
 

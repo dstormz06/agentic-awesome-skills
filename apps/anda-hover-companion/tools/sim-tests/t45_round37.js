@@ -59,6 +59,21 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   eq(t[2], 'Nothing has moved since you last looked.', 'N3 closing Today keeps a look again');
   await p.evaluate(() => closeApp('today'));
 
+  // ---- R. added after the review of round 37 ----
+  eq(await p.evaluate(() => { state.lastLookOn = true; state.lastLook = lookNow(DATA, nowMs()); const t = JSON.parse(backupText()); t.settings.sinceLastLook = false; importBackup(JSON.stringify(t)); return [state.lastLookOn, state.lastLook]; }),
+    [false, null], 'R1 importing a backup set to off removes what was kept');
+  eq(await p.evaluate(() => { const t = JSON.parse(backupText()); delete t.settings.sinceLastLook; importBackup(JSON.stringify(t)); return [state.lastLookOn, document.getElementById('setLastLook').checked, document.getElementById('lastLookStatus').textContent]; }),
+    [false, false, ''], 'R2 a backup from before round 37 keeps the choice the person has now, as the app does, and the status does not contradict the box');
+  eq(await p.evaluate(() => { state.lastLookOn = true; state.lastLook = lookNow(DATA, nowMs()); const b = document.getElementById('bkReset'); b.click(); b.click(); return [state.lastLook, state.lastLookOn]; }),
+    [null, true], 'R3 Reset (pressed twice, as asked) removes what was kept, as the app does, and the switch is on again');
+  // Today opened while off, then turned on: closing it keeps a look
+  await p.evaluate(() => { state.lastLookOn = false; state.lastLook = null; syncSettingsUI(); openToday(); showApp('settings'); document.getElementById('secStart').open = true; }); await settle();
+  await p.focus('#setLastLook'); await p.keyboard.press('Space'); await settle();
+  ok((await listText()).includes('SINCE YOU LAST LOOKED'), 'R4 turned on while Today is open, the group comes back at once');
+  await p.evaluate(() => { closeApp('settings'); closeApp('today'); }); await settle();
+  ok(await p.evaluate(() => !!(state.lastLook && state.lastLook.items)), 'R5 closing that Today keeps a look');
+  eq(await p.evaluate(() => document.getElementById('setLastLook').getAttribute('aria-describedby')), 'lastLookHint', 'R6 the hint is read with the switch');
+
   // ---- F. what changed ----
   eq(await p.evaluate(() => [CHANGES.find(c => c.round === 37).items, APP_VERSION]), [GOLD.changes.items, V29], 'F1 what changed in round 37 is listed, and the version is the one the app is held to');
   eq(GOLD.backupKey, 'sinceLastLook', 'F2 the backup names the switch');

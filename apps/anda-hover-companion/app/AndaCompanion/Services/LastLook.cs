@@ -25,8 +25,9 @@ public static class LastLook
     public static string SaidMore(int more) => $"{more} more change{(more == 1 ? "" : "s")}; the card of each ANDA shows its own.";
     // round 37: the switch in Settings, beside Recent ANDAs (the simulation's words, mockup/round37-golden.json)
     public const string SwitchLabel = "List what moved in my data since I last closed Today";
-    public const string SwitchHint = "Kept on this PC when you close Today, and never sent anywhere: for each ANDA its number, goal date, forecast date and a short fingerprint of its open item (never the item's words). Turning this off removes what is kept, and Today keeps nothing for it.";
+    public const string SwitchHint = "Kept on this PC when you close Today, and never sent anywhere: for each ANDA its number, goal date, forecast date and a short fingerprint of its open item (never the item's words), and when it was kept. Turning this off removes what is kept, and Today keeps nothing for it.";
     public const string SaidSwitchOff = "Since you last looked is off. What this PC kept for it was removed.";
+    public const string SaidSwitchOffNotYet = "Since you last looked is off. What this PC kept for it could not be removed just now; it is tried again each time the app starts or a setting changes.";
     public const string SaidSwitchOn = "Since you last looked is on. The next time you close Today is the first look kept.";
     public const string SaidUndated = "Compared with what this PC kept when you last closed Today.";
     public const string SaidUnreadable = "Your data could not be read just now, so nothing is compared, and the look kept last time stays as it was.";
@@ -123,11 +124,28 @@ public static class LastLook
         return null;
     }
 
-    /// <summary>Round 37: the switch is off: what was kept is removed. A file that cannot be removed now is tried again at the next change.</summary>
-    public static void Forget(string path)
+    /// <summary>
+    /// Round 37: the switch is off, or Reset: what was kept is removed: the file, a copy left while it was being written, and any copy set aside
+    /// because it could not be read (round 37 review). True when none is left; a file that cannot be removed now is tried again later.
+    /// </summary>
+    public static bool Forget(string path)
     {
-        try { if (File.Exists(path)) File.Delete(path); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+        string dir = Path.GetDirectoryName(path) ?? ".", stem = Path.GetFileNameWithoutExtension(path) + ".";
+        var all = new List<string> { path, path + ".tmp" };
+        try { if (Directory.Exists(dir)) all.AddRange(Directory.EnumerateFiles(dir).Where(f => { var n = Path.GetFileName(f); return n.StartsWith(stem, StringComparison.OrdinalIgnoreCase) && n.EndsWith(".json", StringComparison.OrdinalIgnoreCase); })); }
+        catch (IOException) { } catch (UnauthorizedAccessException) { }
+        bool clear = true;
+        foreach (var f in all.Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            try { if (File.Exists(f)) File.Delete(f); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+            if (File.Exists(f)) clear = false;
+        }
+        return clear;
     }
+
+    /// <summary>Round 37 review: the switch's two decisions, apart from the app so that a test runs them. Keep: only while on. Forget: when off.</summary>
+    public static bool KeepIfOn(Settings settings, string path, Look shown, DateTime utc) => settings.SinceLastLook && Save(path, shown with { At = Stamp(utc) });
+    public static bool ForgetIfOff(Settings settings, string path) => settings.SinceLastLook || Forget(path);
 
     public static bool Save(string path, Look look) => SafeFile.Write(path, JsonSerializer.Serialize(look, Options));
 }
@@ -136,10 +154,21 @@ public static class LastLook
 public static class NextWeek
 {
     public sealed record Row(string Id, string Text);
-    public sealed record Result(string Title, IReadOnlyList<Row> Rows, IReadOnlyList<string> Holidays, string? Empty);
+    public sealed record Result(string Title, IReadOnlyList<Row> Rows, IReadOnlyList<string> Holidays, string? Empty, IReadOnlyList<TaskRow>? Tasks = null, int TasksMore = 0);
     public const string SaidEmpty = "Nothing of yours falls due next week.";
 
-    public static Result? Of(DateOnly today, int hour, IEnumerable<AndaRecord> records, BusinessCalendar cal)
+    /// <summary>Round 38: one of the person's unfinished to-do items with a due date (yyyy-MM-dd), from "ANDA to-do list" or "My to-do list".</summary>
+    public sealed record WeekTask(string List, string Title, string? Due);
+    public sealed record TaskRow(string List, string Text);
+    public const int TaskMax = 20;
+    public static string SaidTasksMore(int n) => $"{n} more to-do item{(n == 1 ? "" : "s")} due next week; the to-do lists show them all.";
+
+    /// <summary>The unfinished items with a due date of both to-do lists, as Today's next week reads them. Read when Today opens; nothing is kept.</summary>
+    public static List<WeekTask> TasksOf(IEnumerable<TodoItem> anda, IEnumerable<MyTodoItem> mine) =>
+        anda.Where(i => !i.Done && !string.IsNullOrEmpty(i.Due)).Select(i => new WeekTask("ANDA to-do list", i.Title, i.Due))
+            .Concat(mine.Where(i => !i.Done && !string.IsNullOrEmpty(i.Due)).Select(i => new WeekTask("My to-do list", i.Title, i.Due))).ToList();
+
+    public static Result? Of(DateOnly today, int hour, IEnumerable<AndaRecord> records, BusinessCalendar cal, IEnumerable<WeekTask>? tasks = null)
     {
         var dow = today.DayOfWeek;
         if (!(dow is DayOfWeek.Friday or DayOfWeek.Saturday or DayOfWeek.Sunday || (dow == DayOfWeek.Thursday && hour >= 12))) return null;
@@ -152,6 +181,12 @@ public static class NextWeek
             foreach (var (what, when) in new[] { ("Goal date", r.GoalDateValue), ("Forecast", r.HasForecast ? r.ForecastDateValue : null) })
                 if (when is { } t && t >= mon && t <= fri) found.Add((t, r.Number, $"{what} {WatchRules.Short(t)}"));
         var rows = found.OrderBy(x => x.When).ThenBy(x => x.Id, StringComparer.Ordinal).Select(x => new Row(x.Id, x.Text)).ToList();
-        return new Result($"NEXT WEEK · {WatchRules.Short(mon)} TO {WatchRules.Short(fri)}".ToUpperInvariant(), rows, holidays, rows.Count > 0 ? null : SaidEmpty);
+        // round 38: the person's to-do items due that week, by date, then list, then title; a date that cannot be read or a blank title is left out
+        var due = (tasks ?? Array.Empty<WeekTask>())
+            .Select(k => (k, t: DateOnly.TryParseExact(k.Due ?? "", "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var d) ? d : (DateOnly?)null))
+            .Where(x => x.t is { } d && d >= mon && d <= fri && !string.IsNullOrWhiteSpace(x.k.Title))
+            .OrderBy(x => x.t).ThenBy(x => x.k.List, StringComparer.Ordinal).ThenBy(x => x.k.Title.ToLowerInvariant(), StringComparer.Ordinal).ToList();
+        var shown = due.Take(TaskMax).Select(x => new TaskRow(x.k.List, $"{WatchRules.Short(x.t!.Value)} · {x.k.List}: {x.k.Title.Trim()}")).ToList();
+        return new Result($"NEXT WEEK · {WatchRules.Short(mon)} TO {WatchRules.Short(fri)}".ToUpperInvariant(), rows, holidays, rows.Count > 0 || due.Count > 0 ? null : SaidEmpty, shown, due.Count - shown.Count);
     }
 }

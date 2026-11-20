@@ -1742,6 +1742,34 @@ The owner's choice of Nov 20, after the review of round 36: a switch in Settings
 
 **Every suite was run twice on the final code of round 37**, one run after the other, the app rebuilt from nothing before each. Results, identical in both runs: C# **1,305 passed, 15 skipped, 0 failed**; the Debug build succeeded; simulation **49 of 49 suites, 2,163 checks, 0 failed**; extension unit tests **70 of 70** (also under TZ=UTC); extension browser tests **69, 61 and 16 checks, all passing**; all eleven answer files give **0 mismatches** and no page error; `npm run validate` and `npm run security:docs` pass. The Windows workflow could still not be started from this session (403); nothing of rounds 35 to 37 has run on Windows.
 
+### Round 37: the separate review, after the counts above
+
+A separate reviewer, which had not built the round, read commit b853b319, ran the suites and probes in a copy and broke the copy on purpose; it changed nothing in the repository. Its findings:
+
+| # | Finding | Fix | Held by |
+|---|---|---|---|
+| 1 | The app's wiring tests passed with the removal commented out and an ungated save: they read source text, comments included | The two decisions are functions (`LastLook.KeepIfOn`, `ForgetIfOff`) with tests of what they do; source checks now ignore comments | Both faults put back: caught |
+| 2 | An older backup without the switch turned it back on in the simulation (the app kept it) | Both keep the person's choice; the status is cleared on a restore | Simulation R2; the fault put back: caught |
+| 3 | Off left copies set aside as unreadable, and an unfinished copy | Removed too | Unit test; the fault put back: caught |
+| 4 | An open Today in the app kept the group when the switch went off; a restore did not repaint the simulation's | Both follow at once | Window test; simulation R4 |
+| 5 | A Today opened while off kept nothing once the switch was turned on | The look to keep follows the switch | Window test; simulation R5 |
+| 6 | VERIFICATION still held a placeholder | Already filled by the next commit (ad97467e) | — |
+| 7 | The simulation's Reset kept the look | Removed, as in the app | Simulation R3; the fault put back: caught |
+| 8 | A failed removal was not tried again and said "was removed" | Tried again at each start and setting change; the status says when it failed | Window test |
+| 9 | The simulation painted a closed Today when the switch changed | Only an open one | Read |
+| 10 | The hint was not tied to the switch for screen readers; it left out the time kept | `aria-describedby` and the app's help text; "and when it was kept" added | Simulation R6; window test |
+| 11 | Gaps in the simulation's tests | R1 to R6 added | — |
+
+## Round 38: to-do items in next week, and a faster sheet
+
+Chosen by the builder when the owner wrote "You decide": the two items not built that send and keep nothing new. Next week also lists the unfinished to-do items due that week from both lists (held to `mockup/round38-golden.json`: five sets, among them both lists on one day, a date that cannot be read, twenty-five items, items only, nothing); a card's sister ANDAs come from an index.
+
+**Found while building:** a test of the shared answers put five items on a Saturday, so it never reached the cap (fixed); the app's comparison of the index with the old scan first failed because the test's own file did not quote a drug name with a comma (fixed in the test).
+
+**Tests:** app `Round38Tests` (6, among them the index against the old scan on 400 mixed fictional rows and 5,000 rows from one applicant read in under three seconds; the old scan took about six seconds in the same test); simulation `t46_round38.js` (11 checks, an accessibility scan of Today with the items). Faults put back on purpose and caught: the index missing rows without an ingredient, the old scan back, finished items counted, no cap, items that do not lift "nothing falls due".
+
+COUNTS38_PLACEHOLDER
+
 ## Still open
 
 GDUFA III tier table (needs the commitment-letter text and the dual-source rule); a real-keyboard check of rebound shortcuts on

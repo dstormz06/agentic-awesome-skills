@@ -26,6 +26,9 @@ public class Round37Tests : IClassFixture<HeadlessFixture>
         while (dir is not null && dir.Name != "anda-hover-companion") dir = dir.Parent;
         return Path.Combine(new[] { dir?.FullName ?? throw new DirectoryNotFoundException("anda-hover-companion folder not found") }.Concat(parts).ToArray());
     }
+    /// <summary>A source file without its comments, so that a check of the wiring is not met by a line put out of action (round 37 review).</summary>
+    public static string Code(string path) => string.Join("\n", File.ReadAllLines(path).Select(l => { int i = l.IndexOf("//", StringComparison.Ordinal); return i < 0 ? l : l[..i]; }));
+
     private static readonly Lazy<JsonElement> Gold = new(() => JsonDocument.Parse(File.ReadAllText(Folder("mockup", "round37-golden.json"))).RootElement.Clone());
     private static string G(string name) => Gold.Value.GetProperty(name).GetString()!;
 
@@ -56,13 +59,58 @@ public class Round37Tests : IClassFixture<HeadlessFixture>
     }
 
     [Fact]
-    public void Forgetting_removes_the_kept_look_and_never_fails()
+    public void Forgetting_removes_the_kept_look_with_its_set_aside_and_unfinished_copies_and_nothing_else()
     {
-        string path = Path.Combine(Temp.NewDir(), "last-look.json");
-        LastLook.Forget(path);                                                      // nothing there: nothing happens
-        Assert.True(LastLook.Save(path, new LastLook.Look("2026-07-16T14:42:00.000Z", new Dictionary<string, LastLook.Item>())));
-        LastLook.Forget(path);
+        string dir = Temp.NewDir(), path = Path.Combine(dir, "last-look.json");
+        Assert.True(LastLook.Forget(path));                                        // nothing there: nothing happens
+        var look = new LastLook.Look("2026-07-16T14:42:00.000Z", new Dictionary<string, LastLook.Item>());
+        Assert.True(LastLook.Save(path, look));
+        File.WriteAllText(Path.Combine(dir, "last-look.unreadable-20261120-110000.json"), "{");
+        File.WriteAllText(path + ".tmp", "{");
+        File.WriteAllText(Path.Combine(dir, "settings.json"), "{}");            // another file of the app's folder stays
+        Assert.True(LastLook.Forget(path));
+        Assert.Equal(new[] { "settings.json" }, Directory.GetFiles(dir).Select(Path.GetFileName));
+    }
+
+    [Fact]
+    public void The_switchs_two_decisions_keep_only_while_on_and_forget_only_when_off()
+    {
+        string dir = Temp.NewDir(), path = Path.Combine(dir, "last-look.json");
+        var shown = new LastLook.Look("2026-07-16T14:42:00.000Z", new Dictionary<string, LastLook.Item> { ["300001"] = new("2027-01-04", null, null) });
+        Assert.False(LastLook.KeepIfOn(new Settings { SinceLastLook = false }, path, shown, new DateTime(2026, 7, 16, 15, 0, 0, DateTimeKind.Utc)));
         Assert.False(File.Exists(path));
+        Assert.True(LastLook.KeepIfOn(new Settings(), path, shown, new DateTime(2026, 7, 16, 15, 0, 0, DateTimeKind.Utc)));
+        Assert.Equal("2026-07-16T15:00:00.000Z", LastLook.Load(path)!.At);       // what was shown, at the time Today closed
+        Assert.True(LastLook.ForgetIfOff(new Settings(), path)); Assert.True(File.Exists(path));            // on: nothing removed
+        Assert.True(LastLook.ForgetIfOff(new Settings { SinceLastLook = false }, path)); Assert.False(File.Exists(path));
+    }
+
+    [Fact]
+    public async Task An_open_Today_follows_the_switch_at_once_and_keeps_only_what_the_switch_allows()
+    {
+        var r = await _fx.Session.Dispatch(() =>
+        {
+            var repo = new Data.MockAndaRepository(); bool on = false; int kept = 0;
+            Today.Look? Find(string id) => repo.Find(id) is { } rec ? Round33Tests.Look(rec) : null;
+            var now = LastLook.Of(repo.Numbers.Select(n => repo.Find(n)!), new DateTime(2026, 7, 16, 14, 42, 0, DateTimeKind.Utc));
+            var w = new TodayWindow(new TodayHooks(() => repo.Numbers.Select(n => Find(n)!).ToList(), Find, () => Array.Empty<string>(), () => Array.Empty<string>(), _ => { },
+                Looks: () => on ? (null, now, null, true) : null, KeepLook: _ => kept++));
+            List<string> T() => w.List.GetVisualDescendants().OfType<TextBlock>().Select(t => t.Text ?? "").ToList();
+            try
+            {
+                w.Show(); Settle(); bool before = T().Contains("SINCE YOU LAST LOOKED");
+                on = true; w.RefreshLooks(); Settle(); bool afterOn = T().Contains("SINCE YOU LAST LOOKED") && T().Contains(LastLook.SaidFirst);
+                on = false; w.RefreshLooks(); Settle(); bool afterOff = T().Contains("SINCE YOU LAST LOOKED");
+                on = true; w.RefreshLooks(); Settle();
+                w.Close(); Settle();
+                return (before, afterOn, afterOff, kept);
+            }
+            catch { w.Close(); Settle(); throw; }
+        }, CancellationToken.None);
+        Assert.False(r.before);                // opened while off: no group
+        Assert.True(r.afterOn);                // turned on while open: the group comes, starting from nothing
+        Assert.False(r.afterOff);              // turned off while open: it goes at once
+        Assert.Equal(1, r.kept);               // on again and closed: the look is kept (the app's KeepIfOn decides on the file)
     }
 
     [Fact]
@@ -71,7 +119,9 @@ public class Round37Tests : IClassFixture<HeadlessFixture>
         var r = await _fx.Session.Dispatch(() =>
         {
             var s = new Settings(); int changed = 0;
-            var w = new SettingsWindow(s, new PromptLibraryService(Path.Combine(Temp.NewDir(), "p.json")), () => changed++);
+            int forgot = 0;
+            var w = new SettingsWindow(s, new PromptLibraryService(Path.Combine(Temp.NewDir(), "p.json")), () => changed++,
+                new SettingsHooks(() => "", () => null, () => "", ForgetLastLook: () => { forgot++; return forgot > 1; }));        // the first removal fails
             try
             {
                 w.Show(); Settle();
@@ -84,14 +134,21 @@ public class Round37Tests : IClassFixture<HeadlessFixture>
                 bool after = s.SinceLastLook; int changesOff = changed;
                 check.IsChecked = true; Settle();
                 string saidOn = status.Text ?? "";
-                return (wasOn, label, hint: texts.Contains(LastLook.SwitchHint), saidOff, after, changesOff, saidOn, on: s.SinceLastLook);
+                check.IsChecked = false; Settle();
+                string saidOffAgain = status.Text ?? "";
+                check.IsChecked = true; Settle();
+                bool help = Avalonia.Automation.AutomationProperties.GetHelpText(check) == LastLook.SwitchHint;
+                return (wasOn, label, hint: texts.Contains(LastLook.SwitchHint), saidOff, after, changesOff, saidOn, on: s.SinceLastLook, saidOffAgain, help, forgot);
             }
             finally { w.Close(); Settle(); }
         }, CancellationToken.None);
         Assert.True(r.wasOn);
         Assert.Equal(LastLook.SwitchLabel, r.label);
         Assert.True(r.hint);
-        Assert.Equal(LastLook.SaidSwitchOff, r.saidOff);
+        Assert.Equal(LastLook.SaidSwitchOffNotYet, r.saidOff);                    // the removal failed: it says so, and when it is tried again
+        Assert.Equal(LastLook.SaidSwitchOff, r.saidOffAgain);
+        Assert.Equal(2, r.forgot);
+        Assert.True(r.help);
         Assert.False(r.after);
         Assert.True(r.changesOff >= 1);                                             // saved through the app, which then removes the file
         Assert.Equal(LastLook.SaidSwitchOn, r.saidOn);
@@ -101,9 +158,12 @@ public class Round37Tests : IClassFixture<HeadlessFixture>
     [Fact]
     public void The_app_reads_and_keeps_nothing_when_the_switch_is_off_and_removes_what_was_kept()
     {
-        string app = File.ReadAllText(Folder("app", "AndaCompanion", "App.axaml.cs")), more = File.ReadAllText(Folder("app", "AndaCompanion", "App.Round33.cs"));
-        Assert.Contains("if (!_settings.SinceLastLook) LastLook.Forget(AppPaths.LastLookFile);", app);      // in ApplySettings: from Settings or a restored backup
-        Assert.Contains("Looks: !_settings.SinceLastLook ? null : () =>", more);                           // no group, nothing read
-        Assert.Contains("KeepLook: look => { if (_settings.SinceLastLook) LastLook.Save(", more);           // nothing kept, even if switched off while Today is open
+        // read without comments, so a line put out of action does not count; what each call does is tested above
+        string app = Code(Folder("app", "AndaCompanion", "App.axaml.cs")), more = Code(Folder("app", "AndaCompanion", "App.Round33.cs"));
+        Assert.Equal(2, System.Text.RegularExpressions.Regex.Matches(app, @"LastLook\.ForgetIfOff\(_settings, AppPaths\.LastLookFile\);").Count);   // at start and in ApplySettings
+        Assert.Contains("_todayWindow?.RefreshLooks();", app);                                               // an open Today follows the switch
+        Assert.Contains("ForgetLastLook: () => LastLook.Forget(AppPaths.LastLookFile)", app);              // Settings removes, and says whether it could
+        Assert.Contains("if (!_settings.SinceLastLook) return null;", more);                               // no group, nothing read
+        Assert.Contains("KeepLook: look => LastLook.KeepIfOn(_settings, AppPaths.LastLookFile, look, Clock.UtcNow()),", more);   // nothing kept while off
     }
 }

@@ -46,6 +46,7 @@ public partial class App : Application
     private CardWindow? _card;
     private CompactCardWindow? _compact;
     private SettingsWindow? _settingsWindow;
+    private bool _lookSwitch = true;
     private (AndaRecord Record, PixelPoint Near, bool Mini)? _lastCard;
 
     private readonly TodoService _todo = new();
@@ -69,6 +70,7 @@ public partial class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         _settings = SettingsService.Load(); Clock.ZoneId = _settings.TimeZone;
+        _lookSwitch = _settings.SinceLastLook; LastLook.ForgetIfOff(_settings, AppPaths.LastLookFile);      // round 37 review: a removal that failed is tried again at each start
         ThemeManager.Apply(Edition.Appearance(_settings), Edition.Opacity(_settings));
         DisplayScale.Watch(); DisplayScale.Set(Display.TextScale(_settings.TextSize));      // every window of this app opens at the text size chosen
         _calendar = BusinessCalendar.FromFile(AppPaths.ClosuresFile);
@@ -394,7 +396,8 @@ public partial class App : Application
         _settingsWindow = new SettingsWindow(_settings, _prompts, ApplySettings,
             new SettingsHooks(() => HotkeyService.Report(_hotkeys?.Status ?? Array.Empty<HotkeyStatus>()), () => _portfolio, () => _drugs?.LoadedMessage(ReferenceResolver.TimeFor(_settings)) ?? _drugsMessage, MouseStatusLine, Outlook,
                 OpenTodo: OpenTodoWindow, RunAction: RunActionFromMenu, AgentProblem: _agents.SetupProblem, ClearFinished: () => _todo.ClearCompleted(),
-                OpenMyTodo: OpenMyTodoWindow, OpenNotes: () => OpenNotes(""), ClearMyTodoFinished: () => _myTodo.ClearFinished(), Hotkeys: () => _hotkeys?.Status ?? Array.Empty<HotkeyStatus>()), _replies);
+                OpenMyTodo: OpenMyTodoWindow, OpenNotes: () => OpenNotes(""), ClearMyTodoFinished: () => _myTodo.ClearFinished(), Hotkeys: () => _hotkeys?.Status ?? Array.Empty<HotkeyStatus>(),
+                ForgetLastLook: () => LastLook.Forget(AppPaths.LastLookFile)), _replies);
         _settingsWindow.Closed += (_, _) => _settingsWindow = null;
         _settingsWindow.Show();
     }
@@ -534,7 +537,8 @@ public partial class App : Application
         ThemeManager.Apply(Edition.Appearance(_settings), Edition.Opacity(_settings));
         DisplayScale.Set(Display.TextScale(_settings.TextSize)); _card?.ApplySpacing(Display.Spacing(_settings.Density));      // open windows follow the new text size and spacing at once
         UsageLog.Configure(_settings.UsageLog && SelfTestRun is null);
-        if (!_settings.SinceLastLook) LastLook.Forget(AppPaths.LastLookFile);      // round 37: off removes what was kept (from Settings or a restored backup)
+        LastLook.ForgetIfOff(_settings, AppPaths.LastLookFile);      // round 37: off removes what was kept (from Settings or a restored backup)
+        if (_lookSwitch != _settings.SinceLastLook) { _lookSwitch = _settings.SinceLastLook; _todayWindow?.RefreshLooks(); }      // an open Today follows at once
         _hotkeys?.Reconfigure(HotkeyBindings());
         RefreshTrayLabels();
         // A new brief service only when the connection itself changed: changing a look must not reset "connected" to "not tested".

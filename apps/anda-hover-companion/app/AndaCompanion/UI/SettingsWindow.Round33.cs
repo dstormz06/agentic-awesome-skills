@@ -35,13 +35,15 @@ public partial class SettingsWindow
         };
         // round 37: Today's "Since you last looked" can be switched off; the words are the simulation's
         LastLookCheck.Content = LastLook.SwitchLabel; LastLookHint.Text = LastLook.SwitchHint;
+        AutomationProperties.SetHelpText(LastLookCheck, LastLook.SwitchHint);          // the hint is read with the switch
         LastLookCheck.IsChecked = _settings.SinceLastLook;
         LastLookCheck.IsCheckedChanged += (_, _) =>
         {
             if (_loading) return;
             _settings.SinceLastLook = LastLookCheck.IsChecked == true;
-            LastLookStatus.Text = _settings.SinceLastLook ? LastLook.SaidSwitchOn : LastLook.SaidSwitchOff;
-            Apply();                                    // the app removes what was kept when the switch is off (ApplySettings)
+            Apply();                                    // saved first; the app also removes what was kept whenever the switch is off (ApplySettings)
+            bool gone = _settings.SinceLastLook || (_hooks?.ForgetLastLook?.Invoke() ?? true);
+            LastLookStatus.Text = _settings.SinceLastLook ? LastLook.SaidSwitchOn : gone ? LastLook.SaidSwitchOff : LastLook.SaidSwitchOffNotYet;
         };
         RecentsClear.Click += (_, _) => { _settings.Recents = new(); RecentsStatus.Text = Recents.SaidCleared; Apply(); };
         PinsClear.Click += (_, _) => { _settings.Pins = new(); RecentsStatus.Text = Recents.SaidPinsCleared; Apply(); };

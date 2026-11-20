@@ -23,7 +23,9 @@ public sealed class PortfolioRepository : IAndaRepository
     private readonly string? _notesFolder;
     private readonly Func<DateOnly> _today;
     private Dictionary<string, Row> _rows = new();
-    private Dictionary<string, List<Row>> _byApplicant = new(StringComparer.OrdinalIgnoreCase);   // so a card's sister ANDAs are found without scanning every row
+    // Round 38: a card's sister ANDAs (same applicant, same product, by SameProduct below) are found from an index built once per read, not by
+    // scanning every row of the applicant: a sheet of thousands of rows from one applicant made Today, which reads every record, take seconds.
+    private SisterIndex _sisters = SisterIndex.Empty;
     private Dictionary<string, List<NoteSnippet>> _notes = new();
     private DateTime _loadedWrite;
     private long _loadedLength;
@@ -66,7 +68,7 @@ public sealed class PortfolioRepository : IAndaRepository
             var map = PortfolioColumns.Detect(table.Headers, _overrides);
             if (!map.ContainsKey("number"))
             {
-                Headers = table.Headers; Mapping = map; _rows = new(); _byApplicant = new(StringComparer.OrdinalIgnoreCase);
+                Headers = table.Headers; Mapping = map; _rows = new(); _sisters = SisterIndex.Empty;
                 _status = () => new(false, 0, "No column for the ANDA number was found. Please choose which column holds it in Settings.");
                 return;
             }
@@ -89,8 +91,7 @@ public sealed class PortfolioRepository : IAndaRepository
                     detailCols.Count == 0 ? null : detailCols.Select(kv => (kv.Key, Value: Cell(r, kv.Value))).Where(x => x.Value.Length > 0 || x.Key == "myNotes").ToDictionary(x => x.Key, x => x.Value));
             }
             Headers = table.Headers; Mapping = map; _rows = rows;
-            _byApplicant = rows.Values.Where(r => r.Applicant.Length > 0).GroupBy(r => r.Applicant, StringComparer.OrdinalIgnoreCase)
-                .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
+            _sisters = SisterIndex.Build(rows.Values);
             _loadedWrite = info.LastWriteTime; _loadedLength = info.Length;
             _asOfUtc = info.LastWriteTimeUtc;
             _notes = NotesIndex.Build(_notesFolder);
@@ -105,7 +106,7 @@ public sealed class PortfolioRepository : IAndaRepository
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
             // This runs at every start. Whatever a file does to the reader, the app starts, says so, and shows no rows from that file.
-            _rows = new(); _byApplicant = new(StringComparer.OrdinalIgnoreCase);
+            _rows = new(); _sisters = SisterIndex.Empty;
             _status = () => new(false, 0, "The file could not be read. It may be damaged or hold a value this app does not expect. Nothing was changed in it.");
         }
     }
@@ -153,7 +154,7 @@ public sealed class PortfolioRepository : IAndaRepository
             foreach (var s in snippets.OrderByDescending(x => x.Date).Take(3))
                 notes.Add(new NoteItem($"{s.File} · {s.Date.ToString("MMM d", Inv)}", s.Text));
 
-        var sisters = (row.Applicant.Length > 0 && _byApplicant.TryGetValue(row.Applicant, out var sameApplicant) ? sameApplicant : new List<Row>())
+        var sisters = _sisters.Candidates(row)
             .Where(x => x.Number != number && SameProduct(x, row))
             .Take(3).Select(x => new SisterRef(x.Number, $"{(x.Drug.Length > 0 ? x.Drug : "same product")} — same applicant")).ToList();
 
@@ -182,8 +183,51 @@ public sealed class PortfolioRepository : IAndaRepository
     private static bool SameProduct(Row a, Row b)
     {
         if (a.Ingredient.Length > 0 && b.Ingredient.Length > 0) return string.Equals(a.Ingredient, b.Ingredient, StringComparison.OrdinalIgnoreCase);
-        string First(string s) => s.Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "";
-        return First(a.Drug).Length > 0 && string.Equals(First(a.Drug), First(b.Drug), StringComparison.OrdinalIgnoreCase);
+        return FirstWord(a.Drug).Length > 0 && string.Equals(FirstWord(a.Drug), FirstWord(b.Drug), StringComparison.OrdinalIgnoreCase);
+    }
+    private static string FirstWord(string s) => s.Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "";
+
+    /// <summary>
+    /// Round 38: the rows that can be a row's sisters, in sheet order, without scanning the applicant's other rows. By SameProduct: two rows that
+    /// both name an ingredient match on it; otherwise on the first word of the drug. So a row with an ingredient looks among the applicant's rows
+    /// with that ingredient and those with no ingredient and the same first word; a row with none looks among all with the same first word.
+    /// Every candidate is still checked with SameProduct, and the first three are kept, as before.
+    /// </summary>
+    private sealed class SisterIndex
+    {
+        public static readonly SisterIndex Empty = new(Array.Empty<Row>());
+        private readonly Dictionary<Row, int> _at = new(ReferenceEqualityComparer.Instance);
+        private readonly Dictionary<string, List<Row>> _ingredient = new(StringComparer.OrdinalIgnoreCase), _word = new(StringComparer.OrdinalIgnoreCase), _wordNoIngredient = new(StringComparer.OrdinalIgnoreCase);
+        private static string Key(string applicant, string part) => applicant + "\u0001" + part;
+        private static void Add(Dictionary<string, List<Row>> d, string key, Row r) { if (!d.TryGetValue(key, out var list)) d[key] = list = new(); list.Add(r); }
+        private SisterIndex(IEnumerable<Row> rows)
+        {
+            int i = 0;
+            foreach (var r in rows)
+            {
+                _at[r] = i++;
+                if (r.Applicant.Length == 0) continue;
+                string word = FirstWord(r.Drug);
+                if (r.Ingredient.Length > 0) Add(_ingredient, Key(r.Applicant, r.Ingredient), r);
+                if (word.Length > 0) { Add(_word, Key(r.Applicant, word), r); if (r.Ingredient.Length == 0) Add(_wordNoIngredient, Key(r.Applicant, word), r); }
+            }
+        }
+        public static SisterIndex Build(IEnumerable<Row> rows) => new(rows);
+        private static IReadOnlyList<Row> Get(Dictionary<string, List<Row>> d, string key) => d.TryGetValue(key, out var list) ? list : Array.Empty<Row>();
+        public IEnumerable<Row> Candidates(Row row)
+        {
+            if (row.Applicant.Length == 0) return Array.Empty<Row>();
+            string word = FirstWord(row.Drug);
+            if (row.Ingredient.Length == 0) return word.Length > 0 ? Get(_word, Key(row.Applicant, word)) : Array.Empty<Row>();
+            return Merge(Get(_ingredient, Key(row.Applicant, row.Ingredient)), word.Length > 0 ? Get(_wordNoIngredient, Key(row.Applicant, word)) : Array.Empty<Row>());
+        }
+        // two lists, each in sheet order and with no row in both, merged in sheet order and read only as far as asked
+        private IEnumerable<Row> Merge(IReadOnlyList<Row> a, IReadOnlyList<Row> b)
+        {
+            int i = 0, j = 0;
+            while (i < a.Count || j < b.Count)
+                yield return j >= b.Count || (i < a.Count && _at[a[i]] < _at[b[j]]) ? a[i++] : b[j++];
+        }
     }
 
     public IReadOnlyCollection<string> Numbers => _rows.Keys;

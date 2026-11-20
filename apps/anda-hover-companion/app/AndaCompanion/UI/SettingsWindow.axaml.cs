@@ -11,7 +11,8 @@ namespace AndaCompanion.UI;
 public sealed record SettingsHooks(Func<string> HotkeyStatus, Func<PortfolioRepository?> Portfolio, Func<string> ReferenceStatus,
     Func<string?>? MouseStatus = null, OutlookService? Outlook = null,
     Action? OpenTodo = null, Action<CustomAction>? RunAction = null, Func<AgentSettings, string?>? AgentProblem = null, Func<int>? ClearFinished = null,
-    Action? OpenMyTodo = null, Action? OpenNotes = null, Func<int>? ClearMyTodoFinished = null, Func<IReadOnlyList<HotkeyStatus>>? Hotkeys = null);
+    Action? OpenMyTodo = null, Action? OpenNotes = null, Func<int>? ClearMyTodoFinished = null, Func<IReadOnlyList<HotkeyStatus>>? Hotkeys = null,
+    Func<bool>? ForgetLastLook = null);
 
 public partial class SettingsWindow : Window
 {
@@ -357,7 +358,7 @@ public partial class SettingsWindow : Window
                 return;
             }
             SettingsBackup.Reset(_settings, _prompts, _replies);
-            try { File.Delete(AppPaths.LastLookFile); } catch (IOException) { } catch (UnauthorizedAccessException) { }   // round 36: Today's kept look starts again too
+            _hooks?.ForgetLastLook?.Invoke();       // round 36: Today's kept look starts again too, with any copy set aside (round 37 review)
             Apply();
             RebuildActions(); RebuildAgents();
             BackupStatus.Text = "Everything is back to the starting values. Please open Settings again.";

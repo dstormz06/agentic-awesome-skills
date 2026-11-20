@@ -86,10 +86,10 @@ public class Round36UiTests : IClassFixture<HeadlessFixture>
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         while (dir is not null && dir.Name != "anda-hover-companion") dir = dir.Parent;
-        string more = File.ReadAllText(Path.Combine(dir!.FullName, "app", "AndaCompanion", "App.Round33.cs"));
+        string more = Round37Tests.Code(Path.Combine(dir!.FullName, "app", "AndaCompanion", "App.Round33.cs"));     // without comments: a line put out of action does not count
         Assert.Contains("LastLook.Decide(LastLook.Load(AppPaths.LastLookFile), now, DataReadable());", more);
-        Assert.Contains("KeepLook: look => { if (_settings.SinceLastLook) LastLook.Save(AppPaths.LastLookFile, look with { At = LastLook.Stamp(Clock.UtcNow()) }); },", more);
-        Assert.Contains("var wall = Clock.Wall(Clock.UtcNow()); return NextWeek.Of(DateOnly.FromDateTime(wall), wall.Hour, records, _calendar);", more);
+        Assert.Contains("KeepLook: look => LastLook.KeepIfOn(_settings, AppPaths.LastLookFile, look, Clock.UtcNow()),", more);
+        Assert.Contains("var wall = Clock.Wall(Clock.UtcNow()); return NextWeek.Of(DateOnly.FromDateTime(wall), wall.Hour, records, _calendar, NextWeek.TasksOf(_todo.Items, _myTodo.Items));", more);
         Assert.Contains("private bool DataReadable() => _portfolio is null || _portfolio.Status.Ok;", more);
         Assert.Contains("var records = Records().ToList();", more);                         // read once when Today opens
         Assert.EndsWith("last-look.json", AppPaths.LastLookFile);

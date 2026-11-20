@@ -18,7 +18,7 @@ namespace AndaCompanion.UI;
 /// <param name="CopyText">Puts text on the clipboard and says whether it got there.</param>
 public sealed record TodayHooks(Func<IReadOnlyList<Today.Look>> All, Func<string, Today.Look?> Find, Func<IReadOnlyList<string>> Pins, Func<IReadOnlyList<string>> Recents,
     Action<string> OpenCard, Func<string, Task<bool>>? CopyText = null, Action? ShowAll = null,
-    Func<(LastLook.Look? Kept, LastLook.Look Now, string? Note, bool Keep)>? Looks = null, Action<LastLook.Look>? KeepLook = null, Func<NextWeek.Result?>? Week = null);
+    Func<(LastLook.Look? Kept, LastLook.Look Now, string? Note, bool Keep)?>? Looks = null, Action<LastLook.Look>? KeepLook = null, Func<NextWeek.Result?>? Week = null);
 
 /// <summary>
 /// Today (round 33): a small two-pane window. Left: what needs a look, the ANDAs kept in my list, recents. Right: the selected one, with
@@ -32,7 +32,7 @@ public sealed class TodayWindow : Window
     private readonly StackPanel _main = new() { Spacing = 8 };
     private readonly TextBlock _say = new() { FontSize = 1, Opacity = 0, Height = 1, IsHitTestVisible = false };
     private string? _selected;
-    private bool _looked; private string? _lookNote; private (List<LastLook.Change> Rows, int More)? _since; private NextWeek.Result? _week;
+    private LastLook.Look? _keepOnClose; private bool _looked; private string? _lookNote; private (List<LastLook.Change> Rows, int More)? _since; private NextWeek.Result? _week;
 
     public TextBox Search { get; } = new() { Watermark = "Type an ANDA number", FontSize = 13 };
     public StackPanel List => _list;
@@ -53,13 +53,10 @@ public sealed class TodayWindow : Window
     {
         _hooks = hooks; _all = hooks.All();
         // Round 36: read once when the window opens: what moved since the look kept when Today was last closed, and next week from Thursday noon.
-        if (hooks.Looks?.Invoke() is { } looks)
-        {
-            _looked = true; _lookNote = looks.Note;
-            _since = looks.Kept is null ? null : LastLook.Since(looks.Kept, looks.Now, id => hooks.Find(id)?.Record.Attention?.Text);
-            // what is kept is the look that was shown, so that a change that comes in while Today is open is listed the next time, not lost
-            if (looks.Keep) Closed += (_, _) => hooks.KeepLook?.Invoke(looks.Now);
-        }
+        ReadLooks();
+        // what is kept is the look that was shown, so that a change that comes in while Today is open is listed the next time, not lost;
+        // the handler is always there, and the look to keep follows the switch (round 37 review)
+        Closed += (_, _) => { if (_keepOnClose is { } shown) hooks.KeepLook?.Invoke(shown); };
         Title = "ANDA Companion (Notula) — Today"; Width = 640; Height = 430; MinWidth = 520; MinHeight = 320; CanResize = true;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         Background = Res("C.Bg");
@@ -102,6 +99,18 @@ public sealed class TodayWindow : Window
 
     private List<TodayGroup> Groups() => Today.Groups(_hooks.Pins(), _hooks.Recents(), _all, _hooks.Find);
 
+    private void ReadLooks()
+    {
+        _looked = false; _lookNote = null; _since = null; _keepOnClose = null;
+        if (_hooks.Looks?.Invoke() is not { } looks) return;      // round 37: switched off, no group and nothing kept
+        _looked = true; _lookNote = looks.Note;
+        _since = looks.Kept is null ? null : LastLook.Since(looks.Kept, looks.Now, id => _hooks.Find(id)?.Record.Attention?.Text);
+        if (looks.Keep) _keepOnClose = looks.Now;
+    }
+
+    /// <summary>Round 37 review: the switch changed while Today is open: the group goes or comes back at once, and so does what is kept.</summary>
+    public void RefreshLooks() { ReadLooks(); Paint(); }
+
     /// <summary>A click on the tray icon while Today is open: next week is asked again, and the list is painted again only if it changed.</summary>
     public void RefreshWeek() { if (_hooks.Week?.Invoke()?.Title != _week?.Title) Paint(); }
 
@@ -135,6 +144,8 @@ public sealed class TodayWindow : Window
             foreach (var h in week.Holidays) _list.Children.Add(Note(h));
             if (week.Empty is { } empty) _list.Children.Add(Note(empty));
             foreach (var (id, line) in ById(week.Rows.Select(r => (r.Id, r.Text)))) AddRow("week", id, line, _hooks.Find(id));
+            foreach (var task in week.Tasks ?? Array.Empty<NextWeek.TaskRow>()) _list.Children.Add(Note(task.Text));      // round 38: to-do items due next week, as text
+            if (week.TasksMore > 0) _list.Children.Add(Note(NextWeek.SaidTasksMore(week.TasksMore)));
         }
         foreach (var g in Groups())
         {
