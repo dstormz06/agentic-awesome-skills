@@ -163,6 +163,13 @@ public static class NextWeek
     public const int TaskMax = 20;
     public static string SaidTasksMore(int n) => $"{n} more to-do item{(n == 1 ? "" : "s")} due next week; the to-do lists show them all.";
 
+    // round 39: the switch beside "Since you last looked" (the simulation's words, mockup/round39-golden.json)
+    public const string SwitchLabel = "Also list my to-do items due next week";
+    public const string SwitchHint = "From Thursday noon to Sunday, Today lists your unfinished to-do items due next week, from both lists, by title. They are read from this PC when Today opens and shown on the screen only; nothing is kept or sent for them.";
+    /// <summary>Round 39: the lists are read for Today only while the switch is on; off, nothing of them reaches Today.</summary>
+    public static List<WeekTask> TasksIfOn(Settings settings, Func<IEnumerable<TodoItem>> anda, Func<IEnumerable<MyTodoItem>> mine) =>
+        settings.WeekTodos ? TasksOf(anda(), mine()) : new List<WeekTask>();
+
     /// <summary>The unfinished items with a due date of both to-do lists, as Today's next week reads them. Read when Today opens; nothing is kept.</summary>
     public static List<WeekTask> TasksOf(IEnumerable<TodoItem> anda, IEnumerable<MyTodoItem> mine) =>
         anda.Where(i => !i.Done && !string.IsNullOrEmpty(i.Due)).Select(i => new WeekTask("ANDA to-do list", i.Title, i.Due))

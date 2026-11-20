@@ -1472,6 +1472,8 @@ PS C:\work&gt; </div>
     <label class="opt"><input type="checkbox" id="setLastLook" checked aria-describedby="lastLookHint"> List what moved in my data since I last closed Today</label>
     <span class="hint" id="lastLookStatus" role="status" style="margin:0"></span>
     <p class="hint" id="lastLookHint"></p>
+    <label class="opt"><input type="checkbox" id="setWeekTodos" checked aria-describedby="weekTodosHint"> Also list my to-do items due next week</label>
+    <p class="hint" id="weekTodosHint"></p>
     <hr class="hair">
     <div class="lbl">TRAY ICON · WHEN IT IS COUNTED AGAIN</div>
     <div class="wrap" role="radiogroup" aria-label="When the tray icon is counted again"><label class="opt"><input type="radio" name="trec" value="use"> Only when I use the app</label><label class="opt"><input type="radio" name="trec" value="daily" checked> Also once a day, just after midnight</label><label class="opt"><input type="radio" name="trec" value="hourly"> Also every hour</label></div>
@@ -2663,7 +2665,7 @@ const state = { tz:"", staleDays:7, refStaleDays:45, oldRef:false, oldData:false
   data:{ portfolio:null, notes:null, ref:null }, quickNotes:{}, andaUrl:"https://tracker.example/anda/{anda}",
   myApi:{ name:"My API", endpoint:"", header:"Authorization", scheme:"Bearer", env:"", model:"", template:"", path:"choices[0].message.content" },
   replies:null,
-  density:"comfortable", ts:"standard", lookupStyle:"box", recentsOn:true, recents:[], pins:[], lastLookOn:true,
+  density:"comfortable", ts:"standard", lookupStyle:"box", recentsOn:true, recents:[], pins:[], lastLookOn:true, weekTodosOn:true,
   cardFields:["applicant", "established", "project", "agentCo", "agentEmail", "applicantEmail", "myNotes", "doc356h", "doc32p1"],
   watchOn:false, newsOn:false, newsFile:"", watchCap:3, trayRecount:"daily", wDay:null, wCount:0, wSeen:new Set(), wSnoozed:new Set(), hubSeen:new Set() };
 const steps = {};
@@ -5334,6 +5336,7 @@ function changesSince(before, now, itemText){
    federal holidays in it. hour is the hour of the day in the person's time zone. */
 /* Round 38: tasks are the person's unfinished to-do items that have a due date, as [{ list, title, due:"yyyy-mm-dd" }], from both lists. Those
    due Monday to Friday of next week are listed after the ANDAs' dates, by date, then list, then title; at most WEEK_TASK_MAX, then how many more. */
+const WEEK_TODOS_SAID = { hint:"From Thursday noon to Sunday, Today lists your unfinished to-do items due next week, from both lists, by title. They are read from this PC when Today opens and shown on the screen only; nothing is kept or sent for them." };
 const WEEK_TASK_MAX = 20, weekTasksMore = n => `${n} more to-do item${n === 1 ? "" : "s"} due next week; the to-do lists show them all.`;
 function nextWeek(todayT, hour, data, tasks){
   const dow = dowOf(todayT);
@@ -5360,7 +5363,9 @@ const LOOK_SAID = { first:"From now on, what moves in your data between two look
   /* round 37: the switch in Settings, beside Recent ANDAs */
   hint:"Kept on this PC when you close Today, and never sent anywhere: for each ANDA its number, goal date, forecast date and a short fingerprint of its open item (never the item's words), and when it was kept. Turning this off removes what is kept, and Today keeps nothing for it.",
   off:"Since you last looked is off. What this PC kept for it was removed.", on:"Since you last looked is on. The next time you close Today is the first look kept.", more:n => `${n} more change${n === 1 ? "" : "s"}; the card of each ANDA shows its own.` };
-$("lastLookHint").textContent = LOOK_SAID.hint;      /* round 37: the switch's hint, in the words the app is held to */
+$("lastLookHint").textContent = LOOK_SAID.hint; $("weekTodosHint").textContent = WEEK_TODOS_SAID.hint;
+/* round 39: whether next week also lists the to-do items; an open Today follows at once */
+$("setWeekTodos").addEventListener("change", e => { state.weekTodosOn = e.target.checked; if(isOpen("today")) paintToday(); });      /* round 37: the switch's hint, in the words the app is held to */
 /* The demo starts with a fictional earlier look, so the group can be seen: the forecast of 216482 a week earlier, and one ANDA since gone. */
 function sampleLastLook(){
   const look = lookNow(DATA, Date.UTC(2026, 6, 15, 21, 5)); look.sample = true;
@@ -5370,6 +5375,7 @@ function sampleLastLook(){
 }
 /* Round 38: the person's unfinished to-do items with a due date, from both lists, for next week. Only on this screen; nothing is kept. */
 function weekTasksNow(){
+  if(!state.weekTodosOn) return [];        /* round 39: switched off, neither list is read for Today */
   return [...todoStore.items.filter(i => !i.done && i.due).map(i => ({ list:"ANDA to-do list", title:i.title, due:i.due })),
     ...clStore.items.filter(i => !i.done && i.due != null).map(i => ({ list:"My to-do list", title:i.title, due:isoDate(i.due) }))];
 }
@@ -6219,8 +6225,9 @@ const GUIDE_SAID = {
 /* The guide opens by itself once, at the first start, and never again by itself. "seen" is what the PC remembers; anything but true means it has not been shown. */
 function guideOpensAtStart(seen){ return seen !== true; }
 
-const APP_VERSION = "Prototype, round 38";
+const APP_VERSION = "Prototype, round 39";
 const CHANGES = [
+  { round:39, items:["Settings has a second switch beside “Since you last looked”: whether next week in Today also lists your to-do items. Off, it reads neither to-do list for Today and shows no titles."] },
   { round:38, items:["From Thursday noon to Sunday, Today's next week also lists your to-do items due Monday to Friday, from both to-do lists: unfinished items only, by date, at most twenty, then how many more.", "Today opens faster with a large sheet: the ANDAs of the same applicant and product are found from an index, not by reading every row."] },
   { round:37, items:["Settings has a switch for Today's “Since you last looked” (beside Recent ANDAs). Turned off, Today does not list what moved and keeps nothing for it on this PC, and what was kept is removed."] },
   { round:36, items:["Today begins with what has moved since you last looked: forecasts and goal dates that changed, ANDAs added or gone, and a new item that needs you (items come from the sample records; a sheet has no item column yet). This PC keeps only each ANDA's two dates and a fingerprint of its open item, from when you last closed Today.", "From Thursday noon to Sunday, Today also shows next week: the goal and forecast dates that fall in it, and the federal holidays."] },
@@ -8005,7 +8012,7 @@ function snapSettings(){
     outlook:{ enabled:o.on, cloud:o.cloud, clientId:o.client, tenant:o.tenant, maxItems:o.max }, lens:s.lens,
     actions:JSON.parse(JSON.stringify(s.actions)), agents:JSON.parse(JSON.stringify(s.agents)), todoShowFromData:s.todoAuto, todoRefreshSeconds:s.todoRefresh,
     myTodoMode:s.clMode, adaptive:s.adaptive, allTools:s.allTools,
-    textSize:s.ts, density:s.density, lookupStyle:s.lookupStyle, rememberRecents:s.recentsOn, sinceLastLook:s.lastLookOn, pins:[...s.pins],
+    textSize:s.ts, density:s.density, lookupStyle:s.lookupStyle, rememberRecents:s.recentsOn, sinceLastLook:s.lastLookOn, weekTodos:s.weekTodosOn, pins:[...s.pins],
     cardFields:[...s.cardFields], watchBack:s.watchOn, divisionNews:s.newsOn, noticesPerDay:s.watchCap, andaPage:s.andaUrl, trayRecount:s.trayRecount, timeZone:s.tz, staleAfterDays:s.staleDays, refStaleAfterDays:s.refStaleDays };   /* the counts of opened sections belong to this PC: they are not in a backup */
 }
 const DEFAULT_SETTINGS = { ...snapSettings(), allTools:false }, DEFAULT_PROMPTS = prompts.map(p => [...p]), DEFAULT_REPLIES = state.replies.map(r => ({ ...r }));
@@ -8043,6 +8050,7 @@ function applySettings(x){
   s.recentsOn = typeof x.rememberRecents === "boolean" ? x.rememberRecents : d.rememberRecents; if(!s.recentsOn) s.recents = [];
   /* a backup written before round 37 does not hold the switch: what the person has now stays, as in the app (round 37 review) */
   if(typeof x.sinceLastLook === "boolean") s.lastLookOn = x.sinceLastLook;
+  if(typeof x.weekTodos === "boolean") s.weekTodosOn = x.weekTodos;        /* round 39: an older backup keeps the choice the person has now */
   if(!s.lastLookOn){ s.lastLook = null; s.shownLook = null; }
   $("lastLookStatus").textContent = ""; if(isOpen("today")) paintToday();
   s.pins = Array.isArray(x.pins) ? [...new Set(x.pins.filter(six))].slice(0, PIN_MAX) : []; applyDisplay();
@@ -8076,7 +8084,7 @@ function syncSettingsUI(){
   syncAndaUrl();
   const s = state, check = (name, value) => document.querySelectorAll(`input[name=${name}]`).forEach(r => { r.checked = r.value === String(value); });
   check("look", s.look); check("autohide", s.autoHide); check("consent", s.mode); check("tone", s.tone); check("provider", s.provider); check("midmod", s.middleMod); check("todorefresh", s.todoRefresh);
-  check("clmode", s.clMode); check("ts", s.ts); check("density", s.density); check("lkstyle", s.lookupStyle); $("setRecents").checked = s.recentsOn; $("setLastLook").checked = s.lastLookOn; syncRound19(); $("adaptCheck").checked = s.adaptive; applyEdition();
+  check("clmode", s.clMode); check("ts", s.ts); check("density", s.density); check("lkstyle", s.lookupStyle); $("setRecents").checked = s.recentsOn; $("setLastLook").checked = s.lastLookOn; $("setWeekTodos").checked = s.weekTodosOn; syncRound19(); $("adaptCheck").checked = s.adaptive; applyEdition();
   $("todoAuto").checked = s.todoAuto; renderActions(); renderAgents(); if(isOpen("todo")){ tdApplyTimer(); tdReload(true); }
   $("setUrgent").checked = s.escalate; $("setLead").value = String(s.lead); $("setCapture").checked = s.capture;
   $("setTz").value = s.tz; $("setStale").value = String(s.staleDays); $("setRefStale").value = String(s.refStaleDays); timeTick();

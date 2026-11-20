@@ -1783,6 +1783,14 @@ Chosen by the builder when the owner wrote "You decide": the two items not built
 
 **Every suite was run twice on the final code of round 38** (with the fixes of both reviews), one run after the other, the app rebuilt from nothing before each; a container restart stopped the first attempt part way, and both runs were made again from the start. Results, identical in both runs: C# **1,313 passed, 15 skipped, 0 failed**; the Debug build succeeded; simulation **50 of 50 suites, 2,180 checks, 0 failed**; extension unit tests **70 of 70** (also under TZ=UTC); extension browser tests **69, 61 and 16 checks, all passing**; all twelve answer files give **0 mismatches** and no page error; `npm run validate` and `npm run security:docs` pass. The Windows workflow could still not be started from this session; nothing of rounds 35 to 38 has run on Windows.
 
+## Round 39: a switch for the to-do items in next week
+
+The owner's choice after round 38 (the to-do titles in Today had no switch of their own). In Settings, beside "Since you last looked", in both programs, on by default; off, neither list is read for Today. Part of a backup; an older backup keeps the person's choice. Words held to `mockup/round39-golden.json`.
+
+**Tests:** app `Round39Tests` (4: the words and default, a backup, off reads neither list, the switch in Settings with an open Today following it, the wiring read without comments); simulation `t47_round39.js` (11 checks, among them an accessibility scan of Settings and a check that neither list is touched while off). Faults put back on purpose and caught: off still reading the lists (both programs), no repaint with the call left in a comment, an older backup turning the switch on.
+
+COUNTS39_PLACEHOLDER
+
 ## Still open
 
 GDUFA III tier table (needs the commitment-letter text and the dual-source rule); a real-keyboard check of rebound shortcuts on

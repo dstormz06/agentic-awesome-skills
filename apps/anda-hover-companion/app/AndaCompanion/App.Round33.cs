@@ -81,7 +81,7 @@ public partial class App
                 return ((LastLook.Look? Kept, LastLook.Look Now, string? Note, bool Keep)?)(compare, now, note, keep);
             },
             KeepLook: look => LastLook.KeepIfOn(_settings, AppPaths.LastLookFile, look, Clock.UtcNow()),   // what was shown, kept when Today closed; not if switched off meanwhile
-            Week: () => { var wall = Clock.Wall(Clock.UtcNow()); return NextWeek.Of(DateOnly.FromDateTime(wall), wall.Hour, records, _calendar, NextWeek.TasksOf(_todo.Items, _myTodo.Items)); }));
+            Week: () => { var wall = Clock.Wall(Clock.UtcNow()); return NextWeek.Of(DateOnly.FromDateTime(wall), wall.Hour, records, _calendar, NextWeek.TasksIfOn(_settings, () => _todo.Items, () => _myTodo.Items)); }));
         _todayWindow.Closed += (_, _) => _todayWindow = null;
         _todayWindow.Show();
         RefreshTrayState();

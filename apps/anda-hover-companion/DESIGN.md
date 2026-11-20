@@ -1356,6 +1356,10 @@ The owner asked for it after the review of round 36 (the kept look holds plannin
 
 **A faster sheet.** A card's sister ANDAs (same applicant and product) are found from an index built once per read of the sheet, instead of a scan of every row of the applicant for every card. Today reads every record, so a sheet of 5,000 rows from one applicant took about seven seconds in the round 36 review; the test now reads all 5,000 in well under three seconds. The answers are the old scan's, in the same order (a test compares them on 400 mixed rows).
 
+## 11w. Round 39: a switch for the to-do items in next week
+
+Asked by the owner after round 38. In Settings, beside "Since you last looked", in both programs: *Also list my to-do items due next week*, on by default. Off: neither to-do list is read for Today and no title shows; an open Today follows at once; there is nothing kept to remove. Part of a backup; a backup from before round 39 leaves the switch as it is. Its words are the simulation's (`mockup/round39-golden.json`).
+
 ## 12. Engagement roadmap — seven features that make it the daily habit
 
 Engagement here means *the tool pays the user every time they touch it* — never

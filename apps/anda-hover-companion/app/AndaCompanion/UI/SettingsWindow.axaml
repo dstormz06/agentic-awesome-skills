@@ -169,6 +169,8 @@
               <CheckBox Name="LastLookCheck"/>
               <TextBlock Name="LastLookStatus" Classes="hint" AutomationProperties.LiveSetting="Polite"/>
               <TextBlock Name="LastLookHint" Classes="hint"/>
+              <CheckBox Name="WeekTodosCheck"/>
+              <TextBlock Name="WeekTodosHint" Classes="hint"/>
             </StackPanel>
           </StackPanel>
         </Expander>

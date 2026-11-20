@@ -140,6 +140,6 @@ public class Round38Tests : IClassFixture<HeadlessFixture>
     public void The_app_reads_both_lists_for_next_week()
     {
         string more = Round37Tests.Code(Folder("app", "AndaCompanion", "App.Round33.cs"));      // without comments: a call left in a comment does not count
-        Assert.Contains("records, _calendar, NextWeek.TasksOf(_todo.Items, _myTodo.Items))", more);
+        Assert.Contains("records, _calendar, NextWeek.TasksIfOn(_settings, () => _todo.Items, () => _myTodo.Items))", more);
     }
 }

@@ -111,6 +111,9 @@ public sealed class TodayWindow : Window
     /// <summary>Round 37 review: the switch changed while Today is open: the group goes or comes back at once, and so does what is kept.</summary>
     public void RefreshLooks() { ReadLooks(); Paint(); }
 
+    /// <summary>Round 39: a setting that changes what next week lists: painted again, next week asked again.</summary>
+    public void Repaint() => Paint();
+
     /// <summary>A click on the tray icon while Today is open: next week is asked again, and the list is painted again only if it changed.</summary>
     public void RefreshWeek() { if (_hooks.Week?.Invoke()?.Title != _week?.Title) Paint(); }
 

@@ -46,7 +46,7 @@ public partial class App : Application
     private CardWindow? _card;
     private CompactCardWindow? _compact;
     private SettingsWindow? _settingsWindow;
-    private bool _lookSwitch = true;
+    private bool _lookSwitch = true, _weekTodosSwitch = true;
     private (AndaRecord Record, PixelPoint Near, bool Mini)? _lastCard;
 
     private readonly TodoService _todo = new();
@@ -70,7 +70,7 @@ public partial class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         _settings = SettingsService.Load(); Clock.ZoneId = _settings.TimeZone;
-        _lookSwitch = _settings.SinceLastLook; LastLook.ForgetIfOff(_settings, AppPaths.LastLookFile);      // round 37 review: a removal that failed is tried again at each start
+        _lookSwitch = _settings.SinceLastLook; _weekTodosSwitch = _settings.WeekTodos; LastLook.ForgetIfOff(_settings, AppPaths.LastLookFile);      // round 37 review: a removal that failed is tried again at each start
         ThemeManager.Apply(Edition.Appearance(_settings), Edition.Opacity(_settings));
         DisplayScale.Watch(); DisplayScale.Set(Display.TextScale(_settings.TextSize));      // every window of this app opens at the text size chosen
         _calendar = BusinessCalendar.FromFile(AppPaths.ClosuresFile);
@@ -539,6 +539,7 @@ public partial class App : Application
         UsageLog.Configure(_settings.UsageLog && SelfTestRun is null);
         LastLook.ForgetIfOff(_settings, AppPaths.LastLookFile);      // round 37: off removes what was kept (from Settings or a restored backup)
         if (_lookSwitch != _settings.SinceLastLook) { _lookSwitch = _settings.SinceLastLook; _todayWindow?.RefreshLooks(); }      // an open Today follows at once
+        if (_weekTodosSwitch != _settings.WeekTodos) { _weekTodosSwitch = _settings.WeekTodos; _todayWindow?.Repaint(); }      // round 39: the same for the to-do items
         _hotkeys?.Reconfigure(HotkeyBindings());
         RefreshTrayLabels();
         // A new brief service only when the connection itself changed: changing a look must not reset "connected" to "not tested".

@@ -45,6 +45,11 @@ public partial class SettingsWindow
             bool gone = _settings.SinceLastLook || (_hooks?.ForgetLastLook?.Invoke() ?? true);
             LastLookStatus.Text = _settings.SinceLastLook ? LastLook.SaidSwitchOn : gone ? LastLook.SaidSwitchOff : LastLook.SaidSwitchOffNotYet;
         };
+        // round 39: whether next week in Today also lists the to-do items
+        WeekTodosCheck.Content = NextWeek.SwitchLabel; WeekTodosHint.Text = NextWeek.SwitchHint;
+        AutomationProperties.SetHelpText(WeekTodosCheck, NextWeek.SwitchHint);
+        WeekTodosCheck.IsChecked = _settings.WeekTodos;
+        WeekTodosCheck.IsCheckedChanged += (_, _) => { if (_loading) return; _settings.WeekTodos = WeekTodosCheck.IsChecked == true; Apply(); };
         RecentsClear.Click += (_, _) => { _settings.Recents = new(); RecentsStatus.Text = Recents.SaidCleared; Apply(); };
         PinsClear.Click += (_, _) => { _settings.Pins = new(); RecentsStatus.Text = Recents.SaidPinsCleared; Apply(); };
 

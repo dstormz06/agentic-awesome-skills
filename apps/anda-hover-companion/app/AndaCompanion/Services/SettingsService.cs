@@ -146,6 +146,8 @@ public sealed class Settings
     public bool RememberRecents { get; set; } = true;
     /// <summary>Round 37: Today's "Since you last looked". Off: nothing is compared or kept, and last-look.json is removed.</summary>
     public bool SinceLastLook { get; set; } = true;
+    /// <summary>Round 39: whether next week in Today also lists the to-do items. Off: neither list is read for Today.</summary>
+    public bool WeekTodos { get; set; } = true;
     /// <summary>The last ANDAs looked up, newest first. Six-digit numbers only; this PC only, never part of a backup.</summary>
     public List<string> Recents { get; set; } = new();
     /// <summary>The ANDAs kept with "Keep in my list" on a card, five at most. Saved in a backup.</summary>
