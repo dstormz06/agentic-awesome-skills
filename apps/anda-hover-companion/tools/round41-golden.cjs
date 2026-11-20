@@ -31,7 +31,10 @@ const OUT = DIR + 'round41-golden.json';
     const sha = 'a'.repeat(64);
     const programs = [['', ''], ['C:\\Tools\\mcp.exe', ''], ['C:\\Tools\\mcp.exe', sha], ['"C:\\Program Files\\Example\\mcp-server.exe"', sha.toUpperCase()],
       ['C:\\Tools\\mcp.bat', sha], ['C:\\Tools\\run.ps1', sha], ['\\\\server\\share\\mcp.exe', sha], ['mcp.exe', sha], ['D:\\a\\b\\MCP.EXE', sha], ['C:\\Tools\\mcp.exe', sha.slice(1)],
-      ['C:\\Tools\\mc|p.exe', sha], ['C:\\Tools\\mcp.exe', 'g'.repeat(64)]]
+      ['C:\\Tools\\mc|p.exe', sha], ['C:\\Tools\\mcp.exe', 'g'.repeat(64)],
+      // round 41 review: an alternate stream, "." and "..", folders ending in a dot or a space, an empty folder, a forward slash
+      ['C:\\Tools\\notes.txt:mcp.exe', sha], ['C:\\Tools\\..\\Windows\\mcp.exe', sha], ['C:\\.\\Tools\\mcp.exe', sha], ['C:\\Tools.\\mcp.exe', sha],
+      ['C:\\Tools \\mcp.exe', sha], ['C:\\\\Tools\\mcp.exe', sha], ['C:/Tools/mcp.exe', sha], ['C:\\Tools\\v1.2\\mcp.exe', sha], ['C:\\mcp.exe', sha]]
       .map(([program, s]) => ({ program, sha: s, problem: mcpProgramProblem(program, s), name: mcpProgramName(program), path: mcpProgramPath(program) }));
     const input = [
       { name: 'Fictional local search', isProgram: true, program: ' "C:\\Program Files\\Example\\mcp-server.exe" ', sha: sha.toUpperCase(), args: ['--stdio', '  ', ' --quiet ', '', 'x'.repeat(600)], enabled: true, timeout: 60 },
@@ -39,6 +42,7 @@ const OUT = DIR + 'round41-golden.json';
       { name: 'A script', isProgram: true, program: 'C:\\Tools\\run.bat', sha, args: [], enabled: true, timeout: 30 },
       { name: 'Many arguments', isProgram: true, program: 'C:\\Tools\\mcp.exe', sha, args: Array.from({ length: 25 }, (_, i) => 'a' + i), enabled: false, timeout: 30 },
       { name: 'An https server', endpoint: 'https://mcp.example.test/mcp', header: 'Authorization', scheme: 'Bearer', env: '', enabled: true, timeout: 30 },
+      { name: 'An address that cannot be used', endpoint: 'http://mcp.example.test/mcp', header: 'Authorization', scheme: 'Bearer', env: '', enabled: true, timeout: 30 },
     ];
     const normalized = mcpNormalize(input);
     return {

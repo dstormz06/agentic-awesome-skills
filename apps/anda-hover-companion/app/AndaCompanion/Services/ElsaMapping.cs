@@ -9,9 +9,13 @@ namespace AndaCompanion.Services;
 /// </summary>
 public static class ElsaMapping
 {
+    /// <summary>
+    /// The mapping typed in Settings, only when both parts are there and <see cref="Problem"/> finds nothing (round 41 review: values that
+    /// could not be used counted as Ready); otherwise the placeholder, so Elsa stays offline and says why.
+    /// </summary>
     public static IElsaMapping For(Settings? settings) =>
-        settings is { ElsaRequestTemplate: var t, ElsaReplyPath: var p } && !string.IsNullOrWhiteSpace(t) && !string.IsNullOrWhiteSpace(p)
-            ? new SettingsElsaMapping(t.Trim(), p.Trim(), settings.ElsaAuthHeader, settings.ElsaAuthScheme)
+        settings is not null && !string.IsNullOrWhiteSpace(settings.ElsaRequestTemplate) && !string.IsNullOrWhiteSpace(settings.ElsaReplyPath) && Problem(settings) is null
+            ? new SettingsElsaMapping(settings.ElsaRequestTemplate.Trim(), settings.ElsaReplyPath.Trim(), settings.ElsaAuthHeader, settings.ElsaAuthScheme)
             : new UnfilledElsaMapping();
 
     public const string Hint = "Fill these in only when Elsa's team gives them. The address and the token stay in the environment variables IT sets (ANDA_ELSA_ENDPOINT, ANDA_ELSA_TOKEN, with ANDA_COMPANION_PROVIDER=elsa); nothing here is a secret. The body uses the same placeholders as My API, and {{agent}} for ANDA_ELSA_AGENT. Left blank, Elsa stays offline and says so.";
@@ -25,11 +29,8 @@ public static class ElsaMapping
         if (!template && !path) return null;
         if (!template) return "Please also paste Elsa's request body; until both are filled in, Elsa stays offline.";
         if (!path) return "Please also enter where the reply text is (the reply path); until both are filled in, Elsa stays offline.";
-        if (CustomApiMapping.TryFill(s.ElsaRequestTemplate, "system", "user", 16, "model", new Dictionary<string, string> { ["agent"] = "agent" }, out _) is { } templateError)
-            return templateError;
-        if (!CustomApiMapping.IsValidPath(s.ElsaReplyPath))
-            return "The reply path is not valid. Please use names and [numbers], for example choices[0].message.content";
-        return ApiTarget.Authorization(s.ElsaAuthHeader, s.ElsaAuthScheme, null).Problem;
+        return CustomApiMapping.ShapeProblem(s.ElsaRequestTemplate, s.ElsaReplyPath, "model", new Dictionary<string, string> { ["agent"] = "agent" })
+            ?? ApiTarget.Authorization(s.ElsaAuthHeader, s.ElsaAuthScheme, null).Problem;
     }
 }
 

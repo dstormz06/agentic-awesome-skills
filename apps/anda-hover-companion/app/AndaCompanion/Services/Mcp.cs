@@ -52,9 +52,11 @@ public static class McpRules
         : $"Connected. {names.Count} tool{(names.Count == 1 ? "" : "s")}: {string.Join(", ", names.Take(5))}{(names.Count > 5 ? ", …" : "")}";
     public const string SaidUnexpected = "Something unexpected came back from the server, so nothing more was done. Nothing else was sent.";
     public const string SaidNoServer = "No MCP server is switched on. Add one in Settings, AI and connections.";
-    public const string ProgramHint = "Only a program IT has approved for this PC: its full path (an .exe), its SHA-256 exactly as IT gives it, and any arguments IT names, one per line. The app checks the file's SHA-256 before each start, holds the file so it cannot be changed while it starts, and starts it directly, without a command window or a script. With nothing entered here, no program can be started.";
+    public const string ProgramHint = "Only a program IT has approved for this PC: its full path (an .exe), its SHA-256 exactly as IT gives it, and any arguments IT names, one per line. The app checks the file's SHA-256 before each start, holds the file so it cannot be changed while it starts, and starts it directly, without a command window or a script, and without this app's tokens. The check covers the .exe file itself, not files it loads, so IT should name a program in a folder only administrators can change, such as C:\\Program Files. With nothing entered here, no program can be started.";
     public static string SaidStartsProgram(string name) => $"This starts {name} on this PC. Press again to start it.";
     public static string SaidHashMismatch(string name) => $"{name} is not the program IT approved: its SHA-256 is different. Nothing was started.";
+    public static string SaidNotStarted(string name) => $"{name} is not running, so nothing was sent. Press List tools, then again, to start it.";
+    public static string SaidNotThere(string name) => $"{name} is not at that path on a drive of this PC: Windows found it on a network drive, through a link, or by another name. Please type the full path IT gives. Nothing was started.";
     public static string SaidNoProgram(string name) => $"{name} could not be opened or started on this PC. Nothing was started.";
     public const string SaidTooLarge = "The server's answer is larger than this app reads (1 MB).";
     public const string SaidNotJson = "The arguments must be one JSON object, for example {\"query\": \"text\"}.";
@@ -85,7 +87,7 @@ public static class McpRules
             });
             var kept = list[^1];
             // on only when it can be used: a server with an address, or a program named as IT approved it
-            kept.Enabled = s.Enabled && (IsLocal(kept) ? ProgramProblem(kept.Program, kept.ProgramSha256) is null : kept.Endpoint.Length > 0);
+            kept.Enabled = s.Enabled && Problem(kept) is null;
         }
         return list;
     }
@@ -93,9 +95,30 @@ public static class McpRules
     public const int MaxArguments = 20;
 
     /// <summary>Where a server is, for the Connections window: its host, or "this PC: " and the program's name.</summary>
-    public static string Where(McpServerSettings s) => IsLocal(s) ? "this PC: " + ProgramName(s.Program) : ApiTarget.Host(s.Endpoint);
+    public static string Where(McpServerSettings s) => s.IsProgram ? "this PC: " + ProgramName(s.Program) : ApiTarget.Host(s.Endpoint);
 
-    public static bool IsLocal(McpServerSettings s) => s.IsProgram;
+    /// <summary>
+    /// What keeps a server from being used, or null: an address that cannot be used (as for My API), or a program not named as IT approved
+    /// it. One rule for loading Settings, the Settings rows and the Connections window (round 41 review).
+    /// </summary>
+    public static string? Problem(McpServerSettings s) => s.IsProgram ? ProgramProblem(s.Program, s.ProgramSha256) : ApiTarget.Address(s.Endpoint).Problem;
+
+    /// <summary>The variables that hold this app's own tokens, never given to a program on this PC.</summary>
+    public static readonly IReadOnlyList<string> AlwaysWithheld = new[] { "ANTHROPIC_API_KEY", ElsaConfig.TokenVar };
+
+    /// <summary>
+    /// Round 41 review: a program on this PC is started without the variables that hold this app's tokens: Claude's and Elsa's, and every
+    /// token variable named in Settings (My API, the agents, the MCP servers). Other variables are passed on, as to any program the person starts.
+    /// </summary>
+    public static IReadOnlyCollection<string> WithheldVariables(Settings? settings)
+    {
+        var names = new HashSet<string>(AlwaysWithheld, StringComparer.OrdinalIgnoreCase);
+        void Add(string? name) { if (!string.IsNullOrWhiteSpace(name)) names.Add(name.Trim()); }
+        Add(settings?.CustomApi?.SecretEnvVar);
+        foreach (var a in settings?.Agents ?? new()) Add(a?.Api?.SecretEnvVar);
+        foreach (var m in settings?.McpServers ?? new()) Add(m?.SecretEnvVar);
+        return names;
+    }
 
     /// <summary>The program's file name, for sentences: what follows the last backslash.</summary>
     public static string ProgramName(string? path) { string p = ProgramPath(path); int i = p.LastIndexOf('\\'); return i < 0 ? p : p[(i + 1)..]; }
@@ -103,7 +126,11 @@ public static class McpRules
     /// <summary>A path as typed, trimmed, with one pair of surrounding quotes taken off (as Windows copies a path).</summary>
     public static string ProgramPath(string? path) { string p = (path ?? "").Trim(); return p.Length >= 2 && p[0] == '"' && p[^1] == '"' ? p[1..^1].Trim() : p; }
 
-    private static readonly System.Text.RegularExpressions.Regex ExePath = new(@"^[A-Za-z]:\\[^<>""|?*\u0000-\u001f]*\.exe$", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+    /// <summary>
+    /// A drive letter, then folders and a file name with none of &lt; &gt; : " / \ | ? * or a control character, each folder ending in neither
+    /// a dot nor a space (so no ".", "..", empty folder, or alternate stream), and the name ending in .exe. The simulation uses the same pattern.
+    /// </summary>
+    private static readonly System.Text.RegularExpressions.Regex ExePath = new(@"^[A-Za-z]:\\(?:[^<>:""/\\|?*\u0000-\u001f]*[^<>:""/\\|?*\u0000-\u001f. ]\\)*[^<>:""/\\|?*\u0000-\u001f]*\.exe$", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
     private static readonly System.Text.RegularExpressions.Regex Sha256 = new("^[0-9a-f]{64}$");
 
     /// <summary>Why a program cannot be used as typed, or null: a full path to an .exe on a drive of this PC, and a SHA-256 of 64 hex digits.</summary>
@@ -188,6 +215,29 @@ public static class McpRules
     }
     private static readonly JsonSerializerOptions Compact = new() { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
     private static readonly System.Text.RegularExpressions.Regex SurrogatePair = new(@"(?<!\\)(?:\\\\)*\\u[dD][89abAB][0-9a-fA-F]{2}\\u[dD][c-fC-F][0-9a-fA-F]{2}");
+}
+
+/// <summary>
+/// Round 41 review: a program on this PC starts only on a second press, after the first has said what it starts. One rule for Settings' Test
+/// and the MCP tools window. The second press counts only for the same program, SHA-256 and arguments: an edit in between, or another row,
+/// asks again.
+/// </summary>
+public sealed class McpStartConfirm
+{
+    private string? _armed;
+
+    private static string Key(McpServerSettings s) => string.Join("\u0001", s.Id, s.Program, s.ProgramSha256, string.Join("\u0002", s.ProgramArguments));
+
+    /// <summary>True on the second press for the same program; on the first, false, and the caller says <see cref="McpRules.SaidStartsProgram"/>.</summary>
+    public bool Confirm(McpServerSettings s)
+    {
+        string key = Key(s);
+        if (_armed == key) { _armed = null; return true; }
+        _armed = key;
+        return false;
+    }
+
+    public void Clear() => _armed = null;
 }
 
 /// <summary>Something went wrong talking to a server; the message is for the person and never holds the token or the server's body.</summary>

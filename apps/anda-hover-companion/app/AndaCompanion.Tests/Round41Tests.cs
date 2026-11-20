@@ -127,6 +127,25 @@ public class Round41Tests : IClassFixture<HeadlessFixture>
     }
 
     [Fact]
+    public void Values_that_could_not_be_used_never_make_Elsa_ready()
+    {
+        // round 41 review: a filled-in template with a reply path that is not valid, or a header this app sets itself, counted as Ready
+        Func<string, string?> env = v => v switch { "ANDA_COMPANION_PROVIDER" => "elsa", "ANDA_ELSA_ENDPOINT" => "https://elsa.example.gov/api", _ => null };
+        foreach (var bad in new[]
+        {
+            new Settings { ElsaRequestTemplate = "{\"q\":\"{{user}}\"}", ElsaReplyPath = "output..text" },
+            new Settings { ElsaRequestTemplate = "{\"q\":\"{{user}}\"}", ElsaReplyPath = "output.text", ElsaAuthHeader = "Host" },
+            new Settings { ElsaRequestTemplate = "{not json", ElsaReplyPath = "output.text" },
+        })
+        {
+            Assert.NotNull(ElsaMapping.Problem(bad));
+            Assert.False(ElsaMapping.For(bad).IsFilledIn);
+            Assert.Equal(ElsaStatus.MappingNotFilled, ElsaConfig.Inspect(env, ElsaMapping.For(bad)).Status);
+            Assert.Null(Connections.From(new Settings { Provider = ProviderChoice.Auto, ElsaRequestTemplate = bad.ElsaRequestTemplate, ElsaReplyPath = bad.ElsaReplyPath, ElsaAuthHeader = bad.ElsaAuthHeader }, env).Ai);
+        }
+    }
+
+    [Fact]
     public async Task Settings_shows_Elsas_fields_and_says_what_they_mean()
     {
         var r = await _fx.Session.Dispatch(() =>
@@ -162,6 +181,17 @@ public class Round41Tests : IClassFixture<HeadlessFixture>
         Id = "p", Name = "Fictional program", IsProgram = true, Program = ExePath, ProgramSha256 = sha ?? ExeSha, ProgramArguments = args.ToList(), Enabled = true,
     };
 
+    /// <summary>A client for a program whose start the person has confirmed (the second press), as the windows do.</summary>
+    private static McpClient Confirmed(McpServerSettings s, McpLocal local, IReadOnlyCollection<string>? withheld = null)
+    {
+        var c = new McpClient(s, null, local: local, withheld: withheld);
+        c.PermitStart();
+        return c;
+    }
+
+    /// <summary>What a stand-in writes to end its output, as a program that breaks off.</summary>
+    private const string End = "__END__";
+
     /// <summary>A program in memory: two pipes, and a loop that answers each request line with what the test says.</summary>
     private sealed class FakeProgram : IMcpProcess
     {
@@ -182,7 +212,11 @@ public class Round41Tests : IClassFixture<HeadlessFixture>
                 while ((line = await reader.ReadLineAsync()) is not null)
                 {
                     lock (Seen) Seen.Add(line);
-                    foreach (var reply in answer((JsonNode.Parse(line) as JsonObject)!)) await writer.WriteLineAsync(reply);
+                    foreach (var reply in answer((JsonNode.Parse(line) as JsonObject)!))
+                    {
+                        if (reply == End) { _outClient.Dispose(); await Task.Delay(Timeout.Infinite); }
+                        await writer.WriteLineAsync(reply);
+                    }
                 }
                 if (!endsOnClose) await Task.Delay(Timeout.Infinite);
             });
@@ -215,6 +249,7 @@ public class Round41Tests : IClassFixture<HeadlessFixture>
         public byte[] Bytes { get; set; } = Exe;
         public Func<JsonObject, IEnumerable<string>> Answer { get; set; } = Answers;
         public bool EndsOnClose { get; set; } = true;
+        public int Starts => Steps.Count(x => x == "start");
         public McpLocal Local => new(path => { Steps.Add("open " + path); return new Tracked(Bytes, () => Steps.Add("closed")); },
             info => { Steps.Add("start"); Info = info; return Program = new FakeProgram(Answer, EndsOnClose); });
         private sealed class Tracked(byte[] bytes, Action closed) : MemoryStream(bytes) { protected override void Dispose(bool disposing) { if (disposing) closed(); base.Dispose(disposing); } }
@@ -228,7 +263,7 @@ public class Round41Tests : IClassFixture<HeadlessFixture>
         try
         {
             EventLog.Configure(path);
-            using (var c = new McpClient(Program(null, "--stdio", "--quiet"), local: starter.Local))
+            using (var c = Confirmed(Program(null, "--stdio", "--quiet"), starter.Local))
             {
                 var tools = await c.ListToolsAsync(CancellationToken.None);
                 Assert.Equal("fictional_lookup", Assert.Single(tools).Name);
@@ -256,7 +291,7 @@ public class Round41Tests : IClassFixture<HeadlessFixture>
     public async Task A_program_that_is_not_the_one_approved_is_never_started()
     {
         var other = new Starter { Bytes = Encoding.ASCII.GetBytes("MZ a different program") };
-        using (var c = new McpClient(Program(), local: other.Local))
+        using (var c = Confirmed(Program(), other.Local))
             Assert.Equal(McpRules.SaidHashMismatch("mcp-server.exe"), (await Assert.ThrowsAsync<McpException>(() => c.ListToolsAsync(CancellationToken.None))).Message);
         Assert.Equal(new[] { "open " + ExePath, "closed" }, other.Steps);                           // opened to check, never started
         foreach (var (server, said) in new (McpServerSettings, string)[]
@@ -267,12 +302,12 @@ public class Round41Tests : IClassFixture<HeadlessFixture>
         })
         {
             var starter = new Starter();
-            using var c = new McpClient(server, local: starter.Local);
+            using var c = Confirmed(server, starter.Local);
             Assert.Contains(said, (await Assert.ThrowsAsync<McpException>(() => c.ListToolsAsync(CancellationToken.None))).Message);
             Assert.Empty(starter.Steps);                                                             // not even opened
         }
         var missing = new McpLocal(_ => throw new FileNotFoundException("fictional"), _ => throw new InvalidOperationException("must not start"));
-        using (var c = new McpClient(Program(), local: missing))
+        using (var c = Confirmed(Program(), missing))
             Assert.Equal(McpRules.SaidNoProgram("mcp-server.exe"), (await Assert.ThrowsAsync<McpException>(() => c.ListToolsAsync(CancellationToken.None))).Message);
     }
 
@@ -280,16 +315,28 @@ public class Round41Tests : IClassFixture<HeadlessFixture>
     public async Task A_program_that_floods_stops_early_or_will_not_end_is_handled()
     {
         var flood = new Starter { Answer = m => m["method"]!.GetValue<string>() == "initialize" ? new[] { new string('x', 1_100_000) } : Array.Empty<string>() };
-        using (var c = new McpClient(Program(), local: flood.Local))
+        using (var c = Confirmed(Program(), flood.Local))
+        {
             Assert.Equal(McpRules.SaidTooLarge, (await Assert.ThrowsAsync<McpException>(() => c.ListToolsAsync(CancellationToken.None))).Message);
-        Assert.True(flood.Program!.Killed);                                                         // a program that broke off is stopped, not left running
+            Assert.True(flood.Program!.Killed);                                                     // a program that broke off is stopped, not left running
+            // round 41 review: and it is not started again by the next request; only a new confirmed press starts it
+            Assert.True(c.NeedsStart);
+            Assert.Equal(McpRules.SaidNotStarted("mcp-server.exe"), (await Assert.ThrowsAsync<McpException>(() => c.ListToolsAsync(CancellationToken.None))).Message);
+            Assert.Equal(McpRules.SaidNotStarted("mcp-server.exe"), (await Assert.ThrowsAsync<McpException>(() => c.CallToolAsync("x", new JsonObject(), CancellationToken.None))).Message);
+            Assert.Equal(1, flood.Starts);
+        }
 
         var silent = new Starter { Answer = _ => Array.Empty<string>() };
-        using (var c = new McpClient(Program(), local: silent.Local) { TimeLimit = TimeSpan.FromMilliseconds(300) })
+        using (var c = Confirmed(Program(), silent.Local))
+        {
+            c.TimeLimit = TimeSpan.FromMilliseconds(300);
             Assert.Contains("did not answer in time", (await Assert.ThrowsAsync<McpException>(() => c.ListToolsAsync(CancellationToken.None))).Message);
+            Assert.True(silent.Program!.Killed);                                                    // round 41 review: out of time is stopped, not left running
+            Assert.True(c.NeedsStart);
+        }
 
         var stubborn = new Starter { EndsOnClose = false };
-        using (var c = new McpClient(Program(), local: stubborn.Local))
+        using (var c = Confirmed(Program(), stubborn.Local))
         {
             await c.ListToolsAsync(CancellationToken.None);
             await c.EndAsync();
@@ -303,7 +350,7 @@ public class Round41Tests : IClassFixture<HeadlessFixture>
         var starter = new Starter();
         var r = await _fx.Session.Dispatch(async () =>
         {
-            var w = new McpWindow(new[] { Program() }, null, s => new McpClient(s, local: starter.Local));
+            var w = new McpWindow(new[] { Program() }, null, s => new McpClient(s, null, local: starter.Local));
             try
             {
                 w.Show(); Settle();
@@ -316,8 +363,137 @@ public class Round41Tests : IClassFixture<HeadlessFixture>
         }, CancellationToken.None);
         Assert.Equal((McpRules.SaidStartsProgram("mcp-server.exe"), 0), r.first);
         Assert.Equal((1, true), r.second);
-        string settings = Round37Tests.Code(Folder("app", "AndaCompanion", "UI", "SettingsWindow.Mcp.cs"));
-        Assert.Contains("if (local && !armed && Problem() is null) { armed = true; status.Text = McpRules.SaidStartsProgram(McpRules.ProgramName(s.Program)); return; }", settings);
+    }
+
+    [Fact]
+    public async Task Settings_Test_starts_a_program_only_on_a_second_press_for_the_same_program()
+    {
+        var starter = new Starter();
+        var r = await _fx.Session.Dispatch(async () =>
+        {
+            var dir = Temp.NewDir(); var s = new Settings { McpServers = McpRules.Normalize(new[] { Program() }) };
+            var w = new SettingsWindow(s, new PromptLibraryService(Path.Combine(dir, "p.json")), () => { }, null, new QuickReplyService(Path.Combine(dir, "r.json")));
+            try
+            {
+                w.Show(); Settle();
+                var server = s.McpServers[0]; var test = new Button(); var status = new TextBlock(); var said = new List<(string, int)>();
+                async Task Press() { await w.TestMcpAsync(server, test, status, x => new McpClient(x, null, local: starter.Local)); said.Add((status.Text ?? "", starter.Starts)); }
+                await Press();                                   // says what starts
+                server.ProgramArguments = new() { "--other" };   // an edit in between: the next press asks again (round 41 review)
+                await Press();
+                await Press();                                   // the second press for the same program starts it
+                await Press();                                   // and the next asks again, since the test ended the program
+                return said;
+            }
+            finally { w.Close(); Settle(); }
+        }, CancellationToken.None);
+        string asks = McpRules.SaidStartsProgram("mcp-server.exe");
+        Assert.Equal(new[] { (asks, 0), (asks, 0), (McpRules.SaidTested(new[] { "fictional_lookup" }), 1), (asks, 1) }, r);
+    }
+
+    [Fact]
+    public async Task The_window_never_restarts_a_program_that_broke_off_on_one_press_or_from_Send()
+    {
+        var starter = new Starter { Answer = m => m["method"]!.GetValue<string>() == "tools/call" ? new[] { End } : Answers(m) };
+        var r = await _fx.Session.Dispatch(async () =>
+        {
+            var w = new McpWindow(new[] { Program() }, null, s => new McpClient(s, null, local: starter.Local));
+            try
+            {
+                w.Show(); Settle();
+                await w.ListAsync(); await w.ListAsync(); Settle();
+                w.Preview(); await w.SendAsync(); Settle();
+                string broke = w.Status.Text ?? "";
+                w.Preview(); await w.SendAsync(); Settle();
+                string send = w.Status.Text ?? ""; int afterSend = starter.Starts;
+                await w.ListAsync(); Settle();
+                string once = w.Status.Text ?? ""; int afterOne = starter.Starts;
+                await w.ListAsync(); Settle();
+                return (broke, send, afterSend, once, afterOne, afterTwo: starter.Starts);
+            }
+            finally { w.Close(); Settle(); }
+        }, CancellationToken.None);
+        Assert.Contains("stopped before it answered", r.broke);
+        Assert.Equal((McpRules.SaidNotStarted("mcp-server.exe"), 1), (r.send, r.afterSend));
+        Assert.Equal((McpRules.SaidStartsProgram("mcp-server.exe"), 1), (r.once, r.afterOne));
+        Assert.Equal(2, r.afterTwo);
+    }
+
+    [Fact]
+    public void One_confirm_counts_only_for_the_same_program_SHA_and_arguments()
+    {
+        var confirm = new McpStartConfirm(); var a = Program(); var b = Program(null, "--x");
+        Assert.False(confirm.Confirm(a)); Assert.True(confirm.Confirm(a));                                         // the second press
+        Assert.False(confirm.Confirm(a));                                                                           // used once: asks again
+        Assert.False(confirm.Confirm(b)); Assert.True(confirm.Confirm(b));                                         // another program asks again
+        Assert.False(confirm.Confirm(a)); a.ProgramSha256 = new string('0', 64); Assert.False(confirm.Confirm(a)); // an edit asks again
+        confirm.Clear(); Assert.False(confirm.Confirm(a));
+    }
+
+    [Fact]
+    public async Task A_program_that_writes_while_it_is_written_to_does_not_block_the_app()
+    {
+        // round 41 review: after "initialized" the stand-in writes 2 MB before it reads again, while the app writes a 400 KB request;
+        // without a pump reading its output both would wait for each other until the time limit
+        var notes = Enumerable.Range(0, 200).Select(i => $"{{\"jsonrpc\":\"2.0\",\"method\":\"notifications/message\",\"params\":{{\"data\":\"{new string('n', 10_000)}\"}}}}").ToArray();
+        var chatty = new Starter { Answer = m => m["method"]!.GetValue<string>() == "notifications/initialized" ? notes : Answers(m) };
+        using var c = Confirmed(Program(), chatty.Local);
+        c.TimeLimit = TimeSpan.FromSeconds(20);
+        var started = Stopwatch.StartNew();
+        var answer = await c.CallToolAsync("fictional_lookup", new JsonObject { ["q"] = new string('q', 400_000) }, CancellationToken.None);
+        Assert.Equal("Fictional local answer", answer.Text);
+        Assert.True(started.Elapsed < TimeSpan.FromSeconds(15), started.Elapsed.ToString());
+        await c.EndAsync();
+    }
+
+    [Fact]
+    public async Task A_program_is_started_without_the_variables_that_hold_this_apps_tokens()
+    {
+        var settings = new Settings { CustomApi = new CustomApiSettings { SecretEnvVar = "FICTIONAL_R41_API_TOKEN" } };
+        settings.Agents.Add(new AgentSettings { Name = "Fictional agent", Api = new CustomApiSettings { SecretEnvVar = "FICTIONAL_R41_AGENT_TOKEN" } });
+        settings.McpServers.Add(new McpServerSettings { Name = "Fictional server", SecretEnvVar = "FICTIONAL_R41_MCP_TOKEN" });
+        var withheld = McpRules.WithheldVariables(settings);
+        Assert.Equal(new[] { "ANDA_ELSA_TOKEN", "ANTHROPIC_API_KEY", "FICTIONAL_R41_AGENT_TOKEN", "FICTIONAL_R41_API_TOKEN", "FICTIONAL_R41_MCP_TOKEN" }, withheld.OrderBy(x => x, StringComparer.Ordinal));
+        Assert.Equal(new[] { "ANTHROPIC_API_KEY", "ANDA_ELSA_TOKEN" }, McpRules.WithheldVariables(null));
+        foreach (var name in new[] { "FICTIONAL_R41_API_TOKEN", "ANTHROPIC_API_KEY", "FICTIONAL_R41_KEPT" }) Environment.SetEnvironmentVariable(name, "fictional");
+        try
+        {
+            var starter = new Starter();
+            using (var c = Confirmed(Program(), starter.Local, withheld)) { await c.ListToolsAsync(CancellationToken.None); await c.EndAsync(); }
+            var env = starter.Info!.Environment;
+            Assert.False(env.ContainsKey("FICTIONAL_R41_API_TOKEN"));
+            Assert.False(env.ContainsKey("ANTHROPIC_API_KEY"));
+            Assert.True(env.ContainsKey("FICTIONAL_R41_KEPT"));                                     // other variables are passed on, as to any program
+            var plain = new Starter();                                                               // the public constructor withholds Claude's and Elsa's
+            using (var c = new McpClient(Program(), null, local: plain.Local)) { c.PermitStart(); await c.ListToolsAsync(CancellationToken.None); await c.EndAsync(); }
+            Assert.False(plain.Info!.Environment.ContainsKey("ANTHROPIC_API_KEY"));
+        }
+        finally { foreach (var name in new[] { "FICTIONAL_R41_API_TOKEN", "ANTHROPIC_API_KEY", "FICTIONAL_R41_KEPT" }) Environment.SetEnvironmentVariable(name, null); }
+    }
+
+    [Fact]
+    public async Task Every_program_still_running_is_stopped_when_the_app_ends()
+    {
+        var stubborn = new Starter { EndsOnClose = false };
+        using var c = Confirmed(Program(), stubborn.Local);
+        await c.ListToolsAsync(CancellationToken.None);
+        Assert.False(c.NeedsStart);
+        McpProgram.StopAll();
+        Assert.True(stubborn.Program!.Killed);
+        Assert.True(c.NeedsStart);
+        string app = Round37Tests.Code(Folder("app", "AndaCompanion", "App.axaml.cs"));
+        Assert.Contains("desktop.Exit += (_, _) => { McpProgram.StopAll();", app);
+    }
+
+    [Fact]
+    public void Windows_own_path_for_the_file_must_be_the_path_typed()
+    {
+        const string typed = @"C:\Program Files\Fictional\mcp-server.exe";
+        Assert.True(McpProgram.SameFile(typed, @"\\?\C:\Program Files\Fictional\mcp-server.exe"));
+        Assert.True(McpProgram.SameFile(typed, @"\\?\c:\PROGRAM FILES\Fictional\MCP-SERVER.EXE"));      // letters in any case
+        Assert.False(McpProgram.SameFile(typed, @"\\?\UNC\fictional-server\share\mcp-server.exe"));    // a network drive
+        Assert.False(McpProgram.SameFile(typed, @"\\?\D:\Elsewhere\mcp-server.exe"));                 // through a link or a substituted drive
+        Assert.False(McpProgram.SameFile(typed, null));                                                   // Windows could not say
     }
 
     [Fact]

@@ -104,7 +104,7 @@ public partial class App : Application
             // A tray failure must be reported, not fatal: the hotkeys still work without it.
             try { _tray = BuildTrayIcon(desktop); RefreshTrayState(); ArmTrayRecount(); }
             catch (Exception ex) { _trayError = ex.Message; }
-            desktop.Exit += (_, _) => { _hotkeys.Dispose(); _mouse?.Dispose(); _outlook?.Dispose(); _tray?.Dispose(); };
+            desktop.Exit += (_, _) => { McpProgram.StopAll(); _hotkeys.Dispose(); _mouse?.Dispose(); _outlook?.Dispose(); _tray?.Dispose(); };
             ConnectionStatus.Changed += () => Dispatcher.UIThread.Post(UpdateTrayTip);
             UpdateTrayTip();
             ApplyMouseTrigger();
@@ -468,7 +468,7 @@ public partial class App : Application
     {
         if (_mcpWindow is not null && text is null) { _mcpWindow.Activate(); return; }
         _mcpWindow?.Close();
-        var win = new McpWindow(McpServersOn(), text);
+        var win = new McpWindow(McpServersOn(), text, withheld: McpRules.WithheldVariables(_settings));
         win.Closed += (_, _) => { if (ReferenceEquals(_mcpWindow, win)) _mcpWindow = null; };
         _mcpWindow = win;
         win.Show();

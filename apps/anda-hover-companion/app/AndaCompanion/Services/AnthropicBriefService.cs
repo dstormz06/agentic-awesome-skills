@@ -84,7 +84,7 @@ public static class ConnectionService
         !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY"));
 
     /// <summary>One honest sentence for the Settings panel before any request is made.</summary>
-    public static string Describe(Func<string, string?>? env = null, IElsaMapping? mapping = null)
+    public static string Describe(Func<string, string?>? env, IElsaMapping mapping)
     {
         env ??= Environment.GetEnvironmentVariable;
         if (ElsaConfig.IsSelected(env)) return ElsaConfig.Inspect(env, mapping).Message;
@@ -93,10 +93,10 @@ public static class ConnectionService
             : "Offline mode — deterministic briefs. Ready for API access when approved.";
     }
 
-    public static async Task<string> TestAsync(string? model = null, IElsaMapping? elsa = null)
+    public static async Task<string> TestAsync(string? model, IElsaMapping elsa)
     {
         model = Settings.IsValidModelName(model) ? model!.Trim() : Settings.DefaultClaudeModel;
-        if (ElsaConfig.IsSelected()) return await TestElsaAsync(mapping: elsa);
+        if (ElsaConfig.IsSelected()) return await TestElsaAsync(null, elsa);
         if (!HasKey)
             return "Offline mode — no API key detected. Briefs are assembled deterministically from the " +
                    "record. When access is granted, set ANTHROPIC_API_KEY (agency-approved channel only) " +
@@ -126,10 +126,8 @@ public static class ConnectionService
     }
 
     /// <summary>The same one-request check for Elsa: explains what is missing, or proves the channel end to end.</summary>
-    public static async Task<string> TestElsaAsync(Func<string, string?>? env = null, IElsaMapping? mapping = null,
-        HttpMessageHandler? handler = null)
+    public static async Task<string> TestElsaAsync(Func<string, string?>? env, IElsaMapping mapping, HttpMessageHandler? handler = null)
     {
-        mapping ??= new UnfilledElsaMapping();
         var inspection = ElsaConfig.Inspect(env, mapping);
         if (inspection.Status != ElsaStatus.Ready || inspection.Settings is not { } settings) return inspection.Message;
         try

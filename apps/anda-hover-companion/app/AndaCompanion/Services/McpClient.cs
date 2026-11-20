@@ -3,6 +3,20 @@ using System.Text.Json.Nodes;
 
 namespace AndaCompanion.Services;
 
+/// <summary>How MCP messages reach a server: one message out, and for a request the answer to it, already matched by id.</summary>
+internal interface IMcpTransport : IDisposable
+{
+    /// <summary>The sentence when the connection breaks.</summary>
+    string Unreachable { get; }
+    /// <summary>False when the session can no longer be used (a program that stopped); the client then starts a new one.</summary>
+    bool Alive { get; }
+    /// <summary>Sends a message; for a request (an id), returns the answer to it. An "initialize" starts a new session.</summary>
+    Task<JsonObject?> ExchangeAsync(JsonObject message, int? id, string? version, CancellationToken ct);
+    /// <summary>A server's words with the token taken out, if the server repeated it (https; a program is given no token).</summary>
+    string Redact(string text);
+    Task EndAsync();
+}
+
 /// <summary>
 /// Round 40: an MCP client (protocol 2025-06-18; 2025-03-26 is accepted from a server). It starts a session (initialize, then
 /// notifications/initialized), lists tools (following the cursor) and calls one, and ends the session when asked. Round 41: the messages go
@@ -24,12 +38,28 @@ public sealed class McpClient : IDisposable
     /// <summary>For tests only: a shorter time limit than any offered in Settings.</summary>
     internal TimeSpan TimeLimit { set => _timeout = value; }
 
-    /// <param name="local">For tests only: how a program on this PC is opened and started (the real file and process otherwise).</param>
-    public McpClient(McpServerSettings server, Func<string, string?>? env = null, HttpMessageHandler? handler = null, McpLocal? local = null)
+    /// <param name="withheld">For a program on this PC: the environment variables it is not given (<see cref="McpRules.WithheldVariables"/>).</param>
+    public McpClient(McpServerSettings server, IReadOnlyCollection<string>? withheld = null) : this(server, null, null, null, withheld) { }
+
+    /// <param name="env">For tests: where the token is read (the environment otherwise).</param>
+    /// <param name="handler">For tests: a server that answers without a network.</param>
+    /// <param name="local">For tests: how a program on this PC is opened and started (the real file and process otherwise).</param>
+    internal McpClient(McpServerSettings server, Func<string, string?>? env, HttpMessageHandler? handler = null, McpLocal? local = null, IReadOnlyCollection<string>? withheld = null)
     {
-        _transport = McpRules.IsLocal(server) ? new McpProgram(server, local ?? McpLocal.Real) : new McpHttp(server, env ?? Environment.GetEnvironmentVariable, handler);
+        _transport = server.IsProgram
+            ? new McpProgram(server, local ?? McpLocal.Real, withheld ?? McpRules.AlwaysWithheld)
+            : new McpHttp(server, env ?? Environment.GetEnvironmentVariable, handler);
         _timeout = TimeSpan.FromSeconds(CustomApiSettings.TimeoutChoices.Contains(server.TimeoutSeconds) ? server.TimeoutSeconds : 30);
     }
+
+    /// <summary>
+    /// Round 41: a program on this PC that is not running. It starts only after <see cref="PermitStart"/>, which the windows call on the
+    /// person's second press (<see cref="McpStartConfirm"/>); until then a request is refused before anything is started or sent.
+    /// </summary>
+    public bool NeedsStart => _transport is McpProgram { Alive: false };
+
+    /// <summary>The person confirmed the start: the next request may start the program, once.</summary>
+    public void PermitStart() { if (_transport is McpProgram p) p.Permit(); }
 
     public async Task<IReadOnlyList<McpTool>> ListToolsAsync(CancellationToken ct)
     {
@@ -127,7 +157,7 @@ public sealed class McpClient : IDisposable
                 await EnsureSessionAsync(ct);
                 return await AskAsync(method, p, _version, ct);
             }
-            catch (McpSessionGoneException) when (!again) { _transport.Forget(); _version = null; }
+            catch (McpSessionGoneException) when (!again) { _version = null; }
             catch (McpSessionGoneException) { throw new McpException("The server forgot the session again just after it was started; nothing more was sent."); }
         }
     }
@@ -136,7 +166,7 @@ public sealed class McpClient : IDisposable
     private async Task EnsureSessionAsync(CancellationToken ct)
     {
         if (_version is not null && _transport.Alive) return;
-        _version = null; _transport.Forget();
+        _version = null;
         var init = new JsonObject
         {
             ["protocolVersion"] = McpRules.ProtocolVersion,

@@ -191,8 +191,8 @@ public class ElsaTests
     [Fact]
     public void Describe_is_provider_aware()
     {
-        Assert.Contains("Offline mode", ConnectionService.Describe(Env()));
-        Assert.Contains("Key detected", ConnectionService.Describe(Env(("ANTHROPIC_API_KEY", "x"))));
+        Assert.Contains("Offline mode", ConnectionService.Describe(Env(), new UnfilledElsaMapping()));
+        Assert.Contains("Key detected", ConnectionService.Describe(Env(("ANTHROPIC_API_KEY", "x")), new UnfilledElsaMapping()));
         Assert.Contains("ANDA_ELSA_ENDPOINT", ConnectionService.Describe(Env(Elsa), new UnfilledElsaMapping()));
     }
 

@@ -34,7 +34,10 @@ public sealed class ElsaNotMappedException() : NotImplementedException(
 /// </summary>
 public interface IElsaMapping
 {
-    /// <summary>False for the placeholder; true once real methods replace it.</summary>
+    /// <summary>
+    /// False for the placeholder; true for a mapping that can build a request. Kept (round 41 review) because Inspect must say
+    /// "not filled in yet" before any request, and the placeholder can say so only by throwing.
+    /// </summary>
     bool IsFilledIn { get; }
 
     /// <summary>Build Elsa's request: method, URL (usually settings.Endpoint), auth header, JSON body.</summary>
@@ -73,10 +76,11 @@ public static class ElsaConfig
         string.Equals((env ?? Environment.GetEnvironmentVariable)("ANDA_COMPANION_PROVIDER")?.Trim(), "elsa",
             StringComparison.OrdinalIgnoreCase);
 
-    public static ElsaInspection Inspect(Func<string, string?>? env = null, IElsaMapping? mapping = null)
+    /// <param name="mapping">Required (round 41 review): the caller says which mapping, usually <see cref="ElsaMapping.For"/> of the settings,
+    /// so that no caller reads Elsa as unfilled by forgetting it.</param>
+    public static ElsaInspection Inspect(Func<string, string?>? env, IElsaMapping mapping)
     {
         env ??= Environment.GetEnvironmentVariable;
-        mapping ??= new UnfilledElsaMapping();
         if (!IsSelected(env))
             return new(ElsaStatus.NotSelected, null, "Elsa is not selected (ANDA_COMPANION_PROVIDER is not \"elsa\").");
 

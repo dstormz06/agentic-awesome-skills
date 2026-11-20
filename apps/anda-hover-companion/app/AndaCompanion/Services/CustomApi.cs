@@ -121,10 +121,7 @@ public static class CustomApiConfig
         var (uri, addressProblem) = ApiTarget.Address(s.Endpoint);
         if (uri is null) return new(false, null, addressProblem!);
         string endpoint = s.Endpoint!.Trim();
-        if (CustomApiMapping.TryFill(s.RequestTemplate, "system", "user", 16, s.Model, extras, out _) is { } templateError)
-            return new(false, null, templateError);
-        if (!CustomApiMapping.IsValidPath(s.ResponsePath))
-            return new(false, null, "The reply path is not valid. Please use names and [numbers], for example choices[0].message.content");
+        if (CustomApiMapping.ShapeProblem(s.RequestTemplate, s.ResponsePath, s.Model, extras) is { } shapeProblem) return new(false, null, shapeProblem);
         var (token, tokenProblem) = ApiTarget.Token(s.SecretEnvVar, env);
         if (tokenProblem is not null) return new(false, null, tokenProblem);
         // round 40 re-check: Test says what the send would refuse, not "configured"
@@ -226,6 +223,14 @@ public sealed class CustomApiMapping(CustomApiSettings settings, IReadOnlyDictio
     private readonly record struct Step(string? Name, int? Index);
 
     public static bool IsValidPath(string? path) => !string.IsNullOrWhiteSpace(path) && TrySteps(path, out _);
+
+    /// <summary>
+    /// What is wrong with a request body and reply path, or null: the body must be JSON once filled in, the path names and [numbers].
+    /// One check for My API, the agents and Elsa (round 41 review).
+    /// </summary>
+    public static string? ShapeProblem(string? template, string? path, string? model, IReadOnlyDictionary<string, string>? extras = null) =>
+        TryFill(template, "system", "user", 16, model, extras, out _)
+        ?? (IsValidPath(path) ? null : "The reply path is not valid. Please use names and [numbers], for example choices[0].message.content");
 
     private static IEnumerable<Step> Steps(string path) => TrySteps(path, out var steps) ? steps : Array.Empty<Step>();
 

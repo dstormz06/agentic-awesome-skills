@@ -172,7 +172,7 @@ public class BriefServiceTests
         public async Task Connection_test_without_a_key_explains_offline_mode_and_makes_no_call()
         {
             using var _ = new EnvScope("ANTHROPIC_API_KEY", null);
-            string result = await ConnectionService.TestAsync();
+            string result = await ConnectionService.TestAsync(null, new UnfilledElsaMapping());
             Assert.StartsWith("Offline mode", result);
             Assert.False(ConnectionService.HasKey);
         }

@@ -39,14 +39,16 @@ public sealed class McpWindow : Window
     private readonly string _selection;
     private IReadOnlyList<McpTool> _tools = Array.Empty<McpTool>();
     private (McpServerSettings Server, string Tool, JsonObject Args)? _ready;
-    private string? _armed;          // round 41: the program whose start the person was told about; it starts on the next press
+    private readonly McpStartConfirm _confirm = new();      // round 41: a program starts on the second press, after the first has said so
 
     /// <param name="servers">The servers that are switched on.</param>
     /// <param name="selection">Text from the Ask window ("Use with an MCP tool…"), put into the first text argument of a tool, for the person to check.</param>
     /// <param name="client">Makes the client for a server (a test gives one that answers without a network).</param>
-    public McpWindow(IReadOnlyList<McpServerSettings> servers, string? selection = null, Func<McpServerSettings, McpClient>? client = null)
+    /// <param name="withheld">The environment variables a program on this PC is not given (<see cref="McpRules.WithheldVariables"/>).</param>
+    public McpWindow(IReadOnlyList<McpServerSettings> servers, string? selection = null, Func<McpServerSettings, McpClient>? client = null,
+        IReadOnlyCollection<string>? withheld = null)
     {
-        _servers = servers; _selection = selection ?? ""; _newClient = client ?? (s => new McpClient(s));
+        _servers = servers; _selection = selection ?? ""; _newClient = client ?? (s => new McpClient(s, withheld));
         Title = "ANDA Companion (Notula) — MCP tools"; Width = 560; SizeToContent = SizeToContent.Height; CanResize = false; Topmost = true; ShowInTaskbar = false;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         IBrush Res(string key) => (IBrush)Application.Current!.Resources[key]!;
@@ -57,7 +59,7 @@ public sealed class McpWindow : Window
 
         foreach (var s in servers) Servers.Items.Add(new ComboBoxItem { Content = s.Name, Tag = s.Id });
         Servers.SelectedIndex = servers.Count > 0 ? 0 : -1;
-        Servers.SelectionChanged += (_, _) => { _tools = Array.Empty<McpTool>(); Tools.Items.Clear(); About.Text = ""; Arguments.Text = ""; _armed = null; Reset(); };
+        Servers.SelectionChanged += (_, _) => { _tools = Array.Empty<McpTool>(); Tools.Items.Clear(); About.Text = ""; Arguments.Text = ""; _confirm.Clear(); Reset(); };
         Tools.SelectionChanged += (_, _) => FillTool();
         Arguments.TextChanged += (_, _) => Reset();
         ListButton.Click += async (_, _) => await ListAsync();
@@ -121,16 +123,17 @@ public sealed class McpWindow : Window
     internal Task ListAsync()
     {
         if (Server is not { } server) { Status.Text = McpRules.SaidNoServer; return Task.CompletedTask; }
-        // round 41: a program on this PC starts only on a second press, after the first has said what it starts
-        if (McpRules.IsLocal(server) && !_clients.ContainsKey(server.Id) && _armed != server.Id)
+        // round 41: a program on this PC that is not running (never started, or stopped after a failure) starts only on a second press,
+        // after the first has said what it starts; Send never starts it (round 41 review)
+        var client = ClientFor(server);
+        if (client.NeedsStart)
         {
-            _armed = server.Id; Status.Text = McpRules.SaidStartsProgram(McpRules.ProgramName(server.Program));
-            return Task.CompletedTask;
+            if (!_confirm.Confirm(server)) { Status.Text = McpRules.SaidStartsProgram(McpRules.ProgramName(server.Program)); return Task.CompletedTask; }
+            client.PermitStart();
         }
-        _armed = null;
         return Attempt("Asking the server for its tools…", async ct =>
         {
-            _tools = await ClientFor(server).ListToolsAsync(ct);
+            _tools = await client.ListToolsAsync(ct);
             Tools.Items.Clear();
             foreach (var t in _tools) Tools.Items.Add(new ComboBoxItem { Content = t.Title.Length > 0 ? $"{t.Title} ({t.Name})" : t.Name, Tag = t.Name });
             Tools.SelectedIndex = _tools.Count > 0 ? 0 : -1;

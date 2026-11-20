@@ -38,7 +38,10 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   eq(await status(), GOLD.elsaSaid.filled, 'E4 both filled in: said to be used once IT has set its variables');
   await p.fill('#elsaHeader', 'Host'); await settle();
   ok((await status()).startsWith('Host is a header this app sets itself'), 'E5 a header the app sets itself is refused, as in the app');
-  await p.fill('#elsaHeader', 'Authorization'); await settle();
+  await p.fill('#elsaHeader', 'Authorization'); await p.fill('#elsaPath', 'output..text'); await settle();
+  eq(await p.evaluate(() => [elsaFilled(state.elsa), document.getElementById('elsaStatus').textContent.startsWith('The reply path is not valid')]), [false, true],
+    'E5b a reply path that cannot be used is said, and Elsa does not count as filled in (round 41 review)');
+  await p.fill('#elsaPath', 'output.text'); await settle();
   eq(await p.evaluate(() => { const t = backupText(); const saved = JSON.parse(t).settings.elsa; state.elsa = { header: 'x', scheme: '', template: '', path: '' }; importBackup(t);
     const back = { ...state.elsa }; const x = JSON.parse(t); delete x.settings.elsa; importBackup(JSON.stringify(x)); return [saved.path, back.template, state.elsa.path, document.getElementById('elsaPath').value]; }),
     ['output.text', '{"q":"{{user}}","agent":"{{agent}}"}', 'output.text', 'output.text'], 'E6 Elsa\'s fields are in a backup and come back; an older backup keeps what the person has now');
@@ -53,6 +56,12 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   await p.fill('#mcpList [aria-label="Program of MCP server 1"]', 'C:\\Tools\\run.bat'); await p.fill('#mcpList [aria-label="SHA-256 of MCP server 1"]', 'a'.repeat(64));
   await p.click('#mcpList [data-mcp] input[type=checkbox]'); await settle();
   eq(await p.evaluate(() => state.mcp[0].enabled), false, 'P3 a script is refused: only an .exe by its full path');
+  const refused = [];
+  for (const bad of ['C:\\Tools\\notes.txt:mcp.exe', 'C:\\Tools\\..\\Windows\\mcp.exe', 'C:\\Tools.\\mcp.exe', 'C:/Tools/mcp.exe']) {
+    await p.fill('#mcpList [aria-label="Program of MCP server 1"]', bad); await p.click('#mcpList [data-mcp] input[type=checkbox]'); await settle(60);
+    refused.push(await p.evaluate(() => state.mcp[0].enabled));
+  }
+  eq(refused, [false, false, false, false], 'P3b an alternate stream, "..", a folder ending in a dot and forward slashes are refused (round 41 review)');
   await p.fill('#mcpList [aria-label="Program of MCP server 1"]', '"C:\\Program Files\\Example\\mcp-server.exe"');
   await p.fill('#mcpList [aria-label="Arguments of MCP server 1"]', '--stdio\n\n --quiet ');
   await p.click('#mcpList [data-mcp] input[type=checkbox]'); await settle();
@@ -63,6 +72,12 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   await p.click('#mcpList [data-mcp] button:has-text("Test")'); await settle();
   eq([t1, await p.evaluate(() => document.querySelector('#mcpList [role=status]').textContent)], [GOLD.programSaid.starts, await p.evaluate(() => MCP_SAID.programSim)],
     'P5 Test says what it would start, and only a second press goes on (this page starts nothing)');
+  await p.click('#mcpList [data-mcp] button:has-text("Test")'); await settle();
+  await p.fill('#mcpList [aria-label="Arguments of MCP server 1"]', '--stdio'); await settle();
+  await p.click('#mcpList [data-mcp] button:has-text("Test")'); await settle();
+  eq(await p.evaluate(() => document.querySelector('#mcpList [role=status]').textContent), GOLD.programSaid.starts,
+    'P5b an edit between the two presses asks again, for the program as it now is (round 41 review)');
+  await p.fill('#mcpList [aria-label="Arguments of MCP server 1"]', '--stdio\n--quiet'); await settle();
   await p.evaluate(() => openMcp('')); await settle();
   await p.click('#mwList'); await settle();
   const w1 = await p.evaluate(() => document.getElementById('mwStatus').textContent);

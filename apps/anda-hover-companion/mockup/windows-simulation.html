@@ -4862,7 +4862,7 @@ function connState(){                   /* what this page has switched on. It co
   const agents = state.agents.filter(a => a.enabled).map(a => ({ name:shown(a.name, 60) || "Agent", where:hostOf(a.api && a.api.endpoint), auto:a.auto !== 0 }));
   const outlook = state.outlook.on ? { where:state.outlook.cloud === "us" ? "login.microsoftonline.us and graph.microsoft.us" : "login.microsoftonline.com and graph.microsoft.com" } : null;
   /* round 40: an MCP server counts when it is switched on and its address could be used; round 41: a program when it is on (named as IT approved it) */
-  const mcp = state.mcp.filter(m => m.enabled && (m.isProgram || mcpAddressProblem(m.endpoint) === null)).map(m => ({ name:shown(m.name, 60) || "MCP server", where:mcpWhere(m) }));
+  const mcp = state.mcp.filter(m => m.enabled && mcpProblem(m) === null).map(m => ({ name:shown(m.name, 60) || "MCP server", where:mcpWhere(m) }));
   return { ai, agents, outlook, mcp };
 }
 let connWas = null;                     /* what was on at the last look, so that a change is written to the event log once */
@@ -6375,7 +6375,7 @@ const MCP_SAID = { sends:"Only when you press Test or Send in MCP tools: the sta
   testSim:n => `Simulated: ${n} tool${n === 1 ? "" : "s"} offered by the fictional demo server. This page made no request.`,
   testOther:"Simulation: no request was made. In the Windows app, Test starts a session with this server and lists its tools.",
   argsLabel:"Arguments (JSON), filled in from the tool's description and the text you sent from Ask, if any",
-  programHint:"Only a program IT has approved for this PC: its full path (an .exe), its SHA-256 exactly as IT gives it, and any arguments IT names, one per line. The app checks the file's SHA-256 before each start, holds the file so it cannot be changed while it starts, and starts it directly, without a command window or a script. With nothing entered here, no program can be started.",
+  programHint:"Only a program IT has approved for this PC: its full path (an .exe), its SHA-256 exactly as IT gives it, and any arguments IT names, one per line. The app checks the file's SHA-256 before each start, holds the file so it cannot be changed while it starts, and starts it directly, without a command window or a script, and without this app's tokens. The check covers the .exe file itself, not files it loads, so IT should name a program in a folder only administrators can change, such as C:\\Program Files. With nothing entered here, no program can be started.",
   startsProgram:name => `This starts ${name} on this PC. Press again to start it.`,
   programSim:"Simulation: no program is started. In the Windows app, the second press checks the program's SHA-256 and starts it, and Test lists its tools." };
 /* round 41: a program on this PC, as the app's McpRules: a full path to an .exe on a drive, and a SHA-256 of 64 hex digits */
@@ -6385,10 +6385,17 @@ const mcpProgramName = p => { const t = mcpProgramPath(p), i = t.lastIndexOf("\\
 function mcpProgramProblem(program, sha){
   const p = mcpProgramPath(program);
   if(!p) return "Please enter the program's full path, for example C:\\Program Files\\Example\\mcp-server.exe.";
-  if(!/^[A-Za-z]:\\[^<>"|?*\u0000-\u001f]*\.exe$/i.test(p)) return "Only a program on a drive of this PC, by its full path to an .exe (for example C:\\Program Files\\Example\\mcp-server.exe), can be used. Nothing was started.";
+  /* a drive letter, then folders and a name with none of < > : " / \ | ? * or a control character, each folder ending in neither a dot nor a
+     space (so no ".", "..", empty folder or alternate stream), and the name ending in .exe: the app's pattern (round 41 review) */
+  if(!/^[A-Za-z]:\\(?:[^<>:"/\\|?*\u0000-\u001f]*[^<>:"/\\|?*\u0000-\u001f. ]\\)*[^<>:"/\\|?*\u0000-\u001f]*\.exe$/i.test(p)) return "Only a program on a drive of this PC, by its full path to an .exe (for example C:\\Program Files\\Example\\mcp-server.exe), can be used. Nothing was started.";
   if(!/^[0-9a-f]{64}$/.test(String(sha == null ? "" : sha).trim().toLowerCase())) return "Please enter the program's SHA-256 exactly as IT gives it: 64 letters and digits. Nothing was started.";
   return null;
 }
+/* what keeps a server from being used, or null: one rule for loading, the Settings rows and the Connections window, as the app's McpRules.Problem */
+const mcpProblem = m => m.isProgram ? mcpProgramProblem(m.program, m.sha) : mcpAddressProblem(m.endpoint);
+/* a program starts only on the second press for the same program, SHA-256 and arguments; an edit or another row asks again (McpStartConfirm) */
+const mcpConfirm = { armed:null, key:m => [m.id, m.program, m.sha, (m.args || []).join("\u0002")].join("\u0001"),
+  confirm(m){ const k = this.key(m); if(this.armed === k){ this.armed = null; return true; } this.armed = k; return false; }, clear(){ this.armed = null; } };
 const mcpWhere = m => m.isProgram ? "this PC: " + mcpProgramName(m.program) : hostOf(m.endpoint);
 /* the address, as the app's ApiTarget.Address: https:// only, http:// for this PC only, no user name or password */
 function mcpAddressProblem(endpoint){
@@ -6413,7 +6420,7 @@ function mcpNormalize(list){
       args:(Array.isArray(s.args) ? s.args : []).map(a => String(a == null ? "" : a).trim()).filter(a => a.length > 0).slice(0, MCP_MAX_ARGS).map(a => a.slice(0, 500)) });
     const kept = out[out.length - 1];
     /* on only when it can be used: a server with an address, or a program named as IT approved it */
-    kept.enabled = !!s.enabled && (kept.isProgram ? mcpProgramProblem(kept.program, kept.sha) === null : endpoint.length > 0);
+    kept.enabled = !!s.enabled && mcpProblem(kept) === null;
   }
   return out;
 }
@@ -6454,22 +6461,22 @@ function mcpDemoCall(tool, args){
 }
 const mcpIsDemo = s => s.endpoint === MCP_DEMO.endpoint;
 function paintMcpList(){
-  const box = $("mcpList"); box.replaceChildren(); $("mcpHint").textContent = MCP_SAID.hint;
+  const box = $("mcpList"); box.replaceChildren(); mcpConfirm.clear(); $("mcpHint").textContent = MCP_SAID.hint;
   state.mcp.forEach((s, i) => {
     const row = h("div", { class:"find note", "data-mcp":s.id });
     /* what keeps a row from being used, said where it is typed: no address, or a program not named as IT approved it (round 41) */
-    const problem = () => s.isProgram ? mcpProgramProblem(s.program, s.sha) : mcpAddressProblem(s.endpoint);
+    const problem = () => mcpProblem(s);
     const field = (key, label, ph, lines) => { const inp = h(lines ? "textarea" : "input", lines ? { rows:"2", placeholder:ph, aria:`${label} of MCP server ${i + 1}` } : { type:"text", value:s[key], placeholder:ph, aria:`${label} of MCP server ${i + 1}` });
       if(lines) inp.value = (s[key] || []).join("\n");
-      inp.addEventListener("input", () => { s[key] = lines ? inp.value.split("\n").map(a => a.trim()).filter(a => a.length > 0).slice(0, MCP_MAX_ARGS) : inp.value;
+      inp.addEventListener("input", () => { mcpConfirm.clear(); s[key] = lines ? inp.value.split("\n").map(a => a.trim()).filter(a => a.length > 0).slice(0, MCP_MAX_ARGS) : inp.value;
         if(s.enabled && problem()){ s.enabled = false; on.checked = false; status.textContent = problem(); } paintConnBars(); }); return inp; };
     const on = h("input", { type:"checkbox", aria:`Use MCP server ${i + 1}` }); on.checked = s.enabled;
     const status = h("div", { class:"hint", role:"status", style:"margin:4px 0 0" });
     on.addEventListener("change", () => { const bad = on.checked ? problem() : null; if(bad){ on.checked = false; status.textContent = bad; return; } s.enabled = on.checked; paintConnBars(); });
     const test = h("button", { class:"pill quiet", type:"button", text:"Test" }), del = h("button", { class:"pill quiet", type:"button", text:"Remove" });
-    let armed = false;      /* a program starts only on the second press, as in the app */
     test.addEventListener("click", () => {
-      if(s.isProgram){ const bad = problem(); if(bad){ status.textContent = bad; return; } if(!armed){ armed = true; status.textContent = MCP_SAID.startsProgram(mcpProgramName(s.program)); return; } armed = false; status.textContent = MCP_SAID.programSim; return; }
+      if(s.isProgram){ const bad = problem(); if(bad){ mcpConfirm.clear(); status.textContent = bad; return; }
+        status.textContent = mcpConfirm.confirm(s) ? MCP_SAID.programSim : MCP_SAID.startsProgram(mcpProgramName(s.program)); return; }
       const bad = mcpAddressProblem(s.endpoint) || (s.env && !/^[A-Za-z_][A-Za-z0-9_]{0,127}$/.test(s.env) ? "That does not look like an environment variable name. Please enter the NAME of the variable, never the token itself." : null);
       status.textContent = bad || (mcpIsDemo(s) ? MCP_SAID.testSim(MCP_DEMO.tools.length) : MCP_SAID.testOther); if(!bad && mcpIsDemo(s)) logEvent("sent", `MCP tools listed, ${MCP_DEMO.tools.length} tools`); });
     del.addEventListener("click", () => { state.mcp.splice(state.mcp.indexOf(s), 1); paintMcpList(); paintConnBars(); });
@@ -6501,14 +6508,12 @@ function openMcp(text){
 }
 function mwServer(){ return state.mcp.find(s => s.enabled && s.id === $("mwServer").value) || null; }
 /* the tools are asked for only when the person presses List tools, as in the app */
-let mwArmed = null;      /* round 41: the program whose start the person was told about */
 function mwTools(listed){
   const s = mwServer(), box = $("mwTool");
   if(listed && s && s.isProgram){ box.replaceChildren(); mwReset();
-    if(mwArmed !== s.id){ mwArmed = s.id; $("mwStatus").textContent = MCP_SAID.startsProgram(mcpProgramName(s.program)); }
-    else { mwArmed = null; $("mwStatus").textContent = MCP_SAID.programSim; }
+    $("mwStatus").textContent = mcpConfirm.confirm(s) ? MCP_SAID.programSim : MCP_SAID.startsProgram(mcpProgramName(s.program));
     mwTool(); return; }
-  if(!listed) mwArmed = null;
+  if(!listed) mcpConfirm.clear();
   box.replaceChildren(); mwReset();
   const tools = listed && s && mcpIsDemo(s) ? MCP_DEMO.tools : [];
   tools.forEach(t => box.append(h("option", { value:t.name, text:t.title ? `${t.title} (${t.name})` : t.name })));
@@ -6577,7 +6582,8 @@ function elsaProblem(e){
   if(!validPath(e.path)) return "The reply path is not valid. Please use names and [numbers], for example choices[0].message.content";
   return authHeaderProblem(e.header, e.scheme);
 }
-const elsaFilled = e => String(e.template || "").trim().length > 0 && String(e.path || "").trim().length > 0;
+/* filled in only when both parts are there and nothing is wrong with them (round 41 review: values that could not be used counted as filled) */
+const elsaFilled = e => String(e.template || "").trim().length > 0 && String(e.path || "").trim().length > 0 && elsaProblem(e) === null;
 function paintElsa(){
   const e = state.elsa; $("elsaHint").textContent = ELSA_SAID.hint;
   $("elsaHeader").value = e.header; $("elsaScheme").value = e.scheme; $("elsaTemplate").value = e.template; $("elsaPath").value = e.path;

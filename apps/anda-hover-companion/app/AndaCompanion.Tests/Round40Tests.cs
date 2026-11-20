@@ -307,7 +307,7 @@ public class Round40Tests : IClassFixture<HeadlessFixture>
     {
         using var handler = McpClient.DefaultHandler();
         Assert.False(handler.AllowAutoRedirect);                                                   // a token is never carried to another address
-        Assert.Contains("DefaultHandler()", Round37Tests.Code(Folder("app", "AndaCompanion", "Services", "McpTransports.cs")).Split('\n').Single(l => l.Contains("_http = handler is null")));
+        Assert.Contains("DefaultHandler()", Round37Tests.Code(Folder("app", "AndaCompanion", "Services", "McpHttp.cs")).Split('\n').Single(l => l.Contains("_http = handler is null")));
     }
 
     [Fact]
