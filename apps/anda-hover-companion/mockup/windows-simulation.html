@@ -1599,11 +1599,18 @@ PS C:\work&gt; </div>
     </details>
     <p class="hint">Auto uses an AI access key (ANTHROPIC_API_KEY) or the agency AI service (Elsa) set up on this PC, if one exists, and is otherwise offline. Offline never sends anything, and the app is fully functional offline. The banner at the top says Connected only after a request has succeeded. This page cannot make requests, so it never shows Connected.</p>
     <div class="wrap" id="apiPresets" role="group" aria-label="Fill in My API for a common kind of service"></div>
+    <details class="myapi" id="elsaApi"><summary>Elsa: the request body and reply path, from Elsa's team</summary>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><input type="text" id="elsaHeader" placeholder="Header, for example Authorization" aria-label="Elsa token header"><input type="text" id="elsaScheme" placeholder="Before the token, for example Bearer" aria-label="Elsa token prefix"></div>
+      <textarea id="elsaTemplate" rows="4" style="font:11.5px ui-monospace,Consolas,monospace" aria-label="Elsa request body" placeholder="Request body (JSON), as Elsa's team gives it. Placeholders: {{system}} {{user}} {{max_tokens}} {{model}} {{agent}}"></textarea>
+      <input type="text" id="elsaPath" placeholder="Where the reply text is, for example choices[0].message.content" aria-label="Elsa reply path">
+      <p class="hint" id="elsaStatus" role="status"></p>
+      <p class="hint" id="elsaHint"></p>
+    </details>
     <hr class="hair">
     <div class="lbl">MCP SERVERS · OPTIONAL</div>
     <div class="sim-note">Rehearsal only. This page contacts no server: Test and Send are simulated, and the fictional demo server answers from this page.</div>
     <div id="mcpList"></div>
-    <div style="display:flex;flex-wrap:wrap;gap:8px"><button class="pill quiet" id="mcpAdd" type="button">Add an MCP server</button><button class="pill quiet" id="mcpAddDemo" type="button">Add the fictional demo server</button></div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px"><button class="pill quiet" id="mcpAdd" type="button">Add an MCP server</button><button class="pill quiet" id="mcpAddLocal" type="button">Add a program on this PC (with IT's approval)</button><button class="pill quiet" id="mcpAddDemo" type="button">Add the fictional demo server</button></div>
     <p class="hint" id="mcpHint"></p>
     <hr class="hair">
     <div class="lbl">OUTLOOK · OPTIONAL, READ-ONLY</div>
@@ -1961,7 +1968,7 @@ PS C:\work&gt; </div>
     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"><button class="pill quiet" id="mwPreview" type="button">Show what will be sent</button><button class="pill" id="mwSend" type="button" disabled>Send</button><button class="pill quiet" id="mwCopy" type="button" disabled>Copy the answer</button></div>
     <pre id="mwShown" class="hint" style="white-space:pre-wrap;margin:8px 0 0"></pre>
     <div id="mwStatus" role="status" class="hint"></div>
-    <pre id="mwAnswer" style="white-space:pre-wrap;font:12px ui-monospace,Consolas,monospace;margin:6px 0 0;max-height:220px;overflow:auto" tabindex="0" aria-label="The server's answer"></pre>
+    <pre id="mwAnswer" style="white-space:pre-wrap;font:12px ui-monospace,Consolas,monospace;margin:6px 0 0;max-height:220px;overflow:auto" tabindex="0" role="region" aria-label="The server's answer"></pre>
   </div>
   <!-- ===== prompt library ===== -->
   <div class="app-win" id="plib" role="dialog" aria-label="Prompt library">
@@ -2688,6 +2695,7 @@ const state = { tz:"", staleDays:7, refStaleDays:45, oldRef:false, oldData:false
   mcp:[],            /* round 40: the MCP servers the person connects to */
   data:{ portfolio:null, notes:null, ref:null }, quickNotes:{}, andaUrl:"https://tracker.example/anda/{anda}",
   myApi:{ name:"My API", endpoint:"", header:"Authorization", scheme:"Bearer", env:"", model:"", template:"", path:"choices[0].message.content" },
+  elsa:{ header:"Authorization", scheme:"Bearer", template:"", path:"" },      /* round 41: Elsa's request body and reply path, from Elsa's team */
   replies:null,
   density:"comfortable", ts:"standard", lookupStyle:"box", recentsOn:true, recents:[], pins:[], lastLookOn:true, weekTodosOn:true,
   cardFields:["applicant", "established", "project", "agentCo", "agentEmail", "applicantEmail", "myNotes", "doc356h", "doc32p1"],
@@ -4853,8 +4861,8 @@ function connState(){                   /* what this page has switched on. It co
     : mine ? { name:shown(state.myApi.name, 60) || "My API", where:hostOf(state.myApi.endpoint) } : null;
   const agents = state.agents.filter(a => a.enabled).map(a => ({ name:shown(a.name, 60) || "Agent", where:hostOf(a.api && a.api.endpoint), auto:a.auto !== 0 }));
   const outlook = state.outlook.on ? { where:state.outlook.cloud === "us" ? "login.microsoftonline.us and graph.microsoft.us" : "login.microsoftonline.com and graph.microsoft.com" } : null;
-  /* round 40: an MCP server counts when it is switched on and its address could be used */
-  const mcp = state.mcp.filter(m => m.enabled && mcpAddressProblem(m.endpoint) === null).map(m => ({ name:shown(m.name, 60) || "MCP server", where:hostOf(m.endpoint) }));
+  /* round 40: an MCP server counts when it is switched on and its address could be used; round 41: a program when it is on (named as IT approved it) */
+  const mcp = state.mcp.filter(m => m.enabled && (m.isProgram || mcpAddressProblem(m.endpoint) === null)).map(m => ({ name:shown(m.name, 60) || "MCP server", where:mcpWhere(m) }));
   return { ai, agents, outlook, mcp };
 }
 let connWas = null;                     /* what was on at the last look, so that a change is written to the event log once */
@@ -6147,7 +6155,7 @@ const EV_PHRASES = [
   "settings restored from a backup", "a list was restored from a backup", "a to-do item was put back from the archive", "weekly copy of the sheet switched on", "weekly copy of the sheet switched off",
   "settings file could not be used as it was at start", "ANDA to-do list could not be used as it was at start", "to-do list could not be used as it was at start", "prompt library could not be used as it was at start", "quick replies could not be used as it was at start",
   "kept copies of the sheet",
-  "at start: MCP servers on: #", "MCP servers switched on: # to #", "MCP servers changed", "MCP tools listed, # tools", "MCP request, # characters", "MCP request: no answer", "MCP request (simulated), # characters",
+  "at start: MCP servers on: #", "MCP servers switched on: # to #", "MCP servers changed", "MCP tools listed, # tools", "MCP request, # characters", "MCP request: no answer", "MCP request (simulated), # characters", "MCP program started", "MCP program stopped",
 ];
 const EV_NUMBER = /[0-9]{1,3}(?:,[0-9]{3})*/g;      /* a count, written with commas: 7, 1,234 */
 function eventEntry(type, detail, whenMs){
@@ -6260,8 +6268,9 @@ const GUIDE_SAID = {
 /* The guide opens by itself once, at the first start, and never again by itself. "seen" is what the PC remembers; anything but true means it has not been shown. */
 function guideOpensAtStart(seen){ return seen !== true; }
 
-const APP_VERSION = "Prototype, round 40";
+const APP_VERSION = "Prototype, round 41";
 const CHANGES = [
+  { round:41, items:["Elsa can be filled in from Settings when Elsa's team gives its request body and reply path (Settings, AI and connections, Elsa); left blank, Elsa stays offline. The address and token stay in the environment variables IT sets.", "An MCP server can also be a program on this PC that IT approved: added with “Add a program on this PC”, by its full path and SHA-256, which the app checks before each start. The app asks before it starts the program and stops it when you are done; with nothing entered, no program can be started."] },
   { round:40, items:["MCP servers: connect to tools that answer over https (Settings, AI and connections). Test lists a server's tools; MCP tools in the tray menu's More shows exactly what a call sends before you press Send. Nothing is sent by itself and nothing is kept.", "My API can be filled in for a common kind of service with one press: OpenAI-compatible, Azure OpenAI, or Ollama on this PC."] },
   { round:39, items:["Settings has a second switch beside “Since you last looked”: whether next week in Today also lists your to-do items. Off, it reads neither to-do list for Today and shows no titles."] },
   { round:38, items:["From Thursday noon to Sunday, Today's next week also lists your to-do items due Monday to Friday, from both to-do lists: unfinished items only, by date, at most twenty, then how many more.", "Today opens faster with a large sheet: the ANDAs of the same applicant and product are found from an index, not by reading every row."] },
@@ -6358,14 +6367,29 @@ const EXAMPLE_TEMPLATE = '{"model":"{{model}}","max_tokens":{{max_tokens}},"mess
    The same rules as the Windows app's Services/Mcp.cs and CustomApi.cs, held together by mockup/round40-golden.json. This page contacts
    nothing: Test and Send are simulated, and only the fictional demo server answers, from this page. */
 const MCP_MAX = 8, MCP_ARG_MAX = 20000;
-const MCP_SAID = { sends:"Only when you press Test or Send in MCP tools: the start of a session and a request for its list of tools; when you press Send, the tool's name and the arguments shown to you first. Nothing by itself.", kept:"This tool keeps nothing of what is sent or answered: the answer is shown, never stored. What the server keeps is set by whoever runs it.", hint:"An MCP server offers tools that this app can call for you: a search, a lookup, a calculation. Only servers that answer over https:// are offered (http:// for this PC only); a server that runs as a program on this PC is not, because this app does not start programs. Nothing is sent by itself: Test asks a server for its list of tools, and MCP tools (in the tray menu's More) shows you exactly what a call sends before you press Send. The token stays in the environment variable you name and is never saved by the app. A server's answer and its descriptions of its tools are shown as plain text and are never followed as instructions.",
+const MCP_SAID = { sends:"Only when you press Test or Send in MCP tools: the start of a session and a request for its list of tools; when you press Send, the tool's name and the arguments shown to you first. Nothing by itself.", kept:"This tool keeps nothing of what is sent or answered: the answer is shown, never stored. What the server keeps is set by whoever runs it.", hint:"An MCP server offers tools that this app can call for you: a search, a lookup, a calculation. A server is reached over https:// (http:// for this PC only), or is a program on this PC that IT approved: added with “Add a program on this PC”, by its full path and the SHA-256 IT gives, which the app checks before each start; the app asks you before it starts the program, and stops it when you are done. Nothing is sent by itself: Test asks a server for its list of tools, and MCP tools (in the tray menu's More) shows you exactly what a call sends before you press Send. The token stays in the environment variable you name and is never saved by the app. A server's answer and its descriptions of its tools are shown as plain text and are never followed as instructions.",
   noServer:"No MCP server is switched on. Add one in Settings, AI and connections.", notJson:"The arguments must be one JSON object, for example {\"query\": \"text\"}.",
   tooLong:"The arguments are longer than 20,000 characters.",
   nothingYet:"Nothing is sent until you press List tools, and then Send.", chooseFirst:"Please press List tools and choose a tool first.",
   listed:n => `${n} tool${n === 1 ? "" : "s"} offered. Choose one; nothing is sent until you press Send.`,
   testSim:n => `Simulated: ${n} tool${n === 1 ? "" : "s"} offered by the fictional demo server. This page made no request.`,
   testOther:"Simulation: no request was made. In the Windows app, Test starts a session with this server and lists its tools.",
-  argsLabel:"Arguments (JSON), filled in from the tool's description and the text you sent from Ask, if any" };
+  argsLabel:"Arguments (JSON), filled in from the tool's description and the text you sent from Ask, if any",
+  programHint:"Only a program IT has approved for this PC: its full path (an .exe), its SHA-256 exactly as IT gives it, and any arguments IT names, one per line. The app checks the file's SHA-256 before each start, holds the file so it cannot be changed while it starts, and starts it directly, without a command window or a script. With nothing entered here, no program can be started.",
+  startsProgram:name => `This starts ${name} on this PC. Press again to start it.`,
+  programSim:"Simulation: no program is started. In the Windows app, the second press checks the program's SHA-256 and starts it, and Test lists its tools." };
+/* round 41: a program on this PC, as the app's McpRules: a full path to an .exe on a drive, and a SHA-256 of 64 hex digits */
+const MCP_MAX_ARGS = 20;
+const mcpProgramPath = p => { const t = String(p == null ? "" : p).trim(); return t.length >= 2 && t[0] === '"' && t[t.length - 1] === '"' ? t.slice(1, -1).trim() : t; };
+const mcpProgramName = p => { const t = mcpProgramPath(p), i = t.lastIndexOf("\\"); return i < 0 ? t : t.slice(i + 1); };
+function mcpProgramProblem(program, sha){
+  const p = mcpProgramPath(program);
+  if(!p) return "Please enter the program's full path, for example C:\\Program Files\\Example\\mcp-server.exe.";
+  if(!/^[A-Za-z]:\\[^<>"|?*\u0000-\u001f]*\.exe$/i.test(p)) return "Only a program on a drive of this PC, by its full path to an .exe (for example C:\\Program Files\\Example\\mcp-server.exe), can be used. Nothing was started.";
+  if(!/^[0-9a-f]{64}$/.test(String(sha == null ? "" : sha).trim().toLowerCase())) return "Please enter the program's SHA-256 exactly as IT gives it: 64 letters and digits. Nothing was started.";
+  return null;
+}
+const mcpWhere = m => m.isProgram ? "this PC: " + mcpProgramName(m.program) : hostOf(m.endpoint);
 /* the address, as the app's ApiTarget.Address: https:// only, http:// for this PC only, no user name or password */
 function mcpAddressProblem(endpoint){
   const ep = (endpoint || "").trim();
@@ -6384,7 +6408,12 @@ function mcpNormalize(list){
     let id = base; for(let n = 2; ids.has(id); n++){ const suffix = "-" + n; id = (base.length + suffix.length > 40 ? base.slice(0, 40 - suffix.length).replace(/-+$/, "") : base) + suffix; } ids.add(id);
     const endpoint = String(s.endpoint || "").trim();
     out.push({ id, name:name || "MCP server", endpoint, header:String(s.header == null ? "Authorization" : s.header).trim(), scheme:String(s.scheme == null ? "Bearer" : s.scheme).trim(),
-      env:String(s.env || "").trim(), enabled:!!s.enabled && endpoint.length > 0, timeout:[10, 30, 60, 120].includes(s.timeout) ? s.timeout : 30 });
+      env:String(s.env || "").trim(), timeout:[10, 30, 60, 120].includes(s.timeout) ? s.timeout : 30,
+      isProgram:s.isProgram === true, program:mcpProgramPath(s.program), sha:String(s.sha == null ? "" : s.sha).trim().toLowerCase(),
+      args:(Array.isArray(s.args) ? s.args : []).map(a => String(a == null ? "" : a).trim()).filter(a => a.length > 0).slice(0, MCP_MAX_ARGS).map(a => a.slice(0, 500)) });
+    const kept = out[out.length - 1];
+    /* on only when it can be used: a server with an address, or a program named as IT approved it */
+    kept.enabled = !!s.enabled && (kept.isProgram ? mcpProgramProblem(kept.program, kept.sha) === null : endpoint.length > 0);
   }
   return out;
 }
@@ -6428,23 +6457,36 @@ function paintMcpList(){
   const box = $("mcpList"); box.replaceChildren(); $("mcpHint").textContent = MCP_SAID.hint;
   state.mcp.forEach((s, i) => {
     const row = h("div", { class:"find note", "data-mcp":s.id });
-    const field = (key, label, ph) => { const inp = h("input", { type:"text", value:s[key], placeholder:ph, aria:`${label} of MCP server ${i + 1}` });
-      inp.addEventListener("input", () => { s[key] = inp.value; if(key === "endpoint" && !inp.value.trim()) { s.enabled = false; on.checked = false; } paintConnBars(); }); return inp; };
+    /* what keeps a row from being used, said where it is typed: no address, or a program not named as IT approved it (round 41) */
+    const problem = () => s.isProgram ? mcpProgramProblem(s.program, s.sha) : mcpAddressProblem(s.endpoint);
+    const field = (key, label, ph, lines) => { const inp = h(lines ? "textarea" : "input", lines ? { rows:"2", placeholder:ph, aria:`${label} of MCP server ${i + 1}` } : { type:"text", value:s[key], placeholder:ph, aria:`${label} of MCP server ${i + 1}` });
+      if(lines) inp.value = (s[key] || []).join("\n");
+      inp.addEventListener("input", () => { s[key] = lines ? inp.value.split("\n").map(a => a.trim()).filter(a => a.length > 0).slice(0, MCP_MAX_ARGS) : inp.value;
+        if(s.enabled && problem()){ s.enabled = false; on.checked = false; status.textContent = problem(); } paintConnBars(); }); return inp; };
     const on = h("input", { type:"checkbox", aria:`Use MCP server ${i + 1}` }); on.checked = s.enabled;
     const status = h("div", { class:"hint", role:"status", style:"margin:4px 0 0" });
-    on.addEventListener("change", () => { const bad = on.checked ? mcpAddressProblem(s.endpoint) : null; if(bad){ on.checked = false; status.textContent = bad; return; } s.enabled = on.checked; paintConnBars(); });
+    on.addEventListener("change", () => { const bad = on.checked ? problem() : null; if(bad){ on.checked = false; status.textContent = bad; return; } s.enabled = on.checked; paintConnBars(); });
     const test = h("button", { class:"pill quiet", type:"button", text:"Test" }), del = h("button", { class:"pill quiet", type:"button", text:"Remove" });
-    test.addEventListener("click", () => { const bad = mcpAddressProblem(s.endpoint) || (s.env && !/^[A-Za-z_][A-Za-z0-9_]{0,127}$/.test(s.env) ? "That does not look like an environment variable name. Please enter the NAME of the variable, never the token itself." : null);
+    let armed = false;      /* a program starts only on the second press, as in the app */
+    test.addEventListener("click", () => {
+      if(s.isProgram){ const bad = problem(); if(bad){ status.textContent = bad; return; } if(!armed){ armed = true; status.textContent = MCP_SAID.startsProgram(mcpProgramName(s.program)); return; } armed = false; status.textContent = MCP_SAID.programSim; return; }
+      const bad = mcpAddressProblem(s.endpoint) || (s.env && !/^[A-Za-z_][A-Za-z0-9_]{0,127}$/.test(s.env) ? "That does not look like an environment variable name. Please enter the NAME of the variable, never the token itself." : null);
       status.textContent = bad || (mcpIsDemo(s) ? MCP_SAID.testSim(MCP_DEMO.tools.length) : MCP_SAID.testOther); if(!bad && mcpIsDemo(s)) logEvent("sent", `MCP tools listed, ${MCP_DEMO.tools.length} tools`); });
     del.addEventListener("click", () => { state.mcp.splice(state.mcp.indexOf(s), 1); paintMcpList(); paintConnBars(); });
-    row.append(h("label", { class:"opt" }, on, " Use this server"), field("name", "Name", "A name, for example Division search"), field("endpoint", "Address", "https://… (the server's MCP address)"),
-      h("div", { style:"display:grid;grid-template-columns:1fr 1fr;gap:8px" }, field("header", "Token header", "Header, for example Authorization"), field("scheme", "Before the token", "Before the token, for example Bearer")),
-      field("env", "Token variable", "NAME of the environment variable that holds the token (never the token)"), h("div", { style:"display:flex;gap:8px;margin-top:6px" }, test, del), status);
+    const parts = s.isProgram
+      ? [field("program", "Program", "Full path of the .exe IT approved, for example C:\\Program Files\\Example\\mcp-server.exe"), field("sha", "SHA-256", "The program's SHA-256, exactly as IT gives it (64 letters and digits)"),
+         field("args", "Arguments", "Arguments IT names, one per line (often none)", true), h("p", { class:"hint", text:MCP_SAID.programHint })]
+      : [field("endpoint", "Address", "https://… (the server's MCP address)"),
+         h("div", { style:"display:grid;grid-template-columns:1fr 1fr;gap:8px" }, field("header", "Token header", "Header, for example Authorization"), field("scheme", "Before the token", "Before the token, for example Bearer")),
+         field("env", "Token variable", "NAME of the environment variable that holds the token (never the token)")];
+    row.append(h("label", { class:"opt" }, on, s.isProgram ? " Use this program" : " Use this server"), field("name", "Name", "A name, for example Division search"), ...parts,
+      h("div", { style:"display:flex;gap:8px;margin-top:6px" }, test, del), status);
     box.append(row);
   });
-  $("mcpAdd").disabled = $("mcpAddDemo").disabled = state.mcp.length >= MCP_MAX;
+  $("mcpAdd").disabled = $("mcpAddLocal").disabled = $("mcpAddDemo").disabled = state.mcp.length >= MCP_MAX;
 }
 $("mcpAdd").addEventListener("click", () => { state.mcp = mcpNormalize([...state.mcp, { name:"MCP server " + (state.mcp.length + 1), endpoint:"", enabled:false }]); paintMcpList(); });
+$("mcpAddLocal").addEventListener("click", () => { state.mcp = mcpNormalize([...state.mcp, { name:"Program " + (state.mcp.length + 1), isProgram:true, enabled:false }]); paintMcpList(); });
 $("mcpAddDemo").addEventListener("click", () => { state.mcp = mcpNormalize([...state.mcp, { name:MCP_DEMO.name, endpoint:MCP_DEMO.endpoint, header:"", scheme:"", enabled:true }]); paintMcpList(); paintConnBars(); });
 /* the MCP tools window */
 let mwSent = null;
@@ -6459,8 +6501,15 @@ function openMcp(text){
 }
 function mwServer(){ return state.mcp.find(s => s.enabled && s.id === $("mwServer").value) || null; }
 /* the tools are asked for only when the person presses List tools, as in the app */
+let mwArmed = null;      /* round 41: the program whose start the person was told about */
 function mwTools(listed){
-  const s = mwServer(), box = $("mwTool"); box.replaceChildren(); mwReset();
+  const s = mwServer(), box = $("mwTool");
+  if(listed && s && s.isProgram){ box.replaceChildren(); mwReset();
+    if(mwArmed !== s.id){ mwArmed = s.id; $("mwStatus").textContent = MCP_SAID.startsProgram(mcpProgramName(s.program)); }
+    else { mwArmed = null; $("mwStatus").textContent = MCP_SAID.programSim; }
+    mwTool(); return; }
+  if(!listed) mwArmed = null;
+  box.replaceChildren(); mwReset();
   const tools = listed && s && mcpIsDemo(s) ? MCP_DEMO.tools : [];
   tools.forEach(t => box.append(h("option", { value:t.name, text:t.title ? `${t.title} (${t.name})` : t.name })));
   if(listed){
@@ -6505,6 +6554,40 @@ API_PRESETS.forEach(p => {
   $("apiPresets").append(b);
 });
 paintMcpList();
+/* round 41: Elsa's request body and reply path, typed when Elsa's team gives them; the app's ElsaMapping.Problem, word for word */
+const ELSA_SAID = { hint:"Fill these in only when Elsa's team gives them. The address and the token stay in the environment variables IT sets (ANDA_ELSA_ENDPOINT, ANDA_ELSA_TOKEN, with ANDA_COMPANION_PROVIDER=elsa); nothing here is a secret. The body uses the same placeholders as My API, and {{agent}} for ANDA_ELSA_AGENT. Left blank, Elsa stays offline and says so.",
+  blank:"Left blank: Elsa stays offline until its request body and reply path are filled in.", filled:"Filled in. Elsa is used when IT has set its environment variables; press Test above to try it." };
+/* the token header, as the app's ApiTarget.Authorization checks it (the token itself is not known to this page) */
+const AUTH_RESERVED = ["host", "connection", "keep-alive", "transfer-encoding", "te", "trailer", "upgrade", "accept", "expect", "cookie", "mcp-session-id", "mcp-protocol-version"];
+function authHeaderProblem(header, scheme){
+  const name = String(header == null ? "" : header).trim(), prefix = String(scheme == null ? "" : scheme).trim();
+  if(!name) return null;
+  if(!/^[!#$%&'*+.^_`|~0-9A-Za-z-]{1,64}$/.test(name)) return "The token header name is not valid: letters, digits and - only, for example Authorization. Nothing was sent.";
+  const low = name.toLowerCase();
+  if(AUTH_RESERVED.includes(low) || low.startsWith("content-") || low.startsWith("proxy-")) return `${name} is a header this app sets itself; please use another name for the token, for example Authorization. Nothing was sent.`;
+  if(![...prefix].every(c => c >= "!" && c <= "~")) return "The text before the token is not valid: one word, for example Bearer, with no space or line break. Nothing was sent.";
+  return null;
+}
+function elsaProblem(e){
+  const template = String(e.template || "").trim().length > 0, path = String(e.path || "").trim().length > 0;
+  if(!template && !path) return null;
+  if(!template) return "Please also paste Elsa's request body; until both are filled in, Elsa stays offline.";
+  if(!path) return "Please also enter where the reply text is (the reply path); until both are filled in, Elsa stays offline.";
+  try{ JSON.parse(fillTemplate(e.template, "model").split("{{agent}}").join("agent")); }catch(err){ return "The request body is not valid JSON once the placeholders are filled in."; }
+  if(!validPath(e.path)) return "The reply path is not valid. Please use names and [numbers], for example choices[0].message.content";
+  return authHeaderProblem(e.header, e.scheme);
+}
+const elsaFilled = e => String(e.template || "").trim().length > 0 && String(e.path || "").trim().length > 0;
+function paintElsa(){
+  const e = state.elsa; $("elsaHint").textContent = ELSA_SAID.hint;
+  $("elsaHeader").value = e.header; $("elsaScheme").value = e.scheme; $("elsaTemplate").value = e.template; $("elsaPath").value = e.path;
+  $("elsaStatus").textContent = elsaProblem(e) || (elsaFilled(e) ? ELSA_SAID.filled : ELSA_SAID.blank);
+}
+[["elsaHeader", "header"], ["elsaScheme", "scheme"], ["elsaTemplate", "template"], ["elsaPath", "path"]].forEach(([id, key]) => $(id).addEventListener("input", () => {
+  state.elsa[key] = key === "template" ? $(id).value : $(id).value.trim();
+  $("elsaStatus").textContent = elsaProblem(state.elsa) || (elsaFilled(state.elsa) ? ELSA_SAID.filled : ELSA_SAID.blank);
+}));
+paintElsa();
 
 /* my data: simulated pickers, so the settings and their effect on the card can be seen without touching a real file */
 const PICKS = {
@@ -8197,6 +8280,7 @@ function snapSettings(){
     keys:{ ...s.keys }, middleClick:s.middle, middleModifier:s.middleMod, tone:s.tone, style:s.style, signOff:s.signoff,
     provider:s.provider, claudeModel:s.claudeModel,
     myApi:{ name:m.name, endpoint:m.endpoint, header:m.header, scheme:m.scheme, env:m.env, model:m.model, template:m.template, path:m.path },
+    elsa:{ header:s.elsa.header, scheme:s.elsa.scheme, template:s.elsa.template, path:s.elsa.path },
     outlook:{ enabled:o.on, cloud:o.cloud, clientId:o.client, tenant:o.tenant, maxItems:o.max }, lens:s.lens,
     actions:JSON.parse(JSON.stringify(s.actions)), agents:JSON.parse(JSON.stringify(s.agents)), todoShowFromData:s.todoAuto, todoRefreshSeconds:s.todoRefresh,
     myTodoMode:s.clMode, adaptive:s.adaptive, allTools:s.allTools,
@@ -8239,7 +8323,9 @@ function applySettings(x){
   /* a backup written before round 37 does not hold the switch: what the person has now stays, as in the app (round 37 review) */
   if(typeof x.sinceLastLook === "boolean") s.lastLookOn = x.sinceLastLook;
   if(typeof x.weekTodos === "boolean") s.weekTodosOn = x.weekTodos;        /* round 39: an older backup keeps the choice the person has now */
-  if(Array.isArray(x.mcpServers)) s.mcp = mcpNormalize(x.mcpServers);        /* round 40: an older backup keeps the servers the person has now */
+  if(Array.isArray(x.mcpServers)) s.mcp = mcpNormalize(x.mcpServers);
+  if(x.elsa && typeof x.elsa === "object"){ const e = x.elsa, t = v => typeof v === "string" ? v : "";      /* round 41: an older backup keeps what the person has now */
+    s.elsa = { header:t(e.header).trim(), scheme:t(e.scheme).trim(), template:t(e.template).length > 20000 ? "" : t(e.template), path:t(e.path).trim() }; }        /* round 40: an older backup keeps the servers the person has now */
   if(!s.lastLookOn){ s.lastLook = null; s.shownLook = null; }
   $("lastLookStatus").textContent = ""; if(isOpen("today")) paintToday();
   s.pins = Array.isArray(x.pins) ? [...new Set(x.pins.filter(six))].slice(0, PIN_MAX) : []; applyDisplay();
@@ -8273,7 +8359,7 @@ function syncSettingsUI(){
   syncAndaUrl();
   const s = state, check = (name, value) => document.querySelectorAll(`input[name=${name}]`).forEach(r => { r.checked = r.value === String(value); });
   check("look", s.look); check("autohide", s.autoHide); check("consent", s.mode); check("tone", s.tone); check("provider", s.provider); check("midmod", s.middleMod); check("todorefresh", s.todoRefresh);
-  check("clmode", s.clMode); check("ts", s.ts); check("density", s.density); check("lkstyle", s.lookupStyle); paintMcpList(); $("setRecents").checked = s.recentsOn; $("setLastLook").checked = s.lastLookOn; $("setWeekTodos").checked = s.weekTodosOn; syncRound19(); $("adaptCheck").checked = s.adaptive; applyEdition();
+  check("clmode", s.clMode); check("ts", s.ts); check("density", s.density); check("lkstyle", s.lookupStyle); paintMcpList(); paintElsa(); $("setRecents").checked = s.recentsOn; $("setLastLook").checked = s.lastLookOn; $("setWeekTodos").checked = s.weekTodosOn; syncRound19(); $("adaptCheck").checked = s.adaptive; applyEdition();
   $("todoAuto").checked = s.todoAuto; renderActions(); renderAgents(); if(isOpen("todo")){ tdApplyTimer(); tdReload(true); }
   $("setUrgent").checked = s.escalate; $("setLead").value = String(s.lead); $("setCapture").checked = s.capture;
   $("setTz").value = s.tz; $("setStale").value = String(s.staleDays); $("setRefStale").value = String(s.refStaleDays); timeTick();

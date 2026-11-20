@@ -484,6 +484,19 @@
                   <TextBlock Classes="hint" Text="Nothing here is a secret: the token stays in the environment variable you name and is never saved by this app. Only https:// addresses are used (http:// for localhost). The body shown is only an example of one common shape; use the shape your own service documents. A reply that does not have text at the path is reported without showing what came back."/>
                 </StackPanel>
               </Expander>
+              <Expander Name="ElsaExpander" Header="Elsa: the request body and reply path, from Elsa's team">
+                <StackPanel Spacing="6" Margin="0,6,0,0">
+                  <Grid ColumnDefinitions="*,8,*">
+                    <TextBox Name="ElsaHeader" Watermark="Header, for example Authorization" AutomationProperties.Name="Elsa token header"/>
+                    <TextBox Grid.Column="2" Name="ElsaScheme" Watermark="Before the token, for example Bearer" AutomationProperties.Name="Elsa token prefix"/>
+                  </Grid>
+                  <TextBox Name="ElsaTemplate" AcceptsReturn="True" TextWrapping="Wrap" Height="96" FontFamily="{DynamicResource C.NumFont}" FontSize="12"
+                           Watermark="Request body (JSON), as Elsa's team gives it. Placeholders: {{system}} {{user}} {{max_tokens}} {{model}} {{agent}}" AutomationProperties.Name="Elsa request body"/>
+                  <TextBox Name="ElsaPath" Watermark="Where the reply text is, for example choices[0].message.content" AutomationProperties.Name="Elsa reply path"/>
+                  <TextBlock Name="ElsaStatusLine" Classes="hint" AutomationProperties.LiveSetting="Polite"/>
+                  <TextBlock Name="ElsaHint" Classes="hint"/>
+                </StackPanel>
+              </Expander>
               <TextBlock Classes="hint" Text="Offline only is how the app starts, and it never sends anything. Nothing is switched on until you choose it here. Auto uses a key (ANTHROPIC_API_KEY) or Elsa setup from the environment if one exists, and is otherwise offline. The app is fully functional offline. This line is the truth: it says Connected only after a request has really succeeded."/>
             </StackPanel>
 
@@ -492,7 +505,7 @@
             <StackPanel Spacing="6">
               <TextBlock Classes="lbl" Text="MCP SERVERS · OPTIONAL"/>
               <StackPanel Name="McpList" Spacing="12"/>
-              <WrapPanel><Button Name="McpAdd" Content="Add an MCP server"/></WrapPanel>
+              <WrapPanel ItemSpacing="8" LineSpacing="6"><Button Name="McpAdd" Content="Add an MCP server"/><Button Name="McpAddLocal" Content="Add a program on this PC (with IT's approval)"/></WrapPanel>
               <TextBlock Name="McpHint" Classes="hint"/>
             </StackPanel>
 

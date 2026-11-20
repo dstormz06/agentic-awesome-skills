@@ -77,15 +77,16 @@ public static class Connections
             case ProviderChoice.Auto:
                 string provider = env("ANDA_COMPANION_PROVIDER")?.Trim().ToLowerInvariant() ?? "anthropic";
                 if (provider == "anthropic" && key) ai = new("Claude", "api.anthropic.com");
-                else if (provider == "elsa" && ElsaConfig.Inspect(env) is { Status: ElsaStatus.Ready, Settings: { } elsa }) ai = new("Elsa", ApiTarget.Host(elsa.Endpoint));
+                else if (provider == "elsa" && ElsaConfig.Inspect(env, ElsaMapping.For(s)) is { Status: ElsaStatus.Ready, Settings: { } elsa }) ai = new("Elsa", ApiTarget.Host(elsa.Endpoint));
                 break;
         }
         var agents = (s.Agents ?? new()).Where(a => a is { Enabled: true })
             .Select(a => new ConnAgent(Shown(a.Name, 60) is { Length: > 0 } n ? n : "Agent", ApiTarget.Host(a.Api?.Endpoint), a.AutoRun != AgentRun.Never)).ToList();
         ConnOutlook? outlook = s.Outlook is { Enabled: true } o ? new(o.Cloud == OutlookCloud.UsGovernment ? "login.microsoftonline.us and graph.microsoft.us" : "login.microsoftonline.com and graph.microsoft.com") : null;
-        // round 40: a server counts only when it is switched on and its address could be used (checked as for My API)
-        var mcp = McpRules.Normalize(s.McpServers).Where(m => m.Enabled && ApiTarget.Address(m.Endpoint).Uri is not null)
-            .Select(m => new ConnMcp(Shown(m.Name, 60) is { Length: > 0 } n ? n : "MCP server", ApiTarget.Host(m.Endpoint))).ToList();
+        // round 40: a server counts only when it is switched on and its address could be used (checked as for My API);
+        // round 41: a program on this PC counts when it is switched on (Normalize keeps it on only when named as IT approved it)
+        var mcp = McpRules.Normalize(s.McpServers).Where(m => m.Enabled && (McpRules.IsLocal(m) || ApiTarget.Address(m.Endpoint).Uri is not null))
+            .Select(m => new ConnMcp(Shown(m.Name, 60) is { Length: > 0 } n ? n : "MCP server", McpRules.Where(m))).ToList();
         return new ConnState(ai, agents, outlook, mcp);
     }
 

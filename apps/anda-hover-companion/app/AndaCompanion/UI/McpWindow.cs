@@ -39,6 +39,7 @@ public sealed class McpWindow : Window
     private readonly string _selection;
     private IReadOnlyList<McpTool> _tools = Array.Empty<McpTool>();
     private (McpServerSettings Server, string Tool, JsonObject Args)? _ready;
+    private string? _armed;          // round 41: the program whose start the person was told about; it starts on the next press
 
     /// <param name="servers">The servers that are switched on.</param>
     /// <param name="selection">Text from the Ask window ("Use with an MCP tool…"), put into the first text argument of a tool, for the person to check.</param>
@@ -56,7 +57,7 @@ public sealed class McpWindow : Window
 
         foreach (var s in servers) Servers.Items.Add(new ComboBoxItem { Content = s.Name, Tag = s.Id });
         Servers.SelectedIndex = servers.Count > 0 ? 0 : -1;
-        Servers.SelectionChanged += (_, _) => { _tools = Array.Empty<McpTool>(); Tools.Items.Clear(); About.Text = ""; Arguments.Text = ""; Reset(); };
+        Servers.SelectionChanged += (_, _) => { _tools = Array.Empty<McpTool>(); Tools.Items.Clear(); About.Text = ""; Arguments.Text = ""; _armed = null; Reset(); };
         Tools.SelectionChanged += (_, _) => FillTool();
         Arguments.TextChanged += (_, _) => Reset();
         ListButton.Click += async (_, _) => await ListAsync();
@@ -120,6 +121,13 @@ public sealed class McpWindow : Window
     internal Task ListAsync()
     {
         if (Server is not { } server) { Status.Text = McpRules.SaidNoServer; return Task.CompletedTask; }
+        // round 41: a program on this PC starts only on a second press, after the first has said what it starts
+        if (McpRules.IsLocal(server) && !_clients.ContainsKey(server.Id) && _armed != server.Id)
+        {
+            _armed = server.Id; Status.Text = McpRules.SaidStartsProgram(McpRules.ProgramName(server.Program));
+            return Task.CompletedTask;
+        }
+        _armed = null;
         return Attempt("Asking the server for its tools…", async ct =>
         {
             _tools = await ClientFor(server).ListToolsAsync(ct);

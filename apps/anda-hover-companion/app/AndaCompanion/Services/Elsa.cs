@@ -6,8 +6,8 @@ namespace AndaCompanion.Services;
 /// The Elsa placeholder. Elsa (the agency's AI platform) is expected to be the production brain; its API is not
 /// available to this project yet, and no request or response shape is guessed here. Everything AROUND the call is
 /// already built and tested — provider selection, configuration from the environment, an https-only guard, a
-/// timeout, error handling, offline fallback, the Settings status line and the Test button. What remains is two
-/// small methods in <c>ElsaMapping.cs</c> (see <c>ELSA-INTEGRATION.md</c>).
+/// timeout, error handling, offline fallback, the Settings status line and the Test button. What remains is Elsa's request body and
+/// reply path, typed in Settings when Elsa's team gives them (round 41; see <c>ELSA-INTEGRATION.md</c>).
 /// </summary>
 public sealed record ElsaSettings(string Endpoint, string? Token, string? Model, string? Agent)
 {
@@ -76,7 +76,7 @@ public static class ElsaConfig
     public static ElsaInspection Inspect(Func<string, string?>? env = null, IElsaMapping? mapping = null)
     {
         env ??= Environment.GetEnvironmentVariable;
-        mapping ??= ElsaMapping.Current;
+        mapping ??= new UnfilledElsaMapping();
         if (!IsSelected(env))
             return new(ElsaStatus.NotSelected, null, "Elsa is not selected (ANDA_COMPANION_PROVIDER is not \"elsa\").");
 
@@ -98,8 +98,8 @@ public static class ElsaConfig
         return mapping.IsFilledIn
             ? new(ElsaStatus.Ready, settings, $"Elsa configured · {uri.IdnHost}")
             : new(ElsaStatus.MappingNotFilled, settings,
-                $"Elsa endpoint set ({uri.IdnHost}), but the request mapping is still the placeholder. Briefs stay offline " +
-                "until it is written — see ELSA-INTEGRATION.md, step 3.");
+                $"Elsa endpoint set ({uri.IdnHost}), but Elsa's request body and reply path are not filled in yet. Briefs stay offline " +
+                "until they are: Settings, AI and connections, Elsa (see ELSA-INTEGRATION.md).");
     }
 
     private static string? NullIfBlank(string? s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();

@@ -93,10 +93,10 @@ public static class ConnectionService
             : "Offline mode — deterministic briefs. Ready for API access when approved.";
     }
 
-    public static async Task<string> TestAsync(string? model = null)
+    public static async Task<string> TestAsync(string? model = null, IElsaMapping? elsa = null)
     {
         model = Settings.IsValidModelName(model) ? model!.Trim() : Settings.DefaultClaudeModel;
-        if (ElsaConfig.IsSelected()) return await TestElsaAsync();
+        if (ElsaConfig.IsSelected()) return await TestElsaAsync(mapping: elsa);
         if (!HasKey)
             return "Offline mode — no API key detected. Briefs are assembled deterministically from the " +
                    "record. When access is granted, set ANTHROPIC_API_KEY (agency-approved channel only) " +
@@ -129,7 +129,7 @@ public static class ConnectionService
     public static async Task<string> TestElsaAsync(Func<string, string?>? env = null, IElsaMapping? mapping = null,
         HttpMessageHandler? handler = null)
     {
-        mapping ??= ElsaMapping.Current;
+        mapping ??= new UnfilledElsaMapping();
         var inspection = ElsaConfig.Inspect(env, mapping);
         if (inspection.Status != ElsaStatus.Ready || inspection.Settings is not { } settings) return inspection.Message;
         try
@@ -180,7 +180,7 @@ public static class ConnectionService
         ProviderChoice.Claude => string.IsNullOrEmpty((env ?? Environment.GetEnvironmentVariable)("ANTHROPIC_API_KEY"))
             ? "Claude is chosen, but no ANTHROPIC_API_KEY is set on this PC. Briefs stay offline."
             : "Key detected — press Test to verify the channel.",
-        _ => Describe(env),
+        _ => Describe(env, ElsaMapping.For(settings)),
     };
 
     /// <summary>Tests whichever connection the settings choose.</summary>
@@ -192,7 +192,7 @@ public static class ConnectionService
                 ConnectionStatus.Reset();
                 return Task.FromResult("Offline is chosen, so nothing was sent. Choose Auto, Claude or My API to test a connection.");
             case ProviderChoice.MyApi: return TestMyApiAsync(settings.CustomApi, env, handler);
-            default: return TestAsync(settings.ClaudeModel);
+            default: return TestAsync(settings.ClaudeModel, ElsaMapping.For(settings));
         }
     }
 }

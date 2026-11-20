@@ -222,6 +222,13 @@ public sealed class Settings
     /// <summary>Round 40: the MCP servers the person connects to (none at first). Only names of environment variables are kept, never a token.</summary>
     public List<McpServerSettings> McpServers { get; set; } = new();
 
+    // Round 41: Elsa's request body and reply path, as Elsa's team gives them (blank: not filled in; Elsa stays offline). The address and
+    // the token stay in the environment variables IT sets (ANDA_ELSA_ENDPOINT, ANDA_ELSA_TOKEN).
+    public string ElsaRequestTemplate { get; set; } = "";
+    public string ElsaReplyPath { get; set; } = "";
+    public string ElsaAuthHeader { get; set; } = "Authorization";
+    public string ElsaAuthScheme { get; set; } = "Bearer";
+
     /// <summary>Include items that come from the person's own data (at-risk ANDAs, dates, action items) in the to-do list.</summary>
     public bool TodoShowFromData { get; set; } = true;
 
@@ -403,6 +410,8 @@ public static class SettingsService
         loaded.MyActions = MyActionRules.Normalize(loaded.MyActions, new[] { loaded.PeekHotkey, loaded.LookupHotkey, loaded.DraftHotkey, loaded.AskHotkey, loaded.MyTodoHotkey });
         loaded.Agents = AgentRules.Normalize(loaded.Agents);
         loaded.McpServers = McpRules.Normalize(loaded.McpServers);
+        loaded.ElsaRequestTemplate = (loaded.ElsaRequestTemplate ?? "").Length > 20_000 ? "" : loaded.ElsaRequestTemplate ?? "";
+        loaded.ElsaReplyPath = (loaded.ElsaReplyPath ?? "").Trim(); loaded.ElsaAuthHeader = (loaded.ElsaAuthHeader ?? "").Trim(); loaded.ElsaAuthScheme = (loaded.ElsaAuthScheme ?? "").Trim();
         if (!Settings.TodoRefreshChoices.Contains(loaded.TodoRefreshSeconds)) loaded.TodoRefreshSeconds = 30;
         loaded.SectionUse = SettingsAdvisor.CleanUse(loaded.SectionUse);
         return loaded;

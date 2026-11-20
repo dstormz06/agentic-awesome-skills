@@ -1372,6 +1372,16 @@ The client (`Services/McpClient.cs`): `initialize`, then `notifications/initiali
 
 The event log keeps only counts: *MCP tools listed, # tools*, *MCP request, # characters* (counted as the simulation counts `JSON.stringify(args).length`), *MCP request: no answer*. The Connections window names each server that is on, with its host. In the simulation nothing is contacted: a fictional demo server is answered by the page itself, and Test for any other server says it would be asked in the app. The rules and words are the simulation's (`mockup/round40-golden.json`).
 
+## 11y. Round 41: what waits for an outside answer is a setting, not a source edit
+
+Asked by the owner after round 40: anything that will be known later should be a placeholder or a setting, so that the source is not edited when it arrives. The Claude model, the MCP servers and the agents were already settings. Two things were not, and now are.
+
+**Elsa.** Settings, AI and connections, *Elsa*: the request body (JSON with `{{system}}`, `{{user}}`, `{{max_tokens}}`, `{{model}}` from ANDA_ELSA_MODEL and `{{agent}}` from ANDA_ELSA_AGENT), the reply path, and the token's header and prefix, as Elsa's team gives them. They use My API's template and reply path (`SettingsElsaMapping` over `CustomApiMapping`), so they are checked and filled the same way. The address and the token stay in the environment variables IT sets. Left blank, the mapping is the placeholder: Elsa stays offline and Settings and Test say what to fill in. `ElsaMapping.Current` (a line to edit in code) became `ElsaMapping.For(settings)`. Part of a backup.
+
+**Programs on this PC (stdio MCP).** *Add a program on this PC (with IT's approval)* adds a row with the program's full path (an .exe on a drive of this PC; no network share, no script), its SHA-256 as IT gives it, and its arguments, one per line. It can be switched on only when both are well formed. The app (`McpProgram`): checks the file's SHA-256 before every start, holding the file open (others may only read it) from the check until the program has started; starts it directly, without a shell or a window, with the arguments as typed; speaks MCP as one JSON line each way, each answer read only up to 1 MB, lines that are not the answer passed over; and ends it by closing its input, then, after two seconds, stopping it and anything it started. A program that breaks off is stopped and is not used again until a new press. It starts only on a **second press** of Test or List tools, after a sentence that names it. The Connections window shows it as "this PC: name.exe"; the event log keeps "MCP program started" and "MCP program stopped". A restored backup brings it back switched off. The MCP client's protocol is now shared by two transports, `McpHttp` (round 40) and `McpProgram`. In the simulation nothing is started: the second press says what the app would do.
+
+With nothing entered in either place, nothing changes from round 40: Elsa is offline and no program can be started. Rules and words are the simulation's (`mockup/round41-golden.json`).
+
 ## 12. Engagement roadmap — seven features that make it the daily habit
 
 Engagement here means *the tool pays the user every time they touch it* — never

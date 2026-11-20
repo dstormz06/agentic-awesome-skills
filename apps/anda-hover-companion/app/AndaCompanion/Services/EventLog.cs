@@ -39,7 +39,7 @@ public static class EventLog
         "settings restored from a backup", "a list was restored from a backup", "a to-do item was put back from the archive", "weekly copy of the sheet switched on", "weekly copy of the sheet switched off",
         "settings file could not be used as it was at start", "ANDA to-do list could not be used as it was at start", "to-do list could not be used as it was at start", "prompt library could not be used as it was at start", "quick replies could not be used as it was at start",
         "kept copies of the sheet",
-        "at start: MCP servers on: #", "MCP servers switched on: # to #", "MCP servers changed", "MCP tools listed, # tools", "MCP request, # characters", "MCP request: no answer", "MCP request (simulated), # characters",
+        "at start: MCP servers on: #", "MCP servers switched on: # to #", "MCP servers changed", "MCP tools listed, # tools", "MCP request, # characters", "MCP request: no answer", "MCP request (simulated), # characters", "MCP program started", "MCP program stopped",
     };
     private static readonly HashSet<string> Known = new(Phrases, StringComparer.Ordinal);
     private static readonly Regex Number = new("[0-9]{1,3}(?:,[0-9]{3})*", RegexOptions.CultureInvariant);      // a count, written with commas: 7, 1,234

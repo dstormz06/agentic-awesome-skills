@@ -3,10 +3,11 @@ namespace AndaCompanion.Services;
 /// <summary>The version the tool shows, and what changed, newest first. The same list as the simulation's (mockup/round29-golden.json).</summary>
 public static class ChangeLog
 {
-    public const string Version = "Prototype, round 40";
+    public const string Version = "Prototype, round 41";
 
     public static readonly IReadOnlyList<(int Round, IReadOnlyList<string> Items)> Entries = new (int, IReadOnlyList<string>)[]
     {
+        (41, new[] { "Elsa can be filled in from Settings when Elsa's team gives its request body and reply path (Settings, AI and connections, Elsa); left blank, Elsa stays offline. The address and token stay in the environment variables IT sets.", "An MCP server can also be a program on this PC that IT approved: added with “Add a program on this PC”, by its full path and SHA-256, which the app checks before each start. The app asks before it starts the program and stops it when you are done; with nothing entered, no program can be started." }),
         (40, new[] { "MCP servers: connect to tools that answer over https (Settings, AI and connections). Test lists a server's tools; MCP tools in the tray menu's More shows exactly what a call sends before you press Send. Nothing is sent by itself and nothing is kept.", "My API can be filled in for a common kind of service with one press: OpenAI-compatible, Azure OpenAI, or Ollama on this PC." }),
         (39, new[] { "Settings has a second switch beside “Since you last looked”: whether next week in Today also lists your to-do items. Off, it reads neither to-do list for Today and shows no titles." }),
         (38, new[] { "From Thursday noon to Sunday, Today's next week also lists your to-do items due Monday to Friday, from both to-do lists: unfinished items only, by date, at most twenty, then how many more.", "Today opens faster with a large sheet: the ANDAs of the same applicant and product are found from an index, not by reading every row." }),

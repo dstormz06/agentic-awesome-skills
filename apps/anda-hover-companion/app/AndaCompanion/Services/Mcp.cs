@@ -8,7 +8,8 @@ namespace AndaCompanion.Services;
 /// <summary>
 /// Round 40: one MCP server the person connects to (Model Context Protocol, Streamable HTTP). Nothing here is a secret: like My API, the
 /// token is never stored; <see cref="SecretEnvVar"/> only NAMES the environment variable that holds it, read at the moment of a request.
-/// Servers that run as a program on this PC (stdio) are not offered: starting programs from this app is what endpoint security forbids.
+/// Round 41: or a program on this PC (stdio), only as IT approved it: <see cref="Program"/> (the full path of an .exe), its
+/// <see cref="ProgramSha256"/>, and fixed <see cref="ProgramArguments"/>. With no program named, nothing can be started.
 /// </summary>
 public sealed class McpServerSettings
 {
@@ -20,6 +21,11 @@ public sealed class McpServerSettings
     public string SecretEnvVar { get; set; } = "";
     public bool Enabled { get; set; }
     public int TimeoutSeconds { get; set; } = 30;
+    /// <summary>A program on this PC rather than a server at an address.</summary>
+    public bool IsProgram { get; set; }
+    public string Program { get; set; } = "";
+    public string ProgramSha256 { get; set; } = "";
+    public List<string> ProgramArguments { get; set; } = new();
 }
 
 /// <summary>One tool a server offers, as it described itself. Its words are the server's: shown as text, never followed.</summary>
@@ -36,7 +42,7 @@ public static class McpRules
     /// <summary>The versions this app speaks; a server that answers with another one is told nothing more.</summary>
     public static readonly IReadOnlyList<string> Versions = new[] { "2025-06-18", "2025-03-26" };
 
-    public const string Hint = "An MCP server offers tools that this app can call for you: a search, a lookup, a calculation. Only servers that answer over https:// are offered (http:// for this PC only); a server that runs as a program on this PC is not, because this app does not start programs. Nothing is sent by itself: Test asks a server for its list of tools, and MCP tools (in the tray menu's More) shows you exactly what a call sends before you press Send. The token stays in the environment variable you name and is never saved by the app. A server's answer and its descriptions of its tools are shown as plain text and are never followed as instructions.";
+    public const string Hint = "An MCP server offers tools that this app can call for you: a search, a lookup, a calculation. A server is reached over https:// (http:// for this PC only), or is a program on this PC that IT approved: added with “Add a program on this PC”, by its full path and the SHA-256 IT gives, which the app checks before each start; the app asks you before it starts the program, and stops it when you are done. Nothing is sent by itself: Test asks a server for its list of tools, and MCP tools (in the tray menu's More) shows you exactly what a call sends before you press Send. The token stays in the environment variable you name and is never saved by the app. A server's answer and its descriptions of its tools are shown as plain text and are never followed as instructions.";
     public const string SaidNothingYet = "Nothing is sent until you press List tools, and then Send.", SaidChooseFirst = "Please press List tools and choose a tool first.";
     public static string SaidListed(int n) => $"{n} tool{(n == 1 ? "" : "s")} offered. Choose one; nothing is sent until you press Send.";
     public static string SaidSwitchedOff(int n) => $"{(n == 1 ? "1 MCP server" : n + " MCP servers")} came back switched off: please check {(n == 1 ? "its" : "their")} address and token variable name in Settings, then switch {(n == 1 ? "it" : "them")} on.";
@@ -46,6 +52,11 @@ public static class McpRules
         : $"Connected. {names.Count} tool{(names.Count == 1 ? "" : "s")}: {string.Join(", ", names.Take(5))}{(names.Count > 5 ? ", …" : "")}";
     public const string SaidUnexpected = "Something unexpected came back from the server, so nothing more was done. Nothing else was sent.";
     public const string SaidNoServer = "No MCP server is switched on. Add one in Settings, AI and connections.";
+    public const string ProgramHint = "Only a program IT has approved for this PC: its full path (an .exe), its SHA-256 exactly as IT gives it, and any arguments IT names, one per line. The app checks the file's SHA-256 before each start, holds the file so it cannot be changed while it starts, and starts it directly, without a command window or a script. With nothing entered here, no program can be started.";
+    public static string SaidStartsProgram(string name) => $"This starts {name} on this PC. Press again to start it.";
+    public static string SaidHashMismatch(string name) => $"{name} is not the program IT approved: its SHA-256 is different. Nothing was started.";
+    public static string SaidNoProgram(string name) => $"{name} could not be opened or started on this PC. Nothing was started.";
+    public const string SaidTooLarge = "The server's answer is larger than this app reads (1 MB).";
     public const string SaidNotJson = "The arguments must be one JSON object, for example {\"query\": \"text\"}.";
 
     /// <summary>At most eight servers, each with an id, a one-line name, a known time limit; one with no address stays off.</summary>
@@ -68,11 +79,41 @@ public static class McpRules
             {
                 Id = id, Name = name.Length > 0 ? name : "MCP server", Endpoint = (s.Endpoint ?? "").Trim(),
                 AuthHeader = (s.AuthHeader ?? "").Trim(), AuthScheme = (s.AuthScheme ?? "").Trim(), SecretEnvVar = (s.SecretEnvVar ?? "").Trim(),
-                Enabled = s.Enabled && (s.Endpoint ?? "").Trim().Length > 0,
                 TimeoutSeconds = CustomApiSettings.TimeoutChoices.Contains(s.TimeoutSeconds) ? s.TimeoutSeconds : 30,
+                IsProgram = s.IsProgram, Program = ProgramPath(s.Program), ProgramSha256 = (s.ProgramSha256 ?? "").Trim().ToLowerInvariant(),
+                ProgramArguments = (s.ProgramArguments ?? new()).Select(a => (a ?? "").Trim()).Where(a => a.Length > 0).Take(MaxArguments).Select(a => a.Length > 500 ? a[..500] : a).ToList(),
             });
+            var kept = list[^1];
+            // on only when it can be used: a server with an address, or a program named as IT approved it
+            kept.Enabled = s.Enabled && (IsLocal(kept) ? ProgramProblem(kept.Program, kept.ProgramSha256) is null : kept.Endpoint.Length > 0);
         }
         return list;
+    }
+
+    public const int MaxArguments = 20;
+
+    /// <summary>Where a server is, for the Connections window: its host, or "this PC: " and the program's name.</summary>
+    public static string Where(McpServerSettings s) => IsLocal(s) ? "this PC: " + ProgramName(s.Program) : ApiTarget.Host(s.Endpoint);
+
+    public static bool IsLocal(McpServerSettings s) => s.IsProgram;
+
+    /// <summary>The program's file name, for sentences: what follows the last backslash.</summary>
+    public static string ProgramName(string? path) { string p = ProgramPath(path); int i = p.LastIndexOf('\\'); return i < 0 ? p : p[(i + 1)..]; }
+
+    /// <summary>A path as typed, trimmed, with one pair of surrounding quotes taken off (as Windows copies a path).</summary>
+    public static string ProgramPath(string? path) { string p = (path ?? "").Trim(); return p.Length >= 2 && p[0] == '"' && p[^1] == '"' ? p[1..^1].Trim() : p; }
+
+    private static readonly System.Text.RegularExpressions.Regex ExePath = new(@"^[A-Za-z]:\\[^<>""|?*\u0000-\u001f]*\.exe$", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+    private static readonly System.Text.RegularExpressions.Regex Sha256 = new("^[0-9a-f]{64}$");
+
+    /// <summary>Why a program cannot be used as typed, or null: a full path to an .exe on a drive of this PC, and a SHA-256 of 64 hex digits.</summary>
+    public static string? ProgramProblem(string? program, string? sha256)
+    {
+        string p = ProgramPath(program);
+        if (p.Length == 0) return @"Please enter the program's full path, for example C:\Program Files\Example\mcp-server.exe.";
+        if (!ExePath.IsMatch(p)) return @"Only a program on a drive of this PC, by its full path to an .exe (for example C:\Program Files\Example\mcp-server.exe), can be used. Nothing was started.";
+        if (!Sha256.IsMatch((sha256 ?? "").Trim().ToLowerInvariant())) return "Please enter the program's SHA-256 exactly as IT gives it: 64 letters and digits. Nothing was started.";
+        return null;
     }
 
     /// <summary>

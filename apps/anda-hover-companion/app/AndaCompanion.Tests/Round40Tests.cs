@@ -127,7 +127,7 @@ public class Round40Tests : IClassFixture<HeadlessFixture>
         foreach (var c in g.GetProperty("changes40").EnumerateArray())
             Assert.Equal(c.GetProperty("lines").EnumerateArray().Select(x => x.GetString()!), Connections.Changes(states[c.GetProperty("before").GetInt32()], states[c.GetProperty("now").GetInt32()]));
         var phrases = g.GetProperty("phrases").EnumerateArray().Select(x => x.GetString()!).ToList();
-        Assert.Equal(7, phrases.Count);
+        Assert.Equal(9, phrases.Count);                                                       // round 41 added the two for a program
         Assert.Equal(phrases, EventLog.Phrases.Where(p => p.Contains("MCP")));
         Assert.Equal(g.GetProperty("changes").GetProperty("items").EnumerateArray().Select(x => x.GetString()!).ToList(), ChangeLog.Entries.First(e => e.Round == 40).Items.ToList());
     }
@@ -307,7 +307,7 @@ public class Round40Tests : IClassFixture<HeadlessFixture>
     {
         using var handler = McpClient.DefaultHandler();
         Assert.False(handler.AllowAutoRedirect);                                                   // a token is never carried to another address
-        Assert.Contains("DefaultHandler()", Round37Tests.Code(Folder("app", "AndaCompanion", "Services", "McpClient.cs")).Split('\n').Single(l => l.Contains("_http = handler is null")));
+        Assert.Contains("DefaultHandler()", Round37Tests.Code(Folder("app", "AndaCompanion", "Services", "McpTransports.cs")).Split('\n').Single(l => l.Contains("_http = handler is null")));
     }
 
     [Fact]

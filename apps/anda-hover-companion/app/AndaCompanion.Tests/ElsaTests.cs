@@ -122,7 +122,7 @@ public class ElsaTests
         var ex = Assert.Throws<ElsaNotMappedException>(() => m.BuildRequest(new ElsaSettings(Good, null, null, null), "s", "u", 10));
         Assert.Contains("ELSA-INTEGRATION.md", ex.Message);
         Assert.Throws<ElsaNotMappedException>(() => m.ReadReply("{}"));
-        Assert.False(ElsaMapping.Current.IsFilledIn);
+        Assert.False(ElsaMapping.For(new Settings()).IsFilledIn);
     }
 
     [Fact]
@@ -178,7 +178,7 @@ public class ElsaTests
     public async Task Test_button_text_explains_each_state_and_proves_a_working_channel()
     {
         Assert.Contains("ANDA_ELSA_ENDPOINT", await ConnectionService.TestElsaAsync(Env(Elsa), new UnfilledElsaMapping()));
-        Assert.Contains("placeholder", await ConnectionService.TestElsaAsync(Env(Elsa, (ElsaConfig.EndpointVar, Good)), new UnfilledElsaMapping()));
+        Assert.Contains("not filled in yet", await ConnectionService.TestElsaAsync(Env(Elsa, (ElsaConfig.EndpointVar, Good)), new UnfilledElsaMapping()));
         var handler = new FakeHandler(_ => new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("\"OK\"") });
         string ok = await ConnectionService.TestElsaAsync(Env(Elsa, (ElsaConfig.EndpointVar, Good)), new FilledMapping(), handler);
         Assert.StartsWith("Connected · Elsa", ok);

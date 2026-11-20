@@ -64,7 +64,7 @@ public static class ChatCompleterFactory
         return provider switch
         {
             "anthropic" when ConnectionService.HasKey => new AnthropicChatCompleter(settings?.ClaudeModel),
-            "elsa" => ElsaChatCompleterOrNull(env, mapping ?? ElsaMapping.Current),
+            "elsa" => ElsaChatCompleterOrNull(env, mapping ?? ElsaMapping.For(settings)),
             _ => null, // no key, or an unknown provider → offline mode
         };
     }

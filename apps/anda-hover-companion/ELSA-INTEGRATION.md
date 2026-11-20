@@ -1,6 +1,6 @@
 # Plugging in Elsa
 
-**Status: wired as a placeholder. There are two ways in, and the first needs no code.**
+**Status: wired, waiting for Elsa's details. Since round 41 neither way in needs a source edit: Elsa's request body and reply path are typed in Settings.**
 
 **Agents use the same form.** Settings, My agents (round 15) takes the same fields for each agent, such as Alert Hub or Triaging Agent, whose addresses and formats are not known here. That is separate from Elsa: an agent is asked only for the card's facts, on a click or by the person's choice.
 
@@ -10,8 +10,12 @@ Press **Test**. Nothing is rebuilt and no code is written. The same form works f
 change of settings. It has been tested against a fake server only, never against a real service. The banner at the top of Settings says
 Connected only after a request has really succeeded.
 
-**Or write the two translations in code** (the five-step checklist below). Choose this if Elsa needs something a form cannot express, such as
-integrated Windows authentication or a client certificate.
+**Or keep Elsa as its own connection (round 41).** Settings, AI and connections, **Elsa**: paste Elsa's request body (JSON with the
+placeholders `{{system}}`, `{{user}}`, `{{max_tokens}}`, `{{model}}` and `{{agent}}`), where the reply text is, and the token's header and
+prefix. IT sets the address and the token in the environment variables below. Left blank, Elsa stays offline and says so. No code.
+
+**Only if Elsa needs something a form cannot express**, such as integrated Windows authentication or a client certificate, the two
+translations can still be written in code (step 3, the code route, below).
 
 The app already knows how to talk to "a chat model behind a provider seam". Claude is one provider.
 Elsa is the second, and everything around it is built and tested: choosing it, reading its settings,
@@ -26,9 +30,8 @@ integration fails in confusing ways and looks like a finished one.
 |---|---|---|---|
 | 1 | Get API access and the facts you need: the endpoint URL, how requests are authenticated, which model or agent to use, the request and reply shape, the token allowance. Ask the data owner whether ANDA records may be sent to Elsa, because the prototype does not make that decision. | You | Elsa's team |
 | 2 | Set the environment variables (below). | You | Windows |
-| 3 | Write the two methods in a class that implements `IElsaMapping`. | You, or ask for it | `app/AndaCompanion/Services/ElsaMapping.cs` |
-| 4 | Change one line: `new UnfilledElsaMapping()` → `new YourElsaMapping()`. | You | same file |
-| 5 | Open Settings → **Test**. It says "Connected · Elsa" or tells you what is wrong. | You | the app |
+| 3 | Paste Elsa's request body and reply path, and its token header and prefix. | You | Settings, AI and connections, Elsa |
+| 4 | Open Settings → **Test**. It says "Connected · Elsa" or tells you what is wrong. | You | the app |
 
 ### Step 2 — environment variables
 
@@ -48,7 +51,7 @@ setx ANDA_COMPANION_PROVIDER elsa
 setx ANDA_ELSA_ENDPOINT "https://<the endpoint Elsa's team gives you>"
 ```
 
-### Step 3 — the two methods
+### Step 3, the code route (only if a form cannot express Elsa's API)
 
 `IElsaMapping` has two required members and one optional one:
 
@@ -104,10 +107,10 @@ public sealed class FdaElsaMapping : IElsaMapping
 }
 ```
 
-Then in `ElsaMapping.cs`:
+Then in `ElsaMapping.cs`, return it from `ElsaMapping.For` instead of the mapping read from Settings:
 
 ```csharp
-public static IElsaMapping Current { get; } = new FdaElsaMapping();    // was: new UnfilledElsaMapping()
+public static IElsaMapping For(Settings? settings) => new FdaElsaMapping();    // was: the Settings mapping, or the placeholder
 ```
 
 ## What Settings says, and what it means
@@ -116,7 +119,7 @@ public static IElsaMapping Current { get; } = new FdaElsaMapping();    // was: n
 |---|---|---|
 | "Elsa is selected but ANDA_ELSA_ENDPOINT is not set" | Provider is `elsa`, no endpoint. | Step 2. |
 | "must be an https:// URL … Nothing was sent." | The endpoint is plain `http://` (or not a URL). The app refuses so a token never travels in clear text. | Use the `https://` URL. |
-| "Elsa endpoint set (host), but the request mapping is still the placeholder." | Steps 3 and 4 are not done. Briefs stay offline. | Steps 3 and 4. |
+| "Elsa endpoint set (host), but Elsa's request body and reply path are not filled in yet." | Step 3 is not done. Briefs stay offline. | Step 3. |
 | "Connected · Elsa … response: OK" | End to end works. | Nothing. |
 | "Connection failed: ElsaException — Elsa answered 401 …" | Elsa refused. Only the status is shown, never the body. | Check the token and who it belongs to. |
 | "Connection failed: HttpRequestException …" | The network path is blocked or the host is wrong. | Check the URL, the proxy and the VPN. |

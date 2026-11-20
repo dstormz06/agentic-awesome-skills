@@ -1,6 +1,8 @@
 # Request to IT: may ANDA Companion (Notula) start one approved MCP server on this PC?
 
-**Draft for the owner to send. Nothing in it has been built.** The app does not start programs today, and will not until IT answers.
+**Draft for the owner to send.** Since round 41 the controls below are built into the app, but nothing can start: no program is
+named on any PC, and a program can be named only in Settings, by its full path and the SHA-256 IT gives. Until IT answers, none is
+entered, so the app starts nothing.
 
 ## What is asked
 
@@ -17,25 +19,25 @@ We ask whether the app may start **one specific, reviewed server program**, name
 - Most stdio servers are scripts run by Node.js or Python, often installed from a public registry. Our rules allow no unapproved
   installs and no .bat or .ps1 scripts. A server would only be possible if IT approves that exact program and how it is run.
 
-## What the app would do, if approved
+## What the app does once a program is named (built in round 41, inert until then)
 
-| Control | Proposal |
+| Control | What the app does |
 |---|---|
-| Which program | Only programs on an allow list IT sets (full path, and a SHA-256 hash of the file); anything else is refused |
-| How it starts | Directly, never through a shell (no cmd.exe, no PowerShell); fixed arguments from the allow list; no arguments typed by the person |
-| When | Only when the person presses List tools or Send, after a confirmation that names the program; never at start-up, never by itself |
-| How long | Stopped when MCP tools is closed, and when the app exits |
+| Which program | Only the program named in Settings: the full path of an .exe on a drive of this PC (no network share, no script such as .bat, .cmd or .ps1), with the SHA-256 IT gives. The file's SHA-256 is checked before every start, and the file is held open (no writing, no deleting) from that check until the program has started; a different file is refused |
+| How it starts | Directly, never through a shell (no cmd.exe, no PowerShell), with no window; the arguments are the ones typed in Settings, as IT names them |
+| When | Only when the person presses Test, or List tools, and then presses again after a sentence that names the program; never at start-up, never by itself |
+| How long | Its input is closed when MCP tools is closed or the test ends; after two seconds it is stopped, with anything it started |
 | What it receives | The tool's name and the arguments the person was shown first, as for an https server |
-| What it can reach | Whatever the program itself does; the app gives it no token unless the allow list names a variable for it |
-| What is kept | Counts only in the app's event log (program started, stopped, characters sent); never the arguments or answers |
-| Limits | Answers read up to 1 MB; 30 seconds per request; a program that misbehaves is stopped |
+| What it can reach | Whatever the program itself does, with the person's rights. The app passes it no token, but it inherits the person's environment variables, as any program they start does |
+| What is kept | Counts only in the app's event log ("MCP program started", "MCP program stopped", characters sent); never the arguments or answers. A restored backup brings the program back switched off |
+| Limits | Each answer read up to 1 MB; 30 seconds for a whole operation; a program that breaks off or floods is stopped |
 
 ## What we need from IT
 
-1. Yes or no to letting the app start one allow-listed program, as above.
-2. If yes: the program, its path and hash, and its fixed arguments. Also how Falcon should treat the start: an exclusion, or
-   simply a review of the alert.
+1. Yes or no to letting the app start one approved program, as above.
+2. If yes: the program's full path, its SHA-256, and its arguments, to be typed in Settings (no rebuild of the app is needed). Also how
+   Falcon should treat the start: an exclusion, or simply a review of the alert.
 3. Whether the program may reach the network, and which hosts.
 4. Whether records rules apply to anything the program keeps on its own.
 
-Until IT answers, only MCP servers over https are offered.
+Until IT answers, no program is named, so only MCP servers over https are used.

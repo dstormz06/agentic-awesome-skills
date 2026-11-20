@@ -1,39 +1,33 @@
-using System.Net;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace AndaCompanion.Services;
 
 /// <summary>
-/// Round 40: an MCP client over Streamable HTTP (protocol 2025-06-18; 2025-03-26 is accepted from a server). It starts a session
-/// (initialize, then notifications/initialized), keeps the session id the server gives, lists tools (following the cursor) and calls one,
-/// and ends the session with a DELETE when asked. Every answer is matched to its request by id, whether it comes as one JSON message or
-/// as an event stream, and is read only up to <see cref="McpRules.MaxResponseBytes"/>. The time limit covers a whole operation (a list of
-/// several pages included). A session the server has forgotten (404) is started again once. Nothing is written to a file but the event
-/// log, which keeps counts only.
+/// Round 40: an MCP client (protocol 2025-06-18; 2025-03-26 is accepted from a server). It starts a session (initialize, then
+/// notifications/initialized), lists tools (following the cursor) and calls one, and ends the session when asked. Round 41: the messages go
+/// through a transport: an https server (<see cref="McpHttp"/>), or a program on this PC that IT approved (<see cref="McpProgram"/>). Every
+/// answer is matched to its request by id and read only up to <see cref="McpRules.MaxResponseBytes"/>. The time limit covers a whole
+/// operation. A session the server has forgotten (404, https only) is started again once. Nothing is written to a file but the event log,
+/// which keeps counts only.
 /// </summary>
 public sealed class McpClient : IDisposable
 {
-    private readonly McpServerSettings _server;
-    private readonly Func<string, string?> _env;
-    private readonly HttpClient _http;
+    private readonly IMcpTransport _transport;
     private TimeSpan _timeout;
-    private string? _session, _version;
+    private string? _version;
     private int _nextId;
 
     /// <summary>Not redirected: a token meant for this server is never carried to another address.</summary>
-    internal static HttpClientHandler DefaultHandler() => new() { AllowAutoRedirect = false };
+    internal static HttpClientHandler DefaultHandler() => McpHttp.DefaultHandler();
 
     /// <summary>For tests only: a shorter time limit than any offered in Settings.</summary>
     internal TimeSpan TimeLimit { set => _timeout = value; }
 
-    public McpClient(McpServerSettings server, Func<string, string?>? env = null, HttpMessageHandler? handler = null)
+    /// <param name="local">For tests only: how a program on this PC is opened and started (the real file and process otherwise).</param>
+    public McpClient(McpServerSettings server, Func<string, string?>? env = null, HttpMessageHandler? handler = null, McpLocal? local = null)
     {
-        _server = server; _env = env ?? Environment.GetEnvironmentVariable;
-        _http = handler is null ? new HttpClient(DefaultHandler()) : new HttpClient(handler, disposeHandler: false);
-        _http.Timeout = Timeout.InfiniteTimeSpan;    // the limit is ours (RunAsync), over the whole operation and the whole answer
+        _transport = McpRules.IsLocal(server) ? new McpProgram(server, local ?? McpLocal.Real) : new McpHttp(server, env ?? Environment.GetEnvironmentVariable, handler);
         _timeout = TimeSpan.FromSeconds(CustomApiSettings.TimeoutChoices.Contains(server.TimeoutSeconds) ? server.TimeoutSeconds : 30);
     }
 
@@ -64,20 +58,13 @@ public sealed class McpClient : IDisposable
     }
 
     /// <summary>
-    /// Ends the session, as the protocol asks: a DELETE with the session id, within five seconds. A server that refuses or does not answer
-    /// is left alone; nothing is said and nothing is logged, since nothing of the person's is sent.
+    /// Ends the session: https, a DELETE with the session id within five seconds; a program, its input closed and the program stopped.
+    /// A server that refuses or does not answer is left alone; nothing is said, since nothing of the person's is sent.
     /// </summary>
     public async Task EndAsync()
     {
-        if (_session is null) return;
-        try
-        {
-            using var limit = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-            using var request = NewRequest(HttpMethod.Delete, _version).Request;
-            using var _ = await _http.SendAsync(request, limit.Token);
-        }
-        catch (Exception ex) when (ex is McpException or HttpRequestException or IOException or OperationCanceledException) { }
-        finally { _session = null; _version = null; }
+        try { await _transport.EndAsync(); }
+        finally { _version = null; }
     }
 
     // ---------- one operation ----------
@@ -102,7 +89,7 @@ public sealed class McpClient : IDisposable
     {
         McpException m => m.Message,
         OperationCanceledException when !ct.IsCancellationRequested => "The server did not answer in time.",
-        HttpRequestException or IOException => $"The server at {ApiTarget.Host(_server.Endpoint)} could not be reached, or stopped answering.",
+        HttpRequestException or IOException => _transport.Unreachable,
         _ => null,
     };
 
@@ -130,8 +117,6 @@ public sealed class McpClient : IDisposable
 
     // ---------- the protocol ----------
 
-    private sealed class SessionGoneException() : Exception("session gone");
-
     /// <summary>A request in a session; a session the server has forgotten is started again once, and a second time is a sentence.</summary>
     private async Task<JsonObject> RequestAsync(string method, JsonObject p, CancellationToken ct)
     {
@@ -142,16 +127,16 @@ public sealed class McpClient : IDisposable
                 await EnsureSessionAsync(ct);
                 return await AskAsync(method, p, _version, ct);
             }
-            catch (SessionGoneException) when (!again) { _session = null; _version = null; }
-            catch (SessionGoneException) { throw new McpException("The server forgot the session again just after it was started; nothing more was sent."); }
+            catch (McpSessionGoneException) when (!again) { _transport.Forget(); _version = null; }
+            catch (McpSessionGoneException) { throw new McpException("The server forgot the session again just after it was started; nothing more was sent."); }
         }
     }
 
-    /// <summary>The session counts as started only once the server has taken "initialized" (round 40 review).</summary>
+    /// <summary>The session counts as started only once the server has taken "initialized" (round 40 review), and while the transport lives.</summary>
     private async Task EnsureSessionAsync(CancellationToken ct)
     {
-        if (_version is not null) return;
-        _session = null;
+        if (_version is not null && _transport.Alive) return;
+        _version = null; _transport.Forget();
         var init = new JsonObject
         {
             ["protocolVersion"] = McpRules.ProtocolVersion,
@@ -162,135 +147,41 @@ public sealed class McpClient : IDisposable
         string? version = Str(result["protocolVersion"]);
         if (version is null || !McpRules.Versions.Contains(version))
             throw new McpException($"The server speaks MCP version {McpRules.OneLine(version ?? "(none)", 20)}, which this app does not; nothing more was sent.");
-        try { await PostAsync("notifications/initialized", null, null, version, ct); }
-        catch (Exception ex) when (ex is not SessionGoneException) { await EndAsync(); throw; }      // the session the server opened is ended, not left behind
+        try { await _transport.ExchangeAsync(Message("notifications/initialized", null, null), null, version, ct); }
+        catch (Exception ex) when (ex is not McpSessionGoneException) { await EndAsync(); throw; }      // the session the server opened is ended, not left behind
         _version = version;
     }
 
     /// <summary>A request: its answer's result, or a sentence.</summary>
-    private async Task<JsonObject> AskAsync(string method, JsonObject p, string? version, CancellationToken ct) =>
-        await PostAsync(method, p, ++_nextId, version, ct) ?? throw new McpException("The server's answer had no result.");
-
-    /// <summary>One message to the server. A request (with an id) is answered; a notification (no id) is only taken (202).</summary>
-    private async Task<JsonObject?> PostAsync(string method, JsonObject? p, int? id, string? version, CancellationToken ct)
+    private async Task<JsonObject> AskAsync(string method, JsonObject p, string? version, CancellationToken ct)
     {
-        var (request, token) = NewRequest(HttpMethod.Post, version);
-        using (request)
-        {
-            var message = new JsonObject { ["jsonrpc"] = "2.0", ["method"] = method };
-            if (id is not null) message["id"] = id.Value;
-            if (p is not null) message["params"] = p.DeepClone();      // the same request may be sent again after a forgotten session
-            request.Content = new StringContent(message.ToJsonString(), Encoding.UTF8, "application/json");
-
-            using var response = await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-            if (response.StatusCode == HttpStatusCode.NotFound && _session is not null && method != "initialize") throw new SessionGoneException();
-            if (response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
-                throw new McpException("The server refused the request: it needs a token this app does not have, or the token is not accepted.");
-            if (!response.IsSuccessStatusCode) throw new McpException($"The server answered with an error ({(int)response.StatusCode}).");
-            if (method == "initialize")
-                _session = response.Headers.TryGetValues("Mcp-Session-Id", out var ids) && ids.FirstOrDefault() is { } s && s.Length is > 0 and <= 200 && s.All(c => c is >= '!' and <= '~') ? s : null;
-            if (id is null) return null;
-
-            await using var body = new Limited(await response.Content.ReadAsStreamAsync(ct));
-            bool events = string.Equals(response.Content.Headers.ContentType?.MediaType, "text/event-stream", StringComparison.OrdinalIgnoreCase);
-            var answer = events ? await FromEventsAsync(body, id.Value, ct) : AnswerTo(McpJson.Parse(await ReadAllAsync(body, ct)), id.Value);
-            if (answer["error"] is JsonObject error)
-            {
-                // a server that repeats the token does not get it shown: replaced before the message is cut, so no part of it is left (round 40 re-check)
-                string raw = Str(error["message"]) ?? "no reason given";
-                if (token is not null) raw = raw.Replace(token, "[token]", StringComparison.Ordinal);
-                throw new McpException($"The server could not do this: {McpRules.OneLine(raw, 300)}");
-            }
-            return answer["result"] as JsonObject;
-        }
+        int id = ++_nextId;
+        var answer = await _transport.ExchangeAsync(Message(method, p, id), id, version, ct) ?? throw new McpException("The server's answer had no result.");
+        if (answer["error"] is JsonObject error)
+            // a server that repeats the token does not get it shown: replaced before the message is cut, so no part of it is left (round 40 re-check)
+            throw new McpException($"The server could not do this: {McpRules.OneLine(_transport.Redact(Str(error["message"]) ?? "no reason given"), 300)}");
+        return answer["result"] as JsonObject ?? throw new McpException("The server's answer had no result.");
     }
 
-    /// <summary>A request to this server with its headers: the session, the version, and the token. Checked before anything is sent.</summary>
-    private (HttpRequestMessage Request, string? Token) NewRequest(HttpMethod method, string? version)
+    private static JsonObject Message(string method, JsonObject? p, int? id)
     {
-        var (uri, problem) = ApiTarget.Address(_server.Endpoint);
-        if (uri is null) throw new McpException(problem!);
-        var (token, tokenProblem) = ApiTarget.Token(_server.SecretEnvVar, _env);
-        if (tokenProblem is not null) throw new McpException(tokenProblem);
-        var (auth, authProblem) = ApiTarget.Authorization(_server.AuthHeader, _server.AuthScheme, token);
-        if (authProblem is not null) throw new McpException(authProblem);
-
-        var request = new HttpRequestMessage(method, uri);
-        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
-        if (_session is not null) request.Headers.TryAddWithoutValidation("Mcp-Session-Id", _session);
-        if (version is not null) request.Headers.TryAddWithoutValidation("MCP-Protocol-Version", version);
-        if (auth is { } h && !request.Headers.TryAddWithoutValidation(h.Key, h.Value))
-        {
-            request.Dispose();
-            throw new McpException("The token header name is not valid: letters, digits and - only, for example Authorization. Nothing was sent.");
-        }
-        return (request, token);
+        var message = new JsonObject { ["jsonrpc"] = "2.0", ["method"] = method };
+        if (id is not null) message["id"] = id.Value;
+        if (p is not null) message["params"] = p.DeepClone();      // the same request may be sent again after a forgotten session
+        return message;
     }
 
     /// <summary>The answer must be to this request (round 40 review: a JSON answer was taken whatever its id).</summary>
-    private static JsonObject AnswerTo(JsonNode? message, int id) =>
-        message is JsonObject m && IsAnswerTo(m, id) ? m : throw new McpException("The server's answer was not an answer to this request.");
-
-    private static bool IsAnswerTo(JsonObject m, int id) =>
+    internal static bool IsAnswerTo(JsonObject m, int id) =>
         m["id"] is JsonValue v && v.GetValueKind() == JsonValueKind.Number && v.TryGetValue<int>(out int got) && got == id && (m["result"] is not null || m["error"] is not null);
 
-    private static async Task<string> ReadAllAsync(Stream body, CancellationToken ct)
-    {
-        var buffer = new MemoryStream();
-        await body.CopyToAsync(buffer, ct);
-        return Encoding.UTF8.GetString(buffer.ToArray());
-    }
+    internal static string? Str(JsonNode? n) => n is JsonValue v && v.GetValueKind() == JsonValueKind.String ? v.GetValue<string>() : null;
 
-    /// <summary>An event stream: the answer is the message whose id is ours; other messages (notifications, the server's own requests) are passed over.</summary>
-    private static async Task<JsonObject> FromEventsAsync(Stream body, int id, CancellationToken ct)
-    {
-        using var reader = new StreamReader(body, Encoding.UTF8);
-        var data = new StringBuilder();
-        while (true)
-        {
-            string? line = await reader.ReadLineAsync(ct);
-            if (line is null || line.Length == 0)
-            {
-                if (data.Length > 0)
-                {
-                    JsonNode? m = null;
-                    try { m = McpJson.Parse(data.ToString()); } catch (McpException) { /* not JSON: passed over */ }
-                    data.Clear();
-                    if (m is JsonObject o && IsAnswerTo(o, id)) return o;
-                }
-                if (line is null) throw new McpException("The server ended its answer before it answered.");
-                continue;
-            }
-            if (line.StartsWith("data:", StringComparison.Ordinal)) data.Append(data.Length > 0 ? "\n" : "").Append(line.AsSpan(5).TrimStart(' '));
-        }
-    }
-
-    /// <summary>
-    /// An answer read only up to <see cref="McpRules.MaxResponseBytes"/>, counted in bytes as they arrive, so that a line with no end cannot
-    /// fill the memory. A stream, not a buffer: an event stream is read as it comes and the answer taken as soon as it is there, since a
-    /// server may keep the stream open after it.
-    /// </summary>
-    private sealed class Limited(Stream inner) : Stream
-    {
-        private long _read;
-        private int Count(int n) => (_read += n) > McpRules.MaxResponseBytes ? throw new McpException("The server's answer is larger than this app reads (1 MB).") : n;
-        public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken ct = default) => Count(await inner.ReadAsync(buffer, ct));
-        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken ct) => ReadAsync(buffer.AsMemory(offset, count), ct).AsTask();
-        public override int Read(byte[] buffer, int offset, int count) => Count(inner.Read(buffer, offset, count));
-        public override bool CanRead => true; public override bool CanSeek => false; public override bool CanWrite => false;
-        public override long Length => throw new NotSupportedException(); public override long Position { get => _read; set => throw new NotSupportedException(); }
-        public override void Flush() { }
-        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
-        public override void SetLength(long value) => throw new NotSupportedException();
-        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
-        protected override void Dispose(bool disposing) { if (disposing) inner.Dispose(); base.Dispose(disposing); }
-    }
-
-    private static string? Str(JsonNode? n) => n is JsonValue v && v.GetValueKind() == JsonValueKind.String ? v.GetValue<string>() : null;
-
-    public void Dispose() => _http.Dispose();
+    public void Dispose() => _transport.Dispose();
 }
+
+/// <summary>The https server forgot the session (404); the client starts it again once.</summary>
+internal sealed class McpSessionGoneException() : Exception("session gone");
 
 /// <summary>JSON from a server, read whole before it is used.</summary>
 internal static class McpJson
