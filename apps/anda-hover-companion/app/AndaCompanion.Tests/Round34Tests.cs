@@ -69,10 +69,8 @@ public class Round34Tests : IClassFixture<HeadlessFixture>
     public void The_watch_line_tail_the_version_and_what_changed_are_the_simulations()
     {
         foreach (var w in G("watchMore").EnumerateArray()) Assert.Equal(w.GetProperty("text").GetString(), CardWindow.WatchMoreText(w.GetProperty("n").GetInt32()));
-        Assert.Equal(G("version").GetString(), ChangeLog.Version);
-        var changes = G("changes");
-        Assert.Equal(changes.GetProperty("round").GetInt32(), ChangeLog.Entries[0].Round);
-        Assert.Equal(changes.GetProperty("items").EnumerateArray().Select(x => x.GetString()!).ToList(), ChangeLog.Entries[0].Items.ToList());
+        var changes = G("changes");             // round 34's own entry; the newest version is checked with round 29's answers
+        Assert.Equal(changes.GetProperty("items").EnumerateArray().Select(x => x.GetString()!).ToList(), ChangeLog.Entries.First(e => e.Round == changes.GetProperty("round").GetInt32()).Items.ToList());
     }
 
     // ---------- settings move once ----------
@@ -316,7 +314,7 @@ public class Round34Tests : IClassFixture<HeadlessFixture>
     {
         string app = File.ReadAllText(Folder("app", "AndaCompanion", "App.axaml.cs")), more = File.ReadAllText(Folder("app", "AndaCompanion", "App.Round33.cs"));
         Assert.Contains("tray.Clicked += (_, _) => OpenToday();", app);
-        Assert.Contains("var today = new NativeMenuItem(\"Today…\");", app);
+        Assert.Contains("\"Today…\" => Item(\"Today…\", OpenToday),", app);            // round 35: the menu is built from TrayMenu.Layout
         Assert.DoesNotContain("new NativeMenuItem(\"Watch list…\")", app);
         Assert.Contains("() => _ = OnHotkeyAsync(HotkeyService.IdPeek, middleClick: true)", app);
         Assert.Contains("UrgencyPolicy.Decide(_settings.Consent, _settings.EscalateUrgent, urgent, middleClick)", app);

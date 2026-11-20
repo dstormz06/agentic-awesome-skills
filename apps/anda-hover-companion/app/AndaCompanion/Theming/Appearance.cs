@@ -49,7 +49,7 @@ public sealed record Structure
     public bool SerifLabels { get; init; }
     public double SlotPadV { get; init; } = 10;
     public double SlotPadH { get; init; } = 16;
-    public double DateSize { get; init; } = 13.5;
+    public double DateSize { get; init; } = 13;
     public CardLayout Layout { get; init; } = CardLayout.Standard;
     public string? RailWash { get; init; }              // Rail: the tinted column that carries the days
     public bool Ribbon { get; init; }                   // Pocket: the weeks around the goal and the forecast, drawn under the answer (U)

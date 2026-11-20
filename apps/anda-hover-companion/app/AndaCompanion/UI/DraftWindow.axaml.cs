@@ -122,7 +122,7 @@ public partial class DraftWindow : Window
     {
         var row = new Grid { ColumnDefinitions = new ColumnDefinitions("22,*") };
         row.Children.Add(new TextBlock { Text = icon, FontSize = 13, FontWeight = FontWeight.Bold, Foreground = Res(iconInk) });
-        var t = new TextBlock { Text = text, FontSize = 12.5, TextWrapping = TextWrapping.Wrap, Foreground = Res(textInk) };
+        var t = new TextBlock { Text = text, FontSize = 13, TextWrapping = TextWrapping.Wrap, Foreground = Res(textInk) };
         Grid.SetColumn(t, 1);
         row.Children.Add(t);
         return row;
@@ -328,7 +328,7 @@ public partial class DraftWindow : Window
             }
             var box = new Expander
             {
-                Header = new TextBlock { Text = head, FontSize = 12.5, FontWeight = FontWeight.SemiBold, TextWrapping = TextWrapping.Wrap, Foreground = Res("C.Ink") },
+                Header = new TextBlock { Text = head, FontSize = 13, FontWeight = FontWeight.SemiBold, TextWrapping = TextWrapping.Wrap, Foreground = Res("C.Ink") },
                 Content = body, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch, Tag = g.Number,
             };
             AutomationProperties.SetName(box, head);

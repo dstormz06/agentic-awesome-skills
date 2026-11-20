@@ -102,17 +102,17 @@ public sealed class TodayWindow : Window
         {
             if (g.Rows.Count == 0) continue;
             any = true;
-            _list.Children.Add(new TextBlock { Text = g.Title, FontSize = 9.5, FontWeight = FontWeight.Bold, LetterSpacing = 1.3, Foreground = Res("C.Ink3"), Margin = new Thickness(2, 8, 0, 3) });
+            _list.Children.Add(new TextBlock { Text = g.Title, FontSize = 11, FontWeight = FontWeight.Bold, LetterSpacing = 1.3, Foreground = Res("C.Ink3"), Margin = new Thickness(2, 8, 0, 3) });
             foreach (var row in g.Rows)
             {
                 bool current = row.Id == _selected;
                 var dot = new Border { Width = 9, Height = 9, CornerRadius = new CornerRadius(5), VerticalAlignment = VerticalAlignment.Center, Background = Res(row.Mark == "r" ? "C.Bad" : row.Mark == "w" ? "C.Warn" : "C.Good") };
                 var text = new StackPanel();
                 var idLine = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 6 };
-                idLine.Children.Add(new TextBlock { Text = row.Id, FontSize = 12.5, FontWeight = FontWeight.SemiBold, Foreground = Res("C.Ink") });
+                idLine.Children.Add(new TextBlock { Text = row.Id, FontSize = 13, FontWeight = FontWeight.SemiBold, Foreground = Res("C.Ink") });
                 idLine.Children.Add(new TextBlock { Text = Today.MarkWord(row.Mark), FontSize = 11, Foreground = Res("C.Ink3"), VerticalAlignment = VerticalAlignment.Center });
                 text.Children.Add(idLine);
-                text.Children.Add(new TextBlock { Text = row.Line, FontSize = 11.5, Foreground = Res("C.Ink3"), TextWrapping = TextWrapping.Wrap });
+                text.Children.Add(new TextBlock { Text = row.Line, FontSize = 12, Foreground = Res("C.Ink3"), TextWrapping = TextWrapping.Wrap });
                 var line = new Grid { ColumnDefinitions = new ColumnDefinitions("18,*") };
                 line.Children.Add(dot); Grid.SetColumn(text, 1); line.Children.Add(text);
                 var b = new Button { Content = line, HorizontalAlignment = HorizontalAlignment.Stretch, HorizontalContentAlignment = HorizontalAlignment.Left, Padding = new Thickness(8, 5), Background = Brushes.Transparent,
@@ -147,20 +147,20 @@ public sealed class TodayWindow : Window
         var v = Today.Main(look);
         _main.Children.Add(new TextBlock { Text = v.Meta, FontSize = 12, Foreground = Res("C.Ink2"), TextWrapping = TextWrapping.Wrap });
         var headline = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
-        headline.Children.Add(new TextBlock { Text = v.Figure, FontSize = v.Figure == "On" ? 22 : 30, FontWeight = FontWeight.Bold, Foreground = Res(v.Tone == "late" ? "C.Warn" : "C.Good"), VerticalAlignment = VerticalAlignment.Bottom });
-        headline.Children.Add(new TextBlock { Text = v.Words, FontSize = 14, Foreground = Res("C.Ink"), VerticalAlignment = VerticalAlignment.Bottom, Margin = new Thickness(0, 0, 0, 4) });
+        headline.Children.Add(new TextBlock { Text = v.Figure, FontSize = v.Figure == "On" ? 20 : 34, FontWeight = FontWeight.Bold, Foreground = Res(v.Tone == "late" ? "C.Warn" : "C.Good"), VerticalAlignment = VerticalAlignment.Bottom });
+        headline.Children.Add(new TextBlock { Text = v.Words, FontSize = 15, Foreground = Res("C.Ink"), VerticalAlignment = VerticalAlignment.Bottom, Margin = new Thickness(0, 0, 0, 4) });
         _main.Children.Add(headline);
-        _main.Children.Add(new TextBlock { Text = v.Dates, FontSize = 11.5, Foreground = Res("C.Ink3"), TextWrapping = TextWrapping.Wrap });
+        _main.Children.Add(new TextBlock { Text = v.Dates, FontSize = 12, Foreground = Res("C.Ink3"), TextWrapping = TextWrapping.Wrap });
         if (v.Attn is not null)
         {
             var attn = new StackPanel { Spacing = 2 };
-            attn.Children.Add(new TextBlock { Text = "⚠ NEEDS YOU", FontSize = 9.5, FontWeight = FontWeight.Bold, LetterSpacing = 1.2, Foreground = Res("C.Warn") });
-            attn.Children.Add(new TextBlock { Text = v.Attn, FontSize = 12.5, Foreground = Res("C.Ink"), TextWrapping = TextWrapping.Wrap });
+            attn.Children.Add(new TextBlock { Text = "⚠ NEEDS YOU", FontSize = 11, FontWeight = FontWeight.Bold, LetterSpacing = 1.2, Foreground = Res("C.Warn") });
+            attn.Children.Add(new TextBlock { Text = v.Attn, FontSize = 13, Foreground = Res("C.Ink"), TextWrapping = TextWrapping.Wrap });
             _main.Children.Add(new Border { BorderBrush = Res("C.Warn"), BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(8), Padding = new Thickness(10, 7), Child = attn });
         }
-        if (v.Watch is not null) _main.Children.Add(new TextBlock { Text = v.Watch, FontSize = 11.5, Foreground = Res("C.Ink3"), TextWrapping = TextWrapping.Wrap });
+        if (v.Watch is not null) _main.Children.Add(new TextBlock { Text = v.Watch, FontSize = 12, Foreground = Res("C.Ink3"), TextWrapping = TextWrapping.Wrap });
         CopyButton = new Button { Content = "Copy status" }; OpenButton = new Button { Content = "Open the card" };
-        var status = new TextBlock { FontSize = 11.5, Foreground = Res("C.Ink2"), TextWrapping = TextWrapping.Wrap, IsVisible = false };
+        var status = new TextBlock { FontSize = 12, Foreground = Res("C.Ink2"), TextWrapping = TextWrapping.Wrap, IsVisible = false };
         AutomationProperties.SetLiveSetting(status, AutomationLiveSetting.Polite);
         string id = look.Record.Number, line = v.Status;
         CopyButton.Click += async (_, _) =>

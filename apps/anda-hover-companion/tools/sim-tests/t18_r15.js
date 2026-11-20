@@ -379,10 +379,10 @@ const closeAll = async p => { for (let i = 0; i < 4; i++) { await p.keyboard.pre
   const menu = await p.$$eval('#menu button', n => n.map(x => x.textContent.replace(/\s+/g, ' ').trim()));
   ok(menu.some(x => x.startsWith('ANDA to-do list…')) && menu.some(x => x.startsWith('My to-do list…')) && menu.some(x => x.startsWith('Notes to my to-do list…')), 'the tray menu has "ANDA to-do list…", "My to-do list…" and "Notes to my to-do list…"');
   ok(menu.some(x => x.startsWith('My actions')), 'the tray menu has a "My actions" submenu');
-  await p.locator('#menu button:has-text("My actions")').click(); await settle(p);
-  const subs = await p.$$eval('#menu .sub:not([hidden]) button', n => n.map(x => [...x.children].map(c => c.textContent).join(' ').trim()));
+  await p.click('#menu > button[data-group="More"]'); await p.locator('#menu button[data-group="My actions"]').click(); await settle(p);   // round 35: My actions is inside More
+  const subs = await p.$$eval('#menu button[data-group="My actions"] + .sub button', n => n.map(x => [...x.children].map(c => c.textContent).join(' ').trim()));
   eq(subs, ['Add to my to-do list Ctrl+Alt+T', 'Prepare a status question', 'Ask my AI for next steps'], 'it lists each action, with its shortcut where it has one');
-  await p.locator('#menu .sub:not([hidden]) button').nth(1).click(); await settle(p);
+  await p.locator('#menu button[data-group="My actions"] + .sub button').nth(1).click(); await settle(p);
   ok(await visible(p, '#lookup'), 'choosing an action from the menu asks for an ANDA number');
   await p.fill('#lookupIn', '216482'); await p.keyboard.press('Enter'); await settle(p);
   ok(await visible(p, '#actwin') && (await p.inputValue('#awPrompt')).includes('216482'), 'and then runs it on that ANDA');

@@ -130,9 +130,10 @@ public class Round29UiTests : IClassFixture<HeadlessFixture>
             var texts = Texts(w); Click(w.CopyButton); Settle(); string note = w.Note.Text ?? "";
             w.Close(); return (texts, note);
         }, CancellationToken.None);
-        Assert.Contains("ANDA Companion (Notula) · " + ChangeLog.Version, r.texts); Assert.Equal("Prototype, round 34", ChangeLog.Version);
+        Assert.Contains("ANDA Companion (Notula) · " + ChangeLog.Version, r.texts); Assert.Equal("Prototype, round " + ChangeLog.Entries[0].Round, ChangeLog.Version);   // the newest entry names the version (checked against the simulation via round 29's answers)
         Assert.Contains("A prototype with fictional data. Not an FDA product. It does not update itself.", r.texts);
-        Assert.Equal(new[] { "ROUND 34", "ROUND 33", "ROUND 32", "ROUND 31", "ROUND 30", "ROUND 29", "ROUND 28", "ROUND 27", "ROUND 26" }, r.texts.Where(t => t.StartsWith("ROUND ")));
+        Assert.Equal(ChangeLog.Entries.Select(e => "ROUND " + e.Round), r.texts.Where(t => t.StartsWith("ROUND ")));   // every round, newest first
+        Assert.Equal(ChangeLog.Entries.Select(e => e.Round).OrderByDescending(n => n), ChangeLog.Entries.Select(e => e.Round));
         Assert.All(ChangeLog.Entries.SelectMany(e => e.Items), i => Assert.Contains("• " + i, r.texts));
         Assert.Equal(string.Join("\n", ChangeLog.Text()), Assert.Single(copied)); Assert.Equal("Copied.", r.note);
     }

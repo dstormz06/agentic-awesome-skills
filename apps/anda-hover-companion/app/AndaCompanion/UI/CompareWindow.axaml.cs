@@ -658,12 +658,12 @@ public partial class CompareWindow : Window
             if (r.AddedCount > 0)
             {
                 Out.Children.Add(Label("NEW IN THE LATER FILE"));
-                Out.Children.Add(new TextBlock { Text = string.Join(", ", r.Added) + (r.AddedCount > r.Added.Count ? $", and {N(r.AddedCount - r.Added.Count)} more" : ""), FontSize = 12.5, TextWrapping = TextWrapping.Wrap, Foreground = Res("C.Ink") });
+                Out.Children.Add(new TextBlock { Text = string.Join(", ", r.Added) + (r.AddedCount > r.Added.Count ? $", and {N(r.AddedCount - r.Added.Count)} more" : ""), FontSize = 13, TextWrapping = TextWrapping.Wrap, Foreground = Res("C.Ink") });
             }
             if (r.RemovedCount > 0)
             {
                 Out.Children.Add(Label("NO LONGER IN THE LATER FILE"));
-                Out.Children.Add(new TextBlock { Text = string.Join(", ", r.Removed) + (r.RemovedCount > r.Removed.Count ? $", and {N(r.RemovedCount - r.Removed.Count)} more" : ""), FontSize = 12.5, TextWrapping = TextWrapping.Wrap, Foreground = Res("C.Ink") });
+                Out.Children.Add(new TextBlock { Text = string.Join(", ", r.Removed) + (r.RemovedCount > r.Removed.Count ? $", and {N(r.RemovedCount - r.Removed.Count)} more" : ""), FontSize = 13, TextWrapping = TextWrapping.Wrap, Foreground = Res("C.Ink") });
             }
             Ready("table");
             return true;

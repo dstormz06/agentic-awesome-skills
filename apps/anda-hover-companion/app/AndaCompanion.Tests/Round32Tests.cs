@@ -204,7 +204,7 @@ public class Round32Tests : IDisposable
         string app = File.ReadAllText(Folder("app", "AndaCompanion", "App.axaml.cs")), ask = File.ReadAllText(Folder("app", "AndaCompanion", "App.Ask.cs"));
         Assert.Contains("FirstStart.Run(_settings, s => SettingsService.Save(s)", app);
         Assert.DoesNotContain("FirstRunDone", app);                                                               // nowhere else decides it
-        Assert.Matches(@"new NativeMenuItem\(""Help: first steps…""\);\s+help\.Click \+= \(_, _\) => OpenFirstSteps\(null\);", app);
+        Assert.Contains("\"Help: first steps…\" => Item(label, () => OpenFirstSteps(null)),", app);       // round 35: under Help in the tray menu
         Assert.Contains("FirstStepsWiring.Build(", ask); Assert.Contains("OpenFullCard(sample, at, mini: false, stay: true, notes: notes)", ask); Assert.Contains("_settingsWindow?.OpenSection(section)", ask);
         Assert.Matches(@"FirstStepsWiring\.Build\(\s*\(\) => _settings, _demo,", ask);                          // the bundled sample records, not the person's data
         Assert.Matches(@"_settingsWindow\?\.OpenSection\(section\) == true; \},\s+OpenConnections\), note\);", ask);      // the third button opens Connections, nothing else

@@ -20,7 +20,7 @@
       <Setter Property="Padding" Value="10,7"/>
       <Setter Property="MaxWidth" Value="280"/>
       <Setter Property="FontFamily" Value="{DynamicResource C.Font}"/>
-      <Setter Property="FontSize" Value="11.5"/>
+      <Setter Property="FontSize" Value="12"/>
       <Setter Property="Foreground" Value="{DynamicResource C.Ink2}"/>
     </Style>
     <Style Selector="ToolTip">

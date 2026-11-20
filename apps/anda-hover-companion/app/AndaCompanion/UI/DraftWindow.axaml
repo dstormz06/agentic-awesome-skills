@@ -8,11 +8,11 @@
   <Window.Styles>
     <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource C.Font}"/></Style>
     <Style Selector="TextBlock.lbl">
-      <Setter Property="FontSize" Value="9.5"/><Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="FontSize" Value="11"/><Setter Property="FontWeight" Value="Bold"/>
       <Setter Property="LetterSpacing" Value="1.4"/><Setter Property="Foreground" Value="{DynamicResource C.Ink3}"/>
     </Style>
     <Style Selector="TextBlock.hint"><Setter Property="FontSize" Value="11"/><Setter Property="Foreground" Value="{DynamicResource C.Ink3}"/><Setter Property="TextWrapping" Value="Wrap"/></Style>
-    <Style Selector="TextBox"><Setter Property="FontSize" Value="12.5"/></Style>
+    <Style Selector="TextBox"><Setter Property="FontSize" Value="13"/></Style>
   </Window.Styles>
 
   <Panel Margin="26">
@@ -39,7 +39,7 @@
             <Button Name="SampleBtn" Margin="0,0,8,6" Content="Use the sample draft"/>
           </WrapPanel>
           <TextBlock Classes="hint" Text="All three run on this PC by fixed rules. No AI is used and nothing is sent."/>
-          <TextBlock Name="SummaryText" FontSize="12.5" FontWeight="SemiBold" TextWrapping="Wrap" Foreground="{DynamicResource C.Ink}"
+          <TextBlock Name="SummaryText" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" Foreground="{DynamicResource C.Ink}"
                      AutomationProperties.LiveSetting="Polite"/>
 
           <StackPanel Name="FactWrap" Spacing="6">
@@ -53,7 +53,7 @@
             <StackPanel Name="FixPanel" IsVisible="False" Spacing="6">
               <TextBlock Classes="lbl" Margin="0,4,0,0" Text="YOUR DRAFT, WITH THE CHANGES MARKED"/>
               <Border BorderBrush="{DynamicResource C.Line}" BorderThickness="1" CornerRadius="8" Padding="10,8">
-                <SelectableTextBlock Name="MarkedText" FontSize="12.5" TextWrapping="Wrap" Foreground="{DynamicResource C.Ink}"
+                <SelectableTextBlock Name="MarkedText" FontSize="13" TextWrapping="Wrap" Foreground="{DynamicResource C.Ink}"
                                      AutomationProperties.Name="Your draft with the changes marked"/>
               </Border>
               <WrapPanel Orientation="Horizontal">
@@ -94,7 +94,7 @@
 
           <Expander Name="AiExpander" HorizontalAlignment="Stretch" Margin="0,4,0,0">
             <Expander.Header>
-              <TextBlock Name="AiHeader" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink}" Text="AI options · off"/>
+              <TextBlock Name="AiHeader" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink}" Text="AI options · off"/>
             </Expander.Header>
             <StackPanel Spacing="8">
               <TextBlock Classes="lbl" Text="AI ACTIONS · NEED AN APPROVED AI PLATFORM"/>

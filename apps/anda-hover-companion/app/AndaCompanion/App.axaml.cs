@@ -405,81 +405,56 @@ public partial class App : Application
     {
         var menu = new NativeMenu();
 
-        var lookup = _lookupItem = new NativeMenuItem($"Lookup ANDA…\t{_settings.LookupHotkey}");
-        lookup.Click += (_, _) => OpenLookup();
-        menu.Add(lookup);
-        var draft = _draftItem = new NativeMenuItem($"Review a draft…\t{_settings.DraftHotkey}");
-        draft.Click += (_, _) => OpenDraft("");
-        menu.Add(draft);
-        var ask = _askItem = new NativeMenuItem(AskMenuLabel());
-        ask.Click += (_, _) => OpenAsk("");
-        menu.Add(ask);
-        var compare = new NativeMenuItem("Compare two files…");
-        compare.Click += (_, _) => OpenCompare();
-        menu.Add(compare);
-        var handoff = new NativeMenuItem("Hand-off page…");
-        handoff.Click += (_, _) => OpenHandoff(null);
-        menu.Add(handoff);
-        // Round 34: Today is home. It is in the focused menu and opens with a click on the icon; the watch list opens from it (Show all).
-        var today = new NativeMenuItem("Today…");
-        today.Click += (_, _) => OpenToday();
-        menu.Add(today);
-        var connections = new NativeMenuItem("Connections and event log…");
-        connections.Click += (_, _) => OpenConnections();
-        menu.Add(connections);
-        var backups = new NativeMenuItem("Backups and archive…");
-        backups.Click += (_, _) => OpenBackups();
-        menu.Add(backups);
-        var about = new NativeMenuItem("About and what changed…");
-        about.Click += (_, _) => OpenAbout();
-        menu.Add(about);
-        var help = new NativeMenuItem("Help: first steps…");
-        help.Click += (_, _) => OpenFirstSteps(null);
-        menu.Add(help);
-        var todo = new NativeMenuItem("ANDA to-do list…");
-        todo.Click += (_, _) => OpenTodoWindow();
-        menu.Add(Full(todo));
-        var todoItem = _myTodoItem = new NativeMenuItem(MyTodoMenuLabel());
-        todoItem.Click += (_, _) => OpenMyTodoWindow();
-        menu.Add(Full(todoItem));
-        var notes = new NativeMenuItem("Notes to my to-do list…");
-        notes.Click += (_, _) => OpenNotes("");
-        menu.Add(Full(notes));
-        _actionsMenu = new NativeMenuItem("My actions") { Menu = new NativeMenu() };
+        // Round 35: the menu is built from TrayMenu.Layout, in the simulation's order: seven choices (Lookup, Today, Review a draft, Ask,
+        // More, Settings, Help) and Exit; Lists with all tools on. What only "Show all tools" shows is what the focused layout leaves out.
+        var focused = TrayMenu.Layout(allTools: false);
+        bool InFocused(string label, string? group) => group is null ? focused.Any(e => e.Label == label)
+            : focused.FirstOrDefault(e => e.Label == group)?.Items?.Contains(label) == true;
+        NativeMenuItem Item(string label, Action open) { var i = new NativeMenuItem(label); i.Click += (_, _) => open(); return i; }
+        NativeMenuItem Make(string label) => label switch
+        {
+            "Lookup ANDA…" => _lookupItem = Item($"Lookup ANDA…\t{_settings.LookupHotkey}", OpenLookup),
+            "Today…" => Item("Today…", OpenToday),
+            "Review a draft…" => _draftItem = Item($"Review a draft…\t{_settings.DraftHotkey}", () => OpenDraft("")),
+            "Ask about a selection…" => _askItem = Item(AskMenuLabel(), () => OpenAsk("")),
+            "ANDA to-do list…" => Item(label, OpenTodoWindow),
+            "My to-do list…" => _myTodoItem = Item(MyTodoMenuLabel(), OpenMyTodoWindow),
+            "Notes to my to-do list…" => Item(label, () => OpenNotes("")),
+            "My usage…" => Item(label, () => new UsageWindow(UsageLog.FilePath, UsageLog.Enabled).Show()),
+            "Compare two files…" => Item(label, OpenCompare),
+            "Hand-off page…" => Item(label, () => OpenHandoff(null)),
+            "Quick replies…" => Item(label, () => new QuickRepliesWindow(_replies, () => { }).Show()),
+            "Prompt library…" => Item(label, () => new PromptLibraryWindow(_prompts, _settings, ApplySettings).Show()),
+            "My actions" => _actionsMenu = new NativeMenuItem("My actions") { Menu = new NativeMenu() },
+            // Round 19: the looks are offered in both editions (the owner asked for them back).
+            "Appearance" => BuildRadioSubmenu("Appearance", Appearances.Offered.Select(a => (a.Name, (object)a.Id)),
+                () => (object)_settings.Appearance, value => { _settings.Appearance = (AppearanceId)value; ApplySettings(); }, separatorBefore: Appearances.L.Name),
+            "Auto-hide" => BuildRadioSubmenu("Auto-hide", AutoHidePolicy.Choices.Select(c => (AutoHidePolicy.Label(c), (object)c)),
+                () => (object)_settings.AutoHideSeconds, value => { _settings.AutoHideSeconds = (int)value; ApplySettings(); }),
+            "Connections and event log…" => Item(label, OpenConnections),
+            "Backups and archive…" => Item(label, OpenBackups),
+            "Demo: ANDA at risk" => Item(label, () => DemoCard("216482")),
+            "Demo: ANDA on track" => Item(label, () => DemoCard("214990")),
+            "Settings…" => Item(label, OpenSettings),
+            "Help: first steps…" => Item(label, () => OpenFirstSteps(null)),
+            "About and what changed…" => Item(label, OpenAbout),
+            "Exit" => Item(label, () => desktop.Shutdown()),
+            _ => throw new InvalidOperationException("The tray menu has no action for " + label),
+        };
+        foreach (var entry in TrayMenu.Layout(allTools: true))
+        {
+            if (entry.Label == "Exit") { menu.Add(new NativeMenuItemSeparator()); menu.Add(_hotkeyLine = new NativeMenuItem(HotkeyStatusLine()) { IsEnabled = false }); }
+            NativeMenuItem top;
+            if (entry.Items is { } items)
+            {
+                top = new NativeMenuItem(entry.Label) { Menu = new NativeMenu() };
+                foreach (var label in items) { var child = Make(label); top.Menu.Add(InFocused(label, entry.Label) ? child : Full(child)); }
+            }
+            else top = Make(entry.Label);
+            menu.Add(InFocused(entry.Label, null) ? top : Full(top));
+        }
         RebuildActionsMenu();
-        menu.Add(_actionsMenu);
-
-        var demoRisk = new NativeMenuItem("Demo: ANDA at risk");
-        demoRisk.Click += (_, _) => DemoCard("216482");
-        var demoHealthy = new NativeMenuItem("Demo: ANDA on track");
-        demoHealthy.Click += (_, _) => DemoCard("214990");
-        menu.Add(demoRisk);
-        menu.Add(demoHealthy);
-        menu.Add(new NativeMenuItemSeparator());
-
-        // Round 19: the looks are offered in both editions (the owner asked for them back).
-        menu.Add(BuildRadioSubmenu("Appearance", Appearances.Offered.Select(a => (a.Name, (object)a.Id)),
-            () => (object)_settings.Appearance,
-            value => { _settings.Appearance = (AppearanceId)value; ApplySettings(); },
-            separatorBefore: Appearances.L.Name));
-        menu.Add(BuildRadioSubmenu("Auto-hide", AutoHidePolicy.Choices.Select(c => (AutoHidePolicy.Label(c), (object)c)),
-            () => (object)_settings.AutoHideSeconds,
-            value => { _settings.AutoHideSeconds = (int)value; ApplySettings(); }));
-
-        var settings = new NativeMenuItem("Settings…");
-        settings.Click += (_, _) => OpenSettings();
-        menu.Add(settings);
-
-        var prompts = new NativeMenuItem("Prompt library…");
-        prompts.Click += (_, _) =>
-            new PromptLibraryWindow(_prompts, _settings, ApplySettings).Show();
-        menu.Add(Full(prompts));
-
-        menu.Add(new NativeMenuItemSeparator());
-        menu.Add(_hotkeyLine = new NativeMenuItem(HotkeyStatusLine()) { IsEnabled = false });
-        var exit = new NativeMenuItem("Exit");
-        exit.Click += (_, _) => desktop.Shutdown();
-        menu.Add(exit);
+        _trayMenu = menu;
 
         var tray = new TrayIcon
         {
@@ -494,6 +469,9 @@ public partial class App : Application
     }
 
     private readonly List<NativeMenuItem> _fullOnly = new();
+    private NativeMenu? _trayMenu;
+    /// <summary>The tray menu as built, for a test to read (round 35).</summary>
+    internal NativeMenu? TrayMenuForTest => _trayMenu;
 
     /// <summary>Marks a tray item as one that only "Show all tools" shows. The focused menu is Lookup, Review a draft, Ask, Today (with the watch list), Appearance and Settings.</summary>
     private T Full<T>(T item) where T : NativeMenuItem { _fullOnly.Add(item); return item; }

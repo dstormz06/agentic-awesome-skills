@@ -21,11 +21,11 @@
   <Window.Styles>
     <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource C.Font}"/></Style>
     <Style Selector="TextBlock.lbl">
-      <Setter Property="FontSize" Value="9.5"/><Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="FontSize" Value="11"/><Setter Property="FontWeight" Value="Bold"/>
       <Setter Property="LetterSpacing" Value="1.4"/><Setter Property="Foreground" Value="{DynamicResource C.Ink3}"/>
       <Setter Property="FontFamily" Value="{DynamicResource C.LabelFont}"/>
     </Style>
-    <Style Selector="TextBlock.body2"><Setter Property="FontSize" Value="12.5"/><Setter Property="Foreground" Value="{DynamicResource C.Ink2}"/><Setter Property="TextWrapping" Value="Wrap"/></Style>
+    <Style Selector="TextBlock.body2"><Setter Property="FontSize" Value="13"/><Setter Property="Foreground" Value="{DynamicResource C.Ink2}"/><Setter Property="TextWrapping" Value="Wrap"/></Style>
     <Style Selector="Button.tool">
       <Setter Property="Background" Value="Transparent"/><Setter Property="BorderThickness" Value="0"/>
       <Setter Property="Width" Value="30"/><Setter Property="Height" Value="30"/>
@@ -88,7 +88,7 @@
               <!-- The seal's colors are set in code (ApplyAppearanceStructure): a resource binding here would win over a look's own seal. -->
               <Border Name="Seal" Grid.Column="2"
                       CornerRadius="99" Padding="8,3" VerticalAlignment="Center">
-                <TextBlock Name="SealText" FontSize="10" FontWeight="Bold" LetterSpacing="0.8" Text="✓ VERIFIED"/>
+                <TextBlock Name="SealText" FontSize="11" FontWeight="Bold" LetterSpacing="0.8" Text="✓ VERIFIED"/>
               </Border>
               <StackPanel Name="ToolsPanel" Grid.Column="4" Orientation="Horizontal" Spacing="2">
                 <Button Name="PinBtn" Classes="tool" ToolTip.Tip="Pin (Space)" AutomationProperties.Name="Pin card">
@@ -102,11 +102,11 @@
                 </Button>
               </StackPanel>
             </Grid>
-            <TextBlock Name="DrugText" FontSize="14" FontWeight="Medium" Margin="0,6,0,0"
+            <TextBlock Name="DrugText" FontSize="15" FontWeight="Medium" Margin="0,6,0,0"
                        FontFamily="{DynamicResource C.DrugFont}" FontStyle="{DynamicResource C.DrugStyle}"
                        Foreground="{DynamicResource C.Ink}" TextWrapping="Wrap"/>
             <TextBlock Name="MetaText" FontSize="12" Foreground="{DynamicResource C.Ink2}" Margin="0,2,0,0"/>
-            <TextBlock Name="FreshnessText" FontSize="10.5" Foreground="{DynamicResource C.Ink3}" Margin="0,3,0,0" TextWrapping="Wrap"/>
+            <TextBlock Name="FreshnessText" FontSize="11" Foreground="{DynamicResource C.Ink3}" Margin="0,3,0,0" TextWrapping="Wrap"/>
           </StackPanel>
           </Border>
           <Border Height="1" Background="{DynamicResource C.Hair}"/>
@@ -126,7 +126,7 @@
               <TextBlock Classes="lbl" Text="GOAL" VerticalAlignment="Center"/>
               <TextBlock Grid.Column="2" Name="GoalText" FontSize="{DynamicResource C.DateSize}" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink}"/>
               <TextBlock Grid.Column="4" Name="GoalDaysText" FontSize="12" Foreground="{DynamicResource C.Ink2}"/>
-              <TextBlock Grid.Column="6" Name="PctText" FontSize="11.5" Foreground="{DynamicResource C.Ink2}"
+              <TextBlock Grid.Column="6" Name="PctText" FontSize="12" Foreground="{DynamicResource C.Ink2}"
                          FontFamily="{DynamicResource C.NumFont}"/>
             </Grid>
             <ui:ProgressControl Name="Progress" HorizontalAlignment="Stretch"/>
@@ -141,9 +141,9 @@
               </Grid.ColumnDefinitions>
               <TextBlock Classes="lbl" Text="FORECAST" VerticalAlignment="Center"/>
               <TextBlock Grid.Column="2" Name="ForecastText" FontSize="{DynamicResource C.DateSize}" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink}"/>
-              <TextBlock Grid.Column="4" Name="ForecastDeltaText" FontSize="11.5" FontWeight="Bold" VerticalAlignment="Center"/>
+              <TextBlock Grid.Column="4" Name="ForecastDeltaText" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
             </Grid>
-            <TextBlock Name="ForecastConfText" FontSize="10.5" Foreground="{DynamicResource C.Ink3}"
+            <TextBlock Name="ForecastConfText" FontSize="11" Foreground="{DynamicResource C.Ink3}"
                        HorizontalAlignment="Right" Margin="0,3,0,0"/>
           </StackPanel>
 
@@ -228,15 +228,15 @@
                   <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Classes="lbl" Name="BriefTag" Text="COMPANION" Foreground="{DynamicResource C.Accent}"/>
-                <TextBlock Grid.Column="2" Name="BriefVerify" FontSize="10.5" Foreground="{DynamicResource C.Ink3}"
+                <TextBlock Grid.Column="2" Name="BriefVerify" FontSize="11" Foreground="{DynamicResource C.Ink3}"
                            Text="generated — verify before acting" VerticalAlignment="Center"/>
-                <TextBlock Grid.Column="3" Name="SourcesLink" FontSize="11.5" Foreground="{DynamicResource C.Accent}" Text="sources ›"/>
+                <TextBlock Grid.Column="3" Name="SourcesLink" FontSize="12" Foreground="{DynamicResource C.Accent}" Text="sources ›"/>
               </Grid>
               <Border Name="ConnPill" CornerRadius="99" Padding="8,2" HorizontalAlignment="Left" Margin="0,0,0,6"
                       ToolTip.Tip="Whether this app is really connected to an API. It says Connected only after a request has succeeded.">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                   <Ellipse Name="ConnDot" Width="7" Height="7" VerticalAlignment="Center" StrokeThickness="1.5"/>
-                  <TextBlock Name="ConnText" FontSize="10.5" FontWeight="SemiBold"/>
+                  <TextBlock Name="ConnText" FontSize="11" FontWeight="SemiBold"/>
                 </StackPanel>
               </Border>
               <TextBlock Name="BriefText" Classes="body2" MinHeight="34"/>
@@ -249,7 +249,7 @@
             <!-- My notes (round 24): the person's own quick notes for this ANDA, kept by the app in its own folder. First in the drawer, so Enter shows the box with the newest notes right below it. -->
             <Expander Name="MyNotesExpander" Margin="8,2,8,0"><Expander.Header><TextBlock Name="MyNotesHeader" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink2}" Text="My notes"/></Expander.Header>
               <StackPanel Margin="12,0,12,8" Spacing="6">
-                <TextBox Name="QuickNoteBox" AcceptsReturn="True" TextWrapping="Wrap" MaxLength="500" MinHeight="54" MaxHeight="120" FontSize="12.5"
+                <TextBox Name="QuickNoteBox" AcceptsReturn="True" TextWrapping="Wrap" MaxLength="500" MinHeight="54" MaxHeight="120" FontSize="13"
                          Watermark="Type a note for this ANDA. Ctrl+Enter saves it." AutomationProperties.Name="A new note for this ANDA"/>
                 <WrapPanel>
                   <Button Name="QuickNoteSave" Classes="chip" Margin="0,0,7,4" Content="Save note" ToolTip.Tip="Save this note (Ctrl+Enter)"/>
@@ -257,7 +257,7 @@
                   <Button Name="QuickNoteUndo" Classes="chip" Margin="0,0,7,4" Content="Undo" IsVisible="False"/>
                   <TextBlock Name="QuickNoteCount" FontSize="11" VerticalAlignment="Center" Margin="0,0,8,4" Foreground="{DynamicResource C.Ink3}" Text="0 / 500"/>
                 </WrapPanel>
-                <TextBlock Name="QuickNoteMsg" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap" IsVisible="False" AutomationProperties.LiveSetting="Polite"/>
+                <TextBlock Name="QuickNoteMsg" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap" IsVisible="False" AutomationProperties.LiveSetting="Polite"/>
                 <StackPanel Name="QuickNotesList" Spacing="8"/>
                 <TextBlock FontSize="11" Foreground="{DynamicResource C.Ink3}" TextWrapping="Wrap"
                            Text="Kept on this PC, in the app's own folder. Text only, 500 characters. Never sent anywhere, and your sheet and your notes folder are not changed."/>
@@ -265,14 +265,14 @@
             </Expander>
             <!-- Details (round 33): columns of the person's own sheet, each with Copy. Nothing is looked up anywhere. -->
             <Expander Name="DetailsExpander" Margin="8,2,8,0" IsExpanded="True" IsVisible="False">
-              <Expander.Header><StackPanel Orientation="Horizontal" Spacing="6"><TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink2}" Text="Details"/><TextBlock Name="DetailsCount" FontSize="11.5" VerticalAlignment="Center" Foreground="{DynamicResource C.Ink3}"/></StackPanel></Expander.Header>
+              <Expander.Header><StackPanel Orientation="Horizontal" Spacing="6"><TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink2}" Text="Details"/><TextBlock Name="DetailsCount" FontSize="12" VerticalAlignment="Center" Foreground="{DynamicResource C.Ink3}"/></StackPanel></Expander.Header>
               <StackPanel Margin="12,0,12,8" Spacing="4">
                 <StackPanel Name="DetailsPanel" Spacing="3"/>
                 <WrapPanel>
                   <Button Name="DetailsAll" Classes="chip" Margin="0,4,8,0" Content="Copy all" AutomationProperties.Name="Copy all the details shown"/>
                   <TextBlock Name="DetailsSource" FontSize="11" VerticalAlignment="Center" Margin="0,4,0,0" Foreground="{DynamicResource C.Ink3}"/>
                 </WrapPanel>
-                <TextBlock Name="DetailsMsg" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap" IsVisible="False" AutomationProperties.LiveSetting="Polite"/>
+                <TextBlock Name="DetailsMsg" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap" IsVisible="False" AutomationProperties.LiveSetting="Polite"/>
               </StackPanel>
             </Expander>
             <Expander Name="WatchExpander" Margin="8,2,8,0" IsVisible="False"><Expander.Header><TextBlock Name="WatchHeader" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink2}" Text="Watch list"/></Expander.Header>
@@ -319,7 +319,7 @@
                       ToolTip.Tip="Open this ANDA's page in your browser. The address is set in Settings, My files and writing."
                       AutomationProperties.Name="Open this ANDA's page in the browser"/>
             </WrapPanel>
-            <TextBlock Name="ChipMsg" IsVisible="False" Margin="16,-6,16,8" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
+            <TextBlock Name="ChipMsg" IsVisible="False" Margin="16,-6,16,8" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
             <TextBlock Name="ActHint" Margin="16,-6,16,10" FontSize="11" Foreground="{DynamicResource C.Ink3}" TextWrapping="Wrap"
                        Text="Enter adds a note · S or Copy status copies the status line"/>
           </StackPanel>
@@ -328,7 +328,7 @@
           <Button Name="MoreBtn" IsVisible="False" AutomationProperties.Name="Show the full brief" Height="42" HorizontalAlignment="Stretch"
                   HorizontalContentAlignment="Center" Background="{DynamicResource C.Mark}"
                   BorderThickness="0" CornerRadius="0"
-                  Foreground="{DynamicResource C.Accent}" FontWeight="SemiBold" FontSize="12.5"
+                  Foreground="{DynamicResource C.Accent}" FontWeight="SemiBold" FontSize="13"
                   Content="Full brief ↓"/>
         </StackPanel>
         </ScrollViewer>

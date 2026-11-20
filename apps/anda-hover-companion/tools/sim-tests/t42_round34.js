@@ -38,7 +38,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   eq(await p.evaluate(steps => steps.map(s => { state.mode = s.consent; state.escalate = s.escalate; const id = Object.keys(DATA).find(n => isUrgent(n) === s.urgent); return firstStep(id, s.via); }), GOLD.steps),
     GOLD.steps.map(s => s.step), 'G3 how a card starts, for every way to start, urgent or not, by shortcut or middle-click: as the shared answers say');
   eq(await p.evaluate(ns => ns.map(n => watchMoreText(n)), GOLD.watchMore.map(w => w.n)), GOLD.watchMore.map(w => w.text), 'G4 the watch line\'s tail is short: "(+N more)", and nothing when there is one flag');
-  eq(await p.evaluate(() => [APP_VERSION, CHANGES[0].round, CHANGES[0].items]), [GOLD.version, GOLD.changes.round, GOLD.changes.items], 'G5 the version is round 34, with what changed, newest first');
+  eq(await p.evaluate(() => CHANGES.find(c => c.round === 34).items), GOLD.changes.items, 'G5 what changed in round 34 is listed (the newest version is checked by the round 29 answers)');
   await p.close();
 
   // ---- S. the shortcut opens the answer ----

@@ -107,7 +107,7 @@ public sealed class FirstStepsWindow : Window
         AutomationProperties.SetName(Place, $"{g.Place}: {g.Title}");      // what a screen reader is told when the step changes: its place and its title
         AutomationProperties.SetName(this, $"First steps. {g.Place}: {g.Title}");
         Lines.Children.Clear();
-        foreach (string line in g.Lines) Lines.Children.Add(new TextBlock { Text = line, FontSize = 13.5, TextWrapping = TextWrapping.Wrap, Foreground = ink });
+        foreach (string line in g.Lines) Lines.Children.Add(new TextBlock { Text = line, FontSize = 13, TextWrapping = TextWrapping.Wrap, Foreground = ink });
         ActionButton.IsVisible = g.Action is not null; ActionButton.Content = g.Action ?? "";
         BackButton.IsVisible = g.Back; NextButton.Content = g.Next; LeaveButton.Content = g.Leave;
         Status.Text = g.Index == 0 ? _note : "";

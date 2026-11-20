@@ -8,14 +8,14 @@
   <Window.Styles>
     <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource C.Font}"/></Style>
     <Style Selector="TextBlock.lbl">
-      <Setter Property="FontSize" Value="9.5"/><Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="FontSize" Value="11"/><Setter Property="FontWeight" Value="Bold"/>
       <Setter Property="LetterSpacing" Value="1.4"/><Setter Property="Foreground" Value="{DynamicResource C.Ink3}"/>
     </Style>
     <Style Selector="RadioButton">
-      <Setter Property="FontSize" Value="12.5"/><Setter Property="Foreground" Value="{DynamicResource C.Ink2}"/>
+      <Setter Property="FontSize" Value="13"/><Setter Property="Foreground" Value="{DynamicResource C.Ink2}"/>
     </Style>
     <Style Selector="CheckBox">
-      <Setter Property="FontSize" Value="12.5"/><Setter Property="Foreground" Value="{DynamicResource C.Ink2}"/>
+      <Setter Property="FontSize" Value="13"/><Setter Property="Foreground" Value="{DynamicResource C.Ink2}"/>
     </Style>
     <Style Selector="TextBlock.grp"><Setter Property="FontSize" Value="13"/><Setter Property="FontWeight" Value="Bold"/><Setter Property="Foreground" Value="{DynamicResource C.Ink}"/><Setter Property="Margin" Value="0,2,0,0"/></Style>
     <Style Selector="Border.rule"><Setter Property="Height" Value="2"/><Setter Property="Background" Value="{DynamicResource C.Line}"/><Setter Property="Margin" Value="0,8,0,0"/></Style>
@@ -35,7 +35,7 @@
       <Setter Property="Padding" Value="2,10"/>
     </Style>
     <Style Selector="Border.pill"><Setter Property="CornerRadius" Value="9"/><Setter Property="Padding" Value="8,2"/><Setter Property="Background" Value="{DynamicResource C.Mark}"/></Style>
-    <Style Selector="TextBlock.pilltext"><Setter Property="FontSize" Value="10.5"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Foreground" Value="{DynamicResource C.Accent}"/></Style>
+    <Style Selector="TextBlock.pilltext"><Setter Property="FontSize" Value="11"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Foreground" Value="{DynamicResource C.Accent}"/></Style>
     <Style Selector="TextBlock.hint"><Setter Property="FontSize" Value="11"/><Setter Property="Foreground" Value="{DynamicResource C.Ink3}"/><Setter Property="TextWrapping" Value="Wrap"/></Style>
   </Window.Styles>
 
@@ -53,7 +53,7 @@
           <Grid ColumnDefinitions="Auto,8,*">
             <Ellipse Name="ConnBannerDot" Width="9" Height="9" VerticalAlignment="Center" StrokeThickness="1.6"/>
             <StackPanel Grid.Column="2" Spacing="1">
-              <TextBlock Name="ConnBannerLabel" FontSize="11.5" FontWeight="Bold"/>
+              <TextBlock Name="ConnBannerLabel" FontSize="12" FontWeight="Bold"/>
               <TextBlock Name="ConnBannerText" FontSize="11" TextWrapping="Wrap" Foreground="{DynamicResource C.Ink2}"/>
             </StackPanel>
           </Grid>
@@ -65,7 +65,7 @@
         <!-- Settings arrange themselves: sections that need a look, or that are used most, are open; the rest are collapsed. -->
         <Border Name="AdaptiveBar" CornerRadius="8" Padding="10,8" BorderBrush="{DynamicResource C.Hair}" BorderThickness="1">
           <StackPanel Spacing="6">
-            <TextBlock Name="AdaptiveText" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+            <TextBlock Name="AdaptiveText" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
             <WrapPanel>
               <Button Name="SuggestedBtn" Content="Suggested view" Margin="0,0,8,4"/>
               <Button Name="ExpandAllBtn" Content="Expand all" Margin="0,0,8,4"/>
@@ -96,7 +96,7 @@
               <TextBlock Classes="lbl" Text="CARD TRANSPARENCY"/>
               <Grid ColumnDefinitions="*,10,Auto">
                 <Slider Name="OpacitySlider" Minimum="40" Maximum="100" TickFrequency="1" IsSnapToTickEnabled="True"/>
-                <TextBlock Grid.Column="2" Name="OpacityLabel" FontSize="12.5" VerticalAlignment="Center"
+                <TextBlock Grid.Column="2" Name="OpacityLabel" FontSize="13" VerticalAlignment="Center"
                            Foreground="{DynamicResource C.Ink2}" Width="42" TextAlignment="Right"/>
               </Grid>
               <TextBlock Classes="hint" Text="100% is solid; 40% lets what is behind the card show through. Only the card surface becomes translucent. Text and status colors stay fully opaque, but on a busy background they are easier to read at a higher value."/>
@@ -116,15 +116,15 @@
               <TextBlock Classes="lbl" Text="TIME"/>
               <TextBlock Name="TimeNow" FontSize="13" Foreground="{DynamicResource C.Ink}" TextWrapping="Wrap"/>
               <WrapPanel>
-                <TextBlock Text="Show times in" FontSize="12.5" Foreground="{DynamicResource C.Ink2}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBlock Text="Show times in" FontSize="13" Foreground="{DynamicResource C.Ink2}" VerticalAlignment="Center" Margin="0,0,10,0"/>
                 <ComboBox Name="TimeZoneBox" MinHeight="28" Width="350" HorizontalAlignment="Left" AutomationProperties.Name="Show times in"/>
               </WrapPanel>
               <WrapPanel>
-                <TextBlock Text="Mark my data as stale when it is older than" FontSize="12.5" Foreground="{DynamicResource C.Ink2}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBlock Text="Mark my data as stale when it is older than" FontSize="13" Foreground="{DynamicResource C.Ink2}" VerticalAlignment="Center" Margin="0,0,10,0"/>
                 <ComboBox Name="StaleBox" MinHeight="28" MinWidth="110" AutomationProperties.Name="Mark my data as stale when it is older than"/>
               </WrapPanel>
               <WrapPanel>
-                <TextBlock Text="Mark the Drugs@FDA reference file as stale when it is older than" FontSize="12.5" Foreground="{DynamicResource C.Ink2}" VerticalAlignment="Center" Margin="0,0,10,0" TextWrapping="Wrap"/>
+                <TextBlock Text="Mark the Drugs@FDA reference file as stale when it is older than" FontSize="13" Foreground="{DynamicResource C.Ink2}" VerticalAlignment="Center" Margin="0,0,10,0" TextWrapping="Wrap"/>
                 <ComboBox Name="RefStaleBox" MinHeight="28" MinWidth="110" AutomationProperties.Name="Mark the Drugs@FDA reference file as stale when it is older than"/>
               </WrapPanel>
               <TextBlock Name="TimeHint" Classes="hint" IsVisible="False" AutomationProperties.LiveSetting="Polite"/>
@@ -210,20 +210,20 @@
             <StackPanel Spacing="6">
               <TextBlock Classes="lbl" Text="SHORTCUTS · CLICK A BOX, THEN PRESS THE KEYS"/>
               <Grid ColumnDefinitions="140,*,Auto" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="6" ColumnSpacing="8">
-                <TextBlock Text="Select &amp; Peek" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}"/>
+                <TextBlock Text="Select &amp; Peek" VerticalAlignment="Center" FontSize="13" Foreground="{DynamicResource C.Ink2}"/>
                 <TextBox Grid.Column="1" Name="PeekKeyBox" IsReadOnly="True" AutomationProperties.Name="Select and Peek shortcut"/>
                 <Button Grid.Column="2" Name="PeekKeyReset" Content="Reset"/>
-                <TextBlock Grid.Row="1" Text="Lookup box" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}"/>
+                <TextBlock Grid.Row="1" Text="Lookup box" VerticalAlignment="Center" FontSize="13" Foreground="{DynamicResource C.Ink2}"/>
                 <TextBox Grid.Row="1" Grid.Column="1" Name="LookupKeyBox" IsReadOnly="True" AutomationProperties.Name="Lookup shortcut"/>
                 <Button Grid.Row="1" Grid.Column="2" Name="LookupKeyReset" Content="Reset"/>
-                <TextBlock Grid.Row="2" Text="Review a draft" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}"/>
+                <TextBlock Grid.Row="2" Text="Review a draft" VerticalAlignment="Center" FontSize="13" Foreground="{DynamicResource C.Ink2}"/>
                 <TextBox Grid.Row="2" Grid.Column="1" Name="DraftKeyBox" IsReadOnly="True" AutomationProperties.Name="Review a draft shortcut"/>
                 <Button Grid.Row="2" Grid.Column="2" Name="DraftKeyReset" Content="Reset"/>
-                <TextBlock Grid.Row="3" Text="Ask about a selection" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}"/>
+                <TextBlock Grid.Row="3" Text="Ask about a selection" VerticalAlignment="Center" FontSize="13" Foreground="{DynamicResource C.Ink2}"/>
                 <TextBox Grid.Row="3" Grid.Column="1" Name="AskKeyBox" IsReadOnly="True" AutomationProperties.Name="Ask about a selection shortcut"/>
                 <Button Grid.Row="3" Grid.Column="2" Name="AskKeyReset" Content="Reset"/>
               </Grid>
-              <TextBlock Name="KeyStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+              <TextBlock Name="KeyStatus" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
               <TextBlock Classes="hint" Text="Please use at least two modifiers, one of them Ctrl or Alt, so everyday shortcuts like Ctrl+C keep working. On keyboards where Ctrl+Alt is AltGr, choose Ctrl+Shift instead. Windows reports at once if another program already owns a shortcut."/>
             </StackPanel>
 
@@ -235,10 +235,10 @@
                 <TextBlock Text="Middle-click (wheel button) on selected text starts Select &amp; Peek" TextWrapping="Wrap"/>
               </CheckBox>
               <StackPanel Orientation="Horizontal" Spacing="4">
-                <TextBlock Text="Hold" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}" Margin="0,0,8,0"/>
+                <TextBlock Text="Hold" VerticalAlignment="Center" FontSize="13" Foreground="{DynamicResource C.Ink2}" Margin="0,0,8,0"/>
                 <WrapPanel Name="MiddleModPanel"/>
               </StackPanel>
-              <TextBlock Name="MiddleStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+              <TextBlock Name="MiddleStatus" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
               <TextBlock Classes="hint" Text="Off by default. It uses a Windows mouse hook that sees only the middle button, never the pointer position or any text, and the click still reaches the program under it. Some security software flags mouse hooks. A plain middle-click scrolls or opens links in many programs, so Ctrl is recommended. A middle-click always shows the small invite first, even when your shortcut opens the card. The shortcuts above and the tray icon always work."/>
             </StackPanel>
           </StackPanel>
@@ -273,7 +273,7 @@
                 <Button Grid.Column="1" Name="PortfolioChoose" Content="Choose…"/>
                 <Button Grid.Column="2" Name="PortfolioClear" Content="Clear"/>
               </Grid>
-              <TextBlock Name="PortfolioStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+              <TextBlock Name="PortfolioStatus" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
               <Expander Name="ColumnsExpander" IsVisible="False" Header="Match my columns">
                 <StackPanel Name="ColumnsPanel" Spacing="4" Margin="0,4,0,0"/>
               </Expander>
@@ -287,12 +287,12 @@
                 <Button Grid.Column="1" Name="ReferenceChoose" Content="Choose…"/>
                 <Button Grid.Column="2" Name="ReferenceClear" Content="Clear"/>
               </Grid>
-              <TextBlock Name="ReferenceStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+              <TextBlock Name="ReferenceStatus" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
               <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                 <TextBox Name="ReferenceUrlBox" Watermark="Optional: the https address of the Drugs@FDA data file, to update it from FDA" AutomationProperties.Name="Drugs@FDA data file address"/>
                 <Button Grid.Column="1" Name="ReferenceUpdate" Content="Update now"/>
               </Grid>
-              <TextBlock Name="ReferenceUpdateStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+              <TextBlock Name="ReferenceUpdateStatus" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
               <TextBlock Classes="hint" Text="Update now fetches that one address, only when you press it, and keeps the file only if it really is a Drugs@FDA data file. It needs the network and is the only thing here that does. The address is the file link on FDA's Drugs@FDA data files page; this app does not guess it. The PSG line has no official source connected: it shows a date from a PSG column in your own sheet, or says it is not available."/>
               <TextBlock Classes="hint" Text="This tool only reads these files and never changes them. Nothing is sent anywhere. It shows only what your sheet contains: a forecast or progress that is not in it stays blank. The PSG date shown is the one in your own sheet; no official PSG source is connected yet."/>
             </StackPanel>
@@ -302,7 +302,7 @@
             <StackPanel Spacing="6">
               <TextBlock Classes="lbl" Text="ANDA PAGE · WHAT THE CARD'S “OPEN ANDA PAGE” BUTTON OPENS"/>
               <TextBox Name="AndaPageBox" MaxLength="300" Watermark="https://your-system/anda/{anda}" AutomationProperties.Name="ANDA page address"/>
-              <TextBlock Name="AndaPageStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
+              <TextBlock Name="AndaPageStatus" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
               <TextBlock Classes="hint" Text="Write {anda} where the six-digit number goes. Only an address that starts with https:// is opened, in your default browser, and only the number is put into it. Nothing else about the ANDA is sent." TextWrapping="Wrap"/>
             </StackPanel>
 
@@ -344,12 +344,12 @@
             <StackPanel Spacing="6">
               <TextBlock Classes="lbl" Text="MY TO-DO LIST · YOUR DAILY WORKLOAD, ANDA RELATED OR NOT"/>
               <Grid ColumnDefinitions="140,*,Auto,Auto" ColumnSpacing="8">
-                <TextBlock Text="Notes to my to-do list" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}"/>
+                <TextBlock Text="Notes to my to-do list" VerticalAlignment="Center" FontSize="13" Foreground="{DynamicResource C.Ink2}"/>
                 <TextBox Grid.Column="1" Name="MyTodoKeyBox" IsReadOnly="True" AutomationProperties.Name="My to-do list shortcut"/>
                 <Button Grid.Column="2" Name="MyTodoKeyClear" Content="None"/>
                 <Button Grid.Column="3" Name="MyTodoKeyReset" Content="Reset"/>
               </Grid>
-              <TextBlock Name="MyTodoKeyStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+              <TextBlock Name="MyTodoKeyStatus" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
               <TextBlock Classes="hint" Text="Click the box, then press the keys. Select rough notes anywhere (an email, a chat message, or rough notes), press this shortcut, and they become suggested to-do items. None means no shortcut: the tray menu still opens it."/>
             </StackPanel>
 
@@ -370,7 +370,7 @@
                 <Button Name="MyTodoNotes" Content="Notes to my to-do list…" Margin="0,0,8,6"/>
                 <Button Name="MyTodoClear" Content="Clear finished items" Margin="0,0,8,6"/>
               </WrapPanel>
-              <TextBlock Name="MyTodoStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+              <TextBlock Name="MyTodoStatus" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
               <TextBlock Classes="hint" Text="This is your own workload list, for any task, ANDA related or not. It is apart from the ANDA to-do list, which is built from your ANDA data: it has its own shortcut, window and file (mytodo.json on this PC). Notes are read on this PC by simple rules (no AI, nothing is sent anywhere), and the reading never invents a day: what it did not find stays empty. Items that repeat come back by themselves."/>
             </StackPanel>
           </StackPanel>
@@ -389,7 +389,7 @@
               <WrapPanel>
                 <Button Name="ActionAdd" Content="Add an action" Margin="0,0,8,6"/>
               </WrapPanel>
-              <TextBlock Name="ActionsStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+              <TextBlock Name="ActionsStatus" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
               <TextBlock Classes="hint" Text="Select a number anywhere, then press the shortcut you chose for an action. Add to my to-do list puts it on your list. Fill my prompt shows your own prompt with the card's facts filled in, ready to copy; no AI is called. Ask my AI and Run an agent show exactly what would be sent, and send only after you press Send (unless you turn that off for that one action). Every action is also in the tray menu."/>
             </StackPanel>
 
@@ -401,7 +401,7 @@
               <WrapPanel>
                 <Button Name="AgentAdd" Content="Add an agent" Margin="0,0,8,6"/>
               </WrapPanel>
-              <TextBlock Name="AgentsStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+              <TextBlock Name="AgentsStatus" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
               <TextBlock Classes="hint" Text="An agent is any service you can reach with an address. Alert Hub, Patent Analysis and Triaging Agent are listed so they can be set up: this app does not know their addresses or message format and does not guess them, so each stays off until you enter the details your IT team gives you. Nothing is sent for an agent that is off. The token stays in the environment variable you name and is never saved by this app."/>
               <TextBlock Classes="hint" Text="An agent is asked only when you press Run on a card or use its action, unless you set it to run by itself. By itself means: when a card is opened in full, or only when the ANDA is at risk. A peek never asks an agent. Its answer appears in the card's drawer as the agent's own words, and nothing joins your to-do list until you press its button."/>
             </StackPanel>
@@ -414,14 +414,14 @@
                 <TextBlock Text="Include items from my data (at-risk ANDAs, weekend and holiday dates, action items)" TextWrapping="Wrap"/>
               </CheckBox>
               <StackPanel Orientation="Horizontal" Spacing="4">
-                <TextBlock Text="While the list is open, refresh every" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}" Margin="0,0,8,0"/>
+                <TextBlock Text="While the list is open, refresh every" VerticalAlignment="Center" FontSize="13" Foreground="{DynamicResource C.Ink2}" Margin="0,0,8,0"/>
                 <WrapPanel Name="TodoRefreshPanel"/>
               </StackPanel>
               <WrapPanel>
                 <Button Name="TodoOpen" Content="Open the ANDA to-do list" Margin="0,0,8,6"/>
                 <Button Name="TodoClear" Content="Clear finished items" Margin="0,0,8,6"/>
               </WrapPanel>
-              <TextBlock Name="TodoStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+              <TextBlock Name="TodoStatus" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
               <TextBlock Classes="hint" Text="The list updates itself only while it is open: at the interval you chose, and at once when you change the list. A changed portfolio file is picked up at the next refresh. When it is closed nothing runs. It is kept in a plain file on this PC (todo.json) that you can read, and is never sent anywhere. Items from your data follow the same rules as the card, so the two cannot disagree; ticking one off keeps it done until the date or the situation changes."/>
             </StackPanel>
           </StackPanel>
@@ -465,7 +465,7 @@
                   </Grid>
                   <TextBox Name="ApiEnvVar" Watermark="NAME of the environment variable that holds the token (never the token)" AutomationProperties.Name="My API token variable name"/>
                   <TextBox Name="ApiModel" Watermark="Model or agent name, if your service wants one" AutomationProperties.Name="My API model"/>
-                  <TextBox Name="ApiTemplate" AcceptsReturn="True" TextWrapping="Wrap" Height="96" FontFamily="{DynamicResource C.NumFont}" FontSize="11.5"
+                  <TextBox Name="ApiTemplate" AcceptsReturn="True" TextWrapping="Wrap" Height="96" FontFamily="{DynamicResource C.NumFont}" FontSize="12"
                            Watermark="Request body (JSON). Placeholders: {{system}} {{user}} {{max_tokens}} {{model}}" AutomationProperties.Name="My API request body"/>
                   <TextBox Name="ApiPath" Watermark="Where the reply text is, for example choices[0].message.content" AutomationProperties.Name="My API reply path"/>
                   <WrapPanel Name="ApiTimeoutPanel"/>
@@ -529,7 +529,7 @@
                 <Button Name="BackupRestore" Content="Restore a backup…" Margin="0,0,8,6"/>
                 <Button Name="SettingsReset" Content="Reset all settings…" Margin="0,0,8,6"/>
               </WrapPanel>
-              <TextBlock Name="BackupStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+              <TextBlock Name="BackupStatus" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
               <TextBlock Classes="hint" Text="A backup holds your settings, lenses and quick replies, so a new PC or a colleague can start from yours. It never holds a secret or a file location."/>
             </StackPanel>
 
@@ -564,7 +564,7 @@
                 <WrapPanel>
                   <Button Name="AdaptiveReset" Content="Forget what I use most" Margin="0,0,8,6"/>
                 </WrapPanel>
-                <TextBlock Name="AdaptiveStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
+                <TextBlock Name="AdaptiveStatus" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
                 <TextBlock Classes="hint" Text="Sections open when something in them needs attention (a shortcut another program owns, a file that cannot be read, a connection that was not tested), when you are just starting, and when you open them often. The only thing kept is a count of how often you open each section, in settings.json on this PC. No text, no ANDA numbers, nothing is sent anywhere. Turn this off and no more counts are kept."/>
               </StackPanel>
           </StackPanel>

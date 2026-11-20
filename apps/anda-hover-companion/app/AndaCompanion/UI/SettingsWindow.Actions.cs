@@ -17,7 +17,7 @@ public partial class SettingsWindow
     {
         var box = new TextBox { Text = text, Watermark = watermark, AcceptsReturn = multi, TextWrapping = multi ? TextWrapping.Wrap : TextWrapping.NoWrap };
         if (multi && height > 0) box.Height = height;
-        if (mono) { box.FontFamily = (FontFamily)Application.Current!.Resources["C.NumFont"]!; box.FontSize = 11.5; }
+        if (mono) { box.FontFamily = (FontFamily)Application.Current!.Resources["C.NumFont"]!; box.FontSize = 12; }
         AutomationProperties.SetName(box, name);
         box.LostFocus += (_, _) => { if (!_loading) save(box.Text ?? ""); };
         return box;
@@ -41,7 +41,7 @@ public partial class SettingsWindow
         };
     }
 
-    private TextBlock Note(string text, bool bad = false, double size = 11.5) =>
+    private TextBlock Note(string text, bool bad = false, double size = 12) =>
         new() { Text = text, FontSize = size, TextWrapping = TextWrapping.Wrap, Foreground = Brush(bad ? "C.Bad" : "C.Ink2") };
 
     private void BuildActionSections()
@@ -147,7 +147,7 @@ public partial class SettingsWindow
 
         string watermark = a.Kind == ActionKind.AddToTodo ? "The to-do title, for example: Follow up on ANDA {number}" : "Your prompt. The card's facts are filled in where you write a placeholder.";
         var template = Field("Text for " + a.Name, watermark, a.Template, v => { a.Template = v.Length > MyActionRules.MaxTemplateChars ? v[..MyActionRules.MaxTemplateChars] : v; Check(); Apply(); }, multi: true, height: 78);
-        var placeholders = Note("Placeholders: " + string.Join(" ", ActionFill.Placeholders.Select(p => "{" + p.Name + "}")), size: 10.5);
+        var placeholders = Note("Placeholders: " + string.Join(" ", ActionFill.Placeholders.Select(p => "{" + p.Name + "}")), size: 11);
         placeholders.Foreground = Brush("C.Ink3");
 
         var parts = new List<Control> { head, top, keyRow, template, placeholders };

@@ -360,8 +360,7 @@ public class Round33UiTests : IClassFixture<HeadlessFixture>
         Assert.Matches(@"_lastCard = \(record, near, mini\);\s+NoteRecent\(record\.Number\);", app);
         Assert.Matches(@"JoinCard\(card, own: notes\);\s+card\.Show\(record, near, mini\);", app);
         Assert.Matches(@"DisplayScale\.Apply\(compact, DisplayScale\.Current\);\s+compact\.ShowNear\(near\);", app);
-        Assert.Contains("var today = new NativeMenuItem(\"Today…\");", app);                                                                     // round 34: in the focused menu too, as in the simulation
-        Assert.Contains("today.Click += (_, _) => OpenToday();", app);
+        Assert.Contains("\"Today…\" => Item(\"Today…\", OpenToday),", app);                                                                    // round 34: in the focused menu too; round 35: built from TrayMenu
         Assert.Contains("new(_settings.LookupStyle == \"bar\", ListedForLookup, _repository.Find, OpenDraft, text => OpenAsk(text));", more);
         Assert.Contains("Recents.After(_settings.Recents, number, _settings.RememberRecents)", more);
         Assert.Contains("if (result is \"kept\" or \"removed\") { _settings.Pins = pins; SettingsService.Save(_settings); }", more);

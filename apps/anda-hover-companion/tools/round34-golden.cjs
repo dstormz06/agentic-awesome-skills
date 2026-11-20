@@ -20,7 +20,7 @@ const OUT = DIR + 'round34-golden.json';
       about: 'Shared cases for round 34, written by the browser simulation. The Windows app must give the same answers.',
       defaultConsent: DEFAULT_SETTINGS.consent, consents: CONSENTS, steps,
       watchMore: [0, 1, 2, 5].map(n => ({ n, text: watchMoreText(n) })),
-      version: APP_VERSION, changes: CHANGES[0],
+      changes: CHANGES.find(c => c.round === 34),      // its own round's entry; the newest version is checked with round 29's answers
     };
   });
   const text = JSON.stringify(doc) + '\n';

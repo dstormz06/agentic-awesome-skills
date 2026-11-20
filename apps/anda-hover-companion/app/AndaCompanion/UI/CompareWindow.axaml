@@ -8,10 +8,10 @@
   <Window.Styles>
     <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource C.Font}"/></Style>
     <Style Selector="TextBlock.lbl">
-      <Setter Property="FontSize" Value="9.5"/><Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="FontSize" Value="11"/><Setter Property="FontWeight" Value="Bold"/>
       <Setter Property="LetterSpacing" Value="1.4"/><Setter Property="Foreground" Value="{DynamicResource C.Ink3}"/>
     </Style>
-    <Style Selector="TextBlock.hint"><Setter Property="FontSize" Value="11.5"/><Setter Property="Foreground" Value="{DynamicResource C.Ink2}"/><Setter Property="TextWrapping" Value="Wrap"/></Style>
+    <Style Selector="TextBlock.hint"><Setter Property="FontSize" Value="12"/><Setter Property="Foreground" Value="{DynamicResource C.Ink2}"/><Setter Property="TextWrapping" Value="Wrap"/></Style>
     <Style Selector="Border.rule"><Setter Property="Height" Value="1"/><Setter Property="Background" Value="{DynamicResource C.Hair}"/></Style>
   </Window.Styles>
 
@@ -48,7 +48,7 @@
           </Grid>
           <StackPanel Name="WeekPanel" IsVisible="False" Spacing="4">
             <CheckBox Name="WeekBox">
-              <TextBlock TextWrapping="Wrap" FontSize="12.5" Foreground="{DynamicResource C.Ink}" Text="Keep one copy of my sheet each week, on this PC only, so I can see what changed. Off until I switch it on. Switching it off keeps the copies that exist; only you delete them."/>
+              <TextBlock TextWrapping="Wrap" FontSize="13" Foreground="{DynamicResource C.Ink}" Text="Keep one copy of my sheet each week, on this PC only, so I can see what changed. Off until I switch it on. Switching it off keeps the copies that exist; only you delete them."/>
             </CheckBox>
             <TextBlock Name="WeekCountText" IsVisible="False" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource C.Ink2}"/>
             <Button Name="WeekDelBtn" Content="Delete the kept copies…" IsVisible="False" HorizontalAlignment="Left"/>
@@ -58,7 +58,7 @@
             <Button Name="SampleDocsBtn" Content="Use two sample letters" Margin="0,0,10,6"/>
             <Button Name="SampleReportBtn" Content="Use the sample report" Margin="0,0,10,6" IsVisible="False"/>
             <StackPanel Name="KeyRow" Orientation="Horizontal">
-              <TextBlock Text="Match rows by" VerticalAlignment="Center" FontSize="12.5" Foreground="{DynamicResource C.Ink2}" Margin="0,0,8,6"/>
+              <TextBlock Text="Match rows by" VerticalAlignment="Center" FontSize="13" Foreground="{DynamicResource C.Ink2}" Margin="0,0,8,6"/>
               <ComboBox Name="KeyBox" MinWidth="220" IsEnabled="False" Margin="0,0,0,6" AutomationProperties.Name="Match rows by"/>
             </StackPanel>
           </WrapPanel>
@@ -78,11 +78,11 @@
             <Button Name="UseBtn" Content="Use this prompt…" IsEnabled="False" Margin="0,0,8,6"/>
           </WrapPanel>
           <CheckBox Name="WholeBox">
-            <TextBlock TextWrapping="Wrap" FontSize="12.5" Foreground="{DynamicResource C.Ink}" Text="Also give it the beginning of each file (up to 6,000 characters each). Without this, the prompt gets only the differences the rules found."/>
+            <TextBlock TextWrapping="Wrap" FontSize="13" Foreground="{DynamicResource C.Ink}" Text="Also give it the beginning of each file (up to 6,000 characters each). Without this, the prompt gets only the differences the rules found."/>
           </CheckBox>
           <Border Classes="rule"/>
           <TextBlock Classes="lbl" Text="CHECK AN AI ANSWER · ON THIS PC, NO AI"/>
-          <TextBox Name="AnswerBox" AcceptsReturn="True" TextWrapping="Wrap" Height="74" MaxLength="200001" FontSize="12.5"
+          <TextBox Name="AnswerBox" AcceptsReturn="True" TextWrapping="Wrap" Height="74" MaxLength="200001" FontSize="13"
                    Watermark="Paste an answer about these files here. Every number, date and name with a digit in it is looked up in the comparison and in the two files."
                    AutomationProperties.Name="An AI answer to check"/>
           <WrapPanel><Button Name="CheckBtn" Content="Check the answer" IsEnabled="False"/></WrapPanel>

@@ -71,7 +71,7 @@ public class Round19Tests : IClassFixture<HeadlessFixture>
     [Fact]
     public async Task The_figure_is_amber_when_late_and_green_when_early()
     {
-        static Color Ink(CardWindow w) => ((ISolidColorBrush)w.GetVisualDescendants().OfType<TextBlock>().First(t => t.FontSize == 30).Foreground!).Color;
+        static Color Ink(CardWindow w) => ((ISolidColorBrush)w.GetVisualDescendants().OfType<TextBlock>().First(t => t.FontSize == AndaCompanion.Theming.TypeScale.Display).Foreground!).Color;
         Assert.Equal(Color.Parse(Appearances.T.Palette.Warn), await Inspect(Late, false, Ink));
         Assert.Equal(Color.Parse(Appearances.T.Palette.Good), await Inspect(Early, false, Ink));
     }

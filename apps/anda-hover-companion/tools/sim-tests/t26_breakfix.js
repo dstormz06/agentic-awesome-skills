@@ -125,7 +125,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   p = await fresh();
   const banner = await p.evaluate(() => document.querySelector('.banner').innerText.replace(/\s+/g, ' '));
   ok(/Browser simulation of the ANDA Companion \(Notula\) Windows app\. Fictional data\. Not an FDA product\./.test(banner), 'C18 the banner reads as whole sentences');
-  const menuTxt = async () => { await p.evaluate(() => openMenu()); await settle(p, 100); const t = await p.evaluate(() => document.getElementById('menu').innerText); await p.keyboard.press('Escape'); return t; };
+  const menuTxt = async () => { await p.evaluate(() => openMenu()); await settle(p, 100); const t = await p.evaluate(() => document.getElementById('menu').textContent); await p.keyboard.press('Escape'); return t; };   // round 35: textContent, so what the groups hold is read too
   const basicMenu = await menuTxt();
   ok(!/Ctrl\+Alt\+L/.test(basicMenu), 'D9 the basic tray menu no longer advertises a shortcut that does nothing');
   ok(/Demo: ANDA at risk/.test(basicMenu) && /Demo: ANDA on track/.test(basicMenu), 'C16 the demo menu items name the ANDA state');

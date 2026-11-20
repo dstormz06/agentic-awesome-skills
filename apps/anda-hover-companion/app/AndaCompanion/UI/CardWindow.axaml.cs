@@ -124,8 +124,8 @@ public partial class CardWindow : Window
         foreach (var row in view.Rows)
         {
             var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("132,*,Auto") };
-            grid.Children.Add(new TextBlock { Text = row.Label, FontSize = 11.5, Foreground = Ink3(), VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center });
-            var value = new SelectableTextBlock { Text = row.Text, FontSize = 12.5, Foreground = row.Copy ? Ink2() : Ink3(), FontStyle = row.Copy ? FontStyle.Normal : FontStyle.Italic, TextWrapping = TextWrapping.Wrap, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center };
+            grid.Children.Add(new TextBlock { Text = row.Label, FontSize = 12, Foreground = Ink3(), VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center });
+            var value = new SelectableTextBlock { Text = row.Text, FontSize = 13, Foreground = row.Copy ? Ink2() : Ink3(), FontStyle = row.Copy ? FontStyle.Normal : FontStyle.Italic, TextWrapping = TextWrapping.Wrap, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center };
             Grid.SetColumn(value, 1); grid.Children.Add(value);
             if (row.Copy)
             {
@@ -420,7 +420,7 @@ public partial class CardWindow : Window
         if (QuickNotes?.Problem is { } problem && !QuickNoteMsg.IsVisible) SayNote(problem);
         foreach (var note in notes)
         {
-            var text = new TextBlock { Text = note.Text, FontSize = 12.5, Foreground = Ink2(), TextWrapping = TextWrapping.Wrap };
+            var text = new TextBlock { Text = note.Text, FontSize = 13, Foreground = Ink2(), TextWrapping = TextWrapping.Wrap };
             var when = new TextBlock { Text = Clock.Label(Clock.Ms(note.When), Clock.Zone, false), FontSize = 11, Foreground = Ink3(), VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center, Margin = new Thickness(0, 0, 10, 0) };
             Button Small(string label, string name, Action act)
             {
@@ -602,9 +602,9 @@ public partial class CardWindow : Window
             case CardLayout.Pocket:
             {
                 // The answer first: one figure with its unit, and beneath it the two dates and the confidence, so the figure is never shown alone.
-                _heroNumber = new TextBlock { FontSize = 30, FontWeight = FontWeight.Bold, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Bottom, Margin = new Thickness(0, 0, 8, 0) };
+                _heroNumber = new TextBlock { FontSize = 34, FontWeight = FontWeight.Bold, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Bottom, Margin = new Thickness(0, 0, 8, 0) };
                 _heroUnit = new TextBlock { FontSize = 15, FontWeight = FontWeight.SemiBold, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Bottom, Margin = new Thickness(0, 0, 0, 3), TextWrapping = TextWrapping.Wrap, Foreground = (IBrush)res["C.Ink"]! };
-                _heroSub = new TextBlock { FontSize = 12.5, Foreground = (IBrush)res["C.Ink2"]!, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 6, 0, 0) };
+                _heroSub = new TextBlock { FontSize = 13, Foreground = (IBrush)res["C.Ink2"]!, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 6, 0, 0) };
                 var line = new WrapPanel { Orientation = Avalonia.Layout.Orientation.Horizontal };
                 line.Children.Add(_heroNumber); line.Children.Add(_heroUnit);
                 _hero = new StackPanel { Name = "Hero", Margin = new Thickness(h, 4, h, v + 2) };
@@ -614,7 +614,7 @@ public partial class CardWindow : Window
                     _heroGauge = new ProgressControl { Width = 96, Height = 53 };
                     _heroGaugeBox = new StackPanel { Name = "HeroGauge", Spacing = 1, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center, Margin = new Thickness(14, 0, 0, 0) };
                     _heroGaugeBox.Children.Add(_heroGauge);
-                    _heroGaugeBox.Children.Add(new TextBlock { Text = "OF THE CLOCK", FontSize = 9.5, FontWeight = FontWeight.Bold, LetterSpacing = 0.8, Foreground = (IBrush)res["C.Ink3"]!, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center });
+                    _heroGaugeBox.Children.Add(new TextBlock { Text = "OF THE CLOCK", FontSize = 11, FontWeight = FontWeight.Bold, LetterSpacing = 0.8, Foreground = (IBrush)res["C.Ink3"]!, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center });
                     var answer = new StackPanel(); answer.Children.Add(line); answer.Children.Add(_heroSub);
                     var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto") };
                     Grid.SetColumn(_heroGaugeBox, 1);
@@ -624,8 +624,8 @@ public partial class CardWindow : Window
                 else if (look.HeroCount)
                 {
                     // X: the answer on the left; on the right the days to the goal date. Its ink, fill and edge follow the distance (see GoalCountdown).
-                    _heroCountFigure = new TextBlock { FontSize = 24, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center };
-                    _heroCountCaption = new TextBlock { FontSize = 9, FontWeight = FontWeight.ExtraBold, LetterSpacing = 0.45, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center, Margin = new Thickness(0, 2, 0, 0) };
+                    _heroCountFigure = new TextBlock { FontSize = 20, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center };
+                    _heroCountCaption = new TextBlock { FontSize = 11, FontWeight = FontWeight.ExtraBold, LetterSpacing = 0.45, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center, Margin = new Thickness(0, 2, 0, 0) };
                     var stack = new StackPanel(); stack.Children.Add(_heroCountFigure); stack.Children.Add(_heroCountCaption);
                     _heroCount = new Border { Name = "HeroCount", Width = 96, CornerRadius = new CornerRadius(12), BorderThickness = new Thickness(1.5), Padding = new Thickness(4, 7, 4, 7), Margin = new Thickness(14, 0, 0, 0), VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center, Child = stack };
                     var answer = new StackPanel(); answer.Children.Add(line); answer.Children.Add(_heroSub);
@@ -657,7 +657,7 @@ public partial class CardWindow : Window
                 {
                     BorderBrush = (IBrush)res["C.Ink3"]!, BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(4), Padding = new Thickness(5, 1), Margin = new Thickness(10, 0, 0, 0),
                     VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                    Child = new TextBlock { Text = "Enter", FontSize = 10.5, Foreground = (IBrush)res["C.Ink2"]! },
+                    Child = new TextBlock { Text = "Enter", FontSize = 11, Foreground = (IBrush)res["C.Ink2"]! },
                 };
                 var label = new StackPanel { Orientation = Avalonia.Layout.Orientation.Horizontal, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center };
                 label.Children.Add(_notesLabel); label.Children.Add(keycap);
@@ -707,7 +707,7 @@ public partial class CardWindow : Window
                 ForecastConfText.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left;
                 ForecastConfText.Margin = new Thickness(0);
                 _railCaption = Cap("DAYS TO GOAL"); _railCaption.TextWrapping = TextWrapping.Wrap;
-                _railDays = new TextBlock { FontSize = 38, FontWeight = FontWeight.Bold, Foreground = (IBrush)res["C.Accent"]!, FontFamily = (FontFamily)res["C.NumFont"]!, LineHeight = 42 };
+                _railDays = new TextBlock { FontSize = 34, FontWeight = FontWeight.Bold, Foreground = (IBrush)res["C.Accent"]!, FontFamily = (FontFamily)res["C.NumFont"]!, LineHeight = 42 };
                 var left = new StackPanel { Spacing = 5, Margin = new Thickness(12, 14, 8, 12) };
                 left.Children.Add(_railDays); left.Children.Add(_railCaption); left.Children.Add(ForecastDeltaText); left.Children.Add(ForecastConfText);
                 var wash = new Border { Background = Br(look.RailWash!), BorderBrush = (IBrush)res["C.Line"]!, BorderThickness = new Thickness(0, 0, 1, 0), Child = left };
@@ -732,7 +732,7 @@ public partial class CardWindow : Window
                 Grid.SetColumn(NumTab, 1); Grid.SetColumn(Seal, 3);
                 foreach (var t in new[] { DrugText, MetaText, FreshnessText })
                 { t.TextAlignment = TextAlignment.Center; t.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center; }
-                NumText.FontSize = 18;
+                NumText.FontSize = 20;
 
                 Detach(GoalText); Detach(GoalDaysText); Detach(ForecastText); Detach(ForecastDeltaText); Detach(PctText); Detach(ForecastConfText); Detach(Progress);
                 ClockPanel.Children.Clear();
@@ -815,7 +815,7 @@ public partial class CardWindow : Window
             {
                 int d = record.ForecastDeltaDays!.Value, n = Math.Abs(d);
                 _heroNumber!.Text = d == 0 ? "On" : n.ToString();
-                _heroNumber.FontSize = d == 0 ? 22 : 30;
+                _heroNumber.FontSize = d == 0 ? 20 : 34;
                 _heroNumber.Foreground = (IBrush)Application.Current!.Resources[d > 0 ? "C.Warn" : "C.Good"]!;
                 _heroUnit!.Text = d == 0 ? "the goal date" : $"day{(n == 1 ? "" : "s")} {(d > 0 ? "later than" : "ahead of")} the goal";
                 _heroSub!.Text = $"Goal {record.GoalDate} · Forecast {record.ForecastDate}" + (record.ForecastConfidence.Length > 0 ? $" · {record.ForecastConfidence}" : "");
@@ -837,7 +837,7 @@ public partial class CardWindow : Window
                     _heroCount.Background = fill is null ? Brushes.Transparent : new SolidColorBrush(Color.Parse(fill));
                     _heroCount.BorderBrush = new SolidColorBrush(Color.Parse(edge));
                     _heroCountFigure.Text = GoalCountdown.Figure(days);
-                    _heroCountFigure.FontSize = days == 0 ? 17 : 24;
+                    _heroCountFigure.FontSize = days == 0 ? 20 : 20;
                     _heroCountFigure.FontWeight = heavy ? FontWeight.ExtraBold : FontWeight.SemiBold;
                     _heroCountFigure.Foreground = inkBrush;
                     _heroCountCaption.Text = GoalCountdown.Caption(days);
@@ -918,10 +918,10 @@ public partial class CardWindow : Window
         foreach (var p in record.Pending)
         {
             var row = new Grid { ColumnDefinitions = new("*,Auto"), Margin = new Thickness(0, 3) };
-            row.Children.Add(new TextBlock { Text = p.Title, FontSize = 12.5, Foreground = Ink2(), TextWrapping = TextWrapping.Wrap });
+            row.Children.Add(new TextBlock { Text = p.Title, FontSize = 13, Foreground = Ink2(), TextWrapping = TextWrapping.Wrap });
             var due = new TextBlock
             {
-                Text = p.Due, FontSize = 11.5,
+                Text = p.Due, FontSize = 12,
                 Foreground = p.Urgent ? (IBrush)Application.Current.Resources["C.Warn"]! : Ink3(),
                 FontWeight = p.Urgent ? FontWeight.SemiBold : FontWeight.Normal,
             };
@@ -930,13 +930,13 @@ public partial class CardWindow : Window
             PendingPanel.Children.Add(row);
         }
         if (record.Pending.Count == 0)
-            PendingPanel.Children.Add(new TextBlock { Text = "No open items.", FontSize = 12.5, Foreground = Ink2() });
+            PendingPanel.Children.Add(new TextBlock { Text = "No open items.", FontSize = 13, Foreground = Ink2() });
 
         NotesPanel.Children.Clear();
         foreach (var n in record.Notes)
         {
             NotesPanel.Children.Add(new TextBlock { Text = n.Who, FontSize = 11, Foreground = Ink3(), Margin = new Thickness(0, 5, 0, 1) });
-            NotesPanel.Children.Add(new TextBlock { Text = n.Text, FontSize = 12.5, Foreground = Ink2(), TextWrapping = TextWrapping.Wrap });
+            NotesPanel.Children.Add(new TextBlock { Text = n.Text, FontSize = 13, Foreground = Ink2(), TextWrapping = TextWrapping.Wrap });
         }
         ForecastDetailText.Text = record.ForecastDetail;
         PaintDetails(record); PaintKeep();
@@ -945,7 +945,7 @@ public partial class CardWindow : Window
         foreach (var s in record.Sisters)
             SistersPanel.Children.Add(new TextBlock
             {
-                Text = $"{record.Kind} {s.Number} — {s.Description}", FontSize = 12.5,
+                Text = $"{record.Kind} {s.Number} — {s.Description}", FontSize = 13,
                 Foreground = (IBrush)Application.Current.Resources["C.Accent"]!, TextWrapping = TextWrapping.Wrap,
             });
 
@@ -1093,8 +1093,8 @@ public partial class CardWindow : Window
             if (last is { State: AgentState.Done }) answered++;
 
             var head = new Grid { ColumnDefinitions = new("*,Auto"), Margin = new Thickness(0, 6, 0, 0) };
-            head.Children.Add(new TextBlock { Text = agent.Name, FontSize = 12.5, FontWeight = FontWeight.SemiBold, Foreground = (IBrush)Application.Current!.Resources["C.Ink"]!, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center });
-            var run = new Button { Content = running ? "Asking…" : last is { State: AgentState.Done } ? "Ask again" : last is { State: AgentState.Failed } ? "Try again" : "Run", IsEnabled = !running && problem is null, Padding = new Thickness(10, 2), FontSize = 11.5 };
+            head.Children.Add(new TextBlock { Text = agent.Name, FontSize = 13, FontWeight = FontWeight.SemiBold, Foreground = (IBrush)Application.Current!.Resources["C.Ink"]!, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center });
+            var run = new Button { Content = running ? "Asking…" : last is { State: AgentState.Done } ? "Ask again" : last is { State: AgentState.Failed } ? "Try again" : "Run", IsEnabled = !running && problem is null, Padding = new Thickness(10, 2), FontSize = 12 };
             AutomationProperties.SetName(run, $"{(last is null ? "Run" : "Ask again")} {agent.Name} for ANDA {record.Number}");
             var captured = agent;
             run.Click += (_, _) => _ = AskAgentAsync(captured, record, force: true);
@@ -1120,9 +1120,9 @@ public partial class CardWindow : Window
                     AgentsPanel.Children.Add(row);
                 }
             if (last is { State: AgentState.Done } d2)
-                AgentsPanel.Children.Add(MailLine($"{d2.Message} Asked at {Clock.Time(d2.At)}.", 10.5, brush: Ink3(), margin: new Thickness(0, 4, 0, 0)));
+                AgentsPanel.Children.Add(MailLine($"{d2.Message} Asked at {Clock.Time(d2.At)}.", 11, brush: Ink3(), margin: new Thickness(0, 4, 0, 0)));
         }
-        AgentsPanel.Children.Add(MailLine("These are the agents' own words, shown as received, not facts from the record. They are never run or passed on, and nothing is added to your to-do list until you press its button.", 10.5, brush: Ink3(), margin: new Thickness(0, 8, 0, 0)));
+        AgentsPanel.Children.Add(MailLine("These are the agents' own words, shown as received, not facts from the record. They are never run or passed on, and nothing is added to your to-do list until you press its button.", 11, brush: Ink3(), margin: new Thickness(0, 8, 0, 0)));
         AgentsHeader.Text = answered > 0 ? $"Agent findings · {answered}" : "Agent findings";
         Dispatcher.UIThread.Post(ClampToScreen, DispatcherPriority.Loaded);
     }
@@ -1146,7 +1146,7 @@ public partial class CardWindow : Window
         };
     }
 
-    private TextBlock MailLine(string text, double size = 12.5, bool strong = false, IBrush? brush = null, Thickness? margin = null) => new()
+    private TextBlock MailLine(string text, double size = 13, bool strong = false, IBrush? brush = null, Thickness? margin = null) => new()
     {
         Text = text, FontSize = size, TextWrapping = TextWrapping.Wrap, Foreground = brush ?? Ink2(),
         FontWeight = strong ? FontWeight.SemiBold : FontWeight.Normal, Margin = margin ?? new Thickness(0),
@@ -1188,7 +1188,7 @@ public partial class CardWindow : Window
             MailPanel.Children.Add(MailLine(string.Join(" · ", new[] { m.From, m.Received?.LocalDateTime.ToString("MMM d, yyyy") ?? "" }.Where(x => x.Length > 0)), 11, brush: Ink3()));
             if (m.Preview.Length > 0) MailPanel.Children.Add(MailLine(m.Preview));
         }
-        MailPanel.Children.Add(MailLine("Read from your Outlook for this ANDA number only. Not saved, not sent to any AI service.", 10.5, brush: Ink3(), margin: new Thickness(0, 8, 0, 0)));
+        MailPanel.Children.Add(MailLine("Read from your Outlook for this ANDA number only. Not saved, not sent to any AI service.", 11, brush: Ink3(), margin: new Thickness(0, 8, 0, 0)));
         Dispatcher.UIThread.Post(ClampToScreen, DispatcherPriority.Loaded);
     }
 
@@ -1247,9 +1247,9 @@ public partial class CardWindow : Window
         foreach (var f in _watchFlags)
         {
             var color = (IBrush)Application.Current!.Resources[f.Severity switch { WatchSeverity.Bad => "C.Bad", WatchSeverity.Warn => "C.Warn", _ => "C.Ink2" }]!;
-            WatchPanel.Children.Add(new TextBlock { Text = f.Text, FontSize = 12.5, FontWeight = FontWeight.SemiBold, Foreground = color, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 6, 0, 1) });
-            WatchPanel.Children.Add(new TextBlock { Text = f.Why, FontSize = 11.5, Foreground = Ink2(), TextWrapping = TextWrapping.Wrap });
-            WatchPanel.Children.Add(new TextBlock { Text = "Source: " + f.Source, FontSize = 10.5, Foreground = Ink3() });
+            WatchPanel.Children.Add(new TextBlock { Text = f.Text, FontSize = 13, FontWeight = FontWeight.SemiBold, Foreground = color, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 6, 0, 1) });
+            WatchPanel.Children.Add(new TextBlock { Text = f.Why, FontSize = 12, Foreground = Ink2(), TextWrapping = TextWrapping.Wrap });
+            WatchPanel.Children.Add(new TextBlock { Text = "Source: " + f.Source, FontSize = 11, Foreground = Ink3() });
         }
     }
 

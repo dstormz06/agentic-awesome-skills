@@ -27,11 +27,11 @@ public sealed class UsageWindow : Window
         Background = Res("C.Bg");
         var days = UsageSummary.Read(logPath);
         var lines = UsageSummary.Lines(days, today ?? DateOnly.FromDateTime(DateTime.Now));
-        Summary = new TextBox { Text = string.Join("\n", lines), IsReadOnly = true, AcceptsReturn = true, TextWrapping = TextWrapping.Wrap, MinHeight = 150, FontSize = 12.5 };
+        Summary = new TextBox { Text = string.Join("\n", lines), IsReadOnly = true, AcceptsReturn = true, TextWrapping = TextWrapping.Wrap, MinHeight = 150, FontSize = 13 };
         AutomationProperties.SetName(Summary, "My usage summary");
         Note = new TextBlock
         {
-            FontSize = 11.5, TextWrapping = TextWrapping.Wrap, Foreground = Res("C.Ink2"),
+            FontSize = 12, TextWrapping = TextWrapping.Wrap, Foreground = Res("C.Ink2"),
             Text = enabled ? "Counting is on (Settings, Maintenance). Nothing is sent; you decide whether to copy this and share it."
                            : "Counting is off, so nothing new is being counted. Switch it on under Settings, Maintenance, if you want these numbers.",
         };

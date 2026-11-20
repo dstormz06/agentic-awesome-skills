@@ -5727,43 +5727,38 @@ function openMenu(){
     b.addEventListener("click", () => { if(fn) fn(); if(!o.keep) closeMenus(); });
     return b;
   };
+  /* Round 35: seven choices, the daily ones first (Lookup, Today, Review, Ask), then More, Settings and Help; Lists with all tools.
+     A group opens in place, under its name, and says whether it is open. The same order as the Windows app (TrayMenu.Order). */
+  const group = (label, children) => {
+    const g = item(label, "▸", null, { keep:true }), box = document.createElement("div");
+    box.className = "sub"; box.hidden = true; box.append(...children); g.setAttribute("aria-expanded", "false"); g.dataset.group = label;
+    g.addEventListener("click", () => { box.hidden = !box.hidden; g.setAttribute("aria-expanded", String(!box.hidden)); });
+    return [g, box];
+  };
+  const ap = group("Appearance", LOOKS.map(([id, name]) => item(name, "", () => { applyLook(id); const r = document.querySelector(`input[name=look][value=${id}]`); if(r) r.checked = true; }, { checked:state.look === id })));
+  const ah = group("Auto-hide", AUTO_CHOICES.map(sec => item(sec ? sec + " s" : "Off", "", () => { state.autoHide = sec; const r = document.querySelector(`input[name=autohide][value=${sec}]`); if(r) r.checked = true; }, { checked:state.autoHide === sec })));
+  const acts = state.actions.filter(a => a.enabled);
+  const ma = group("My actions", acts.length ? acts.map(a => item(a.name, a.hotkey || "", () => runActionFromMenu(a))) : [item("No actions yet. Add one in Settings.", "", null, { disabled:true })]);
   menu.append(
     item("Lookup ANDA…", state.keys.look, () => openLookup(pointer)),
+    item("Today…", "", () => openToday()),
     item("Review a draft…", state.keys.draft, () => openDraft("")),
     item("Ask about a selection…", state.keys.ask || "", () => openAsk("")),
-    item("Compare two files…", "", () => openCompare()),
-    item("Hand-off page…", "", () => openHandoff(null)),
-    item("Today…", "", () => openToday()),
-    item("Connections and event log…", "", () => openConn()),
-    item("Backups and archive…", "", () => openBackups()),
-    item("About and what changed…", "", () => openAbout()),
-    item("Help: first steps…", "", () => openFirst()),
-    item(alertReasons().length ? `News and alerts… (${alertReasons().length} today)` : "News and alerts…", "", () => openHub()),
-    ...(state.allTools ? [item("ANDA to-do list…", "", () => openTodo()),
-    item("My to-do list…", state.keys.list || "", () => openMyTodo()),
-    item("Notes to my to-do list…", "", () => openNotes("")),
-    item("My usage…", "", () => openUsage())] : []),
-    item("Demo: ANDA at risk", "", () => openCard("216482", { anchor:trayAnchor() })),
-    item("Demo: ANDA on track", "", () => openCard("214990", { anchor:trayAnchor() })),
-    document.createElement("hr"));
-  const ap = item("Appearance", "▸", null, { keep:true });
-  const subBox = document.createElement("div"); subBox.className = "sub"; subBox.hidden = true;
-  LOOKS.forEach(([id, name]) => subBox.append(item(name, "", () => { applyLook(id); const r = document.querySelector(`input[name=look][value=${id}]`); if(r) r.checked = true; }, { checked:state.look === id })));
-  ap.addEventListener("click", () => { subBox.hidden = !subBox.hidden; });
-  const ah = item("Auto-hide", "▸", null, { keep:true });
-  const ahBox = document.createElement("div"); ahBox.className = "sub"; ahBox.hidden = true;
-  AUTO_CHOICES.forEach(sec => ahBox.append(item(sec ? sec + " s" : "Off", "", () => { state.autoHide = sec; const r = document.querySelector(`input[name=autohide][value=${sec}]`); if(r) r.checked = true; }, { checked:state.autoHide === sec })));
-  ah.addEventListener("click", () => { ahBox.hidden = !ahBox.hidden; });
-  const ma = item("My actions", "▸", null, { keep:true });
-  const maBox = document.createElement("div"); maBox.className = "sub"; maBox.hidden = true;
-  const acts = state.actions.filter(a => a.enabled);
-  if(!acts.length) maBox.append(item("No actions yet. Add one in Settings.", "", null, { disabled:true }));
-  acts.forEach(a => maBox.append(item(a.name, a.hotkey || "", () => runActionFromMenu(a))));
-  ma.addEventListener("click", () => { maBox.hidden = !maBox.hidden; });
-  menu.append(...(state.allTools ? [ma, maBox] : []), ap, subBox, ah, ahBox,
+    ...(state.allTools ? group("Lists", [item("ANDA to-do list…", "", () => openTodo()), item("My to-do list…", state.keys.list || "", () => openMyTodo()),
+      item("Notes to my to-do list…", "", () => openNotes("")), item("My usage…", "", () => openUsage())]) : []),
+    ...group("More", [
+      item("Compare two files…", "", () => openCompare()),
+      item("Hand-off page…", "", () => openHandoff(null)),
+      item(alertReasons().length ? `News and alerts… (${alertReasons().length} today)` : "News and alerts…", "", () => openHub()),
+      item("Quick replies…", "", () => { showApp("replies"); renderReplies(0); }),
+      ...(state.allTools ? [item("Prompt library…", "", () => { showApp("plib"); renderPrompts(0); }), ...ma] : []),
+      ...ap, ...ah,
+      item("Connections and event log…", "", () => openConn()),
+      item("Backups and archive…", "", () => openBackups()),
+      item("Demo: ANDA at risk", "", () => openCard("216482", { anchor:trayAnchor() })),
+      item("Demo: ANDA on track", "", () => openCard("214990", { anchor:trayAnchor() }))]),
     item("Settings…", "", () => showApp("settings")),
-    ...(state.allTools ? [item("Prompt library…", "", () => { showApp("plib"); renderPrompts(0); })] : []),
-    item("Quick replies…", "", () => { showApp("replies"); renderReplies(0); }),
+    ...group("Help", [item("Help: first steps…", "", () => openFirst()), item("About and what changed…", "", () => openAbout())]),
     document.createElement("hr"),
     item(hotkeyLine(), "", null, { disabled:true }),
     item("Connection: " + connInfo().label, "", null, { disabled:true }),
@@ -5782,7 +5777,7 @@ $("chev").addEventListener("click", e => {
 });
 function pinIcon(){ state.pinned = true; $("appIcon").classList.add("pinned"); markStep("pin"); closeMenus(); }
 $("pinBtn2").addEventListener("click", pinIcon);
-$("flyIcon").addEventListener("click", () => { closeMenus(); openLookup(pointer); });
+$("flyIcon").addEventListener("click", () => { closeMenus(); openToday(); });      /* round 35: the icon in the overflow does what the pinned one does */
 $("flyIcon").addEventListener("contextmenu", e => { e.preventDefault(); openMenu(); });
 $("appIcon").addEventListener("click", () => { closeMenus(); openToday(); });      /* round 34: a click on the tray icon opens Today */
 $("appIcon").addEventListener("contextmenu", e => { e.preventDefault(); openMenu(); });
@@ -6060,7 +6055,7 @@ const GUIDE_STEPS = [
     "Settings and the app's other large windows say at their foot what is switched on. At the moment: {connections}",
     "No AI is used until you choose a connection in Settings. “Connections and event log” lists what each connection sends, where to, and what is kept."] },
   { title:"Where things are", action:null, lines:[
-    "Click the tray icon near the clock to open Today: what needs a look, the ANDAs you keep, and the recent ones. Right-click it for the menu, which holds Lookup, Review a draft, Connections and event log, Backups and archive, and Settings.",
+    "Click the tray icon near the clock to open Today: what needs a look, the ANDAs you keep, and the recent ones. Right-click it for the menu: Lookup, Today, Review a draft, Ask, Settings, Help, and More for the rest, such as Connections and event log, and Backups and archive.",
     "This guide is there as well, under “Help: first steps”. Notices and the tray dot appear only while the app is running."] },
 ];
 /* One step as it is shown: its place, its title, its lines with the person's own shortcut and what is switched on written in, and its buttons. */
@@ -6087,8 +6082,9 @@ const GUIDE_SAID = {
 /* The guide opens by itself once, at the first start, and never again by itself. "seen" is what the PC remembers; anything but true means it has not been shown. */
 function guideOpensAtStart(seen){ return seen !== true; }
 
-const APP_VERSION = "Prototype, round 34";
+const APP_VERSION = "Prototype, round 35";
 const CHANGES = [
+  { round:35, items:["The tray menu is shorter: Lookup, Today, Review a draft, Ask, More, Settings and Help. With all tools on, Lists holds the two to-do lists, the notes and your usage. More holds the rest; Help holds first steps and what changed.", "Text in the Windows app uses one scale of six sizes, so pages read calmer and larger text grows them together."] },
   { round:34, items:["Your own shortcut now opens the card directly. If you prefer the small invite first, choose Whisper in Settings, How it starts. A middle-click still shows the invite first.", "The card shows the answer first: what needs you, the goal and the forecast, and the first thing worth a look. The calendar, Latest, Ahead, the reference dates and the brief are one press away, under More or E.", "A click on the tray icon opens Today, which now also holds what the Watch list showed."] },
   { round:33, items:["The Windows app now has what the simulation has shown since rounds 18 and 19: details from your own sheet on an expanded card, each with Copy; larger text and compact spacing; recent ANDAs and a short list you keep; One Bar; and Today.", "In Today, what needs a look is listed with the most pressing first.", "The Edge extension says where a card's data is from, as of when in your time zone and how long ago, marks it STALE after the days you choose, and has first steps of its own."] },
   { round:32, items:["A guide of five short steps opens once, at the first start. You can leave it at any step and open it again from the tray menu: Help: first steps.", "The Drugs@FDA reference file says when it was saved and how long ago, and is marked STALE after a number of days of its own."] },

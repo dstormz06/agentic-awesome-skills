@@ -54,7 +54,7 @@ public sealed class ConnectionsWindow : Window
         _logEmpty = Hint("Nothing has happened yet that is written here: a connection switched on or off, data sent, a file set aside or restored, something deleted at your request, an error.");
         Count = Hint(""); AutomationProperties.SetLiveSetting(Count, AutomationLiveSetting.Polite);
         Note = Hint(""); AutomationProperties.SetLiveSetting(Note, AutomationLiveSetting.Polite);
-        LineText = new TextBlock { FontSize = 11.5, Foreground = Res("C.Ink2"), Margin = new Thickness(0, 4, 0, 0) };
+        LineText = new TextBlock { FontSize = 12, Foreground = Res("C.Ink2"), Margin = new Thickness(0, 4, 0, 0) };
 
         CopyListButton = new Button { Content = "Copy this list" };
         CopyListButton.Click += async (_, _) => await CopyAsync(string.Join("\n", _describe().Text), "The list was copied. Nothing was sent.");
@@ -102,7 +102,7 @@ public sealed class ConnectionsWindow : Window
             var box = new StackPanel { Spacing = 2 };
             box.Children.Add(new TextBlock { Text = i.Name, FontSize = 13, FontWeight = FontWeight.SemiBold, TextWrapping = TextWrapping.Wrap, Foreground = Res("C.Ink") });
             foreach (string line in new[] { "Sends: " + i.Sends, "To: " + i.Where, "Kept: " + i.Kept })
-                box.Children.Add(new TextBlock { Text = line, FontSize = 12.5, TextWrapping = TextWrapping.Wrap, Foreground = Res("C.Ink") });
+                box.Children.Add(new TextBlock { Text = line, FontSize = 13, TextWrapping = TextWrapping.Wrap, Foreground = Res("C.Ink") });
             List.Children.Add(new Border { BorderBrush = Res("C.Line"), BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(8), Padding = new Thickness(10, 8), Child = box });
         }
         LineText.Text = r.Line;
@@ -173,7 +173,7 @@ public sealed class AboutWindow : Window
         IBrush Res(string key) => (IBrush)Application.Current!.Resources[key]!;
         Background = Res("C.Bg");
         TextBlock Hint(string text) => new() { FontSize = 12, TextWrapping = TextWrapping.Wrap, Foreground = Res("C.Ink2"), Text = text };
-        VersionText = new TextBlock { Text = "ANDA Companion (Notula) · " + ChangeLog.Version, FontSize = 13.5, FontWeight = FontWeight.SemiBold, Foreground = Res("C.Ink") };
+        VersionText = new TextBlock { Text = "ANDA Companion (Notula) · " + ChangeLog.Version, FontSize = 13, FontWeight = FontWeight.SemiBold, Foreground = Res("C.Ink") };
         Changes = new StackPanel { Spacing = 3 };
         foreach (var (round, items) in ChangeLog.Entries)
         {

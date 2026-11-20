@@ -625,7 +625,7 @@ internal static class SelfTest
         try
         {
             const string sentence = "Please review ANDA 216482 before Friday.";
-            var box = new TextBox { Text = sentence, FontSize = 16, Margin = new Thickness(16), VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center };
+            var box = new TextBox { Text = sentence, FontSize = 15, Margin = new Thickness(16), VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center };
             win = new Window
             {
                 Width = 560, Height = 120, Topmost = true, Title = "Self-test copy target",

@@ -45,14 +45,14 @@ public partial class WatchListWindow : Window
             string tone = item.Severity switch { "bad" => "C.Bad", "warn" => "C.Warn", _ => "C.Ink2" };
             string tag = item.Severity switch { "bad" => "ACT", "warn" => "CHECK", _ => "NOTE" };
             var grid = new Grid { ColumnDefinitions = new("56,70,*"), Margin = new Thickness(2, 4) };
-            grid.Children.Add(new TextBlock { Text = tag, FontSize = 9.5, FontWeight = FontWeight.Bold, Foreground = Res(tone), VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center });
+            grid.Children.Add(new TextBlock { Text = tag, FontSize = 11, FontWeight = FontWeight.Bold, Foreground = Res(tone), VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center });
             var num = new TextBlock { Text = item.Number, FontWeight = FontWeight.Bold, Foreground = Res("C.Ink") };
             Grid.SetColumn(num, 1);
             grid.Children.Add(num);
             var text = new StackPanel();
             text.Children.Add(new TextBlock { Text = item.Drug, Foreground = Res("C.Ink"), TextWrapping = TextWrapping.Wrap });
-            if (item.TopFlag is not null) text.Children.Add(new TextBlock { Text = item.TopFlag, FontSize = 11.5, Foreground = Res(tone), TextWrapping = TextWrapping.Wrap });
-            else if (item.UrgentReason is not null) text.Children.Add(new TextBlock { Text = item.UrgentReason, FontSize = 11.5, Foreground = Res(tone), TextWrapping = TextWrapping.Wrap });
+            if (item.TopFlag is not null) text.Children.Add(new TextBlock { Text = item.TopFlag, FontSize = 12, Foreground = Res(tone), TextWrapping = TextWrapping.Wrap });
+            else if (item.UrgentReason is not null) text.Children.Add(new TextBlock { Text = item.UrgentReason, FontSize = 12, Foreground = Res(tone), TextWrapping = TextWrapping.Wrap });
             Grid.SetColumn(text, 2);
             grid.Children.Add(text);
             string number = item.Number;

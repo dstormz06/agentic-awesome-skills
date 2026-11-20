@@ -36,7 +36,7 @@ public sealed class HandoffWindow : Window
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         IBrush Res(string key) => (IBrush)Application.Current!.Resources[key]!;
         Background = Res("C.Bg");
-        TextBlock Hint(string text) => new() { FontSize = 11.5, TextWrapping = TextWrapping.Wrap, Foreground = Res("C.Ink2"), Text = text };
+        TextBlock Hint(string text) => new() { FontSize = 12, TextWrapping = TextWrapping.Wrap, Foreground = Res("C.Ink2"), Text = text };
 
         AllButton = new Button { Content = "Every ANDA in my data" };
         WatchButton = new Button { Content = "Only those that need a look" };
@@ -49,7 +49,7 @@ public sealed class HandoffWindow : Window
         // Notes are the person's own and can be candid: a page that may go to someone else holds them only when the person ticks the box, each time.
         NotesBox = new CheckBox { Content = "Include my notes", IsChecked = false };
         NotesBox.IsCheckedChanged += (_, _) => Paint();
-        Page = new TextBox { IsReadOnly = true, AcceptsReturn = true, TextWrapping = TextWrapping.Wrap, Height = 300, FontSize = 12.5, FontFamily = new FontFamily("Consolas, Menlo, monospace") };
+        Page = new TextBox { IsReadOnly = true, AcceptsReturn = true, TextWrapping = TextWrapping.Wrap, Height = 300, FontSize = 13, FontFamily = new FontFamily("Consolas, Menlo, monospace") };
         AutomationProperties.SetName(Page, "The page, as text");
         Note = Hint(""); AutomationProperties.SetLiveSetting(Note, AutomationLiveSetting.Polite);
 

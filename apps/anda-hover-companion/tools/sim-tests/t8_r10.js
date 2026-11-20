@@ -161,7 +161,7 @@ const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++
   await page.keyboard.press('Escape'); await page.waitForTimeout(100);
   ok(!(await vis('#replyMenu')), 'Esc closes the menu and not the card'); 
   // manager
-  await page.click('#appIcon', { button: 'right' }); await page.click('#menu >> text=Quick replies…'); await page.waitForTimeout(150);
+  await page.click('#appIcon', { button: 'right' }); await page.click('#menu > button[data-group="More"]'); await page.click('#menu >> text=Quick replies…'); await page.waitForTimeout(150);   // round 35: inside More
   ok(await vis('#replies'), 'the tray menu opens Quick replies');
   await page.click('#rpNew'); await page.fill('#rpName', 'Holiday check'); await page.fill('#rpText', 'ANDA {number}: PSG {psg} | RLD {rld} | {nothing} | {forecast}');
   ok((await txt('#rpPreview')).includes('Jan 14, 2026 · fictional demo date') && (await txt('#rpPreview')).includes('{nothing}'), 'the preview fills placeholders and leaves unknown ones as typed');

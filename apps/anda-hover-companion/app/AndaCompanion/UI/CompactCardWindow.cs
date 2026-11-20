@@ -125,7 +125,7 @@ public sealed class CompactCardWindow : Window
                 Children =
                 {
                     body,
-                    new TextBlock { Name = "StaleMark", Text = at >= 0 ? line.Text[at..] : "STALE", FontSize = 10.5, FontWeight = FontWeight.SemiBold, Foreground = Res("C.Warn"), Margin = new Thickness(look.Form == CardForm.Badge ? 14 : 10, 0, 10, 5) },
+                    new TextBlock { Name = "StaleMark", Text = at >= 0 ? line.Text[at..] : "STALE", FontSize = 11, FontWeight = FontWeight.SemiBold, Foreground = Res("C.Warn"), Margin = new Thickness(look.Form == CardForm.Badge ? 14 : 10, 0, 10, 5) },
                 },
             };
         }
@@ -204,7 +204,7 @@ public sealed class CompactCardWindow : Window
 
     private static TextBlock Label(string text) => new()
     {
-        Text = text, FontSize = 9, FontWeight = FontWeight.Bold, LetterSpacing = 1.1,
+        Text = text, FontSize = 11, FontWeight = FontWeight.Bold, LetterSpacing = 1.1,
         Foreground = Res("C.Ink3"), FontFamily = Font("C.LabelFont"), VerticalAlignment = VerticalAlignment.Center,
     };
 
@@ -270,10 +270,10 @@ public sealed class CompactCardWindow : Window
 
         var dates = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 5, Margin = new Thickness(0, 1, 0, 0) };
         dates.Children.Add(Label("GOAL"));
-        dates.Children.Add(Text(goal, 12.5, FontWeight.SemiBold));
-        dates.Children.Add(Text("→", 12.5, ink: "C.Ink3"));
+        dates.Children.Add(Text(goal, 13, FontWeight.SemiBold));
+        dates.Children.Add(Text("→", 13, ink: "C.Ink3"));
         dates.Children.Add(Label("FORECAST"));
-        dates.Children.Add(Text(fc, 12.5, FontWeight.SemiBold));
+        dates.Children.Add(Text(fc, 13, FontWeight.SemiBold));
         var delta = Text(CompactText.ShortDelta(_record.ForecastDelta), 12, FontWeight.Bold);
         delta.Foreground = DeltaBrush;
         delta.Margin = new Thickness(3, 0, 0, 0);
@@ -282,7 +282,7 @@ public sealed class CompactCardWindow : Window
         var body = new StackPanel { Margin = new Thickness(12, 8, 6, 8), Spacing = 2 };
         body.Children.Add(top);
         body.Children.Add(dates);
-        if (AttentionLine(11.5) is { } attn) body.Children.Add(attn);
+        if (AttentionLine(12) is { } attn) body.Children.Add(attn);
 
         var inner = new StackPanel { Width = 340 - 4 - 2 };     // spine 4 + border 2 → 340 overall
         inner.Children.Add(body);
@@ -309,13 +309,13 @@ public sealed class CompactCardWindow : Window
         Grid.SetColumn(close, 1);
         head.Children.Add(close);
 
-        var delta = Text(CompactText.ShortDelta(_record.ForecastDelta), 24, FontWeight.Bold);
+        var delta = Text(CompactText.ShortDelta(_record.ForecastDelta), 20, FontWeight.Bold);
         delta.Foreground = DeltaBrush;
         delta.Margin = new Thickness(0, 4, 0, 0);
 
         var panel = new StackPanel { Width = 196 - 2 - 18, Margin = new Thickness(12, 8, 6, 10), Spacing = 1 };   // → 196 overall
         panel.Children.Add(head);
-        panel.Children.Add(Text(_record.Drug, 11.5, ink: "C.Ink2", trim: true));
+        panel.Children.Add(Text(_record.Drug, 12, ink: "C.Ink2", trim: true));
         panel.Children.Add(delta);
         panel.Children.Add(Text($"forecast {CompactText.Pair(_record.GoalDate, _record.ForecastDate).Forecast} · goal {CompactText.Pair(_record.GoalDate, _record.ForecastDate).Goal}",
             10.5, ink: "C.Ink3", trim: true));
@@ -332,10 +332,10 @@ public sealed class CompactCardWindow : Window
     {
         var stub = new StackPanel { Width = 80, Margin = new Thickness(10, 8, 6, 8), VerticalAlignment = VerticalAlignment.Center, Spacing = 1 };
         stub.Children.Add(Label(_record.Kind));
-        stub.Children.Add(Text(_record.Number, 14, FontWeight.Bold, font: "C.NumFont"));
+        stub.Children.Add(Text(_record.Number, 15, FontWeight.Bold, font: "C.NumFont"));
         if (_record.Attention is not null)
         {
-            var warn = Text("⚠ needs you", 10.5, FontWeight.SemiBold);
+            var warn = Text("⚠ needs you", 11, FontWeight.SemiBold);
             warn.Foreground = Res(_record.Attention.Level == AttentionLevel.Bad ? "C.Bad" : "C.Warn");
             stub.Children.Add(warn);
         }
@@ -350,7 +350,7 @@ public sealed class CompactCardWindow : Window
         main.Children.Add(Text(_record.Drug, 12, FontWeight.SemiBold, trim: true));
         var fc = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 5 };
         fc.Children.Add(Label("FORECAST"));
-        fc.Children.Add(Text(CompactText.Pair(_record.GoalDate, _record.ForecastDate).Forecast, 12.5, FontWeight.SemiBold));
+        fc.Children.Add(Text(CompactText.Pair(_record.GoalDate, _record.ForecastDate).Forecast, 13, FontWeight.SemiBold));
         var delta = Text(CompactText.ShortDelta(_record.ForecastDelta), 12, FontWeight.Bold);
         delta.Foreground = DeltaBrush;
         fc.Children.Add(delta);
@@ -376,7 +376,7 @@ public sealed class CompactCardWindow : Window
     {
         var row = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 7, Margin = new Thickness(12, 7, 6, 7) };
         row.Children.Add(new Ellipse { Width = 9, Height = 9, Fill = ToneBrush, VerticalAlignment = VerticalAlignment.Center });
-        row.Children.Add(Text(_record.Number, 12.5, FontWeight.Bold, font: "C.NumFont"));
+        row.Children.Add(Text(_record.Number, 13, FontWeight.Bold, font: "C.NumFont"));
         var delta = Text(CompactText.ShortDelta(_record.ForecastDelta), 12, FontWeight.Bold);
         delta.Foreground = DeltaBrush;
         row.Children.Add(delta);

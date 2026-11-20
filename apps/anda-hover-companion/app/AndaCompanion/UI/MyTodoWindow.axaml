@@ -8,10 +8,10 @@
   <Window.Styles>
     <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource C.Font}"/></Style>
     <Style Selector="TextBlock.lbl">
-      <Setter Property="FontSize" Value="9.5"/><Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="FontSize" Value="11"/><Setter Property="FontWeight" Value="Bold"/>
       <Setter Property="LetterSpacing" Value="1.4"/><Setter Property="Foreground" Value="{DynamicResource C.Ink3}"/>
     </Style>
-    <Style Selector="TextBlock.hint"><Setter Property="FontSize" Value="11.5"/><Setter Property="Foreground" Value="{DynamicResource C.Ink2}"/><Setter Property="TextWrapping" Value="Wrap"/></Style>
+    <Style Selector="TextBlock.hint"><Setter Property="FontSize" Value="12"/><Setter Property="Foreground" Value="{DynamicResource C.Ink2}"/><Setter Property="TextWrapping" Value="Wrap"/></Style>
     <Style Selector="Border.rule"><Setter Property="Height" Value="1"/><Setter Property="Background" Value="{DynamicResource C.Hair}"/></Style>
   </Window.Styles>
 
@@ -29,15 +29,15 @@
           <Border Name="BarFill" CornerRadius="3" Background="{DynamicResource C.Accent}"/>
           <Border Name="BarRest" Grid.Column="1" CornerRadius="3" Background="{DynamicResource C.Hair}"/>
         </Grid>
-        <TextBlock Name="FocusLine" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink}" TextWrapping="Wrap"/>
+        <TextBlock Name="FocusLine" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource C.Ink}" TextWrapping="Wrap"/>
         <Border Classes="rule"/>
         <Grid ColumnDefinitions="*,8,Auto,8,Auto">
           <TextBox Name="AddBox" MaxLength="200" Watermark="Type a task, for example: send the status update by Friday" AutomationProperties.Name="New to-do item"/>
           <Button Grid.Column="2" Name="AddBtn" Classes="primary" Content="Add"/>
           <Button Grid.Column="4" Name="NotesBtn" Content="Paste notes…"/>
         </Grid>
-        <TextBlock Name="AddPreview" FontSize="11.5" Foreground="{DynamicResource C.Ink3}" TextWrapping="Wrap"/>
-        <TextBlock Name="AddStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
+        <TextBlock Name="AddPreview" FontSize="12" Foreground="{DynamicResource C.Ink3}" TextWrapping="Wrap"/>
+        <TextBlock Name="AddStatus" FontSize="12" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
         <Grid ColumnDefinitions="Auto,8,150,*">
           <TextBlock VerticalAlignment="Center" Classes="lbl" Text="SHOW"/>
           <ComboBox Grid.Column="2" Name="FilterBox" HorizontalAlignment="Stretch" AutomationProperties.Name="Show which items"/>

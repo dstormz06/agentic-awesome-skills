@@ -8,7 +8,7 @@
   <Window.Styles>
     <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource C.Font}"/></Style>
     <Style Selector="TextBlock.lbl">
-      <Setter Property="FontSize" Value="9.5"/><Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="FontSize" Value="11"/><Setter Property="FontWeight" Value="Bold"/>
       <Setter Property="LetterSpacing" Value="1.4"/><Setter Property="Foreground" Value="{DynamicResource C.Ink3}"/>
     </Style>
   </Window.Styles>
@@ -39,7 +39,7 @@
             <TextBlock Classes="lbl" Text="NAME"/>
             <TextBox Name="NameBox" FontSize="13" AutomationProperties.Name="Name of the reply"/>
             <TextBlock Classes="lbl" Text="TEXT, WITH PLACEHOLDERS" Margin="0,4,0,0"/>
-            <TextBox Name="TextBox1" AcceptsReturn="True" TextWrapping="Wrap" Height="120" FontSize="12.5" AutomationProperties.Name="Text of the reply, with placeholders"/>
+            <TextBox Name="TextBox1" AcceptsReturn="True" TextWrapping="Wrap" Height="120" FontSize="13" AutomationProperties.Name="Text of the reply, with placeholders"/>
             <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
               <Button Name="SaveBtn" Classes="primary" Content="Save"
                       ToolTip.Tip="Store this reply"/>
@@ -47,8 +47,8 @@
             </StackPanel>
             <TextBlock Name="StatusText" FontSize="11" Foreground="{DynamicResource C.Ink3}"/>
             <TextBlock Classes="lbl" Text="PREVIEW (THE FICTIONAL DEMO RECORD)" Margin="0,4,0,0"/>
-            <TextBlock Name="PreviewText" FontSize="11.5" TextWrapping="Wrap" Foreground="{DynamicResource C.Ink2}"/>
-            <TextBlock Name="PlaceholderHelp" FontSize="10.5" TextWrapping="Wrap" Foreground="{DynamicResource C.Ink3}"/>
+            <TextBlock Name="PreviewText" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource C.Ink2}"/>
+            <TextBlock Name="PlaceholderHelp" FontSize="11" TextWrapping="Wrap" Foreground="{DynamicResource C.Ink3}"/>
           </StackPanel>
         </Grid>
       </StackPanel>

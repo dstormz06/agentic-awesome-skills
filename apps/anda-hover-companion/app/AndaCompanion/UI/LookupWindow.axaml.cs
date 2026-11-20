@@ -64,7 +64,7 @@ public partial class LookupWindow : Window
         var ids = _options?.Listed?.Invoke() ?? Array.Empty<(string, bool)>();
         RecentPanel.IsVisible = ids.Count > 0;
         if (ids.Count == 0) return;
-        RecentPanel.Children.Add(new TextBlock { Text = "RECENT", FontSize = 9.5, FontWeight = FontWeight.Bold, LetterSpacing = 1.4, Foreground = Res("C.Ink3"), VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 4) });
+        RecentPanel.Children.Add(new TextBlock { Text = "RECENT", FontSize = 11, FontWeight = FontWeight.Bold, LetterSpacing = 1.4, Foreground = Res("C.Ink3"), VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 4) });
         foreach (var (id, kept) in ids)
         {
             var b = new Button { Content = id, Classes = { "chip" }, Margin = new Thickness(0, 0, 6, 4), FontWeight = kept ? FontWeight.SemiBold : FontWeight.Normal, Tag = id };
@@ -86,8 +86,8 @@ public partial class LookupWindow : Window
         {
             var row = _rows[i]; int index = i;
             var text = new StackPanel { Spacing = 1 };
-            text.Children.Add(new TextBlock { Text = row.Title, FontSize = 12.5, FontWeight = FontWeight.SemiBold, Foreground = Res("C.Ink"), TextWrapping = TextWrapping.Wrap });
-            text.Children.Add(new TextBlock { Text = row.Sub, FontSize = 11.5, Foreground = Res("C.Ink3"), TextWrapping = TextWrapping.Wrap });
+            text.Children.Add(new TextBlock { Text = row.Title, FontSize = 13, FontWeight = FontWeight.SemiBold, Foreground = Res("C.Ink"), TextWrapping = TextWrapping.Wrap });
+            text.Children.Add(new TextBlock { Text = row.Sub, FontSize = 12, Foreground = Res("C.Ink3"), TextWrapping = TextWrapping.Wrap });
             var line = new Grid { ColumnDefinitions = new ColumnDefinitions("22,*") };
             line.Children.Add(new TextBlock { Text = row.Icon, FontSize = 13, Foreground = Res("C.Accent"), VerticalAlignment = VerticalAlignment.Center });
             Grid.SetColumn(text, 1); line.Children.Add(text);

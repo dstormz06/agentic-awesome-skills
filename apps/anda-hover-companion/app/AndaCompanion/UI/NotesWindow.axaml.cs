@@ -107,8 +107,8 @@ public partial class NotesWindow : Window
         return new Row
         {
             Include = include, Fields = fields, Source = item,
-            Problem = new TextBlock { FontSize = 11.5, Foreground = Res("C.Bad"), TextWrapping = TextWrapping.Wrap, IsVisible = false },
-            AddedMark = new TextBlock { Text = "Added to your to-do list", FontSize = 11.5, FontWeight = FontWeight.SemiBold, Foreground = Res("C.Good"), IsVisible = false },
+            Problem = new TextBlock { FontSize = 12, Foreground = Res("C.Bad"), TextWrapping = TextWrapping.Wrap, IsVisible = false },
+            AddedMark = new TextBlock { Text = "Added to your to-do list", FontSize = 12, FontWeight = FontWeight.SemiBold, Foreground = Res("C.Good"), IsVisible = false },
         };
     }
 

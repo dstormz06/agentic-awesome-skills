@@ -8,11 +8,11 @@
   <Window.Styles>
     <Style Selector="TextBlock"><Setter Property="FontFamily" Value="{DynamicResource C.Font}"/></Style>
     <Style Selector="TextBlock.lbl">
-      <Setter Property="FontSize" Value="9.5"/><Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="FontSize" Value="11"/><Setter Property="FontWeight" Value="Bold"/>
       <Setter Property="LetterSpacing" Value="1.4"/><Setter Property="Foreground" Value="{DynamicResource C.Ink3}"/>
     </Style>
-    <Style Selector="TextBlock.hint"><Setter Property="FontSize" Value="11.5"/><Setter Property="Foreground" Value="{DynamicResource C.Ink2}"/><Setter Property="TextWrapping" Value="Wrap"/></Style>
-    <Style Selector="TextBox"><Setter Property="FontSize" Value="12.5"/></Style>
+    <Style Selector="TextBlock.hint"><Setter Property="FontSize" Value="12"/><Setter Property="Foreground" Value="{DynamicResource C.Ink2}"/><Setter Property="TextWrapping" Value="Wrap"/></Style>
+    <Style Selector="TextBox"><Setter Property="FontSize" Value="13"/></Style>
     <Style Selector="Border.rule"><Setter Property="Height" Value="1"/><Setter Property="Background" Value="{DynamicResource C.Hair}"/></Style>
   </Window.Styles>
 

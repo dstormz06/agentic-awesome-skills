@@ -117,7 +117,7 @@ public partial class TodoWindow : Window
         {
             var group = _view.Rows.Where(r => r.Priority == priority).ToList();
             if (group.Count == 0) continue;
-            Rows.Children.Add(new TextBlock { Text = $"{heading} · {group.Count}", FontSize = 9.5, FontWeight = FontWeight.Bold, Foreground = Res("C.Ink3"), Margin = new Thickness(2, 10, 0, 2) });
+            Rows.Children.Add(new TextBlock { Text = $"{heading} · {group.Count}", FontSize = 11, FontWeight = FontWeight.Bold, Foreground = Res("C.Ink3"), Margin = new Thickness(2, 10, 0, 2) });
             foreach (var row in group) Rows.Children.Add(MakeRow(row));
         }
     }
@@ -139,7 +139,7 @@ public partial class TodoWindow : Window
         grid.Children.Add(done);
         var tag = new TextBlock
         {
-            Text = row.Auto ? (row.Severity == "bad" ? "ACT" : row.Severity == "warn" ? "CHECK" : "NOTE") : "YOURS", FontSize = 9.5, FontWeight = FontWeight.Bold,
+            Text = row.Auto ? (row.Severity == "bad" ? "ACT" : row.Severity == "warn" ? "CHECK" : "NOTE") : "YOURS", FontSize = 11, FontWeight = FontWeight.Bold,
             Foreground = Res(row.Auto ? tone : "C.Accent"), VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top, Margin = new Thickness(0, 4, 0, 0),
         };
         Grid.SetColumn(tag, 1); grid.Children.Add(tag);
@@ -158,7 +158,7 @@ public partial class TodoWindow : Window
         var buttons = new StackPanel { Orientation = Avalonia.Layout.Orientation.Horizontal, Spacing = 4, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top };
         if (row.Number is { } number)
         {
-            var open = new Button { Content = number, Padding = new Thickness(8, 2), FontSize = 11.5 };
+            var open = new Button { Content = number, Padding = new Thickness(8, 2), FontSize = 12 };
             AutomationProperties.SetName(open, $"Open the card for ANDA {number}");
             open.Click += (_, _) => _hooks.OpenCard(number, new PixelPoint(Position.X + 80, Position.Y + 80));
             buttons.Children.Add(open);
@@ -166,7 +166,7 @@ public partial class TodoWindow : Window
         if (!row.Done)
         {
             bool asleep = row.SnoozedUntil is not null;
-            var snooze = new Button { Content = asleep ? "Wake" : "Snooze", Padding = new Thickness(8, 2), FontSize = 11.5 };
+            var snooze = new Button { Content = asleep ? "Wake" : "Snooze", Padding = new Thickness(8, 2), FontSize = 12 };
             AutomationProperties.SetName(snooze, (asleep ? "Wake: " : "Snooze until the next business day: ") + row.Title);
             snooze.Click += (_, _) =>
             {
@@ -181,7 +181,7 @@ public partial class TodoWindow : Window
         }
         if (!row.Auto && row.ItemId is { } itemId)
         {
-            var del = new Button { Content = "Delete", Padding = new Thickness(8, 2), FontSize = 11.5 };
+            var del = new Button { Content = "Delete", Padding = new Thickness(8, 2), FontSize = 12 };
             AutomationProperties.SetName(del, "Delete: " + row.Title);
             del.Click += (_, _) => _hooks.Store.Delete(itemId);
             buttons.Children.Add(del);

@@ -229,7 +229,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   await p.evaluate(() => openMenu()); await settle(p, 100);
   const menu = await p.$$eval('#menu button', n => n.map(x => x.textContent));
   ok(menu.some(x => x.startsWith('My to-do list…')) && menu.some(x => x === 'Notes to my to-do list…') && menu.some(x => x.includes('Ctrl+Alt+Shift+L ✓')), 'the tray menu lists My to-do list, Notes to my to-do list and the live shortcut');
-  await p.click('#menu >> text=Notes to my to-do list…'); await settle(p);
+  await p.click('#menu > button[data-group="Lists"]'); await p.click('#menu >> text=Notes to my to-do list…'); await settle(p);   // round 35: inside Lists
   ok(await vis(p, '#notes'), 'the tray item opens the notes window');
   await p.close();
 

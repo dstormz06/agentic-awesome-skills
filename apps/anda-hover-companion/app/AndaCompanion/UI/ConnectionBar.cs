@@ -45,7 +45,7 @@ public static class ConnectionBar
         var bar = new Button
         {
             Content = Line(), Tag = "onbar", HorizontalAlignment = HorizontalAlignment.Stretch, HorizontalContentAlignment = HorizontalAlignment.Left,
-            FontSize = 11.5, MinHeight = 26, Padding = new Thickness(20, 5), Background = Brushes.Transparent, CornerRadius = new CornerRadius(0),
+            FontSize = 12, MinHeight = 26, Padding = new Thickness(20, 5), Background = Brushes.Transparent, CornerRadius = new CornerRadius(0),
             BorderThickness = new Thickness(0, 1, 0, 0), BorderBrush = Res("C.Line"), Foreground = Res("C.Ink2"),
         };
         AutomationProperties.SetName(bar, Line() + Suffix);

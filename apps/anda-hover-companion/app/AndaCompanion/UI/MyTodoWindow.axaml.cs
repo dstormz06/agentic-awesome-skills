@@ -180,7 +180,7 @@ public partial class MyTodoWindow : Window
         {
             Rows.Children.Add(new TextBlock
             {
-                Text = $"{group.Heading} · {group.Items.Count}", FontSize = 9.5, FontWeight = FontWeight.Bold,
+                Text = $"{group.Heading} · {group.Items.Count}", FontSize = 11, FontWeight = FontWeight.Bold,
                 Foreground = Res(group.Heading == "OVERDUE" ? "C.Bad" : "C.Ink3"), Margin = new Thickness(2, 10, 0, 2),
             });
             foreach (var item in group.Items) Rows.Children.Add(MakeRow(item));
@@ -209,7 +209,7 @@ public partial class MyTodoWindow : Window
 
         var text = new StackPanel { Spacing = 1 };
         var line = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 6 };
-        if (item.High && !item.Done) line.Children.Add(new TextBlock { Text = "URGENT", FontSize = 9.5, FontWeight = FontWeight.Bold, Foreground = Res("C.Bad"), VerticalAlignment = VerticalAlignment.Center });
+        if (item.High && !item.Done) line.Children.Add(new TextBlock { Text = "URGENT", FontSize = 11, FontWeight = FontWeight.Bold, Foreground = Res("C.Bad"), VerticalAlignment = VerticalAlignment.Center });
         text.Children.Add(new TextBlock
         {
             Text = item.Title, TextWrapping = TextWrapping.Wrap, Foreground = item.Done ? Res("C.Ink3") : Res("C.Ink"),
@@ -229,23 +229,23 @@ public partial class MyTodoWindow : Window
         var buttons = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 4, VerticalAlignment = VerticalAlignment.Top };
         if (item.Number is { } number)
         {
-            var open = new Button { Content = number, Padding = new Thickness(8, 2), FontSize = 11.5 };
+            var open = new Button { Content = number, Padding = new Thickness(8, 2), FontSize = 12 };
             AutomationProperties.SetName(open, $"Open the card for ANDA {number}");
             open.Click += (_, _) => _hooks.OpenCard(number, new PixelPoint(Position.X + 80, Position.Y + 80));
             buttons.Children.Add(open);
         }
         if (!item.Done)
         {
-            var tomorrow = new Button { Content = "Tomorrow", Padding = new Thickness(8, 2), FontSize = 11.5 };
+            var tomorrow = new Button { Content = "Tomorrow", Padding = new Thickness(8, 2), FontSize = 12 };
             AutomationProperties.SetName(tomorrow, "Move to tomorrow: " + item.Title);
             tomorrow.Click += (_, _) => _hooks.Store.MoveDue(item.Id, _hooks.Today().AddDays(1));
             buttons.Children.Add(tomorrow);
-            var edit = new Button { Content = "Edit", Padding = new Thickness(8, 2), FontSize = 11.5 };
+            var edit = new Button { Content = "Edit", Padding = new Thickness(8, 2), FontSize = 12 };
             AutomationProperties.SetName(edit, "Edit: " + item.Title);
             edit.Click += (_, _) => BeginEdit(item);
             buttons.Children.Add(edit);
         }
-        var del = new Button { Content = "Delete", Padding = new Thickness(8, 2), FontSize = 11.5 };
+        var del = new Button { Content = "Delete", Padding = new Thickness(8, 2), FontSize = 12 };
         AutomationProperties.SetName(del, "Delete: " + item.Title);
         del.Click += (_, _) =>
         {
@@ -278,7 +278,7 @@ public partial class MyTodoWindow : Window
 
     private Control EditorBox(ItemFields editor)
     {
-        var error = _errorBox = new TextBlock { Text = _editorError, FontSize = 11.5, Foreground = Res("C.Bad"), TextWrapping = TextWrapping.Wrap };
+        var error = _errorBox = new TextBlock { Text = _editorError, FontSize = 12, Foreground = Res("C.Bad"), TextWrapping = TextWrapping.Wrap };
         QuietText.HideWhenEmpty(error);
         var save = new Button { Content = "Save", Classes = { "primary" } };
         var cancel = new Button { Content = "Cancel" };
