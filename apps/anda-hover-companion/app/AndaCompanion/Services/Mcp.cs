@@ -37,7 +37,6 @@ public static class McpRules
     public const string ProtocolVersion = "2025-06-18";
     /// <summary>The versions this app speaks; a server that answers with another one is told nothing more.</summary>
     public static readonly IReadOnlyList<string> Versions = new[] { "2025-06-18", "2025-03-26" };
-    public static readonly IReadOnlyList<int> TimeoutChoices = CustomApiSettings.TimeoutChoices;
 
     public const string Hint = "An MCP server offers tools that this app can call for you: a search, a lookup, a calculation. Only servers that answer over https:// are offered (http:// for this PC only); a server that runs as a program on this PC is not, because this app does not start programs. Nothing is sent by itself: Test asks a server for its list of tools, and MCP tools (in the tray menu's More) shows you exactly what a call sends before you press Send. The token stays in the environment variable you name and is never saved by the app. A server's answer and its descriptions of its tools are shown as plain text and are never followed as instructions.";
     public const string SaidNothingYet = "Nothing is sent until you press List tools, and then Send.", SaidChooseFirst = "Please press List tools and choose a tool first.";
@@ -66,7 +65,7 @@ public static class McpRules
                 Id = id, Name = name.Length > 0 ? name : "MCP server", Endpoint = (s.Endpoint ?? "").Trim(),
                 AuthHeader = (s.AuthHeader ?? "").Trim(), AuthScheme = (s.AuthScheme ?? "").Trim(), SecretEnvVar = (s.SecretEnvVar ?? "").Trim(),
                 Enabled = s.Enabled && (s.Endpoint ?? "").Trim().Length > 0,
-                TimeoutSeconds = TimeoutChoices.Contains(s.TimeoutSeconds) ? s.TimeoutSeconds : 30,
+                TimeoutSeconds = CustomApiSettings.TimeoutChoices.Contains(s.TimeoutSeconds) ? s.TimeoutSeconds : 30,
             });
         }
         return list;
@@ -176,7 +175,7 @@ public sealed class McpClient : IDisposable
         // not redirected: a token meant for this server is never carried to another address (as for My API)
         _http = handler is null ? new HttpClient(DefaultHandler()) : new HttpClient(handler, disposeHandler: false);
         _http.Timeout = Timeout.InfiniteTimeSpan;    // the time limit covers the whole answer, read to its end (below), not only its first line
-        _timeout = TimeSpan.FromSeconds(McpRules.TimeoutChoices.Contains(server.TimeoutSeconds) ? server.TimeoutSeconds : 30);
+        _timeout = TimeSpan.FromSeconds(CustomApiSettings.TimeoutChoices.Contains(server.TimeoutSeconds) ? server.TimeoutSeconds : 30);
     }
 
     /// <summary>The address, or why none can be used (checked as for My API, before anything is sent).</summary>

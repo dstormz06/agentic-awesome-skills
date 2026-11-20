@@ -102,6 +102,11 @@ public class Round36Tests
         string path = Path.Combine(Temp.NewDir(), "last-look.json");
         LastLook.Save(path, now); Assert.Equal("file:0badf00d", LastLook.Load(path)!.Source);
         Assert.Equal(LastLook.SaidOtherData, LastLook.Decide(now with { Source = null }, now, true).Note);
+        // the view Today is given: the decision, with the time the compared look was kept, in the person's zone
+        var ny = TimeZoneInfo.FindSystemTimeZoneById("America/New_York");
+        Assert.Equal(new LastLook.View(kept, now, "Compared with what this PC kept when you last closed Today: Jul 15, 2026, 5:05 PM EDT.", true), LastLook.ViewOf(kept, now, true, ny));
+        Assert.Equal(new LastLook.View(null, now, LastLook.SaidUnreadable, false), LastLook.ViewOf(kept, now, false, ny));
+        Assert.Equal(new LastLook.View(null, now, null, true), LastLook.ViewOf(null, now, true, ny));
     }
 
     [Fact]

@@ -71,15 +71,9 @@ public partial class App
             }, ShowAll: OpenWatchList,                            // round 34: the watch list has no tray item; it opens from Today
             // round 36: what moved since the look kept when Today was last closed, kept again when it closes; and next week, from Thursday noon.
             // Round 37: with the switch off there is no group, nothing is read and nothing is kept.
-            Looks: () =>
-            {
-                if (!_settings.SinceLastLook) return null;
-                var now = LastLook.Of(records, Clock.UtcNow(), LookSource());
-                var (compare, note, keep) = LastLook.Decide(LastLook.Load(AppPaths.LastLookFile), now, DataReadable());
-                if (note is null && compare is not null && DateTime.TryParse(compare.At, null, System.Globalization.DateTimeStyles.AdjustToUniversal, out var at))
-                    note = LastLook.SaidNote(Clock.Ms(DateTime.SpecifyKind(at, DateTimeKind.Utc)), Clock.Zone);
-                return ((LastLook.Look? Kept, LastLook.Look Now, string? Note, bool Keep)?)(compare, now, note, keep);
-            },
+            Looks: () => _settings.SinceLastLook
+                ? LastLook.ViewOf(LastLook.Load(AppPaths.LastLookFile), LastLook.Of(records, Clock.UtcNow(), LookSource()), DataReadable(), Clock.Zone)
+                : null,
             KeepLook: look => LastLook.KeepIfOn(_settings, AppPaths.LastLookFile, look, Clock.UtcNow()),   // what was shown, kept when Today closed; not if switched off meanwhile
             Week: () => { var wall = Clock.Wall(Clock.UtcNow()); return NextWeek.Of(DateOnly.FromDateTime(wall), wall.Hour, records, _calendar, NextWeek.TasksIfOn(_settings, () => _todo.Items, () => _myTodo.Items), todosOff: !_settings.WeekTodos); }));
         _todayWindow.Closed += (_, _) => _todayWindow = null;

@@ -18,7 +18,7 @@ namespace AndaCompanion.UI;
 /// <param name="CopyText">Puts text on the clipboard and says whether it got there.</param>
 public sealed record TodayHooks(Func<IReadOnlyList<Today.Look>> All, Func<string, Today.Look?> Find, Func<IReadOnlyList<string>> Pins, Func<IReadOnlyList<string>> Recents,
     Action<string> OpenCard, Func<string, Task<bool>>? CopyText = null, Action? ShowAll = null,
-    Func<(LastLook.Look? Kept, LastLook.Look Now, string? Note, bool Keep)?>? Looks = null, Action<LastLook.Look>? KeepLook = null, Func<NextWeek.Result?>? Week = null);
+    Func<LastLook.View?>? Looks = null, Action<LastLook.Look>? KeepLook = null, Func<NextWeek.Result?>? Week = null);
 
 /// <summary>
 /// Today (round 33): a small two-pane window. Left: what needs a look, the ANDAs kept in my list, recents. Right: the selected one, with

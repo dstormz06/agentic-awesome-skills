@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace AndaCompanion.Services;
+namespace AndaCompanion.UI;
 
 /// <summary>
 /// Round 35: the tray menu as data, in the simulation's order (mockup/round35-golden.json). Seven choices in the focused edition (Lookup,

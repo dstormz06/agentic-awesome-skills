@@ -38,12 +38,12 @@ public class Round36UiTests : IClassFixture<HeadlessFixture>
             int keptTimes = 0; LastLook.Look? keptLook = null;
             var week = new NextWeek.Result("NEXT WEEK · MON NOV 23 TO FRI NOV 27", Array.Empty<NextWeek.Row>(), new[] { "Thu Nov 26: Thanksgiving Day (federal holiday)" }, NextWeek.SaidEmpty);
             var w = new TodayWindow(new TodayHooks(() => all, Find, () => Array.Empty<string>(), () => Array.Empty<string>(), _ => { },
-                Looks: () => (kept, now, "Compared with what this PC kept when you last closed Today: Jul 15, 2026, 5:05 PM EDT.", true), KeepLook: l => { keptTimes++; keptLook = l; }, Week: () => week));
-            var first = new TodayWindow(new TodayHooks(() => all, Find, () => Array.Empty<string>(), () => Array.Empty<string>(), _ => { }, Looks: () => (null, now, null, true)));
+                Looks: () => new LastLook.View(kept, now, "Compared with what this PC kept when you last closed Today: Jul 15, 2026, 5:05 PM EDT.", true), KeepLook: l => { keptTimes++; keptLook = l; }, Week: () => week));
+            var first = new TodayWindow(new TodayHooks(() => all, Find, () => Array.Empty<string>(), () => Array.Empty<string>(), _ => { }, Looks: () => new LastLook.View(null, now, null, true)));
             // the person's sheet could not be read: nothing compared, and the look kept last time is not written over
             int unreadKept = 0;
             var unread = new TodayWindow(new TodayHooks(() => all, Find, () => Array.Empty<string>(), () => Array.Empty<string>(), _ => { },
-                Looks: () => { var (c, n, k) = LastLook.Decide(kept, now, readable: false); return (c, now, n, k); }, KeepLook: _ => unreadKept++));
+                Looks: () => LastLook.ViewOf(kept, now, readable: false, TimeZoneInfo.Utc), KeepLook: _ => unreadKept++));
             var off = new TodayWindow(new TodayHooks(() => all, Find, () => Array.Empty<string>(), () => Array.Empty<string>(), _ => { }));
             try
             {
@@ -87,7 +87,8 @@ public class Round36UiTests : IClassFixture<HeadlessFixture>
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         while (dir is not null && dir.Name != "anda-hover-companion") dir = dir.Parent;
         string more = Round37Tests.Code(Path.Combine(dir!.FullName, "app", "AndaCompanion", "App.Round33.cs"));     // without comments: a line put out of action does not count
-        Assert.Contains("LastLook.Decide(LastLook.Load(AppPaths.LastLookFile), now, DataReadable());", more);
+        Assert.Contains("Looks: () => _settings.SinceLastLook ? LastLook.ViewOf(LastLook.Load(AppPaths.LastLookFile), LastLook.Of(records, Clock.UtcNow(), LookSource()), DataReadable(), Clock.Zone) : null,",
+            System.Text.RegularExpressions.Regex.Replace(more, @"\s+", " "));
         Assert.Contains("KeepLook: look => LastLook.KeepIfOn(_settings, AppPaths.LastLookFile, look, Clock.UtcNow()),", more);
         Assert.Contains("var wall = Clock.Wall(Clock.UtcNow()); return NextWeek.Of(DateOnly.FromDateTime(wall), wall.Hour, records, _calendar, NextWeek.TasksIfOn(_settings, () => _todo.Items, () => _myTodo.Items), todosOff: !_settings.WeekTodos);", more);
         Assert.Contains("private bool DataReadable() => _portfolio is null || _portfolio.Status.Ok;", more);

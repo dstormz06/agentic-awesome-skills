@@ -94,7 +94,7 @@ public class Round37Tests : IClassFixture<HeadlessFixture>
             Today.Look? Find(string id) => repo.Find(id) is { } rec ? Round33Tests.Look(rec) : null;
             var now = LastLook.Of(repo.Numbers.Select(n => repo.Find(n)!), new DateTime(2026, 7, 16, 14, 42, 0, DateTimeKind.Utc));
             var w = new TodayWindow(new TodayHooks(() => repo.Numbers.Select(n => Find(n)!).ToList(), Find, () => Array.Empty<string>(), () => Array.Empty<string>(), _ => { },
-                Looks: () => on ? (null, now, null, true) : null, KeepLook: _ => kept++));
+                Looks: () => on ? new LastLook.View(null, now, null, true) : null, KeepLook: _ => kept++));
             List<string> T() => w.List.GetVisualDescendants().OfType<TextBlock>().Select(t => t.Text ?? "").ToList();
             try
             {
@@ -163,7 +163,8 @@ public class Round37Tests : IClassFixture<HeadlessFixture>
         Assert.Equal(2, System.Text.RegularExpressions.Regex.Matches(app, @"LastLook\.ForgetIfOff\(_settings, AppPaths\.LastLookFile\);").Count);   // at start and in ApplySettings
         Assert.Contains("_todayWindow?.RefreshLooks();", app);                                               // an open Today follows the switch
         Assert.Contains("ForgetLastLook: () => LastLook.Forget(AppPaths.LastLookFile)", app);              // Settings removes, and says whether it could
-        Assert.Contains("if (!_settings.SinceLastLook) return null;", more);                               // no group, nothing read
+        Assert.Contains("Looks: () => _settings.SinceLastLook ? LastLook.ViewOf(", System.Text.RegularExpressions.Regex.Replace(more, @"\s+", " "));   // off: no group, nothing read
+        Assert.EndsWith(": null,", System.Text.RegularExpressions.Regex.Replace(more, @"\s+", " ").Split("Looks: () => _settings.SinceLastLook ?")[1].Split("KeepLook:")[0].Trim());
         Assert.Contains("KeepLook: look => LastLook.KeepIfOn(_settings, AppPaths.LastLookFile, look, Clock.UtcNow()),", more);   // nothing kept while off
     }
 }

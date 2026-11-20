@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using AndaCompanion.Services;
+using AndaCompanion.UI;
 using AndaCompanion.Theming;
 using Xunit;
 
