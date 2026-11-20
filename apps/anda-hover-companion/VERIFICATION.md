@@ -1787,7 +1787,20 @@ Chosen by the builder when the owner wrote "You decide": the two items not built
 
 The owner's choice after round 38 (the to-do titles in Today had no switch of their own). In Settings, beside "Since you last looked", in both programs, on by default; off, neither list is read for Today. Part of a backup; an older backup keeps the person's choice. Words held to `mockup/round39-golden.json`.
 
-**Tests:** app `Round39Tests` (4: the words and default, a backup, off reads neither list, the switch in Settings with an open Today following it, the wiring read without comments); simulation `t47_round39.js` (11 checks, among them an accessibility scan of Settings and a check that neither list is touched while off). Faults put back on purpose and caught: off still reading the lists (both programs), no repaint with the call left in a comment, an older backup turning the switch on.
+**Tests:** app `Round39Tests` (4 tests: the words, default and backups; off reads neither list; the switch in Settings with an open Today following it; the wiring read without comments); simulation `t47_round39.js` (13 checks, among them an accessibility scan of Settings, a check that neither list is touched while off, and Reset). Faults put back on purpose and caught: off still reading the lists (both programs), no repaint with the call left in a comment, an older backup turning the switch on (both programs).
+
+**A separate reviewer** read commit 6b4c0406, ran the suites and probes in a copy and broke the copy on purpose; it changed nothing in the repository and found no path where titles show or the lists are read while off. Its findings:
+
+| # | Finding | Fix | Held by |
+|---|---|---|---|
+| 1 | Off, the week said "Nothing of yours falls due next week" even when to-do items were due | Off, it says the to-do items are not listed and that the switch is in Settings, in both programs | Shared answers; app and simulation tests; the fault put back: caught |
+| 2 | In the app no test caught an older backup turning the switch on | Test added | The fault put back: caught |
+| 3 | No test caught a box showing the wrong state (both programs) | Settings opened with the switch off is checked; the simulation's restore checks the box | Each fault put back: caught |
+| 4 | No test of Reset in the simulation | R1 | The fault put back: caught |
+| 5 | The app's window test built its own guard | It uses the app's own `TasksIfOn` with real lists | — |
+| 6 | VERIFICATION held a placeholder and miscounted the tests | Corrected; counts below | — |
+| 7 | The switch sat under "TODAY · SINCE YOU LAST LOOKED" | The section is "TODAY" in both programs | Simulation R2 |
+| 8 | The hint said the lists are read when Today opens (they are read each time next week is shown); a stray comment | Wording and comment corrected | Shared answers |
 
 COUNTS39_PLACEHOLDER
 

@@ -11,7 +11,9 @@ const OUT = DIR + 'round39-golden.json';
   await p.goto('file://' + DIR + 'windows-simulation.html?clock=fixed'); await p.waitForTimeout(300);
   const doc = await p.evaluate(() => ({
     about: 'Shared cases for round 39, written by the browser simulation. The Windows app must give the same words.',
-    label: document.getElementById('setWeekTodos').parentElement.textContent.trim(), hint: WEEK_TODOS_SAID.hint,
+    label: document.getElementById('setWeekTodos').parentElement.textContent.trim(), hint: WEEK_TODOS_SAID.hint, off: WEEK_TODOS_SAID.off,
+    // a Friday with nothing of the demo's due next week: read (an empty list) and switched off (null)
+    weekRead: nextWeek(ymd(2026, 11, 27), 10, {}, []), weekOff: nextWeek(ymd(2026, 11, 27), 10, {}, null),
     backupKey: 'weekTodos' in snapSettings() ? 'weekTodos' : null, changes: CHANGES.find(c => c.round === 39),
   }));
   const text = JSON.stringify(doc) + '\n';

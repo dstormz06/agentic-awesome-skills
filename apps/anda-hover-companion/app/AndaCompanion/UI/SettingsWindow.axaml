@@ -165,7 +165,7 @@
             <Border Classes="hair"/>
 
             <StackPanel Spacing="6">
-              <TextBlock Classes="lbl" Text="TODAY · SINCE YOU LAST LOOKED"/>
+              <TextBlock Classes="lbl" Text="TODAY"/>
               <CheckBox Name="LastLookCheck"/>
               <TextBlock Name="LastLookStatus" Classes="hint" AutomationProperties.LiveSetting="Polite"/>
               <TextBlock Name="LastLookHint" Classes="hint"/>

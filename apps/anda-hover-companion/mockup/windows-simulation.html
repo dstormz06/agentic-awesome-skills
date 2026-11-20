@@ -1468,7 +1468,7 @@ PS C:\work&gt; </div>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><button class="pill quiet" id="recentsClear" type="button">Clear recents</button><button class="pill quiet" id="pinsClear" type="button">Clear my list</button><span class="hint" id="recentsStatus" role="status" style="margin:0"></span></div>
     <p class="hint">Only six-digit numbers are kept, in this PC's settings, and never sent anywhere. Turning this off clears them. ANDAs you keep with “Keep in my list” on a card stay until you remove them and are saved in a backup.</p>
     <hr class="hair">
-    <div class="lbl">TODAY · SINCE YOU LAST LOOKED</div>
+    <div class="lbl">TODAY</div>
     <label class="opt"><input type="checkbox" id="setLastLook" checked aria-describedby="lastLookHint"> List what moved in my data since I last closed Today</label>
     <span class="hint" id="lastLookStatus" role="status" style="margin:0"></span>
     <p class="hint" id="lastLookHint"></p>
@@ -5336,7 +5336,8 @@ function changesSince(before, now, itemText){
    federal holidays in it. hour is the hour of the day in the person's time zone. */
 /* Round 38: tasks are the person's unfinished to-do items that have a due date, as [{ list, title, due:"yyyy-mm-dd" }], from both lists. Those
    due Monday to Friday of next week are listed after the ANDAs' dates, by date, then list, then title; at most WEEK_TASK_MAX, then how many more. */
-const WEEK_TODOS_SAID = { hint:"From Thursday noon to Sunday, Today lists your unfinished to-do items due next week, from both lists, by title. They are read from this PC when Today opens and shown on the screen only; nothing is kept or sent for them." };
+/* off: tasks is null, and the week does not claim that nothing of the person's falls due (round 39 review) */
+const WEEK_TODOS_SAID = { off:"No ANDA dates of yours fall due next week. Your to-do items are not listed here; that is switched off in Settings.", hint:"From Thursday noon to Sunday, Today lists your unfinished to-do items due next week, from both lists, by title. They are read from this PC each time Today shows next week and only shown on the screen; nothing is kept or sent for them." };
 const WEEK_TASK_MAX = 20, weekTasksMore = n => `${n} more to-do item${n === 1 ? "" : "s"} due next week; the to-do lists show them all.`;
 function nextWeek(todayT, hour, data, tasks){
   const dow = dowOf(todayT);
@@ -5355,7 +5356,7 @@ function nextWeek(todayT, hour, data, tasks){
     .sort((a, b) => a.t - b.t || cmp(a.list, b.list) || cmp(low(a.title), low(b.title)));
   const shown = due.slice(0, WEEK_TASK_MAX).map(k => ({ list:k.list, text:`${shortDate(k.t)} · ${k.list}: ${k.title.trim()}` }));
   return { title:`NEXT WEEK · ${shortDate(mon)} TO ${shortDate(fri)}`.toUpperCase(), rows:rows.map(({ id, text }) => ({ id, text })), holidays,
-    tasks:shown, tasksMore:due.length - shown.length, empty:rows.length || due.length ? null : "Nothing of yours falls due next week." };
+    tasks:shown, tasksMore:due.length - shown.length, empty:rows.length || due.length ? null : tasks === null ? WEEK_TODOS_SAID.off : "Nothing of yours falls due next week." };
 }
 const LOOK_SAID = { first:"From now on, what moves in your data between two looks is listed here.", none:"Nothing has moved since you last looked.",
   note:(atMs, zone) => `Compared with what this PC kept when you last closed Today: ${timeLabel(atMs, zone)}.`,
@@ -5363,9 +5364,9 @@ const LOOK_SAID = { first:"From now on, what moves in your data between two look
   /* round 37: the switch in Settings, beside Recent ANDAs */
   hint:"Kept on this PC when you close Today, and never sent anywhere: for each ANDA its number, goal date, forecast date and a short fingerprint of its open item (never the item's words), and when it was kept. Turning this off removes what is kept, and Today keeps nothing for it.",
   off:"Since you last looked is off. What this PC kept for it was removed.", on:"Since you last looked is on. The next time you close Today is the first look kept.", more:n => `${n} more change${n === 1 ? "" : "s"}; the card of each ANDA shows its own.` };
-$("lastLookHint").textContent = LOOK_SAID.hint; $("weekTodosHint").textContent = WEEK_TODOS_SAID.hint;
+$("lastLookHint").textContent = LOOK_SAID.hint; /* round 37 and 39: the switches' hints, in the words the app is held to */ $("weekTodosHint").textContent = WEEK_TODOS_SAID.hint;
 /* round 39: whether next week also lists the to-do items; an open Today follows at once */
-$("setWeekTodos").addEventListener("change", e => { state.weekTodosOn = e.target.checked; if(isOpen("today")) paintToday(); });      /* round 37: the switch's hint, in the words the app is held to */
+$("setWeekTodos").addEventListener("change", e => { state.weekTodosOn = e.target.checked; if(isOpen("today")) paintToday(); });
 /* The demo starts with a fictional earlier look, so the group can be seen: the forecast of 216482 a week earlier, and one ANDA since gone. */
 function sampleLastLook(){
   const look = lookNow(DATA, Date.UTC(2026, 6, 15, 21, 5)); look.sample = true;
@@ -5375,7 +5376,7 @@ function sampleLastLook(){
 }
 /* Round 38: the person's unfinished to-do items with a due date, from both lists, for next week. Only on this screen; nothing is kept. */
 function weekTasksNow(){
-  if(!state.weekTodosOn) return [];        /* round 39: switched off, neither list is read for Today */
+  if(!state.weekTodosOn) return null;      /* round 39: switched off, neither list is read for Today */
   return [...todoStore.items.filter(i => !i.done && i.due).map(i => ({ list:"ANDA to-do list", title:i.title, due:i.due })),
     ...clStore.items.filter(i => !i.done && i.due != null).map(i => ({ list:"My to-do list", title:i.title, due:isoDate(i.due) }))];
 }

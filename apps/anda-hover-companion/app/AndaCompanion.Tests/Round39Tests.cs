@@ -34,6 +34,11 @@ public class Round39Tests : IClassFixture<HeadlessFixture>
     {
         Assert.Equal(Gold.Value.GetProperty("label").GetString(), NextWeek.SwitchLabel);
         Assert.Equal(Gold.Value.GetProperty("hint").GetString(), NextWeek.SwitchHint);
+        Assert.Equal(Gold.Value.GetProperty("off").GetString(), NextWeek.SaidEmptyTodosOff);
+        // a week with nothing due: read, it says nothing of the person's falls due; switched off, it says the to-do items are not listed
+        var cal = new BusinessCalendar();
+        Assert.Equal(Gold.Value.GetProperty("weekRead").GetProperty("empty").GetString(), NextWeek.Of(new DateOnly(2026, 11, 27), 10, Array.Empty<Models.AndaRecord>(), cal, Array.Empty<NextWeek.WeekTask>())!.Empty);
+        Assert.Equal(Gold.Value.GetProperty("weekOff").GetProperty("empty").GetString(), NextWeek.Of(new DateOnly(2026, 11, 27), 10, Array.Empty<Models.AndaRecord>(), cal, Array.Empty<NextWeek.WeekTask>(), todosOff: true)!.Empty);
         Assert.Equal(Gold.Value.GetProperty("changes").GetProperty("items").EnumerateArray().Select(x => x.GetString()!).ToList(), ChangeLog.Entries.First(e => e.Round == 39).Items.ToList());
         Assert.True(new Settings().WeekTodos);
         Assert.True(JsonSerializer.Deserialize<Settings>("{}")!.WeekTodos);                    // an older settings file reads as on, as before
@@ -42,6 +47,12 @@ public class Round39Tests : IClassFixture<HeadlessFixture>
         var target = new Settings();
         Assert.True(SettingsBackup.Import(SettingsBackup.Export(new Settings { WeekTodos = false }, lenses, replies), target, lenses, replies).Item1);
         Assert.False(target.WeekTodos);
+        // a backup written before round 39 does not hold the switch: the person's choice stays (round 39 review)
+        var older = System.Text.Json.Nodes.JsonNode.Parse(SettingsBackup.Export(new Settings(), lenses, replies))!;
+        Assert.True(older["Settings"]!.AsObject().Remove("WeekTodos"), "the backup should name the switch before it is taken out");
+        var kept = new Settings { WeekTodos = false };
+        Assert.True(SettingsBackup.Import(older.ToJsonString(), kept, lenses, replies).Item1);
+        Assert.False(kept.WeekTodos);
     }
 
     [Fact]
@@ -62,27 +73,32 @@ public class Round39Tests : IClassFixture<HeadlessFixture>
         var r = await _fx.Session.Dispatch(() =>
         {
             var s = new Settings(); int changed = 0;
+            var offAtStart = new SettingsWindow(new Settings { WeekTodos = false }, new PromptLibraryService(Path.Combine(Temp.NewDir(), "p0.json")), () => { });
             var w = new SettingsWindow(s, new PromptLibraryService(Path.Combine(Temp.NewDir(), "p.json")), () => changed++);
             var repo = new MockAndaRepository();
             Today.Look? Find(string id) => repo.Find(id) is { } rec ? Round33Tests.Look(rec) : null;
-            var tasks = new[] { new NextWeek.WeekTask("My to-do list", "Fictional task", "2026-12-01") };
+            // the hook as the app builds it: the real lists through the switch
+            var mine = new[] { new MyTodoItem { Title = "Fictional task", Due = "2026-12-01" } };
             var today = new TodayWindow(new TodayHooks(() => repo.Numbers.Select(n => Find(n)!).ToList(), Find, () => Array.Empty<string>(), () => Array.Empty<string>(), _ => { },
-                Week: () => NextWeek.Of(new DateOnly(2026, 11, 27), 10, Array.Empty<Models.AndaRecord>(), new BusinessCalendar(), NextWeek.TasksIfOn(s, () => Array.Empty<TodoItem>(), () => Array.Empty<MyTodoItem>()).Concat(s.WeekTodos ? tasks : Array.Empty<NextWeek.WeekTask>()))));
+                Week: () => NextWeek.Of(new DateOnly(2026, 11, 27), 10, Array.Empty<Models.AndaRecord>(), new BusinessCalendar(), NextWeek.TasksIfOn(s, () => Array.Empty<TodoItem>(), () => mine), todosOff: !s.WeekTodos)));
             List<string> T() => today.List.GetVisualDescendants().OfType<TextBlock>().Select(t => t.Text ?? "").ToList();
             try
             {
-                w.Show(); today.Show(); Settle();
+                w.Show(); today.Show(); offAtStart.Show(); Settle();
+                bool shownOff = offAtStart.FindControl<CheckBox>("WeekTodosCheck")!.IsChecked == false; offAtStart.Close();
                 var check = w.FindControl<CheckBox>("WeekTodosCheck")!;
                 bool before = T().Contains("Tue Dec 1 · My to-do list: Fictional task");
                 check.IsChecked = false; Settle(); today.Repaint(); Settle();
-                bool after = T().Contains("Tue Dec 1 · My to-do list: Fictional task"), empty = T().Contains(NextWeek.SaidEmpty);
-                return (label: check.Content as string, help: Avalonia.Automation.AutomationProperties.GetHelpText(check), before, after, empty, off: !s.WeekTodos, changed);
+                bool after = T().Contains("Tue Dec 1 · My to-do list: Fictional task"), empty = T().Contains(NextWeek.SaidEmpty), offSaid = T().Contains(NextWeek.SaidEmptyTodosOff);
+                return (label: check.Content as string, help: Avalonia.Automation.AutomationProperties.GetHelpText(check), before, after, empty, offSaid, off: !s.WeekTodos, changed, shownOff);
             }
             finally { w.Close(); today.Close(); Settle(); }
         }, CancellationToken.None);
         Assert.Equal(NextWeek.SwitchLabel, r.label);
         Assert.Equal(NextWeek.SwitchHint, r.help);
-        Assert.True(r.before); Assert.False(r.after); Assert.True(r.empty);
+        Assert.True(r.before); Assert.False(r.after);
+        Assert.False(r.empty); Assert.True(r.offSaid);          // off, it never says that nothing of the person's falls due
+        Assert.True(r.shownOff);                               // Settings opened with the switch off shows it off
         Assert.True(r.off); Assert.True(r.changed >= 1);
     }
 
@@ -90,7 +106,7 @@ public class Round39Tests : IClassFixture<HeadlessFixture>
     public void The_app_asks_the_switch_and_repaints_an_open_Today()
     {
         string app = Round37Tests.Code(Folder("app", "AndaCompanion", "App.axaml.cs")), more = Round37Tests.Code(Folder("app", "AndaCompanion", "App.Round33.cs"));
-        Assert.Contains("NextWeek.TasksIfOn(_settings, () => _todo.Items, () => _myTodo.Items)", more);
+        Assert.Contains("NextWeek.TasksIfOn(_settings, () => _todo.Items, () => _myTodo.Items), todosOff: !_settings.WeekTodos)", more);
         Assert.Contains("if (_weekTodosSwitch != _settings.WeekTodos) { _weekTodosSwitch = _settings.WeekTodos; _todayWindow?.Repaint(); }", app);
     }
 }

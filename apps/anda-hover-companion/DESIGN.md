@@ -1358,7 +1358,7 @@ The owner asked for it after the review of round 36 (the kept look holds plannin
 
 ## 11w. Round 39: a switch for the to-do items in next week
 
-Asked by the owner after round 38. In Settings, beside "Since you last looked", in both programs: *Also list my to-do items due next week*, on by default. Off: neither to-do list is read for Today and no title shows; an open Today follows at once; there is nothing kept to remove. Part of a backup; a backup from before round 39 leaves the switch as it is. Its words are the simulation's (`mockup/round39-golden.json`).
+Asked by the owner after round 38. In Settings, beside "Since you last looked", in both programs: *Also list my to-do items due next week*, on by default. Off: neither to-do list is read for Today and no title shows; an open Today follows at once; there is nothing kept to remove. Off, a week with no ANDA date says that the to-do items are not listed and that the switch is in Settings, never that nothing of the person's falls due (after the review). Both switches sit under "TODAY" in Settings. Part of a backup; a backup from before round 39 leaves the switch as it is. Its words are the simulation's (`mockup/round39-golden.json`).
 
 ## 12. Engagement roadmap — seven features that make it the daily habit
 

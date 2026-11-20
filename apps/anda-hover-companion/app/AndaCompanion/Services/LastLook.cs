@@ -156,6 +156,8 @@ public static class NextWeek
     public sealed record Row(string Id, string Text);
     public sealed record Result(string Title, IReadOnlyList<Row> Rows, IReadOnlyList<string> Holidays, string? Empty, IReadOnlyList<TaskRow>? Tasks = null, int TasksMore = 0);
     public const string SaidEmpty = "Nothing of yours falls due next week.";
+    /// <summary>Round 39 review: with the to-do items switched off, the week does not claim that nothing of the person's falls due.</summary>
+    public const string SaidEmptyTodosOff = "No ANDA dates of yours fall due next week. Your to-do items are not listed here; that is switched off in Settings.";
 
     /// <summary>Round 38: one of the person's unfinished to-do items with a due date (yyyy-MM-dd), from "ANDA to-do list" or "My to-do list".</summary>
     public sealed record WeekTask(string List, string Title, string? Due);
@@ -165,7 +167,7 @@ public static class NextWeek
 
     // round 39: the switch beside "Since you last looked" (the simulation's words, mockup/round39-golden.json)
     public const string SwitchLabel = "Also list my to-do items due next week";
-    public const string SwitchHint = "From Thursday noon to Sunday, Today lists your unfinished to-do items due next week, from both lists, by title. They are read from this PC when Today opens and shown on the screen only; nothing is kept or sent for them.";
+    public const string SwitchHint = "From Thursday noon to Sunday, Today lists your unfinished to-do items due next week, from both lists, by title. They are read from this PC each time Today shows next week and only shown on the screen; nothing is kept or sent for them.";
     /// <summary>Round 39: the lists are read for Today only while the switch is on; off, nothing of them reaches Today.</summary>
     public static List<WeekTask> TasksIfOn(Settings settings, Func<IEnumerable<TodoItem>> anda, Func<IEnumerable<MyTodoItem>> mine) =>
         settings.WeekTodos ? TasksOf(anda(), mine()) : new List<WeekTask>();
@@ -180,7 +182,7 @@ public static class NextWeek
     /// <summary>A to Z as a to z, every other character as it is: the simulation's order of titles, whatever the language.</summary>
     private static string AsciiLower(string s) => string.Create(s.Length, s, (span, src) => { for (int i = 0; i < src.Length; i++) span[i] = src[i] is >= 'A' and <= 'Z' ? (char)(src[i] + 32) : src[i]; });
 
-    public static Result? Of(DateOnly today, int hour, IEnumerable<AndaRecord> records, BusinessCalendar cal, IEnumerable<WeekTask>? tasks = null)
+    public static Result? Of(DateOnly today, int hour, IEnumerable<AndaRecord> records, BusinessCalendar cal, IEnumerable<WeekTask>? tasks = null, bool todosOff = false)
     {
         var dow = today.DayOfWeek;
         if (!(dow is DayOfWeek.Friday or DayOfWeek.Saturday or DayOfWeek.Sunday || (dow == DayOfWeek.Thursday && hour >= 12))) return null;
@@ -199,6 +201,6 @@ public static class NextWeek
             .Where(x => x.t is { } d && d >= mon && d <= fri && (x.k.Title ?? "").Trim(JsSpace).Length > 0)
             .OrderBy(x => x.t).ThenBy(x => x.k.List, StringComparer.Ordinal).ThenBy(x => AsciiLower(x.k.Title), StringComparer.Ordinal).ToList();
         var shown = due.Take(TaskMax).Select(x => new TaskRow(x.k.List, $"{WatchRules.Short(x.t!.Value)} · {x.k.List}: {x.k.Title.Trim(JsSpace)}")).ToList();
-        return new Result($"NEXT WEEK · {WatchRules.Short(mon)} TO {WatchRules.Short(fri)}".ToUpperInvariant(), rows, holidays, rows.Count > 0 || due.Count > 0 ? null : SaidEmpty, shown, due.Count - shown.Count);
+        return new Result($"NEXT WEEK · {WatchRules.Short(mon)} TO {WatchRules.Short(fri)}".ToUpperInvariant(), rows, holidays, rows.Count > 0 || due.Count > 0 ? null : todosOff ? SaidEmptyTodosOff : SaidEmpty, shown, due.Count - shown.Count);
     }
 }

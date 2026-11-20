@@ -33,14 +33,18 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   ok((await listText()).includes(TITLE), 'O1 (before) next week lists the to-do item');
   await p.focus('#setWeekTodos'); await p.keyboard.press('Space'); await settle();
   let t = await listText();
-  ok(!t.includes(TITLE) && t.includes('Nothing of yours falls due next week.'), 'O2 off: an open Today drops the item at once, and the week says nothing falls due');
+  ok(!t.includes(TITLE) && !t.includes('Nothing of yours falls due next week.') && t.includes(GOLD.off), 'O2 off: an open Today drops the item at once, and the week says the to-do items are not listed, never that nothing falls due');
   eq(await p.evaluate(() => { let read = 0; const a = todoStore.items, c = clStore.items; const spy = arr => new Proxy(arr, { get(o, k) { read++; return o[k]; } });
-    todoStore.items = spy(a); clStore.items = spy(c); const r = weekTasksNow(); todoStore.items = a; clStore.items = c; return [r, read]; }), [[], 0], 'O3 off: neither list is read for Today');
+    todoStore.items = spy(a); clStore.items = spy(c); const r = weekTasksNow(); todoStore.items = a; clStore.items = c; return [r, read]; }), [null, 0], 'O3 off: neither list is read for Today');
   eq(await axe('#settings'), [], 'O4 accessibility scan of Settings with the second switch');
-  eq(await p.evaluate(() => { const t = backupText(); state.weekTodosOn = true; importBackup(t); return [JSON.parse(t).settings.weekTodos, state.weekTodosOn]; }), [false, false], 'B1 off is part of a backup and comes back');
-  eq(await p.evaluate(() => { const t = JSON.parse(backupText()); delete t.settings.weekTodos; importBackup(JSON.stringify(t)); return state.weekTodosOn; }), false, 'B2 a backup from before round 39 keeps the choice the person has now');
+  eq(await p.evaluate(() => { const t = backupText(); state.weekTodosOn = true; document.getElementById('setWeekTodos').checked = true; importBackup(t); return [JSON.parse(t).settings.weekTodos, state.weekTodosOn, document.getElementById('setWeekTodos').checked]; }), [false, false, false], 'B1 off is part of a backup and comes back, and the box shows it');
+  eq(await p.evaluate(() => { const t = JSON.parse(backupText()); delete t.settings.weekTodos; importBackup(JSON.stringify(t)); return [state.weekTodosOn, document.getElementById('setWeekTodos').checked]; }), [false, false], 'B2 a backup from before round 39 keeps the choice the person has now, and the box shows it');
   await p.focus('#setWeekTodos'); await p.keyboard.press('Space'); await settle();
   ok((await listText()).includes(TITLE), 'N1 on again: the item comes back at once');
+  // Reset (pressed twice, as asked) with the switch off and Today open: on again, and the item comes back at once
+  await p.evaluate(() => { state.weekTodosOn = false; syncSettingsUI(); paintToday(); const b = document.getElementById('bkReset'); b.click(); b.click(); }); await settle();
+  eq([await p.evaluate(() => [state.weekTodosOn, document.getElementById('setWeekTodos').checked]), (await listText()).includes(TITLE)], [[true, true], true], 'R1 Reset turns it on again, and an open Today follows');
+  eq(await p.evaluate(() => [...document.querySelectorAll('#settings .lbl')].some(e => e.textContent === 'TODAY')), true, 'R2 the two switches sit under TODAY, as in the app');
   eq(await p.evaluate(() => [CHANGES.find(c => c.round === 39).items, APP_VERSION]), [GOLD.changes.items, V29], 'F1 what changed in round 39 is listed, and the version is the one the app is held to');
   eq(GOLD.backupKey, 'weekTodos', 'F2 the backup names the switch');
   eq(errs, [], 'F3 no error in the page');
