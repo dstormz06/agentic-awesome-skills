@@ -273,22 +273,22 @@ public class Round33Tests
 
     // ---------- settings ----------
     [Fact]
-    public void Settings_move_to_version_5_by_themselves_with_everything_as_it_looked_before()
+    public void Settings_move_forward_from_version_4_by_themselves_with_everything_as_it_looked_before()
     {
         string path = Path.Combine(Temp.NewDir(), "settings.json");
         File.WriteAllText(path, "{\"SchemaVersion\":4,\"Tone\":\"Warm\",\"TimeZone\":\"America/Denver\",\"RefStaleAfterDays\":90}");      // written by round 32
         var s = SettingsService.Load(path);
-        Assert.Equal((5, "Warm", "America/Denver", 90), (s.SchemaVersion, s.Tone, s.TimeZone, s.RefStaleAfterDays));
+        Assert.Equal((Settings.CurrentSchema, "Warm", "America/Denver", 90), (s.SchemaVersion, s.Tone, s.TimeZone, s.RefStaleAfterDays));   // 6 since round 34
         Assert.Equal(("standard", "comfortable", "box", true), (s.TextSize, s.Density, s.LookupStyle, s.RememberRecents));
         Assert.Empty(s.Recents); Assert.Empty(s.Pins); Assert.Equal(CardDetails.DefaultFields.ToList(), s.CardFields);
-        Assert.Equal(5, Settings.CurrentSchema); Assert.Null(SettingsService.LoadNote);
+        Assert.Null(SettingsService.LoadNote);
         s.TextSize = "xl"; s.Density = "compact"; s.LookupStyle = "bar"; s.Recents = new() { "216482" }; s.Pins = new() { "214990" }; s.CardFields = new() { "fei" };
-        Assert.True(SettingsService.Save(s, path)); Assert.Contains("\"SchemaVersion\": 5", File.ReadAllText(path));
+        Assert.True(SettingsService.Save(s, path)); Assert.Contains($"\"SchemaVersion\": {Settings.CurrentSchema}", File.ReadAllText(path));
         var again = SettingsService.Load(path);
         Assert.Equal(("xl", "compact", "bar"), (again.TextSize, again.Density, again.LookupStyle));
         Assert.Equal(new[] { "216482" }, again.Recents.ToArray()); Assert.Equal(new[] { "214990" }, again.Pins.ToArray()); Assert.Equal(new[] { "fei" }, again.CardFields.ToArray());
         File.WriteAllText(path, "{\"SchemaVersion\":1,\"Tone\":\"Warm\"}");                                                      // four versions back: every step is taken
-        Assert.Equal((5, "standard", 45), (SettingsService.Load(path).SchemaVersion, SettingsService.Load(path).TextSize, SettingsService.Load(path).RefStaleAfterDays));
+        Assert.Equal((Settings.CurrentSchema, "standard", 45), (SettingsService.Load(path).SchemaVersion, SettingsService.Load(path).TextSize, SettingsService.Load(path).RefStaleAfterDays));
     }
 
     [Fact]

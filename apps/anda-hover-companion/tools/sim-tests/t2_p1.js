@@ -14,6 +14,8 @@ const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++
   page.on('pageerror', e => errors.push('pageerror: ' + e.message));
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto(URL);
+  ok(await page.evaluate(() => state.mode) === 'full', 'round 34: by default the shortcut opens the card directly (Full)');
+  await page.evaluate(() => { const r = document.querySelector('input[name=consent][value=whisper]'); r.checked = true; r.dispatchEvent(new Event('change')); });   // round 34: the shortcut opens the card by default; this suite checks the whisper path, so it chooses Whisper
   const vis = sel => page.$eval(sel, e => getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().width > 0).catch(() => false);
   const inside = async sel => page.$eval(sel, e => { const r = e.getBoundingClientRect(); const tb = document.getElementById('taskbar').getBoundingClientRect(); return r.left >= 0 && r.top >= 0 && r.right <= innerWidth && r.bottom <= tb.top + 1; });
 
@@ -48,7 +50,7 @@ const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++
   ok(menuText.includes('Hotkeys: Ctrl+Alt+A ✓   Ctrl+Alt+Space ✓   Ctrl+Alt+Shift+R ✓'), 'menu states all three hotkeys are live');
   await page.click('#menu >> text=Settings…'); ok(await vis('#settings'), 'Settings opens'); await page.click('#adaptExpand');
   await page.screenshot({ path: OUT + '/s3-settings.png' });
-  ok(await page.isChecked('input[name=consent][value=whisper]'), 'Settings: whisper invite is the default consent model');
+  ok(await page.isChecked('input[name=consent][value=whisper]'), 'Settings shows the consent model in use (Whisper, chosen above; Full is the default since round 34)');
   ok(await page.isChecked('#setUrgent'), 'Settings: urgent items open a peek is on by default');
   ok(await page.$eval('#setLead', e => e.value) === '3', 'Settings: holiday window defaults to 3 business days');
   await page.check('input[name=consent][value=full]');

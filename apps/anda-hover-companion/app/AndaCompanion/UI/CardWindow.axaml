@@ -305,6 +305,9 @@
               <Button Name="CopyChip" Classes="chip" Margin="0,0,7,7" Content="Copy status"
                       ToolTip.Tip="Copy a formatted status sentence for emails and trackers (S)"
                       AutomationProperties.Name="Copy formatted status line"/>
+              <Button Name="MoreChip" Classes="chip" Margin="0,0,7,7" Content="More ↓"
+                      ToolTip.Tip="Show the rest of the card: the calendar, Latest, Ahead, the reference dates, the brief and the drawer (E)"
+                      AutomationProperties.Name="More: show the rest of the card (E)"/>
               <Button Name="RepliesChip" Classes="chip" Margin="0,0,7,7" Content="Quick replies ▾"
                       ToolTip.Tip="Copy one of your own quick replies, filled in from this card (R)"
                       AutomationProperties.Name="Copy a quick reply"/>

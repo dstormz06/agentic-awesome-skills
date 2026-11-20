@@ -12,6 +12,7 @@ const ok = (c, m) => { checks++; console.log((c ? 'PASS ' : 'FAIL ') + m); if (!
   const page = await ctx.newPage();
   const errs = []; page.on('pageerror', e => errs.push(e.message)); page.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
   await page.goto(URL); await page.waitForTimeout(300);
+  await page.evaluate(() => { const r = document.querySelector('input[name=consent][value=whisper]'); r.checked = true; r.dispatchEvent(new Event('change')); });   // round 34: the shortcut opens the card by default; this suite checks the whisper path, so it chooses Whisper
   const vis = sel => page.$eval(sel, e => getComputedStyle(e).display !== 'none' && !e.hidden && e.getBoundingClientRect().width > 0).catch(() => false);
   const txt = sel => page.textContent(sel);
 
@@ -67,9 +68,9 @@ const ok = (c, m) => { checks++; console.log((c ? 'PASS ' : 'FAIL ') + m); if (!
   await page.click('#appIcon', { button: 'right' }); await page.waitForTimeout(200);
   ok(await vis('#menu'), 'the tray menu opens');
   const menu = await txt('#menu');
-  ok(/Lookup/.test(menu) && /Watch list/.test(menu) && /Settings/.test(menu), 'the tray menu offers Lookup, Watch list and Settings');
-  await page.click('#menu >> text=Watch list'); await page.waitForTimeout(300);
-  ok(await vis('#wlist'), 'the watch list opens'); await page.click('#wlDone');
+  ok(/Lookup/.test(menu) && /Today/.test(menu) && /Settings/.test(menu), 'the tray menu offers Lookup, Today and Settings (round 34: the watch list opens from Today)');
+  await page.click('#menu >> text=Today'); await page.waitForTimeout(300); await page.click('#tdAll'); await page.waitForTimeout(300);
+  ok(await vis('#wlist'), 'the watch list opens from Today'); await page.click('#wlDone'); await page.click('#tdClose');
   await page.click('#appIcon', { button: 'right' }); await page.click('#menu >> text=Settings…'); await page.waitForTimeout(300);
   ok(await vis('#settings'), 'Settings opens');
   ok(await page.$eval('input[name=autohide][value="10"]', e => e.checked), 'auto-hide is 10 seconds by default');

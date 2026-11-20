@@ -13,6 +13,7 @@ const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++
   page.on('pageerror', e => errors.push('pageerror: ' + e.message));
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto(URL);
+  await page.evaluate(() => { const r = document.querySelector('input[name=consent][value=whisper]'); r.checked = true; r.dispatchEvent(new Event('change')); });   // round 34: the shortcut opens the card by default; this suite checks the whisper path, so it chooses Whisper
   const vis = sel => page.$eval(sel, e => getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().width > 0).catch(() => false);
   const items = async () => page.$$eval('#ctxmenu button', bs => bs.map(b => b.textContent));
   const rightClick = async sel => { await page.click(sel, { clickCount: 2 }); await page.click(sel, { button: 'right' }); };
@@ -75,10 +76,10 @@ const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++
   ok(await vis('#draft'), 'check as a draft opens the draft window with the selection');
   await page.keyboard.press('Escape');
 
-  // the app's Watch list, from the tray
+  // the app's Watch list: since round 34 it opens from Today (a click on the tray icon), with Show all
   await page.click('#chev'); await page.click('#pinBtn2');
-  await page.click('#appIcon', { button: 'right' });
-  await page.click('#menu >> text=Watch list…');
+  await page.click('#appIcon'); await page.waitForTimeout(150);
+  await page.click('#tdAll');
   await page.waitForTimeout(200);
   const rows = await page.$$eval('#wlRows .row .n', ns => ns.map(n => n.textContent));
   ok(rows[0] === '216482' && rows.length === 2, 'tray: the Watch list leads with the at-risk ANDA: ' + JSON.stringify(rows));

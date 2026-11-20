@@ -12,7 +12,7 @@ public class SettingsTests
         var s = new Settings();
         Assert.Equal(AppearanceId.X, s.Appearance);      // X · Graphite Calendar is the default (round 24)
         Assert.Equal(10, s.AutoHideSeconds);
-        Assert.Equal(ConsentModel.Whisper, s.Consent);     // whisper invite is the default (tester feedback)
+        Assert.Equal(ConsentModel.Full, s.Consent);        // round 34: the shortcut opens the card (the owner's choice); Whisper stays a choice
         Assert.True(s.EscalateUrgent); Assert.Equal(7, s.UrgentLateDays); Assert.Equal(3, s.HolidayLeadDays);
         Assert.Equal(("Ctrl+Alt+A", "Ctrl+Alt+Space", "Ctrl+Alt+Shift+R"), (s.PeekHotkey, s.LookupHotkey, s.DraftHotkey));
         Assert.Null(s.PortfolioPath); Assert.Null(s.NotesFolder); Assert.Null(s.ReferenceDataPath);

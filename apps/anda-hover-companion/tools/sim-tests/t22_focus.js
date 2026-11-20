@@ -44,7 +44,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   ok(/Ask: my stored prompts|STORED PROMPTS/i.test(await p.evaluate(() => document.getElementById('secActions').innerText)), 'A9 the Actions group is named for Ask');
   ok(!(await p.isVisible('#agentsBlock')) && !(await p.isVisible('#todoBlock')), 'A10 agents and the ANDA to-do settings are hidden');
   const items = await (async () => { await p.click('#setDone'); return trayItems(p); })();
-  ok(items.some(t => /^Lookup ANDA/.test(t)) && items.some(t => /^Review a draft/.test(t)) && items.some(t => /^Ask about a selection/.test(t)) && items.some(t => /^Watch list/.test(t)), 'A11 the tray has Lookup, Review, Ask and the watch list');
+  ok(items.some(t => /^Lookup ANDA/.test(t)) && items.some(t => /^Review a draft/.test(t)) && items.some(t => /^Ask about a selection/.test(t)) && items.some(t => /^Today/.test(t)) && !items.some(t => /^Watch list/.test(t)), 'A11 the tray has Lookup, Review, Ask and Today (round 34: the watch list opens from Today)');
   ok(!items.some(t => /to-do list|Notes to my/i.test(t)), 'A12 the tray has no to-do items in the focused edition');
   ok(items.some(t => /Ctrl\+Alt\+Shift\+P/.test(t)), 'A13 the tray shows the Ask shortcut');
 

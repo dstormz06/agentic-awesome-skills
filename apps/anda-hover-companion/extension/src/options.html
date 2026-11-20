@@ -44,9 +44,9 @@
   <p class="hint">This extension's ID: <code id="extId"></code><br>In the app, open Settings, Edge extension, and choose Connect. The app lists only this ID, so no other extension can use the connection. Your browser asks you to allow "communicate with cooperating native applications".</p>
 
   <h2>When you select an ANDA number</h2>
-  <label class="opt"><input type="radio" name="consent" value="whisper"> Whisper invite: a small chip you click (default)</label>
+  <label class="opt"><input type="radio" name="consent" value="full"> Full card: your shortcut opens it (default)</label>
   <label class="opt"><input type="radio" name="consent" value="peek"> Peek first: a small card, expand for the rest</label>
-  <label class="opt"><input type="radio" name="consent" value="full"> Full card</label>
+  <label class="opt"><input type="radio" name="consent" value="whisper"> Whisper invite: a small chip you click</label>
   <label class="opt"><input type="checkbox" id="escalate"> In whisper mode, open a peek by itself for an at-risk or late ANDA</label>
   <div class="row"><span>Late means a forecast at least</span><select id="late" style="width:auto" aria-label="Late means a forecast at least this many days past the goal"><option>3</option><option>7</option><option>14</option></select><span>days past the goal</span></div>
   <div class="row" style="margin-top:6px"><span>Flag dates within</span><select id="lead" style="width:auto" aria-label="Flag dates within this many business days of a federal holiday"><option>0</option><option>2</option><option>3</option><option>5</option></select><span>business days of a federal holiday</span></div>

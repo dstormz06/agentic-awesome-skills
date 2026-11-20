@@ -146,7 +146,10 @@ public class LookRobustnessTests : IClassFixture<HeadlessFixture>
             var rec = variant switch { "sparse" => Sparse(), "long" => Long(), "healthy" => repo.Find("214990")!, _ => Demo };
             var w = new CardWindow(new OfflineBriefService(), repo.Find) { CloseWhenDeactivated = false, Today = () => new DateOnly(2026, 11, 2) };
             w.Show(rec, new PixelPoint(40, 40), variant == "peek"); Settle();
-            if (variant == "drawer") { w.FindControl<Button>("ExpBtn")!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent)); Settle(); }
+            // Round 34: the card opens with the answer only; the reference lines and the brief are under More.
+            var first = w.GetVisualDescendants().OfType<TextBlock>().Where(t => t.IsEffectivelyVisible).Select(t => t.Text ?? "").ToList();
+            bool moreOffered = w.FindControl<Button>("MoreChip")!.IsEffectivelyVisible;
+            if (variant != "peek") { w.FindControl<Button>(variant == "drawer" ? "ExpBtn" : "MoreChip")!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent)); Settle(); }
             var root = w.FindControl<Border>("Root")!;
             var frame = w.CaptureRenderedFrame();
             double rootW = root.Bounds.Width;
@@ -157,7 +160,7 @@ public class LookRobustnessTests : IClassFixture<HeadlessFixture>
             if (dir is not null && frame is not null) { Directory.CreateDirectory(dir); frame.Save(Path.Combine(dir, $"{id}-{variant}.png")); }
             w.Close(); Settle();
             ThemeManager.Apply(Appearances.Default);
-            return (frame, rootW, outside, texts);
+            return (frame, rootW, outside, texts, first, moreOffered);
         }, CancellationToken.None);
 
         Assert.NotNull(r.frame);
@@ -165,7 +168,8 @@ public class LookRobustnessTests : IClassFixture<HeadlessFixture>
         Assert.True(r.outside.Count == 0, $"{id}/{variant}: text sticks out of the card: {string.Join(" | ", r.outside.Take(3))}");
         string all = string.Join("\n", r.texts);
         Assert.Contains(variant == "sparse" ? "123456" : variant == "healthy" ? "214990" : "216482", all);
-        if (variant != "peek") { Assert.Contains("PSG", all); Assert.Contains("RLD LABEL", all); }   // both reference lines are on every full card (a peek is the short form)
+        if (variant != "peek") { Assert.Contains("PSG", all); Assert.Contains("RLD LABEL", all); }   // both reference lines are on every full card once More is pressed (a peek is the short form)
+        if (variant != "peek") { Assert.True(r.moreOffered, $"{id}/{variant}: More is offered"); Assert.DoesNotContain("RLD LABEL", string.Join("\n", r.first)); }   // round 34: answer first
         if (variant == "sparse") Assert.DoesNotContain("NaN", all);
         if (variant is "peek") Assert.DoesNotContain("OFFLINE BRIEF", all);                   // a peek makes no brief
     }

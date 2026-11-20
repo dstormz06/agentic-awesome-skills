@@ -185,6 +185,7 @@ public partial class CardWindow : Window
         Closed += (_, _) => ConnectionStatus.Changed -= OnConn;
         PinBtn.Click += (_, _) => TogglePin();
         ExpBtn.Click += (_, _) => ToggleExpand();
+        MoreChip.Click += (_, _) => { ToggleExpand(); ExpBtn.Focus(); };     // round 34: More hides itself, so the keyboard goes to the button that closes it again
         MoreBtn.Click += (_, _) => ExpandFromMini();
         SisterChip.Click += (_, _) => OpenFirstSister();
         NotesChip.Click += (_, _) => OpenNotes();
@@ -322,6 +323,8 @@ public partial class CardWindow : Window
         Drawer.IsVisible = !Drawer.IsVisible;
         _autoHide.Touch();
         Root.Width = Drawer.IsVisible ? 492 : 372;
+        SetAnswerFirst();
+        if (Drawer.IsVisible && _briefWaiting && _record is { } waiting) _briefReady = LoadBriefAsync(waiting);   // the brief was waiting for More
         Dispatcher.UIThread.Post(ClampToScreen, DispatcherPriority.Loaded);   // it just grew: keep it on-screen
     }
 
@@ -329,8 +332,9 @@ public partial class CardWindow : Window
     {
         _mini = false;
         SetMiniVisibility();
+        if (!Drawer.IsVisible) { Drawer.IsVisible = true; Root.Width = 492; SetAnswerFirst(); }   // round 34: "Full brief" shows the brief, so the rest opens with it
         PrepareAgents();                    // the full card is stage two: the agents drawer appears now, and agents set to run by themselves are asked
-        if (_record is not null) _ = LoadBriefAsync(_record);
+        if (_record is not null) _briefReady = LoadBriefAsync(_record);
         Dispatcher.UIThread.Post(ClampToScreen, DispatcherPriority.Loaded);
     }
 
@@ -351,6 +355,9 @@ public partial class CardWindow : Window
     private string? _editingNoteId;
     private (string Number, int At, QuickNote Note)? _lastDeleted;
 
+    /// <summary>The watch line's tail when more flags wait in the drawer (round 34: shorter). Pinned in mockup/round34-golden.json.</summary>
+    public static string WatchMoreText(int more) => more > 0 ? $"(+{more} more)" : "";
+
     public static string NoteButtonLabel(int notes) => "Add a note" + (notes > 0 ? $" · {notes} note{(notes == 1 ? "" : "s")}" : "");
 
     private int NoteCount(AndaRecord record) => record.Notes.Count + (QuickNotes?.Count(record.Number) ?? 0);
@@ -358,8 +365,8 @@ public partial class CardWindow : Window
     private void PaintNotesButton()
     {
         if (_record is null) return;
-        string label = NoteButtonLabel(NoteCount(_record));
-        if (_notesLabel is not null) _notesLabel.Text = label; else NotesChip.Content = label;
+        string label = NoteButtonLabel(NoteCount(_record)), shown = Drawer.IsVisible ? label : NoteButtonLabel(0);   // round 34: the count shows with the rest; it is always said
+        if (_notesLabel is not null) _notesLabel.Text = shown; else NotesChip.Content = shown;
         AutomationProperties.SetName(NotesChip, label.Replace(" · ", ", ") + ". Opens the notes with a box for a new one.");
     }
 
@@ -753,14 +760,32 @@ public partial class CardWindow : Window
     {
         AttentionSlot.IsVisible = !_mini && _record?.Attention is not null;
         WatchSlot.IsVisible = !_mini && _watchFlags.Count > 0;
-        RefSlot.IsVisible = !_mini && _refShown;
-        LatestSlot.IsVisible = !_mini;
-        AheadSlot.IsVisible = !_mini && _record?.Ahead is not null;
-        BriefSlot.IsVisible = !_mini;
         ChipsSlot.IsVisible = !_mini;
         MoreBtn.IsVisible = _mini;
         if (_mini) { Drawer.IsVisible = false; Root.Width = 372; }
+        SetAnswerFirst();
     }
+
+    /// <summary>
+    /// Round 34: the card shows the answer first: what it says, goal and forecast, what needs attention, the first watch line, the data
+    /// line and the actions. The calendar, Latest, Ahead, the reference dates, the brief and the key hint open with the drawer (More or E),
+    /// so the card fits a 1366 by 768 laptop. The same parts as the simulation's "more-only" ones.
+    /// </summary>
+    private void SetAnswerFirst()
+    {
+        bool more = !_mini && Drawer.IsVisible;
+        LatestSlot.IsVisible = more;
+        AheadSlot.IsVisible = more && _record?.Ahead is not null;
+        RefSlot.IsVisible = more && _refShown;
+        BriefSlot.IsVisible = more;
+        ActHint.IsVisible = more;
+        if (_ribbonSlot is not null) _ribbonSlot.IsVisible = more && _ribbonWanted;
+        MoreChip.IsVisible = !_mini && !Drawer.IsVisible;
+        PaintNotesButton();
+    }
+
+    /// <summary>True while the card is collapsed: the answer only (round 34).</summary>
+    public bool AnswerOnly => !_mini && !Drawer.IsVisible;
 
     public void Show(AndaRecord record, PixelPoint near, bool mini)
     {
@@ -819,7 +844,8 @@ public partial class CardWindow : Window
             if (_ribbonSlot is not null && _ribbon is not null && _ribbonText is not null)
             {
                 bool both = gap && !mini && record.GoalDateValue is not null && record.ForecastDateValue is not null;
-                _ribbonSlot.IsVisible = both;
+                _ribbonWanted = both;
+                _ribbonSlot.IsVisible = both && Drawer.IsVisible;      // round 34: under More
                 if (both)
                 {
                     _ribbon.Set(record.GoalDateValue, record.ForecastDateValue, Calendar);
@@ -932,13 +958,13 @@ public partial class CardWindow : Window
             _anchor = near;
             Position = near;      // provisional; Opened re-places it using the real, laid-out size
             LimitHeightTo(near);
-            _briefReady = _mini ? Task.CompletedTask : LoadBriefAsync(record);
+            _briefReady = _mini ? Task.CompletedTask : BriefOrWait(record);
             Show();
         }
         else
         {
             // Sister-hop on an open card: new record, new brief, possibly a different height.
-            _briefReady = _mini ? Task.CompletedTask : LoadBriefAsync(record);
+            _briefReady = _mini ? Task.CompletedTask : BriefOrWait(record);
             Dispatcher.UIThread.Post(ClampToScreen, DispatcherPriority.Loaded);
         }
         _shownAt = DateTime.Now;
@@ -947,8 +973,28 @@ public partial class CardWindow : Window
         Focus();
     }
 
+    /// <summary>The words shown while an AI brief waits for More (round 34). Pinned to the simulation's.</summary>
+    public const string BriefWaits = "asked for when you press More";
+    private bool _briefWaiting;
+    private bool _ribbonWanted;          // the calendar has two dates to draw (round 34: shown with the rest, under More)
+    /// <summary>True while an AI brief waits for More: nothing has been sent for it.</summary>
+    public bool BriefWaiting => _briefWaiting;
+
+    /// <summary>
+    /// Round 34: the brief sits under More, so an AI brief is asked for only once the person opens it; nothing is sent for a part that is
+    /// not shown. The offline brief is read from the record on this PC, so it is made at once.
+    /// </summary>
+    private Task BriefOrWait(AndaRecord record)
+    {
+        if (Drawer.IsVisible || _briefs is OfflineBriefService) return LoadBriefAsync(record);
+        _briefCts?.Cancel(); _briefWaiting = true;
+        BriefTag.Text = "COMPANION"; BriefVerify.Text = BriefWaits; BriefText.Text = "";
+        return Task.CompletedTask;
+    }
+
     private async Task LoadBriefAsync(AndaRecord record)
     {
+        _briefWaiting = false;
         _briefCts?.Cancel();
         var cts = _briefCts = new CancellationTokenSource();
         BriefText.Foreground = Ink3();
@@ -1175,7 +1221,7 @@ public partial class CardWindow : Window
 
         var top = _watchFlags[0];
         string tone = top.Severity switch { WatchSeverity.Bad => "C.Bad", WatchSeverity.Warn => "C.Warn", _ => "C.Ink2" };
-        WatchText.Text = top.Text + (_watchFlags.Count > 1 ? $"  (+{_watchFlags.Count - 1} more in the drawer)" : "");
+        WatchText.Text = top.Text + (_watchFlags.Count > 1 ? "  " + WatchMoreText(_watchFlags.Count - 1) : "");
         WatchText.Foreground = (IBrush)Application.Current!.Resources[tone]!;
         ToolTip.SetTip(WatchText, top.Why);
         if (counted) UsageLog.Record("watch_flag_shown");
@@ -1196,7 +1242,7 @@ public partial class CardWindow : Window
         _refShown = true;
         PsgText.Text = info.PsgText ?? ReferenceResolver.NoPsg;
         PaintRld(info);
-        RefSlot.IsVisible = !_mini;
+        RefSlot.IsVisible = !_mini && Drawer.IsVisible;      // round 34: the reference dates sit under More
         RepliesChip.IsVisible = QuickReplies?.Invoke() is { Count: > 0 };
     }
 

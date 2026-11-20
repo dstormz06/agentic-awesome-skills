@@ -3,10 +3,11 @@ namespace AndaCompanion.Services;
 /// <summary>The version the tool shows, and what changed, newest first. The same list as the simulation's (mockup/round29-golden.json).</summary>
 public static class ChangeLog
 {
-    public const string Version = "Prototype, round 33";
+    public const string Version = "Prototype, round 34";
 
     public static readonly IReadOnlyList<(int Round, IReadOnlyList<string> Items)> Entries = new (int, IReadOnlyList<string>)[]
     {
+        (34, new[] { "Your own shortcut now opens the card directly. If you prefer the small invite first, choose Whisper in Settings, How it starts. A middle-click still shows the invite first.", "The card shows the answer first: what needs you, the goal and the forecast, and the first thing worth a look. The calendar, Latest, Ahead, the reference dates and the brief are one press away, under More or E.", "A click on the tray icon opens Today, which now also holds what the Watch list showed." }),
         (33, new[] { "The Windows app now has what the simulation has shown since rounds 18 and 19: details from your own sheet on an expanded card, each with Copy; larger text and compact spacing; recent ANDAs and a short list you keep; One Bar; and Today.", "In Today, what needs a look is listed with the most pressing first.", "The Edge extension says where a card's data is from, as of when in your time zone and how long ago, marks it STALE after the days you choose, and has first steps of its own." }),
         (32, new[] { "A guide of five short steps opens once, at the first start. You can leave it at any step and open it again from the tray menu: Help: first steps.", "The Drugs@FDA reference file says when it was saved and how long ago, and is marked STALE after a number of days of its own." }),
         (31, new[] { "Every time is written in your time zone, with its abbreviation and the right daylight time. You can choose another zone.", "Every piece of data says where it is from and as of when, and how long ago.", "Data older than the days you choose is marked STALE.", "A clock in Settings, and “minutes ago” on the card, are brought up to date once a minute." }),

@@ -81,8 +81,8 @@ function installHost(userData, { origin = `chrome-extension://${h.EXPECTED_ID}/`
   await h.setSettings(worker, { followApp: false });
   await page.bringToFront();
   await h.select(page, '#q'); await h.trigger(worker, 'peek');
-  await page.locator('.chip:not(.notice)').waitFor({ timeout: 15000 });
-  h.ok(true, 'with "follow the app" off, the extension\'s own whisper default applies (a quiet ANDA gets the invite)');
+  await page.locator('.card').waitFor({ timeout: 15000 });
+  h.ok((await page.locator('.chip:not(.notice)').count()) === 0, 'with "follow the app" off, the extension\'s own default applies: Full since round 34 (a quiet ANDA opens the card, no invite)');
   await page.keyboard.press('Escape');
   await h.setSettings(worker, { followApp: true });
 

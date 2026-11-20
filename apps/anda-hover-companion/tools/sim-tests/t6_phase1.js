@@ -37,6 +37,7 @@ const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++
   ok(cal.lead0.near === null, 'a holiday window of 0 flags only weekends and holidays themselves');
 
   // ---- WATCH on the card ----
+  await page.evaluate(() => { const r = document.querySelector('input[name=consent][value=whisper]'); r.checked = true; r.dispatchEvent(new Event('change')); });   // round 34: Full is the default; the lookup check below is about whisper mode
   await page.click('#chev'); await page.click('#pinBtn2');
   await page.click('#appIcon', { button: 'right' }); await page.click('#menu >> text=Lookup ANDA…');
   await page.fill('#lookupIn', '216482'); await page.keyboard.press('Enter'); await page.waitForTimeout(400);
@@ -44,7 +45,7 @@ const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++
   ok(await vis('#watchSlot'), 'the full card shows a WATCH line');
   const w1 = await page.textContent('#c-watch');
   ok(w1 === 'Goal date falls on a weekend: Sat Oct 3. Nearest business days: Fri Oct 2 and Mon Oct 5.', 'WATCH says the goal date is on a weekend: ' + w1);
-  ok((await page.textContent('#c-watch-more')) === '(+1 more in the drawer)', 'WATCH points to the second flag in the drawer');
+  ok((await page.textContent('#c-watch-more')) === '(+1 more)', 'WATCH says one more flag is in the drawer (round 34: shorter tail)');
 
   await page.screenshot({ path: OUT + '/s9-watch-card.png' });
   await page.click('#expBtn'); await page.waitForTimeout(250);
@@ -66,9 +67,10 @@ const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++
   await page.keyboard.press('Escape');
   await page.uncheck('#swToday');
 
-  // ---- urgent auto-peek is the default; healthy ANDA gets the invite ----
+  // ---- whisper (a choice since round 34): urgent auto-peek; healthy ANDA gets the invite ----
+  await page.evaluate(() => { const r = document.querySelector('input[name=consent][value=whisper]'); r.checked = true; r.dispatchEvent(new Event('change')); });
   await page.dblclick('[data-pick="214990"]'); await page.keyboard.press('Control+Alt+KeyA'); await page.waitForTimeout(300);
-  ok(await vis('#chip') && (await page.textContent('#chipTxt')) === 'ANDA 214990' && !(await vis('#card')), 'whisper default: the healthy ANDA gets the small invite');
+  ok(await vis('#chip') && (await page.textContent('#chipTxt')) === 'ANDA 214990' && !(await vis('#card')), 'whisper: the healthy ANDA gets the small invite');
 
   await page.click('#chip'); await page.waitForTimeout(250);
   ok(await vis('#card') && !(await page.$eval('#card', e => e.classList.contains('mini'))), 'clicking the invite opens the full card');

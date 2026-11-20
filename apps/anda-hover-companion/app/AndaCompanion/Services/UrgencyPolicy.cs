@@ -12,14 +12,16 @@ public static class UrgencyPolicy
 {
     /// <summary>
     /// What a captured selection does first. Full opens the card, Peek opens the small one (no AI call), Invite shows the whisper
-    /// chip. In whisper mode an urgent ANDA skips the invite and opens a peek, if the person left that on.
+    /// chip. In whisper mode an urgent ANDA skips the invite and opens a peek, if the person left that on. Round 34: Full is the
+    /// usual setting, because the person's own shortcut is the consent; a middle-click, which may not have been aimed at the app,
+    /// is treated as whisper. The answers are pinned in mockup/round34-golden.json.
     /// </summary>
-    public static FirstStep Decide(ConsentModel consent, bool escalateUrgent, bool urgent) => consent switch
+    public static FirstStep Decide(ConsentModel consent, bool escalateUrgent, bool urgent, bool middleClick = false)
     {
-        ConsentModel.Whisper => escalateUrgent && urgent ? FirstStep.Peek : FirstStep.Invite,
-        ConsentModel.PeekFirst => FirstStep.Peek,
-        _ => FirstStep.Full,
-    };
+        bool whisper = consent == ConsentModel.Whisper || (consent == ConsentModel.Full && middleClick);
+        if (whisper) return escalateUrgent && urgent ? FirstStep.Peek : FirstStep.Invite;
+        return consent == ConsentModel.PeekFirst ? FirstStep.Peek : FirstStep.Full;
+    }
 
     public const int DefaultLateDays = 7;
     public static readonly IReadOnlyList<int> LateDayChoices = new[] { 3, 7, 14 };

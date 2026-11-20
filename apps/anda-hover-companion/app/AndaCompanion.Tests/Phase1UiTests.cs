@@ -31,9 +31,9 @@ public class FirstStepTests
         Assert.Equal(expected, UrgencyPolicy.Decide(consent, escalate, urgent));
 
     [Fact]
-    public void With_the_demo_records_and_the_new_default_the_at_risk_one_peeks_and_the_healthy_one_invites()
+    public void With_the_demo_records_in_whisper_mode_the_at_risk_one_peeks_and_the_healthy_one_invites()
     {
-        var s = new Settings();
+        var s = new Settings { Consent = ConsentModel.Whisper };   // a choice since round 34 (Full is the default); this is the whisper path
         var risk = Repo.Find("216482")!; var fine = Repo.Find("214990")!;
         var today = new DateOnly(2026, 11, 2);
         Assert.Equal(FirstStep.Peek, UrgencyPolicy.Decide(s.Consent, s.EscalateUrgent, UrgencyPolicy.IsUrgent(risk, today, Cal, s.UrgentLateDays)));
@@ -84,7 +84,7 @@ public class Phase1UiTests : IClassFixture<HeadlessFixture>
         }, CancellationToken.None);
         Assert.True(r.Item1);
         Assert.Contains("falls on a weekend: Sat Oct 3", r.Item2);
-        Assert.Contains("more in the drawer", r.Item2);
+        Assert.Contains("(+1 more)", r.Item2);                     // round 34: the shorter tail
         Assert.True(r.Item3);
         Assert.Equal("Watch list · 2", r.Item4);
         Assert.Contains(r.Item5, t => t.StartsWith("Source: U.S. federal calendar (OPM)"));
@@ -152,6 +152,7 @@ public class Phase1UiTests : IClassFixture<HeadlessFixture>
                     { CloseWhenDeactivated = false, Today = () => new DateOnly(2026, 11, 2), Reference = reference };
                 w.Show(record, new PixelPoint(40, 40), false);
                 Settle();
+                w.FindControl<Button>("MoreChip")!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent)); Settle();   // round 34: the reference lines sit under More
                 var res = (w.FindControl<Control>("RefSlot")!.IsVisible, w.FindControl<TextBlock>("PsgText")!.Text, w.FindControl<TextBlock>("RldText")!.Text);
                 w.Close();
                 return res;

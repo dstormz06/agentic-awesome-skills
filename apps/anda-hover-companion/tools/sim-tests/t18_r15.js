@@ -252,6 +252,7 @@ const closeAll = async p => { for (let i = 0; i < 4; i++) { await p.keyboard.pre
   await p.click('#setDone'); await select(p, '216482'); await p.keyboard.press('Control+Alt+KeyA'); await p.waitForTimeout(700);
   ok(await p.evaluate(() => document.getElementById('x-agents-d').hidden), 'with no agent switched on the card has no agents drawer');
   await closeAll(p); await openSettings(p); await setupHub(); await p.click('#setDone'); await settle(p);
+  await p.evaluate(() => { const r = document.querySelector('input[name=consent][value=whisper]'); r.checked = true; r.dispatchEvent(new Event('change')); });   // round 34: Full is the default; these checks are about the whisper path's peek
   await select(p, '216482'); await p.keyboard.press('Control+Alt+KeyA'); await p.waitForTimeout(700);        // 216482 is at risk: a peek opens by itself
   ok(await p.evaluate(() => document.getElementById('card').classList.contains('mini')), 'an at-risk ANDA opens as a peek');
   ok(await p.evaluate(() => document.getElementById('x-agents-d').hidden), 'a peek has no agents drawer and asks no agent');

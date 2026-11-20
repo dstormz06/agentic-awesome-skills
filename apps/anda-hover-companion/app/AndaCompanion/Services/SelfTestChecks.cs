@@ -180,7 +180,7 @@ internal static class SelfTestChecks
             File.WriteAllText(settingsPath, "{ this is not json");
             var d = SettingsService.Load(settingsPath);
             if (d.Appearance != Theming.Appearances.Default || d.Appearance != Theming.AppearanceId.X ||
-                !d.CaptureViaCopy || d.Consent != ConsentModel.Whisper || d.AutoHideSeconds != UI.AutoHidePolicy.Default)
+                !d.CaptureViaCopy || d.Consent != ConsentModel.Full || d.AutoHideSeconds != UI.AutoHidePolicy.Default)
                 problems.Add("corrupt settings did not fall back to defaults");
 
             var lib = new PromptLibraryService(promptsPath);

@@ -17,7 +17,7 @@ namespace AndaCompanion.UI;
 /// <param name="OpenCard">Opens the card of an ANDA.</param>
 /// <param name="CopyText">Puts text on the clipboard and says whether it got there.</param>
 public sealed record TodayHooks(Func<IReadOnlyList<Today.Look>> All, Func<string, Today.Look?> Find, Func<IReadOnlyList<string>> Pins, Func<IReadOnlyList<string>> Recents,
-    Action<string> OpenCard, Func<string, Task<bool>>? CopyText = null);
+    Action<string> OpenCard, Func<string, Task<bool>>? CopyText = null, Action? ShowAll = null);
 
 /// <summary>
 /// Today (round 33): a small two-pane window. Left: what needs a look, the ANDAs kept in my list, recents. Right: the selected one, with
@@ -38,6 +38,9 @@ public sealed class TodayWindow : Window
     public Button CopyButton { get; private set; } = new();
     public Button OpenButton { get; private set; } = new();
     public Button CloseButton { get; } = new() { Content = "Close", HorizontalAlignment = HorizontalAlignment.Right };
+    /// <summary>Round 34: the watch list has no tray item; it opens from here, with the reason for each ANDA. Shown while something needs a look.</summary>
+    public Button ShowAllButton { get; } = new() { Content = ShowAllLabel, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 8, 0, 0) };
+    public const string ShowAllLabel = "Show all, with reasons…";
     public string? Selected => _selected;
     /// <summary>What was last said to a screen reader, for a test to read.</summary>
     public string Said => _say.Text ?? "";
@@ -59,6 +62,9 @@ public sealed class TodayWindow : Window
 
         var side = new DockPanel();
         DockPanel.SetDock(Search, Dock.Top); Search.Margin = new Thickness(0, 0, 0, 8); side.Children.Add(Search);
+        DockPanel.SetDock(ShowAllButton, Dock.Bottom); side.Children.Add(ShowAllButton);
+        AutomationProperties.SetName(ShowAllButton, "Show all that need a look, with reasons, in the watch list");
+        ShowAllButton.Click += (_, _) => _hooks.ShowAll?.Invoke();
         side.Children.Add(new ScrollViewer { Content = _list, VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto });
         var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("240,16,*") };
         grid.Children.Add(side);
@@ -116,6 +122,7 @@ public sealed class TodayWindow : Window
             }
             if (g.More > 0) _list.Children.Add(new TextBlock { Text = Today.More(g.More), FontSize = 11, Foreground = Res("C.Ink3"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(2, 2, 0, 0) });
         }
+        ShowAllButton.IsVisible = _hooks.ShowAll is not null && Groups()[0].Ids.Count > 0;
         if (!any) _list.Children.Add(new TextBlock { Text = Today.SaidNothing, FontSize = 12, Foreground = Res("C.Ink3"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(2, 8, 0, 0) });
         PaintMain();
     }

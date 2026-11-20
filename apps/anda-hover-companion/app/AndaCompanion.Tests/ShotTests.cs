@@ -197,6 +197,17 @@ public class ShotTests : IClassFixture<HeadlessFixture>
                 var today33 = new TodayWindow(new TodayHooks(() => repo33.Numbers.Select(n => Find33(n)!).ToList(), Find33, () => new[] { "214990" }, () => new[] { "216482", "214990" }, _ => { }));
                 today33.Show(); ConnectionBar.Attach(today33); for (int i = 0; i < 20; i++) { Settle(); Thread.Sleep(12); }
                 Save(today33, dir, "today-33"); today33.Close();
+                // Round 34: the answer-first card at standard and at the largest text, the same card opened with More, and Today with Show all.
+                var first34 = Card33(); first34.Show(repo33.Find("216482")!, new PixelPoint(40, 40), false); for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
+                Save(first34, dir, "card-34-answer-first");
+                first34.FindControl<Button>("MoreChip")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
+                Save(first34, dir, "card-34-more"); first34.Close();
+                var big34 = Card33(); DisplayScale.Apply(big34, Display.TextScale("xl"));
+                big34.Show(repo33.Find("216482")!, new PixelPoint(40, 40), false); for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
+                Save(big34, dir, "card-34-answer-first-largest"); big34.Close();
+                var today34 = new TodayWindow(new TodayHooks(() => repo33.Numbers.Select(n => Find33(n)!).ToList(), Find33, () => new[] { "214990" }, () => new[] { "216482", "214990" }, _ => { }, ShowAll: () => { }));
+                today34.Show(); ConnectionBar.Attach(today34); for (int i = 0; i < 20; i++) { Settle(); Thread.Sleep(12); }
+                Save(today34, dir, "today-34-show-all"); today34.Close();
             }
             // Round 31: the card's data line, fresh and STALE, and the Time part of Settings.
             using (new ZoneScope("America/New_York"))

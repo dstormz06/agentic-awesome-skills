@@ -119,6 +119,7 @@ public class Round23Tests : IClassFixture<HeadlessFixture>
     {
         var r = await Inspect(Late, false, AppearanceId.U, w =>
         {
+            w.FindControl<Button>("MoreChip")!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent)); Settle();   // round 34: the calendar sits under More
             var slot = w.GetVisualDescendants().OfType<StackPanel>().Single(p => p.Name == "Ribbon");
             var ribbon = slot.Children.OfType<CalendarRibbon>().Single();
             return (visible: slot.IsEffectivelyVisible, texts: Texts(w), name: Avalonia.Automation.AutomationProperties.GetName(ribbon), h: ribbon.Bounds.Height, wide: ribbon.Bounds.Width);
@@ -128,11 +129,11 @@ public class Round23Tests : IClassFixture<HeadlessFixture>
         Assert.Contains("Goal Sat Oct 3 (a weekend day); forecast Sat Oct 17 (a weekend day); 14 days apart.", r.texts);
         Assert.Equal("Calendar ribbon. Goal Sat Oct 3 (a weekend day); forecast Sat Oct 17 (a weekend day); 14 days apart.", r.name);
         Assert.Equal(80, r.h);
-        Assert.InRange(r.wide, 250, 400);
+        Assert.InRange(r.wide, 250, 470);                     // round 34: drawn in the open card, which is 492 px wide
         // the small card leaves the calendar out, as in the simulation
         Assert.False(await Inspect(Late, true, AppearanceId.U, w => w.GetVisualDescendants().OfType<StackPanel>().Single(p => p.Name == "Ribbon").IsVisible));
         // without a forecast there is no gap to draw
-        Assert.False(await Inspect(Late with { ForecastDeltaDays = null }, false, AppearanceId.U, w => w.GetVisualDescendants().OfType<StackPanel>().Single(p => p.Name == "Ribbon").IsVisible));
+        Assert.False(await Inspect(Late with { ForecastDeltaDays = null }, false, AppearanceId.U, w => { w.FindControl<Button>("MoreChip")!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent)); Settle(); return w.GetVisualDescendants().OfType<StackPanel>().Single(p => p.Name == "Ribbon").IsVisible; }));   // with More pressed, so it is the missing forecast that hides it
     }
 
     [Fact]

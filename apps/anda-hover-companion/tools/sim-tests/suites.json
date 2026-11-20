@@ -43,5 +43,6 @@
   "r17_selection_parity.js",
   "r19_recognizer_parity.js",
   "r21_proofread_parity.js",
-  "r24_countdown_parity.js"
+  "r24_countdown_parity.js",
+  "t42_round34.js"
 ]

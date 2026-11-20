@@ -93,7 +93,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   eq(await p.evaluate(() => [state.pins, document.getElementById('recentsStatus').textContent]), [[], 'My list cleared. The ANDAs themselves are not changed.'], 'R9 "Clear my list" empties the kept list, numbers no longer in the data included');
 
   // ---- F. the version ----
-  eq(await p.evaluate(() => [APP_VERSION, CHANGES[0].round, CHANGES[0].items.length]), ['Prototype, round 33', 33, 3], 'F1 the version is round 33, with what changed');
+  eq(await p.evaluate(() => [/^Prototype, round \d+$/.test(APP_VERSION), CHANGES.find(c => c.round === 33).items.length]), [true, 3], 'F1 round 33 is listed with what changed (the version itself is checked by the newest round\'s suite)');
   eq(errs, [], 'F2 no error in the page');
 
   await b.close();

@@ -36,7 +36,7 @@ public static class Guide
         }),
         ("Where things are", null, new[]
         {
-            "Right-click the tray icon near the clock. The menu holds Lookup, Review a draft, Connections and event log, Backups and archive, and Settings.",
+            "Click the tray icon near the clock to open Today: what needs a look, the ANDAs you keep, and the recent ones. Right-click it for the menu, which holds Lookup, Review a draft, Connections and event log, Backups and archive, and Settings.",
             "This guide is there as well, under “Help: first steps”. Notices and the tray dot appear only while the app is running.",
         }),
     };

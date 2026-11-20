@@ -1,11 +1,12 @@
 import { TZ_CHOICES, STALE_CHOICES, STALE_DEFAULT } from './time.js';
 
-/** The form of the stored settings. 1: before round 33 (no number was stored). 2: adds the time zone and the days before data is marked STALE. */
-export const SETTINGS_SCHEMA = 2;
+/** The form of the stored settings. 1: before round 33 (no number was stored). 2: adds the time zone and the days before data is marked STALE.
+ *  3 (round 34): the shortcut opens the card directly; a Whisper stored by an earlier form, when Whisper was the default, becomes Full once. */
+export const SETTINGS_SCHEMA = 3;
 
 export const DEFAULT_SETTINGS = Object.freeze({
   schema: SETTINGS_SCHEMA,
-  consent: 'whisper',          // 'full' | 'peek' | 'whisper': the same three consent models as the app; whisper is the default
+  consent: 'full',             // 'full' | 'peek' | 'whisper': the same three consent models as the app; full is the default since round 34
   escalateUrgent: true,        // in whisper mode an urgent ANDA opens a peek by itself
   urgentLateDays: 7,           // forecast this many days past goal (3, 7 or 14) counts as urgent
   holidayLeadDays: 3,          // flag dates within this many business days of a federal holiday (0, 2, 3 or 5)
@@ -30,7 +31,9 @@ export function normalizeSettings(s = {}) {
   out.schema = SETTINGS_SCHEMA;
   if (!TZ_CHOICES.some((c) => c[0] === out.timeZone)) out.timeZone = '';
   if (!STALE_CHOICES.includes(out.staleAfterDays)) out.staleAfterDays = STALE_DEFAULT;
-  if (!['full', 'peek', 'whisper'].includes(out.consent)) out.consent = 'whisper';
+  if (!['full', 'peek', 'whisper'].includes(out.consent)) out.consent = 'full';
+  const form = Number.isInteger(stored.schema) ? stored.schema : 1;
+  if (form < 3 && out.consent === 'whisper') out.consent = 'full';   // round 34, once: Whisper was the default before, so it is not taken as a choice
   out.escalateUrgent = out.escalateUrgent !== false;
   if (![3, 7, 14].includes(out.urgentLateDays)) out.urgentLateDays = 7;
   if (!HOLIDAY_LEAD_CHOICES.includes(out.holidayLeadDays)) out.holidayLeadDays = 3;

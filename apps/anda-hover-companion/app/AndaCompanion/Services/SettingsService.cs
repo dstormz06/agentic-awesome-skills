@@ -23,9 +23,10 @@ public sealed class Settings
     /// </summary>
     public int AutoHideSeconds { get; set; } = UI.AutoHidePolicy.Default;
 
-    // Whisper = DESIGN.md consent model ③: a small invite, and the card opens only if it is clicked. It is the default
-    // since 2026-11-02 (tester feedback). Urgent ANDAs skip the invite and open a peek (see EscalateUrgent).
-    public ConsentModel Consent { get; set; } = ConsentModel.Whisper;
+    // Full = DESIGN.md consent model ①: the person's own shortcut is the consent, so the card opens at once. The default since
+    // round 34 (2026-11-20, the owner's choice); Whisper (③, a small invite first) was the default from 2026-11-02 and stays a choice.
+    // A middle-click still asks first (see UrgencyPolicy.Decide). In whisper mode urgent ANDAs open a peek (see EscalateUrgent).
+    public ConsentModel Consent { get; set; } = ConsentModel.Full;
 
     /// <summary>
     /// In whisper mode, an urgent or at-risk ANDA opens as a peek instead of waiting for a click. Still started by the user's
@@ -117,7 +118,7 @@ public sealed class Settings
     public ProviderChoice Provider { get; set; } = ProviderChoice.Offline;      // off until the person chooses a connection here; a key found on the PC is not a choice
 
     /// <summary>The version of this file's layout. A file with an older number is moved forward when it is read; see <see cref="SettingsService.Migrate"/>.</summary>
-    public const int CurrentSchema = 5;
+    public const int CurrentSchema = 6;
 
     /// <summary>How many backup copies of each list are kept (and one for each of that many days). See <see cref="Backups"/>.</summary>
     public int BackupCopies { get; set; } = Backups.KeepDefault;
@@ -255,6 +256,9 @@ public static class SettingsService
     /// <summary>One plain sentence when the last <see cref="Load"/> had to repair, move forward or set aside the file; otherwise null. The app shows it once.</summary>
     public static string? LoadNote { get; private set; }
 
+    /// <summary>Said once, when settings kept from before round 34 move from Whisper to Full.</summary>
+    public const string ConsentMovedNote = "Your shortcut now opens the card directly. To see the small invite first again, choose Whisper in Settings, How it starts.";
+
     /// <summary>The settings as they were the last time the file was read without a problem. Used when the file itself cannot be read.</summary>
     public static string LastGoodFile(string path) => Path.Combine(Path.GetDirectoryName(path) ?? ".", Path.GetFileNameWithoutExtension(path) + ".last-good" + Path.GetExtension(path));
 
@@ -320,6 +324,7 @@ public static class SettingsService
     /// "Offline only". An AI connection is something the person switches on in Settings.
     /// Version 1 to 2: two new choices take their usual values (30 backup copies of each list; a finished item is archived after 30 days,
     /// as before). Nothing the person set is changed, so nothing is said.
+    /// Version 5 to 6 (round 34): Whisper, the usual setting until now, becomes Full once, and the person is told how to go back.
     /// </summary>
     public static string? Migrate(Settings s, int fromVersion)
     {
@@ -336,6 +341,11 @@ public static class SettingsService
         {
             s.TextSize = "standard"; s.Density = "comfortable"; s.LookupStyle = "box"; s.RememberRecents = true;
             s.Recents = new(); s.Pins = new(); s.CardFields = CardDetails.DefaultFields.ToList();
+        }
+        if (fromVersion < 6 && s.Consent == ConsentModel.Whisper)                              // round 34, once: Whisper was the default, so it is not taken as a choice
+        {
+            s.Consent = ConsentModel.Full;
+            note = (note is null ? "" : note + " ") + ConsentMovedNote;
         }
         return note;
     }

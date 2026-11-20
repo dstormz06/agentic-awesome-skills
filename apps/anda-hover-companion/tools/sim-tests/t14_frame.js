@@ -50,11 +50,11 @@ const ok = (c, m) => { checks++; if (!c) { fails++; console.log('FAIL ' + m); } 
     g = await geo('#draft'); ok(!!g && inside(g) && (phone ? g.w >= W - 30 : g.w <= 540), `${tag}: draft check opens inside the frame (${g ? Math.round(g.w) : '-'} px)`);
     ok((await txt('#drOut')).length > 20, `${tag}: draft check lists its findings`);
     await f.click('#drDone'); await f.waitForTimeout(200);
-    // tray: watch list, settings, prompt library, quick replies
-    for (const [item, win, done] of [['Watch list', '#wlist', '#wlDone'], ['Settings…', '#settings', '#setDone']]) {
+    // tray: Today (home since round 34), settings
+    for (const [item, win, done] of [['Today…', '#today', '#tdClose'], ['Settings…', '#settings', '#setDone']]) {
       await f.click('#appIcon', { button: 'right' }); await f.waitForTimeout(200);
       await f.click(`#menu >> text=${item}`); await f.waitForTimeout(350);
-      g = await geo(win); ok(!!g && inside(g) && (phone ? g.w >= W - 30 : g.w <= 540), `${tag}: ${item} opens inside the frame (${g ? Math.round(g.w) : '-'} px)`);
+      g = await geo(win); ok(!!g && inside(g) && (phone ? g.w >= W - 30 : g.w <= (win === '#today' ? 560 : 540))   /* Today has two panes, 560 px */, `${tag}: ${item} opens inside the frame (${g ? Math.round(g.w) : '-'} px)`);
       await f.click(done); await f.waitForTimeout(200);
     }
     // settings: every section reachable, and the backup box is not cut off

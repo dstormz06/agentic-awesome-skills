@@ -15,6 +15,14 @@ public sealed record SettingsHooks(Func<string> HotkeyStatus, Func<PortfolioRepo
 
 public partial class SettingsWindow : Window
 {
+    /// <summary>The three ways a card can start, as the simulation names them (round 34: Full is the default). Pinned in mockup/round34-golden.json.</summary>
+    public static readonly IReadOnlyList<(ConsentModel Model, string Label)> ConsentLabels = new (ConsentModel, string)[]
+    {
+        (ConsentModel.Full, "① Full card: the hotkey press is the consent (default)"),
+        (ConsentModel.PeekFirst, "② Peek first: expand for the full brief"),
+        (ConsentModel.Whisper, "③ Whisper invite: opens only if clicked"),
+    };
+
     private readonly Settings _settings;
     private readonly PromptLibraryService _prompts;
     private readonly Action _onChanged;
@@ -66,13 +74,7 @@ public partial class SettingsWindow : Window
             AutoHidePanel.Children.Add(rb);
         }
 
-        var consents = new (ConsentModel Model, string Label)[]
-        {
-            (ConsentModel.Full, "① Full card — the hotkey press is the consent"),
-            (ConsentModel.PeekFirst, "② Peek first — expand for the full brief"),
-            (ConsentModel.Whisper, "③ Whisper invite — opens only if clicked"),
-        };
-        foreach (var (model, label) in consents)
+        foreach (var (model, label) in ConsentLabels)
         {
             var rb = new RadioButton
             {

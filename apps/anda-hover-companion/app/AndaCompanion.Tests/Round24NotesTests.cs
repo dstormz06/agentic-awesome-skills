@@ -216,7 +216,7 @@ public class Round24NotesTests : IClassFixture<HeadlessFixture>
                     message: w.FindControl<TextBlock>("QuickNoteMsg")!.Text, header: w.FindControl<TextBlock>("MyNotesHeader")!.Text,
                     listed: Texts(w.FindControl<StackPanel>("QuickNotesList")!), hint: w.FindControl<TextBlock>("ActHint")!.Text);
         });
-        Assert.Equal("Add a note · 3 notes Enter", r.before);                     // three project notes in the sample record
+        Assert.Equal("Add a note Enter", r.before);                               // three project notes in the sample record; round 34: the count shows once the card is open
         Assert.True(r.drawer && r.open && r.focused);
         Assert.Equal("57 / 500", r.counter);
         Assert.Equal(new[] { "Called the US agent: the response will come next Tuesday." }, r.saved);
@@ -336,7 +336,7 @@ public class Round24NotesTests : IClassFixture<HeadlessFixture>
             Key(w, Avalonia.Input.Key.Enter);
             return (label, open: w.FindControl<Expander>("MyNotesExpander")!.IsExpanded, open2: (string)w.FindControl<Button>("OpenChip")!.Content!);
         }, id: id);
-        Assert.Equal(("Add a note · 3 notes", true, "Open ANDA page ↗"), r);
+        Assert.Equal(("Add a note", true, "Open ANDA page ↗"), r);              // round 34: the count shows with the rest of the card
     }
 
     [Fact]

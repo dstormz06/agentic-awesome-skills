@@ -26,7 +26,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   eq(await p.evaluate(() => state.provider), 'offline', 'X1 the AI connection starts as "Offline only": nothing is on until it is chosen');
   { const name = '<img src=x onerror="window.__ran=1">';
     await restore(p, JSON.stringify({ kind: KIND, version: 1, settings: { lens: name }, lenses: [{ name, text: 'anything' }], replies: [] }));
-    await p.evaluate(() => { const t = document.querySelector('#swAi'); t.checked = true; t.dispatchEvent(new Event('change', { bubbles: true })); closeApp('settings'); openCard('216482', { forceFull: true }); setPin(true); });
+    await p.evaluate(() => { const t = document.querySelector('#swAi'); t.checked = true; t.dispatchEvent(new Event('change', { bubbles: true })); closeApp('settings'); openCard('216482', { forceFull: true }); setPin(true); toggleExpand(); });   // round 34: an AI brief is asked for once More is pressed
     let seen = null;
     for (let i = 0; i < 20 && !seen; i++) { await p.waitForTimeout(700); const t = await p.evaluate(() => document.getElementById('c-ai').textContent); if (t.includes('would steer this brief')) seen = t; }
     const after = await p.evaluate(() => [window.__ran === undefined, document.querySelectorAll('#c-ai img').length]);
@@ -55,6 +55,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
 
   // ====================================================== K. Keyboard and screen reader
   p = await fresh();
+  await p.evaluate(() => { const r = document.querySelector('input[name=consent][value=whisper]'); r.checked = true; r.dispatchEvent(new Event('change')); });   // round 34: Full is the default; the invite exists in Whisper
   { const id = await p.evaluate(() => Object.keys(DATA).find(n => firstStep(n) === 'invite'));
     await p.evaluate(n => { lastSel = { text: 'ANDA ' + n }; hotkey('peek', 'keyboard'); }, id); await settle(p, 250);
     const first = await p.evaluate(() => [chip.style.display !== 'none', document.getElementById('chipGo').hidden, card.style.display === 'block', document.getElementById('chipSay').textContent, document.getElementById('chipSay').getAttribute('role')]);

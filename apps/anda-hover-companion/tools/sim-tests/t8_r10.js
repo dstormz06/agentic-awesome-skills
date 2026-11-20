@@ -66,7 +66,8 @@ const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++
   ok((await txt('#keyStatus')).includes('✗ Lookup box: Ctrl+Alt+Space is already used by another program'), 'Settings says which shortcut is taken and what to do');
   await closeSettings();
   await page.click('#appIcon'); await page.waitForTimeout(150);
-  ok(await vis('#lookup'), 'the tray icon still opens the lookup box');
+  ok(await vis('#today') && await vis('#tdSearch'), 'the tray icon still opens Today, whose box finds an ANDA without the shortcut (round 34: Today is home)');
+  await page.evaluate(() => closeApp('today'));
   await page.keyboard.press('Escape');
   await page.uncheck('#swConflictLook');
 
@@ -93,7 +94,8 @@ const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++
   await page.click('#appIcon', { button: 'right' }); await page.click('#menu >> text=Lookup ANDA…');
   await page.fill('#lookupIn', '216482'); await page.keyboard.press('Enter'); await page.waitForTimeout(400);
   ok((await txt('#c-psg')) === 'Jan 14, 2026 · fictional demo date' && (await txt('#c-rld')) === 'Mar 3, 2026 · fictional demo date', 'demo data: both reference lines, labelled as fictional demo dates');
-  ok(await vis('#psgSlot') && await vis('#rldSlot'), 'both lines are visible on the full card');
+  await page.click('#chipMore'); await page.waitForTimeout(150);   // round 34: the reference lines sit under More
+  ok(await vis('#psgSlot') && await vis('#rldSlot'), 'both lines are visible on the full card once More is pressed');
   await page.screenshot({ path: OUT + '/r10-card-refs.png' });
   await page.click('#pinBtn'); await page.click('#appIcon', { button: 'right' }); await page.click('#menu >> text=Settings…'); await page.click('#adaptExpand'); await page.waitForTimeout(150);
   await page.click('#dataPortfolioPick'); await page.waitForTimeout(150);

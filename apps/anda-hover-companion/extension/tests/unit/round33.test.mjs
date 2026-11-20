@@ -30,13 +30,13 @@ test('settings stored before round 33 are carried over: every choice kept, the n
   const old = { consent: 'peek', escalateUrgent: false, urgentLateDays: 14, holidayLeadDays: 5, autoHideSeconds: 40, dataSource: 'imported', followApp: false, extraClosures: [{ date: '2026-12-24', name: 'Closing' }] };
   const now = normalizeSettings(old);
   assert.deepEqual(now, { ...old, schema: SETTINGS_SCHEMA, timeZone: '', staleAfterDays: 7 });
-  assert.equal(SETTINGS_SCHEMA, 2);
+  assert.equal(SETTINGS_SCHEMA, 3);   // round 34 numbered the form 3 (see round34.test.mjs)
   assert.deepEqual(normalizeSettings(now), now, 'carrying over twice changes nothing');
 });
 
 test('a setting that is not one of the choices goes back to its usual setting, and what is not a setting is dropped', () => {
   const s = normalizeSettings({ timeZone: 'Europe/Paris', staleAfterDays: 2, schema: 99, somethingElse: 'x', consent: 'loud' });
-  assert.equal(s.timeZone, ''); assert.equal(s.staleAfterDays, 7); assert.equal(s.schema, SETTINGS_SCHEMA); assert.equal(s.consent, 'whisper');
+  assert.equal(s.timeZone, ''); assert.equal(s.staleAfterDays, 7); assert.equal(s.schema, SETTINGS_SCHEMA); assert.equal(s.consent, 'full');   // Full is the usual setting since round 34
   assert.equal('somethingElse' in s, false);
   for (const bad of [null, undefined, 'text', 7, []]) assert.deepEqual(normalizeSettings(bad), { ...DEFAULT_SETTINGS }, JSON.stringify(bad));
   assert.equal(normalizeSettings({ timeZone: 'America/Phoenix', staleAfterDays: 30 }).timeZone, 'America/Phoenix');
@@ -46,7 +46,7 @@ test('the service keeps the time settings and gives them back', async () => {
   const store = memory({ settings: { consent: 'full' } }), svc = createService({ storage: store, computer: NY });
   assert.equal((await svc.getSettings()).staleAfterDays, 7);
   await svc.saveSettings({ timeZone: 'America/Denver', staleAfterDays: 3 });
-  assert.deepEqual([store.m.get('settings').schema, store.m.get('settings').timeZone, store.m.get('settings').staleAfterDays, store.m.get('settings').consent], [2, 'America/Denver', 3, 'full']);
+  assert.deepEqual([store.m.get('settings').schema, store.m.get('settings').timeZone, store.m.get('settings').staleAfterDays, store.m.get('settings').consent], [SETTINGS_SCHEMA, 'America/Denver', 3, 'full']);
   assert.equal(await svc.zone(), 'America/Denver');
 });
 

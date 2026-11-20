@@ -24,7 +24,7 @@ public class Round19Tests : IClassFixture<HeadlessFixture>
     private static AndaRecord Late => new MockAndaRepository().Find("216482")!;
     private static AndaRecord Early => new MockAndaRepository().Find("214990")!;
 
-    private async Task<T> Inspect<T>(AndaRecord record, bool mini, Func<CardWindow, T> read, AppearanceId id = AppearanceId.T, double opacity = 1.0)
+    private async Task<T> Inspect<T>(AndaRecord record, bool mini, Func<CardWindow, T> read, AppearanceId id = AppearanceId.T, double opacity = 1.0, bool more = false)
     {
         return await _fx.Session.Dispatch(() =>
         {
@@ -33,6 +33,7 @@ public class Round19Tests : IClassFixture<HeadlessFixture>
             try
             {
                 w.Show(record, new PixelPoint(40, 40), mini); Settle();
+                if (more) { w.FindControl<Button>("MoreChip")!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent)); Settle(); }   // round 34: the rest of the card
                 return read(w);
             }
             finally { w.Close(); Settle(); ThemeManager.Apply(Appearances.Default); }
@@ -96,7 +97,7 @@ public class Round19Tests : IClassFixture<HeadlessFixture>
             var others = new[] { "CopyChip", "RepliesChip", "SisterChip", "OpenChip" }.Select(n => w.FindControl<Button>(n)!).ToList();
             return (insideScroll, Fill: ((ISolidColorBrush)main.Background!), main.MinHeight, main.IsEffectivelyVisible, Wide: main.Bounds.Width,
                     PlainOthers: others.All(b => b.BorderThickness == new Thickness(0)), Label: string.Join(" ", main.GetVisualDescendants().OfType<TextBlock>().Select(t => t.Text)),
-                    Copy: (string)w.FindControl<Button>("CopyChip")!.Content!);
+                    Copy: (string)w.FindControl<Button>("CopyChip")!.Content!, Said: Avalonia.Automation.AutomationProperties.GetName(main));
         });
         Assert.False(r.insideScroll);                                             // it stays put while the facts scroll
         Assert.Equal(Color.Parse(Appearances.T.Palette.Accent), r.Fill.Color);    // the look's accent ...
@@ -104,7 +105,8 @@ public class Round19Tests : IClassFixture<HeadlessFixture>
         Assert.InRange(r.MinHeight, 34, 40);                                      // slimmer than the 44 px of round 19
         Assert.True(r.IsEffectivelyVisible && r.Wide > 300);
         Assert.True(r.PlainOthers);
-        Assert.Equal("Add a note · 3 notes Enter", r.Label);
+        Assert.Equal("Add a note Enter", r.Label);                                // round 34: the count shows with the rest of the card ...
+        Assert.StartsWith("Add a note, 3 notes.", r.Said);                        // ... and is always said to a screen reader
         Assert.Equal("Copy status", r.Copy);                                      // still there, as a small button
     }
 
@@ -156,7 +158,7 @@ public class Round19Tests : IClassFixture<HeadlessFixture>
     [Fact]
     public async Task Every_fact_of_the_standard_card_is_still_on_the_default_card()
     {
-        var t = string.Join("\n", await Inspect(Late, false, Texts));
+        var t = string.Join("\n", await Inspect(Late, false, Texts, more: true));   // round 34: Latest sits under More
         foreach (var fact in new[] { "ANDA 216482", "Metformin HCl ER Tablets, 500 mg", "IR response due in 5 days", "Amendment (minor) received Jun 30", "Oct 3, 2026", "Oct 17, 2026", "moderate confidence" })
             Assert.Contains(fact, t);
     }

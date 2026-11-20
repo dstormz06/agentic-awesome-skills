@@ -21,12 +21,21 @@ const PAGE = `<!doctype html><meta charset="utf-8"><title>Huddle prep</title><bo
 
   h.ok(id === h.EXPECTED_ID, 'the extension id is the one the desktop app allows');
 
-  // ---- whisper is the default: a healthy ANDA gets a small invite, a click opens the full card ----
+  // ---- round 34: Full is the default, so the shortcut opens the card at once ----
   await goto('/');
   await h.select(page, '#a2');
   await h.trigger(worker, 'peek');
+  await card().waitFor({ timeout: 5000 });
+  h.ok((await chip().count()) === 0 && (await text(card())).includes('Metformin HCl ER Tablets, 750 mg'), 'default (full): the shortcut opens the card at once, with no invite first');
+  await page.keyboard.press('Escape');
+
+  // ---- whisper, when chosen: a healthy ANDA gets a small invite, a click opens the full card ----
+  await h.setSettings(worker, { consent: 'whisper' });
+  await page.bringToFront();
+  await h.select(page, '#a2');
+  await h.trigger(worker, 'peek');
   await chip().waitFor({ timeout: 5000 });
-  h.ok((await text(chip())).includes('ANDA 214990'), 'default (whisper): a healthy ANDA gets the small invite chip');
+  h.ok((await text(chip())).includes('ANDA 214990'), 'whisper: a healthy ANDA gets the small invite chip');
   h.ok((await card().count()) === 0, '... and no card yet');
   await chip().click();
   await card().waitFor({ timeout: 5000 });

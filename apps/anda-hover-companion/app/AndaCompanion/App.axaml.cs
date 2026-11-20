@@ -143,7 +143,8 @@ public partial class App : Application
     /// is pushed to the thread pool; only the resulting UI work is marshalled to the UI thread.
     /// A second press while a capture is in flight is ignored.
     /// </summary>
-    private async Task OnHotkeyAsync(int id)
+    /// <param name="middleClick">Started by the middle-click trigger, not by a shortcut: it asks first (round 34).</param>
+    private async Task OnHotkeyAsync(int id, bool middleClick = false)
     {
         // Self-test: only report that the key arrived. No capture, no windows, no side effects.
         if (SelfTestRun is not null) { HotkeyObserved?.Invoke(id); return; }
@@ -163,12 +164,12 @@ public partial class App : Application
             if (!_settings.CaptureViaCopy) { Dispatcher.UIThread.Post(OpenLookup); return; }
 
             var result = await Task.Run(TextCaptureService.CaptureSelection);
-            Dispatcher.UIThread.Post(() => HandleCapture(result, near));
+            Dispatcher.UIThread.Post(() => HandleCapture(result, near, middleClick));
         }
         finally { Interlocked.Exchange(ref _captureBusy, 0); }
     }
 
-    private void HandleCapture(CaptureResult result, PixelPoint near)
+    private void HandleCapture(CaptureResult result, PixelPoint near, bool middleClick = false)
     {
         // Something the user should hear about (terminal in front, modifiers held, clipboard busy):
         // say so, then still offer the lookup box so the press is never a dead end.
@@ -195,7 +196,7 @@ public partial class App : Application
         // Two-stage consent: the hotkey is stage one; what happens next depends on the model. In whisper mode an urgent or at-risk
         // ANDA skips the invite and opens a peek (no AI call). The person's own selection and shortcut still started it.
         bool urgent = _settings.EscalateUrgent && UrgencyPolicy.IsUrgent(record, Today(), _calendar, _settings.UrgentLateDays);
-        switch (UrgencyPolicy.Decide(_settings.Consent, _settings.EscalateUrgent, urgent))
+        switch (UrgencyPolicy.Decide(_settings.Consent, _settings.EscalateUrgent, urgent, middleClick))
         {
             case FirstStep.Invite:
                 // The invite takes no focus. Pressing the same shortcut again on the same number accepts it: the keyboard way in.
@@ -205,7 +206,7 @@ public partial class App : Application
                 _invite.ShowInvite($"ANDA {record.Number}", near, () => OpenCard(record, near, mini: false), record.Number);
                 break;
             case FirstStep.Peek:
-                if (_settings.Consent == ConsentModel.Whisper) UsageLog.Record("peek_auto_open");
+                if (_settings.Consent != ConsentModel.PeekFirst) UsageLog.Record("peek_auto_open");   // the urgent rule opened it, not the person's choice of Peek
                 OpenCard(record, near, mini: true);
                 break;
             default:
@@ -417,10 +418,8 @@ public partial class App : Application
         var handoff = new NativeMenuItem("Hand-off page…");
         handoff.Click += (_, _) => OpenHandoff(null);
         menu.Add(handoff);
-        var watch = new NativeMenuItem("Watch list…");
-        watch.Click += (_, _) => OpenWatchList();
-        menu.Add(watch);
-        var today = Full(new NativeMenuItem("Today…"));
+        // Round 34: Today is home. It is in the focused menu and opens with a click on the icon; the watch list opens from it (Show all).
+        var today = new NativeMenuItem("Today…");
         today.Click += (_, _) => OpenToday();
         menu.Add(today);
         var connections = new NativeMenuItem("Connections and event log…");
@@ -486,7 +485,7 @@ public partial class App : Application
             ToolTipText = "ANDA Companion (Notula) · fictional demo data",
             Menu = menu,
         };
-        tray.Clicked += (_, _) => OpenLookup();
+        tray.Clicked += (_, _) => OpenToday();      // round 34: a click opens Today; the menu stays on right-click
         tray.IsVisible = true;
         ShowToolsInTray();
         return tray;
@@ -494,7 +493,7 @@ public partial class App : Application
 
     private readonly List<NativeMenuItem> _fullOnly = new();
 
-    /// <summary>Marks a tray item as one that only "Show all tools" shows. The focused menu is Lookup, Review a draft, Ask, the watch list, Appearance and Settings.</summary>
+    /// <summary>Marks a tray item as one that only "Show all tools" shows. The focused menu is Lookup, Review a draft, Ask, Today (with the watch list), Appearance and Settings.</summary>
     private T Full<T>(T item) where T : NativeMenuItem { _fullOnly.Add(item); return item; }
 
     private void ShowToolsInTray() { foreach (var item in _fullOnly) item.IsVisible = _settings.ShowAllTools; }
@@ -623,7 +622,7 @@ public partial class App : Application
         bool want = _settings.MiddleClickTrigger && SelfTestRun is null && OperatingSystem.IsWindows();
         if (!want) { _mouse?.Dispose(); _mouse = null; _mouseProblem = null; return; }
         if (_mouse is not null) return;                       // the chosen key is read live on every click
-        var service = new MouseTriggerService(() => _settings.MiddleClickModifier, () => _ = OnHotkeyAsync(HotkeyService.IdPeek));
+        var service = new MouseTriggerService(() => _settings.MiddleClickModifier, () => _ = OnHotkeyAsync(HotkeyService.IdPeek, middleClick: true));
         if (service.Start()) { _mouse = service; _mouseProblem = null; }
         else { _mouseProblem = service.Problem; service.Dispose(); ShowNotice(_mouseProblem ?? "The middle-click trigger could not start."); }
     }

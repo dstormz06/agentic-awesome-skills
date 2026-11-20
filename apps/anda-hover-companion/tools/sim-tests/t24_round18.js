@@ -84,6 +84,7 @@ const contrast = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - 
   const names = await p.$$eval('input[name=look]', n => n.map(r => r.parentElement.textContent.trim()));
   ok(names.slice(0, 4).join('|') === 'X · Graphite Calendar|V · Glass Sheet|U · Calendar Ribbon|T · Pocket Plain' && names.length === 8, 'C1 Settings lists the four newest looks first (the default leading), 8 in all');
   await p.evaluate(() => applyLook('u')); await openCardFull(p, '216482');
+  await p.evaluate(() => toggleExpand()); await settle(p, 150);   // round 34: the ribbon sits under More
   ok(await vis(p, '#c-ribbon-slot'), 'C2 the ribbon is shown in Calendar Ribbon');
   eq(await txt(p, '#c-ribbon-t'), 'Goal Sat Oct 3 (a weekend day); forecast Sat Oct 17 (a weekend day); 14 days apart.', 'C3 a sentence says the same in words');
   const rb = await p.evaluate(() => { const s = document.getElementById('c-ribbon'); return { label: s.getAttribute('aria-label'), text: [...s.querySelectorAll('text')].map(t => t.textContent), poly: s.querySelectorAll('polygon').length, circ: s.querySelectorAll('circle').length, gx: +s.querySelector('polygon').getAttribute('points').split(' ')[0].split(',')[0], fx: +s.querySelector('circle').getAttribute('cx'), rects: s.querySelectorAll('rect').length }; });
@@ -230,7 +231,7 @@ const contrast = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - 
   // ====================================================== H. Today
   p = await fresh();
   await p.click('#trayMenuBtn'); await settle(p, 80);
-  ok(!(await p.$$eval('#menu button', n => n.some(x => /^Today/.test(x.textContent.trim())))), 'H1 the focused tray menu has no Today');
+  ok(await p.$$eval('#menu button', n => n.some(x => /^Today/.test(x.textContent.trim()))), 'H1 the focused tray menu has Today (round 34: Today is home)');
   await p.keyboard.press('Escape'); await p.close();
   p = await fresh({ all: true });
   await p.click('#trayMenuBtn'); await settle(p, 80);

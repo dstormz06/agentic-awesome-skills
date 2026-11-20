@@ -36,7 +36,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   // ====================================================== A. the card's actions
   let p = await fresh();
   await openFull(p, '216482');
-  eq(await p.$$eval('.chips .chip', n => n.filter(x => !x.hidden).map(x => x.textContent)), ['Add a note · 3 notes', 'Copy status', 'Quick replies ▾', 'Keep in my list', 'Sister ANDA · 1', 'Open ANDA page ↗'], 'A1 the main action is Add a note; Copy status and Open ANDA page are small buttons');
+  eq(await p.$$eval('.chips .chip', n => n.filter(x => !x.hidden).map(x => x.textContent)), ['Add a note · 3 notes', 'Copy status', 'More ↓', 'Quick replies ▾', 'Keep in my list', 'Sister ANDA · 1', 'Open ANDA page ↗'], 'A1 the main action is Add a note; Copy status and Open ANDA page are small buttons (round 34: More opens the rest of the card)');
   const main = await p.$eval('#chipNotes', c => { const s = getComputedStyle(c), r = c.getBoundingClientRect(); return { h: Math.round(r.height), bg: s.backgroundColor, key: getComputedStyle(c, '::after').content }; });
   ok(main.h <= 36 && main.h >= 32, `A2 it is slimmer than before (${main.h} px; it was 44)`);
   ok(/0\.1\)$/.test(main.bg), `A3 and tinted, not solid (${main.bg})`);

@@ -32,7 +32,7 @@ const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++
   const ids = ['c-id', 'c-drug', 'c-goal', 'c-fc', 'c-fdelta', 'c-fconf', 'c-latest', 'c-ahead', 'c-psg', 'c-rld'];
   for (const look of ['p', 'k']) {   // the two classic-layout looks still offered; the answer-first looks are covered by suite 24
     await page.evaluate(l => applyLook(l), look);
-    await page.evaluate(() => openCard('216482', { anchor: { x: 420, y: 40 }, forceFull: true }));
+    await page.evaluate(() => { openCard('216482', { anchor: { x: 420, y: 40 }, forceFull: true }); toggleExpand(); });   // round 34: Latest, Ahead and the references sit under More
     await page.waitForTimeout(250);
     const want = look === 'r' ? ids.map(i => i === 'c-fdelta' ? 'c-rail-d' : i === 'c-fconf' ? 'c-rail-c' : i) : ids;   // R carries the gap and the confidence in its column
     const shown = await page.evaluate(ids => ids.map(i => { const e = document.getElementById(i); return e && e.textContent.trim().length > 0 && getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().width > 0; }), want);

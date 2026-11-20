@@ -60,7 +60,7 @@ public partial class App
                 if (_repository.Find(id) is not { } r) return;
                 var cursor = TextCaptureService.GetCursorPosition();
                 OpenCard(r, new PixelPoint(cursor.X, cursor.Y), mini: false);
-            }));
+            }, ShowAll: OpenWatchList));                          // round 34: the watch list has no tray item; it opens from Today
         _todayWindow.Closed += (_, _) => _todayWindow = null;
         _todayWindow.Show();
         RefreshTrayState();

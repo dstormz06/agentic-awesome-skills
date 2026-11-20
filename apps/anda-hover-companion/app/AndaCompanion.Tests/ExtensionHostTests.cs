@@ -47,7 +47,7 @@ public class NativeHostFramingTests
         Assert.True(r[0]["ok"]!.GetValue<bool>());
         Assert.Equal(NativeHostSession.Protocol, r[0]["protocol"]!.GetValue<int>());
         Assert.Equal("demo", r[0]["dataKind"]!.GetValue<string>());
-        Assert.Equal("whisper", r[1]["settings"]!["consent"]!.GetValue<string>());
+        Assert.Equal("full", r[1]["settings"]!["consent"]!.GetValue<string>());   // Full is the default since round 34
         Assert.Equal(7, r[1]["settings"]!["urgentLateDays"]!.GetValue<int>());
     }
 

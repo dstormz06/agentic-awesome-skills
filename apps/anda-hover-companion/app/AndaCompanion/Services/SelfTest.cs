@@ -255,7 +255,7 @@ internal static class SelfTest
             bool slot = win.FindControl<Control>("WatchSlot")!.IsVisible;
             string text = win.FindControl<TextBlock>("WatchText")!.Text ?? "";
             win.Close();
-            report.Add(slot && text.Contains("falls on a weekend: Sat Oct 3") && text.Contains("more in the drawer")
+            report.Add(slot && text.Contains("falls on a weekend: Sat Oct 3") && text.Contains("(+1 more)")
                 ? new("watch-line-on-card", CheckStatus.Pass, "the card shows the weekend goal-date flag and points to the rest of the watch list")
                 : new("watch-line-on-card", CheckStatus.Fail, $"WATCH slot visible={slot}, text='{text}'"));
             await Task.CompletedTask;

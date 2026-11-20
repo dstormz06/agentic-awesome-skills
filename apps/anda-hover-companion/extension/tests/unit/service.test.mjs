@@ -10,21 +10,22 @@ const NOW = () => new Date(2026, 10, 3, 9, 0, 0);
 const T = (s) => new TextEncoder().encode(s);
 const CSV = 'ANDA,Product,Applicant,Goal date,Forecast date,Status\n930001,Alpha tabs,Birch,2026-10-03,2026-10-17,In review\n930002,Beta tabs,Birch,2031-03-04,2031-03-03,Waiting\n';
 
-test('demo records answer by default, and whisper decides what opens first', async () => {
+test('demo records answer by default, the card opens at once, and whisper still decides what opens first when chosen', async () => {
   const svc = createService({ storage: memory(), now: NOW });
   const risk = await svc.lookup('ANDA 216482'), calm = await svc.lookup('214990');
-  assert.equal(risk.ok, true); assert.equal(risk.step, 'peek'); assert.equal(risk.card.demo, true);
-  assert.equal(calm.step, 'invite');
+  assert.equal(risk.ok, true); assert.equal(risk.step, 'full'); assert.equal(risk.card.demo, true);   // round 34: the shortcut opens the card
+  assert.equal(calm.step, 'full');
   assert.equal((await svc.lookup('999999')).error, 'not-found');
   assert.equal((await svc.lookup('NDA 021234')).error, 'bad-number');
-  await svc.saveSettings({ consent: 'full' });
-  assert.equal((await svc.lookup('214990')).step, 'full');
+  await svc.saveSettings({ consent: 'whisper' });
+  assert.equal((await svc.lookup('216482')).step, 'peek');
+  assert.equal((await svc.lookup('214990')).step, 'invite');
 });
 
 test('with an imported sheet as the source, demo numbers are not found and the sheet answers', async () => {
   const store = memory(), svc = createService({ storage: store, now: NOW });
   await svc.importFile('Tracker.csv', T(CSV), new Date(2026, 10, 2, 8, 30).getTime());
-  await svc.saveSettings({ dataSource: 'imported' });
+  await svc.saveSettings({ dataSource: 'imported', consent: 'whisper' });   // Whisper, so the urgent rule shows in the first step (Full opens every card)
   const r = await svc.lookup('930001');
   assert.equal(r.ok, true); assert.equal(r.card.source, 'Your portfolio: Tracker.csv'); assert.equal(r.card.drug, 'Alpha tabs');
   assert.equal(r.step, 'peek');                                                                  // its goal date has passed: urgent
@@ -63,7 +64,7 @@ test('the app source asks the app, follows its settings when asked to, and has n
   const r = await svc.lookup('930001');
   assert.equal(r.card.drug, 'From the app'); assert.equal(r.step, 'full'); assert.equal(r.settings.autoHideSeconds, 40);   // the app's consent wins
   await svc.saveSettings({ followApp: false });
-  assert.equal((await svc.lookup('930001')).step, 'peek');                                                                 // the extension's own: whisper + urgent
+  assert.equal((await svc.lookup('930001')).step, 'full');                                                                 // the extension's own: Full, the usual setting since round 34
   const down = createService({ storage: memory(), native: { request: async () => { throw new NativeError('not-installed', 'The desktop app connection is not set up.'); } }, now: NOW });
   await down.saveSettings({ dataSource: 'app' });
   const bad = await down.lookup('216482');

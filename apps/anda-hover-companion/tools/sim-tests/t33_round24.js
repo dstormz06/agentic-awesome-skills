@@ -42,13 +42,14 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   await openFull(p, '216482');
   let c = await count(p);
   eq([c.shown, c.cls, c.aria, c.fig, c.cap], [true, 'cd5 lv-calm', '79 days to the goal date', '79', 'DAYS TO GOAL'], 'X3 beside the answer: 79 days to the goal date, in a picture and in words');
+  await p.evaluate(() => toggleExpand()); await settle(p, 200);   // round 34: the calendar sits under More
   const geo = await p.evaluate(() => { const r = e => e.getBoundingClientRect(), cd = r(document.getElementById('c-cd')), hero = r(document.getElementById('c-hero')), hl = r(document.querySelector('#c-hero .hl')), hs = r(document.getElementById('c-hero-s')), rb = r(document.getElementById('c-ribbon-slot')), cs = getComputedStyle(document.documentElement);
     return { inHero: cd.left >= hero.left && cd.right <= hero.right + .5 && cd.top >= hero.top - .5 && cd.bottom <= hero.bottom + .5, clear: hl.right <= cd.left + .5 && hs.right <= cd.left + .5, oneLine: hl.height < 44, w: Math.round(cd.width), ribbon: getComputedStyle(document.getElementById('c-ribbon-slot')).display !== 'none' && rb.top >= hero.bottom - 1, gauge: getComputedStyle(document.getElementById('c-hgauge')).display, accent: cs.getPropertyValue('--c-accent').trim(), said: document.getElementById('c-ribbon').getAttribute('aria-label'), hero: document.getElementById('c-hero').innerText.replace(/\s+/g, ' ') }; });
   ok(geo.inHero && geo.clear && geo.oneLine && geo.w === 96, `X4 the count sits inside the answer area, 96 px wide, no text runs under it, and the answer stays on one line`);
   eq([geo.ribbon, geo.said, geo.gauge, geo.accent], [true, 'Calendar ribbon. Goal Sat Oct 3 (a weekend day); forecast Sat Oct 17 (a weekend day); 14 days apart.', 'none', '#56626e'], 'X5 the calendar from U is under the answer, with its sentence; the dial of W is gone; the colors are the graphite ones');
   ok(/^14 days later than the goal /.test(geo.hero), 'X6 the first thing the card says is still the forecast against the goal');
-  eq(await p.$$eval('.chips .chip', n => n.filter(x => !x.hidden).map(x => x.textContent)), ['Add a note · 3 notes', 'Copy status', 'Quick replies ▾', 'Keep in my list', 'Sister ANDA · 1', 'Open ANDA page ↗'], 'X7 the same actions stay at the bottom');
-  ok(await p.evaluate(() => { const k = card.getBoundingClientRect(); return getComputedStyle(document.querySelector('.chips-slot')).position === 'sticky' && k.bottom <= innerHeight + 1 && [...document.querySelectorAll('.chips .chip')].filter(x => !x.hidden).every(c => { const r = c.getBoundingClientRect(); return r.top >= k.top && r.bottom <= k.bottom + 1; }); }), 'X8 the card fits the screen with the calendar in it, and every action is on screen');
+  eq(await p.$$eval('.chips .chip', n => n.filter(x => !x.hidden).map(x => x.textContent)), ['Add a note · 3 notes', 'Copy status', 'More ↓', 'Quick replies ▾', 'Keep in my list', 'Sister ANDA · 1', 'Open ANDA page ↗'], 'X7 the same actions stay at the bottom');
+  ok(await p.evaluate(() => { const k = card.getBoundingClientRect(); return getComputedStyle(document.querySelector('.chips-slot')).position === 'sticky' && k.bottom <= innerHeight + 1 && [...document.querySelectorAll('.chips .chip')].filter(x => !x.hidden && x.getClientRects().length).every(c => { const r = c.getBoundingClientRect(); return r.top >= k.top && r.bottom <= k.bottom + 1; }); }), 'X8 the card fits the screen with the calendar in it, and every action is on screen');
   await p.keyboard.press('Enter'); await settle(p, 300);
   eq(await p.evaluate(() => [document.activeElement.id, document.getElementById('x-notes-d').open]), ['qnText', true], 'X9 Enter still goes straight to a new note');
   await p.keyboard.press('Escape'); await settle(p, 120); await p.keyboard.press('Escape'); await settle(p, 250);
@@ -82,7 +83,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   await p.close();
   for (const [w, hgt] of [[1920, 1080], [1280, 720], [1024, 768], [390, 844]]) {
     const q = await fresh({ viewport: { width: w, height: hgt } });
-    await openFull(q, '216482');
+    await openFull(q, '216482'); await q.evaluate(() => toggleExpand()); await q.waitForTimeout(200);   // round 34: the calendar sits under More
     eq(await q.evaluate(() => { const k = card.getBoundingClientRect(), cd = document.getElementById('c-cd').getBoundingClientRect(), rb = document.getElementById('c-ribbon').getBoundingClientRect(); return [document.documentElement.scrollWidth <= innerWidth, k.top >= -1 && k.bottom <= innerHeight + 1, cd.width > 0 && cd.right <= k.right + .5, rb.width > 0 && rb.right <= k.right + .5]; }), [true, true, true, true], `X21 at ${w} by ${hgt} the page does not scroll sideways, the card fits, and the count and the calendar are inside it`);
     await q.close(); }
   // the live clock: real dates, long holiday names, and midnight

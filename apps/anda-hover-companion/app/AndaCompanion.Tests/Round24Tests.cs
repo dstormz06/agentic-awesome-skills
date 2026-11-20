@@ -113,6 +113,7 @@ public class Round24Tests : IClassFixture<HeadlessFixture>
     {
         var r = await Inspect(Late, false, w =>
         {
+            w.FindControl<Button>("MoreChip")!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent)); Settle();   // round 34: the calendar sits under More
             var box = w.GetVisualDescendants().OfType<Border>().Single(b => b.Name == "HeroCount");
             var hero = w.GetVisualDescendants().OfType<StackPanel>().Single(p => p.Name == "Hero");
             var ribbon = w.GetVisualDescendants().OfType<StackPanel>().Single(p => p.Name == "Ribbon");
