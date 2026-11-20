@@ -129,7 +129,8 @@ const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++
   // sample brief what-if + honest label
   await page.check('#swAi'); await page.click('#appIcon', { button: 'right' }); await page.click('#menu >> text=Settings…'); await page.click('#adaptExpand');
   await page.check('input[name=consent][value=full]'); await page.click('#setDone');
-  await page.dblclick('[data-pick="216482"]'); await page.keyboard.press('Control+Alt+KeyA'); await page.waitForTimeout(2600);
+  await page.dblclick('[data-pick="216482"]'); await page.keyboard.press('Control+Alt+KeyA'); await page.waitForTimeout(300);
+  await page.click('#chipMore'); await page.waitForTimeout(2600);       // round 34: with AI on, the brief is asked for once the card is opened in full
   ok((await page.textContent('#c-verify')).includes('no model is called'), 'sample brief is labelled as simulated');
   await page.screenshot({ path: OUT + '/s8-sample-brief.png' });
   await page.keyboard.press('Escape');
