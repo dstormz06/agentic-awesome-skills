@@ -90,7 +90,7 @@ public static class SettingsBackup
     /// <summary>
     /// A backup is a file anyone can edit or send, and a connection is an address plus the NAME of an environment variable whose value is sent to it.
     /// So a restore never switches on a connection that sends data or a token off this PC: the AI connection goes back to "Offline only" and every agent comes back
-    /// switched off and not automatic. The address and variable name are kept, so the person can read them and switch the connection on themselves.
+    /// switched off and not automatic, and so does every MCP server (round 40). The address and variable name are kept, so the person can read them and switch the connection on themselves.
     /// </summary>
     public static string SwitchOffConnections(Settings target)
     {
@@ -113,6 +113,10 @@ public static class SettingsBackup
         }
         if (wereOn > 0)
             notes.Add($"{(wereOn == 1 ? "1 agent" : wereOn + " agents")} came back switched off: please check {(wereOn == 1 ? "its" : "their")} address in Settings, then switch {(wereOn == 1 ? "it" : "them")} on.");
+        // round 40 review: an MCP server sends a token too, so it never comes back switched on
+        int mcpOn = target.McpServers.Count(m => m.Enabled);
+        foreach (var m in target.McpServers) m.Enabled = false;
+        if (mcpOn > 0) notes.Add(McpRules.SaidSwitchedOff(mcpOn));
         return notes.Count == 0 ? "" : " " + string.Join(" ", notes);
     }
 

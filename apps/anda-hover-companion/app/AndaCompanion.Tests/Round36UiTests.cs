@@ -54,10 +54,10 @@ public class Round36UiTests : IClassFixture<HeadlessFixture>
                 var rowNames = w.List.Children.OfType<Button>().Select(b => AutomationProperties.GetName(b)).ToList();
                 // pressing the row in "since" keeps the keyboard on that row, not on the same ANDA further down
                 // the same ANDA is in "since" and again under NEEDS A LOOK: pressing the second keeps the keyboard there, not on the first
-                var both = w.List.Children.OfType<Button>().Where(b => (string?)b.Tag == "216482").ToList();
+                var both = w.List.Children.OfType<Button>().Where(b => b.Tag is TodayWindow.RowKey { Id: "216482" }).ToList();
                 both[^1].RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); Settle();
                 var focused = TopLevel.GetTopLevel(w)!.FocusManager!.GetFocusedElement() as Button;
-                int idxFocused = w.List.Children.IndexOf(focused!), idxFirst = w.List.Children.IndexOf(w.List.Children.OfType<Button>().Where(b => (string?)b.Tag == "216482").Last()), copies = both.Count;
+                int idxFocused = w.List.Children.IndexOf(focused!), idxFirst = w.List.Children.IndexOf(w.List.Children.OfType<Button>().Where(b => b.Tag is TodayWindow.RowKey { Id: "216482" }).Last()), copies = both.Count;
                 w.Close(); Settle();
                 return (texts, gone, rowNames, idxFocused, idxFirst, copies, keptTimes, keptSame: ReferenceEquals(keptLook, now), firstTexts: Texts(first.List), offTexts: Texts(off.List), unreadTexts, unreadKept);
             }

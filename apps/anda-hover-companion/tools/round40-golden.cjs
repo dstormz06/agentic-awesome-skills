@@ -23,7 +23,8 @@ const OUT = DIR + 'round40-golden.json';
     for (const t of tools) for (const sel of selections) argumentsFor.push({ tool: t, selection: sel, result: mcpArgumentsFor(t, sel) });
     const parse = ['', '   ', '{}', '{"query":"x"}', '[1,2]', '"text"', '42', '{bad json', ' {"a":{"b":[1,2,3]}} ', 'x'.repeat(20001)]
       .map(text => { const r = mcpParseArgs(text); return { text: text.length > 100 ? `x*${text.length}` : text, args: r.args, problem: r.problem }; });
-    const addresses = ['', '   ', 'https://mcp.example.test/mcp', 'http://mcp.example.test/mcp', 'http://localhost:8080/mcp', 'http://127.0.0.1/mcp', 'https://user:pw@mcp.example.test/', 'ftp://mcp.example.test', 'not an address', 'https://xn--exmple-4nf.test/mcp']
+    const addresses = ['', '   ', 'https://mcp.example.test/mcp', 'http://mcp.example.test/mcp', 'http://localhost:8080/mcp', 'http://127.0.0.1/mcp', 'https://user:pw@mcp.example.test/', 'ftp://mcp.example.test', 'not an address', 'https://xn--exmple-4nf.test/mcp',
+      'http://LOCALHOST/mcp', 'http://127.0.0.2/mcp', 'http://[::1]:8080/mcp', 'http://localhost.example.test/mcp']
       .map(endpoint => ({ endpoint, problem: mcpAddressProblem(endpoint) }));
     const long = 'A'.repeat(39);
     const normalize = [
@@ -48,7 +49,8 @@ const OUT = DIR + 'round40-golden.json';
     return {
       about: 'Shared cases for round 40, written by the browser simulation. The Windows app must give the same answers.',
       said: { sends: MCP_SAID.sends, kept: MCP_SAID.kept, hint: MCP_SAID.hint, noServer: MCP_SAID.noServer, notJson: MCP_SAID.notJson, tooLong: MCP_SAID.tooLong,
-        nothingYet: MCP_SAID.nothingYet, chooseFirst: MCP_SAID.chooseFirst, listed: [1, 3].map(n => ({ n, text: MCP_SAID.listed(n) })) },
+        nothingYet: MCP_SAID.nothingYet, chooseFirst: MCP_SAID.chooseFirst, listed: [1, 3].map(n => ({ n, text: MCP_SAID.listed(n) })),
+        argsLabel: MCP_SAID.argsLabel, switchedOff: [1, 2].map(n => ({ n, text: mcpSwitchedOff(n) })) },
       argumentsFor, parse, addresses, normalize,
       characters: [{}, { query: 'goal date', max_results: 2 }, { q: 'é "quoted" \\ <b>&</b>\n' }, { emoji: '\u{1F600}', n: [1.5, true, null] }, { t: 'a\\\u{1F600}\\\\\u{1F4C4}' }, { typed: '\\uD83D\\uDE00 is text' }].map(args => ({ args, n: JSON.stringify(args).length })),
       preview: mcpPreview({ name: 'Division search' }, 'search', { query: 'Metformin', limit: 3 }, 'mcp.example.test'),

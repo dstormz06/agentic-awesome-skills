@@ -45,26 +45,6 @@ public sealed class CustomApiSettings
 public sealed record CustomApiInspection(bool Ok, ElsaSettings? Settings, string Message);
 
 /// <summary>
-/// Round 40: My API filled in for a common kind of service with one press: the header, its prefix, the body and the reply path. The address
-/// stays the person's own; Hint is only shown as its example. The same three as the simulation (mockup/round40-golden.json).
-/// </summary>
-public sealed record CustomApiPreset(string Id, string Label, string Header, string Scheme, string Template, string Path, string Hint)
-{
-    public static readonly IReadOnlyList<CustomApiPreset> All = new CustomApiPreset[]
-    {
-        new("openai", "OpenAI-compatible", "Authorization", "Bearer", CustomApiSettings.ExampleTemplate, "choices[0].message.content", "https://…/v1/chat/completions"),
-        new("azure", "Azure OpenAI", "api-key", "",
-            "{\"max_tokens\":{{max_tokens}},\"messages\":[{\"role\":\"system\",\"content\":\"{{system}}\"},{\"role\":\"user\",\"content\":\"{{user}}\"}]}",
-            "choices[0].message.content", "https://<resource>.openai.azure.com/openai/deployments/<deployment>/chat/completions?api-version=<version>"),
-        new("ollama", "Ollama on this PC", "", "",
-            "{\"model\":\"{{model}}\",\"stream\":false,\"messages\":[{\"role\":\"system\",\"content\":\"{{system}}\"},{\"role\":\"user\",\"content\":\"{{user}}\"}]}",
-            "message.content", "http://localhost:11434/api/chat"),
-    };
-
-    public void FillIn(CustomApiSettings api) { api.AuthHeader = Header; api.AuthScheme = Scheme; api.RequestTemplate = Template; api.ResponsePath = Path; }
-}
-
-/// <summary>
 /// Round 40: where a request may go and with which token, checked the same way for My API, the agents and the MCP servers before anything
 /// is sent. The address: https:// only (http:// for this PC only), no user name or password in it. The token: read from the environment
 /// variable the person names, never stored. Each check gives either its value or a sentence for the person, never both.
@@ -75,12 +55,39 @@ public static class ApiTarget
     {
         string address = (endpoint ?? "").Trim();
         if (address.Length == 0) return (null, "Please enter the endpoint address of your API (https://…).");
-        if (!Uri.TryCreate(address, UriKind.Absolute, out var uri) ||
-            !(uri.Scheme == Uri.UriSchemeHttps || (uri.Scheme == Uri.UriSchemeHttp && uri.IsLoopback)))
+        if (!Uri.TryCreate(address, UriKind.Absolute, out var uri) || !Allowed(uri))
             return (null, "The endpoint must be an https:// address (http:// is accepted only for localhost). Nothing was sent.");
         if (!string.IsNullOrEmpty(uri.UserInfo))
             return (null, "Please do not put a user name or password in the address; use the environment variable for the token instead. Nothing was sent.");
         return (uri, null);
+    }
+
+    /// <summary>
+    /// https, or http to this PC only: the names localhost, 127.0.0.1 and [::1], as the simulation has them (round 40 review: "loopback"
+    /// let 127.0.0.2 through, and the two programs disagreed). Elsa uses the same rule.
+    /// </summary>
+    public static bool Allowed(Uri uri) => uri.Scheme == Uri.UriSchemeHttps || (uri.Scheme == Uri.UriSchemeHttp && uri.Host.ToLowerInvariant() is "localhost" or "127.0.0.1" or "[::1]" or "::1");
+
+    /// <summary>The host of an http or https address in the form the network uses (a look-alike letter shows as "xn--…"), or "" when there is none.</summary>
+    public static string Host(string? address) =>
+        Uri.TryCreate((address ?? "").Trim(), UriKind.Absolute, out var u) && (u.Scheme == Uri.UriSchemeHttps || u.Scheme == Uri.UriSchemeHttp) ? u.IdnHost : "";
+
+    /// <summary>
+    /// The header that carries the token, or why it cannot be sent (round 40 review: a line break in the prefix split the header in two and
+    /// moved the token into a header of the sender's choosing). The name must be an HTTP token; the prefix and the token visible ASCII.
+    /// No token or no header name: nothing to send and no problem. A problem never repeats the token.
+    /// </summary>
+    public static (KeyValuePair<string, string>? Header, string? Problem) Authorization(string? header, string? scheme, string? token)
+    {
+        string name = (header ?? "").Trim(), prefix = (scheme ?? "").Trim();
+        if (string.IsNullOrEmpty(token) || name.Length == 0) return (null, null);
+        if (!System.Text.RegularExpressions.Regex.IsMatch(name, @"^[!#$%&'*+.^_`|~0-9A-Za-z-]{1,64}$"))
+            return (null, "The token header name is not valid: letters, digits and - only, for example Authorization. Nothing was sent.");
+        if (!prefix.All(c => c is >= '!' and <= '~'))
+            return (null, "The text before the token is not valid: one word, for example Bearer, with no space or line break. Nothing was sent.");
+        if (!token.All(c => c is >= '!' and <= '~'))
+            return (null, "The token in that environment variable has a character that cannot be sent in a header (a line break, a space, or a letter outside ASCII), so it was not sent.");
+        return (new(name, prefix.Length > 0 ? $"{prefix} {token}" : token), null);
     }
 
     /// <summary>No variable named: no token and no problem.</summary>
@@ -138,14 +145,10 @@ public sealed class CustomApiMapping(CustomApiSettings settings, IReadOnlyDictio
         if (TryFill(settings.RequestTemplate, system, user, maxTokens, settings.Model, extras, out string body) is { } error)
             throw new ElsaException(error);
         var request = new HttpRequestMessage(HttpMethod.Post, es.Endpoint) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
-        string header = (settings.AuthHeader ?? "").Trim();
-        if (es.Token is { Length: > 0 } token && header.Length > 0)
-        {
-            string scheme = (settings.AuthScheme ?? "").Trim();
-            // TryAddWithoutValidation: a token or scheme with unusual characters must not throw a message that echoes it.
-            if (!request.Headers.TryAddWithoutValidation(header, scheme.Length > 0 ? $"{scheme} {token}" : token))
-                throw new ElsaException("The authentication header name is not valid.");
-        }
+        var (auth, problem) = ApiTarget.Authorization(settings.AuthHeader, settings.AuthScheme, es.Token);
+        if (problem is not null) { request.Dispose(); throw new ElsaException(problem); }
+        // TryAddWithoutValidation: checked above, and a value with unusual characters must not throw a message that echoes it
+        if (auth is { } h && !request.Headers.TryAddWithoutValidation(h.Key, h.Value)) { request.Dispose(); throw new ElsaException("The authentication header name is not valid."); }
         return request;
     }
 

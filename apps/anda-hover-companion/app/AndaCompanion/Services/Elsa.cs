@@ -86,8 +86,7 @@ public static class ElsaConfig
                 $"Elsa is selected but {EndpointVar} is not set. Set it to the endpoint URL Elsa's team gives you.");
 
         // A token must never travel in clear text. https only; plain http is allowed solely for a local test server.
-        if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var uri) ||
-            !(uri.Scheme == Uri.UriSchemeHttps || (uri.Scheme == Uri.UriSchemeHttp && uri.IsLoopback)))
+        if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var uri) || !ApiTarget.Allowed(uri))
             return new(ElsaStatus.InsecureEndpoint, null,
                 $"{EndpointVar} must be an https:// URL (http:// is accepted only for localhost). Nothing was sent.");
 
@@ -97,9 +96,9 @@ public static class ElsaConfig
             NullIfBlank(env(ModelVar)), NullIfBlank(env(AgentVar)));
 
         return mapping.IsFilledIn
-            ? new(ElsaStatus.Ready, settings, $"Elsa configured · {uri.Host}")
+            ? new(ElsaStatus.Ready, settings, $"Elsa configured · {uri.IdnHost}")
             : new(ElsaStatus.MappingNotFilled, settings,
-                $"Elsa endpoint set ({uri.Host}), but the request mapping is still the placeholder. Briefs stay offline " +
+                $"Elsa endpoint set ({uri.IdnHost}), but the request mapping is still the placeholder. Briefs stay offline " +
                 "until it is written — see ELSA-INTEGRATION.md, step 3.");
     }
 

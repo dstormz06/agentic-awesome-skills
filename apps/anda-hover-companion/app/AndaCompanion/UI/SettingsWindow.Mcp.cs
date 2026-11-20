@@ -29,6 +29,8 @@ public partial class SettingsWindow
             var s = _settings.McpServers[i]; int n = i + 1;
             var status = new TextBlock { Classes = { "hint" } };
             AutomationProperties.SetLiveSetting(status, AutomationLiveSetting.Polite);
+            var use = new CheckBox { Content = "Use this server", IsChecked = s.Enabled };
+            AutomationProperties.SetName(use, $"Use MCP server {n}");
             TextBox Field(string label, string watermark, string value, Action<string> set)
             {
                 var box = new TextBox { Text = value, Watermark = watermark };
@@ -36,13 +38,12 @@ public partial class SettingsWindow
                 box.LostFocus += (_, _) =>
                 {
                     set((box.Text ?? "").Trim());
-                    if (s.Endpoint.Length == 0 && s.Enabled) { s.Enabled = false; status.Text = "No address, so this server is not used."; }
+                    // the rule of McpRules.Normalize (no address, not used), shown at once: the box is cleared and the reason said
+                    if (s.Endpoint.Length == 0 && s.Enabled) { s.Enabled = false; use.IsChecked = false; status.Text = "No address, so this server is not used."; }
                     Apply();
                 };
                 return box;
             }
-            var use = new CheckBox { Content = "Use this server", IsChecked = s.Enabled };
-            AutomationProperties.SetName(use, $"Use MCP server {n}");
             use.IsCheckedChanged += (_, _) =>
             {
                 if (use.IsChecked == true && ApiTarget.Address(s.Endpoint).Problem is { } problem) { use.IsChecked = false; status.Text = problem; return; }
@@ -53,15 +54,11 @@ public partial class SettingsWindow
             test.Click += async (_, _) =>
             {
                 test.IsEnabled = false; status.Text = "Asking the server for its tools…";
-                try
-                {
-                    using var client = new McpClient(s);
-                    var tools = await client.ListToolsAsync(CancellationToken.None);
-                    status.Text = tools.Count == 0 ? "Connected. The server offers no tools."
-                        : $"Connected. {tools.Count} tool{(tools.Count == 1 ? "" : "s")}: {string.Join(", ", tools.Take(5).Select(t => t.Name))}{(tools.Count > 5 ? ", …" : "")}";
-                }
+                using var client = new McpClient(s);
+                try { status.Text = McpRules.SaidTested((await client.ListToolsAsync(CancellationToken.None)).Select(t => t.Name).ToList()); }
                 catch (McpException ex) { status.Text = ex.Message; }
-                finally { test.IsEnabled = true; }
+                catch (Exception) { status.Text = McpRules.SaidUnexpected; }      // round 40 review: nothing a server sends may close the app
+                finally { await client.EndAsync(); test.IsEnabled = true; }
             };
             var remove = new Button { Content = "Remove" };
             AutomationProperties.SetName(remove, $"Remove MCP server {n}");

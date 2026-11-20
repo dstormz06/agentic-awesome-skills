@@ -13,7 +13,9 @@ namespace AndaCompanion.UI;
 /// <summary>
 /// Round 40: MCP tools. Nothing is sent by itself: the person chooses a server and presses List tools (the start of a session and a request
 /// for its tools), chooses a tool, reads and changes the arguments, presses "Show what will be sent", and only then Send. The answer is shown
-/// as plain text and kept nowhere. The client writes each request to the event log as a count, never its content.
+/// as plain text and kept nowhere. The client writes each request to the event log as a count, never its content. While a request is out,
+/// the server, the tool and the arguments cannot be changed, so what goes is what was shown (round 40 review). One session per server
+/// for as long as the window is open; closing it cancels what is out and ends the sessions.
 /// </summary>
 public sealed class McpWindow : Window
 {
@@ -31,17 +33,19 @@ public sealed class McpWindow : Window
     public Func<string, Task>? WriteClipboard { get; set; }
 
     private readonly IReadOnlyList<McpServerSettings> _servers;
-    private readonly Func<McpServerSettings, McpClient> _client;
+    private readonly Func<McpServerSettings, McpClient> _newClient;
+    private readonly Dictionary<string, McpClient> _clients = new(StringComparer.Ordinal);
+    private readonly CancellationTokenSource _closing = new();
     private readonly string _selection;
     private IReadOnlyList<McpTool> _tools = Array.Empty<McpTool>();
     private (McpServerSettings Server, string Tool, JsonObject Args)? _ready;
 
     /// <param name="servers">The servers that are switched on.</param>
-    /// <param name="selection">Text the person had selected, put into the first text argument of a tool, for the person to check.</param>
+    /// <param name="selection">Text from the Ask window ("Use with an MCP tool…"), put into the first text argument of a tool, for the person to check.</param>
     /// <param name="client">Makes the client for a server (a test gives one that answers without a network).</param>
     public McpWindow(IReadOnlyList<McpServerSettings> servers, string? selection = null, Func<McpServerSettings, McpClient>? client = null)
     {
-        _servers = servers; _selection = selection ?? ""; _client = client ?? (s => new McpClient(s));
+        _servers = servers; _selection = selection ?? ""; _newClient = client ?? (s => new McpClient(s));
         Title = "ANDA Companion (Notula) — MCP tools"; Width = 560; SizeToContent = SizeToContent.Height; CanResize = false; Topmost = true; ShowInTaskbar = false;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         IBrush Res(string key) => (IBrush)Application.Current!.Resources[key]!;
@@ -72,6 +76,12 @@ public sealed class McpWindow : Window
         var close = new Button { Content = "Done" };
         close.Click += (_, _) => Close();
         KeyDown += (_, e) => { if (e.Key == Key.Escape) Close(); };
+        Closed += async (_, _) =>
+        {
+            _closing.Cancel();
+            foreach (var c in _clients.Values) { await c.EndAsync(); c.Dispose(); }
+            _clients.Clear();
+        };
         Status.Text = servers.Count == 0 ? McpRules.SaidNoServer : McpRules.SaidNothingYet;
 
         Label LabelFor(string text, Control target) { var l = new Label { Content = text, Target = target, Padding = new Thickness(0), FontSize = 12, Foreground = Res("C.Ink2") }; return l; }
@@ -81,7 +91,7 @@ public sealed class McpWindow : Window
         foreach (var b in new[] { PreviewButton, SendButton, CopyButton, close }) buttons.Children.Add(b);
         var body = new StackPanel { Spacing = 6, Margin = new Thickness(20) };
         body.Children.Add(new TextBlock { Text = "MCP tools", FontSize = 15, FontWeight = FontWeight.Bold, Foreground = Res("C.Ink") });
-        foreach (var c in new Control[] { LabelFor("_Server", Servers), row, LabelFor("_Tool", Tools), Tools, About, LabelFor("_Arguments (JSON), filled in from the tool's description and your selection", Arguments),
+        foreach (var c in new Control[] { LabelFor("_Server", Servers), row, LabelFor("_Tool", Tools), Tools, About, LabelFor(McpRules.ArgumentsLabel, Arguments),
                      Arguments, buttons, Shown, Status, Answer })
             body.Children.Add(c);
         Content = new ScrollViewer { Content = body, MaxHeight = 760 };
@@ -91,21 +101,42 @@ public sealed class McpWindow : Window
 
     private void Reset() { _ready = null; SendButton.IsEnabled = false; Shown.Text = ""; }
 
-    internal async Task ListAsync()
+    private McpClient ClientFor(McpServerSettings server) =>
+        _clients.TryGetValue(server.Id, out var c) ? c : _clients[server.Id] = _newClient(server);
+
+    /// <summary>While a request is out nothing that decides what is sent can change.</summary>
+    private void Busy(bool busy)
     {
-        if (Server is not { } server) { Status.Text = McpRules.SaidNoServer; return; }
-        ListButton.IsEnabled = false; Status.Text = "Asking the server for its tools…";
-        try
+        foreach (var c in new Control[] { Servers, Tools, ListButton, PreviewButton }) c.IsEnabled = !busy;
+        Arguments.IsReadOnly = busy;
+        if (busy) SendButton.IsEnabled = false;
+    }
+
+    /// <summary>
+    /// One request, with every way it can end said in one sentence: a server's error, a cancel when the window closes, and anything else a
+    /// server might cause (round 40 review: an unexpected error in a button's handler would have closed the app).
+    /// </summary>
+    private async Task Attempt(string asking, Func<CancellationToken, Task> work)
+    {
+        Busy(true); Status.Text = asking;
+        try { await work(_closing.Token); }
+        catch (McpException ex) { Status.Text = ex.Message; }
+        catch (OperationCanceledException) { /* the window is closing */ }
+        catch (Exception) { Status.Text = McpRules.SaidUnexpected; }
+        finally { if (!_closing.IsCancellationRequested) Busy(false); }
+    }
+
+    internal Task ListAsync()
+    {
+        if (Server is not { } server) { Status.Text = McpRules.SaidNoServer; return Task.CompletedTask; }
+        return Attempt("Asking the server for its tools…", async ct =>
         {
-            using var client = _client(server);
-            _tools = await client.ListToolsAsync(CancellationToken.None);
+            _tools = await ClientFor(server).ListToolsAsync(ct);
             Tools.Items.Clear();
             foreach (var t in _tools) Tools.Items.Add(new ComboBoxItem { Content = t.Title.Length > 0 ? $"{t.Title} ({t.Name})" : t.Name, Tag = t.Name });
             Tools.SelectedIndex = _tools.Count > 0 ? 0 : -1;
             Status.Text = _tools.Count == 0 ? "The server offers no tools." : McpRules.SaidListed(_tools.Count);
-        }
-        catch (McpException ex) { Status.Text = ex.Message; }
-        finally { ListButton.IsEnabled = true; }
+        });
     }
 
     private void FillTool()
@@ -126,18 +157,16 @@ public sealed class McpWindow : Window
         SendButton.IsEnabled = true; Status.Text = "Nothing has been sent yet.";
     }
 
-    internal async Task SendAsync()
+    internal Task SendAsync()
     {
-        if (_ready is not { } ready) return;
-        SendButton.IsEnabled = false; Status.Text = "Sending…";
-        try
+        if (_ready is not { } ready) return Task.CompletedTask;
+        _ready = null;
+        return Attempt("Sending…", async ct =>
         {
-            using var client = _client(ready.Server);
-            var result = await client.CallToolAsync(ready.Tool, ready.Args, CancellationToken.None);
+            var result = await ClientFor(ready.Server).CallToolAsync(ready.Tool, ready.Args, ct);
             Answer.Text = result.Text; CopyButton.IsEnabled = result.Text.Length > 0;
-            Status.Text = result.Message + " The answer is shown here only and is not kept.";
-        }
-        catch (McpException ex) { Status.Text = ex.Message; }
-        finally { _ready = null; Shown.Text = ""; }
+            Status.Text = (result.ToolError ? McpRules.SaidToolFailed : McpRules.SaidAnswered) + " " + McpRules.SaidNotKept;
+            Shown.Text = "";
+        });
     }
 }

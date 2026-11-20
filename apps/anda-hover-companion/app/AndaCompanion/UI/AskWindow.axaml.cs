@@ -18,6 +18,9 @@ public sealed record AskHooks(
 
     /// <summary>Round 27: opens a meeting page for the ANDAs a selection names (up to eight).</summary>
     public Action<IReadOnlyList<string>>? MeetingPage { get; init; }
+
+    /// <summary>Round 40 (review): hands the text to MCP tools, which shows what will be sent before Send. Null while no MCP server is on.</summary>
+    public Action<string>? UseWithMcp { get; init; }
 }
 
 /// <summary>
@@ -89,6 +92,8 @@ public partial class AskWindow : Window
         }
         FillOwnBtn.Click += (_, _) => RunOwn(ActionKind.FillPrompt);
         AskOwnBtn.Click += (_, _) => RunOwn(ActionKind.AskAi);
+        McpBtn.IsVisible = hooks.UseWithMcp is not null;
+        McpBtn.Click += (_, _) => hooks.UseWithMcp?.Invoke(SelectionBox.Text ?? "");
         Opened += (_, _) => { FitToScreen(); if (string.IsNullOrWhiteSpace(SelectionBox.Text)) SelectionBox.Focus(); UsageLog.Record("ask_open"); };
         Closed += (_, _) => _debounce.Stop();
         Analyse();

@@ -32,7 +32,12 @@ public sealed class TodayWindow : Window
     private readonly StackPanel _main = new() { Spacing = 8 };
     private readonly TextBlock _say = new() { FontSize = 1, Opacity = 0, Height = 1, IsHitTestVisible = false };
     private string? _selected;
-    private LastLook.Look? _keepOnClose; private bool _looked; private string? _lookNote; private (List<LastLook.Change> Rows, int More)? _since; private NextWeek.Result? _week;
+    /// <summary>What Today shows of "Since you last looked": its sentence, what moved (none the first time), and the look to keep on closing.</summary>
+    private sealed record LookShown(string Note, (List<LastLook.Change> Rows, int More)? Since, LastLook.Look? Keep);
+    private LookShown? _look;          // null: switched off, no group and nothing kept
+    private NextWeek.Result? _week;
+    /// <summary>A row of the list: the section it is in and its ANDA, so that the keyboard stays on the row that was pressed.</summary>
+    public sealed record RowKey(string Section, string Id);
 
     public TextBox Search { get; } = new() { Watermark = "Type an ANDA number", FontSize = 13 };
     public StackPanel List => _list;
@@ -56,7 +61,7 @@ public sealed class TodayWindow : Window
         ReadLooks();
         // what is kept is the look that was shown, so that a change that comes in while Today is open is listed the next time, not lost;
         // the handler is always there, and the look to keep follows the switch (round 37 review)
-        Closed += (_, _) => { if (_keepOnClose is { } shown) hooks.KeepLook?.Invoke(shown); };
+        Closed += (_, _) => { if (_look?.Keep is { } shown) hooks.KeepLook?.Invoke(shown); };
         Title = "ANDA Companion (Notula) — Today"; Width = 640; Height = 430; MinWidth = 520; MinHeight = 320; CanResize = true;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         Background = Res("C.Bg");
@@ -101,18 +106,13 @@ public sealed class TodayWindow : Window
 
     private void ReadLooks()
     {
-        _looked = false; _lookNote = null; _since = null; _keepOnClose = null;
-        if (_hooks.Looks?.Invoke() is not { } looks) return;      // round 37: switched off, no group and nothing kept
-        _looked = true; _lookNote = looks.Note;
-        _since = looks.Kept is null ? null : LastLook.Since(looks.Kept, looks.Now, id => _hooks.Find(id)?.Record.Attention?.Text);
-        if (looks.Keep) _keepOnClose = looks.Now;
+        if (_hooks.Looks?.Invoke() is not { } looks) { _look = null; return; }      // round 37: switched off, no group and nothing kept
+        var since = looks.Kept is null ? ((List<LastLook.Change>, int)?)null : LastLook.Since(looks.Kept, looks.Now, id => _hooks.Find(id)?.Record.Attention?.Text);
+        _look = new LookShown(looks.Note ?? (since is null ? LastLook.SaidFirst : LastLook.SaidUndated), since, looks.Keep ? looks.Now : null);
     }
 
-    /// <summary>Round 37 review: the switch changed while Today is open: the group goes or comes back at once, and so does what is kept.</summary>
-    public void RefreshLooks() { ReadLooks(); Paint(); }
-
-    /// <summary>Round 39: a setting that changes what next week lists: painted again, next week asked again.</summary>
-    public void Repaint() => Paint();
+    /// <summary>A setting changed while Today is open (rounds 37 and 39): the look and next week are asked again and the list painted again at once.</summary>
+    public void Refresh() { ReadLooks(); Paint(); }
 
     /// <summary>A click on the tray icon while Today is open: next week is asked again, and the list is painted again only if it changed.</summary>
     public void RefreshWeek() { if (_hooks.Week?.Invoke()?.Title != _week?.Title) Paint(); }
@@ -123,59 +123,49 @@ public sealed class TodayWindow : Window
         string? typed = AndaValidator.Extract(Search.Text);
         if (typed is not null && _hooks.Find(typed) is not null) _selected = typed;
         _list.Children.Clear();
-        bool any = false;
-        TextBlock Head(string text) => new() { Text = text, FontSize = 11, FontWeight = FontWeight.Bold, LetterSpacing = 1.3, Foreground = Res("C.Ink3"), Margin = new Thickness(2, 8, 0, 3) };
-        TextBlock Note(string text) => new() { Text = text, FontSize = 11, Foreground = Res("C.Ink2"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(2, 0, 0, 4) };
         // the sentences of one ANDA together, in the order the rule gives them
-        static List<(string Id, string Line)> ById(IEnumerable<(string Id, string Text)> rows) =>
-            rows.GroupBy(r => r.Id).Select(g => (g.Key, string.Join(" ", g.Select(r => r.Text)))).ToList();
-        // Round 36: what moved since the last look comes first; then next week, from Thursday noon
-        if (_looked)
-        {
-            _list.Children.Add(Head("SINCE YOU LAST LOOKED"));
-            _list.Children.Add(Note(_lookNote ?? (_since is null ? LastLook.SaidFirst : LastLook.SaidUndated)));
-            if (_since is { } since)
-            {
-                if (since.Rows.Count == 0) _list.Children.Add(Note(LastLook.SaidNone));
-                foreach (var (id, line) in ById(since.Rows.Select(r => (r.Id, r.Text)))) AddRow("since", id, line, _hooks.Find(id));
-                if (since.More > 0) _list.Children.Add(Note(LastLook.SaidMore(since.More)));
-            }
-        }
+        static IEnumerable<(string Id, string Line, string? Mark)> ById(IEnumerable<(string Id, string Text)> rows) =>
+            rows.GroupBy(r => r.Id).Select(g => (g.Key, string.Join(" ", g.Select(r => r.Text)), (string?)null));
+        // Round 36: what moved since the last look comes first; then next week, from Thursday noon; then the groups
+        if (_look is { } look)
+            Section("since", "SINCE YOU LAST LOOKED", new[] { look.Note }.Concat(look.Since is { Rows.Count: 0 } ? new[] { LastLook.SaidNone } : Array.Empty<string>()),
+                ById((look.Since?.Rows ?? new()).Select(r => (r.Id, r.Text))), look.Since is { More: > 0 } s ? new[] { LastLook.SaidMore(s.More) } : Array.Empty<string>());
         if (_week is { } week)
-        {
-            _list.Children.Add(Head(week.Title));
-            foreach (var h in week.Holidays) _list.Children.Add(Note(h));
-            if (week.Empty is { } empty) _list.Children.Add(Note(empty));
-            foreach (var (id, line) in ById(week.Rows.Select(r => (r.Id, r.Text)))) AddRow("week", id, line, _hooks.Find(id));
-            foreach (var task in week.Tasks ?? Array.Empty<NextWeek.TaskRow>()) _list.Children.Add(Note(task.Text));      // round 38: to-do items due next week, as text
-            if (week.TasksMore > 0) _list.Children.Add(Note(NextWeek.SaidTasksMore(week.TasksMore)));
-        }
-        foreach (var g in Groups())
-        {
-            if (g.Rows.Count == 0) continue;
-            any = true;
-            _list.Children.Add(Head(g.Title));
-            foreach (var row in g.Rows) AddRow(g.Title, row.Id, row.Line, _hooks.Find(row.Id), row.Mark);
-            if (g.More > 0) _list.Children.Add(new TextBlock { Text = Today.More(g.More), FontSize = 11, Foreground = Res("C.Ink3"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(2, 2, 0, 0) });
-        }
+            Section("week", week.Title, week.Holidays.Concat(week.Empty is { } empty ? new[] { empty } : Array.Empty<string>()), ById(week.Rows.Select(r => (r.Id, r.Text))),
+                (week.Tasks ?? Array.Empty<NextWeek.TaskRow>()).Select(t => t.Text).Concat(week.TasksMore > 0 ? new[] { NextWeek.SaidTasksMore(week.TasksMore) } : Array.Empty<string>()));   // round 38: to-do items, as text
+        var groups = Groups().Where(g => g.Rows.Count > 0).ToList();
+        foreach (var g in groups)
+            Section(g.Title, g.Title, Array.Empty<string>(), g.Rows.Select(r => (r.Id, r.Line, (string?)r.Mark)), g.More > 0 ? new[] { Today.More(g.More) } : Array.Empty<string>());
         ShowAllButton.IsVisible = _hooks.ShowAll is not null && Groups()[0].Ids.Count > 0;
-        if (!any) _list.Children.Add(new TextBlock { Text = Today.SaidNothing, FontSize = 12, Foreground = Res("C.Ink3"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(2, 8, 0, 0) });
+        if (groups.Count == 0) _list.Children.Add(new TextBlock { Text = Today.SaidNothing, FontSize = 12, Foreground = Res("C.Ink3"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(2, 8, 0, 0) });
         PaintMain();
     }
 
-    /// <summary>One row: an ANDA in the data can be pressed; one no longer in it is shown as text. group keeps the keyboard on the row pressed.</summary>
-    private void AddRow(string group, string id, string line, Today.Look? look, string? mark = null)
+    /// <summary>One section of the list: its title, its sentences, its rows, and what follows them.</summary>
+    private void Section(string key, string title, IEnumerable<string> notes, IEnumerable<(string Id, string Line, string? Mark)> rows, IEnumerable<string> after)
     {
-        if (look is null)
-        {
-            var gone = new StackPanel { Margin = new Thickness(8, 4, 0, 4) };
-            gone.Children.Add(new TextBlock { Text = id, FontSize = 12, FontWeight = FontWeight.SemiBold, Foreground = Res("C.Ink2") });
-            gone.Children.Add(new TextBlock { Text = line, FontSize = 12, Foreground = Res("C.Ink3"), TextWrapping = TextWrapping.Wrap });
-            AutomationProperties.SetName(gone, $"ANDA {id}. {line}");
-            _list.Children.Add(gone); return;
-        }
-        mark ??= Today.Mark(look);
-        bool current = id == _selected;
+        TextBlock Note(string text) => new() { Text = text, FontSize = 11, Foreground = Res("C.Ink2"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(2, 0, 0, 4) };
+        _list.Children.Add(new TextBlock { Text = title, FontSize = 11, FontWeight = FontWeight.Bold, LetterSpacing = 1.3, Foreground = Res("C.Ink3"), Margin = new Thickness(2, 8, 0, 3) });
+        foreach (var n in notes) _list.Children.Add(Note(n));
+        foreach (var (id, line, mark) in rows)
+            _list.Children.Add(_hooks.Find(id) is { } found ? Row(new RowKey(key, id), line, mark ?? Today.Mark(found)) : Gone(id, line));
+        foreach (var n in after) _list.Children.Add(Note(n));
+    }
+
+    /// <summary>An ANDA no longer in the data: shown as text, since there is nothing to open.</summary>
+    private Control Gone(string id, string line)
+    {
+        var gone = new StackPanel { Margin = new Thickness(8, 4, 0, 4) };
+        gone.Children.Add(new TextBlock { Text = id, FontSize = 12, FontWeight = FontWeight.SemiBold, Foreground = Res("C.Ink2") });
+        gone.Children.Add(new TextBlock { Text = line, FontSize = 12, Foreground = Res("C.Ink3"), TextWrapping = TextWrapping.Wrap });
+        AutomationProperties.SetName(gone, $"ANDA {id}. {line}");
+        return gone;
+    }
+
+    /// <summary>A row that can be pressed: its mark as a dot and as a word, its line, and a border when it is the one shown.</summary>
+    private Button Row(RowKey key, string line, string mark)
+    {
+        string id = key.Id; bool current = id == _selected;
         var dot = new Border { Width = 9, Height = 9, CornerRadius = new CornerRadius(5), VerticalAlignment = VerticalAlignment.Center, Background = Res(mark == "r" ? "C.Bad" : mark == "w" ? "C.Warn" : "C.Good") };
         var text = new StackPanel();
         var idLine = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 6 };
@@ -186,21 +176,20 @@ public sealed class TodayWindow : Window
         var rowGrid = new Grid { ColumnDefinitions = new ColumnDefinitions("18,*") };
         rowGrid.Children.Add(dot); Grid.SetColumn(text, 1); rowGrid.Children.Add(text);
         var b = new Button { Content = rowGrid, HorizontalAlignment = HorizontalAlignment.Stretch, HorizontalContentAlignment = HorizontalAlignment.Left, Padding = new Thickness(8, 5), Background = Brushes.Transparent,
-            BorderThickness = new Thickness(current ? 2 : 1), BorderBrush = Res(current ? "C.Accent" : "C.Hair"), Tag = id };
-        b.Classes.Add("grp-" + group.Replace(' ', '-'));
+            BorderThickness = new Thickness(current ? 2 : 1), BorderBrush = Res(current ? "C.Accent" : "C.Hair"), Tag = key };
         // the mark is a color; its meaning is also in the name a screen reader reads
         AutomationProperties.SetName(b, $"ANDA {id}, {Today.MarkWord(mark)}. {line}" + (current ? ". Shown on the right" : ""));
-        b.Click += (_, _) => Choose(id, group);
-        _list.Children.Add(b);
+        b.Click += (_, _) => Choose(key);
+        return b;
     }
 
     /// <summary>A row was pressed: show that ANDA, keep the keyboard on its row, and say so in one short sentence.</summary>
-    private void Choose(string id, string? group = null)
+    private void Choose(RowKey key)
     {
+        string id = key.Id;
         _selected = id; Paint();
-        string cls = "grp-" + (group ?? "").Replace(' ', '-');
-        var rows = _list.Children.OfType<Button>().Where(b => (string?)b.Tag == id).ToList();
-        (rows.FirstOrDefault(b => group is not null && b.Classes.Contains(cls)) ?? rows.FirstOrDefault(b => b.BorderThickness.Left > 1))?.Focus();
+        var rows = _list.Children.OfType<Button>().Where(b => b.Tag is RowKey k && k.Id == id).ToList();
+        (rows.FirstOrDefault(b => Equals(b.Tag, key)) ?? rows.FirstOrDefault())?.Focus();
         if (_hooks.Find(id) is { } look) _say.Text = Today.Shown(id, Today.Main(look));
     }
 

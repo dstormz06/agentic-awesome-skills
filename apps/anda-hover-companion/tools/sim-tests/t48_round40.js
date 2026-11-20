@@ -8,6 +8,7 @@ const fs = require('fs'), path = require('path');
 const { chromium } = require('playwright');
 const SIM = SIMURL + '/mockup/windows-simulation.html?clock=fixed';
 const GOLD = JSON.parse(fs.readFileSync(path.join(SIMROOT, 'mockup', 'round40-golden.json'), 'utf8'));
+const GOLD_SWITCHED_OFF = GOLD.said.switchedOff[0].text;
 const V29 = JSON.parse(fs.readFileSync(path.join(SIMROOT, 'mockup', 'round29-golden.json'), 'utf8')).version;
 let fails = 0, checks = 0;
 const ok = (c, m) => { checks++; console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++; };
@@ -63,6 +64,16 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   eq(await p.evaluate(() => [state.myApi.header, state.myApi.scheme, state.myApi.path, document.getElementById('apiHeader').value, document.getElementById('apiEndpoint').placeholder, document.getElementById('myApi').open]),
     ['api-key', '', 'choices[0].message.content', 'api-key', GOLD.presets[1].hint, true], 'P2 a preset fills the header, prefix, body and reply path, and leaves the address to the person');
 
+  // ---------- Ask hands its text to MCP tools ----------
+  await p.evaluate(() => { state.mcp = []; paintMcpList(); openAsk('Fictional: goal date question'); }); await settle();
+  eq(await p.evaluate(() => document.getElementById('asMcp').hidden), true, 'A1 with no MCP server on, Ask offers no MCP tool');
+  await p.evaluate(() => { closeApp('ask'); state.mcp = mcpNormalize([{ name: MCP_DEMO.name, endpoint: MCP_DEMO.endpoint, header: '', scheme: '', enabled: true }]); paintMcpList(); openAsk('Fictional: goal date question'); }); await settle();
+  await p.click('#asMcp'); await settle(); await p.click('#mwList'); await settle();
+  eq(await p.evaluate(() => [document.getElementById('asMcp').hidden, document.getElementById('mcpw').style.display, JSON.parse(document.getElementById('mwArgs').value).query, document.querySelector('label[for=mwArgs]').textContent]),
+    [false, 'block', 'Fictional: goal date question', GOLD.said.argsLabel], 'A2 with a server on, "Use with an MCP tool…" opens MCP tools with Ask\'s text in the first text argument, and nothing is sent');
+  await p.evaluate(() => { closeApp('mcpw'); closeApp('ask'); state.mcp = []; paintMcpList(); showApp('settings'); document.getElementById('secConnections').open = true; }); await settle();
+  await p.click('#mcpAddDemo'); await settle();
+
   // ---------- the window ----------
   await p.evaluate(() => openMcp()); await settle();
   const n0 = (await log()).length;
@@ -72,7 +83,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   eq(await p.evaluate(() => document.getElementById('mwStatus').textContent), GOLD.said.chooseFirst, 'W2 Show what will be sent before a tool is chosen says what to do');
   await p.evaluate(() => { document.getElementById('mwArgs').dataset.sel = '  Metformin ER  '; }); await p.click('#mwList'); await settle();
   eq(await p.evaluate(() => [document.getElementById('mwTool').options.length, document.getElementById('mwStatus').textContent, document.getElementById('mwArgs').value]),
-    [2, await p.evaluate(() => MCP_SAID.listed(2)), '{\n  "query": "Metformin ER",\n  "max_results": 0\n}'], 'W3 List tools offers the two tools and fills the arguments in from the selection');
+    [2, await p.evaluate(() => MCP_SAID.listed(2)), '{\n  "query": "Metformin ER",\n  "max_results": 0\n}'], 'W3 List tools offers the two tools and fills the arguments in from the text sent from Ask');
   await p.fill('#mwArgs', '[1]'); await p.click('#mwPreview'); await settle();
   eq(await p.evaluate(() => [document.getElementById('mwStatus').textContent, document.getElementById('mwSend').disabled]), [GOLD.said.notJson, true], 'W4 arguments that are not one object are refused, and Send stays off');
   await p.fill('#mwArgs', '{"query": "goal date", "max_results": 2}'); await p.click('#mwPreview'); await settle();
@@ -90,10 +101,10 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   eq(await p.evaluate(() => document.getElementById('mwStatus').textContent), GOLD.said.noServer, 'W10 with no server on, the window says where to add one');
 
   // ---------- backups, the menu, what changed ----------
-  eq(await p.evaluate(() => { state.mcp = mcpNormalize([{ name: 'Fictional backup server', endpoint: 'https://mcp.example.test/b', enabled: true, env: 'FICTIONAL_TOKEN' }]); const t = backupText();
-    state.mcp = []; importBackup(t); const kept = state.mcp.map(s => [s.name, s.enabled, s.env]); const x = JSON.parse(t); delete x.settings.mcpServers; importBackup(JSON.stringify(x));
-    return [JSON.parse(t).settings.mcpServers.length, kept, state.mcp.length, document.querySelectorAll('#mcpList [data-mcp]').length]; }),
-    [1, [['Fictional backup server', true, 'FICTIONAL_TOKEN']], 1, 1], 'B1 the servers are in a backup and come back (the variable NAME only); an older backup keeps the servers the person has now');
+  eq(await p.evaluate(GOLD_SWITCHED_OFF => { state.mcp = mcpNormalize([{ name: 'Fictional backup server', endpoint: 'https://mcp.example.test/b', enabled: true, env: 'FICTIONAL_TOKEN' }]); const t = backupText();
+    state.mcp = []; const said = importBackup(t)[1]; const kept = state.mcp.map(s => [s.name, s.enabled, s.env]); const x = JSON.parse(t); delete x.settings.mcpServers; importBackup(JSON.stringify(x));
+    return [JSON.parse(t).settings.mcpServers.length, kept, said.includes(GOLD_SWITCHED_OFF), state.mcp.length, document.querySelectorAll('#mcpList [data-mcp]').length, connState().mcp.length]; }, GOLD_SWITCHED_OFF),
+    [1, [['Fictional backup server', false, 'FICTIONAL_TOKEN']], true, 1, 1, 0], 'B1 the servers are in a backup (the variable NAME only) and come back switched off, as the app does; an older backup keeps the servers the person has now');
   eq(await p.evaluate(() => [CHANGES.find(c => c.round === 40).items, APP_VERSION]), [GOLD.changes.items, V29], 'F1 what changed in round 40 is listed, and the version is the one the app is held to');
   eq(requests, [], 'F2 the page asked no server for anything');
   eq(errs, [], 'F3 no error in the page');

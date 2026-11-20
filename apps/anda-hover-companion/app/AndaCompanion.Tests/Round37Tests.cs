@@ -99,9 +99,9 @@ public class Round37Tests : IClassFixture<HeadlessFixture>
             try
             {
                 w.Show(); Settle(); bool before = T().Contains("SINCE YOU LAST LOOKED");
-                on = true; w.RefreshLooks(); Settle(); bool afterOn = T().Contains("SINCE YOU LAST LOOKED") && T().Contains(LastLook.SaidFirst);
-                on = false; w.RefreshLooks(); Settle(); bool afterOff = T().Contains("SINCE YOU LAST LOOKED");
-                on = true; w.RefreshLooks(); Settle();
+                on = true; w.Refresh(); Settle(); bool afterOn = T().Contains("SINCE YOU LAST LOOKED") && T().Contains(LastLook.SaidFirst);
+                on = false; w.Refresh(); Settle(); bool afterOff = T().Contains("SINCE YOU LAST LOOKED");
+                on = true; w.Refresh(); Settle();
                 w.Close(); Settle();
                 return (before, afterOn, afterOff, kept);
             }
@@ -161,7 +161,7 @@ public class Round37Tests : IClassFixture<HeadlessFixture>
         // read without comments, so a line put out of action does not count; what each call does is tested above
         string app = Code(Folder("app", "AndaCompanion", "App.axaml.cs")), more = Code(Folder("app", "AndaCompanion", "App.Round33.cs"));
         Assert.Equal(2, System.Text.RegularExpressions.Regex.Matches(app, @"LastLook\.ForgetIfOff\(_settings, AppPaths\.LastLookFile\);").Count);   // at start and in ApplySettings
-        Assert.Contains("_todayWindow?.RefreshLooks();", app);                                               // an open Today follows the switch
+        Assert.Contains("_todayWindow?.Refresh();", app);                                               // an open Today follows the switch
         Assert.Contains("ForgetLastLook: () => LastLook.Forget(AppPaths.LastLookFile)", app);              // Settings removes, and says whether it could
         Assert.Contains("Looks: () => _settings.SinceLastLook ? LastLook.ViewOf(", System.Text.RegularExpressions.Regex.Replace(more, @"\s+", " "));   // off: no group, nothing read
         Assert.EndsWith(": null,", System.Text.RegularExpressions.Regex.Replace(more, @"\s+", " ").Split("Looks: () => _settings.SinceLastLook ?")[1].Split("KeepLook:")[0].Trim());

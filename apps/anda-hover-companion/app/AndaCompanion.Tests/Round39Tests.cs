@@ -88,7 +88,7 @@ public class Round39Tests : IClassFixture<HeadlessFixture>
                 bool shownOff = offAtStart.FindControl<CheckBox>("WeekTodosCheck")!.IsChecked == false; offAtStart.Close();
                 var check = w.FindControl<CheckBox>("WeekTodosCheck")!;
                 bool before = T().Contains("Tue Dec 1 · My to-do list: Fictional task");
-                check.IsChecked = false; Settle(); today.Repaint(); Settle();
+                check.IsChecked = false; Settle(); today.Refresh(); Settle();
                 bool after = T().Contains("Tue Dec 1 · My to-do list: Fictional task"), empty = T().Contains(NextWeek.SaidEmpty), offSaid = T().Contains(NextWeek.SaidEmptyTodosOff);
                 return (label: check.Content as string, help: Avalonia.Automation.AutomationProperties.GetHelpText(check), before, after, empty, offSaid, off: !s.WeekTodos, changed, shownOff);
             }
@@ -107,6 +107,6 @@ public class Round39Tests : IClassFixture<HeadlessFixture>
     {
         string app = Round37Tests.Code(Folder("app", "AndaCompanion", "App.axaml.cs")), more = Round37Tests.Code(Folder("app", "AndaCompanion", "App.Round33.cs"));
         Assert.Contains("NextWeek.TasksIfOn(_settings, () => _todo.Items, () => _myTodo.Items), todosOff: !_settings.WeekTodos)", more);
-        Assert.Contains("if (_weekTodosSwitch != _settings.WeekTodos) { _weekTodosSwitch = _settings.WeekTodos; _todayWindow?.Repaint(); }", app);
+        Assert.Contains("_todayWindow?.Refresh();", app);
     }
 }

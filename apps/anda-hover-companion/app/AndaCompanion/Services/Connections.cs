@@ -72,20 +72,20 @@ public static class Connections
                 if (key) ai = new("Claude", "api.anthropic.com");
                 break;
             case ProviderChoice.MyApi:
-                if (CustomApiConfig.Inspect(s.CustomApi, env).Ok) ai = new(Shown(s.CustomApi.Name, 60) is { Length: > 0 } n ? n : "My API", Host(s.CustomApi.Endpoint));
+                if (CustomApiConfig.Inspect(s.CustomApi, env).Ok) ai = new(Shown(s.CustomApi.Name, 60) is { Length: > 0 } n ? n : "My API", ApiTarget.Host(s.CustomApi.Endpoint));
                 break;
             case ProviderChoice.Auto:
                 string provider = env("ANDA_COMPANION_PROVIDER")?.Trim().ToLowerInvariant() ?? "anthropic";
                 if (provider == "anthropic" && key) ai = new("Claude", "api.anthropic.com");
-                else if (provider == "elsa" && ElsaConfig.Inspect(env) is { Status: ElsaStatus.Ready, Settings: { } elsa }) ai = new("Elsa", Host(elsa.Endpoint));
+                else if (provider == "elsa" && ElsaConfig.Inspect(env) is { Status: ElsaStatus.Ready, Settings: { } elsa }) ai = new("Elsa", ApiTarget.Host(elsa.Endpoint));
                 break;
         }
         var agents = (s.Agents ?? new()).Where(a => a is { Enabled: true })
-            .Select(a => new ConnAgent(Shown(a.Name, 60) is { Length: > 0 } n ? n : "Agent", Host(a.Api?.Endpoint), a.AutoRun != AgentRun.Never)).ToList();
+            .Select(a => new ConnAgent(Shown(a.Name, 60) is { Length: > 0 } n ? n : "Agent", ApiTarget.Host(a.Api?.Endpoint), a.AutoRun != AgentRun.Never)).ToList();
         ConnOutlook? outlook = s.Outlook is { Enabled: true } o ? new(o.Cloud == OutlookCloud.UsGovernment ? "login.microsoftonline.us and graph.microsoft.us" : "login.microsoftonline.com and graph.microsoft.com") : null;
         // round 40: a server counts only when it is switched on and its address could be used (checked as for My API)
         var mcp = McpRules.Normalize(s.McpServers).Where(m => m.Enabled && ApiTarget.Address(m.Endpoint).Uri is not null)
-            .Select(m => new ConnMcp(Shown(m.Name, 60) is { Length: > 0 } n ? n : "MCP server", Host(m.Endpoint))).ToList();
+            .Select(m => new ConnMcp(Shown(m.Name, 60) is { Length: > 0 } n ? n : "MCP server", ApiTarget.Host(m.Endpoint))).ToList();
         return new ConnState(ai, agents, outlook, mcp);
     }
 
@@ -114,8 +114,6 @@ public static class Connections
         return lines;
     }
 
-    private static string Host(string? address) =>
-        Uri.TryCreate((address ?? "").Trim(), UriKind.Absolute, out var u) && (u.Scheme == Uri.UriSchemeHttps || u.Scheme == Uri.UriSchemeHttp) ? u.IdnHost : "";      // the form the network uses, so a look-alike letter shows as "xn--…"
 
     /// <summary>A name the person typed, for the line: one line, and no invisible character that could reorder what is read.</summary>
     private static string Shown(string? s, int max) => OneLine(ActionFill.WithoutHidden(s ?? "").Text, max);

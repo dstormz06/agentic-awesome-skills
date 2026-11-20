@@ -297,7 +297,7 @@ public class Round34Tests : IClassFixture<HeadlessFixture>
             {
                 w.Show(); none.Show(); calm.Show(); Settle();
                 var buttons = w.GetVisualDescendants().OfType<Button>().ToList();
-                bool afterRows = buttons.IndexOf(w.ShowAllButton) > buttons.FindLastIndex(b => b.Tag is string);   // Tab reaches it after the rows, as it is drawn
+                bool afterRows = buttons.IndexOf(w.ShowAllButton) > buttons.FindLastIndex(b => b.Tag is TodayWindow.RowKey);   // Tab reaches it after the rows, as it is drawn
                 bool offered = w.ShowAllButton.IsEffectivelyVisible; string label = (string)w.ShowAllButton.Content!, said = AutomationProperties.GetName(w.ShowAllButton) ?? "";
                 Click(w.ShowAllButton);
                 return (offered, label, said, shown, withoutHook: none.ShowAllButton.IsVisible, nothingNeeds: calm.ShowAllButton.IsVisible, afterRows);

@@ -132,7 +132,7 @@ public sealed class ActionRunner(
         if (agent is null || problem is not null)
             return Show(new ActionWindowModel(action.Name, subject, "YOUR PROMPT, FILLED IN", prompt, (problem ?? "The agent is not set up.") + " Nothing was sent.",
                 "", null, "", false, null));
-        string host = Uri.TryCreate(agent.Api.Endpoint, UriKind.Absolute, out var uri) ? uri.Host : "the address you set";
+        string host = ApiTarget.Host(agent.Api.Endpoint) is { Length: > 0 } h ? h : "the address you set";
         return Show(new ActionWindowModel(action.Name, subject, "THIS IS WHAT WILL BE SENT TO " + agent.Name.ToUpperInvariant(), prompt,
             $"Nothing has been sent yet. Pressing Send asks {agent.Name} at {host}. It sends this text and only the fields named in the request body you set up in Settings.",
             $"{agent.Name.ToUpperInvariant()} REPLIED", async ct =>

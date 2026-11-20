@@ -180,10 +180,15 @@ public sealed class PortfolioRepository : IAndaRepository
         };
     }
 
+    /// <summary>What names a row's product, for sisters: its ingredient, and the first word of its drug. Read here only, for the rule and the index alike.</summary>
+    private readonly record struct Product(string Ingredient, string Word);
+    private static Product ProductOf(Row r) => new(r.Ingredient, FirstWord(r.Drug));
+
     private static bool SameProduct(Row a, Row b)
     {
-        if (a.Ingredient.Length > 0 && b.Ingredient.Length > 0) return string.Equals(a.Ingredient, b.Ingredient, StringComparison.OrdinalIgnoreCase);
-        return FirstWord(a.Drug).Length > 0 && string.Equals(FirstWord(a.Drug), FirstWord(b.Drug), StringComparison.OrdinalIgnoreCase);
+        Product x = ProductOf(a), y = ProductOf(b);
+        if (x.Ingredient.Length > 0 && y.Ingredient.Length > 0) return string.Equals(x.Ingredient, y.Ingredient, StringComparison.OrdinalIgnoreCase);
+        return x.Word.Length > 0 && string.Equals(x.Word, y.Word, StringComparison.OrdinalIgnoreCase);
     }
     private static string FirstWord(string s) => s.Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "";
 
@@ -207,9 +212,9 @@ public sealed class PortfolioRepository : IAndaRepository
             {
                 _at[r] = i++;
                 if (r.Applicant.Length == 0) continue;
-                string word = FirstWord(r.Drug);
-                if (r.Ingredient.Length > 0) Add(_ingredient, Key(r.Applicant, r.Ingredient), r);
-                if (word.Length > 0) { Add(_word, Key(r.Applicant, word), r); if (r.Ingredient.Length == 0) Add(_wordNoIngredient, Key(r.Applicant, word), r); }
+                var (ingredient, word) = ProductOf(r);
+                if (ingredient.Length > 0) Add(_ingredient, Key(r.Applicant, ingredient), r);
+                if (word.Length > 0) { Add(_word, Key(r.Applicant, word), r); if (ingredient.Length == 0) Add(_wordNoIngredient, Key(r.Applicant, word), r); }
             }
         }
         public static SisterIndex Build(IEnumerable<Row> rows) => new(rows);
@@ -217,9 +222,9 @@ public sealed class PortfolioRepository : IAndaRepository
         public IEnumerable<Row> Candidates(Row row)
         {
             if (row.Applicant.Length == 0) return Array.Empty<Row>();
-            string word = FirstWord(row.Drug);
-            if (row.Ingredient.Length == 0) return word.Length > 0 ? Get(_word, Key(row.Applicant, word)) : Array.Empty<Row>();
-            return Merge(Get(_ingredient, Key(row.Applicant, row.Ingredient)), word.Length > 0 ? Get(_wordNoIngredient, Key(row.Applicant, word)) : Array.Empty<Row>());
+            var (ingredient, word) = ProductOf(row);
+            if (ingredient.Length == 0) return word.Length > 0 ? Get(_word, Key(row.Applicant, word)) : Array.Empty<Row>();
+            return Merge(Get(_ingredient, Key(row.Applicant, ingredient)), word.Length > 0 ? Get(_wordNoIngredient, Key(row.Applicant, word)) : Array.Empty<Row>());
         }
         // two lists, each in sheet order and with no row in both, merged in sheet order and read only as far as asked
         private IEnumerable<Row> Merge(IReadOnlyList<Row> a, IReadOnlyList<Row> b)

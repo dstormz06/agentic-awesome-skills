@@ -1812,7 +1812,7 @@ PS C:\work&gt; </div>
     <div class="lbl">ASK WITH A PROMPT</div>
     <div style="display:flex;gap:8px"><select id="asPrompt" aria-label="Stored prompt" style="flex:1"></select><button class="pill quiet" id="asUse" type="button">Use this prompt…</button></div>
     <textarea id="asOwn" rows="2" maxlength="1000" aria-label="Your own instruction" placeholder="Or type your own instruction, for example: list anything that looks inconsistent." style="margin-top:8px"></textarea>
-    <div class="acts"><button class="pill quiet" id="asFillOwn" type="button">Fill it and show it</button><button class="pill quiet" id="asAskOwn" type="button">Ask my AI…</button></div>
+    <div class="acts"><button class="pill quiet" id="asFillOwn" type="button">Fill it and show it</button><button class="pill quiet" id="asAskOwn" type="button">Ask my AI…</button><button class="pill quiet" id="asMcp" type="button" hidden>Use with an MCP tool…</button></div>
     <p class="hint" id="asStatus" role="status" hidden></p>
     <p class="hint">Quick checks run on this PC. A prompt is filled in and shown to you first. Nothing is sent unless you press “Ask my AI…” and then Send on the preview, and only to the connection set up in Settings.</p>
   </div>
@@ -1956,7 +1956,7 @@ PS C:\work&gt; </div>
     <div style="display:flex;gap:8px;align-items:center"><select id="mwServer" style="flex:1"></select><button class="pill quiet" id="mwList" type="button">List tools</button></div>
     <label class="hint" for="mwTool" style="display:block;margin:8px 0 2px">Tool</label><select id="mwTool"></select>
     <p class="hint" id="mwToolAbout"></p>
-    <label class="hint" for="mwArgs" style="display:block;margin:8px 0 2px">Arguments (JSON), filled in from the tool's description and your selection</label>
+    <label class="hint" for="mwArgs" style="display:block;margin:8px 0 2px">Arguments (JSON), filled in from the tool's description and the text you sent from Ask, if any</label>
     <textarea id="mwArgs" rows="6" style="font:11.5px ui-monospace,Consolas,monospace" spellcheck="false"></textarea>
     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"><button class="pill quiet" id="mwPreview" type="button">Show what will be sent</button><button class="pill" id="mwSend" type="button" disabled>Send</button><button class="pill quiet" id="mwCopy" type="button" disabled>Copy the answer</button></div>
     <pre id="mwShown" class="hint" style="white-space:pre-wrap;margin:8px 0 0"></pre>
@@ -4432,6 +4432,7 @@ function openAsk(text){
   const sel = $("asPrompt"); sel.replaceChildren();
   if(asPrompts.length === 0){ sel.append(h("option", { text:"No stored prompts yet. Add one under Settings.", value:"" })); sel.disabled = true; $("asUse").disabled = true; }
   else { sel.append(h("option", { text:"Choose one of your stored prompts…", value:"" })); asPrompts.forEach((a, i) => sel.append(h("option", { text:`${a.name} · ${a.kind === 2 ? "ask my AI" : "fill and show"}`, value:String(i) }))); sel.disabled = false; $("asUse").disabled = false; }
+  $("asMcp").hidden = !state.mcp.some(m => m.enabled);      /* round 40 review: the way selected text reaches an MCP tool, as in the app */
   showApp("ask"); $("ask").style.zIndex = "52"; askAnalyse();
   setTimeout(() => { if(!$("asText").value.trim()) $("asText").focus(); }, 30);
 }
@@ -4512,6 +4513,7 @@ $("asUse").addEventListener("click", () => {
 });
 $("asFillOwn").addEventListener("click", () => askRunOwn(1));
 $("asAskOwn").addEventListener("click", () => askRunOwn(2));
+$("asMcp").addEventListener("click", () => openMcp($("asText").value));
 
 /* ---- Round 26: the Compare two files window, the extra Ask buttons, and My usage ------------------------------------------------ */
 const CMP_AI_TEMPLATE = "Write an executive summary of the differences between two versions of a report, for a busy manager: three to five sentences, then up to five bullets with what changed and what may need attention. Use only the facts below. Do not guess at reasons.\n\n{selection}";
@@ -5921,7 +5923,7 @@ function openMenu(){
       item("Hand-off page…", "", () => openHandoff(null)),
       item(alertReasons().length ? `News and alerts… (${alertReasons().length} today)` : "News and alerts…", "", () => openHub()),
       item("Quick replies…", "", () => { showApp("replies"); renderReplies(0); }),
-      ...(state.allTools ? [item("Prompt library…", "", () => { showApp("plib"); renderPrompts(0); }), item("MCP tools…", "", () => openMcp()), ...ma] : []),
+      ...(state.allTools ? [item("Prompt library…", "", () => { showApp("plib"); renderPrompts(0); }), item("MCP tools…", "", () => openMcp("")), ...ma] : []),
       ...ap, ...ah,
       item("Connections and event log…", "", () => openConn()),
       item("Backups and archive…", "", () => openBackups()),
@@ -6362,7 +6364,8 @@ const MCP_SAID = { sends:"Only when you press Test or Send in MCP tools: the sta
   nothingYet:"Nothing is sent until you press List tools, and then Send.", chooseFirst:"Please press List tools and choose a tool first.",
   listed:n => `${n} tool${n === 1 ? "" : "s"} offered. Choose one; nothing is sent until you press Send.`,
   testSim:n => `Simulated: ${n} tool${n === 1 ? "" : "s"} offered by the fictional demo server. This page made no request.`,
-  testOther:"Simulation: no request was made. In the Windows app, Test starts a session with this server and lists its tools." };
+  testOther:"Simulation: no request was made. In the Windows app, Test starts a session with this server and lists its tools.",
+  argsLabel:"Arguments (JSON), filled in from the tool's description and the text you sent from Ask, if any" };
 /* the address, as the app's ApiTarget.Address: https:// only, http:// for this PC only, no user name or password */
 function mcpAddressProblem(endpoint){
   const ep = (endpoint || "").trim();
@@ -6387,6 +6390,7 @@ function mcpNormalize(list){
 }
 /* The arguments offered for a tool: each property its schema names, in order, as an empty value of its type; the selected text goes into the
    first required text property, or else the first text property. The same as the app's McpRules.ArgumentsFor. */
+const mcpSwitchedOff = n => `${n === 1 ? "1 MCP server" : n + " MCP servers"} came back switched off: please check ${n === 1 ? "its" : "their"} address and token variable name in Settings, then switch ${n === 1 ? "it" : "them"} on.`;
 function mcpArgumentsFor(tool, selection){
   const schema = tool.inputSchema || {}, props = schema.properties && typeof schema.properties === "object" && !Array.isArray(schema.properties) ? schema.properties : null;
   const typeOf = p => !p || typeof p !== "object" ? null : typeof p.type === "string" ? p.type : Array.isArray(p.type) ? (p.type.find(t => typeof t === "string" && t !== "null") || null) : null;
@@ -6444,9 +6448,10 @@ $("mcpAdd").addEventListener("click", () => { state.mcp = mcpNormalize([...state
 $("mcpAddDemo").addEventListener("click", () => { state.mcp = mcpNormalize([...state.mcp, { name:MCP_DEMO.name, endpoint:MCP_DEMO.endpoint, header:"", scheme:"", enabled:true }]); paintMcpList(); paintConnBars(); });
 /* the MCP tools window */
 let mwSent = null;
-function openMcp(){
+/* text: what "Use with an MCP tool…" in Ask sends; from the tray menu, none */
+function openMcp(text){
   closeMenus(); showApp("mcpw");
-  const sel = String(window.getSelection ? window.getSelection() : "").trim();
+  const sel = String(text || "").trim();
   const servers = state.mcp.filter(s => s.enabled), box = $("mwServer"); box.replaceChildren();
   servers.forEach(s => box.append(h("option", { value:s.id, text:s.name })));
   $("mwStatus").textContent = servers.length ? MCP_SAID.nothingYet : MCP_SAID.noServer; $("mwArgs").dataset.sel = sel; $("mwAnswer").textContent = ""; $("mwCopy").disabled = true;
@@ -8233,8 +8238,8 @@ function applySettings(x){
   s.recentsOn = typeof x.rememberRecents === "boolean" ? x.rememberRecents : d.rememberRecents; if(!s.recentsOn) s.recents = [];
   /* a backup written before round 37 does not hold the switch: what the person has now stays, as in the app (round 37 review) */
   if(typeof x.sinceLastLook === "boolean") s.lastLookOn = x.sinceLastLook;
-  if(typeof x.weekTodos === "boolean") s.weekTodosOn = x.weekTodos;
-  if(Array.isArray(x.mcpServers)) s.mcp = mcpNormalize(x.mcpServers);        /* round 40: an older backup keeps the servers the person has now */        /* round 39: an older backup keeps the choice the person has now */
+  if(typeof x.weekTodos === "boolean") s.weekTodosOn = x.weekTodos;        /* round 39: an older backup keeps the choice the person has now */
+  if(Array.isArray(x.mcpServers)) s.mcp = mcpNormalize(x.mcpServers);        /* round 40: an older backup keeps the servers the person has now */
   if(!s.lastLookOn){ s.lastLook = null; s.shownLook = null; }
   $("lastLookStatus").textContent = ""; if(isOpen("today")) paintToday();
   s.pins = Array.isArray(x.pins) ? [...new Set(x.pins.filter(six))].slice(0, PIN_MAX) : []; applyDisplay();
@@ -8305,6 +8310,10 @@ function importBackup(text){
   const wereOn = state.agents.filter(a => a.enabled || a.auto !== 0).length;
   state.agents.forEach(a => { a.enabled = false; a.auto = 0; });
   if(wereOn) notes.push(`${wereOn === 1 ? "1 agent" : wereOn + " agents"} came back switched off: please check ${wereOn === 1 ? "its" : "their"} address in Settings, then switch ${wereOn === 1 ? "it" : "them"} on.`);
+  /* round 40 review: an MCP server sends a token too, so it never comes back switched on */
+  const mcpOn = state.mcp.filter(m => m.enabled).length;
+  state.mcp.forEach(m => { m.enabled = false; });
+  if(mcpOn) notes.push(mcpSwitchedOff(mcpOn));
   if(notes.length) syncSettingsUI();
   return [true, `Restored your settings, ${lenses.length} lens${lenses.length === 1 ? "" : "es"} and ${replies.length} quick repl${replies.length === 1 ? "y" : "ies"}. File locations on this PC were kept.${kept}` + (notes.length ? " " + notes.join(" ") : "")];
 }

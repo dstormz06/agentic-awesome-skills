@@ -53,6 +53,7 @@ public partial class App
             AddNote = (number, note) => _quickNotes.Add(number, note),
             Today = Today,
             MeetingPage = OpenHandoff,
+            UseWithMcp = McpServersOn().Count > 0 ? OpenMcp : null,
         };
         var win = new AskWindow(hooks, text ?? "");
         win.Closed += (_, _) => { if (ReferenceEquals(_askWindow, win)) _askWindow = null; };

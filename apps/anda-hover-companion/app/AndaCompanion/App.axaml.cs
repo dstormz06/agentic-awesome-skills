@@ -46,7 +46,6 @@ public partial class App : Application
     private CardWindow? _card;
     private CompactCardWindow? _compact;
     private SettingsWindow? _settingsWindow;
-    private bool _lookSwitch = true, _weekTodosSwitch = true;
     private (AndaRecord Record, PixelPoint Near, bool Mini)? _lastCard;
 
     private readonly TodoService _todo = new();
@@ -70,7 +69,7 @@ public partial class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         _settings = SettingsService.Load(); Clock.ZoneId = _settings.TimeZone;
-        _lookSwitch = _settings.SinceLastLook; _weekTodosSwitch = _settings.WeekTodos; LastLook.ForgetIfOff(_settings, AppPaths.LastLookFile);      // round 37 review: a removal that failed is tried again at each start
+        LastLook.ForgetIfOff(_settings, AppPaths.LastLookFile);      // round 37 review: a removal that failed is tried again at each start
         ThemeManager.Apply(Edition.Appearance(_settings), Edition.Opacity(_settings));
         DisplayScale.Watch(); DisplayScale.Set(Display.TextScale(_settings.TextSize));      // every window of this app opens at the text size chosen
         _calendar = BusinessCalendar.FromFile(AppPaths.ClosuresFile);
@@ -424,7 +423,7 @@ public partial class App : Application
             "Hand-off page…" => Item(label, () => OpenHandoff(null)),
             "Quick replies…" => Item(label, OpenQuickReplies),
             "Prompt library…" => Item(label, () => new PromptLibraryWindow(_prompts, _settings, ApplySettings).Show()),
-            "MCP tools…" => Item(label, OpenMcp),
+            "MCP tools…" => Item(label, () => OpenMcp(null)),
             "My actions" => _actionsMenu = new NativeMenuItem("My actions") { Menu = new NativeMenu() },
             // Round 19: the looks are offered in both editions (the owner asked for them back).
             "Appearance" => BuildRadioSubmenu("Appearance", Appearances.Offered.Select(a => (a.Name, (object)a.Id)),
@@ -461,14 +460,21 @@ public partial class App : Application
     // Round 35 (review): from the tray, Quick replies and My usage open once, like Settings, and a change to the replies reaches an open
     // card and an open Settings window as it does when they are managed from Settings.
     private McpWindow? _mcpWindow;
-    /// <summary>Round 40: MCP tools, once; the servers that are switched on. Nothing is sent until the person presses List tools and Send.</summary>
-    private void OpenMcp()
+    /// <summary>
+    /// Round 40: MCP tools, once; the servers that are switched on. Nothing is sent until the person presses List tools and Send. Opened from
+    /// Ask with its text, a window already open is replaced, so the text the person sent is the one offered.
+    /// </summary>
+    private void OpenMcp(string? text)
     {
-        if (_mcpWindow is not null) { _mcpWindow.Activate(); return; }
-        _mcpWindow = new McpWindow(McpRules.Normalize(_settings.McpServers).Where(s => s.Enabled).ToList());
-        _mcpWindow.Closed += (_, _) => _mcpWindow = null;
-        _mcpWindow.Show();
+        if (_mcpWindow is not null && text is null) { _mcpWindow.Activate(); return; }
+        _mcpWindow?.Close();
+        var win = new McpWindow(McpServersOn(), text);
+        win.Closed += (_, _) => { if (ReferenceEquals(_mcpWindow, win)) _mcpWindow = null; };
+        _mcpWindow = win;
+        win.Show();
     }
+
+    private List<McpServerSettings> McpServersOn() => McpRules.Normalize(_settings.McpServers).Where(s => s.Enabled).ToList();
 
     private QuickRepliesWindow? _repliesWindow;
     private UsageWindow? _usageWindow;
@@ -550,8 +556,7 @@ public partial class App : Application
         DisplayScale.Set(Display.TextScale(_settings.TextSize)); _card?.ApplySpacing(Display.Spacing(_settings.Density));      // open windows follow the new text size and spacing at once
         UsageLog.Configure(_settings.UsageLog && SelfTestRun is null);
         LastLook.ForgetIfOff(_settings, AppPaths.LastLookFile);      // round 37: off removes what was kept (from Settings or a restored backup)
-        if (_lookSwitch != _settings.SinceLastLook) { _lookSwitch = _settings.SinceLastLook; _todayWindow?.RefreshLooks(); }      // an open Today follows at once
-        if (_weekTodosSwitch != _settings.WeekTodos) { _weekTodosSwitch = _settings.WeekTodos; _todayWindow?.Repaint(); }      // round 39: the same for the to-do items
+        _todayWindow?.Refresh();      // rounds 37 and 39: an open Today follows its two switches at once
         _hotkeys?.Reconfigure(HotkeyBindings());
         RefreshTrayLabels();
         // A new brief service only when the connection itself changed: changing a look must not reset "connected" to "not tested".

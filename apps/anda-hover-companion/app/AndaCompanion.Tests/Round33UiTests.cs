@@ -202,7 +202,7 @@ public class Round33UiTests : IClassFixture<HeadlessFixture>
             Click(w.CopyButton); var afterCopy = Texts(w.Main).Last();
             allow = false; Click(w.CopyButton); var afterRefused = Texts(w.Main).Last(); allow = true;
             Click(w.OpenButton);
-            Click(w.List.Children.OfType<Button>().First(b => (string?)b.Tag == "214990")); string? sel1 = w.Selected; var main1 = Texts(w.Main);
+            Click(w.List.Children.OfType<Button>().First(b => b.Tag is TodayWindow.RowKey { Id: "214990" })); string? sel1 = w.Selected; var main1 = Texts(w.Main);
             w.Search.Text = "ANDA 216482"; Settle(); string? sel2 = w.Selected;
             w.Search.Text = "999999"; Settle(); string? sel3 = w.Selected;                 // a number the data does not know changes nothing
             bool closed = false; w.Closed += (_, _) => closed = true;
@@ -450,14 +450,14 @@ public class Round33UiTests : IClassFixture<HeadlessFixture>
             Today.Look? Find(string id) => repo.Find(id) is { } rec ? Round33Tests.Look(rec) : null;
             var w = new TodayWindow(new TodayHooks(() => repo.Numbers.Select(n => Find(n)!).ToList(), Find, () => pins, () => Array.Empty<string>(), _ => { }));
             w.Show(); Settle();
-            var row = w.List.Children.OfType<Button>().First(b => (string?)b.Tag == "214990");
+            var row = w.List.Children.OfType<Button>().First(b => b.Tag is TodayWindow.RowKey { Id: "214990" });
             row.Focus(); Click(row);
             var focused = w.FocusManager?.GetFocusedElement() as Button;
             string said = w.Said; bool mainIsQuiet = AutomationProperties.GetLiveSetting(w.Main) == AutomationLiveSetting.Off;
             pins.Add("214990"); w.Search.Text = "x"; Settle();                     // kept on a card meanwhile: the window shows it at its next paint
             var titles = Texts(w.List);
             w.Close(); Settle();
-            return ((string?)focused?.Tag, focused?.BorderThickness.Left, said, mainIsQuiet, kept: titles.Contains("KEPT IN MY LIST"));
+            return ((focused?.Tag as TodayWindow.RowKey)?.Id, focused?.BorderThickness.Left, said, mainIsQuiet, kept: titles.Contains("KEPT IN MY LIST"));
         }, CancellationToken.None);
         Assert.Equal("214990", r.Item1); Assert.Equal(2, r.Item2);
         Assert.Equal("Shown: ANDA 214990, 9 days ahead of the goal.", r.said);

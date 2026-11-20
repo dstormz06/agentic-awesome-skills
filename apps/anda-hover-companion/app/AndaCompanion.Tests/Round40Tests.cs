@@ -47,6 +47,8 @@ public class Round40Tests : IClassFixture<HeadlessFixture>
         Assert.Equal(said.GetProperty("notJson").GetString(), McpRules.SaidNotJson);
         Assert.Equal(said.GetProperty("nothingYet").GetString(), McpRules.SaidNothingYet);
         Assert.Equal(said.GetProperty("chooseFirst").GetString(), McpRules.SaidChooseFirst);
+        Assert.Equal(said.GetProperty("argsLabel").GetString(), McpRules.ArgumentsLabel);
+        foreach (var l in said.GetProperty("switchedOff").EnumerateArray()) Assert.Equal(l.GetProperty("text").GetString(), McpRules.SaidSwitchedOff(l.GetProperty("n").GetInt32()));
         foreach (var l in said.GetProperty("listed").EnumerateArray()) Assert.Equal(l.GetProperty("text").GetString(), McpRules.SaidListed(l.GetProperty("n").GetInt32()));
         int n = 0;
         foreach (var c in g.GetProperty("argumentsFor").EnumerateArray())
@@ -173,9 +175,13 @@ public class Round40Tests : IClassFixture<HeadlessFixture>
     {
         public sealed record Seen(string Method, JsonObject Body, HttpRequestMessage Request, string? Session, string? Version, string? Auth, string Accept);
         public List<Seen> Requests { get; } = new();
+        /// <summary>When set, each request waits for it (or for its cancel) before it is answered.</summary>
+        public Task? Gate { get; set; }
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
         {
-            var body = (JsonNode.Parse(await request.Content!.ReadAsStringAsync(ct)) as JsonObject)!;
+            if (Gate is { } gate) await gate.WaitAsync(ct);
+            // a DELETE (the end of a session) has no body; it is kept as the method "DELETE"
+            var body = request.Content is null ? new JsonObject { ["method"] = "DELETE" } : (JsonNode.Parse(await request.Content.ReadAsStringAsync(ct)) as JsonObject)!;
             string? H(string name) => request.Headers.TryGetValues(name, out var v) ? string.Join(",", v) : null;
             var seen = new Seen(body["method"]!.GetValue<string>(), body, request, H("Mcp-Session-Id"), H("MCP-Protocol-Version"), H("Authorization") ?? H("x-api-key"), request.Headers.Accept.ToString());
             Requests.Add(seen);
@@ -218,7 +224,7 @@ public class Round40Tests : IClassFixture<HeadlessFixture>
         Assert.Equal(new[] { "search", "word_count", "third" }, tools.Select(t => t.Name));
         Assert.Equal("Fictional search", tools[0].Description);
         var answer = await client.CallToolAsync("search", new JsonObject { ["query"] = "Metformin" }, CancellationToken.None);
-        Assert.True(answer.Ok); Assert.False(answer.ToolError);
+        Assert.False(answer.ToolError);
         Assert.Equal("Echo: {\"query\":\"Metformin\"}", answer.Text);
 
         Assert.Equal(new[] { "initialize", "notifications/initialized", "tools/list", "tools/list", "tools/call" }, fake.Requests.Select(r => r.Method));
@@ -301,7 +307,7 @@ public class Round40Tests : IClassFixture<HeadlessFixture>
     {
         using var handler = McpClient.DefaultHandler();
         Assert.False(handler.AllowAutoRedirect);                                                   // a token is never carried to another address
-        Assert.Contains("DefaultHandler()", Round37Tests.Code(Folder("app", "AndaCompanion", "Services", "Mcp.cs")).Split('\n').Single(l => l.Contains("_http = handler is null")));
+        Assert.Contains("DefaultHandler()", Round37Tests.Code(Folder("app", "AndaCompanion", "Services", "McpClient.cs")).Split('\n').Single(l => l.Contains("_http = handler is null")));
     }
 
     [Fact]
@@ -336,7 +342,7 @@ public class Round40Tests : IClassFixture<HeadlessFixture>
         using (var c = new McpClient(Server(), _ => null, failed))
         {
             var r = await c.CallToolAsync("search", new JsonObject(), CancellationToken.None);
-            Assert.False(r.Ok); Assert.True(r.ToolError);
+            Assert.True(r.ToolError);
             Assert.Equal("Fictional failure.\n\n[An image was returned; this app shows text only.]\n\n[Audio was returned; this app shows text only.]\n\n[A link to https://mcp.example.test/doc/1]\n\nEmbedded text.\n\n[A part of a kind this app does not show was returned.]", r.Text);
         }
 
@@ -361,7 +367,10 @@ public class Round40Tests : IClassFixture<HeadlessFixture>
             (new McpServerSettings { Name = "x", Endpoint = "https://user:pw@mcp.example.test/mcp" }, _ => null, "user name or password"),
             (Server("FICTIONAL_UNSET"), _ => null, "FICTIONAL_UNSET is not set"),
             (Server("not a name"), _ => "x", "does not look like an environment variable name"),
-            (Server("FICTIONAL_TOKEN"), _ => "two\nlines", "control character"),
+            (Server("FICTIONAL_TOKEN"), _ => "two\nlines", "cannot be sent in a header"),
+            (Server("FICTIONAL_TOKEN"), _ => "jeton-élevé", "cannot be sent in a header"),                         // round 40 review: not "could not be reached"
+            (Server("FICTIONAL_TOKEN") is var crlf && (crlf.AuthScheme = "Bearer\r\nX-Injected: 1") is not null ? crlf : null!, _ => "fictional-token", "text before the token is not valid"),
+            (Server("FICTIONAL_TOKEN") is var colon && (colon.AuthHeader = "Authorization: x") is not null ? colon : null!, _ => "fictional-token", "header name is not valid"),
         })
         {
             using var client = new McpClient(server, env, fake);
@@ -580,5 +589,192 @@ public class Round40Tests : IClassFixture<HeadlessFixture>
         finally { EventLog.Configure(null); }
         foreach (var file in new[] { Folder("app", "AndaCompanion", "UI", "McpWindow.cs"), Folder("app", "AndaCompanion", "UI", "SettingsWindow.Mcp.cs") })
             Assert.DoesNotContain("EventLog.Record(", Round37Tests.Code(file));                    // one place writes the MCP lines: the client
+    }
+
+    // ---------- the round 40 review ----------
+
+    private static HttpResponseMessage Raw(string json, string media = "application/json") => new(HttpStatusCode.OK) { Content = new StringContent(json, Encoding.UTF8, media) };
+    private static Func<FakeServer.Seen, HttpResponseMessage> Started(Func<FakeServer.Seen, HttpResponseMessage> rest) => s => s.Method switch
+    {
+        "initialize" => Json(Init(s), "fictional-session-1"),
+        "notifications/initialized" => new HttpResponseMessage(HttpStatusCode.Accepted),
+        "DELETE" => new HttpResponseMessage(HttpStatusCode.OK),
+        _ => rest(s),
+    };
+
+    [Fact]
+    public void A_restored_backup_never_switches_an_MCP_server_on()
+    {
+        var dir = Temp.NewDir();
+        var lenses = new PromptLibraryService(Path.Combine(dir, "p.json")); var replies = new QuickReplyService(Path.Combine(dir, "r.json"));
+        var mine = new Settings { McpServers = new() { new() { Name = "Fictional elsewhere", Endpoint = "https://mcp.example.test/mcp", SecretEnvVar = "FICTIONAL_TOKEN", Enabled = true },
+            new() { Name = "Fictional two", Endpoint = "https://two.example.test/mcp", Enabled = true } } };
+        string json = SettingsBackup.Export(mine, lenses, replies);
+        var target = new Settings();
+        var (ok, message) = SettingsBackup.Import(json, target, lenses, replies);
+        Assert.True(ok);
+        Assert.Equal(2, target.McpServers.Count);
+        Assert.All(target.McpServers, m => Assert.False(m.Enabled));                                   // kept to read, never on
+        Assert.Equal("FICTIONAL_TOKEN", target.McpServers[0].SecretEnvVar);
+        Assert.Contains(McpRules.SaidSwitchedOff(2), message);
+        Assert.Empty(Connections.From(target, _ => "fictional-token").Mcp);
+    }
+
+    [Fact]
+    public void The_token_header_is_checked_for_My_API_the_agents_and_MCP_alike()
+    {
+        Assert.Equal((new KeyValuePair<string, string>("Authorization", "Bearer t0ken"), (string?)null), ApiTarget.Authorization(" Authorization ", " Bearer ", "t0ken"));
+        Assert.Equal((new KeyValuePair<string, string>("api-key", "t0ken"), (string?)null), ApiTarget.Authorization("api-key", "", "t0ken"));
+        Assert.Equal(((KeyValuePair<string, string>?)null, (string?)null), ApiTarget.Authorization("", "Bearer", "t0ken"));     // no header: nothing to send
+        Assert.Equal(((KeyValuePair<string, string>?)null, (string?)null), ApiTarget.Authorization("Authorization", "Bearer", null));
+        const string T = "fictional-s3cret";
+        foreach (var (header, scheme, token) in new[] { ("Author ization", "Bearer", T), ("Authorization:", "Bearer", T), ("Authorization\r\nX", "Bearer", T),
+                     ("Authorization", "Bearer\r\nX-Injected: 1", T), ("Authorization", "Bear er", T), ("Authorization", "Bearer", T + "\n"), ("Authorization", "Bearer", T + "ø"), ("Authorization", "Bearer", T + " x") })
+        {
+            var (h, problem) = ApiTarget.Authorization(header, scheme, token);
+            Assert.Null(h); Assert.NotNull(problem);
+            Assert.DoesNotContain("s3cret", problem!);                                              // a problem never repeats the token
+        }
+        // My API builds its header with the same check
+        var api = new CustomApiSettings { Name = "Mine", Endpoint = "https://x.example.test/v1", AuthScheme = "Bearer\r\nX-Injected: 1" };
+        var mapping = new CustomApiMapping(api);
+        Assert.Contains("text before the token is not valid", Assert.Throws<ElsaException>(() => mapping.BuildRequest(new ElsaSettings(api.Endpoint, "fictional-token", null, null), "s", "u", 16)).Message);
+    }
+
+    [Fact]
+    public async Task A_duplicate_key_from_a_server_is_a_sentence_never_a_crash()
+    {
+        // JsonNode reports a duplicate key only when the object is first read; the client reads every answer whole first
+        var asJson = new FakeServer(Started(s => Raw($"{{\"jsonrpc\":\"2.0\",\"id\":{s.Body["id"]},\"id\":{s.Body["id"]},\"result\":{{}}}}")));
+        using (var c = new McpClient(Server(), _ => null, asJson))
+            Assert.Equal("The server's answer was not JSON.", (await Assert.ThrowsAsync<McpException>(() => c.ListToolsAsync(CancellationToken.None))).Message);
+        var inSchema = new FakeServer(Started(s => Raw($"{{\"jsonrpc\":\"2.0\",\"id\":{s.Body["id"]},\"result\":{{\"tools\":[{{\"name\":\"t\",\"inputSchema\":{{\"type\":\"object\",\"properties\":{{\"a\":{{}},\"a\":{{}}}}}}}}]}}}}")));
+        using (var c = new McpClient(Server(), _ => null, inSchema))
+            Assert.Equal("The server's answer was not JSON.", (await Assert.ThrowsAsync<McpException>(() => c.ListToolsAsync(CancellationToken.None))).Message);
+        var inEvents = new FakeServer(Started(s => Raw($"data: {{\"jsonrpc\":\"2.0\",\"id\":{s.Body["id"]},\"id\":1,\"result\":{{}}}}\n\n", "text/event-stream")));
+        using (var c = new McpClient(Server(), _ => null, inEvents))
+            Assert.Contains("ended its answer before it answered", (await Assert.ThrowsAsync<McpException>(() => c.ListToolsAsync(CancellationToken.None))).Message);
+    }
+
+    [Fact]
+    public async Task A_session_is_started_only_when_the_server_took_initialized_and_a_forgotten_one_never_escapes()
+    {
+        // 404 to "initialized" with a session id: started again once, then a sentence (it escaped as an unknown error before the review)
+        var gone = new FakeServer(s => s.Method == "initialize" ? Json(Init(s), "fictional-session") : new HttpResponseMessage(HttpStatusCode.NotFound));
+        using (var c = new McpClient(Server(), _ => null, gone))
+            Assert.Contains("forgot the session again", (await Assert.ThrowsAsync<McpException>(() => c.ListToolsAsync(CancellationToken.None))).Message);
+        Assert.Equal(2, gone.Requests.Count(r => r.Method == "initialize"));
+        // "initialized" refused: the next request starts the session again instead of going on without it
+        bool refuse = true;
+        var once = new FakeServer(s => s.Method == "notifications/initialized" && refuse ? new HttpResponseMessage(HttpStatusCode.InternalServerError) : Good(s));
+        using (var c = new McpClient(Server(), _ => null, once))
+        {
+            await Assert.ThrowsAsync<McpException>(() => c.ListToolsAsync(CancellationToken.None));
+            refuse = false;
+            Assert.Equal(3, (await c.ListToolsAsync(CancellationToken.None)).Count);
+        }
+        Assert.Equal(new[] { "initialize", "notifications/initialized", "initialize", "notifications/initialized", "tools/list", "tools/list" }, once.Requests.Select(r => r.Method));
+    }
+
+    [Fact]
+    public async Task An_answer_must_be_to_this_request_in_either_form_and_the_media_type_is_read_in_any_case()
+    {
+        var other = new FakeServer(Started(_ => Raw("{\"jsonrpc\":\"2.0\",\"id\":424242,\"result\":{\"tools\":[]}}")));
+        using (var c = new McpClient(Server(), _ => null, other))
+            Assert.Contains("not an answer to this request", (await Assert.ThrowsAsync<McpException>(() => c.ListToolsAsync(CancellationToken.None))).Message);
+        var upper = new FakeServer(Started(s => Raw($"data: {{\"jsonrpc\":\"2.0\",\"id\":{s.Body["id"]},\"result\":{{\"tools\":[{{\"name\":\"t\"}}]}}}}\n\n", "Text/Event-Stream")));
+        using (var c = new McpClient(Server(), _ => null, upper))
+            Assert.Single(await c.ListToolsAsync(CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task A_tool_whose_name_would_look_different_from_what_is_sent_or_comes_twice_is_not_offered()
+    {
+        var fake = new FakeServer(Started(s => Json(Result(s, new JsonObject
+        {
+            ["tools"] = new JsonArray(new JsonObject { ["name"] = "search" }, new JsonObject { ["name"] = "sea\u202Erch" }, new JsonObject { ["name"] = "sea\u200Brch" },
+                new JsonObject { ["name"] = "search", ["description"] = "a second search" }, new JsonObject { ["name"] = "count" }),
+        }))));
+        using var c = new McpClient(Server(), _ => null, fake);
+        var tools = await c.ListToolsAsync(CancellationToken.None);
+        Assert.Equal(new[] { "search", "count" }, tools.Select(t => t.Name));
+        Assert.Equal("", tools[0].Description);                                                     // the first of two is the one kept
+    }
+
+    [Fact]
+    public async Task A_server_that_repeats_the_token_does_not_get_it_shown_and_the_session_is_ended_with_its_id()
+    {
+        var echo = new FakeServer(Started(s => Json(new JsonObject { ["jsonrpc"] = "2.0", ["id"] = s.Body["id"]!.DeepClone(), ["error"] = new JsonObject { ["code"] = 1, ["message"] = "Bad token: fictional-secret-123" } })));
+        using (var c = new McpClient(Server("FICTIONAL_TOKEN"), _ => "fictional-secret-123", echo))
+        {
+            var said = (await Assert.ThrowsAsync<McpException>(() => c.ListToolsAsync(CancellationToken.None))).Message;
+            Assert.Equal("The server could not do this: Bad token: [token]", said);
+            await c.EndAsync();
+        }
+        var end = echo.Requests.Last();
+        Assert.Equal("DELETE", end.Method);
+        Assert.Equal(HttpMethod.Delete, end.Request.Method);
+        Assert.Equal("fictional-session-1", end.Session);
+        Assert.Equal("Bearer fictional-secret-123", end.Auth);
+        int before = echo.Requests.Count;
+        using (var fresh = new McpClient(Server(), _ => null, echo)) await fresh.EndAsync();             // no session: nothing is sent
+        Assert.Equal(before, echo.Requests.Count);
+    }
+
+    [Fact]
+    public async Task While_a_request_is_out_nothing_that_decides_what_is_sent_can_change_and_closing_cancels_it()
+    {
+        var gate = new TaskCompletionSource();
+        var fake = new FakeServer(Good) { Gate = gate.Task };
+        var r = await _fx.Session.Dispatch(async () =>
+        {
+            var w = new McpWindow(new[] { Server(), Server() is var b && (b.Id = "b") is not null ? b : null! }, null, s => new McpClient(s, _ => null, fake));
+            w.Show(); Settle();
+            var listing = w.ListAsync(); Settle();
+            var busy = (w.Servers.IsEnabled, w.Tools.IsEnabled, w.ListButton.IsEnabled, w.PreviewButton.IsEnabled, w.Arguments.IsReadOnly, w.Status.Text);
+            w.Close(); Settle();
+            await listing;                                                                          // cancelled quietly: no error reaches the app
+            return (busy, fake.Requests.Count);
+        }, CancellationToken.None);
+        Assert.Equal((false, false, false, false, true, "Asking the server for its tools…"), r.busy);
+        Assert.Equal(0, r.Item2);                                                                   // the request never got through the gate
+    }
+
+    [Fact]
+    public async Task One_session_serves_the_window_and_is_ended_when_it_closes()
+    {
+        var fake = new FakeServer(Good);
+        await _fx.Session.Dispatch(async () =>
+        {
+            var w = new McpWindow(new[] { Server() }, "Fictional text", s => new McpClient(s, _ => null, fake));
+            w.Show(); Settle();
+            await w.ListAsync(); Settle();
+            w.Preview(); await w.SendAsync(); Settle();
+            w.Close(); Settle();
+            for (int i = 0; i < 50 && fake.Requests.All(x => x.Method != "DELETE"); i++) { await Task.Delay(10); Settle(); }
+            return 0;
+        }, CancellationToken.None);
+        Assert.Equal(new[] { "initialize", "notifications/initialized", "tools/list", "tools/list", "tools/call", "DELETE" }, fake.Requests.Select(x => x.Method));
+    }
+
+    [Fact]
+    public async Task Ask_hands_its_text_to_MCP_tools_only_while_a_server_is_on()
+    {
+        var r = await _fx.Session.Dispatch(() =>
+        {
+            string? sent = null;
+            var hooks = new AskHooks(() => Array.Empty<CustomAction>(), (_, _) => { }, _ => { }, _ => { });
+            var off = new AskWindow(hooks, "Fictional text"); var on = new AskWindow(hooks with { UseWithMcp = t => sent = t }, "Fictional text");
+            try
+            {
+                off.Show(); on.Show(); Settle();
+                on.McpBtn.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
+                return (off: off.McpBtn.IsVisible, on: on.McpBtn.IsVisible, sent);
+            }
+            finally { off.Close(); on.Close(); Settle(); }
+        }, CancellationToken.None);
+        Assert.False(r.off); Assert.True(r.on); Assert.Equal("Fictional text", r.sent);
+        string ask = Round37Tests.Code(Folder("app", "AndaCompanion", "App.Ask.cs"));
+        Assert.Contains("UseWithMcp = McpServersOn().Count > 0 ? OpenMcp : null,", ask);
     }
 }

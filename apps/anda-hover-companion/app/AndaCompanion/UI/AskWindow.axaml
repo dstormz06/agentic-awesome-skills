@@ -83,6 +83,7 @@
           <StackPanel Orientation="Horizontal" Spacing="8">
             <Button Name="FillOwnBtn" Content="Fill it and show it"/>
             <Button Name="AskOwnBtn" Content="Ask my AI…"/>
+            <Button Name="McpBtn" Content="Use with an MCP tool…" IsVisible="False"/>
           </StackPanel>
           <TextBlock Name="Status" Classes="hint" AutomationProperties.LiveSetting="Polite"/>
           <TextBlock Name="PrivacyNote" Classes="hint"/>
