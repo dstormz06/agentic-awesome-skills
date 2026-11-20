@@ -129,6 +129,8 @@ public sealed class McpClient : IDisposable
     {
         McpException m => m.Message,
         OperationCanceledException when !ct.IsCancellationRequested => "The server did not answer in time.",
+        // round 41 review: with the revocation check on, a certificate refused or not checkable is said as such, not as "not reachable"
+        HttpRequestException { InnerException: System.Security.Authentication.AuthenticationException } => McpRules.SaidCertificate,
         HttpRequestException or IOException => _transport.Unreachable,
         _ => null,
     };

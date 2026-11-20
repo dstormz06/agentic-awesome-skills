@@ -127,7 +127,7 @@ public class Round40Tests : IClassFixture<HeadlessFixture>
         foreach (var c in g.GetProperty("changes40").EnumerateArray())
             Assert.Equal(c.GetProperty("lines").EnumerateArray().Select(x => x.GetString()!), Connections.Changes(states[c.GetProperty("before").GetInt32()], states[c.GetProperty("now").GetInt32()]));
         var phrases = g.GetProperty("phrases").EnumerateArray().Select(x => x.GetString()!).ToList();
-        Assert.Equal(9, phrases.Count);                                                       // round 41 added the two for a program
+        Assert.Equal(10, phrases.Count);                                                      // round 41 added three for a program
         Assert.Equal(phrases, EventLog.Phrases.Where(p => p.Contains("MCP")));
         Assert.Equal(g.GetProperty("changes").GetProperty("items").EnumerateArray().Select(x => x.GetString()!).ToList(), ChangeLog.Entries.First(e => e.Round == 40).Items.ToList());
     }

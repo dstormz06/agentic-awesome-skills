@@ -44,6 +44,7 @@ Mark each step pass or fail and copy the app's sentence exactly when one is show
 | You see | It means | Next |
 |---|---|---|
 | "could not be reached, or stopped answering" | The PC could not reach the host, or the connection was cut | Ask IT whether the host is allowed and whether Zscaler inspects it |
+| "The server's certificate was not accepted…" | The certificate is not valid, was revoked, or its revocation list could not be checked from this network (since round 41 the app checks it) | Ask IT whether the proxy lets the PC reach the certificate's revocation list (CRL or OCSP) for this host |
 | "refused the request: it needs a token…" | 401 or 403 from the server | Check the variable, the header name and the word before the token with the server owner |
 | "answered with an error (N)" | Any other HTTP error, N is the code | Give N to the server owner; 307 or 308 means the address redirects: use the final address |
 | "speaks MCP version …, which this app does not" | The server's protocol version is not 2025-06-18 or 2025-03-26 | Tell the builder the version shown |

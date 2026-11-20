@@ -58,9 +58,10 @@ jobs:
       - name: Build
         run: dotnet build app/AndaCompanion.Tests -c Release -nologo
 
-      - name: Test (all tests, including the Windows-only ones)
+      - name: Test (all tests, including the Windows-only ones; the stand-in program's tests in the next step)
         run: >
           dotnet test app/AndaCompanion.Tests -c Release --no-build -nologo
+          --filter "FullyQualifiedName!~Round41ProgramTests"
           --logger "trx;LogFileName=test-results.trx"
           --results-directory "$env:RUNNER_TEMP/test-results"
 

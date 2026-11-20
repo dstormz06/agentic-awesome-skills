@@ -58,6 +58,7 @@ public static class McpRules
     public static string SaidNotStarted(string name) => $"{name} is not running, so nothing was sent. Press List tools, then again, to start it.";
     public static string SaidNotThere(string name) => $"{name} is not at that path on a drive of this PC: Windows found it on a network drive, through a link, or by another name. Please type the full path IT gives. Nothing was started.";
     public static string SaidNoProgram(string name) => $"{name} could not be opened or started on this PC. Nothing was started.";
+    public const string SaidCertificate = "The server's certificate was not accepted: it is not valid, was revoked, or its revocation could not be checked from this network. Nothing was sent.";
     public const string SaidTooLarge = "The server's answer is larger than this app reads (1 MB).";
     public const string SaidNotJson = "The arguments must be one JSON object, for example {\"query\": \"text\"}.";
 

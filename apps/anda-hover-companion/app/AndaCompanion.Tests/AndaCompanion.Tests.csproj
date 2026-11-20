@@ -15,4 +15,12 @@
     <!-- built first, not referenced: the Windows-only tests start its .exe as a real program on this PC -->
     <ProjectReference Include="../AndaCompanion.McpStub/AndaCompanion.McpStub.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
+  <!-- the stub's program and its files, copied next to the tests as stub/, where Round41ProgramTests finds it -->
+  <Target Name="CopyMcpStub" AfterTargets="Build">
+    <ItemGroup>
+      <McpStubFile Include="../AndaCompanion.McpStub/bin/$(Configuration)/$(TargetFramework)/*" />
+    </ItemGroup>
+    <Error Condition="'@(McpStubFile)' == ''" Text="AndaCompanion.McpStub was not built for $(Configuration); the tests need it." />
+    <Copy SourceFiles="@(McpStubFile)" DestinationFolder="$(OutDir)stub" SkipUnchangedFiles="true" />
+  </Target>
 </Project>
