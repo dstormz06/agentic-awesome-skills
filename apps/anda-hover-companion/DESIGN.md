@@ -67,7 +67,8 @@ nothing to ignore; stage 2 is always a deliberate act by the user. A full card n
 appears without stage 2. The user picks their model in settings — all ship, one default.
 
 **What the Windows app ships (2026-11-02):** three models — Full card, Peek first and **Whisper invite, the default
-for new installs** (an install that already saved a choice keeps it). In Whisper mode there is one controlled
+for new installs** (an install that already saved a choice keeps it). **Since round 34 (2026-11-20) Full card is the default**
+(see §11r): the shortcut is the consent; Whisper stays a choice and a middle-click still asks first. In Whisper mode there is one controlled
 exception, switchable in Settings: an **urgent** ANDA (a bad attention item, a forecast late by 7 days or more (3, 7 or 14, as
 chosen), or a goal date that has passed) skips the invite and opens a **peek**. It still starts only from the
 person's own selection and shortcut, the peek makes no AI call, and typing a number in the lookup box (itself the
@@ -380,8 +381,8 @@ history. Open these in any browser, desktop or phone, with fictional data:
   menu, three shortcuts or the toolbar button, standalone or through the app's native-messaging host. It is not a mockup: it loads in a browser engine
   and is tested end to end there, including against the real host process. The simulation below shows its right-click menu in the Browser window.
 - **`mockup/windows-simulation.html`** — a Windows 11 desktop in the browser (default **T**) that ports the app's
-  logic: the recognizer, the placement rule, the three consent models (§2, **whisper default with the urgent-peek
-  rule**), the offline brief, auto-hide, the compact boxes (a click or the hotkey again expands them), the **WATCH
+  logic: the recognizer, the placement rule, the three consent models (§2, **Full default since round 34**; whisper with the urgent-peek
+  rule is a choice), the offline brief, auto-hide, the compact boxes (a click or the hotkey again expands them), the **WATCH
   line with the federal-holiday calendar** (OPM dates, 3-business-day window) and the **draft check** (`Ctrl+Alt+Shift+R`).
   My data, the writing actions and rebinding shortcuts need real files and a model connection, so the simulation only
   describes them. It also shows the Edge extension's **right-click menu** (Browser window only, where the extension runs) and the app's **Watch list**. It shows the forecast-first clock, the single
@@ -396,7 +397,7 @@ All looks are light-only (§5).
 
 **`app/`** contains the working v0: a .NET 8 / Avalonia tray application with twenty
 looks (T default; four of them compact boxes) selectable from the tray menu, auto-hide, all three consent models
-(Whisper default, with the urgent-peek rule), four rebindable global hotkeys (`Ctrl+Alt+A` Select & Peek,
+(Full default since round 34; Whisper with the urgent-peek rule is a choice), four rebindable global hotkeys (`Ctrl+Alt+A` Select & Peek,
 `Ctrl+Alt+Space` lookup, `Ctrl+Alt+Shift+R` review a draft, `Ctrl+Alt+Shift+P` ask about a selection), the weekend and federal-holiday WATCH line, the draft
 check and the writing actions (Proofread / Rewrite / Fact-check, preview before send, Copy only), reading
 the person's own Excel or CSV portfolio and notes folder, one RLD-labeling date from a downloaded Drugs@FDA
@@ -1314,6 +1315,20 @@ The simulation is where a feature is tried first. By round 32 it was ahead of th
 **After the separate review** (17 findings, all fixed; see VERIFICATION, Round 33): the extension's minute ages only the moment the open card was built from, so a card never starts naming a file imported after it opened; a change of text size reaches windows opened at standard size, and Settings stays on its screen at larger text; One Bar starts again at the first row when the person types, says each move to a screen reader, and answers Enter on an NDA number with the reason instead of a review; Today keeps the keyboard on a pressed row, says one short sentence, and shows each mark as a word; a restore or a reset forgets the recent numbers when remembering is off or reset; Settings gets *Clear my list*; the Copy buttons' names keep their capitals ("Copy US agent email").
 
 **What is not the same, said plainly.** Larger text in the app enlarges the window, not only the letters. One Bar in the app does not read a selection. The app's Today caps "needs a look" at forty. Detail columns are found by header name only; there is no box in Settings to choose them by hand. The extension has no event log and no export, import or reset of its settings. Notices near the clock and division news (round 19 in the simulation) are still not in the app.
+
+## 11r. Round 34: the answer first, one press, and Today as home
+
+Measured at the end of round 33: the full card was about 794 px tall at standard text, so it scrolled on a 1366 × 768 laptop (about 728 px above the taskbar); the default way to start (Whisper) cost a second act on every lookup; and Today, the best start of the day, was hidden behind "Show all tools". On Nov 20 the owner chose three changes, built in the simulation first and then in the app and the extension.
+
+**The shortcut opens the card.** Full card (model ①) is the default again: the person's own shortcut, or the extension's menu item, is the consent. Whisper (③) stays a choice in Settings, *How it starts*. A middle-click, an opt-in trigger the person may not have aimed at the app, is treated as Whisper even when Full is chosen. The rule (`firstStep(id, via)` in the simulation, `UrgencyPolicy.Decide(…, middleClick)` in the app, `firstStep` in the extension, which has no middle-click) is pinned for all 24 combinations in `mockup/round34-golden.json`. Settings kept from before round 34, written when Whisper was the default, move to Full once: the app's settings form 6, with the sentence "Your shortcut now opens the card directly. To see the small invite first again, choose Whisper in Settings, How it starts."; the extension's form 3. A Whisper chosen after the move is kept. A backup restored by the person is taken as it is.
+
+**The answer first.** The card opens with what it says first, goal and forecast, what needs the person, the first watch line (its tail is now "(+1 more)"), the data line and the actions, with a new **More ↓** button. The calendar, Latest, Ahead, the two reference dates, the brief and the key hint open with More or E (in the app: with the drawer). The note count is shown on "Add a note" only when the card is open; it is always in the button's name for a screen reader. More hides itself once pressed, so the keyboard goes to the button that folds the card again. A peek's "Full brief" opens the card with the brief in view. In the simulation, the collapsed card at standard text is 513 to 601 px tall, depending on the look, and 610 to 642 px at large text: no scrolling on a 1366 × 768 screen. At the largest text it reaches the screen's height and scrolls, with the actions kept in view. The target of 420 px suggested in round 33 was not met: the action buttons take two rows. A change of text size while a card is open now keeps the card on the screen.
+
+**Nothing is sent for a part not shown.** With an AI connection switched on, the brief is asked for only when the person opens the card (More, E, "Full brief" or Add a note); until then it says "asked for when you press More". The offline brief is read from the record on this PC and is made at once.
+
+**Today is home.** A click on the tray icon opens Today; a right-click keeps the menu (in the simulation on a phone, a long press). Today is in the focused tray menu. The watch list has no tray item of its own: Today's *Show all, with reasons…*, shown while something needs a look, opens it above Today, with the keyboard, and Escape closes it alone. First steps says so.
+
+**What is not the same, said plainly.** The extension's card keeps its own layout; it opens directly by default but is not answer-first (suggestion F2, not approved). Larger text in the app still enlarges the whole window (round 33).
 
 ## 12. Engagement roadmap — seven features that make it the daily habit
 

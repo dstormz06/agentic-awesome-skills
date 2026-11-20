@@ -113,7 +113,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   await popup.waitForFunction(() => { const f = document.querySelector('.card .fresh'); return f && !f.textContent.includes('STALE'); }, null, { timeout: 5000 });
   line = await text(popup.locator('.card .fresh'));
   h.ok(/\(9 days ago\)$/.test(line) && (await popup.locator('.card .fresh.stale').count()) === 0 && !(await text(popup.locator('.card'))).includes('This data is 9 days old'), 'with 14 days chosen the same data is no longer STALE, on the line and in the watch line');
-  h.ok((await worker.evaluate(async () => (await chrome.storage.local.get('settings')).settings)).schema === 2, 'the stored settings carry the number of their form');
+  h.ok((await worker.evaluate(async () => (await chrome.storage.local.get('settings')).settings)).schema === 3, 'the stored settings carry the number of their form (3 since round 34)');
 
   // ---- another zone: written differently, nothing stored changes ----
   const before = await worker.evaluate(async () => (await chrome.storage.local.get('imported')).imported.savedMs);

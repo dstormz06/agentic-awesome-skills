@@ -9,7 +9,7 @@ Prototype, not an FDA product. It makes **no network requests and uses no AI**.
 
 | You do | It does |
 |---|---|
-| Select an ANDA number on a page, right-click, **ANDA Companion (Notula): peek at "…"** (or press **Alt+Shift+A**) | Whisper invite by default: a small chip you click. An at-risk or late ANDA opens a peek by itself and says why. Settings choose "peek first" or "full card" instead |
+| Select an ANDA number on a page, right-click, **ANDA Companion (Notula): peek at "…"** (or press **Alt+Shift+A**) | The full card by default since round 34: your shortcut or the menu item is the consent. Settings choose "peek first" or "whisper invite" instead; in whisper mode an at-risk or late ANDA opens a peek by itself and says why. Settings stored before round 34 move from Whisper to Full once |
 | Select text, or click into the message you are writing, then **ANDA Companion (Notula): check this text as a draft** (**Alt+Shift+D**) | Compares the ANDA numbers, goal and forecast dates and on-track or late wording with your data. No AI. Says what it did not check |
 | Right-click the page, **scan this page for ANDA numbers** (**Alt+Shift+S**) | Lists the numbers on the page with a one-line status each. Reads the visible text on your click only |
 | Click the toolbar button | **Look up** a number, **Draft**, **Watch list** (every ANDA with something worth a look, worst first), **This page** |

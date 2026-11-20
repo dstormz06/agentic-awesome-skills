@@ -83,8 +83,8 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `AndaCompanion.
 - **Settings window** — Appearance (eight looks since round 23, **light-only by product decision**; **X ·
   Graphite Calendar is the default**, W · Graphite Gauge and T · Pocket Plain were before it): six full cards (X, V, U, T, K, P, none with a pattern behind it) and two **compact boxes** (L, O). A setting saved with a retired look falls back to the default.
   When the tray icon is counted again (three choices),
-  Auto-hide (Off / 10 / 20 / 40 s, default 10), Consent model (**Whisper invite is the default** for
-  new installs; an install that already saved a choice keeps it), **urgent items** (in whisper mode an
+  Auto-hide (Off / 10 / 20 / 40 s, default 10), Consent model (**Full card is the default** since round 34:
+  your shortcut opens the card; settings kept from earlier, where Whisper was the default, move to Full once and say so), **urgent items** (in whisper mode an
   at-risk or late ANDA opens a peek by itself), the weekend/holiday window, **My data**,
   **standing instructions** for the writing actions, **four rebindable shortcuts** (Select & Peek, Lookup, Review a draft, Ask), an optional
   **usage log** (off by default), **card transparency slider** (40–100%, starting at 90% since round 20, 92% before; text always stays opaque),
@@ -142,7 +142,8 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `AndaCompanion.
   only after your own selection and shortcut. Registration is **checked**: if another program owns a
   combination you get a plain-language notice with the fallback, and the tray menu shows which
   hotkeys are live.
-- **Consent, with the urgent rule** — default **Whisper**: a small invite you click. If the ANDA is
+- **Consent, with the urgent rule** — default **Full card** since round 34: your own shortcut is the consent, so the card opens at once.
+  A middle-click (an opt-in trigger) still shows the invite first. **Whisper**, a choice: a small invite you click. If the ANDA is
   urgent (a "Bad" attention item, a forecast 7 or more days past goal (3/7/14 selectable), or a
   goal date that already passed) and the rule is on, the invite is skipped and a **peek** opens
   (no AI call). `Services/UrgencyPolicy.cs`, unit-tested.
@@ -222,7 +223,7 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `AndaCompanion.
   `Services/SettingsBackup.cs`.
 - **My writing** — Settings → *My writing*: tone, style, sign-off, and **quick replies** (templates the card fills in from its record with no AI; the Quick replies
   button or the R key copies one). `Services/QuickReplies.cs`.
-- **Watch list** — tray → *Watch list…*: every ANDA in your data (the demo records, or your portfolio) that has something worth a look, worst
+- **Watch list** — tray icon (a click opens Today) → *Show all, with reasons…* (since round 34 it has no tray item of its own): every ANDA in your data (the demo records, or your portfolio) that has something worth a look, worst
   first, with the same rules the card uses. Computed when you open it; nothing runs in the background. Notes (a date near a holiday, no goal date) are
   hidden until you ask. Click a row to open its card. `Services/WatchList.cs`.
 - **Edge extension, together with this app** — the same exe is the browser extension's native-messaging host: when Edge starts it with an
