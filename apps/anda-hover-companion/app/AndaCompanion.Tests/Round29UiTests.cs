@@ -46,7 +46,7 @@ public class Round29UiTests : IClassFixture<HeadlessFixture>
                 var after = bars.Select(b => b.Content as string).ToArray();
                 Click(bars[1]); Settle();
                 // The card, the invite and the Connections window itself carry no such line.
-                var conn = new ConnectionsWindow(() => Connections.Describe(new ConnState(null, Array.Empty<ConnAgent>(), null)), () => (Array.Empty<EventEntry>(), 0, 0), () => "", null);
+                var conn = new ConnectionsWindow(() => Connections.Describe(new ConnState(null, Array.Empty<ConnAgent>(), null, Array.Empty<ConnMcp>())), () => (Array.Empty<EventEntry>(), 0, 0), () => "", null);
                 bool none = ConnectionBar.Attach(conn) is null && ConnectionBar.Attach(new ChipWindow()) is null;
                 foreach (var w in windows) w.Close();
                 line = "changed after closing"; ConnectionBar.Refresh(); Settle();                       // a closed window is no longer told
@@ -63,7 +63,7 @@ public class Round29UiTests : IClassFixture<HeadlessFixture>
     [Fact]
     public async Task The_connections_window_lists_what_each_connection_sends_and_keeps_and_the_event_log_newest_first()
     {
-        var state = new ConnState(new ConnAi("Claude", "api.anthropic.com"), new[] { new ConnAgent("<b>Alert</b> Hub", "", true) }, new ConnOutlook("graph.microsoft.com"));
+        var state = new ConnState(new ConnAi("Claude", "api.anthropic.com"), new[] { new ConnAgent("<b>Alert</b> Hub", "", true) }, new ConnOutlook("graph.microsoft.com"), Array.Empty<ConnMcp>());
         var t0 = new DateTime(2026, 7, 16, 13, 5, 7, 42, DateTimeKind.Utc);
         var entries = new List<EventEntry> { EventLog.Entry("connection", "AI switched on", t0), EventLog.Entry("sent", "AI request, 1,234 characters", t0.AddMinutes(1)), EventLog.Entry("sent", "about ANDA 216482", t0.AddMinutes(2)) };
         var copied = new List<string>(); var saved = new List<string>();
@@ -109,7 +109,7 @@ public class Round29UiTests : IClassFixture<HeadlessFixture>
         var r = await _fx.Session.Dispatch(() =>
         {
             ThemeManager.Apply(Appearances.Default);
-            var w = new ConnectionsWindow(() => Connections.Describe(new ConnState(null, Array.Empty<ConnAgent>(), null)), () => (Array.Empty<EventEntry>(), 0, 0), () => EventLog.Csv(Array.Empty<EventEntry>()), null);
+            var w = new ConnectionsWindow(() => Connections.Describe(new ConnState(null, Array.Empty<ConnAgent>(), null, Array.Empty<ConnMcp>())), () => (Array.Empty<EventEntry>(), 0, 0), () => EventLog.Csv(Array.Empty<EventEntry>()), null);
             w.Show(); Settle();
             var v = (Texts(w.List), w.LineText.Text, w.CopyCsvButton.IsEnabled, w.SaveCsvButton.IsEnabled, w.Count.Text, w.Log.Children.Count);
             w.Close(); return v;

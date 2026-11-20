@@ -62,6 +62,7 @@ public partial class SettingsWindow : Window
 
         BuildTime();
         BuildRound33();
+        BuildMcp();
         foreach (int seconds in AutoHidePolicy.Choices)
         {
             var rb = new RadioButton
@@ -261,6 +262,17 @@ public partial class SettingsWindow : Window
             ConnStatus.Text = ConnectionService.DescribeFor(_settings);
         }
         foreach (var box in new[] { ApiName, ApiEndpoint, ApiHeader, ApiScheme, ApiEnvVar, ApiModel, ApiTemplate, ApiPath }) box.LostFocus += (_, _) => SaveApi();
+        // round 40: one press fills My API in for a common kind of service; the address stays the person's own
+        foreach (var preset in CustomApiPreset.All)
+        {
+            var b = new Button { Content = "Fill in for " + preset.Label, Margin = new Avalonia.Thickness(0, 0, 8, 6) };
+            b.Click += (_, _) =>
+            {
+                ApiHeader.Text = preset.Header; ApiScheme.Text = preset.Scheme; ApiTemplate.Text = preset.Template; ApiPath.Text = preset.Path;
+                ApiEndpoint.Watermark = preset.Hint; SaveApi();
+            };
+            ApiPresetsPanel.Children.Add(b);
+        }
         foreach (int seconds in CustomApiSettings.TimeoutChoices)
         {
             var rb = new RadioButton { Content = $"{seconds} s", GroupName = "apitimeout", IsChecked = seconds == api.TimeoutSeconds, Margin = new Avalonia.Thickness(0, 0, 12, 2) };

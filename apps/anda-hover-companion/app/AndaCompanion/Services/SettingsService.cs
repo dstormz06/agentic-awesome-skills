@@ -219,6 +219,8 @@ public sealed class Settings
 
     /// <summary>Agents the person registered (for example Alert Hub, Patent Analysis and Triaging Agent). Each is off until it is switched on and set up.</summary>
     public List<AgentSettings> Agents { get; set; } = AgentRules.Presets();
+    /// <summary>Round 40: the MCP servers the person connects to (none at first). Only names of environment variables are kept, never a token.</summary>
+    public List<McpServerSettings> McpServers { get; set; } = new();
 
     /// <summary>Include items that come from the person's own data (at-risk ANDAs, dates, action items) in the to-do list.</summary>
     public bool TodoShowFromData { get; set; } = true;
@@ -400,6 +402,7 @@ public static class SettingsService
         loaded.MyTodoHotkey = Settings.RepairMyTodoHotkey(loaded.MyTodoHotkey, new[] { loaded.PeekHotkey, loaded.LookupHotkey, loaded.DraftHotkey, loaded.AskHotkey });
         loaded.MyActions = MyActionRules.Normalize(loaded.MyActions, new[] { loaded.PeekHotkey, loaded.LookupHotkey, loaded.DraftHotkey, loaded.AskHotkey, loaded.MyTodoHotkey });
         loaded.Agents = AgentRules.Normalize(loaded.Agents);
+        loaded.McpServers = McpRules.Normalize(loaded.McpServers);
         if (!Settings.TodoRefreshChoices.Contains(loaded.TodoRefreshSeconds)) loaded.TodoRefreshSeconds = 30;
         loaded.SectionUse = SettingsAdvisor.CleanUse(loaded.SectionUse);
         return loaded;

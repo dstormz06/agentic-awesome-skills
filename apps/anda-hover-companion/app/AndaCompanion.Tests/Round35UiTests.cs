@@ -70,7 +70,7 @@ public class Round35UiTests : IClassFixture<HeadlessFixture>
         {
             ["Lookup ANDA…"] = "OpenLookup", ["Today…"] = "OpenToday", ["Review a draft…"] = "OpenDraft(", ["Ask about a selection…"] = "OpenAsk(",
             ["ANDA to-do list…"] = "OpenTodoWindow", ["My to-do list…"] = "OpenMyTodoWindow", ["Notes to my to-do list…"] = "OpenNotes(", ["My usage…"] = "OpenUsage",
-            ["Compare two files…"] = "OpenCompare", ["Hand-off page…"] = "OpenHandoff(", ["Quick replies…"] = "OpenQuickReplies", ["Prompt library…"] = "new PromptLibraryWindow(",
+            ["Compare two files…"] = "OpenCompare", ["Hand-off page…"] = "OpenHandoff(", ["Quick replies…"] = "OpenQuickReplies", ["Prompt library…"] = "new PromptLibraryWindow(", ["MCP tools…"] = "OpenMcp",
             ["My actions"] = "_actionsMenu =", ["Appearance"] = "BuildRadioSubmenu(\"Appearance\"", ["Auto-hide"] = "BuildRadioSubmenu(\"Auto-hide\"",
             ["Connections and event log…"] = "OpenConnections", ["Backups and archive…"] = "OpenBackups", ["Demo: ANDA at risk"] = "DemoCard(\"216482\")",
             ["Demo: ANDA on track"] = "DemoCard(\"214990\")", ["Settings…"] = "OpenSettings", ["Help: first steps…"] = "OpenFirstSteps(", ["About and what changed…"] = "OpenAbout",
@@ -156,7 +156,7 @@ public class Round35UiTests : IClassFixture<HeadlessFixture>
                 new TodayWindow(new TodayHooks(() => repo.Numbers.Select(n => Find(n)!).ToList(), Find, () => new[] { "214990" }, () => new[] { "216482" }, _ => { })),
                 new LookupWindow(_ => { }), new CompareWindow(), new AboutWindow(), new UsageWindow(null, false),
                 new QuickRepliesWindow(new QuickReplyService(Path.Combine(dir, "r2.json")), () => { }),
-                new ConnectionsWindow(() => Connections.Describe(new ConnState(null, Array.Empty<ConnAgent>(), null)), () => (Array.Empty<EventEntry>(), 0, 0), () => "", null),
+                new ConnectionsWindow(() => Connections.Describe(new ConnState(null, Array.Empty<ConnAgent>(), null, Array.Empty<ConnMcp>())), () => (Array.Empty<EventEntry>(), 0, 0), () => "", null),
             };
             foreach (var w in more) { w.Show(); Settle(); windows.Add(w); }
             try

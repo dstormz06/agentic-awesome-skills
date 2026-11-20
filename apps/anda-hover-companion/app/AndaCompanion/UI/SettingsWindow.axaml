@@ -468,6 +468,7 @@
               <TextBox Name="ClaudeModelBox" Watermark="Claude model name (default: claude-opus-4-8)" AutomationProperties.Name="Claude model name"/>
               <Expander Name="MyApiExpander" Header="My API: the address, header and body of my own service">
                 <StackPanel Spacing="5" Margin="0,4,0,0">
+                  <WrapPanel Name="ApiPresetsPanel" AutomationProperties.Name="Fill in My API for a common kind of service"/>
                   <TextBox Name="ApiName" Watermark="A name for it, for example Division API" AutomationProperties.Name="My API name"/>
                   <TextBox Name="ApiEndpoint" Watermark="https://… (the address your service gives you)" AutomationProperties.Name="My API address"/>
                   <Grid ColumnDefinitions="*,8,*">
@@ -484,6 +485,15 @@
                 </StackPanel>
               </Expander>
               <TextBlock Classes="hint" Text="Offline only is how the app starts, and it never sends anything. Nothing is switched on until you choose it here. Auto uses a key (ANTHROPIC_API_KEY) or Elsa setup from the environment if one exists, and is otherwise offline. The app is fully functional offline. This line is the truth: it says Connected only after a request has really succeeded."/>
+            </StackPanel>
+
+            <Border Classes="hair"/>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="MCP SERVERS · OPTIONAL"/>
+              <StackPanel Name="McpList" Spacing="12"/>
+              <WrapPanel><Button Name="McpAdd" Content="Add an MCP server"/></WrapPanel>
+              <TextBlock Name="McpHint" Classes="hint"/>
             </StackPanel>
 
             <Border Classes="hair"/>

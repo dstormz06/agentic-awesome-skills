@@ -87,7 +87,8 @@ public partial class App : Application
             // The event log is written from here on, and every window carries the line that says what is switched on.
             if (SelfTestRun is null) EventLog.Configure(Path.Combine(AppPaths.Root, "events.csv"));
             _connectionState = Connections.From(_settings);
-            EventLog.Record("connection", Connections.StartLine(_connectionState));      // what is already on at start, so that the log never shows "off" without an "on" before it
+            EventLog.Record("connection", Connections.StartLine(_connectionState));
+            if (Connections.McpStartLine(_connectionState) is { } line) EventLog.Record("connection", line);      // round 40: MCP servers on at start      // what is already on at start, so that the log never shows "off" without an "on" before it
             ConnectionBar.Line = () => Connections.Describe(Connections.From(_settings)).Line;
             ConnectionBar.Open = OpenConnections;
             Window.WindowOpenedEvent.AddClassHandler<Window>((w, _) => ConnectionBar.Attach(w));
@@ -423,6 +424,7 @@ public partial class App : Application
             "Hand-off page…" => Item(label, () => OpenHandoff(null)),
             "Quick replies…" => Item(label, OpenQuickReplies),
             "Prompt library…" => Item(label, () => new PromptLibraryWindow(_prompts, _settings, ApplySettings).Show()),
+            "MCP tools…" => Item(label, OpenMcp),
             "My actions" => _actionsMenu = new NativeMenuItem("My actions") { Menu = new NativeMenu() },
             // Round 19: the looks are offered in both editions (the owner asked for them back).
             "Appearance" => BuildRadioSubmenu("Appearance", Appearances.Offered.Select(a => (a.Name, (object)a.Id)),
@@ -458,6 +460,16 @@ public partial class App : Application
 
     // Round 35 (review): from the tray, Quick replies and My usage open once, like Settings, and a change to the replies reaches an open
     // card and an open Settings window as it does when they are managed from Settings.
+    private McpWindow? _mcpWindow;
+    /// <summary>Round 40: MCP tools, once; the servers that are switched on. Nothing is sent until the person presses List tools and Send.</summary>
+    private void OpenMcp()
+    {
+        if (_mcpWindow is not null) { _mcpWindow.Activate(); return; }
+        _mcpWindow = new McpWindow(McpRules.Normalize(_settings.McpServers).Where(s => s.Enabled).ToList());
+        _mcpWindow.Closed += (_, _) => _mcpWindow = null;
+        _mcpWindow.Show();
+    }
+
     private QuickRepliesWindow? _repliesWindow;
     private UsageWindow? _usageWindow;
     private void OpenQuickReplies()

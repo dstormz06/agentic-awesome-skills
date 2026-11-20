@@ -293,6 +293,7 @@ kbd{font:11px/1 ui-monospace,Consolas,monospace;border:1px solid var(--win-line)
 .app-win :focus-visible{outline:2px solid var(--c-accent);outline-offset:2px}
 #settings{width:440px;padding:18px 20px;max-height:calc(100% - var(--tb-h) - 58px);overflow:auto;left:calc(50% - 220px);top:46px}
 #plib{width:520px;padding:18px 20px;left:calc(50% - 150px);top:80px;max-height:calc(100% - var(--tb-h) - 92px);overflow:auto}
+#mcpw{width:520px;padding:18px 20px;left:calc(50% - 260px);top:60px;max-height:calc(100% - var(--tb-h) - 72px);overflow:auto;z-index:53}   /* round 40: opened on purpose, over Settings */
 #plib .cols{display:grid;grid-template-columns:150px 1fr;gap:12px}
 #plib .list{display:grid;gap:2px;align-content:start}
 #plib .list button{border:none;background:none;text-align:left;padding:7px 9px;border-radius:7px;color:var(--c-ink2);font-size:calc(12.5px*var(--ts))}
@@ -1597,6 +1598,13 @@ PS C:\work&gt; </div>
       <p class="hint">Nothing here is a secret: the token stays in the environment variable you name and is never saved by the app. Only https:// addresses are used (http:// for localhost). The body shown is only an example of one common shape; use the shape your own service documents. A reply that does not have text at the path is reported without showing what came back. In this simulation the form is checked but nothing is ever sent.</p>
     </details>
     <p class="hint">Auto uses an AI access key (ANTHROPIC_API_KEY) or the agency AI service (Elsa) set up on this PC, if one exists, and is otherwise offline. Offline never sends anything, and the app is fully functional offline. The banner at the top says Connected only after a request has succeeded. This page cannot make requests, so it never shows Connected.</p>
+    <div class="wrap" id="apiPresets" role="group" aria-label="Fill in My API for a common kind of service"></div>
+    <hr class="hair">
+    <div class="lbl">MCP SERVERS · OPTIONAL</div>
+    <div class="sim-note">Rehearsal only. This page contacts no server: Test and Send are simulated, and the fictional demo server answers from this page.</div>
+    <div id="mcpList"></div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px"><button class="pill quiet" id="mcpAdd" type="button">Add an MCP server</button><button class="pill quiet" id="mcpAddDemo" type="button">Add the fictional demo server</button></div>
+    <p class="hint" id="mcpHint"></p>
     <hr class="hair">
     <div class="lbl">OUTLOOK · OPTIONAL, READ-ONLY</div>
     <div class="sim-note">Rehearsal only. This page never contacts Microsoft and has no mailbox. Sign in shows the steps with a made-up code, and the card shows made-up messages.</div>
@@ -1940,6 +1948,21 @@ PS C:\work&gt; </div>
     <div id="wlRows"></div>
   </div>
 
+  <!-- ===== MCP tools (round 40) ===== -->
+  <div class="app-win" id="mcpw" role="dialog" aria-label="MCP tools">
+    <div class="hdr"><h2>MCP tools</h2><button class="pill" id="mwClose" type="button">Done</button></div>
+    <div class="sim-note">Simulated: this page contacts no server. In the Windows app, Send makes one request to the server you choose.</div>
+    <label class="hint" for="mwServer" style="display:block;margin:6px 0 2px">Server</label>
+    <div style="display:flex;gap:8px;align-items:center"><select id="mwServer" style="flex:1"></select><button class="pill quiet" id="mwList" type="button">List tools</button></div>
+    <label class="hint" for="mwTool" style="display:block;margin:8px 0 2px">Tool</label><select id="mwTool"></select>
+    <p class="hint" id="mwToolAbout"></p>
+    <label class="hint" for="mwArgs" style="display:block;margin:8px 0 2px">Arguments (JSON), filled in from the tool's description and your selection</label>
+    <textarea id="mwArgs" rows="6" style="font:11.5px ui-monospace,Consolas,monospace" spellcheck="false"></textarea>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"><button class="pill quiet" id="mwPreview" type="button">Show what will be sent</button><button class="pill" id="mwSend" type="button" disabled>Send</button><button class="pill quiet" id="mwCopy" type="button" disabled>Copy the answer</button></div>
+    <pre id="mwShown" class="hint" style="white-space:pre-wrap;margin:8px 0 0"></pre>
+    <div id="mwStatus" role="status" class="hint"></div>
+    <pre id="mwAnswer" style="white-space:pre-wrap;font:12px ui-monospace,Consolas,monospace;margin:6px 0 0;max-height:220px;overflow:auto" tabindex="0" aria-label="The server's answer"></pre>
+  </div>
   <!-- ===== prompt library ===== -->
   <div class="app-win" id="plib" role="dialog" aria-label="Prompt library">
     <div class="hdr"><h2>Prompt library</h2><button class="pill" id="plClose" type="button">Done</button></div>
@@ -2662,6 +2685,7 @@ const state = { tz:"", staleDays:7, refStaleDays:45, oldRef:false, oldData:false
   adaptive:true, allTools:location.hash === "#all", sectionUse:{}, clMode:0,
   middle:false, middleMod:"Ctrl", provider:"offline", tone:"", style:"", signoff:"", claudeModel:"claude-opus-4-8",
   outlook:{ on:false, cloud:"com", client:"", tenant:"organizations", max:5, step:"out", msg:"" },
+  mcp:[],            /* round 40: the MCP servers the person connects to */
   data:{ portfolio:null, notes:null, ref:null }, quickNotes:{}, andaUrl:"https://tracker.example/anda/{anda}",
   myApi:{ name:"My API", endpoint:"", header:"Authorization", scheme:"Bearer", env:"", model:"", template:"", path:"choices[0].message.content" },
   replies:null,
@@ -2669,7 +2693,7 @@ const state = { tz:"", staleDays:7, refStaleDays:45, oldRef:false, oldData:false
   cardFields:["applicant", "established", "project", "agentCo", "agentEmail", "applicantEmail", "myNotes", "doc356h", "doc32p1"],
   watchOn:false, newsOn:false, newsFile:"", watchCap:3, trayRecount:"daily", wDay:null, wCount:0, wSeen:new Set(), wSnoozed:new Set(), hubSeen:new Set() };
 const steps = {};
-const APP_WINS = ["lookup", "plib", "settings", "draft", "wlist", "replies", "actwin", "todo", "mytodo", "notes", "ask", "today", "hub", "cmp", "usage", "handoff", "conn", "about", "bak", "first"];
+const APP_WINS = ["mcpw", "lookup", "plib", "settings", "draft", "wlist", "replies", "actwin", "todo", "mytodo", "notes", "ask", "today", "hub", "cmp", "usage", "handoff", "conn", "about", "bak", "first"];
 
 /* ================= round 19 =================
    1. Card details: columns of the person's own sheet, shown when a card is expanded, each with Copy. Nothing is looked up anywhere.
@@ -4827,14 +4851,16 @@ function connState(){                   /* what this page has switched on. It co
     : mine ? { name:shown(state.myApi.name, 60) || "My API", where:hostOf(state.myApi.endpoint) } : null;
   const agents = state.agents.filter(a => a.enabled).map(a => ({ name:shown(a.name, 60) || "Agent", where:hostOf(a.api && a.api.endpoint), auto:a.auto !== 0 }));
   const outlook = state.outlook.on ? { where:state.outlook.cloud === "us" ? "login.microsoftonline.us and graph.microsoft.us" : "login.microsoftonline.com and graph.microsoft.com" } : null;
-  return { ai, agents, outlook };
+  /* round 40: an MCP server counts when it is switched on and its address could be used */
+  const mcp = state.mcp.filter(m => m.enabled && mcpAddressProblem(m.endpoint) === null).map(m => ({ name:shown(m.name, 60) || "MCP server", where:hostOf(m.endpoint) }));
+  return { ai, agents, outlook, mcp };
 }
 let connWas = null;                     /* what was on at the last look, so that a change is written to the event log once */
 function paintConnBars(){
   const c = connState(), line = connections(c).line;
   /* The line is read out as it is shown: what is on, then what a press does. */
   document.querySelectorAll(".onbar").forEach(b => { b.textContent = line; if(b.tagName === "BUTTON") b.setAttribute("aria-label", line + ". Opens the list of connections and the event log."); });
-  if(connWas) connChanges(connWas, c).forEach(l => logEvent("connection", l)); else logEvent("connection", connStart(c));
+  if(connWas) connChanges(connWas, c).forEach(l => logEvent("connection", l)); else { logEvent("connection", connStart(c)); if(connMcpStart(c)) logEvent("connection", connMcpStart(c)); }
   connWas = c; if(isOpen("conn")) connPaint();
 }
 function connPaint(){
@@ -5895,7 +5921,7 @@ function openMenu(){
       item("Hand-off page…", "", () => openHandoff(null)),
       item(alertReasons().length ? `News and alerts… (${alertReasons().length} today)` : "News and alerts…", "", () => openHub()),
       item("Quick replies…", "", () => { showApp("replies"); renderReplies(0); }),
-      ...(state.allTools ? [item("Prompt library…", "", () => { showApp("plib"); renderPrompts(0); }), ...ma] : []),
+      ...(state.allTools ? [item("Prompt library…", "", () => { showApp("plib"); renderPrompts(0); }), item("MCP tools…", "", () => openMcp()), ...ma] : []),
       ...ap, ...ah,
       item("Connections and event log…", "", () => openConn()),
       item("Backups and archive…", "", () => openBackups()),
@@ -6060,7 +6086,7 @@ function middleRule(on, mod, ctrl, shift, alt){
   $("setMiddle").addEventListener("change", e => { state.middle = e.target.checked; });
   document.addEventListener("mousedown", e => {
     if(e.button !== 1 || !state.middle || !state.running) return;
-    if(e.target.closest("#settings, #plib, #replies, #lookup, #draft, #wlist, #actwin, #todo, #card, #chip, #menu, #flyout, #replyMenu, #taskbar, .banner, #guide, #compact")) return;
+    if(e.target.closest("#settings, #plib, #mcpw, #replies, #lookup, #draft, #wlist, #actwin, #todo, #card, #chip, #menu, #flyout, #replyMenu, #taskbar, .banner, #guide, #compact")) return;
     if(!middleRule(state.middle, state.middleMod, e.ctrlKey, e.shiftKey, e.altKey)) return;
     e.preventDefault();
     pointer = { x:e.clientX, y:e.clientY };
@@ -6098,6 +6124,7 @@ function connections(c){
   const items = [], nowhere = "no address yet, so nothing can be sent";
   if(c.ai) items.push({ name:`${c.ai.name} (AI)`, sends:"When a card is opened in full: the whole record of that ANDA from your sheet, with its notes, and your lens. When you press Send: the text shown to you first and, for a writing action, your tone, standing instructions and sign-off. Nothing else.", where:c.ai.where || nowhere, kept:"This tool keeps nothing of what is sent. What the service keeps is set by your office's agreement with it." });
   for(const a of c.agents || []) items.push({ name:`${a.name} (agent)`, sends:a.auto ? "By itself when a card is opened in full: the fields of that ANDA that its prompt names, never selected text. Also when you press Run or Send." : "Only when you press Run or Send: its prompt, filled in and shown to you.", where:a.where || nowhere, kept:"Its answer is kept in memory until you close the app, and counts as fresh for the minutes you chose. It is never written to a file." });
+  for(const m of c.mcp || []) items.push({ name:`${m.name} (MCP server)`, sends:MCP_SAID.sends, where:m.where || nowhere, kept:MCP_SAID.kept });
   if(c.outlook) items.push({ name:"Outlook (read-only)", sends:"When you sign in: this app's ID and the read-only permission it asks for. After that, only a search for the six-digit number of the open ANDA.", where:c.outlook.where, kept:"Mail is shown, never stored. The sign-in is held in memory until you sign out or close the app." });
   const names = items.map(i => i.name);
   const line = names.length === 0 ? CONN_OFFLINE : "Switched on: " + names.slice(0, 3).join(" · ") + (names.length > 3 ? ` · and ${names.length - 3} more` : "");
@@ -6118,6 +6145,7 @@ const EV_PHRASES = [
   "settings restored from a backup", "a list was restored from a backup", "a to-do item was put back from the archive", "weekly copy of the sheet switched on", "weekly copy of the sheet switched off",
   "settings file could not be used as it was at start", "ANDA to-do list could not be used as it was at start", "to-do list could not be used as it was at start", "prompt library could not be used as it was at start", "quick replies could not be used as it was at start",
   "kept copies of the sheet",
+  "at start: MCP servers on: #", "MCP servers switched on: # to #", "MCP servers changed", "MCP tools listed, # tools", "MCP request, # characters", "MCP request: no answer", "MCP request (simulated), # characters",
 ];
 const EV_NUMBER = /[0-9]{1,3}(?:,[0-9]{3})*/g;      /* a count, written with commas: 7, 1,234 */
 function eventEntry(type, detail, whenMs){
@@ -6128,6 +6156,8 @@ function eventEntry(type, detail, whenMs){
 /* What is written to the log about connections: one line at start that says what is already on, and a line whenever something is switched
    on or off or goes somewhere else. Never a name or an address. */
 function connStart(c){ return `at start: AI ${c.ai ? "on" : "off"}, agents on: ${(c.agents || []).length}, Outlook ${c.outlook ? "on" : "off"}`; }
+/* round 40: a second line at start, only when MCP servers are on */
+function connMcpStart(c){ return (c.mcp || []).length ? `at start: MCP servers on: ${c.mcp.length}` : null; }
 function connChanges(before, now){
   const lines = [], sig = list => JSON.stringify((list || []).map(a => [a.name, a.where, !!a.auto]));
   if(!!now.ai !== !!before.ai) lines.push(now.ai ? "AI switched on" : "AI switched off");
@@ -6136,6 +6166,8 @@ function connChanges(before, now){
   if(a !== b) lines.push(`agents switched on: ${a} to ${b}`); else if(sig(before.agents) !== sig(now.agents)) lines.push("agents changed");
   if(!!now.outlook !== !!before.outlook) lines.push(now.outlook ? "Outlook switched on" : "Outlook switched off");
   else if(now.outlook && now.outlook.where !== before.outlook.where) lines.push("Outlook connection changed");
+  const m = (before.mcp || []).length, n = (now.mcp || []).length, msig = list => JSON.stringify((list || []).map(x => [x.name, x.where]));
+  if(m !== n) lines.push(`MCP servers switched on: ${m} to ${n}`); else if(msig(before.mcp) !== msig(now.mcp)) lines.push("MCP servers changed");
   return lines;
 }
 function eventCsv(entries){ return ["time_utc,type,detail", ...entries.map(e => [e.t, e.type, '"' + e.detail.replace(/"/g, '""') + '"'].join(","))].join("\r\n") + "\r\n"; }
@@ -6226,8 +6258,9 @@ const GUIDE_SAID = {
 /* The guide opens by itself once, at the first start, and never again by itself. "seen" is what the PC remembers; anything but true means it has not been shown. */
 function guideOpensAtStart(seen){ return seen !== true; }
 
-const APP_VERSION = "Prototype, round 39";
+const APP_VERSION = "Prototype, round 40";
 const CHANGES = [
+  { round:40, items:["MCP servers: connect to tools that answer over https (Settings, AI and connections). Test lists a server's tools; MCP tools in the tray menu's More shows exactly what a call sends before you press Send. Nothing is sent by itself and nothing is kept.", "My API can be filled in for a common kind of service with one press: OpenAI-compatible, Azure OpenAI, or Ollama on this PC."] },
   { round:39, items:["Settings has a second switch beside “Since you last looked”: whether next week in Today also lists your to-do items. Off, it reads neither to-do list for Today and shows no titles."] },
   { round:38, items:["From Thursday noon to Sunday, Today's next week also lists your to-do items due Monday to Friday, from both to-do lists: unfinished items only, by date, at most twenty, then how many more.", "Today opens faster with a large sheet: the ANDAs of the same applicant and product are found from an index, not by reading every row."] },
   { round:37, items:["Settings has a switch for Today's “Since you last looked” (beside Recent ANDAs). Turned off, Today does not list what moved and keeps nothing for it on this PC, and what was kept is removed."] },
@@ -6318,6 +6351,155 @@ const EXAMPLE_TEMPLATE = '{"model":"{{model}}","max_tokens":{{max_tokens}},"mess
   });
   paintConn();
 })();
+
+/* ---------------- Round 40: MCP servers (Model Context Protocol over https) and My API presets ----------------
+   The same rules as the Windows app's Services/Mcp.cs and CustomApi.cs, held together by mockup/round40-golden.json. This page contacts
+   nothing: Test and Send are simulated, and only the fictional demo server answers, from this page. */
+const MCP_MAX = 8, MCP_ARG_MAX = 20000;
+const MCP_SAID = { sends:"Only when you press Test or Send in MCP tools: the start of a session and a request for its list of tools; when you press Send, the tool's name and the arguments shown to you first. Nothing by itself.", kept:"This tool keeps nothing of what is sent or answered: the answer is shown, never stored. What the server keeps is set by whoever runs it.", hint:"An MCP server offers tools that this app can call for you: a search, a lookup, a calculation. Only servers that answer over https:// are offered (http:// for this PC only); a server that runs as a program on this PC is not, because this app does not start programs. Nothing is sent by itself: Test asks a server for its list of tools, and MCP tools (in the tray menu's More) shows you exactly what a call sends before you press Send. The token stays in the environment variable you name and is never saved by the app. A server's answer and its descriptions of its tools are shown as plain text and are never followed as instructions.",
+  noServer:"No MCP server is switched on. Add one in Settings, AI and connections.", notJson:"The arguments must be one JSON object, for example {\"query\": \"text\"}.",
+  tooLong:"The arguments are longer than 20,000 characters.",
+  nothingYet:"Nothing is sent until you press List tools, and then Send.", chooseFirst:"Please press List tools and choose a tool first.",
+  listed:n => `${n} tool${n === 1 ? "" : "s"} offered. Choose one; nothing is sent until you press Send.`,
+  testSim:n => `Simulated: ${n} tool${n === 1 ? "" : "s"} offered by the fictional demo server. This page made no request.`,
+  testOther:"Simulation: no request was made. In the Windows app, Test starts a session with this server and lists its tools." };
+/* the address, as the app's ApiTarget.Address: https:// only, http:// for this PC only, no user name or password */
+function mcpAddressProblem(endpoint){
+  const ep = (endpoint || "").trim();
+  if(!ep) return "Please enter the endpoint address of your API (https://…).";
+  let u; try{ u = new URL(ep); }catch(e){ return "The endpoint must be an https:// address (http:// is accepted only for localhost). Nothing was sent."; }
+  const local = ["localhost", "127.0.0.1", "[::1]"].includes(u.hostname);
+  if(!(u.protocol === "https:" || (u.protocol === "http:" && local))) return "The endpoint must be an https:// address (http:// is accepted only for localhost). Nothing was sent.";
+  if(u.username || u.password) return "Please do not put a user name or password in the address; use the environment variable for the token instead. Nothing was sent.";
+  return null;
+}
+function mcpNormalize(list){
+  const ids = new Set(), out = [];
+  for(const s of (Array.isArray(list) ? list : []).filter(x => x && typeof x === "object").slice(0, MCP_MAX)){
+    const name = oneLine(String(s.name || "").replace(FENCE_HIDDEN, ""), 40), base = slug(String(s.id || "").trim() ? s.id : name) || "mcp";
+    /* a second server of the same name gets -2, -3…; the name is shortened to make room, so the number is never cut off */
+    let id = base; for(let n = 2; ids.has(id); n++){ const suffix = "-" + n; id = (base.length + suffix.length > 40 ? base.slice(0, 40 - suffix.length).replace(/-+$/, "") : base) + suffix; } ids.add(id);
+    const endpoint = String(s.endpoint || "").trim();
+    out.push({ id, name:name || "MCP server", endpoint, header:String(s.header == null ? "Authorization" : s.header).trim(), scheme:String(s.scheme == null ? "Bearer" : s.scheme).trim(),
+      env:String(s.env || "").trim(), enabled:!!s.enabled && endpoint.length > 0, timeout:[10, 30, 60, 120].includes(s.timeout) ? s.timeout : 30 });
+  }
+  return out;
+}
+/* The arguments offered for a tool: each property its schema names, in order, as an empty value of its type; the selected text goes into the
+   first required text property, or else the first text property. The same as the app's McpRules.ArgumentsFor. */
+function mcpArgumentsFor(tool, selection){
+  const schema = tool.inputSchema || {}, props = schema.properties && typeof schema.properties === "object" && !Array.isArray(schema.properties) ? schema.properties : null;
+  const typeOf = p => !p || typeof p !== "object" ? null : typeof p.type === "string" ? p.type : Array.isArray(p.type) ? (p.type.find(t => typeof t === "string" && t !== "null") || null) : null;
+  const required = new Set(Array.isArray(schema.required) ? schema.required.filter(x => typeof x === "string") : []), args = {};
+  if(props){
+    const texts = Object.keys(props).filter(k => typeOf(props[k]) === "string"), target = texts.find(k => required.has(k)) || texts[0];
+    for(const k of Object.keys(props)){
+      const t = typeOf(props[k]);
+      args[k] = t === "string" ? (k === target ? String(selection || "").trim() : "") : t === "number" || t === "integer" ? 0 : t === "boolean" ? false : t === "array" ? [] : t === "object" ? {} : null;
+    }
+  }
+  return JSON.stringify(args, null, 2);
+}
+function mcpParseArgs(text){
+  const t = String(text || "").trim();
+  if(!t) return { args:{}, problem:null };
+  if(t.length > MCP_ARG_MAX) return { args:null, problem:MCP_SAID.tooLong };
+  try{ const v = JSON.parse(t); return v && typeof v === "object" && !Array.isArray(v) ? { args:v, problem:null } : { args:null, problem:MCP_SAID.notJson }; }catch(e){ return { args:null, problem:MCP_SAID.notJson }; }
+}
+const mcpPreview = (server, tool, args, host) => `To ${server.name} (${host}), the tool ${tool}, with these arguments:\n${JSON.stringify(args, null, 2)}`;
+/* the fictional demo server: two tools, answered by this page */
+const MCP_DEMO = { name:"Fictional demo server", endpoint:"https://mcp.example.invalid/demo",
+  tools:[{ name:"search_fictional_guidance", title:"Search fictional guidance", description:"Searches a few fictional guidance notes. Simulated: answered by this page.",
+      inputSchema:{ type:"object", properties:{ query:{ type:"string" }, max_results:{ type:"integer" } }, required:["query"] } },
+    { name:"word_count", title:"Count words", description:"Counts the words in a text. Simulated: answered by this page.", inputSchema:{ type:"object", properties:{ text:{ type:"string" } }, required:["text"] } }] };
+const MCP_DEMO_NOTES = ["Fictional note 1: a response to an information request is tracked from the day it arrives.", "Fictional note 2: a goal date that moves is noted with the reason given.", "Fictional note 3: labeling comments are answered in one round where possible."];
+function mcpDemoCall(tool, args){
+  if(tool === "word_count"){ const n = String(args.text || "").trim().split(/\s+/).filter(Boolean).length; return `${n} word${n === 1 ? "" : "s"} (simulated).`; }
+  const q = String(args.query || "").trim().toLowerCase(), max = Math.max(1, Math.min(3, Number(args.max_results) || 3));
+  const hits = MCP_DEMO_NOTES.filter(n => !q || q.split(/\s+/).some(w => n.toLowerCase().includes(w))).slice(0, max);
+  return hits.length ? hits.join("\n") + "\n(simulated)" : "No fictional note matches (simulated).";
+}
+const mcpIsDemo = s => s.endpoint === MCP_DEMO.endpoint;
+function paintMcpList(){
+  const box = $("mcpList"); box.replaceChildren(); $("mcpHint").textContent = MCP_SAID.hint;
+  state.mcp.forEach((s, i) => {
+    const row = h("div", { class:"find note", "data-mcp":s.id });
+    const field = (key, label, ph) => { const inp = h("input", { type:"text", value:s[key], placeholder:ph, aria:`${label} of MCP server ${i + 1}` });
+      inp.addEventListener("input", () => { s[key] = inp.value; if(key === "endpoint" && !inp.value.trim()) { s.enabled = false; on.checked = false; } paintConnBars(); }); return inp; };
+    const on = h("input", { type:"checkbox", aria:`Use MCP server ${i + 1}` }); on.checked = s.enabled;
+    const status = h("div", { class:"hint", role:"status", style:"margin:4px 0 0" });
+    on.addEventListener("change", () => { const bad = on.checked ? mcpAddressProblem(s.endpoint) : null; if(bad){ on.checked = false; status.textContent = bad; return; } s.enabled = on.checked; paintConnBars(); });
+    const test = h("button", { class:"pill quiet", type:"button", text:"Test" }), del = h("button", { class:"pill quiet", type:"button", text:"Remove" });
+    test.addEventListener("click", () => { const bad = mcpAddressProblem(s.endpoint) || (s.env && !/^[A-Za-z_][A-Za-z0-9_]{0,127}$/.test(s.env) ? "That does not look like an environment variable name. Please enter the NAME of the variable, never the token itself." : null);
+      status.textContent = bad || (mcpIsDemo(s) ? MCP_SAID.testSim(MCP_DEMO.tools.length) : MCP_SAID.testOther); if(!bad && mcpIsDemo(s)) logEvent("sent", `MCP tools listed, ${MCP_DEMO.tools.length} tools`); });
+    del.addEventListener("click", () => { state.mcp.splice(state.mcp.indexOf(s), 1); paintMcpList(); paintConnBars(); });
+    row.append(h("label", { class:"opt" }, on, " Use this server"), field("name", "Name", "A name, for example Division search"), field("endpoint", "Address", "https://… (the server's MCP address)"),
+      h("div", { style:"display:grid;grid-template-columns:1fr 1fr;gap:8px" }, field("header", "Token header", "Header, for example Authorization"), field("scheme", "Before the token", "Before the token, for example Bearer")),
+      field("env", "Token variable", "NAME of the environment variable that holds the token (never the token)"), h("div", { style:"display:flex;gap:8px;margin-top:6px" }, test, del), status);
+    box.append(row);
+  });
+  $("mcpAdd").disabled = $("mcpAddDemo").disabled = state.mcp.length >= MCP_MAX;
+}
+$("mcpAdd").addEventListener("click", () => { state.mcp = mcpNormalize([...state.mcp, { name:"MCP server " + (state.mcp.length + 1), endpoint:"", enabled:false }]); paintMcpList(); });
+$("mcpAddDemo").addEventListener("click", () => { state.mcp = mcpNormalize([...state.mcp, { name:MCP_DEMO.name, endpoint:MCP_DEMO.endpoint, header:"", scheme:"", enabled:true }]); paintMcpList(); paintConnBars(); });
+/* the MCP tools window */
+let mwSent = null;
+function openMcp(){
+  closeMenus(); showApp("mcpw");
+  const sel = String(window.getSelection ? window.getSelection() : "").trim();
+  const servers = state.mcp.filter(s => s.enabled), box = $("mwServer"); box.replaceChildren();
+  servers.forEach(s => box.append(h("option", { value:s.id, text:s.name })));
+  $("mwStatus").textContent = servers.length ? MCP_SAID.nothingYet : MCP_SAID.noServer; $("mwArgs").dataset.sel = sel; $("mwAnswer").textContent = ""; $("mwCopy").disabled = true;
+  mwTools(); setTimeout(() => (servers.length ? box : $("mwClose")).focus(), 30);
+}
+function mwServer(){ return state.mcp.find(s => s.enabled && s.id === $("mwServer").value) || null; }
+/* the tools are asked for only when the person presses List tools, as in the app */
+function mwTools(listed){
+  const s = mwServer(), box = $("mwTool"); box.replaceChildren(); mwReset();
+  const tools = listed && s && mcpIsDemo(s) ? MCP_DEMO.tools : [];
+  tools.forEach(t => box.append(h("option", { value:t.name, text:t.title ? `${t.title} (${t.name})` : t.name })));
+  if(listed){
+    if(!s) $("mwStatus").textContent = MCP_SAID.noServer;
+    else if(!tools.length) $("mwStatus").textContent = MCP_SAID.testOther;
+    else { logEvent("sent", `MCP tools listed, ${tools.length} tools`); $("mwStatus").textContent = MCP_SAID.listed(tools.length); }
+  }
+  mwTool();
+}
+function mwTool(){
+  const s = mwServer(), t = s && mcpIsDemo(s) ? MCP_DEMO.tools.find(x => x.name === $("mwTool").value) : null;
+  $("mwToolAbout").textContent = t ? t.description : ""; $("mwArgs").value = t ? mcpArgumentsFor(t, $("mwArgs").dataset.sel) : ""; mwReset();
+}
+function mwReset(){ mwSent = null; $("mwSend").disabled = true; $("mwShown").textContent = ""; }
+$("mwServer").addEventListener("change", () => mwTools(false)); $("mwList").addEventListener("click", () => mwTools(true)); $("mwTool").addEventListener("change", mwTool); $("mwArgs").addEventListener("input", mwReset);
+$("mwPreview").addEventListener("click", () => {
+  const s = mwServer(), tool = $("mwTool").value;
+  if(!s || !tool){ $("mwStatus").textContent = s ? MCP_SAID.chooseFirst : MCP_SAID.noServer; return; }
+  const r = mcpParseArgs($("mwArgs").value);
+  if(r.problem){ $("mwStatus").textContent = r.problem; return; }
+  mwSent = { server:s, tool, args:r.args }; $("mwShown").textContent = mcpPreview(s, tool, r.args, hostOf(s.endpoint)); $("mwSend").disabled = false; $("mwStatus").textContent = "Nothing has been sent yet.";
+});
+$("mwSend").addEventListener("click", () => {
+  if(!mwSent) return;
+  const text = mcpDemoCall(mwSent.tool, mwSent.args);
+  logEvent("sent", `MCP request (simulated), ${JSON.stringify(mwSent.args).length.toLocaleString("en-US")} characters`);
+  $("mwAnswer").textContent = text; $("mwStatus").textContent = "Answered. The answer is shown here only and is not kept. (Simulated.)"; $("mwCopy").disabled = false; mwSent = null; $("mwSend").disabled = true; $("mwShown").textContent = "";
+});
+$("mwCopy").addEventListener("click", () => writeClipboard($("mwAnswer").textContent).then(() => { $("mwStatus").textContent = "Copied."; }, () => { $("mwStatus").textContent = "Your browser did not allow copying. Please select the answer and press Ctrl+C."; }));
+$("mwClose").addEventListener("click", () => closeApp("mcpw"));
+/* My API, filled in for a common kind of service with one press; the address stays the person's */
+const API_PRESETS = [
+  { id:"openai", label:"OpenAI-compatible", header:"Authorization", scheme:"Bearer", template:EXAMPLE_TEMPLATE, path:"choices[0].message.content", hint:"https://…/v1/chat/completions" },
+  { id:"azure", label:"Azure OpenAI", header:"api-key", scheme:"", template:'{"max_tokens":{{max_tokens}},"messages":[{"role":"system","content":"{{system}}"},{"role":"user","content":"{{user}}"}]}', path:"choices[0].message.content", hint:"https://<resource>.openai.azure.com/openai/deployments/<deployment>/chat/completions?api-version=<version>" },
+  { id:"ollama", label:"Ollama on this PC", header:"", scheme:"", template:'{"model":"{{model}}","stream":false,"messages":[{"role":"system","content":"{{system}}"},{"role":"user","content":"{{user}}"}]}', path:"message.content", hint:"http://localhost:11434/api/chat" },
+];
+API_PRESETS.forEach(p => {
+  const b = h("button", { class:"pill quiet", type:"button", text:"Fill in for " + p.label });
+  b.addEventListener("click", () => { const m = state.myApi; Object.assign(m, { header:p.header, scheme:p.scheme, template:p.template, path:p.path });
+    ["apiHeader", "apiScheme", "apiTemplate", "apiPath"].forEach((id, i) => { $(id).value = [p.header, p.scheme, p.template, p.path][i]; });
+    $("apiEndpoint").placeholder = p.hint; $("myApi").open = true; paintConn(); });
+  $("apiPresets").append(b);
+});
+paintMcpList();
 
 /* my data: simulated pickers, so the settings and their effect on the card can be seen without touching a real file */
 const PICKS = {
@@ -8013,7 +8195,7 @@ function snapSettings(){
     outlook:{ enabled:o.on, cloud:o.cloud, clientId:o.client, tenant:o.tenant, maxItems:o.max }, lens:s.lens,
     actions:JSON.parse(JSON.stringify(s.actions)), agents:JSON.parse(JSON.stringify(s.agents)), todoShowFromData:s.todoAuto, todoRefreshSeconds:s.todoRefresh,
     myTodoMode:s.clMode, adaptive:s.adaptive, allTools:s.allTools,
-    textSize:s.ts, density:s.density, lookupStyle:s.lookupStyle, rememberRecents:s.recentsOn, sinceLastLook:s.lastLookOn, weekTodos:s.weekTodosOn, pins:[...s.pins],
+    textSize:s.ts, density:s.density, lookupStyle:s.lookupStyle, rememberRecents:s.recentsOn, sinceLastLook:s.lastLookOn, weekTodos:s.weekTodosOn, mcpServers:JSON.parse(JSON.stringify(s.mcp)), pins:[...s.pins],
     cardFields:[...s.cardFields], watchBack:s.watchOn, divisionNews:s.newsOn, noticesPerDay:s.watchCap, andaPage:s.andaUrl, trayRecount:s.trayRecount, timeZone:s.tz, staleAfterDays:s.staleDays, refStaleAfterDays:s.refStaleDays };   /* the counts of opened sections belong to this PC: they are not in a backup */
 }
 const DEFAULT_SETTINGS = { ...snapSettings(), allTools:false }, DEFAULT_PROMPTS = prompts.map(p => [...p]), DEFAULT_REPLIES = state.replies.map(r => ({ ...r }));
@@ -8051,7 +8233,8 @@ function applySettings(x){
   s.recentsOn = typeof x.rememberRecents === "boolean" ? x.rememberRecents : d.rememberRecents; if(!s.recentsOn) s.recents = [];
   /* a backup written before round 37 does not hold the switch: what the person has now stays, as in the app (round 37 review) */
   if(typeof x.sinceLastLook === "boolean") s.lastLookOn = x.sinceLastLook;
-  if(typeof x.weekTodos === "boolean") s.weekTodosOn = x.weekTodos;        /* round 39: an older backup keeps the choice the person has now */
+  if(typeof x.weekTodos === "boolean") s.weekTodosOn = x.weekTodos;
+  if(Array.isArray(x.mcpServers)) s.mcp = mcpNormalize(x.mcpServers);        /* round 40: an older backup keeps the servers the person has now */        /* round 39: an older backup keeps the choice the person has now */
   if(!s.lastLookOn){ s.lastLook = null; s.shownLook = null; }
   $("lastLookStatus").textContent = ""; if(isOpen("today")) paintToday();
   s.pins = Array.isArray(x.pins) ? [...new Set(x.pins.filter(six))].slice(0, PIN_MAX) : []; applyDisplay();
@@ -8085,7 +8268,7 @@ function syncSettingsUI(){
   syncAndaUrl();
   const s = state, check = (name, value) => document.querySelectorAll(`input[name=${name}]`).forEach(r => { r.checked = r.value === String(value); });
   check("look", s.look); check("autohide", s.autoHide); check("consent", s.mode); check("tone", s.tone); check("provider", s.provider); check("midmod", s.middleMod); check("todorefresh", s.todoRefresh);
-  check("clmode", s.clMode); check("ts", s.ts); check("density", s.density); check("lkstyle", s.lookupStyle); $("setRecents").checked = s.recentsOn; $("setLastLook").checked = s.lastLookOn; $("setWeekTodos").checked = s.weekTodosOn; syncRound19(); $("adaptCheck").checked = s.adaptive; applyEdition();
+  check("clmode", s.clMode); check("ts", s.ts); check("density", s.density); check("lkstyle", s.lookupStyle); paintMcpList(); $("setRecents").checked = s.recentsOn; $("setLastLook").checked = s.lastLookOn; $("setWeekTodos").checked = s.weekTodosOn; syncRound19(); $("adaptCheck").checked = s.adaptive; applyEdition();
   $("todoAuto").checked = s.todoAuto; renderActions(); renderAgents(); if(isOpen("todo")){ tdApplyTimer(); tdReload(true); }
   $("setUrgent").checked = s.escalate; $("setLead").value = String(s.lead); $("setCapture").checked = s.capture;
   $("setTz").value = s.tz; $("setStale").value = String(s.staleDays); $("setRefStale").value = String(s.refStaleDays); timeTick();

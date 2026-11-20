@@ -6,9 +6,11 @@ namespace AndaCompanion.Services;
 public sealed record ConnAi(string Name, string Where);
 public sealed record ConnAgent(string Name, string Where, bool Auto);
 public sealed record ConnOutlook(string Where);
+/// <summary>Round 40: an MCP server that is switched on and has an address that can be used.</summary>
+public sealed record ConnMcp(string Name, string Where);
 
-/// <summary>What is switched on: the AI connection if one is ready, the agents that are on, and Outlook if it is on.</summary>
-public sealed record ConnState(ConnAi? Ai, IReadOnlyList<ConnAgent> Agents, ConnOutlook? Outlook);
+/// <summary>What is switched on: the AI connection if one is ready, the agents that are on, Outlook if it is on, and the MCP servers that are on.</summary>
+public sealed record ConnState(ConnAi? Ai, IReadOnlyList<ConnAgent> Agents, ConnOutlook? Outlook, IReadOnlyList<ConnMcp> Mcp);
 public sealed record ConnItem(string Name, string Sends, string Where, string Kept);
 public sealed record ConnResult(string Line, IReadOnlyList<ConnItem> Items, IReadOnlyList<string> Text);
 
@@ -22,6 +24,8 @@ public static class Connections
     public const string Offline = "Offline · Local only";
     public const string Note = "“Update now” for the Drugs@FDA file fetches the one address you paste, only when you press it. “Open ANDA page” opens an address you set, in your browser. Neither is a standing connection.";
     private const string Nowhere = "no address yet, so nothing can be sent";
+    public const string McpSends = "Only when you press Test or Send in MCP tools: the start of a session and a request for its list of tools; when you press Send, the tool's name and the arguments shown to you first. Nothing by itself.";
+    public const string McpKept = "This tool keeps nothing of what is sent or answered: the answer is shown, never stored. What the server keeps is set by whoever runs it.";
 
     public static ConnResult Describe(ConnState c)
     {
@@ -34,6 +38,8 @@ public static class Connections
                     ? "By itself when a card is opened in full: the fields of that ANDA that its prompt names, never selected text. Also when you press Run or Send."
                     : "Only when you press Run or Send: its prompt, filled in and shown to you.",
                 a.Where.Length > 0 ? a.Where : Nowhere, "Its answer is kept in memory until you close the app, and counts as fresh for the minutes you chose. It is never written to a file."));
+        foreach (var m in c.Mcp)
+            items.Add(new($"{m.Name} (MCP server)", McpSends, m.Where.Length > 0 ? m.Where : Nowhere, McpKept));
         if (c.Outlook is { } o)
             items.Add(new("Outlook (read-only)", "When you sign in: this app's ID and the read-only permission it asks for. After that, only a search for the six-digit number of the open ANDA.", o.Where, "Mail is shown, never stored. The sign-in is held in memory until you sign out or close the app."));
 
@@ -77,12 +83,18 @@ public static class Connections
         var agents = (s.Agents ?? new()).Where(a => a is { Enabled: true })
             .Select(a => new ConnAgent(Shown(a.Name, 60) is { Length: > 0 } n ? n : "Agent", Host(a.Api?.Endpoint), a.AutoRun != AgentRun.Never)).ToList();
         ConnOutlook? outlook = s.Outlook is { Enabled: true } o ? new(o.Cloud == OutlookCloud.UsGovernment ? "login.microsoftonline.us and graph.microsoft.us" : "login.microsoftonline.com and graph.microsoft.com") : null;
-        return new ConnState(ai, agents, outlook);
+        // round 40: a server counts only when it is switched on and its address could be used (checked as for My API)
+        var mcp = McpRules.Normalize(s.McpServers).Where(m => m.Enabled && ApiTarget.Address(m.Endpoint).Uri is not null)
+            .Select(m => new ConnMcp(Shown(m.Name, 60) is { Length: > 0 } n ? n : "MCP server", Host(m.Endpoint))).ToList();
+        return new ConnState(ai, agents, outlook, mcp);
     }
 
     /// <summary>The line written to the event log at start: what is already on. Never a name or an address.</summary>
     public static string StartLine(ConnState c) =>
         $"at start: AI {(c.Ai is null ? "off" : "on")}, agents on: {c.Agents.Count.ToString(CultureInfo.InvariantCulture)}, Outlook {(c.Outlook is null ? "off" : "on")}";
+
+    /// <summary>Round 40: a second line at start, only when MCP servers are on; the first line is as before.</summary>
+    public static string? McpStartLine(ConnState c) => c.Mcp.Count == 0 ? null : $"at start: MCP servers on: {c.Mcp.Count.ToString(CultureInfo.InvariantCulture)}";
 
     /// <summary>
     /// The lines for the event log when what is switched on has changed: switched on or off, or going somewhere else (another service,
@@ -97,6 +109,8 @@ public static class Connections
         else if (!now.Agents.SequenceEqual(before.Agents)) lines.Add("agents changed");
         if ((now.Outlook is null) != (before.Outlook is null)) lines.Add(now.Outlook is null ? "Outlook switched off" : "Outlook switched on");
         else if (now.Outlook is not null && now.Outlook != before.Outlook) lines.Add("Outlook connection changed");
+        if (now.Mcp.Count != before.Mcp.Count) lines.Add($"MCP servers switched on: {before.Mcp.Count.ToString(CultureInfo.InvariantCulture)} to {now.Mcp.Count.ToString(CultureInfo.InvariantCulture)}");
+        else if (!now.Mcp.SequenceEqual(before.Mcp)) lines.Add("MCP servers changed");
         return lines;
     }
 

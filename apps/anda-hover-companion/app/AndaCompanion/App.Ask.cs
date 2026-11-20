@@ -233,7 +233,7 @@ public partial class App
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return null; }
     }
 
-    private ConnState _connectionState = new(null, Array.Empty<ConnAgent>(), null);
+    private ConnState _connectionState = new(null, Array.Empty<ConnAgent>(), null, Array.Empty<ConnMcp>());
 
     /// <summary>
     /// Called when settings change: every window's line follows, and a connection that was switched on or off, or that now goes somewhere

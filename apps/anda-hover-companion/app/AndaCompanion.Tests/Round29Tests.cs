@@ -37,7 +37,7 @@ public class Round29Tests
             ConnAi? ai = s.GetProperty("ai").ValueKind == JsonValueKind.Null ? null : new(s.GetProperty("ai").GetProperty("name").GetString()!, s.GetProperty("ai").GetProperty("where").GetString()!);
             var agents = s.GetProperty("agents").EnumerateArray().Select(a => new ConnAgent(a.GetProperty("name").GetString()!, a.GetProperty("where").GetString()!, a.GetProperty("auto").GetBoolean())).ToList();
             ConnOutlook? outlook = s.GetProperty("outlook").ValueKind == JsonValueKind.Null ? null : new(s.GetProperty("outlook").GetProperty("where").GetString()!);
-            var r = Connections.Describe(new ConnState(ai, agents, outlook)); var want = c.GetProperty("result");
+            var r = Connections.Describe(new ConnState(ai, agents, outlook, Array.Empty<ConnMcp>())); var want = c.GetProperty("result");
             Same(bad, $"case {n} line", want.GetProperty("line").GetString()!, r.Line);
             Same(bad, $"case {n} items", string.Join("\n", want.GetProperty("items").EnumerateArray().Select(i => $"{i.GetProperty("name").GetString()}|{i.GetProperty("sends").GetString()}|{i.GetProperty("where").GetString()}|{i.GetProperty("kept").GetString()}")),
                 string.Join("\n", r.Items.Select(i => $"{i.Name}|{i.Sends}|{i.Where}|{i.Kept}")));
@@ -123,7 +123,8 @@ public class Round29Tests
         ConnState State(JsonElement st) => new(
             st.GetProperty("ai").ValueKind == JsonValueKind.Null ? null : new(st.GetProperty("ai").GetProperty("name").GetString()!, st.GetProperty("ai").GetProperty("where").GetString()!),
             st.GetProperty("agents").EnumerateArray().Select(a => new ConnAgent(a.GetProperty("name").GetString()!, a.GetProperty("where").GetString()!, a.GetProperty("auto").GetBoolean())).ToList(),
-            st.GetProperty("outlook").ValueKind == JsonValueKind.Null ? null : new(st.GetProperty("outlook").GetProperty("where").GetString()!));
+            st.GetProperty("outlook").ValueKind == JsonValueKind.Null ? null : new(st.GetProperty("outlook").GetProperty("where").GetString()!),
+            Array.Empty<ConnMcp>());          // round 29's states have no MCP server; round 40's answers hold those
         foreach (var c in doc.RootElement.GetProperty("connections").EnumerateArray()) states.Add(State(c.GetProperty("state")));
         Same(bad, "starts", string.Join("\n", Strings(doc.RootElement.GetProperty("starts"))), string.Join("\n", states.Select(Connections.StartLine)));
         int k = 0;

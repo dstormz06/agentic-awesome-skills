@@ -17,7 +17,7 @@ public static class TrayMenu
     public static IReadOnlyList<Entry> Layout(bool allTools)
     {
         var more = new List<string> { "Compare two files…", "Hand-off page…", "Quick replies…" };
-        if (allTools) more.AddRange(new[] { "Prompt library…", "My actions" });
+        if (allTools) more.AddRange(new[] { "Prompt library…", "MCP tools…", "My actions" });
         more.AddRange(new[] { "Appearance", "Auto-hide", "Connections and event log…", "Backups and archive…", "Demo: ANDA at risk", "Demo: ANDA on track" });
         var top = new List<Entry> { new("Lookup ANDA…"), new("Today…"), new("Review a draft…"), new("Ask about a selection…") };
         if (allTools) top.Add(new("Lists", new[] { "ANDA to-do list…", "My to-do list…", "Notes to my to-do list…", "My usage…" }));

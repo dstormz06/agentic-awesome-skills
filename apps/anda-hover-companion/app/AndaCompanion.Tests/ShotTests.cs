@@ -147,7 +147,7 @@ public class ShotTests : IClassFixture<HeadlessFixture>
             handoff.Show(); handoff.NotesBox.IsChecked = true; for (int i = 0; i < 30; i++) { Settle(); Thread.Sleep(12); }
             Save(handoff, dir, "handoff-27");
             // Round 29: the Connections and event log window, and a window with the line that says what is switched on.
-            var st29 = new ConnState(new ConnAi("Claude", "api.anthropic.com"), new[] { new ConnAgent("Alert Hub", "", false) }, null);
+            var st29 = new ConnState(new ConnAi("Claude", "api.anthropic.com"), new[] { new ConnAgent("Alert Hub", "", false) }, null, Array.Empty<ConnMcp>());
             var t29 = new DateTime(2026, 7, 16, 13, 5, 7, DateTimeKind.Utc);
             var ev29 = new List<EventEntry> { EventLog.Entry("connection", "AI switched on", t29), EventLog.Entry("sent", "AI request, 1,234 characters", t29.AddMinutes(2)), EventLog.Entry("file", "settings restored from a backup", t29.AddMinutes(9)), EventLog.Entry("deleted", "kept copies of the sheet", t29.AddMinutes(12)) };
             var conn29 = new ConnectionsWindow(() => Connections.Describe(st29), () => (ev29, ev29.Count, 0), () => EventLog.Csv(ev29), @"C:\Users\me\AppData\Roaming\AndaCompanion\events.csv", TimeZoneInfo.FindSystemTimeZoneById("America/New_York"));

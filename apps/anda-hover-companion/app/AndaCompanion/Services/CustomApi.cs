@@ -44,35 +44,75 @@ public sealed class CustomApiSettings
 
 public sealed record CustomApiInspection(bool Ok, ElsaSettings? Settings, string Message);
 
+/// <summary>
+/// Round 40: My API filled in for a common kind of service with one press: the header, its prefix, the body and the reply path. The address
+/// stays the person's own; Hint is only shown as its example. The same three as the simulation (mockup/round40-golden.json).
+/// </summary>
+public sealed record CustomApiPreset(string Id, string Label, string Header, string Scheme, string Template, string Path, string Hint)
+{
+    public static readonly IReadOnlyList<CustomApiPreset> All = new CustomApiPreset[]
+    {
+        new("openai", "OpenAI-compatible", "Authorization", "Bearer", CustomApiSettings.ExampleTemplate, "choices[0].message.content", "https://…/v1/chat/completions"),
+        new("azure", "Azure OpenAI", "api-key", "",
+            "{\"max_tokens\":{{max_tokens}},\"messages\":[{\"role\":\"system\",\"content\":\"{{system}}\"},{\"role\":\"user\",\"content\":\"{{user}}\"}]}",
+            "choices[0].message.content", "https://<resource>.openai.azure.com/openai/deployments/<deployment>/chat/completions?api-version=<version>"),
+        new("ollama", "Ollama on this PC", "", "",
+            "{\"model\":\"{{model}}\",\"stream\":false,\"messages\":[{\"role\":\"system\",\"content\":\"{{system}}\"},{\"role\":\"user\",\"content\":\"{{user}}\"}]}",
+            "message.content", "http://localhost:11434/api/chat"),
+    };
+
+    public void FillIn(CustomApiSettings api) { api.AuthHeader = Header; api.AuthScheme = Scheme; api.RequestTemplate = Template; api.ResponsePath = Path; }
+}
+
+/// <summary>
+/// Round 40: where a request may go and with which token, checked the same way for My API, the agents and the MCP servers before anything
+/// is sent. The address: https:// only (http:// for this PC only), no user name or password in it. The token: read from the environment
+/// variable the person names, never stored. Each check gives either its value or a sentence for the person, never both.
+/// </summary>
+public static class ApiTarget
+{
+    public static (Uri? Uri, string? Problem) Address(string? endpoint)
+    {
+        string address = (endpoint ?? "").Trim();
+        if (address.Length == 0) return (null, "Please enter the endpoint address of your API (https://…).");
+        if (!Uri.TryCreate(address, UriKind.Absolute, out var uri) ||
+            !(uri.Scheme == Uri.UriSchemeHttps || (uri.Scheme == Uri.UriSchemeHttp && uri.IsLoopback)))
+            return (null, "The endpoint must be an https:// address (http:// is accepted only for localhost). Nothing was sent.");
+        if (!string.IsNullOrEmpty(uri.UserInfo))
+            return (null, "Please do not put a user name or password in the address; use the environment variable for the token instead. Nothing was sent.");
+        return (uri, null);
+    }
+
+    /// <summary>No variable named: no token and no problem.</summary>
+    public static (string? Token, string? Problem) Token(string? secretEnvVar, Func<string, string?> env)
+    {
+        string var = (secretEnvVar ?? "").Trim();
+        if (var.Length == 0) return (null, null);
+        if (!System.Text.RegularExpressions.Regex.IsMatch(var, "^[A-Za-z_][A-Za-z0-9_]{0,127}$"))
+            return (null, "That does not look like an environment variable name. Please enter the NAME of the variable, never the token itself.");
+        string? token = env(var)?.Trim();
+        return string.IsNullOrEmpty(token)
+            ? (null, $"The environment variable {var} is not set on this PC, so no token can be sent. Set it through your approved channel and press Test again.")
+            : (token, null);
+    }
+}
+
 public static class CustomApiConfig
 {
     /// <summary>Checks everything that can be checked without sending a request. Values are never logged.</summary>
     public static CustomApiInspection Inspect(CustomApiSettings s, Func<string, string?>? env = null, IReadOnlyDictionary<string, string>? extras = null)
     {
         env ??= Environment.GetEnvironmentVariable;
-        string endpoint = (s.Endpoint ?? "").Trim();
-        if (endpoint.Length == 0) return new(false, null, "Please enter the endpoint address of your API (https://…).");
-        if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var uri) ||
-            !(uri.Scheme == Uri.UriSchemeHttps || (uri.Scheme == Uri.UriSchemeHttp && uri.IsLoopback)))
-            return new(false, null, "The endpoint must be an https:// address (http:// is accepted only for localhost). Nothing was sent.");
-        if (!string.IsNullOrEmpty(uri.UserInfo))
-            return new(false, null, "Please do not put a user name or password in the address; use the environment variable for the token instead. Nothing was sent.");
-
+        // round 40: the address and token checks are shared with the MCP servers (ApiTarget), in the same order as before
+        var (uri, addressProblem) = ApiTarget.Address(s.Endpoint);
+        if (uri is null) return new(false, null, addressProblem!);
+        string endpoint = s.Endpoint!.Trim();
         if (CustomApiMapping.TryFill(s.RequestTemplate, "system", "user", 16, s.Model, extras, out _) is { } templateError)
             return new(false, null, templateError);
         if (!CustomApiMapping.IsValidPath(s.ResponsePath))
             return new(false, null, "The reply path is not valid. Please use names and [numbers], for example choices[0].message.content");
-
-        string? token = null;
-        string var = (s.SecretEnvVar ?? "").Trim();
-        if (var.Length > 0)
-        {
-            if (!System.Text.RegularExpressions.Regex.IsMatch(var, "^[A-Za-z_][A-Za-z0-9_]{0,127}$"))
-                return new(false, null, "That does not look like an environment variable name. Please enter the NAME of the variable, never the token itself.");
-            token = env(var)?.Trim();
-            if (string.IsNullOrEmpty(token))
-                return new(false, null, $"The environment variable {var} is not set on this PC, so no token can be sent. Set it through your approved channel and press Test again.");
-        }
+        var (token, tokenProblem) = ApiTarget.Token(s.SecretEnvVar, env);
+        if (tokenProblem is not null) return new(false, null, tokenProblem);
         return new(true, new ElsaSettings(endpoint, token, string.IsNullOrWhiteSpace(s.Model) ? null : s.Model.Trim(), null),
             $"{s.Name} configured · {uri.Host}");
     }
