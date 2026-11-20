@@ -7,7 +7,7 @@ namespace AndaCompanion.Services;
 public static class Recents
 {
     public const int RecentMax = 8, PinMax = 5;
-    public const string SaidOff = "Recent ANDAs are off and were cleared.", SaidCleared = "Recent ANDAs cleared.";
+    public const string SaidOff = "Recent ANDAs are off and were cleared.", SaidCleared = "Recent ANDAs cleared.", SaidPinsCleared = "My list cleared. The ANDAs themselves are not changed.";
 
     public static bool Six(string? v) => v is { Length: 6 } && v.All(c => c is >= '0' and <= '9');
 

@@ -21,6 +21,7 @@
         <TextBlock Name="ErrorText" FontSize="11.5" Foreground="{DynamicResource C.Bad}" IsVisible="False" TextWrapping="Wrap" AutomationProperties.LiveSetting="Assertive"/>
         <!-- One Bar (round 33): what can be opened from what is typed. Rows to press; nothing opens by itself. -->
         <StackPanel Name="RowsPanel" Spacing="2" IsVisible="False" AutomationProperties.Name="Suggestions"/>
+        <TextBlock Name="RowSay" FontSize="1" Opacity="0" Height="1" AutomationProperties.LiveSetting="Polite" IsHitTestVisible="False"/>
         <!-- The ANDAs kept in my list, then the recent ones (round 33). -->
         <WrapPanel Name="RecentPanel" IsVisible="False"/>
       </StackPanel>

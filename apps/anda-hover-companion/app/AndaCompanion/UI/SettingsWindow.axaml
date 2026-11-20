@@ -156,6 +156,7 @@
               <CheckBox Name="RecentsCheck" Content="Remember the last eight ANDAs I looked up, on this PC"/>
               <WrapPanel>
                 <Button Name="RecentsClear" Content="Clear recents" Margin="0,0,10,0"/>
+                <Button Name="PinsClear" Content="Clear my list" Margin="0,0,10,0" ToolTip.Tip="Empties the short list kept with “Keep in my list”, including numbers no longer in your data. The ANDAs themselves are not changed."/>
                 <TextBlock Name="RecentsStatus" Classes="hint" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite"/>
               </WrapPanel>
               <TextBlock Classes="hint" Text="Only six-digit numbers are kept, in this PC's settings, and never sent anywhere. Turning this off clears them. ANDAs you keep with “Keep in my list” on a card stay until you remove them and are saved in a backup."/>

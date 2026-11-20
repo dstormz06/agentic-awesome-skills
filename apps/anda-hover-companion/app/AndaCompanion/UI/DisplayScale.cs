@@ -34,15 +34,15 @@ public static class DisplayScale
         if (!(scale >= 1 && scale <= 2)) scale = 1;
         if (!States.TryGetValue(w, out var s))
         {
-            if (scale == 1) return;                                      // standard text: the window is left exactly as it was built
+            if (scale == 1) { Track(w); return; }                        // standard text: the window is left as it was built, and remembered for a later change
             if (w.Content is not Control content) return;
             w.Content = null;
             s = new State { Host = new LayoutTransformControl { Child = content }, Width = w.Width, Height = w.Height, MinWidth = w.MinWidth, MinHeight = w.MinHeight, MaxWidth = w.MaxWidth, MaxHeight = w.MaxHeight };
             w.Content = s.Host;
             States.Add(w, s);
-            Open.Add(new WeakReference<Window>(w));
-            w.Closed += (_, _) => Open.RemoveAll(r => !r.TryGetTarget(out var t) || ReferenceEquals(t, w));
+            Track(w);
         }
+        bool changed = s.Applied != scale;
         s.Applied = scale;
         s.Host.LayoutTransform = scale == 1 ? null : new ScaleTransform(scale, scale);
         var room = Room(w);
@@ -53,11 +53,33 @@ public static class DisplayScale
         if (!double.IsInfinity(s.MaxHeight)) w.MaxHeight = Fit(s.MaxHeight, room.Height);
         if (!double.IsNaN(s.Width)) w.Width = Fit(s.Width, room.Width);
         if (!double.IsNaN(s.Height)) w.Height = Fit(s.Height, room.Height);
+        if (changed) Scaled?.Invoke(w);
     }
+
+    /// <summary>Raised after a window was drawn at a new size, so that a window that fits itself to the screen can do so again.</summary>
+    public static event Action<Window>? Scaled;
+
+    private static readonly ConditionalWeakTable<Window, object> Tracked = new();
+
+    /// <summary>Remembers an open window once, so that <see cref="Set"/> reaches it; forgets it when it closes.</summary>
+    private static void Track(Window w)
+    {
+        if (Tracked.TryGetValue(w, out _)) return;
+        Tracked.Add(w, new object());
+        Open.Add(new WeakReference<Window>(w));
+        w.Closed += (_, _) => Open.RemoveAll(r => !r.TryGetTarget(out var t) || ReferenceEquals(t, w));
+    }
+
+    /// <summary>The windows that follow a change of size now. For tests.</summary>
+    public static int OpenCount => Open.Count(r => r.TryGetTarget(out _));
+
+    /// <summary>Replaces the screen's size in a test, where there is no screen.</summary>
+    public static Func<Window, Size?>? RoomForTest { get; set; }
 
     /// <summary>The space a window may take on the screen it is on, in the window's own units. Without a screen (a test), no limit.</summary>
     private static Size Room(Window w)
     {
+        if (RoomForTest?.Invoke(w) is { } given) return given;
         try
         {
             var screen = w.Screens?.ScreenFromWindow(w) ?? w.Screens?.Primary;

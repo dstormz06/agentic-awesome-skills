@@ -48,7 +48,7 @@ public static class CardDetails
         var rows = Fields.Where(f => set.Contains(f.Key)).Select(f =>
         {
             string? v = Value(r, f.Key);
-            return new DetailRow(f.Key, f.Label, v, v ?? NotInSheet, v is not null, "Copy " + f.Label.ToLowerInvariant());
+            return new DetailRow(f.Key, f.Label, v, v ?? NotInSheet, v is not null, "Copy " + Name(f.Label));
         }).ToList();
         int have = rows.Count(x => x.Copy);
         string block = string.Join("\n", new[] { $"ANDA {r.Number}" }.Concat(rows.Where(x => x.Copy).Select(x => $"{x.Label}: {x.Value}")));
@@ -56,6 +56,13 @@ public static class CardDetails
     }
 
     public static string Copied(string what) => $"Copied: {what}.";
+
+    /// <summary>
+    /// A column's name inside a sentence: "Copy US agent email", "Copied: applicant email." An ordinary first word is lowered; a word in
+    /// capitals (US, FEI) and the rest of the name are kept, so a screen reader says "U S", not "us".
+    /// </summary>
+    public static string Name(string label) =>
+        label.Length > 1 && char.IsUpper(label[0]) && char.IsLower(label[1]) ? char.ToLowerInvariant(label[0]) + label[1..] : label;
 
     /// <summary>Where the details are from, said under them.</summary>
     public static string Source(AndaRecord r, string? fileName) => r.Demo || string.IsNullOrEmpty(fileName) ? "From the fictional demo records." : $"From {fileName}.";

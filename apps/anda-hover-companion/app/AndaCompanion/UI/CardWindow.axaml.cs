@@ -108,7 +108,10 @@ public partial class CardWindow : Window
     private async void CopyDetail(string text, string what)
     {
         _autoHide.Touch();
-        SayDetails(await PutOnClipboard(text) ? CardDetails.Copied(what) : "Windows did not allow copying. Please select the text and press Ctrl+C.");
+        var before = _record;
+        bool ok = await PutOnClipboard(text);
+        if (!ReferenceEquals(before, _record)) return;      // the card moved on to another ANDA while the copy was under way: say nothing there
+        SayDetails(ok ? CardDetails.Copied(what) : "Windows did not allow copying. Please select the text and press Ctrl+C.");
     }
 
     /// <summary>The chosen columns of the person's own sheet for this ANDA: a value with Copy, or "not in your sheet".</summary>
@@ -128,7 +131,7 @@ public partial class CardWindow : Window
             {
                 var copy = new Button { Content = "Copy", Classes = { "chip" }, Margin = new Thickness(8, 0, 0, 0), Tag = row.Key };
                 Avalonia.Automation.AutomationProperties.SetName(copy, row.CopyName);
-                string text = row.Value!, what = row.Label.ToLowerInvariant();
+                string text = row.Value!, what = CardDetails.Name(row.Label);
                 copy.Click += (_, _) => CopyDetail(text, what);
                 Grid.SetColumn(copy, 2); grid.Children.Add(copy);
             }

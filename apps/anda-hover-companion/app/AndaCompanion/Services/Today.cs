@@ -13,6 +13,12 @@ public sealed record TodayMain(string Meta, string Tone, string Figure, string W
 /// </summary>
 public static class Today
 {
+    /// <summary>Each mark in words, shown beside the number, so that its meaning is not carried by color alone.</summary>
+    public static string MarkWord(string mark) => mark switch { "r" => "urgent", "w" => "worth a look", _ => "on track" };
+
+    /// <summary>What is said when a row is pressed: short, so that the whole right-hand side is not read again.</summary>
+    public static string Shown(string id, TodayMain v) => $"Shown: ANDA {id}, {(v.Figure == "On" ? "on the goal date" : v.Figure == AndaRecord.Unknown ? v.Words : v.Figure + " " + v.Words)}.";
+
     public const string SaidNothing = "Nothing needs a look. Type a number above to open an ANDA.", SaidChoose = "Choose an ANDA on the left.";
     /// <summary>How many rows "needs a look" shows. A large portfolio has more; the watch list holds them all.</summary>
     public const int NeedLookMax = 40;

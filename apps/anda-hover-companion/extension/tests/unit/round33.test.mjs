@@ -1,3 +1,6 @@
+// The legacy test below reads wall-clock parts in this computer's zone; it is pinned to a zone with daylight time, so that a reading of
+// those parts as UTC fails here too (the CI machines run in UTC, where the two readings agree). Set before anything reads a date.
+process.env.TZ = 'America/New_York';
 // Round 33 in the extension: the card's data line and its age, the time zone, settings carried over from the earlier form, the moment a
 // spreadsheet was saved, what is switched on, the first steps, and the timer that writes a line again as each minute begins.
 import { test, mock } from 'node:test';
@@ -50,7 +53,7 @@ test('the service keeps the time settings and gives them back', async () => {
 // ---------- the moment a spreadsheet was saved ----------
 test('a spreadsheet kept before round 33 (wall-clock parts) is still read, and one kept now holds one moment in UTC', async () => {
   const parts = { y: 2026, m: 11, d: 2, hh: 8, mm: 30 };
-  assert.equal(savedMsOf({ savedAt: parts }), new Date(2026, 10, 2, 8, 30).getTime());
+  assert.equal(savedMsOf({ savedAt: parts }), Date.UTC(2026, 10, 2, 13, 30), 'the parts are this computer\'s wall clock (8:30 AM EST), not UTC');
   assert.equal(savedMsOf({ savedMs: 123456789000, savedAt: parts }), 123456789000, 'the moment wins where both are kept');
   assert.ok(Number.isNaN(savedMsOf({})), 'nothing kept: not known');
   const store = memory(), svc = createService({ storage: store, now: () => new Date(at(2026, 11, 19, 17)), computer: NY });
@@ -246,7 +249,7 @@ test('the guide opens after an installation only, and the page that draws it mar
 test('what is switched on is said in one line: local only, linked by name with what is sent and kept, or chosen and not answering', async () => {
   assert.equal(connectionLine('demo', null).short, 'Offline · Local only'); assert.equal(connectionLine('imported', null).state, 'local');
   const linked = connectionLine('app', { ok: true });
-  assert.equal(linked.state, 'linked'); assert.match(linked.full, /ANDA Companion \(Notula\), the desktop app on this PC\. Sent to it: .* Where it goes: .* Kept by the extension: nothing\./);
+  assert.equal(linked.state, 'linked'); assert.match(linked.full, /ANDA Companion \(Notula\), the desktop app on this PC\. Sent to it: .* Where it goes: .* Kept by the extension from these requests: nothing \(your settings, and a spreadsheet you imported earlier, stay in this browser profile until you remove them\)\./);
   assert.equal(connectionLine('app', { ok: false }).state, 'silent'); assert.equal(connectionLine('app', null).state, 'silent');
   const up = { request: async (b) => (b.type === 'hello' ? { ok: true, version: '1', dataKind: 'demo', dataLabel: 'L', count: 2 } : { ok: false }) };
   const svc = createService({ storage: memory(), native: up });
@@ -290,4 +293,44 @@ test('writing the line again changes only the line', () => {
   assert.equal(UI.setFresh({ querySelector: () => null }, 'x', false), false); assert.equal(UI.setFresh(null, 'x', false), false);
   assert.match(readFileSync(join(here, '..', '..', 'src', 'content.js'), 'utf8'), /stopMinute = UI\.everyMinute\(refreshLine\)/);
   assert.match(readFileSync(join(here, '..', '..', 'src', 'content.js'), 'utf8'), /if \(stopMinute\) \{ stopMinute\(\); stopMinute = null; \}/);
+});
+
+// ---------- after the separate review ----------
+test('the minute ages only the moment the open card was built from: a re-import, or another source, never changes what it names', async () => {
+  const box = { ms: at(2026, 11, 19, 17) }, store = memory(), svc = createService({ storage: store, now: () => new Date(box.ms), computer: NY });
+  await svc.importFile('Old.csv', T(CSV), box.ms - 18 * DAY);
+  await svc.saveSettings({ dataSource: 'imported', consent: 'full' });
+  const card = (await svc.lookup('930001')).card;
+  assert.equal(card.dataSource, 'Your portfolio file · Old.csv'); assert.equal(card.asOfUtc, new Date(box.ms - 18 * DAY).toISOString());
+  assert.match(card.freshness, /Old\.csv · as of .* \(18 days ago\) · STALE: older than 7 days$/);
+  await svc.importFile('Newer.csv', T(CSV.replace('In review', 'Approved')), box.ms);       // a newer file while the card is open
+  box.ms += 60000;
+  let f = await svc.fresh({ number: '930001', asOfUtc: card.asOfUtc, dataSource: card.dataSource, demo: false, freshness: card.freshness });
+  assert.equal(f.ok, true); assert.match(f.freshness, /^Your portfolio file · Old\.csv · as of .* \(18 days ago\) · STALE: older than 7 days$/); assert.equal(f.stale, true);
+  // a sample card left open after the source became the person's own file
+  const demo = (await createService({ storage: memory(), now: () => new Date(box.ms), computer: NY }).lookup('216482')).card;
+  f = await svc.fresh({ number: '216482', asOfUtc: demo.asOfUtc, dataSource: demo.dataSource, demo: true, freshness: demo.freshness });
+  assert.equal(f.freshness, demo.freshness, 'it still says it is fictional sample data that does not change');
+  // the desktop app: its new line is used only while it names the same source
+  const line = { v: 'Your portfolio file · P.xlsx · as of Nov 19, 2026, 9:00 AM EST (just now)' };
+  const native = { request: async (b) => (b.type === 'lookup' ? { ok: true, card: { number: '930001', kind: 'ANDA', drug: 'X', freshness: line.v, urgency: { isUrgent: false }, watch: [], hasForecast: false } } : { ok: false }) };
+  const app = createService({ storage: memory({ settings: { dataSource: 'app', followApp: false } }), native, computer: NY });
+  const opened = line.v; line.v = 'Your portfolio file · P.xlsx · as of Nov 19, 2026, 9:00 AM EST (1 minute ago)';
+  assert.equal((await app.fresh({ number: '930001', freshness: opened })).freshness, line.v);
+  line.v = 'Your portfolio file · Other.xlsx · as of Nov 19, 2026, 10:00 AM EST (just now)';
+  assert.deepEqual([(await app.fresh({ number: '930001', freshness: opened })).ok, (await app.fresh({ number: '930001', freshness: opened })).error], [false, 'changed']);
+});
+
+test('the page script and the toolbar window send the card\'s own moment with each minute, and the extension checks what it is given', () => {
+  const content = src('src/content.js'), popup = src('src/popup.js'), bg = src('src/background.js');
+  assert.match(content, /type: 'anda:fresh', number, asOfUtc: m\.asOfUtc \?\? null, dataSource: m\.dataSource \?\? null, demo: m\.demo === true, freshness: m\.freshness \?\? null/);
+  assert.match(popup, /type: 'anda:fresh', number, asOfUtc: card\.asOfUtc \?\? null, dataSource: card\.dataSource \?\? null/);
+  assert.match(bg, /case 'anda:fresh': \{\s+const t = \(v\) => \(typeof v === 'string' \? v\.slice\(0, 400\) : null\);/);
+});
+
+test('the guide\'s sample card answers E, S and Esc where it is, and offers no sister ANDA', () => {
+  const options = src('src/options.js');
+  assert.match(options, /sampleCard = \{ \.\.\.r\.card, sisters: \[\] \};/);
+  assert.match(options, /if \(e\.key === 'Escape'\) \{ e\.preventDefault\(\); e\.stopPropagation\(\); sampleCard = null;/);
+  assert.equal(/id="timeNow"[^>]*role=/.test(src('src/options.html')), false, 'the clock is not a live region: it would be read out every minute');
 });

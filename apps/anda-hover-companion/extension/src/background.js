@@ -118,7 +118,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!own) return false;
   const answer = (p) => { p.then(sendResponse, (e) => sendResponse({ ok: false, error: 'error', message: e && e.message })); return true; };
   switch (msg.type) {
-    case 'anda:fresh': return answer(service.fresh(String(msg.number || '')));
+    case 'anda:fresh': {
+      const t = (v) => (typeof v === 'string' ? v.slice(0, 400) : null);
+      return answer(service.fresh({ number: String(msg.number || ''), asOfUtc: t(msg.asOfUtc), dataSource: t(msg.dataSource), demo: msg.demo === true, freshness: t(msg.freshness) }));
+    }
     case 'anda:card': return answer(service.lookup(String(msg.number || '')).then((r) => (r.ok ? { ok: true, card: r.card } : r)));
     case 'svc:lookup': return answer(service.lookup(String(msg.text || '')));
     case 'svc:draft': return answer(service.draft(String(msg.text || '').slice(0, 20000)));

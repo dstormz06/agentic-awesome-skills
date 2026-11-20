@@ -44,6 +44,8 @@ public class Round33Tests
         Assert.Equal(G("notInSheet").GetString(), CardDetails.NotInSheet);
         Assert.Equal(G("noneChosen").GetString(), CardDetails.NoneChosen);
         foreach (var c in G("copied").EnumerateArray()) Assert.Equal(c.GetProperty("text").GetString(), CardDetails.Copied(c.GetProperty("what").GetString()!));
+        // a column's name inside a sentence keeps its capitals ("US agent", "FEI"), so a screen reader does not say "us"
+        foreach (var c in G("detailNames").EnumerateArray()) Assert.Equal(c.GetProperty("name").GetString(), CardDetails.Name(c.GetProperty("label").GetString()!));
     }
 
     [Fact]
@@ -184,8 +186,9 @@ public class Round33Tests
             Assert.True(want.SequenceEqual(got), $"typed {JsonSerializer.Serialize(typed)}, selected {JsonSerializer.Serialize(sel)}: {JsonSerializer.Serialize(got.Select(g => g.Title))}");
             n++;
         }
-        Assert.Equal(52, n);
+        Assert.Equal(56, n);
         Assert.All(OneBar.Rows(null, null, Demo.Find), r => Assert.Contains(r.Act, new[] { "draft", "ask" }));
+        foreach (var c in G("nearNumbers").EnumerateArray()) Assert.True(c.GetProperty("near").GetBoolean() == OneBar.NearNumber(c.GetProperty("typed").GetString()!), c.GetProperty("typed").GetString());
     }
 
     [Fact]
@@ -193,7 +196,7 @@ public class Round33Tests
     {
         int n = 0;
         foreach (var c in G("lookupErrors").EnumerateArray()) { Assert.Equal(c.GetProperty("text").GetString(), OneBar.LookupError(S(c.GetProperty("typed")))); n++; }
-        Assert.Equal(18, n);
+        Assert.Equal(19, n);
     }
 
     // ---------- Today ----------
@@ -220,6 +223,9 @@ public class Round33Tests
             n++;
         }
         Assert.Equal(4, n);
+        foreach (var c in G("todayShown").EnumerateArray()) { var look = Find(c.GetProperty("id").GetString()!)!; Assert.Equal(c.GetProperty("text").GetString(), Today.Shown(look.Record.Number, Today.Main(look))); }
+        foreach (var m in G("todayMarks").EnumerateObject()) Assert.Equal(m.Value.GetString(), Today.MarkWord(m.Name));
+        Assert.Equal(G("pinsCleared").GetString(), Recents.SaidPinsCleared);
         foreach (var c in G("todayMain").EnumerateArray())
         {
             var w = c.GetProperty("result"); var m = Today.Main(Find(c.GetProperty("id").GetString()!)!);
@@ -315,7 +321,13 @@ public class Round33Tests
         Assert.True(ok);
         Assert.Equal(("large", "compact", "bar", false), (other.TextSize, other.Density, other.LookupStyle, other.RememberRecents));
         Assert.Equal(new[] { "214990" }, other.Pins.ToArray()); Assert.Equal(new[] { "applicant", "fei" }, other.CardFields.ToArray());
-        Assert.Equal(new[] { "100001" }, other.Recents.ToArray());                                     // this PC's own recent numbers are left as they are
+        Assert.Empty(other.Recents);                                                                     // the backup switches remembering off: nothing is kept, as the Settings hint says
+        var on = new Settings { Recents = new() { "100001" } };
+        Assert.True(SettingsBackup.Import(SettingsBackup.Export(new Settings { RememberRecents = true }, lenses, replies), on, lenses, replies).Ok);
+        Assert.Equal(new[] { "100001" }, on.Recents.ToArray());                                          // with remembering on, this PC's own recent numbers are left as they are
+        var reset = new Settings { Recents = new() { "100001" }, Pins = new() { "214990" }, RememberRecents = false };
+        SettingsBackup.Reset(reset, lenses, replies);
+        Assert.Empty(reset.Recents); Assert.Empty(reset.Pins); Assert.True(reset.RememberRecents);          // a reset forgets both lists, as in the simulation
         // a backup made before round 33 holds none of these: the person's choices are left as they are
         var before = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json)!;
         var held = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(before["Settings"].GetRawText())!;

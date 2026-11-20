@@ -59,11 +59,11 @@ public class Round33UiTests : IClassFixture<HeadlessFixture>
         }, CancellationToken.None);
 
         Assert.True(r.shown); Assert.Equal(9, r.Count);
-        Assert.Equal(new[] { "Copy applicant", "Copy established name", "Copy project description", "Copy us agent", "Copy us agent email", "Copy applicant email", "Copy my notes" }, r.names.ToArray());
+        Assert.Equal(new[] { "Copy applicant", "Copy established name", "Copy project description", "Copy US agent", "Copy US agent email", "Copy applicant email", "Copy my notes" }, r.names.ToArray());
         Assert.Equal("Meridian Pharmaceuticals, Inc. (fictional) (Meridian)", r.values[0]);
         Assert.Equal(new[] { CardDetails.NotInSheet, CardDetails.NotInSheet }, r.values.Skip(7).ToArray());      // this sample ANDA has no 356h and no 3.2.P.1 in its sheet
         Assert.Equal("· 7 of 9 in your sheet", r.count); Assert.Equal("From the fictional demo records.", r.source);
-        Assert.Equal("Copied: us agent email.", r.said1); Assert.Equal("Copied: all the details shown.", r.said2);
+        Assert.Equal("Copied: US agent email.", r.said1); Assert.Equal("Copied: all the details shown.", r.said2);
         Assert.Equal("Windows did not allow copying. Please select the text and press Ctrl+C.", r.said3);                 // never "Copied" when it was not
         Assert.Equal(2, r.copied.Count); Assert.Equal("us.agent@northgate-agents.example", r.copied[0]);
         Assert.StartsWith("ANDA 216482\nApplicant: Meridian Pharmaceuticals, Inc. (fictional) (Meridian)\n", r.copied[1]); Assert.Equal(8, r.copied[1].Split('\n').Length);
@@ -213,7 +213,7 @@ public class Round33UiTests : IClassFixture<HeadlessFixture>
             return (list0, main0, sel0, rowNames, focusInSearch, afterCopy, afterRefused, sel1, main1, sel2, sel3, closed, emptyTexts, copied, opened, title: w.Title);
         }, CancellationToken.None);
         Assert.Equal("216482", r.sel0);                                                   // the most pressing one is shown first
-        Assert.Equal(new[] { "NEEDS A LOOK", "216482", "14 d later · IR response due in 5 days", "214990", "9 d ahead", "KEPT IN MY LIST", "214990", "9 d ahead", "RECENT", "216482", "14 d later · IR response due in 5 days" }, r.list0.ToArray());
+        Assert.Equal(new[] { "NEEDS A LOOK", "216482", "urgent", "14 d later · IR response due in 5 days", "214990", "worth a look", "9 d ahead", "KEPT IN MY LIST", "214990", "worth a look", "9 d ahead", "RECENT", "216482", "urgent", "14 d later · IR response due in 5 days" }, r.list0.ToArray());      // each mark is a word as well as a color
         Assert.Equal("ANDA 216482, urgent. 14 d later · IR response due in 5 days. Shown on the right", r.rowNames[0]);      // the color of the mark is also said in words
         Assert.Equal("ANDA 214990, worth a look. 9 d ahead", r.rowNames[1]);
         Assert.Equal(new[] { "ANDA 216482 · Metformin HCl ER Tablets, 500 mg", "14", "days later than the goal", "Goal Oct 3, 2026 · Forecast Oct 17, 2026 · moderate confidence", "⚠ NEEDS YOU", "IR response due in 5 days — Biopharmaceutics" }, r.main0.Take(6).ToArray());
@@ -369,5 +369,158 @@ public class Round33UiTests : IClassFixture<HeadlessFixture>
         Assert.Contains("card.CardFields = () => _settings.CardFields;", more);
         Assert.Contains("card.ApplySpacing(Display.Spacing(_settings.Density));", more);
         Assert.Contains("DisplayScale.Apply(card, DisplayScale.Current);", more);
+    }
+
+    // ---------- after the separate review ----------
+
+    [Fact]
+    public async Task A_change_of_text_size_reaches_windows_opened_at_standard_size_and_Settings_stays_on_its_screen()
+    {
+        var r = await _fx.Session.Dispatch(() =>
+        {
+            ThemeManager.Apply(Appearances.Default);
+            DisplayScale.Set(1);
+            var repo = new Data.MockAndaRepository();
+            var card = new CardWindow(new OfflineBriefService(), repo.Find) { CloseWhenDeactivated = false };
+            DisplayScale.Apply(card, 1); card.Show(repo.Find("216482")!, new PixelPoint(40, 40), false); Settle();
+            Today.Look? None(string _) => null;
+            var today = new TodayWindow(new TodayHooks(() => Array.Empty<Today.Look>(), None, () => Array.Empty<string>(), () => Array.Empty<string>(), _ => { }));
+            DisplayScale.Apply(today, 1); today.Show(); Settle();
+            double w0 = today.Width, c0 = card.ClientSize.Width;
+            DisplayScale.Set(1.3); Settle();
+            var after = (DisplayScale.Of(card), DisplayScale.Of(today), today.Width, card.ClientSize.Width / c0);
+            // the screen is 1366 x 768 with a 40-pixel taskbar; at 1.3 the Settings window must still fit in it
+            DisplayScale.RoomForTest = _ => new Size(1366, 728);
+            using var home = new EnvScope(AppPaths.HomeEnvVar, Temp.NewDir());
+            var settings = new SettingsWindow(new Settings(), new PromptLibraryService(Path.Combine(Temp.NewDir(), "p.json")), () => { });
+            DisplayScale.Apply(settings, 1.3); settings.Show(); settings.ExpandAll(); Settle();
+            var body = settings.FindControl<ScrollViewer>("Body")!;
+            double maxAt13 = body.MaxHeight;
+            DisplayScale.Set(1); Settle(); double maxAt1 = body.MaxHeight;
+            // a window larger than the room is held to it
+            var big = new Window { Width = 1200, Height = 700, Content = new TextBlock { Text = "x" } };
+            DisplayScale.Apply(big, 1.3); var held = (big.Width, big.Height);
+            DisplayScale.RoomForTest = null;
+            card.Close(); today.Close(); settings.Close(); big.Close(); Settle(); DisplayScale.Set(1);
+            return (w0, after, maxAt13, maxAt1, held, screenH: settings.Screens?.Primary is { } p ? p.WorkingArea.Height / p.Scaling : double.NaN);
+        }, CancellationToken.None);
+        Assert.Equal(640, r.w0);
+        Assert.Equal(1.3, r.after.Item1, 6); Assert.Equal(1.3, r.after.Item2, 6); Assert.Equal(832, r.after.Item3, 6); Assert.InRange(r.after.Item4, 1.29, 1.31);
+        Assert.Equal((1366.0, 728.0), r.held);
+        if (!double.IsNaN(r.screenH))
+        {
+            Assert.True(r.maxAt13 < r.maxAt1, $"at 1.3 the sections get less room ({r.maxAt13}) than at standard size ({r.maxAt1})");
+            Assert.True((r.maxAt13 + 52 + 40 + 34 + 14 + 20 + ConnectionBar.Height) * 1.3 <= r.screenH + 0.5 || r.maxAt13 <= 240, $"the enlarged Settings window fits its screen ({r.maxAt13} at 1.3, screen {r.screenH})");
+        }
+    }
+
+    [Fact]
+    public async Task One_Bar_starts_again_at_the_first_row_after_typing_says_each_move_and_explains_an_NDA_number_on_Enter()
+    {
+        var r = await _fx.Session.Dispatch(() =>
+        {
+            ThemeManager.Apply(Appearances.Default);
+            var repo = new Data.MockAndaRepository(); var cards = new List<string>(); var drafts = new List<string>();
+            LookupWindow Open() { var x = new LookupWindow(cards.Add, new LookupOptions(true, null, repo.Find, drafts.Add, _ => { })); x.Show(); Settle(); return x; }
+            void Press(LookupWindow x, Key key, PhysicalKey physical) { x.FindControl<TextBox>("Input")!.Focus(); x.KeyPress(key, RawInputModifiers.None, physical, null); Settle(); }
+            var w = Open();
+            Press(w, Key.Down, PhysicalKey.ArrowDown); string said = w.Said;
+            w.FindControl<TextBox>("Input")!.Text = "216482"; Settle(); int atAfterTyping = w.SelectedRow;
+            Press(w, Key.Enter, PhysicalKey.Enter);
+            var w2 = Open(); w2.FindControl<TextBox>("Input")!.Text = "N210793"; Settle();
+            var first = w2.Rows[0]; Press(w2, Key.Enter, PhysicalKey.Enter);
+            var err = w2.FindControl<TextBlock>("ErrorText")!; bool stillOpen = w2.IsVisible;
+            string go = (string)w2.FindControl<Button>("GoBtn")!.Content!;
+            w2.Close(); Settle();
+            return (said, atAfterTyping, cards, drafts, first, errText: err.Text, errShown: err.IsVisible, stillOpen, go);
+        }, CancellationToken.None);
+        Assert.Equal("Ask about a selection. 2 of 2.", r.said);
+        Assert.Equal(0, r.atAfterTyping); Assert.Equal(new[] { "216482" }, r.cards.ToArray());
+        Assert.Equal(("!", "Not an ANDA number", "note"), (r.first.Icon, r.first.Title, r.first.Act));
+        Assert.True(r.errShown && r.stillOpen); Assert.Equal("N210793 is an NDA number (N is for NDA, A is for ANDA). Please enter a six-digit ANDA number.", r.errText);
+        Assert.Empty(r.drafts); Assert.Equal("Go", r.go);
+    }
+
+    [Fact]
+    public async Task Pressing_a_row_of_Today_keeps_the_keyboard_on_it_says_one_short_sentence_and_reads_the_lists_as_they_are_now()
+    {
+        var r = await _fx.Session.Dispatch(() =>
+        {
+            ThemeManager.Apply(Appearances.Default);
+            var repo = new Data.MockAndaRepository(); var pins = new List<string>();
+            Today.Look? Find(string id) => repo.Find(id) is { } rec ? Round33Tests.Look(rec) : null;
+            var w = new TodayWindow(new TodayHooks(() => repo.Numbers.Select(n => Find(n)!).ToList(), Find, () => pins, () => Array.Empty<string>(), _ => { }));
+            w.Show(); Settle();
+            var row = w.List.Children.OfType<Button>().First(b => (string?)b.Tag == "214990");
+            row.Focus(); Click(row);
+            var focused = w.FocusManager?.GetFocusedElement() as Button;
+            string said = w.Said; bool mainIsQuiet = AutomationProperties.GetLiveSetting(w.Main) == AutomationLiveSetting.Off;
+            pins.Add("214990"); w.Search.Text = "x"; Settle();                     // kept on a card meanwhile: the window shows it at its next paint
+            var titles = Texts(w.List);
+            w.Close(); Settle();
+            return ((string?)focused?.Tag, focused?.BorderThickness.Left, said, mainIsQuiet, kept: titles.Contains("KEPT IN MY LIST"));
+        }, CancellationToken.None);
+        Assert.Equal("214990", r.Item1); Assert.Equal(2, r.Item2);
+        Assert.Equal("Shown: ANDA 214990, 9 days ahead of the goal.", r.said);
+        Assert.True(r.mainIsQuiet); Assert.True(r.kept);
+    }
+
+    [Fact]
+    public async Task A_Copied_message_never_stays_on_or_lands_on_another_ANDA()
+    {
+        var r = await _fx.Session.Dispatch(async () =>
+        {
+            ThemeManager.Apply(Appearances.Default);
+            var repo = new Data.MockAndaRepository(); var gate = new TaskCompletionSource<bool>(); bool slow = false;
+            var w = new CardWindow(new OfflineBriefService(), repo.Find) { CloseWhenDeactivated = false, CardFields = () => CardDetails.DefaultFields,
+                CopyText = _ => slow ? gate.Task : Task.FromResult(true) };
+            try
+            {
+                w.Show(repo.Find("216482")!, new PixelPoint(40, 40), false); Settle();
+                w.KeyPress(Key.E, RawInputModifiers.None, PhysicalKey.E, "e"); Settle();
+                var msg = w.FindControl<TextBlock>("DetailsMsg")!;
+                Click(w.FindControl<StackPanel>("DetailsPanel")!.GetVisualDescendants().OfType<Button>().First()); string first = msg.Text ?? "";
+                w.Show(repo.Find("214990")!, new PixelPoint(40, 40), false); Settle(); bool clearedOnNew = !msg.IsVisible;
+                slow = true; Click(w.FindControl<StackPanel>("DetailsPanel")!.GetVisualDescendants().OfType<Button>().First());
+                w.Show(repo.Find("216482")!, new PixelPoint(40, 40), false); Settle();
+                gate.SetResult(true); await Task.Delay(30); Settle();
+                return (first, clearedOnNew, landed: msg.IsVisible ? msg.Text ?? "" : "");
+            }
+            finally { w.Close(); Settle(); }
+        }, CancellationToken.None);
+        Assert.Equal("Copied: applicant.", r.first); Assert.True(r.clearedOnNew); Assert.Equal("", r.landed);
+    }
+
+    [Fact]
+    public async Task Clear_my_list_empties_the_kept_list_and_says_the_ANDAs_are_not_changed()
+    {
+        var r = await _fx.Session.Dispatch(() =>
+        {
+            using var home = new EnvScope(AppPaths.HomeEnvVar, Temp.NewDir());
+            ThemeManager.Apply(Appearances.Default);
+            var s = new Settings { Pins = new() { "214990", "999999" }, Recents = new() { "216482" } };
+            var w = new SettingsWindow(s, new PromptLibraryService(Path.Combine(Temp.NewDir(), "p.json")), () => { });
+            w.Show(); w.ExpandAll(); Settle();
+            Click(w.FindControl<Button>("PinsClear")!);
+            string said = w.FindControl<TextBlock>("RecentsStatus")!.Text ?? "";
+            w.Close(); Settle();
+            return (s.Pins.Count, s.Recents.Count, said, saved: SettingsService.Load().Pins.Count);
+        }, CancellationToken.None);
+        Assert.Equal((0, 1, Recents.SaidPinsCleared, 0), r);
+    }
+
+    [Fact]
+    public void The_app_remembers_a_number_when_its_card_opens_and_offers_no_recent_number_while_remembering_is_off()
+    {
+        string Read(string name)
+        {
+            var dir = new DirectoryInfo(AppContext.BaseDirectory);
+            while (dir is not null && dir.Name != "anda-hover-companion") dir = dir.Parent;
+            return File.ReadAllText(Path.Combine(dir!.FullName, "app", "AndaCompanion", name));
+        }
+        string more = Read("App.Round33.cs");
+        Assert.Matches(@"var after = Recents\.After\(_settings\.Recents, number, _settings\.RememberRecents\);\s+if \(after\.SequenceEqual\(_settings\.Recents\)\) return;\s+_settings\.Recents = after;\s+SettingsService\.Save\(_settings\);", more);
+        Assert.Contains("_settings.RememberRecents ? _settings.Recents : new List<string>(), x => _repository.Find(x) is not null", more);
+        Assert.Contains("Recents: () => _settings.RememberRecents ? _settings.Recents : new List<string>(),", more);
     }
 }

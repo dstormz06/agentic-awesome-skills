@@ -126,9 +126,9 @@
   /** Asks for the data line of the card that is open, written for now, and puts it in place. A card that has since closed or changed is left alone. */
   async function refreshLine() {
     if (!current || current.kind !== 'card') return;
-    const number = current.model.number;
+    const m = current.model, number = m.number;
     let r = null;
-    try { r = await ask({ type: 'anda:fresh', number }); } catch (e) { return; }
+    try { r = await ask({ type: 'anda:fresh', number, asOfUtc: m.asOfUtc ?? null, dataSource: m.dataSource ?? null, demo: m.demo === true, freshness: m.freshness ?? null }); } catch (e) { return; }
     if (!r || !r.ok || !current || current.kind !== 'card' || current.model.number !== number || typeof r.freshness !== 'string') return;
     current.model.freshness = r.freshness; current.model.stale = !!r.stale;
     UI.setFresh(current.el, r.freshness, r.stale);

@@ -128,6 +128,7 @@ public partial class SettingsWindow : Window
 
         CloseBtn.Click += (_, _) => Close();
         Opened += (_, _) => FitToScreen();
+        DisplayScale.Scaled += w => { if (ReferenceEquals(w, this)) FitToScreen(); };      // a change of text size while Settings is open fits it again
         KeyDown += (_, e) => { if (e.Key == Key.Escape) Close(); };
         _loading = false;
     }
@@ -565,7 +566,8 @@ public partial class SettingsWindow : Window
         var screen = Screens.ScreenFromWindow(this) ?? Screens.Primary;
         if (screen is null) return;
         // window chrome around the scroller: outer margins 52, card padding 40, header row ~34 + spacing, safety.
-        double available = screen.WorkingArea.Height / screen.Scaling - 52 - 40 - 34 - 14 - 20 - ConnectionBar.Height;
+        // At larger text everything here is drawn larger, the chrome included, so the screen's height is taken in the window's own units first.
+        double available = screen.WorkingArea.Height / screen.Scaling / DisplayScale.Of(this) - 52 - 40 - 34 - 14 - 20 - ConnectionBar.Height;
         Body.MaxHeight = Math.Max(240, available);
     }
 

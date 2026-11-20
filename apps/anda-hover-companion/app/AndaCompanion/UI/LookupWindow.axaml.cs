@@ -35,18 +35,18 @@ public partial class LookupWindow : Window
     {
         _onValid = onValid; _options = options;
         InitializeComponent();
-        GoBtn.Click += (_, _) => Submit();
+        GoBtn.Click += (_, _) => { if (Bar && _rows.Count > 0) Run(_rows[_at]); else Submit(); };
         Input.KeyDown += (_, e) =>
         {
             if (e.Key == Key.Enter) { e.Handled = true; if (Bar && _rows.Count > 0) Run(_rows[_at]); else Submit(); }
             else if (Bar && e.Key == Key.Down) { e.Handled = true; Move(1); }
             else if (Bar && e.Key == Key.Up) { e.Handled = true; Move(-1); }
         };
-        Input.TextChanged += (_, _) => { ErrorText.IsVisible = false; PaintRows(); };
+        Input.TextChanged += (_, _) => { ErrorText.IsVisible = false; _at = 0; PaintRows(); };      // typing starts again at the first row, as in the simulation
         KeyDown += (_, e) => { if (e.Key == Key.Escape) Close(); };
         Deactivated += (_, _) => Close();
         Opened += (_, _) => Input.Focus();
-        if (Bar) { Caption.Text = "ONE BAR"; Input.Watermark = "An ANDA number, or text to review"; AutomationProperties.SetName(Input, "An ANDA number, or text to review as a draft"); }
+        if (Bar) { Caption.Text = "ONE BAR"; GoBtn.Content = "Go"; Input.Watermark = "An ANDA number, or text to review"; AutomationProperties.SetName(Input, "An ANDA number, or text to review as a draft"); }
         PaintRecent(); PaintRows();
     }
 
@@ -99,12 +99,21 @@ public partial class LookupWindow : Window
         }
     }
 
-    private void Move(int by) { if (_rows.Count == 0) return; _at = (_at + by + _rows.Count) % _rows.Count; PaintRows(); }
+    private void Move(int by)
+    {
+        if (_rows.Count == 0) return;
+        _at = (_at + by + _rows.Count) % _rows.Count; PaintRows();
+        RowSay.Text = $"{_rows[_at].Title}. {_at + 1} of {_rows.Count}.";      // the keyboard stays in the box, so the move is said
+    }
+
+    /// <summary>What was last said about a move, for a test to read.</summary>
+    public string Said => RowSay.Text ?? "";
 
     /// <summary>Presses one row: the card for the number typed, Review a draft with what was typed, or Ask.</summary>
     public void Run(BarRow row)
     {
         if (row.Act == "card") { Submit(); return; }
+        if (row.Act == "note") { ErrorText.Text = row.Sub; ErrorText.IsVisible = true; return; }
         Close();
         if (row.Act == "draft") _options?.OpenDraft?.Invoke(row.Text); else _options?.OpenAsk?.Invoke(row.Text);
     }

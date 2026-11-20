@@ -24,7 +24,7 @@ const OUT = DIR + 'round33-golden.json';
       else if (what === 'off') { on = false; recents = []; } else if (what === 'on') on = true; else recents = [];
       return { what, id, result, recents: recents.slice(), pins: pins.slice(), listed: listedOf(pins, recents, known), names: listedOf(pins, recents, known).map(x => recentName(x, pins.includes(x))) };
     });
-    const typed = ['', '  ', '216482', 'ANDA 214990', '999999', 'N210793', 'NDA 021234', '216 482', '216-482', '12345', 'Please confirm the goal date of ANDA 216482.', 'hello there', 'A216482'];
+    const typed = ['', '  ', '216482', 'ANDA 214990', '999999', 'N210793', 'NDA 021234', 'NDA No. 021234', '216 482', '216-482', '12345', 'Please confirm the goal date of ANDA 216482.', 'hello there', 'A216482'];
     const sels = ['', 'ANDA 216482 is on track.', 'Name\tGoal\nA\t1\nB\t2', '214990'];
     const display = {};
     for (const [ts, density] of [['standard', 'comfortable'], ['large', 'comfortable'], ['xl', 'compact'], ['standard', 'compact']]) {
@@ -45,6 +45,10 @@ const OUT = DIR + 'round33-golden.json';
       todaySaid: TODAY_SAID,
       today: [[[], []], [['214990'], ['216482', '214990']], [['999999', '216482'], ['214990', '888888']], [[], ['214990']]].map(([pins, recents]) => ({ pins, recents, groups: todayGroups(pins, recents) })),
       todayMain: ids.map(id => ({ id, result: todayMain(id) })),
+      todayShown: ids.map(id => ({ id, text: todayShown(id) })), todayMarks: TODAY_MARK,
+      detailNames: DETAIL_FIELDS.map(f => ({ label: f[1], name: detailName(f[1]) })),
+      nearNumbers: ['N210793', 'n-210793', 'NDA 021234', 'NDA No. 021234', 'nda#021234', 'BLA 125000', 'DMF 012345', 'NDC 0000-1111', '216 482', '216-482', '216482', 'NDA 021234 is late, please check', 'N2107931', 'hello'].map(t => ({ typed: t, near: nearNumber(t) })),
+      pinsCleared: RECENTS_SAID.pinsCleared,
       display,
     };
   });

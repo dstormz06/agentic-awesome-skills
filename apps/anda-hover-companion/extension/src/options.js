@@ -21,7 +21,7 @@ let connection = { state: 'local', short: 'Offline · Local only', full: 'Offlin
 async function paintConnection() {
   connection = await service.connection();
   $('conn').className = 'conn ' + connection.state;
-  $('conn').textContent = connection.full;
+  if ($('conn').textContent !== connection.full) $('conn').textContent = connection.full;      // written only when it changes, so it is not announced on every unrelated change
   if (!$('first').hidden) paintGuide(false);
 }
 
@@ -187,6 +187,13 @@ $('first').addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.prev
 let sampleCard = null, sampleWide = false;
 const sampleRoot = $('fsCard').attachShadow({ mode: 'open' }), sampleLayer = UI.h('div', { class: 'k' });
 UI.mountStyles(sampleRoot); sampleRoot.append(sampleLayer);
+sampleLayer.addEventListener('keydown', (e) => {
+  if (!sampleCard || e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); sampleCard = null; drawSample(); $('fsAct').focus(); $('fsSay').textContent = 'The sample card is closed. The guide is still open.'; }
+  else if (k === 'e') { e.preventDefault(); sampleWide = !sampleWide; drawSample(); const el = sampleLayer.querySelector('.card'); if (el) el.focus(); }
+  else if (k === 's') { e.preventDefault(); const b = sampleLayer.querySelector('[data-act="copy"]'); if (b) b.click(); }
+});
 function drawSample() {
   const host = sampleLayer;
   host.replaceChildren(); $('fsCard').hidden = !sampleCard;
@@ -202,7 +209,8 @@ $('fsAct').addEventListener('click', async () => {
   if ($('fsAct').dataset.act === 'file') { $('file').scrollIntoView({ block: 'center' }); $('file').focus(); $('fsSay').textContent = 'Moved to “My spreadsheet”.'; return; }
   const r = await service.sample();
   if (!r.ok) { $('fsSay').textContent = r.message; return; }
-  sampleCard = r.card; sampleWide = false; drawSample();
+  sampleCard = { ...r.card, sisters: [] }; sampleWide = false; drawSample();
+  const el = sampleLayer.querySelector('.card'); if (el) el.focus();
   $('fsSay').textContent = 'The sample card is shown below. It is fictional sample data.';
 });
 

@@ -10,7 +10,7 @@ export function connectionLine(dataSource, status) {
     return { state: 'local', short: 'Offline · Local only', full: 'Offline · Local only. The extension makes no network requests and is not linked to any other program. Your data stays in this browser profile on this PC.' };
   if (status && status.ok)
     return { state: 'linked', short: 'Linked: the desktop app on this PC · no network use',
-      full: 'Linked: ANDA Companion (Notula), the desktop app on this PC. Sent to it: the ANDA number or the draft text you ask about. Where it goes: the app on this computer only. Kept by the extension: nothing. The extension makes no network requests; what the app has switched on is shown in the app.' };
+      full: 'Linked: ANDA Companion (Notula), the desktop app on this PC. Sent to it: the ANDA number or the draft text you ask about. Where it goes: the app on this computer only. Kept by the extension from these requests: nothing (your settings, and a spreadsheet you imported earlier, stay in this browser profile until you remove them). The extension makes no network requests; what the app has switched on is shown in the app.' };
   return { state: 'silent', short: 'Desktop app chosen, not answering · nothing is sent',
     full: 'The desktop app on this PC is chosen as the source, and it is not answering, so nothing is sent to it and no card can be shown. The extension makes no network requests.' };
 }

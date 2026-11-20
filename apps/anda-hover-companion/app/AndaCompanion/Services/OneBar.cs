@@ -24,11 +24,18 @@ public static class OneBar
         return (delta == 0 ? "On the goal date" : $"{n} day{(n == 1 ? "" : "s")} {(delta > 0 ? "later than" : "ahead of")} the goal") + needs;
     }
 
+    /// <summary>What was typed is nearly an ANDA number (an NDA number, six digits with a space) and is nothing else.</summary>
+    public static bool NearNumber(string raw) =>
+        Regex.IsMatch(raw, @"^N-?[0-9]{6}$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)
+        || Regex.IsMatch(raw, @"^(NDA|BLA|IND|DMF|MF|NDC)[\s#:.-]*(No\.?\s*)?[0-9-]{5,11}$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)
+        || Regex.IsMatch(raw, @"^[0-9]{3}[\s-][0-9]{3}$");
+
     public static List<BarRow> Rows(string? typed, string? selection, Func<string, AndaRecord?> find)
     {
         string raw = (typed ?? "").Trim(), sel = selection ?? "";
         string? n = AndaValidator.Extract(raw);
         var rows = new List<BarRow>();
+        if (n is null && NearNumber(raw)) rows.Add(new BarRow("!", "Not an ANDA number", LookupError(raw), "note", raw));      // Enter says why, instead of opening a review of it
         if (n is not null)
         {
             var r = find(n);

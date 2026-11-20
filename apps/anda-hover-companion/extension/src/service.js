@@ -30,6 +30,7 @@ export function savedMsOf(imp) {
 export function createService({ storage, native = null, now = () => new Date(), computer = computerZone }) {
   const todayIso = () => localIso(now());
   const zoneOf = (settings) => zoneInUse(settings.timeZone, computer());
+  const nowMs = () => now().getTime();
   const demoRepo = () => ({ find: (n) => DEMO_RECORDS.find((r) => r.number === n) ?? null, records: () => DEMO_RECORDS, label: 'Fictional demo data', kind: 'demo' });
   let appSettingsCache = null;
 
@@ -93,15 +94,32 @@ export function createService({ storage, native = null, now = () => new Date(), 
       card = buildCard(rec, ctx);
       const line = dataLine(rec, ctx.nowMs, ctx.staleDays, ctx.zone);      // where the data is from, as of when, how long ago, and STALE past the days chosen
       card.freshness = line.text.length > 0 ? line.text : null; card.stale = line.stale;
+      card.asOfUtc = rec.asOfUtc ?? null; card.dataSource = rec.dataSource ?? null;      // the moment this card was built from, so that a later minute re-ages that moment only
     }
     if (useApp(settings)) card.stale = typeof card.freshness === 'string' && card.freshness.includes(' · STALE: ');      // the app writes its own line, in its own zone
     return { ok: true, card, step: firstStep(settings.consent, settings.escalateUrgent, card.urgency.isUrgent), settings: { consent: settings.consent, autoHideSeconds: settings.autoHideSeconds } };
   }
 
-  /** The card's data line alone, written again for now: asked for as each minute begins while a card is open. */
-  async function fresh(text) {
-    const r = await lookup(text);
-    return r.ok ? { ok: true, number: r.card.number, freshness: r.card.freshness, stale: !!r.card.stale } : { ok: false, error: r.error, message: r.message };
+  /**
+   * The card's data line alone, written again for now: asked for as each minute begins while a card is open.
+   * A card built from a file or the sample records says the moment it was built from, and only that moment is aged again: the line never
+   * starts naming another file, or the person's file on a sample card, because the source changed while the card was open.
+   * A card from the desktop app has no moment of its own here; the app's new line is used only if it still names the same source.
+   * @param card the open card's number, asOfUtc, dataSource, demo and freshness (or just a number, as text)
+   */
+  async function fresh(card) {
+    const c = typeof card === 'string' ? { number: card } : (card || {});
+    if (typeof c.dataSource === 'string' && c.dataSource.length > 0 && typeof c.asOfUtc === 'string') {
+      const settings = await getSettings(), now = new Date(nowMs()).getTime();
+      const line = dataLine({ demo: c.demo === true, dataSource: c.dataSource, asOfUtc: c.asOfUtc }, now, settings.staleAfterDays, zoneOf(settings));
+      return line.text.length > 0 ? { ok: true, number: String(c.number || ''), freshness: line.text, stale: line.stale } : { ok: false, error: 'no-line', message: 'No data line.' };
+    }
+    const r = await lookup(String(c.number || ''));
+    if (!r.ok) return { ok: false, error: r.error, message: r.message };
+    const sourceOf = (line) => (typeof line === 'string' ? line.split(' · as of ')[0] : null);
+    if (typeof c.freshness === 'string' && sourceOf(c.freshness) !== sourceOf(r.card.freshness))
+      return { ok: false, error: 'changed', message: 'The data source changed since this card was opened. Please open the card again.' };
+    return { ok: true, number: r.card.number, freshness: r.card.freshness, stale: !!r.card.stale };
   }
 
   /** The sample card of the guide: always the fictional record, whatever source is chosen, and never through the desktop app. */

@@ -34,6 +34,7 @@ public partial class SettingsWindow
             Apply();
         };
         RecentsClear.Click += (_, _) => { _settings.Recents = new(); RecentsStatus.Text = Recents.SaidCleared; Apply(); };
+        PinsClear.Click += (_, _) => { _settings.Pins = new(); RecentsStatus.Text = Recents.SaidPinsCleared; Apply(); };
 
         foreach (var (key, label) in CardDetails.Fields)
         {

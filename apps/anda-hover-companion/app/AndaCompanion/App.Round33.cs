@@ -33,7 +33,7 @@ public partial class App
     }
 
     private IReadOnlyList<(string Id, bool Kept)> ListedForLookup() =>
-        Recents.Listed(_settings.Pins, _settings.Recents, x => _repository.Find(x) is not null).Select(x => (x, _settings.Pins.Contains(x))).ToList();
+        Recents.Listed(_settings.Pins, _settings.RememberRecents ? _settings.Recents : new List<string>(), x => _repository.Find(x) is not null).Select(x => (x, _settings.Pins.Contains(x))).ToList();
 
     /// <summary>What the lookup window offers now: the kept and recent numbers, and, when the person chose One Bar, Review and Ask.</summary>
     private LookupOptions LookupOptionsNow() => new(_settings.LookupStyle == "bar", ListedForLookup, _repository.Find, OpenDraft, text => OpenAsk(text));
@@ -54,7 +54,7 @@ public partial class App
         _todayWindow = new TodayWindow(new TodayHooks(
             All: () => _repository.Numbers.Select(n => _repository.Find(n)).Where(r => r is not null).Select(r => LookAt(r!)).ToList(),
             Find: id => _repository.Find(id) is { } r ? LookAt(r) : null,
-            Pins: () => _settings.Pins, Recents: () => _settings.Recents,
+            Pins: () => _settings.Pins, Recents: () => _settings.RememberRecents ? _settings.Recents : new List<string>(),
             OpenCard: id =>
             {
                 if (_repository.Find(id) is not { } r) return;

@@ -78,6 +78,7 @@ public static class SettingsBackup
         var clean = SettingsService.Normalize(backup.Settings);
         // A backup written before a setting existed does not hold it. What the person has now stays: it is not set back to the usual value.
         CopyFrom(target, clean, skip: ThisPcOnly.Concat(Absent(json)).ToArray());
+        if (!target.RememberRecents) target.Recents = new();      // remembering is now off: nothing is kept, as the Settings hint says
         // A backup that holds no list of prompts or replies leaves the person's own alone: an absent list is not an empty one.
         if (backup.Lenses is not null) lenses.ReplaceAll(backup.Lenses);
         if (backup.Replies is not null) replies.ReplaceAll(backup.Replies);
@@ -120,6 +121,7 @@ public static class SettingsBackup
     {
         CopyFrom(target, SettingsService.Normalize(new Settings()), skip: ThisPcOnly);
         target.SectionUse = new();        // a reset starts the window's learning over, too
+        target.Recents = new();           // and the numbers looked up lately are forgotten, as in the simulation (a backup still never carries them)
         lenses.ReplaceAll(PromptLibraryService.Starters);
         replies.ReplaceAll(QuickReplyService.Starters);
     }

@@ -28,7 +28,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   eq(await p.evaluate(() => [document.getElementById('x-details-n').textContent, document.getElementById('x-details-all').hidden]), [rule.count, !rule.copyAll], 'A2 the count beside the heading and whether "Copy all" is offered are the rule\'s');
   eq([rule.have, rule.rows.length, rule.rows.filter(r => !r.copy).map(r => r.key)], [7, 9, ['applicantEmail', 'myNotes']], 'A3 this sample ANDA has seven of the nine usual columns, and the two it lacks are said to be missing');
   await p.click('#x-details [data-copy="agentEmail"]'); await settle();
-  eq([await p.evaluate(() => navigator.clipboard.readText()), await p.textContent('#x-details-status')], ['us.agent@northgate-agents.example', 'Copied: us agent email.'], 'A4 Copy puts the value on the clipboard and says what was copied');
+  eq([await p.evaluate(() => navigator.clipboard.readText()), await p.textContent('#x-details-status')], ['us.agent@northgate-agents.example', 'Copied: US agent email.'], 'A4 Copy puts the value on the clipboard and says what was copied');
   await p.click('#x-details-all'); await settle();
   eq([await p.evaluate(() => navigator.clipboard.readText()), await p.textContent('#x-details-status')], [rule.block, 'Copied: all the details shown.'], 'A5 "Copy all" copies the rule\'s block: the ANDA and only the columns that have a value');
   await p.evaluate(() => { state.cardFields = []; paintDetails('214990'); });
@@ -64,7 +64,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   const groups = await p.evaluate(() => todayGroups(state.pins, state.recents));
   eq(groups[0].rows.map(r => [r.id, r.mark]), [['216482', 'r'], ['214990', 'w']], 'D1 what needs a look is listed with the most pressing first: the urgent ANDA before the one that is only worth a look');
   eq(await p.evaluate(() => [...document.querySelectorAll('#tdList .td-grp, #tdList .td-it')].map(x => x.classList.contains('td-grp') ? x.textContent : x.querySelector('b').textContent + ' ' + x.querySelector('small').textContent)),
-    groups.flatMap(g => g.ids.length ? [g.title, ...g.rows.map(r => r.id + ' ' + r.line)] : []), 'D2 the window lists the rule\'s three groups and rows');
+    groups.flatMap(g => g.ids.length ? [g.title, ...g.rows.map(r => r.id + ' ' + ({ r: 'urgent', w: 'worth a look', g: 'on track' })[r.mark] + ' ' + r.line)] : []), 'D2 the window lists the rule\'s three groups and rows');
   eq(await p.evaluate(() => tdSel), '216482', 'D3 the most pressing ANDA is the one shown on the right when the window opens');
   const main = await p.evaluate(() => todayMain('216482'));
   eq(await p.evaluate(() => [document.querySelector('#tdMain .meta').textContent, document.querySelector('#tdMain .hl b').textContent, document.querySelector('#tdMain .hl span').textContent, document.querySelector('#tdMain .hint').textContent]), [main.meta, main.figure, main.words, main.dates], 'D4 the right-hand side says what the rule says about that ANDA');
@@ -73,6 +73,24 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
 
   // ---- E. text size and spacing ----
   eq(await p.evaluate(() => { const out = []; for (const [ts, d] of [['large', 'comfortable'], ['xl', 'compact'], ['standard', 'comfortable']]) { state.ts = ts; state.density = d; applyDisplay(); const c = getComputedStyle(document.documentElement); out.push([+c.getPropertyValue('--ts') || 1, +c.getPropertyValue('--sp') || 1]); } return out; }), [[1.15, 1], [1.3, 0.72], [1, 1]], 'E1 larger text is 1.15 and 1.3 times as large, and compact spacing keeps 0.72 of the space');
+
+  // ---- R. after the separate review ----
+  eq(await p.evaluate(() => detailRows('214990', ['agentCo', 'agentEmail', 'fei', 'applicant']).rows.map(r => r.copyName)), ['Copy applicant', 'Copy US agent', 'Copy US agent email', 'Copy facility FEI'], 'R1 the names of the Copy buttons keep their capitals, so a screen reader says "U S", not "us"');
+  await p.evaluate(() => { APP_WINS.forEach(closeApp); state.lookupStyle = 'bar'; openLookup({ x: 500, y: 300 }); }); await settle(300);
+  await p.fill('#lookupIn', 'N210793'); await settle();
+  eq(await p.evaluate(() => [lkRows[0].t, lkRows[0].act, lkRows.length]), ['Not an ANDA number', 'note', 3], 'R2 an NDA number gets a first row that says it is not an ANDA number');
+  await p.press('#lookupIn', 'Enter'); await settle();
+  eq(await p.evaluate(() => [document.getElementById('lkSay').textContent, document.getElementById('draft').style.display === 'block', document.getElementById('lookup').style.display]), ['N210793 is an NDA number (N is for NDA, A is for ANDA). Please enter a six-digit ANDA number.', false, 'block'], 'R3 Enter on it says why, and opens no review');
+  await p.fill('#lookupIn', '216482'); await settle(); await p.press('#lookupIn', 'ArrowDown'); await settle();
+  eq(await p.evaluate(() => [document.getElementById('lookupIn').getAttribute('aria-activedescendant'), document.getElementById('lk-row-1').getAttribute('aria-selected'), document.getElementById('lkSay').textContent]), ['lk-row-1', 'true', 'Review a draft. 2 of 3.'], 'R4 a move with the arrow keys is the box\'s active row and is said');
+  await p.evaluate(() => { APP_WINS.forEach(closeApp); state.lookupStyle = 'box'; state.recentsOn = true; state.pins = ['214990']; state.recents = ['216482']; tdSel = null; openToday(); }); await settle(300);
+  eq(await p.evaluate(() => [...document.querySelectorAll('#tdList .td-tag')].map(t => t.textContent)), ['urgent', 'worth a look', 'worth a look', 'urgent'], 'R5 each mark in Today is a word beside the number, not a color alone');
+  await p.click('#tdList .td-it[data-id="214990"]'); await settle();
+  eq(await p.evaluate(() => [document.activeElement.dataset.id, document.activeElement.getAttribute('aria-current'), document.getElementById('tdSay').textContent, document.getElementById('tdMain').hasAttribute('aria-live')]), ['214990', 'true', 'Shown: ANDA 214990, 9 days ahead of the goal.', false], 'R6 a pressed row keeps the keyboard, and one short sentence is said instead of the whole right-hand side');
+  eq(await p.evaluate(() => { state.recentsOn = false; state.recents = ['216482']; return [listedIds(), todayGroups(state.pins, state.recentsOn ? state.recents : [])[2].ids]; }), [['214990'], []], 'R8 while remembering is off, no recent number is offered in the lookup window or Today');
+  await p.evaluate(() => { APP_WINS.forEach(closeApp); showApp('settings'); document.querySelectorAll('details.sec').forEach(d => { d.open = true; }); state.pins = ['214990', '999999']; document.getElementById('pinsClear').scrollIntoView({ block: 'center' }); }); await settle(300);
+  await p.click('#pinsClear'); await settle();
+  eq(await p.evaluate(() => [state.pins, document.getElementById('recentsStatus').textContent]), [[], 'My list cleared. The ANDAs themselves are not changed.'], 'R9 "Clear my list" empties the kept list, numbers no longer in the data included');
 
   // ---- F. the version ----
   eq(await p.evaluate(() => [APP_VERSION, CHANGES[0].round, CHANGES[0].items.length]), ['Prototype, round 33', 33, 3], 'F1 the version is round 33, with what changed');

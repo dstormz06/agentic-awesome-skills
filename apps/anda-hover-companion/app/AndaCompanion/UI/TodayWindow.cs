@@ -29,6 +29,7 @@ public sealed class TodayWindow : Window
     private readonly IReadOnlyList<Today.Look> _all;
     private readonly StackPanel _list = new() { Spacing = 2 };
     private readonly StackPanel _main = new() { Spacing = 8 };
+    private readonly TextBlock _say = new() { FontSize = 1, Opacity = 0, Height = 1, IsHitTestVisible = false };
     private string? _selected;
 
     public TextBox Search { get; } = new() { Watermark = "Type an ANDA number", FontSize = 13 };
@@ -38,6 +39,8 @@ public sealed class TodayWindow : Window
     public Button OpenButton { get; private set; } = new();
     public Button CloseButton { get; } = new() { Content = "Close", HorizontalAlignment = HorizontalAlignment.Right };
     public string? Selected => _selected;
+    /// <summary>What was last said to a screen reader, for a test to read.</summary>
+    public string Said => _say.Text ?? "";
 
     private static IBrush Res(string key) => (IBrush)Application.Current!.Resources[key]!;
 
@@ -48,7 +51,7 @@ public sealed class TodayWindow : Window
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         Background = Res("C.Bg");
         AutomationProperties.SetName(Search, "Find an ANDA number");
-        AutomationProperties.SetLiveSetting(_main, AutomationLiveSetting.Polite);
+        AutomationProperties.SetLiveSetting(_say, AutomationLiveSetting.Polite);      // only a short sentence is said; the right-hand side is not read again whole
 
         var head = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto"), Margin = new Thickness(0, 0, 0, 10) };
         head.Children.Add(new TextBlock { Text = "Today", FontSize = 15, FontWeight = FontWeight.SemiBold, Foreground = Res("C.Ink"), VerticalAlignment = VerticalAlignment.Center });
@@ -64,8 +67,8 @@ public sealed class TodayWindow : Window
 
         var hint = new TextBlock { Text = "The same rules as the card and the watch list, read from your data when you open this window. Nothing runs while it is closed.", FontSize = 11, Foreground = Res("C.Ink3"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 10, 0, 0) };
         var root = new DockPanel { Margin = new Thickness(18) };
-        DockPanel.SetDock(head, Dock.Top); DockPanel.SetDock(hint, Dock.Bottom);
-        root.Children.Add(head); root.Children.Add(hint); root.Children.Add(grid);
+        DockPanel.SetDock(head, Dock.Top); DockPanel.SetDock(hint, Dock.Bottom); DockPanel.SetDock(_say, Dock.Bottom);
+        root.Children.Add(head); root.Children.Add(hint); root.Children.Add(_say); root.Children.Add(grid);
         Content = root;
 
         var groups = Groups();
@@ -95,23 +98,34 @@ public sealed class TodayWindow : Window
                 bool current = row.Id == _selected;
                 var dot = new Border { Width = 9, Height = 9, CornerRadius = new CornerRadius(5), VerticalAlignment = VerticalAlignment.Center, Background = Res(row.Mark == "r" ? "C.Bad" : row.Mark == "w" ? "C.Warn" : "C.Good") };
                 var text = new StackPanel();
-                text.Children.Add(new TextBlock { Text = row.Id, FontSize = 12.5, FontWeight = FontWeight.SemiBold, Foreground = Res("C.Ink") });
+                var idLine = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 6 };
+                idLine.Children.Add(new TextBlock { Text = row.Id, FontSize = 12.5, FontWeight = FontWeight.SemiBold, Foreground = Res("C.Ink") });
+                idLine.Children.Add(new TextBlock { Text = Today.MarkWord(row.Mark), FontSize = 11, Foreground = Res("C.Ink3"), VerticalAlignment = VerticalAlignment.Center });
+                text.Children.Add(idLine);
                 text.Children.Add(new TextBlock { Text = row.Line, FontSize = 11.5, Foreground = Res("C.Ink3"), TextWrapping = TextWrapping.Wrap });
                 var line = new Grid { ColumnDefinitions = new ColumnDefinitions("18,*") };
                 line.Children.Add(dot); Grid.SetColumn(text, 1); line.Children.Add(text);
                 var b = new Button { Content = line, HorizontalAlignment = HorizontalAlignment.Stretch, HorizontalContentAlignment = HorizontalAlignment.Left, Padding = new Thickness(8, 5), Background = Brushes.Transparent,
                     BorderThickness = new Thickness(current ? 2 : 1), BorderBrush = Res(current ? "C.Accent" : "C.Hair"), Tag = row.Id };
                 // the mark is a color; its meaning is also in the name a screen reader reads
-                string mark = row.Mark == "r" ? "urgent" : row.Mark == "w" ? "worth a look" : "on track";
+                string mark = Today.MarkWord(row.Mark);
                 AutomationProperties.SetName(b, $"ANDA {row.Id}, {mark}. {row.Line}" + (current ? ". Shown on the right" : ""));
                 string id = row.Id;
-                b.Click += (_, _) => { _selected = id; Paint(); };
+                b.Click += (_, _) => Choose(id);
                 _list.Children.Add(b);
             }
             if (g.More > 0) _list.Children.Add(new TextBlock { Text = Today.More(g.More), FontSize = 11, Foreground = Res("C.Ink3"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(2, 2, 0, 0) });
         }
         if (!any) _list.Children.Add(new TextBlock { Text = Today.SaidNothing, FontSize = 12, Foreground = Res("C.Ink3"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(2, 8, 0, 0) });
         PaintMain();
+    }
+
+    /// <summary>A row was pressed: show that ANDA, keep the keyboard on its row, and say so in one short sentence.</summary>
+    private void Choose(string id)
+    {
+        _selected = id; Paint();
+        _list.Children.OfType<Button>().FirstOrDefault(b => (string?)b.Tag == id && b.BorderThickness.Left > 1)?.Focus();
+        if (_hooks.Find(id) is { } look) _say.Text = Today.Shown(id, Today.Main(look));
     }
 
     private void PaintMain()

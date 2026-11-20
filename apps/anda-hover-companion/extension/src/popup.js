@@ -53,7 +53,7 @@ async function open(text) {
 // While a card is shown, its data line is written again as each minute begins.
 UI.everyMinute(async () => {
   if (!card) return;
-  const number = card.number, r = await ask({ type: 'anda:fresh', number });
+  const number = card.number, r = await ask({ type: 'anda:fresh', number, asOfUtc: card.asOfUtc ?? null, dataSource: card.dataSource ?? null, demo: card.demo === true, freshness: card.freshness ?? null });
   if (!r || !r.ok || !card || card.number !== number || typeof r.freshness !== 'string') return;
   card.freshness = r.freshness; card.stale = !!r.stale;
   UI.setFresh($('cardHost'), r.freshness, r.stale);
