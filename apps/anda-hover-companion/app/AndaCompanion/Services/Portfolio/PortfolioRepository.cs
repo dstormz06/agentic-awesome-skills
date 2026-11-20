@@ -155,7 +155,7 @@ public sealed class PortfolioRepository : IAndaRepository
                 notes.Add(new NoteItem($"{s.File} · {s.Date.ToString("MMM d", Inv)}", s.Text));
 
         var sisters = _sisters.Candidates(row)
-            .Where(x => x.Number != number && SameProduct(x, row))
+            .Where(x => x.Number != number && string.Equals(x.Applicant, row.Applicant, StringComparison.OrdinalIgnoreCase) && SameProduct(x, row))
             .Take(3).Select(x => new SisterRef(x.Number, $"{(x.Drug.Length > 0 ? x.Drug : "same product")} — same applicant")).ToList();
 
         string meta = string.Join(" · ", new[] { row.Applicant, row.Cycle.Length > 0 ? $"Cycle {row.Cycle}" : "" }.Where(x => x.Length > 0));

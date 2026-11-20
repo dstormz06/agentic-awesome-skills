@@ -58,7 +58,7 @@ public class Round38Tests : IClassFixture<HeadlessFixture>
             Assert.Equal(want.GetProperty("rows").EnumerateArray().Select(r => r.GetProperty("id").GetString() + " " + r.GetProperty("text").GetString()), got.Rows.Select(r => r.Id + " " + r.Text));
             n++;
         }
-        Assert.Equal(5, n);
+        Assert.Equal(6, n);
         Assert.Equal(g.GetProperty("taskMax").GetInt32(), NextWeek.TaskMax);
         foreach (var m in g.GetProperty("more").EnumerateArray()) Assert.Equal(m.GetProperty("text").GetString(), NextWeek.SaidTasksMore(m.GetProperty("n").GetInt32()));
         Assert.Equal(g.GetProperty("changes").GetProperty("items").EnumerateArray().Select(x => x.GetString()!).ToList(), ChangeLog.Entries.First(e => e.Round == 38).Items.ToList());
@@ -139,7 +139,7 @@ public class Round38Tests : IClassFixture<HeadlessFixture>
     [Fact]
     public void The_app_reads_both_lists_for_next_week()
     {
-        string more = File.ReadAllText(Folder("app", "AndaCompanion", "App.Round33.cs"));
-        Assert.Contains("NextWeek.TasksOf(_todo.Items, _myTodo.Items)", more);
+        string more = Round37Tests.Code(Folder("app", "AndaCompanion", "App.Round33.cs"));      // without comments: a call left in a comment does not count
+        Assert.Contains("records, _calendar, NextWeek.TasksOf(_todo.Items, _myTodo.Items))", more);
     }
 }

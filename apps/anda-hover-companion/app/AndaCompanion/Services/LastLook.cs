@@ -168,6 +168,11 @@ public static class NextWeek
         anda.Where(i => !i.Done && !string.IsNullOrEmpty(i.Due)).Select(i => new WeekTask("ANDA to-do list", i.Title, i.Due))
             .Concat(mine.Where(i => !i.Done && !string.IsNullOrEmpty(i.Due)).Select(i => new WeekTask("My to-do list", i.Title, i.Due))).ToList();
 
+    /// <summary>Round 38 review: the simulation's trim() (JavaScript's white space and line ends), so both programs drop and trim the same titles.</summary>
+    private static readonly char[] JsSpace = "\t\n\v\f\r \u00A0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF".ToCharArray();
+    /// <summary>A to Z as a to z, every other character as it is: the simulation's order of titles, whatever the language.</summary>
+    private static string AsciiLower(string s) => string.Create(s.Length, s, (span, src) => { for (int i = 0; i < src.Length; i++) span[i] = src[i] is >= 'A' and <= 'Z' ? (char)(src[i] + 32) : src[i]; });
+
     public static Result? Of(DateOnly today, int hour, IEnumerable<AndaRecord> records, BusinessCalendar cal, IEnumerable<WeekTask>? tasks = null)
     {
         var dow = today.DayOfWeek;
@@ -184,9 +189,9 @@ public static class NextWeek
         // round 38: the person's to-do items due that week, by date, then list, then title; a date that cannot be read or a blank title is left out
         var due = (tasks ?? Array.Empty<WeekTask>())
             .Select(k => (k, t: DateOnly.TryParseExact(k.Due ?? "", "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var d) ? d : (DateOnly?)null))
-            .Where(x => x.t is { } d && d >= mon && d <= fri && !string.IsNullOrWhiteSpace(x.k.Title))
-            .OrderBy(x => x.t).ThenBy(x => x.k.List, StringComparer.Ordinal).ThenBy(x => x.k.Title.ToLowerInvariant(), StringComparer.Ordinal).ToList();
-        var shown = due.Take(TaskMax).Select(x => new TaskRow(x.k.List, $"{WatchRules.Short(x.t!.Value)} · {x.k.List}: {x.k.Title.Trim()}")).ToList();
+            .Where(x => x.t is { } d && d >= mon && d <= fri && (x.k.Title ?? "").Trim(JsSpace).Length > 0)
+            .OrderBy(x => x.t).ThenBy(x => x.k.List, StringComparer.Ordinal).ThenBy(x => AsciiLower(x.k.Title), StringComparer.Ordinal).ToList();
+        var shown = due.Take(TaskMax).Select(x => new TaskRow(x.k.List, $"{WatchRules.Short(x.t!.Value)} · {x.k.List}: {x.k.Title.Trim(JsSpace)}")).ToList();
         return new Result($"NEXT WEEK · {WatchRules.Short(mon)} TO {WatchRules.Short(fri)}".ToUpperInvariant(), rows, holidays, rows.Count > 0 || due.Count > 0 ? null : SaidEmpty, shown, due.Count - shown.Count);
     }
 }

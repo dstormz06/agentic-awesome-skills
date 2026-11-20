@@ -21,6 +21,12 @@ const OUT = DIR + 'round38-golden.json';
       { name: 'a date that cannot be read, a blank title, spaces around a title', tasks: [
         { list: M, title: 'Never shown', due: '2026-12-32' }, { list: A, title: '   ', due: '2026-12-01' }, { list: M, title: '  Trimmed title  ', due: '2026-12-02' }, { list: A, title: 'No date', due: null }] },
       { name: 'twenty-five items: twenty shown, then how many more', tasks: many },
+      // added after the review: titles that sort differently with and without case, a date that would roll over into the week, and
+      // characters that lower-case differently by language (only A to Z count as letters for the order) or are white space to one reader only
+      { name: 'case, a rolled-over date, and characters beyond A to Z', tasks: [
+        { list: M, title: 'apple', due: '2026-12-02' }, { list: M, title: 'Banana', due: '2026-12-02' }, { list: M, title: 'Rolled over', due: '2026-11-31' },
+        { list: M, title: '\u0130b', due: '2026-12-03' }, { list: M, title: '\u0391\u03a31', due: '2026-12-03' }, { list: M, title: '\u03b1\u03c30', due: '2026-12-03' },
+        { list: M, title: '\ufeff', due: '2026-12-03' }, { list: M, title: ' \u00a0Lead and trail\u2003 ', due: '2026-12-03' }, { list: M, title: 'zeta', due: '2026-12-03' }] },
       { name: 'to-do items only, no ANDA dates: the week is not empty', tasks: [{ list: M, title: 'Only item', due: '2026-12-03' }], noRecords: true },
       { name: 'nothing at all', tasks: [], noRecords: true },
     ];

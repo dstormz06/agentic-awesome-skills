@@ -1768,6 +1768,19 @@ Chosen by the builder when the owner wrote "You decide": the two items not built
 
 **Tests:** app `Round38Tests` (6, among them the index against the old scan on 400 mixed fictional rows and 5,000 rows from one applicant read in under three seconds; the old scan took about six seconds in the same test); simulation `t46_round38.js` (11 checks, an accessibility scan of Today with the items). Faults put back on purpose and caught: the index missing rows without an ingredient, the old scan back, finished items counted, no cap, items that do not lift "nothing falls due".
 
+**A separate reviewer** read commit 22b74f0a, ran the suites and probes in a copy and broke the copy on purpose; it changed nothing in the repository and found nothing of high severity. Its findings:
+
+| # | Finding | Fix | Held by |
+|---|---|---|---|
+| 1 | Three rules could break with every test passing: the order of titles regardless of case (both programs), and the simulation's check that a date exists (a day that rolls over into the week) | New shared case: "apple" and "Banana" on one day, Nov 31, and titles beyond A to Z | Each fault put back: caught |
+| 2 | The app's wiring test passed with the call left in a comment | It reads the source without comments | The fault put back: caught |
+| 3 | The two programs ordered and dropped some titles differently (İ, a final Σ, a lone byte-order mark) | One rule in both: A to Z count as a to z, every other character as it is; white space as JavaScript reads it | The new shared case |
+| 4 | ROADMAP still listed the to-do dates as not built; this section held a placeholder | Corrected; filled below | — |
+| 5 | Which items appear was not written down (snoozed, rows from the data, repeating, an open Today) | DESIGN §11v | — |
+| 6 | Turning the look off removes `last-look.*.json` in the app's folder, which could be shared if `ANDA_COMPANION_HOME` points elsewhere | Said in SECURITY | — |
+| 7 | (Theoretical) an applicant name holding U+0001 could mix two applicants in the index | A sister must also have the same applicant, checked again | Read |
+| 8 | (Note) to-do titles show in Today with no switch of their own | Left as is: on screen only, nothing kept; listed as a question to the owner | — |
+
 COUNTS38_PLACEHOLDER
 
 ## Still open

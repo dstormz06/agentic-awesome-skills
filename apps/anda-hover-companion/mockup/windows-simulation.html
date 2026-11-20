@@ -5346,8 +5346,10 @@ function nextWeek(todayT, hour, data, tasks){
   });
   rows.sort((a, b) => a.t - b.t || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   const cmp = (a, b) => a < b ? -1 : a > b ? 1 : 0;
+  /* titles are ordered with A to Z read as a to z and every other character as it is, so the app orders them alike (round 38 review) */
+  const low = t => t.replace(/[A-Z]/g, c => String.fromCharCode(c.charCodeAt(0) + 32));
   const due = (tasks || []).map(k => ({ ...k, t:dayOfIso(k.due) })).filter(k => k.t !== null && isoDay(k.t) === k.due && k.t >= mon && k.t <= fri && typeof k.title === "string" && k.title.trim())
-    .sort((a, b) => a.t - b.t || cmp(a.list, b.list) || cmp(a.title.toLowerCase(), b.title.toLowerCase()));
+    .sort((a, b) => a.t - b.t || cmp(a.list, b.list) || cmp(low(a.title), low(b.title)));
   const shown = due.slice(0, WEEK_TASK_MAX).map(k => ({ list:k.list, text:`${shortDate(k.t)} · ${k.list}: ${k.title.trim()}` }));
   return { title:`NEXT WEEK · ${shortDate(mon)} TO ${shortDate(fri)}`.toUpperCase(), rows:rows.map(({ id, text }) => ({ id, text })), holidays,
     tasks:shown, tasksMore:due.length - shown.length, empty:rows.length || due.length ? null : "Nothing of yours falls due next week." };
