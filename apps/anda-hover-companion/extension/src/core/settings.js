@@ -18,6 +18,13 @@ export const DEFAULT_SETTINGS = Object.freeze({
   staleAfterDays: STALE_DEFAULT, // data older than this many days is marked STALE (1, 3, 7, 14 or 30)
 });
 export const HOLIDAY_LEAD_CHOICES = [0, 2, 3, 5];
+/** Said once on the Settings page when a Whisper stored before round 34 was moved to Full. The same words as the app's, for this page. */
+export const CONSENT_MOVED = 'Your shortcut now opens the card directly. To see the small invite first again, choose Whisper invite below.';
+/** Whether settings as stored are moved from Whisper to Full by normalizeSettings (round 34): stored by an earlier form, with Whisper. */
+export function consentMoves(stored) {
+  const s = stored && typeof stored === 'object' && !Array.isArray(stored) ? stored : null;
+  return !!s && s.consent === 'whisper' && !(Number.isInteger(s.schema) && s.schema >= 3);
+}
 export const AUTO_HIDE_CHOICES = [0, 10, 20, 40];
 
 /**

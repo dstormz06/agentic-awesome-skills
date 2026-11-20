@@ -237,7 +237,7 @@ public partial class SettingsWindow
         {
             var previous = a.AutoRun; a.AutoRun = runChoices[i];
             if (AgentRules.Validate(a) is { } refused) { a.AutoRun = previous; AgentsStatus.Text = refused; RebuildAgents(); return; }
-            AgentsStatus.Text = a.AutoRun == AgentRun.Never ? "" : $"{a.Name} will now run by itself {(a.AutoRun == AgentRun.OnFullCard ? "whenever a full card opens" : "when a full card opens for an at-risk ANDA")}. A peek never runs it. Only the fields its prompt and body name are sent.";
+            AgentsStatus.Text = a.AutoRun == AgentRun.Never ? "" : $"{a.Name} will now run by itself {(a.AutoRun == AgentRun.OnFullCard ? "whenever a card is opened in full" : "when a card is opened in full for an at-risk ANDA")}. A peek never runs it. Only the fields its prompt and body name are sent.";
             Check(); Apply();
         });
         var cache = Choice("How long to reuse an answer", AgentRules.CacheChoices.Select(m => m == 0 ? "Always ask again" : $"Reuse an answer for {m} minutes").ToList(),

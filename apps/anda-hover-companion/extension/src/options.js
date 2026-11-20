@@ -4,6 +4,7 @@ import { FIELDS } from './core/portfolio.js';
 import { TZ_CHOICES, STALE_CHOICES, timeLabel, zoneSaid, computerZone } from './core/time.js';
 import { CHANGES } from './core/about.js';
 import { guideStep, guideStart, guideOpensAtStart, GUIDE_NOT_REMEMBERED } from './core/guide.js';
+import { CONSENT_MOVED } from './core/settings.js';
 
 const UI = globalThis.AndaUI;
 
@@ -40,6 +41,7 @@ async function paintNow() { $('timeNow').textContent = `Now: ${timeLabel(Date.no
 UI.everyMinute(paintNow);
 
 async function paintSettings() {
+  if (await service.consentMoved()) { $('consentMoved').hidden = false; $('consentMoved').textContent = CONSENT_MOVED; }   // round 34, once
   const s = await service.getSettings();
   document.querySelector(`input[name=source][value=${s.dataSource}]`).checked = true;
   document.querySelector(`input[name=consent][value=${s.consent}]`).checked = true;

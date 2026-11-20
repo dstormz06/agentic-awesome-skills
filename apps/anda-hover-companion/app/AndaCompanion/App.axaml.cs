@@ -111,7 +111,8 @@ public partial class App : Application
             if (SelfTestRun is null && StartNotes() is { Length: > 0 } notes)
             {
                 foreach (var (what, note) in new[] { ("settings file", SettingsService.LoadNote), ("ANDA to-do list", _todo.LoadNote), ("to-do list", _myTodo.LoadNote), ("prompt library", _prompts.LoadNote), ("quick replies", _replies.LoadNote) })
-                    if (!string.IsNullOrEmpty(note)) EventLog.Record("file", what + " could not be used as it was at start");
+                    if (!string.IsNullOrEmpty(note) && !(what == "settings file" && SettingsService.LoadNoteIsMove))     // a planned move forward is not a problem with the file
+                        EventLog.Record("file", what + " could not be used as it was at start");
                 Dispatcher.UIThread.Post(() => ShowNotice(notes), DispatcherPriority.Background);
             }
 
@@ -244,6 +245,7 @@ public partial class App : Application
     /// </summary>
     public void OpenCard(AndaRecord record, PixelPoint near, bool mini)
     {
+        _invite?.Close(); _invite = null;            // round 34: a card that opens replaces a waiting invite, as in the simulation
         _lastCard = (record, near, mini);
         NoteRecent(record.Number);
         RefreshTrayState();

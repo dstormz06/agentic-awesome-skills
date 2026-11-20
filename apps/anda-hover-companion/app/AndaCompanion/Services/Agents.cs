@@ -9,9 +9,9 @@ namespace AndaCompanion.Services;
 public enum AgentRun
 {
     Never = 0,
-    /// <summary>Whenever a full card opens (a peek and an invite never run an agent).</summary>
+    /// <summary>Whenever a card is opened in full (a peek and an invite never run an agent).</summary>
     OnFullCard = 1,
-    /// <summary>Only when a full card opens for an ANDA that the urgency rules call at risk.</summary>
+    /// <summary>Only when a card is opened in full for an ANDA that the urgency rules call at risk.</summary>
     WhenAtRisk = 2,
 }
 
@@ -156,7 +156,7 @@ public static class AgentRules
 
     public static string RunLabel(AgentRun r) => r switch
     {
-        AgentRun.OnFullCard => "When a full card opens", AgentRun.WhenAtRisk => "Only when the ANDA is at risk", _ => "Only when I ask",
+        AgentRun.OnFullCard => "When a card is opened in full", AgentRun.WhenAtRisk => "Only when the ANDA is at risk", _ => "Only when I ask",
     };
 }
 

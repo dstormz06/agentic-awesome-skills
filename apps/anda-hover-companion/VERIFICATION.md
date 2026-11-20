@@ -1611,6 +1611,53 @@ The owner's go-ahead of Nov 19. **The Edge extension** (version 0.2.0) gains wha
 
 CI: **no Windows run has started for this round's commits either.** GitHub refused to let this session start it ("Resource not accessible by integration"). The last Windows run is still run 44, on the round 24 code, from Nov 12. The owner can start the workflow from the repository's Actions tab.
 
+## Round 34: the shortcut opens the card, the answer first, Today as home; a separate adversarial review; tested twice
+
+The owner's choices of Nov 20, from the suggestions written after round 33 (A1, A2, C1): **the person's own shortcut opens the card directly** (in the simulation, the app and the Edge extension; Whisper stays a choice, and a middle-click still asks first); **the card shows the answer first**, with the calendar, Latest, Ahead, the reference dates, the brief and the key hint one press away under More or E (simulation and app); **a click on the tray icon opens Today**, which is in the everyday tray menu and leads to the watch list with *Show all, with reasons…*; the watch list's own tray item is gone (simulation and app). Settings stored before round 34, when Whisper was the default, move to Full once: the app writes its settings in form 6 and says so in one sentence; the extension writes form 3 and says so once on its Settings page.
+
+**Built, held to shared answers.** `tools/round34-golden.cjs` writes `mockup/round34-golden.json` from the simulation: the usual way to start, the three labels, the first step for all 24 combinations of way to start, urgent rule, urgency and shortcut or middle-click, the watch line's tail, the version and what changed. The app (`Round34Tests`) and the extension (`round34.test.mjs`, the 12 cases started by a shortcut) give the same answers. (The simulation's own check against that file guards against later drift only; it cannot disagree with itself on the day it is written.) `mockup/round29-golden.json` was written again for one change of wording, "when a card is opened in full", and nothing else changed in it.
+
+**Found while building, before the review:** the tray icon's spoken label still said "Click for lookup" after its first refresh (simulation); a change of text size with a card open let the card run past the taskbar (simulation; it showed once the card became short); the watch list opened from Today did not take the keyboard, so Escape closed Today instead (simulation); a card without a forecast would have shown an empty calendar after More (app); a peek's "Full brief" led to a card whose brief was hidden; and, with an AI connection on, the brief would have been asked for although it is not shown. All are fixed with a test (R355 to R360).
+
+**A static security pass by the builder** (reading only; nothing was scanned or probed), with the Security Engineer and Secure App Builder skill sets as checklists: no new outbound host, permission, hook, capture, clipboard use or stored item; new text on screen is set as text, never as markup; less is sent than before, because with an AI connection on neither the brief nor an agent set to run by itself is asked before the card is opened in full. The one stored change is the move from Whisper to Full, flagged in the risk log.
+
+**A separate reviewer**, which had not built the round, read the change, ran the suites and probes in a copy, and broke the copy on purpose; it changed nothing in the repository. Its eleven findings, all fixed:
+
+| # | The reviewer's finding | Fix | Held by |
+|---|---|---|---|
+| 1 | **A test edit switched off three checks**: a comment put in the middle of a line in the extension's safety test hid the checks of three settings that fall back to their usual value | The comment moved to the end of the line; every line added this round was searched for the same mistake (none) | The removed allow-list put back: caught |
+| 2 | App: the move from Whisper to Full, and its sentence, came back at every start until something saved the settings; and the event log called it a file that "could not be used" | Moved settings are written back once; the event log writes nothing for a planned move (its sentences are shared with the simulation) | Rule test; the fault put back: caught |
+| 3 | Simulation: a brief left waiting on a closed card was asked for by a later peek when E was pressed | What waits is forgotten when the card closes or opens as a peek; a peek never asks | Simulation C11b; the fault put back: caught |
+| 4 | App: after a peek's "Full brief" the calendar never appeared (the simulation shows it) | The calendar's "has two dates" no longer depends on how the card started | Window test; the fault put back: caught |
+| 5 | **An agent set to run by itself was still asked while the card showed the answer only**, in both programs; the wording "when a full card opens" no longer told the truth | Such agents wait for the card to be opened in full (More, E, Full brief or a note), like the brief; the wording is now "when a card is opened in full" in Settings, Connections and the documents | Simulation t18; app window test with a counting connection; the fault put back: caught |
+| 6 | App: Tab reached Today's *Show all* before the rows above it | It comes after the rows, as it is drawn | Window test; simulation T5a; the fault put back: caught |
+| 7 | After More the keyboard landed on a button that still said "Expand card" | The button says "Collapse card" or "Expand card", and in the simulation carries `aria-expanded` | Window test; simulation C11c, C11d; the fault put back: caught |
+| 8 | The demo guide, the trial sheet and the start-here text still described the invite and the Watch list item; the middle-click hint did not say that it asks first | All updated; the hint says so in both programs | Simulation C11e |
+| 9 | App: in Full mode, a middle-click invite stayed up after the shortcut opened the card | A card that opens closes a waiting invite, as in the simulation | Source check (it needs the whole app running) |
+| 10 | A deliberate Whisper could still be moved without a word: in the app when the file could not be read and the last good copy was older; in the extension always | The app says what moving the last good copy changed, and the last good copy is written after the move; the extension says it once on its Settings page and saves the move | Rule tests in both |
+| 11 | Gaps in the tests: Ahead not checked under More; nothing for the brief after a peek, agents, the repeated sentence or the extension's saved move; the tray wiring only read as text | Each added except the tray wiring, which needs the whole app on Windows | As above |
+
+**The faults put back on purpose.** Before the review, five faults put into the app (answer-first switched off, the brief asked at once, the middle-click ignored, the move skipped, Show all always offered) and four into the simulation (Whisper as default, More-only parts drawn, the tray opening the lookup box, the watch list without the keyboard) were each caught. After the fixes, the five fixes in the app were each undone in a copy and each was caught; the simulation's brief fix likewise.
+
+{{COUNTS}}
+
+**Not proven by this round**, and what to do about each: nothing ran on Windows (no Windows build since Nov 12; this session may not start the workflow), so the tray icon's single click, the card's real height on a 1366 × 768 screen, the settings move on a real profile and Narrator on More and Show all are unknown: a Windows run and a keyboard and Narrator walk. The extension ran in Chromium, not Edge. Going back to an older version and forward again would move a Whisper chosen in between once more; that is not handled. The card is not yet at the 420 px once suggested (513 to 601 px at standard text in the simulation).
+
+### Defects caught in round 34
+
+| # | Finding | Found by | Disposition |
+|---|---|---|---|
+| R355 | The tray icon's spoken label said "Click for lookup" after its first refresh (simulation) | The new round 34 suite (T1) | Fixed |
+| R356 | A change of text size with a card open let the card run past the taskbar (simulation) | An older suite's check (round 18, E7) once the card became short | Fixed: the card is fitted again |
+| R357 | The watch list opened from Today did not take the keyboard; Escape closed Today (simulation) | An older suite (the extension pages, t7) | Fixed: it opens like every window, above Today |
+| R358 | An empty calendar would have shown after More on a card without a forecast (app) | The stricter calendar test written while updating it | Fixed |
+| R359 | A peek's "Full brief" led to a card whose brief was hidden | The builder, reading the change | Fixed in both programs |
+| R360 | With an AI connection on, the brief would have been asked for although it is not shown | The builder, reading the change against the data rules | Fixed in both programs |
+| R361 to R371 | The eleven findings of the separate review, in the table above | The separate review | Fixed |
+| R372 | Fourteen older simulation suites, eight older app tests and two extension tests still described the previous defaults (Whisper first, everything on the card, the Watch list tray item, round 33 as the newest) | The first full runs after the change | Each updated to the new behaviour with its intent kept; where a check was about the whisper path it now chooses Whisper |
+
+CI: **no Windows run has started for this round's commits either.** The last Windows run is still run 44, on the round 24 code, from Nov 12. The owner can start the workflow from the repository's Actions tab.
+
 ## Still open
 
 GDUFA III tier table (needs the commitment-letter text and the dual-source rule); a real-keyboard check of rebound shortcuts on

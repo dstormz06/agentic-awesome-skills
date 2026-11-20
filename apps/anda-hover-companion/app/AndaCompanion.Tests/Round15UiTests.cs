@@ -511,21 +511,24 @@ public class Round15UiTests : IClassFixture<HeadlessFixture>
     }
 
     [Fact]
-    public async Task An_agent_set_to_run_by_itself_does_so_when_the_full_card_opens_or_only_when_at_risk()
+    public async Task An_agent_set_to_run_by_itself_does_so_when_the_card_is_opened_in_full_or_only_when_at_risk()
     {
         var r = await _fx.Session.Dispatch(async () =>
         {
             ThemeManager.Apply(AppearanceId.A);
             var always = new Handler(_ => Json("{\"answer\":\"- a\"}"));
             var svc1 = new AgentService(() => new[] { Hub(a => a.AutoRun = AgentRun.OnFullCard) }, Env, always);
-            var w1 = NewCard(svc1); w1.Show(Demo, new PixelPoint(40, 40), false);
+            var w1 = NewCard(svc1); w1.Show(Demo, new PixelPoint(40, 40), false); Settle();
+            w1.FindControl<Button>("MoreChip")!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));   // round 34: agents wait for the card to be opened in full
             await Until(() => svc1.Last("alert-hub", "216482") is not null); w1.Close(); Settle();
 
             var risk = new Handler(_ => Json("{\"answer\":\"- a\"}"));
             var svc2 = new AgentService(() => new[] { Hub(a => a.AutoRun = AgentRun.WhenAtRisk) }, Env, risk);
-            var w2 = NewCard(svc2, atRisk: _ => false); w2.Show(Demo, new PixelPoint(40, 40), false); await Task.Delay(150); Settle(); w2.Close(); Settle();
+            var w2 = NewCard(svc2, atRisk: _ => false); w2.Show(Demo, new PixelPoint(40, 40), false); Settle();
+            w2.FindControl<Button>("MoreChip")!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent)); await Task.Delay(150); Settle(); w2.Close(); Settle();
             int notAtRisk = risk.Sent;
-            var w3 = NewCard(svc2, atRisk: _ => true); w3.Show(Demo, new PixelPoint(40, 40), false);
+            var w3 = NewCard(svc2, atRisk: _ => true); w3.Show(Demo, new PixelPoint(40, 40), false); Settle();
+            w3.FindControl<Button>("MoreChip")!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
             await Until(() => risk.Sent > 0); w3.Close(); Settle();
             return (always.Sent, notAtRisk, atRisk: risk.Sent);
         }, CancellationToken.None);

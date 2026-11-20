@@ -62,10 +62,14 @@ public sealed class TodayWindow : Window
 
         var side = new DockPanel();
         DockPanel.SetDock(Search, Dock.Top); Search.Margin = new Thickness(0, 0, 0, 8); side.Children.Add(Search);
-        DockPanel.SetDock(ShowAllButton, Dock.Bottom); side.Children.Add(ShowAllButton);
         AutomationProperties.SetName(ShowAllButton, "Show all that need a look, with reasons, in the watch list");
         ShowAllButton.Click += (_, _) => _hooks.ShowAll?.Invoke();
-        side.Children.Add(new ScrollViewer { Content = _list, VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto });
+        // Show all is drawn below the list and comes after it with Tab too (round 34).
+        var listAndAll = new Grid { RowDefinitions = new RowDefinitions("*,Auto") };
+        var listScroll = new ScrollViewer { Content = _list, VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto };
+        listAndAll.Children.Add(listScroll);
+        Grid.SetRow(ShowAllButton, 1); listAndAll.Children.Add(ShowAllButton);
+        side.Children.Add(listAndAll);
         var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("240,16,*") };
         grid.Children.Add(side);
         var right = new ScrollViewer { Content = _main, VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto };

@@ -91,7 +91,7 @@ test('scanning a page: numbers are distinct, in order, never an NDA, and capped'
 test('settings fall back safely and keep their meaning', () => {
   assert.deepEqual(normalizeSettings({}), DEFAULT_SETTINGS);
   const s = normalizeSettings({ consent: 'nonsense', urgentLateDays: 9, holidayLeadDays: 4, autoHideSeconds: 15, dataSource: 'cloud', extraClosures: [{ date: '2026-12-24', name: 'EO' }, { date: 'bad' }, null] });
-  assert.equal(s.consent, 'full'); assert.equal(s.urgentLateDays, 7);   // Full is the usual setting since round 34 assert.equal(s.holidayLeadDays, 3); assert.equal(s.autoHideSeconds, 20); assert.equal(s.dataSource, 'demo');
+  assert.equal(s.consent, 'full'); assert.equal(s.urgentLateDays, 7); assert.equal(s.holidayLeadDays, 3); assert.equal(s.autoHideSeconds, 20); assert.equal(s.dataSource, 'demo');   // Full is the usual setting since round 34
   assert.deepEqual(s.extraClosures, [{ date: '2026-12-24', name: 'EO' }]);
 });
 

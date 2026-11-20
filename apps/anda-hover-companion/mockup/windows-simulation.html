@@ -1481,7 +1481,7 @@ PS C:\work&gt; </div>
     <div class="lbl">OTHER WAYS TO START IT</div>
     <label class="opt"><input type="checkbox" id="setMiddle"> Middle-click (wheel button) on selected text starts Select &amp; Peek</label>
     <div class="wrap" id="setMiddleMod"></div>
-    <p class="hint">Off by default. In the Windows app it uses a mouse hook that sees only the middle button, never the pointer position or any text, and the click still reaches the program under it. Some security software flags mouse hooks. A plain middle-click scrolls or opens links in many programs, so Ctrl is recommended. Here it works on the text in the windows below; the page only stops the browser's own scroll mode. The shortcuts and the tray icon always work.</p>
+    <p class="hint">Off by default. In the Windows app it uses a mouse hook that sees only the middle button, never the pointer position or any text, and the click still reaches the program under it. Some security software flags mouse hooks. A plain middle-click scrolls or opens links in many programs, so Ctrl is recommended. A middle-click always shows the small invite first, even when your shortcut opens the card. Here it works on the text in the windows below; the page only stops the browser's own scroll mode. The shortcuts and the tray icon always work.</p>
     </div></details>
     <details class="sec" id="secDates"><summary><h3 class="grp">Dates</h3><span class="pillnote" id="pillDates" hidden></span></summary>
     <div class="secbody">
@@ -1552,7 +1552,7 @@ PS C:\work&gt; </div>
     <div class="wrap"><button class="pill quiet" id="agAdd" type="button">Add an agent</button></div>
     <div class="keystatus" id="agStatus" role="status"></div>
     <p class="hint">An agent is any service you can reach with an address. Alert Hub, Patent Analysis and Triaging Agent are listed so they can be set up: this app does not know their addresses or message format and does not guess them, so each stays off until you enter the details your IT team gives you. Nothing is sent for an agent that is off. The token stays in the environment variable you name and is never saved by this app.</p>
-    <p class="hint">An agent is asked only when you press Run on a card or use its action, unless you set it to run by itself. By itself means: when a full card opens, or only when the ANDA is at risk. A peek never asks an agent. Its answer appears in the card's drawer as the agent's own words, and nothing joins your to-do list until you press its button.</p>
+    <p class="hint">An agent is asked only when you press Run on a card or use its action, unless you set it to run by itself. By itself means: when a card is opened in full, or only when the ANDA is at risk. A peek never asks an agent. Its answer appears in the card's drawer as the agent's own words, and nothing joins your to-do list until you press its button.</p>
     </div>
     <div id="todoBlock">
     <hr class="hair">
@@ -1960,7 +1960,7 @@ PS C:\work&gt; </div>
       <span class="seal">✓ Verified</span>
       <span class="tools">
         <button id="pinBtn" type="button" title="Pin (Space)" aria-label="Pin card"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2.5l4 4-2.2.55a2 2 0 0 0-1.25 1.25L9.5 10.5 5.5 6.5l2.2-.55A2 2 0 0 0 8.95 4.7z"/><path d="M5.5 10.5L2.5 13.5"/></svg></button>
-        <button id="expBtn" type="button" title="Expand (E)" aria-label="Expand card"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 6.5L13 3M13 3h-3.5M13 3v3.5M6.5 9.5L3 13M3 13h3.5M3 13V9.5"/></svg></button>
+        <button id="expBtn" type="button" title="Expand (E)" aria-label="Expand card" aria-expanded="false"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 6.5L13 3M13 3h-3.5M13 3v3.5M6.5 9.5L3 13M3 13h3.5M3 13V9.5"/></svg></button>
         <button id="closeBtn" type="button" title="Close (Esc)" aria-label="Close card"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
       </span>
     </div>
@@ -3562,13 +3562,13 @@ function openCard(id, opts = {}){
   if(state.form !== "full" && !opts.forceFull){ showCompact(id, opts.anchor || pointer); return; }
   closeCompact();
   current = id; fill(id); setPin(false);
-  card.classList.remove("expanded");
+  card.classList.remove("expanded"); syncExpBtn();
   card.classList.toggle("mini", !!opts.mini);
   card.classList.toggle("above", !!opts.above);    /* opened from the to-do list: in front of that window */
   card.classList.toggle("sheet", isSheet());
   card.style.display = "block";
   /* Final content first, then place: the brief changes the height, and a card placed before it arrives can overflow. */
-  if(opts.mini) $("c-ai").textContent = ""; else renderBrief(id);
+  if(opts.mini){ $("c-ai").textContent = ""; briefWaiting = agentsWaiting = null; } else renderBrief(id);
   prepareAgents();                                 /* the agents drawer belongs to the full card; a peek never asks an agent */
   if(isSheet()){ scrim.style.display = "block"; card.style.left = card.style.top = ""; card.style.maxHeight = ""; }
   else { scrim.style.display = "none"; limitHeight(); placeCard(opts.anchor || pointer); }
@@ -3583,15 +3583,20 @@ function closeCard(){
   clearInterval(autoTimer);
   clearInterval(streamTimer); clearTimeout(streamTimer);
   card.style.display = "none"; scrim.style.display = "none";
-  setPin(false); card.classList.remove("expanded", "mini", "above"); current = null; $("x-agents-d").hidden = true;
+  setPin(false); card.classList.remove("expanded", "mini", "above"); current = null; $("x-agents-d").hidden = true; briefWaiting = agentsWaiting = null;
 }
 function setPin(v){
   pinnedCard = v; card.classList.toggle("pinned", v); $("pinBtn").classList.toggle("on", v);
 }
 $("chipMore").addEventListener("click", () => { toggleExpand(); $("expBtn").focus(); });
+/* Round 34: the button says what a press will do, and whether the card is open, so a screen reader hears it right after More. */
+function syncExpBtn(){ const open = card.classList.contains("expanded"), b = $("expBtn"); b.setAttribute("aria-expanded", String(open)); b.setAttribute("aria-label", open ? "Collapse card" : "Expand card"); b.title = open ? "Collapse (E)" : "Expand (E)"; }
 function toggleExpand(){
-  card.classList.toggle("expanded");
-  if(card.classList.contains("expanded") && briefWaiting && briefWaiting === current) renderBrief(current);
+  card.classList.toggle("expanded"); syncExpBtn();
+  if(card.classList.contains("expanded") && !card.classList.contains("mini")){        /* round 34: what waited for More is asked for now */
+    if(briefWaiting && briefWaiting === current) renderBrief(current);
+    if(agentsWaiting && agentsWaiting === current) runAutoAgents();
+  }
   setTimeout(() => { clampCard(); if(card.classList.contains("expanded")) $("x-details-d").scrollIntoView({ block:"nearest" }); }, 0);   /* expanding is asking for the details: bring them into view */
 }
 function copyStatus(){
@@ -5952,8 +5957,8 @@ const CONN_NOTE = "“Update now” for the Drugs@FDA file fetches the one addre
 /* c: { ai:null|{name, where}, agents:[{name, where, auto}] (only those switched on), outlook:null|{where} }. The same rule as the app's Connections.Describe. */
 function connections(c){
   const items = [], nowhere = "no address yet, so nothing can be sent";
-  if(c.ai) items.push({ name:`${c.ai.name} (AI)`, sends:"When a full card opens: the whole record of that ANDA from your sheet, with its notes, and your lens. When you press Send: the text shown to you first and, for a writing action, your tone, standing instructions and sign-off. Nothing else.", where:c.ai.where || nowhere, kept:"This tool keeps nothing of what is sent. What the service keeps is set by your office's agreement with it." });
-  for(const a of c.agents || []) items.push({ name:`${a.name} (agent)`, sends:a.auto ? "By itself when a full card opens: the fields of that ANDA that its prompt names, never selected text. Also when you press Run or Send." : "Only when you press Run or Send: its prompt, filled in and shown to you.", where:a.where || nowhere, kept:"Its answer is kept in memory until you close the app, and counts as fresh for the minutes you chose. It is never written to a file." });
+  if(c.ai) items.push({ name:`${c.ai.name} (AI)`, sends:"When a card is opened in full: the whole record of that ANDA from your sheet, with its notes, and your lens. When you press Send: the text shown to you first and, for a writing action, your tone, standing instructions and sign-off. Nothing else.", where:c.ai.where || nowhere, kept:"This tool keeps nothing of what is sent. What the service keeps is set by your office's agreement with it." });
+  for(const a of c.agents || []) items.push({ name:`${a.name} (agent)`, sends:a.auto ? "By itself when a card is opened in full: the fields of that ANDA that its prompt names, never selected text. Also when you press Run or Send." : "Only when you press Run or Send: its prompt, filled in and shown to you.", where:a.where || nowhere, kept:"Its answer is kept in memory until you close the app, and counts as fresh for the minutes you chose. It is never written to a file." });
   if(c.outlook) items.push({ name:"Outlook (read-only)", sends:"When you sign in: this app's ID and the read-only permission it asks for. After that, only a search for the six-digit number of the open ANDA.", where:c.outlook.where, kept:"Mail is shown, never stored. The sign-in is held in memory until you sign out or close the app." });
   const names = items.map(i => i.name);
   const line = names.length === 0 ? CONN_OFFLINE : "Switched on: " + names.slice(0, 3).join(" · ") + (names.length > 3 ? ` · and ${names.length - 3} more` : "");
@@ -6403,7 +6408,7 @@ function paintMail(id){
 const ACT_KINDS = ["Add to my to-do list", "Fill my prompt and show it", "Ask my AI (after a preview)", "Run one of my agents"];
 const ACT_MAX = 8, ACT_NAME_MAX = 40, ACT_TEXT_MAX = 4000, DUE_CHOICES = [0, 1, 2, 3, 5, 10], SEL_MAX = 2000, MISSING = "(not in my data)";
 const AGENT_MAX = 8, AGENT_NAME_MAX = 40, AGENT_ITEMS_MAX = 8, FINDING_MAX = 2000, CACHE_CHOICES = [0, 5, 15, 60], TIMEOUTS = [10, 30, 60, 120];
-const AGENT_RUNS = [["Only when I ask", 0], ["When a full card opens", 1], ["Only when the ANDA is at risk", 2]];
+const AGENT_RUNS = [["Only when I ask", 0], ["When a card is opened in full", 1], ["Only when the ANDA is at risk", 2]];
 const ACT_PLACEHOLDERS = REPLY_HELP.concat(["selection"]);
 const TODO_MAX = 500, TODO_TITLE_MAX = 200, TODO_NOTE_MAX = 500, KEEP_DONE_DAYS = 30, SHOW_DONE_DAYS = 7, AUTO_CAP = 400;
 const TODO_REFRESH = [0, 15, 30, 60, 300];
@@ -6876,6 +6881,14 @@ function prepareAgents(){
   d.open = false; d.hidden = true; $("x-agents").replaceChildren();
   if(!current || card.classList.contains("mini") || !enabledAgents().length) return;
   d.hidden = false; paintAgents();
+  /* Round 34: the drawer is under More, so an agent set to run by itself waits until the card is opened in full. Nothing is sent before. */
+  if(!card.classList.contains("expanded")){ agentsWaiting = current; return; }
+  runAutoAgents();
+}
+let agentsWaiting = null;          /* the ANDA whose automatic agents wait for More (round 34) */
+function runAutoAgents(){
+  agentsWaiting = null;
+  if(!current || card.classList.contains("mini")) return;
   const risk = isUrgent(current);
   state.agents.filter(a => a.enabled && !agentSetupProblem(a) && (a.auto === 1 || (a.auto === 2 && risk))).forEach(a => { askAgent(a, current, null, false); });
 }
@@ -7029,7 +7042,7 @@ function agentEditor(a){
     const previous = a.auto; a.auto = AGENT_RUNS[auto.selectedIndex][1];
     const refused = validateAgent(a);
     if(refused && a.auto !== 0){ a.auto = previous; auto.selectedIndex = Math.max(0, AGENT_RUNS.findIndex(r => r[1] === previous)); $("agStatus").textContent = refused; return; }
-    $("agStatus").textContent = a.auto === 0 ? "" : `${a.name} will now run by itself ${a.auto === 1 ? "whenever a full card opens" : "when a full card opens for an at-risk ANDA"}. A peek never runs it. Only the fields its prompt and body name are sent.`;
+    $("agStatus").textContent = a.auto === 0 ? "" : `${a.name} will now run by itself ${a.auto === 1 ? "whenever a card is opened in full" : "when a card is opened in full for an at-risk ANDA"}. A peek never runs it. Only the fields its prompt and body name are sent.`;
     changed();
   });
   const cache = h("select", { aria:"How long to reuse an answer" }); selOptions(cache, CACHE_CHOICES.map(m => m === 0 ? "Always ask again" : `Reuse an answer for ${m} minutes`), Math.max(0, CACHE_CHOICES.indexOf(a.cache)));
@@ -8067,7 +8080,7 @@ $("closeBtn").addEventListener("click", closeCard);
 $("pinBtn").addEventListener("click", () => setPin(!pinnedCard));
 $("expBtn").addEventListener("click", toggleExpand);
 $("chipCopy").addEventListener("click", copyStatus);
-$("moreBtn").addEventListener("click", () => { card.classList.remove("mini"); if(!card.classList.contains("expanded")) card.classList.add("expanded"); if(current){ renderBrief(current); prepareAgents(); }   /* round 34: "Full brief" shows the brief, so the card opens with the rest */ if($("watchSlot").style.display !== "none") markStep("watch"); setTimeout(clampCard, 0); });
+$("moreBtn").addEventListener("click", () => { card.classList.remove("mini"); if(!card.classList.contains("expanded")) card.classList.add("expanded"); syncExpBtn(); if(current){ renderBrief(current); prepareAgents(); }   /* round 34: "Full brief" shows the brief, so the card opens with the rest */ if($("watchSlot").style.display !== "none") markStep("watch"); setTimeout(clampCard, 0); });
 $("chipSister").addEventListener("click", () => { const s = current && DATA[current].sisters[0]; if(s){ current = s[0]; fill(current); renderBrief(current); prepareAgents(); setTimeout(clampCard, 0); } });
 $("chipNotes").addEventListener("click", openNotesOnCard);
 $("chipOpen").addEventListener("click", openAndaPage);

@@ -324,7 +324,8 @@ public partial class CardWindow : Window
         _autoHide.Touch();
         Root.Width = Drawer.IsVisible ? 492 : 372;
         SetAnswerFirst();
-        if (Drawer.IsVisible && _briefWaiting && _record is { } waiting) _briefReady = LoadBriefAsync(waiting);   // the brief was waiting for More
+        if (Drawer.IsVisible && !_mini && _briefWaiting && _record is { } waiting) _briefReady = LoadBriefAsync(waiting);   // the brief was waiting for More
+        if (Drawer.IsVisible && !_mini && _agentsWaiting) RunAutoAgents();                                                   // and so were automatic agents
         Dispatcher.UIThread.Post(ClampToScreen, DispatcherPriority.Loaded);   // it just grew: keep it on-screen
     }
 
@@ -781,6 +782,9 @@ public partial class CardWindow : Window
         ActHint.IsVisible = more;
         if (_ribbonSlot is not null) _ribbonSlot.IsVisible = more && _ribbonWanted;
         MoreChip.IsVisible = !_mini && !Drawer.IsVisible;
+        // the button says what a press will do, so a screen reader hears "Collapse card" right after More (round 34)
+        AutomationProperties.SetName(ExpBtn, Drawer.IsVisible ? "Collapse card" : "Expand card");
+        ToolTip.SetTip(ExpBtn, Drawer.IsVisible ? "Collapse (E)" : "Expand (E)");
         PaintNotesButton();
     }
 
@@ -844,7 +848,7 @@ public partial class CardWindow : Window
             if (_ribbonSlot is not null && _ribbon is not null && _ribbonText is not null)
             {
                 bool both = gap && !mini && record.GoalDateValue is not null && record.ForecastDateValue is not null;
-                _ribbonWanted = both;
+                _ribbonWanted = gap && record.GoalDateValue is not null && record.ForecastDateValue is not null;   // a peek opened in full shows it too
                 _ribbonSlot.IsVisible = both && Drawer.IsVisible;      // round 34: under More
                 if (both)
                 {
@@ -1033,10 +1037,12 @@ public partial class CardWindow : Window
 
     /// <summary>
     /// Shows the agent section for a full card when at least one agent is switched on. A peek and an invite never show it and never
-    /// ask an agent. An agent the person set to run by itself is asked here, once, when the full card opens; the others wait for a click.
+    /// ask an agent. An agent the person set to run by itself is asked once the card is opened in full (round 34: More, E, Full brief or a
+    /// note); until then nothing is sent. The others wait for a click.
     /// </summary>
     private void PrepareAgents()
     {
+        _agentsWaiting = false;
         AgentsPanel.Children.Clear();
         AgentsExpander.IsExpanded = false;
         AgentsExpander.IsVisible = false;
@@ -1051,6 +1057,18 @@ public partial class CardWindow : Window
             Closed += (_, _) => service.Changed -= OnChanged;
         }
         PaintAgents();
+        if (!Drawer.IsVisible) { _agentsWaiting = true; return; }
+        RunAutoAgents();
+    }
+
+    private bool _agentsWaiting;
+    /// <summary>True while agents set to run by themselves wait for the card to be opened in full: nothing has been sent to them (round 34).</summary>
+    public bool AgentsWaiting => _agentsWaiting;
+
+    private void RunAutoAgents()
+    {
+        _agentsWaiting = false;
+        if (Agents is not { } service || _record is not { } record || _mini) return;
         bool risk = AtRisk?.Invoke(record) ?? false;
         foreach (var agent in service.AutoFor(risk)) _ = AskAgentAsync(agent, record, force: false);
     }

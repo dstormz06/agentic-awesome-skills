@@ -26,7 +26,9 @@ const ok = (c, m) => { checks++; console.log((c ? 'PASS ' : 'FAIL ') + m); if (!
   ok((await txt('#c-id')).includes('216482') && (await txt('#c-fdelta')).includes('14'), 'the full card shows the number and the 14 day gap');
   ok((await txt('#c-psg')).length > 5 && (await txt('#c-rld')).length > 5, 'PSG and RLD lines are filled');
   ok((await txt('#c-conn-t')).includes('OFFLINE'), 'the card says no API is connected');
-  // 2. auto-hide after 10 s when nothing touches it (mouse parked outside)
+  // 2. auto-hide after 10 s when nothing touches it (mouse parked outside). Round 34: Full brief opens the card in full, and an open
+  //    drawer counts as in use and never hides, so the card is folded back to the answer first.
+  await page.evaluate(() => toggleExpand());
   await page.mouse.move(5, 400);
   await page.waitForTimeout(500);
   ok(await vis('#card'), 'still showing after half a second');

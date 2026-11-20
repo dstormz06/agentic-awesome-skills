@@ -259,7 +259,7 @@ const closeAll = async p => { for (let i = 0; i < 4; i++) { await p.keyboard.pre
   await p.click('#moreBtn'); await p.waitForTimeout(500);
   ok(await p.evaluate(() => !document.getElementById('x-agents-d').hidden), 'Full brief shows the drawer');
   eq(await p.evaluate(() => Object.keys(agentCache).length), 0, 'and still asks no agent until the person presses Run (the default is "only when I ask")');
-  await p.click('#expBtn'); await settle(p);
+  ok(await p.evaluate(() => card.classList.contains('expanded')), 'Full brief opens the card in full (round 34), so the drawer is in view');
   await p.locator('#x-agents-d summary').click(); await settle(p);
   ok((await p.textContent('#x-agents')).includes('Not asked yet. Press Run to ask Alert Hub about this ANDA'), 'the drawer says "Not asked yet" and how to ask');
   await p.locator('#x-agents button:has-text("Run")').click(); await p.waitForTimeout(250);
@@ -282,18 +282,20 @@ const closeAll = async p => { for (let i = 0; i < 4; i++) { await p.keyboard.pre
   await openSettings(p);
   const auto = p.locator('#agList .bx').nth(0).locator('select[aria-label="When this agent runs"]');
   await auto.selectOption({ index: 1 }); await settle(p);
-  ok((await p.textContent('#agStatus')).includes('will now run by itself whenever a full card opens') && (await p.textContent('#agStatus')).includes('A peek never runs it'), 'choosing automatic says exactly when it will run');
+  ok((await p.textContent('#agStatus')).includes('will now run by itself whenever a card is opened in full') && (await p.textContent('#agStatus')).includes('A peek never runs it'), 'choosing automatic says exactly when it will run');
   await p.click('#setDone'); await settle(p);
   await p.evaluate(() => clearAgentCache());
   await select(p, '214990'); await p.keyboard.press('Control+Alt+KeyA'); await p.waitForTimeout(500);                 // 214990 opens an invite (not at risk)
   await p.click('#chip'); await p.waitForTimeout(1300);
-  ok(await p.evaluate(() => !!agentCache['alert-hub|214990']), 'an agent set to run when a full card opens does so, without a click');
+  ok(await p.evaluate(() => !agentCache['alert-hub|214990'] && agentsWaiting === '214990'), 'round 34: on the answer-first card it waits; nothing is sent before the card is opened in full');
+  await p.click('#chipMore'); await p.waitForTimeout(1300);
+  ok(await p.evaluate(() => !!agentCache['alert-hub|214990']), 'an agent set to run when a card is opened in full does so once More is pressed, without a click on Run');
   await closeAll(p);
   await openSettings(p);
   await auto.selectOption({ index: 2 }); await settle(p); await p.click('#setDone'); await settle(p);
   await p.evaluate(() => clearAgentCache());
-  await select(p, '214990'); await p.keyboard.press('Control+Alt+KeyA'); await p.waitForTimeout(500); await p.click('#chip'); await p.waitForTimeout(1300);
-  ok(await p.evaluate(() => !agentCache['alert-hub|214990']), '"only when at risk" does not run for an ANDA that is on track');
+  await select(p, '214990'); await p.keyboard.press('Control+Alt+KeyA'); await p.waitForTimeout(500); await p.click('#chip'); await p.click('#chipMore'); await p.waitForTimeout(1300);
+  ok(await p.evaluate(() => !agentCache['alert-hub|214990']), '"only when at risk" does not run for an ANDA that is on track, even opened in full');
   await closeAll(p);
   await select(p, '216482'); await p.keyboard.press('Control+Alt+KeyA'); await p.waitForTimeout(500); await p.click('#moreBtn'); await p.waitForTimeout(1300);
   ok(await p.evaluate(() => !!agentCache['alert-hub|216482']), 'but it does run for an at-risk ANDA once the full card is open');

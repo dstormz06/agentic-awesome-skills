@@ -34,3 +34,19 @@ test('settings stored before round 34 move from Whisper to Full once; a Whisper 
   for (const kept of ['peek', 'full']) assert.equal(normalizeSettings({ schema: 2, consent: kept }).consent, kept, `${kept} is never changed`);
   assert.equal(normalizeSettings({ schema: 2, consent: 'whisper' }).schema, 3, 'the moved settings carry the new form, so the move happens once');
 });
+
+test('the extension says once that a stored Whisper was moved, and saves the move so it is not said again', async () => {
+  const { createService } = await import('../../src/service.js');
+  const { consentMoves, CONSENT_MOVED } = await import('../../src/core/settings.js');
+  const m = new Map([['settings', { schema: 2, consent: 'whisper', autoHideSeconds: 40 }]]);
+  const storage = { get: async (k) => m.get(k), set: async (k, v) => { m.set(k, v); } };
+  const svc = createService({ storage });
+  assert.equal(await svc.consentMoved(), true);
+  assert.deepEqual([m.get('settings').consent, m.get('settings').schema, m.get('settings').autoHideSeconds], ['full', 3, 40]);
+  assert.equal(await svc.consentMoved(), false, 'said once');
+  await svc.saveSettings({ consent: 'whisper' });
+  assert.equal((await svc.getSettings()).consent, 'whisper', 'a Whisper chosen after the move is kept');
+  assert.equal(await svc.consentMoved(), false);
+  for (const [stored, want] of [[undefined, false], [{}, false], [{ consent: 'whisper' }, true], [{ schema: 3, consent: 'whisper' }, false], [{ schema: 2, consent: 'peek' }, false]]) assert.equal(consentMoves(stored), want, JSON.stringify(stored));
+  assert.match(CONSENT_MOVED, /^Your shortcut now opens the card directly\. To see the small invite first again, choose Whisper invite below\.$/);
+});

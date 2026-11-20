@@ -104,7 +104,7 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `AndaCompanion.
 - **My agents** — **Alert Hub**, **Patent Analysis** and **Triaging Agent** are listed, **switched off and without an address**: this app does not know their
   addresses or message format and does not guess, so each needs the details your IT team gives you (address, token header, the *name* of the
   environment variable that holds the token, request body, reply path). Your own agents use the same form (up to eight). An agent is asked only
-  when you press Run on a card or use its action, unless you set it to run by itself: when a full card opens, or only for an at-risk ANDA. A
+  when you press Run on a card or use its action, unless you set it to run by itself: when a card is opened in full (More or E), or only for an at-risk ANDA. A
   peek never asks an agent, and an automatic agent cannot use `{selection}`. Its answer appears in the card's *Agent findings* drawer as the
   agent's own words (plain text, never run, never passed on); an item joins your to-do list only when you press its button. A restored backup
   brings every agent back switched off. `Services/Agents.cs`.

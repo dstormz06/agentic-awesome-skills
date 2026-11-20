@@ -239,7 +239,7 @@
                 <WrapPanel Name="MiddleModPanel"/>
               </StackPanel>
               <TextBlock Name="MiddleStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
-              <TextBlock Classes="hint" Text="Off by default. It uses a Windows mouse hook that sees only the middle button, never the pointer position or any text, and the click still reaches the program under it. Some security software flags mouse hooks. A plain middle-click scrolls or opens links in many programs, so Ctrl is recommended. The shortcuts above and the tray icon always work."/>
+              <TextBlock Classes="hint" Text="Off by default. It uses a Windows mouse hook that sees only the middle button, never the pointer position or any text, and the click still reaches the program under it. Some security software flags mouse hooks. A plain middle-click scrolls or opens links in many programs, so Ctrl is recommended. A middle-click always shows the small invite first, even when your shortcut opens the card. The shortcuts above and the tray icon always work."/>
             </StackPanel>
           </StackPanel>
         </Expander>
@@ -403,7 +403,7 @@
               </WrapPanel>
               <TextBlock Name="AgentsStatus" FontSize="11.5" Foreground="{DynamicResource C.Ink2}" TextWrapping="Wrap"/>
               <TextBlock Classes="hint" Text="An agent is any service you can reach with an address. Alert Hub, Patent Analysis and Triaging Agent are listed so they can be set up: this app does not know their addresses or message format and does not guess them, so each stays off until you enter the details your IT team gives you. Nothing is sent for an agent that is off. The token stays in the environment variable you name and is never saved by this app."/>
-              <TextBlock Classes="hint" Text="An agent is asked only when you press Run on a card or use its action, unless you set it to run by itself. By itself means: when a full card opens, or only when the ANDA is at risk. A peek never asks an agent. Its answer appears in the card's drawer as the agent's own words, and nothing joins your to-do list until you press its button."/>
+              <TextBlock Classes="hint" Text="An agent is asked only when you press Run on a card or use its action, unless you set it to run by itself. By itself means: when a card is opened in full, or only when the ANDA is at risk. A peek never asks an agent. Its answer appears in the card's drawer as the agent's own words, and nothing joins your to-do list until you press its button."/>
             </StackPanel>
 
             <Border Name="TodoRule" Classes="hair"/>

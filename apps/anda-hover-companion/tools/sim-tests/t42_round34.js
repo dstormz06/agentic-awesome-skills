@@ -88,7 +88,21 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   eq(await p.evaluate(() => [document.getElementById('c-verify').textContent, document.getElementById('c-ai').textContent, briefWaiting]), ['asked for when you press More', '', '216482'], 'C10 with AI on, the collapsed card asks for no brief, and says when it will');
   await p.click('#chipMore'); await settle(p, 300);
   eq(await p.evaluate(() => [document.getElementById('c-verify').textContent, briefWaiting]), ['sample text · no model is called', null], 'C11 More asks for it');
+  // the separate review's case: a brief that waited on a closed card must not be asked for by a later peek
+  await p.evaluate(() => closeCard());
+  eq(await p.evaluate(() => briefWaiting), null, 'C11a closing the card forgets the brief that waited');
+  await press(p, '216482', 'keyboard'); await p.keyboard.press('Escape'); await settle(p);
+  await p.evaluate(() => { openCard('216482', { anchor: { x: 600, y: 120 }, mini: true, forceFull: true }); card.focus(); }); await settle(p);
+  await p.keyboard.press('KeyE'); await settle(p, 300);
+  eq(await p.evaluate(() => [card.classList.contains('mini'), document.getElementById('c-verify').textContent === 'sample text · no model is called', getComputedStyle(document.querySelector('.slot.ai')).display !== 'none']), [true, false, false], 'C11b a peek, even with E pressed, asks for no brief');
   await p.evaluate(() => { closeCard(); state.ai = false; });
+  // the expand button says what a press will do, and whether the card is open
+  await press(p, '216482', 'keyboard');
+  eq(await p.evaluate(() => { const b = document.getElementById('expBtn'); return [b.getAttribute('aria-label'), b.getAttribute('aria-expanded')]; }), ['Expand card', 'false'], 'C11c collapsed: "Expand card", not expanded');
+  await p.click('#chipMore'); await settle(p);
+  eq(await p.evaluate(() => { const b = document.getElementById('expBtn'); return [document.activeElement === b, b.getAttribute('aria-label'), b.getAttribute('aria-expanded')]; }), [true, 'Collapse card', 'true'], 'C11d after More the keyboard is on "Collapse card", which says the card is open');
+  ok((await p.textContent('#setMiddle + *, #settings')).includes('A middle-click always shows the small invite first, even when your shortcut opens the card.'), 'C11e Settings says that a middle-click asks first');
+  await p.evaluate(() => closeCard());
   // a peek's "Full brief" shows the brief: the card opens with the rest
   await p.evaluate(() => { const r = document.querySelector('input[name=consent][value=peek]'); r.checked = true; r.dispatchEvent(new Event('change')); });
   await press(p, '214990', 'keyboard'); await p.click('#moreBtn'); await settle(p, 300);
@@ -109,6 +123,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   ok(await shown(p, '#today'), 'T4 Today opens from the menu too');
   const need = await p.evaluate(() => needLookIds().length);
   eq([need > 0, await shown(p, '#tdAll'), await p.textContent('#tdAll')], [true, true, 'Show all, with reasons…'], 'T5 when something needs a look, Today offers Show all');
+  eq(await p.evaluate(() => { const all = [...document.querySelectorAll('#today button, #today input')]; return all.indexOf(document.getElementById('tdAll')) > Math.max(...[...document.querySelectorAll('#tdList button')].map(b => all.indexOf(b))); }), true, 'T5a Show all comes after the rows with Tab, as it is drawn');
   await p.click('#tdAll'); await settle(p, 250);
   const top = await p.evaluate(() => { const z = id => parseInt(getComputedStyle(document.getElementById(id)).zIndex, 10) || 0; return [document.getElementById('wlist').contains(document.activeElement), z('wlist') > z('today'), document.querySelectorAll('#wlRows .row').length, document.getElementById('wlNote').textContent]; });
   ok(top[0] && top[1] && top[2] === need && top[3].startsWith(`${need} of `), `T6 Show all opens the watch list above Today, with the keyboard, listing the same ${need} ANDAs with their reasons`);

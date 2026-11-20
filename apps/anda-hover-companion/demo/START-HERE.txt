@@ -18,9 +18,10 @@ SET UP (about 2 minutes)
 
 TRY IT
   1. In Notepad, double-click a number such as 216482 and press Ctrl+Alt+A.
-     A new install shows a small invite that you click. An at-risk ANDA such as 216482
-     opens a small peek by itself (Settings can turn that off). Click "Full brief" to
-     see the whole card, including the WATCH line about weekend and holiday dates.
+     The card opens at once with the answer: how late or early, goal and forecast, what
+     needs you, and the WATCH line about weekend and holiday dates. Press More (or E)
+     for the calendar, Latest, Ahead, the reference dates and the brief. Settings, How it
+     starts, can show a small invite first instead (Whisper).
   2. Select any text and press Ctrl+Alt+Shift+R. It reviews a draft against the record and against itself
      (dates, weekdays, holidays, repeated words, a placeholder left in). No AI is used and nothing
      leaves the computer.
@@ -28,8 +29,9 @@ TRY IT
   4. In Notepad, select the spreadsheet cells near the bottom of the memo and press Ctrl+Alt+Shift+P (Ask).
      It says what you selected and suggests one button. Quick checks (duplicates, blanks, totals, compare
      two columns) run on this PC with no AI. A prompt of your own is filled in and shown to you first.
-  5. Open the tray icon's Watch list: every ANDA with something worth a look, worst first.
-  6. Read the card's PSG and RLD LABEL lines (a date, or a brief reason there is none) and
+  5. Click the tray icon to open Today: what needs a look, the ANDAs you keep, and the recent ones.
+     "Show all, with reasons..." opens the watch list: every ANDA with something worth a look.
+  6. Press More on a card and read its PSG and RLD LABEL lines (a date, or a brief reason there is none) and
      the pill that says whether an API is connected. Offline is the default.
   7. Press the Quick replies button (or R) on a card to copy one of your own templates, filled in.
 

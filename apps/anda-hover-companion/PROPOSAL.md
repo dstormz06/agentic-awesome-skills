@@ -53,7 +53,7 @@ never ANDA numbers or text; it is off by default and readable by the tester. The
 default) signs in on Microsoft's own page, reads mail read-only, searches only for the six-digit number on the open
 card, and keeps nothing. Full threat model: `SECURITY.md`.
 
-**Cost envelope.** Offline mode costs nothing. A brief is generated only when the full card opens, at a planning figure
+**Cost envelope.** Offline mode costs nothing. A brief is generated only when the card is opened in full (More or E), at a planning figure
 of about 3,000 tokens (about 800 input plus 150 output tokens measured on sample records). At about 8 requests per
 tester per week, that is roughly 35 briefs and 100,000 tokens per tester per month, or about 1 million tokens a month
 for ten testers. That is a few dollars a month at public Sonnet-class list prices, and about 2% of one 50M-token monthly

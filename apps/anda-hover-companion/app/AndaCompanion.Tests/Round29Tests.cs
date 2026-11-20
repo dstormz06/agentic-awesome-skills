@@ -109,7 +109,7 @@ public class Round29Tests
         var r = Connections.Describe(Connections.From(t, none));
         Assert.Equal($"Switched on: {t.Agents[0].Name} (agent) · {t.Agents[1].Name} (agent) · Outlook (read-only)", r.Line);
         Assert.Equal("no address yet, so nothing can be sent", r.Items[0].Where); Assert.Equal("agents.example.test", r.Items[1].Where);
-        Assert.StartsWith("By itself when a full card opens", r.Items[1].Sends); Assert.Equal("login.microsoftonline.us and graph.microsoft.us", r.Items[2].Where);
+        Assert.StartsWith("By itself when a card is opened in full", r.Items[1].Sends); Assert.Equal("login.microsoftonline.us and graph.microsoft.us", r.Items[2].Where);
         Assert.DoesNotContain(r.Text, l => l.Contains("token=abc"));
 
         // A name is the person's own text: an invisible character that could reorder the line is removed. A look-alike letter in an address shows in the form the network uses.

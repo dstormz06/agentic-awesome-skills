@@ -255,6 +255,8 @@ public static class SettingsService
 {
     /// <summary>One plain sentence when the last <see cref="Load"/> had to repair, move forward or set aside the file; otherwise null. The app shows it once.</summary>
     public static string? LoadNote { get; private set; }
+    /// <summary>True when <see cref="LoadNote"/> only says that the file was moved forward on purpose: nothing was wrong with it (round 34).</summary>
+    public static bool LoadNoteIsMove { get; private set; }
 
     /// <summary>Said once, when settings kept from before round 34 move from Whisper to Full.</summary>
     public const string ConsentMovedNote = "Your shortcut now opens the card directly. To see the small invite first again, choose Whisper in Settings, How it starts.";
@@ -269,30 +271,36 @@ public static class SettingsService
     /// </summary>
     public static Settings Load(string? path = null)
     {
-        path ??= AppPaths.SettingsFile; LoadNote = null;
+        path ??= AppPaths.SettingsFile; LoadNote = null; LoadNoteIsMove = false;
         if (!File.Exists(path)) return new Settings();
-        var (settings, note) = TryRead(path);
+        var (settings, note, moved, problem) = TryRead(path);
         if (settings is not null)
         {
-            LoadNote = note;
+            LoadNote = note; LoadNoteIsMove = note is not null && !problem;
+            // Round 34: a file moved forward is written back once in the current form, so the move (and its sentence) happens once.
+            if (moved) Save(settings, path);
             try { File.Copy(path, LastGoodFile(path), overwrite: true); } catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { /* the copy is a convenience */ }
             return settings;
         }
         string? aside = SafeFile.SetAside(path);
-        var (earlier, _) = File.Exists(LastGoodFile(path)) ? TryRead(LastGoodFile(path)) : (null, null);
-        LoadNote = SafeFile.Note("settings file", aside, earlier is not null ? "Your settings from the last good start were restored." : "The settings are back at their defaults.");
+        var (earlier, earlierNote, _, _) = File.Exists(LastGoodFile(path)) ? TryRead(LastGoodFile(path)) : (null, null, false, false);
+        LoadNote = SafeFile.Note("settings file", aside, earlier is not null ? "Your settings from the last good start were restored." : "The settings are back at their defaults.")
+            + (earlier is not null && earlierNote is not null ? " " + earlierNote : "");      // what moving the last good copy forward changed is said too
         return earlier ?? new Settings();
     }
 
-    /// <summary>The settings in one file, or null when the file is not a settings file at all. The note says what was repaired or moved forward.</summary>
-    private static (Settings? Settings, string? Note) TryRead(string path)
+    /// <summary>
+    /// The settings in one file, or null when the file is not a settings file at all. The note says what was repaired or moved forward;
+    /// Moved: the file was written by an earlier version; Problem: something in it could not be read or it came from a newer version.
+    /// </summary>
+    private static (Settings? Settings, string? Note, bool Moved, bool Problem) TryRead(string path)
     {
         var (text, _) = SafeFile.Read(path);
-        if (text is null) return (null, null);
+        if (text is null) return (null, null, false, false);
         try
         {
             using var doc = JsonDocument.Parse(text);
-            if (doc.RootElement.ValueKind != JsonValueKind.Object) return (null, null);
+            if (doc.RootElement.ValueKind != JsonValueKind.Object) return (null, null, false, false);
             var s = new Settings(); int repaired = 0;
             foreach (var p in typeof(Settings).GetProperties().Where(p => p.CanRead && p.CanWrite && p.GetIndexParameters().Length == 0))
             {
@@ -313,9 +321,9 @@ public static class SettingsService
             else if (version < Settings.CurrentSchema && Migrate(s, version) is { } moved) notes.Add(moved);
             s.SchemaVersion = Settings.CurrentSchema;
             if (repaired > 0) notes.Add($"{repaired} {(repaired == 1 ? "setting" : "settings")} in the file could not be read and {(repaired == 1 ? "is" : "are")} back at the default; the rest was kept.");
-            return (Normalize(s), notes.Count == 0 ? null : string.Join(" ", notes));
+            return (Normalize(s), notes.Count == 0 ? null : string.Join(" ", notes), version < Settings.CurrentSchema, repaired > 0 || version > Settings.CurrentSchema);
         }
-        catch (JsonException) { return (null, null); }
+        catch (JsonException) { return (null, null, false, false); }
     }
 
     /// <summary>

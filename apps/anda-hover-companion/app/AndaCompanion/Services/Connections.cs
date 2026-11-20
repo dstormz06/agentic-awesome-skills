@@ -27,11 +27,11 @@ public static class Connections
     {
         var items = new List<ConnItem>();
         if (c.Ai is { } ai)
-            items.Add(new($"{ai.Name} (AI)", "When a full card opens: the whole record of that ANDA from your sheet, with its notes, and your lens. When you press Send: the text shown to you first and, for a writing action, your tone, standing instructions and sign-off. Nothing else.",
+            items.Add(new($"{ai.Name} (AI)", "When a card is opened in full: the whole record of that ANDA from your sheet, with its notes, and your lens. When you press Send: the text shown to you first and, for a writing action, your tone, standing instructions and sign-off. Nothing else.",
                 ai.Where.Length > 0 ? ai.Where : Nowhere, "This tool keeps nothing of what is sent. What the service keeps is set by your office's agreement with it."));
         foreach (var a in c.Agents)
             items.Add(new($"{a.Name} (agent)", a.Auto
-                    ? "By itself when a full card opens: the fields of that ANDA that its prompt names, never selected text. Also when you press Run or Send."
+                    ? "By itself when a card is opened in full: the fields of that ANDA that its prompt names, never selected text. Also when you press Run or Send."
                     : "Only when you press Run or Send: its prompt, filled in and shown to you.",
                 a.Where.Length > 0 ? a.Where : Nowhere, "Its answer is kept in memory until you close the app, and counts as fresh for the minutes you chose. It is never written to a file."));
         if (c.Outlook is { } o)

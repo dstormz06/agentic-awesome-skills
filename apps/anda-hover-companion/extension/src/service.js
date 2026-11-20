@@ -2,7 +2,7 @@
 // browser. There are two data sources that work on their own (the fictional demo records, and the person's imported spreadsheet) and
 // one that goes through the desktop app. The source is a visible setting and there is no silent fallback: if the chosen source cannot
 // answer, the person is told, rather than being shown some other source's data.
-import { normalizeSettings, DEFAULT_SETTINGS } from './core/settings.js';
+import { normalizeSettings, DEFAULT_SETTINGS, consentMoves } from './core/settings.js';
 import { BusinessCalendar } from './core/calendar.js';
 import { buildCard, buildWatchList } from './core/card.js';
 import { checkDraft } from './core/draftcheck.js';
@@ -35,6 +35,13 @@ export function createService({ storage, native = null, now = () => new Date(), 
   let appSettingsCache = null;
 
   async function getSettings() { return normalizeSettings((await storage.get('settings')) || {}); }
+  /** Round 34: when the stored settings still say Whisper from an earlier form, write them in the current form (Full) once and say true. */
+  async function consentMoved() {
+    const stored = await storage.get('settings');
+    if (!consentMoves(stored)) return false;
+    await storage.set('settings', normalizeSettings(stored));
+    return true;
+  }
   async function saveSettings(patch) {
     const next = normalizeSettings({ ...(await getSettings()), ...patch });
     await storage.set('settings', next);
@@ -230,6 +237,6 @@ export function createService({ storage, native = null, now = () => new Date(), 
     try { await storage.set('firstSteps', { seen: true, atMs: now().getTime() }); return { seen, kept: (await storage.get('firstSteps'))?.seen === true }; } catch (e) { return { seen, kept: false }; }
   }
 
-  return { getSettings, saveSettings, effectiveSettings, lookup, fresh, sample, draft, watchlist, scan, importFile, setOverrides, importedInfo, clearImported, status, connection, firstSteps,
+  return { getSettings, saveSettings, consentMoved, effectiveSettings, lookup, fresh, sample, draft, watchlist, scan, importFile, setOverrides, importedInfo, clearImported, status, connection, firstSteps,
     zone: async () => zoneOf(await getSettings()), DEFAULT_SETTINGS, findNumbers };
 }
