@@ -1732,6 +1732,16 @@ The owner's choice of Nov 20 (suggestions C2 and C4). **Today begins with what h
 | R391 | Tests passed with the round's fixes undone | The round 36 reviewer | Fixed: stronger tests and shared answers |
 | R392 | "1 more changes", cap cut part-way, a colored dot, an empty note | The round 36 reviewer | Fixed |
 
+## Round 37: a switch for "Since you last looked"; tested twice
+
+The owner's choice of Nov 20, after the review of round 36: a switch in Settings, beside Recent ANDAs, in both programs, on by default. Off: Today has no such group, nothing is read or kept, and `last-look.json` is removed (in the app each time the settings are applied, so a restored backup that says off removes it too). The switch is part of a backup. Its words are held to `mockup/round37-golden.json`.
+
+**Found while building:** the simulation stopped loading when the hint's words were used before they were defined (every suite would have failed; caught by the answer file's run at once); a test could not find the switch in a folded Settings section (it now finds it by name).
+
+**Tests:** app `Round37Tests` (5: the words, the default and an older settings file, a backup, removing the file, the switch in Settings, the wiring); simulation `t45_round37.js` (14 checks, among them an accessibility scan of Settings and a backup round trip). The fault put back on purpose (a look kept while the switch is off) was caught. The app's wiring is checked by reading its source, as the tray needs the whole app.
+
+COUNTS37_PLACEHOLDER
+
 ## Still open
 
 GDUFA III tier table (needs the commitment-letter text and the dual-source rule); a real-keyboard check of rebound shortcuts on

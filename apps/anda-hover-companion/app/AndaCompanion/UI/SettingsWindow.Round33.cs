@@ -33,6 +33,16 @@ public partial class SettingsWindow
             if (!_settings.RememberRecents) { _settings.Recents = new(); RecentsStatus.Text = Recents.SaidOff; } else RecentsStatus.Text = "";
             Apply();
         };
+        // round 37: Today's "Since you last looked" can be switched off; the words are the simulation's
+        LastLookCheck.Content = LastLook.SwitchLabel; LastLookHint.Text = LastLook.SwitchHint;
+        LastLookCheck.IsChecked = _settings.SinceLastLook;
+        LastLookCheck.IsCheckedChanged += (_, _) =>
+        {
+            if (_loading) return;
+            _settings.SinceLastLook = LastLookCheck.IsChecked == true;
+            LastLookStatus.Text = _settings.SinceLastLook ? LastLook.SaidSwitchOn : LastLook.SaidSwitchOff;
+            Apply();                                    // the app removes what was kept when the switch is off (ApplySettings)
+        };
         RecentsClear.Click += (_, _) => { _settings.Recents = new(); RecentsStatus.Text = Recents.SaidCleared; Apply(); };
         PinsClear.Click += (_, _) => { _settings.Pins = new(); RecentsStatus.Text = Recents.SaidPinsCleared; Apply(); };
 

@@ -144,6 +144,8 @@ public sealed class Settings
     public string LookupStyle { get; set; } = "box";
     /// <summary>Remember the last eight ANDAs looked up, on this PC.</summary>
     public bool RememberRecents { get; set; } = true;
+    /// <summary>Round 37: Today's "Since you last looked". Off: nothing is compared or kept, and last-look.json is removed.</summary>
+    public bool SinceLastLook { get; set; } = true;
     /// <summary>The last ANDAs looked up, newest first. Six-digit numbers only; this PC only, never part of a backup.</summary>
     public List<string> Recents { get; set; } = new();
     /// <summary>The ANDAs kept with "Keep in my list" on a card, five at most. Saved in a backup.</summary>

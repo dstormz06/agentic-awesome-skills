@@ -69,8 +69,9 @@ public partial class App
                 var cursor = TextCaptureService.GetCursorPosition();
                 OpenCard(r, new PixelPoint(cursor.X, cursor.Y), mini: false);
             }, ShowAll: OpenWatchList,                            // round 34: the watch list has no tray item; it opens from Today
-            // round 36: what moved since the look kept when Today was last closed, kept again when it closes; and next week, from Thursday noon
-            Looks: () =>
+            // round 36: what moved since the look kept when Today was last closed, kept again when it closes; and next week, from Thursday noon.
+            // Round 37: with the switch off there is no group, nothing is read and nothing is kept.
+            Looks: !_settings.SinceLastLook ? null : () =>
             {
                 var now = LastLook.Of(records, Clock.UtcNow(), LookSource());
                 var (compare, note, keep) = LastLook.Decide(LastLook.Load(AppPaths.LastLookFile), now, DataReadable());
@@ -78,7 +79,7 @@ public partial class App
                     note = LastLook.SaidNote(Clock.Ms(DateTime.SpecifyKind(at, DateTimeKind.Utc)), Clock.Zone);
                 return (compare, now, note, keep);
             },
-            KeepLook: look => LastLook.Save(AppPaths.LastLookFile, look with { At = LastLook.Stamp(Clock.UtcNow()) }),   // what was shown, kept at the time Today closed
+            KeepLook: look => { if (_settings.SinceLastLook) LastLook.Save(AppPaths.LastLookFile, look with { At = LastLook.Stamp(Clock.UtcNow()) }); },   // what was shown, kept when Today closed; not if switched off meanwhile
             Week: () => { var wall = Clock.Wall(Clock.UtcNow()); return NextWeek.Of(DateOnly.FromDateTime(wall), wall.Hour, records, _calendar); }));
         _todayWindow.Closed += (_, _) => _todayWindow = null;
         _todayWindow.Show();

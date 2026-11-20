@@ -534,6 +534,7 @@ public partial class App : Application
         ThemeManager.Apply(Edition.Appearance(_settings), Edition.Opacity(_settings));
         DisplayScale.Set(Display.TextScale(_settings.TextSize)); _card?.ApplySpacing(Display.Spacing(_settings.Density));      // open windows follow the new text size and spacing at once
         UsageLog.Configure(_settings.UsageLog && SelfTestRun is null);
+        if (!_settings.SinceLastLook) LastLook.Forget(AppPaths.LastLookFile);      // round 37: off removes what was kept (from Settings or a restored backup)
         _hotkeys?.Reconfigure(HotkeyBindings());
         RefreshTrayLabels();
         // A new brief service only when the connection itself changed: changing a look must not reset "connected" to "not tested".

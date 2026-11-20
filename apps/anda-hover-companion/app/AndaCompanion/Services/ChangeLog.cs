@@ -3,10 +3,11 @@ namespace AndaCompanion.Services;
 /// <summary>The version the tool shows, and what changed, newest first. The same list as the simulation's (mockup/round29-golden.json).</summary>
 public static class ChangeLog
 {
-    public const string Version = "Prototype, round 36";
+    public const string Version = "Prototype, round 37";
 
     public static readonly IReadOnlyList<(int Round, IReadOnlyList<string> Items)> Entries = new (int, IReadOnlyList<string>)[]
     {
+        (37, new[] { "Settings has a switch for Today's “Since you last looked” (beside Recent ANDAs). Turned off, Today does not list what moved and keeps nothing for it on this PC, and what was kept is removed." }),
         (36, new[] { "Today begins with what has moved since you last looked: forecasts and goal dates that changed, ANDAs added or gone, and a new item that needs you (items come from the sample records; a sheet has no item column yet). This PC keeps only each ANDA's two dates and a fingerprint of its open item, from when you last closed Today.", "From Thursday noon to Sunday, Today also shows next week: the goal and forecast dates that fall in it, and the federal holidays." }),
         (35, new[] { "The tray menu is shorter: Lookup, Today, Review a draft, Ask, More, Settings and Help. With all tools on, Lists holds the two to-do lists, the notes and your usage. More holds the rest (with all tools on, also the prompt library and My actions); Help holds first steps and what changed.", "Text in the Windows app uses one scale of six sizes, so pages read calmer and larger text grows them together." }),
         (34, new[] { "Your own shortcut now opens the card directly. If you prefer the small invite first, choose Whisper in Settings, How it starts. A middle-click still shows the invite first.", "The card shows the answer first: what needs you, the goal and the forecast, and the first thing worth a look. The calendar, Latest, Ahead, the reference dates and the brief are one press away, under More or E.", "A click on the tray icon opens Today, which now also holds what the Watch list showed." }),

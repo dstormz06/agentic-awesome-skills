@@ -1346,6 +1346,10 @@ Measured at the end of round 33: the full card was about 794 px tall at standard
 
 **Shared answers.** `mockup/round36-golden.json` holds the fingerprint, the look kept of the demo records, six pairs of looks (among them a first start, forty-five changes, a number that is not six digits) and twelve days (the hours around Thursday noon, every day of a week, Thanksgiving, a week that ends on New Year's Day, the Friday before each demo date), and, after the review, dates that cannot be read, a fortieth change in the middle of an ANDA, and three weeks with records made for them (two ANDAs on one day, no forecast, no goal date, Independence Day observed on Friday Jul 3, 2026, New Year's Day 2028 observed on Friday Dec 31, 2027); the app reproduces each answer.
 
+## 11u. Round 37: a switch for "Since you last looked"
+
+The owner asked for it after the review of round 36 (the kept look holds planning dates on this PC). In Settings, beside Recent ANDAs, in both programs: *List what moved in my data since I last closed Today*, on by default. Off: Today has no such group (an open Today drops it at once), nothing is read or kept, and what was kept is removed (in the app whenever the settings are applied, so a restored backup that says off removes it too). On again: the next time Today closes is the first look kept; the demo's fictional earlier look does not come back. The switch is part of a backup. Its words are the simulation's (`mockup/round37-golden.json`).
+
 ## 12. Engagement roadmap — seven features that make it the daily habit
 
 Engagement here means *the tool pays the user every time they touch it* — never

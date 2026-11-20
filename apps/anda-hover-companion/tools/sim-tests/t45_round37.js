@@ -1,0 +1,69 @@
+// Paths are found from this file's place in the repository, so the suite runs from any folder. See README.md in this folder.
+const SIMROOT = require('path').resolve(__dirname, '..', '..'), SIMURL = require('url').pathToFileURL(SIMROOT).href;
+const AXE_FILE = process.env.AXE_PATH || (() => { try { return require.resolve('axe-core/axe.min.js'); } catch (e) { return ''; } })();
+// Round 37 in the browser simulation: a switch in Settings for Today's "Since you last looked". Off: Today has no such group, nothing is
+// kept, and what was kept is removed. Its words are held to mockup/round37-golden.json, which the Windows app is also tested against.
+const fs = require('fs'), path = require('path');
+const { chromium } = require('playwright');
+const SIM = SIMURL + '/mockup/windows-simulation.html?clock=fixed';
+const GOLD = JSON.parse(fs.readFileSync(path.join(SIMROOT, 'mockup', 'round37-golden.json'), 'utf8'));
+const V29 = JSON.parse(fs.readFileSync(path.join(SIMROOT, 'mockup', 'round29-golden.json'), 'utf8')).version;
+let fails = 0, checks = 0;
+const ok = (c, m) => { checks++; console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++; };
+const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.stringify(a) === JSON.stringify(b) ? '' : ` (got ${JSON.stringify(a)}, wanted ${JSON.stringify(b)})`}`);
+
+(async () => {
+  const b = await chromium.launch(); const errs = [];
+  const ctx = await b.newContext({ viewport: { width: 1366, height: 768 }, timezoneId: 'America/New_York', reducedMotion: 'reduce' });
+  const p = await ctx.newPage(); p.on('pageerror', e => errs.push(e.message));
+  p.on('console', m => { if (m.type() === 'error') errs.push(m.type() + ': ' + m.text()); });
+  await p.goto(SIM); await p.waitForTimeout(300);
+  const settle = (ms = 200) => p.waitForTimeout(ms);
+  const listText = () => p.evaluate(() => document.getElementById('tdList').innerText.split('\n').map(s => s.trim()).filter(Boolean));
+  const axe = async sel => {
+    if (!AXE_FILE) return ['axe-core not found: set AXE_PATH'];
+    await p.addScriptTag({ path: AXE_FILE });
+    return p.evaluate(async s => (await axe.run(document.querySelector(s), { runOnly: ['wcag2a', 'wcag2aa'] })).violations.map(v => v.id), sel);
+  };
+
+  // ---- W. the words ----
+  eq(await p.evaluate(() => [document.getElementById('setLastLook').parentElement.textContent.trim(), document.getElementById('lastLookHint').textContent, document.getElementById('setLastLook').checked]),
+    [GOLD.label, GOLD.hint, true], 'W1 the switch has the shared label and hint, and is on at first');
+
+  // ---- O. off ----
+  await p.evaluate(() => openToday()); await settle();
+  ok((await listText())[0] === 'SINCE YOU LAST LOOKED', 'O1 (before) Today begins with what moved');
+  await p.evaluate(() => { showApp('settings'); document.getElementById('secStart').open = true; }); await settle();
+  await p.focus('#setLastLook'); await p.keyboard.press('Space'); await settle();   // by keyboard: Today may lie over Settings
+  eq([await p.textContent('#lastLookStatus'), await p.evaluate(() => [state.lastLookOn, state.lastLook])], [GOLD.off, [false, null]], 'O2 turning it off says so and removes what was kept');
+  ok(!(await listText()).includes('SINCE YOU LAST LOOKED'), 'O3 an open Today drops the group at once');
+  eq(await axe('#settings'), [], 'O4 accessibility scan of Settings with the switch');
+  await p.evaluate(() => { closeApp('settings'); closeApp('today'); }); await settle();
+  eq(await p.evaluate(() => state.lastLook), null, 'O5 closing Today keeps nothing while it is off');
+  await p.evaluate(() => openToday()); await settle();
+  ok(!(await listText()).includes('SINCE YOU LAST LOOKED') && (await listText()).includes('NEEDS A LOOK'), 'O6 Today opened again has no such group; the rest is as it was');
+  await p.evaluate(() => closeApp('today'));
+
+  // ---- B. a backup ----
+  eq(await p.evaluate(() => { const t = backupText(); const was = state.lastLookOn; state.lastLookOn = true; importBackup(t); return [JSON.parse(t).settings.sinceLastLook, was, state.lastLookOn, document.getElementById('setLastLook').checked]; }),
+    [false, false, false, false], 'B1 off is part of a backup and comes back');
+
+  // ---- N. on again ----
+  await p.evaluate(() => { showApp('settings'); document.getElementById('secStart').open = true; }); await settle();
+  await p.focus('#setLastLook'); await p.keyboard.press('Space'); await settle();   // by keyboard: Today may lie over Settings
+  eq(await p.textContent('#lastLookStatus'), GOLD.on, 'N1 turning it on says when the first look is kept');
+  await p.evaluate(() => { closeApp('settings'); openToday(); }); await settle();
+  let t = await listText();
+  eq([t[0], t[1]], ['SINCE YOU LAST LOOKED', 'From now on, what moves in your data between two looks is listed here.'], 'N2 Today starts again from nothing: no earlier look, not even the demo\'s');
+  await p.evaluate(() => closeApp('today')); await p.evaluate(() => openToday()); await settle(); t = await listText();
+  eq(t[2], 'Nothing has moved since you last looked.', 'N3 closing Today keeps a look again');
+  await p.evaluate(() => closeApp('today'));
+
+  // ---- F. what changed ----
+  eq(await p.evaluate(() => [CHANGES.find(c => c.round === 37).items, APP_VERSION]), [GOLD.changes.items, V29], 'F1 what changed in round 37 is listed, and the version is the one the app is held to');
+  eq(GOLD.backupKey, 'sinceLastLook', 'F2 the backup names the switch');
+  eq(errs, [], 'F3 no error in the page');
+  await b.close();
+  console.log(`\n${checks - fails} of ${checks} checks pass`);
+  process.exit(fails ? 1 : 0);
+})().catch(e => { console.error(e); process.exit(2); });

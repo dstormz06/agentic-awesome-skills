@@ -161,6 +161,15 @@
               </WrapPanel>
               <TextBlock Classes="hint" Text="Only six-digit numbers are kept, in this PC's settings, and never sent anywhere. Turning this off clears them. ANDAs you keep with “Keep in my list” on a card stay until you remove them and are saved in a backup."/>
             </StackPanel>
+
+            <Border Classes="hair"/>
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="TODAY · SINCE YOU LAST LOOKED"/>
+              <CheckBox Name="LastLookCheck"/>
+              <TextBlock Name="LastLookStatus" Classes="hint" AutomationProperties.LiveSetting="Polite"/>
+              <TextBlock Name="LastLookHint" Classes="hint"/>
+            </StackPanel>
           </StackPanel>
         </Expander>
         <Expander Name="SecStart" Classes="sec" IsExpanded="False">

@@ -23,6 +23,11 @@ public static class LastLook
     public const string SaidNone = "Nothing has moved since you last looked.";
     public static string SaidNote(long atMs, TimeZoneInfo zone, string? ianaId = null) => $"Compared with what this PC kept when you last closed Today: {Clock.Label(atMs, zone, false, ianaId)}.";
     public static string SaidMore(int more) => $"{more} more change{(more == 1 ? "" : "s")}; the card of each ANDA shows its own.";
+    // round 37: the switch in Settings, beside Recent ANDAs (the simulation's words, mockup/round37-golden.json)
+    public const string SwitchLabel = "List what moved in my data since I last closed Today";
+    public const string SwitchHint = "Kept on this PC when you close Today, and never sent anywhere: for each ANDA its number, goal date, forecast date and a short fingerprint of its open item (never the item's words). Turning this off removes what is kept, and Today keeps nothing for it.";
+    public const string SaidSwitchOff = "Since you last looked is off. What this PC kept for it was removed.";
+    public const string SaidSwitchOn = "Since you last looked is on. The next time you close Today is the first look kept.";
     public const string SaidUndated = "Compared with what this PC kept when you last closed Today.";
     public const string SaidUnreadable = "Your data could not be read just now, so nothing is compared, and the look kept last time stays as it was.";
     public const string SaidOtherData = "The look kept last time was of other data (the sample records, or another file), so nothing is compared this time. From now on, what moves is listed here.";
@@ -116,6 +121,12 @@ public static class LastLook
         catch (JsonException) { }
         SafeFile.SetAside(path);
         return null;
+    }
+
+    /// <summary>Round 37: the switch is off: what was kept is removed. A file that cannot be removed now is tried again at the next change.</summary>
+    public static void Forget(string path)
+    {
+        try { if (File.Exists(path)) File.Delete(path); } catch (IOException) { } catch (UnauthorizedAccessException) { }
     }
 
     public static bool Save(string path, Look look) => SafeFile.Write(path, JsonSerializer.Serialize(look, Options));
