@@ -1835,6 +1835,12 @@ The owner asked that the tool connect to AI APIs and to MCP servers. AI APIs wer
 
 **Not tested:** a real MCP server; a run on Windows; a proxy such as Zscaler in the path. "Seamless and flawless" cannot be claimed from fake servers.
 
+**Faults put back on purpose after the reviews, 15 of 15 caught:** a restore leaving servers on; the prefix, reserved-name and Test header checks removed; lazy JSON; no id check on a JSON answer; no lock while a request is out; no DELETE after a failed "initialized"; the token cut before it is replaced; any loopback address for http; hidden tool names; the Ask hook never set; the preview kept after a send; the session marked started; closing not ending the sessions.
+
+**Both reviewers' last word, at commit 0bab3ae6: no findings** (the adversarial reviewer with its probes and the round 40 tests run; the second model by reading).
+
+**Every suite was run twice on the final code of round 40**, one run after the other, the app rebuilt from nothing before each. Results, identical in both runs: C# **1,360 passed, 15 skipped, 0 failed**; the Debug build succeeded; simulation **52 of 52 suites, 2,220 checks, 0 failed**; extension unit tests **70 of 70** (also under TZ=UTC); extension browser tests **69, 61 and 16 checks, all passing**; all fourteen answer files give **0 mismatches** and no page error; `npm run validate` and `npm run security:docs` pass. One earlier full run of the simulation (before the last fixes) failed one check of `t30_round21.js` (S2: a typed note lost its first letter after a reload); the suite passed every run since, alone and in full, and the cause was not found. Nothing of rounds 35 to 40 has run on Windows.
+
 ## Still open
 
 GDUFA III tier table (needs the commitment-letter text and the dual-source rule); a real-keyboard check of rebound shortcuts on
