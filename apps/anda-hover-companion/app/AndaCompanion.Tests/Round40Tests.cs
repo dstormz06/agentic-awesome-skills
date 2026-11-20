@@ -673,7 +673,8 @@ public class Round40Tests : IClassFixture<HeadlessFixture>
             refuse = false;
             Assert.Equal(3, (await c.ListToolsAsync(CancellationToken.None)).Count);
         }
-        Assert.Equal(new[] { "initialize", "notifications/initialized", "initialize", "notifications/initialized", "tools/list", "tools/list" }, once.Requests.Select(r => r.Method));
+        // the session the server opened before "initialized" failed is ended (round 40 re-check), then a new one is started
+        Assert.Equal(new[] { "initialize", "notifications/initialized", "DELETE", "initialize", "notifications/initialized", "tools/list", "tools/list" }, once.Requests.Select(r => r.Method));
     }
 
     [Fact]
@@ -800,5 +801,56 @@ public class Round40Tests : IClassFixture<HeadlessFixture>
         }, CancellationToken.None);
         Assert.Equal(new[] { "Copied.", "Windows did not allow copying just now. Please select the answer and copy it.", "Windows did not allow copying just now. Please select the answer and copy it." }, said.r);
         Assert.Equal(new[] { "Fictional answer" }, said.copied);
+    }
+
+    // ---------- the round 40 re-check ----------
+
+    [Fact]
+    public async Task A_long_error_never_shows_any_part_of_the_token()
+    {
+        const string token = "fictional-token-ABCDEFGHIJKLMNOP";
+        var echo = new FakeServer(Started(s => Json(new JsonObject { ["jsonrpc"] = "2.0", ["id"] = s.Body["id"]!.DeepClone(), ["error"] = new JsonObject { ["code"] = 1, ["message"] = new string('p', 280) + " " + token + " and more" } })));
+        using var c = new McpClient(Server("FICTIONAL_TOKEN"), _ => token, echo);
+        string said = (await Assert.ThrowsAsync<McpException>(() => c.ListToolsAsync(CancellationToken.None))).Message;
+        Assert.DoesNotContain("fictional-token", said);
+        Assert.Contains("[token]", said);
+    }
+
+    [Theory]
+    [InlineData("Host")]
+    [InlineData("content-length")]
+    [InlineData("Transfer-Encoding")]
+    [InlineData("Mcp-Session-Id")]
+    [InlineData("Proxy-Authorization")]
+    public void A_header_the_app_sets_itself_cannot_carry_the_token(string header)
+    {
+        var (h, problem) = ApiTarget.Authorization(header, "Bearer", "fictional-token");
+        Assert.Null(h);
+        Assert.Contains("header this app sets itself", problem);
+    }
+
+    [Fact]
+    public void My_API_Test_refuses_what_the_send_would_refuse()
+    {
+        var api = new CustomApiSettings { Name = "Mine", Endpoint = "https://x.example.test/v1", AuthScheme = "Bearer x", SecretEnvVar = "FICTIONAL_TOKEN" };
+        var inspected = CustomApiConfig.Inspect(api, _ => "fictional-token");
+        Assert.False(inspected.Ok);
+        Assert.Contains("text before the token is not valid", inspected.Message);
+        api.AuthScheme = "Bearer";
+        Assert.Contains("cannot be sent in a header", CustomApiConfig.Inspect(api, _ => "jeton-élevé").Message);
+        Assert.True(CustomApiConfig.Inspect(api, _ => "fictional-token").Ok);
+    }
+
+    [Fact]
+    public async Task After_a_failed_Send_the_old_preview_is_gone_and_a_new_look_is_needed()
+    {
+        var fake = new FakeServer(s => s.Method == "tools/call" ? new HttpResponseMessage(HttpStatusCode.InternalServerError) : Good(s));
+        var r = await _fx.Session.Dispatch(async () =>
+        {
+            var w = new McpWindow(new[] { Server() }, null, s => new McpClient(s, _ => null, fake));
+            try { w.Show(); Settle(); await w.ListAsync(); Settle(); w.Preview(); await w.SendAsync(); Settle(); return (w.Shown.Text ?? "", w.SendButton.IsEnabled, w.Status.Text ?? ""); }
+            finally { w.Close(); Settle(); }
+        }, CancellationToken.None);
+        Assert.Equal(("", false, "The server answered with an error (500)."), r);
     }
 }

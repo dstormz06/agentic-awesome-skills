@@ -151,13 +151,12 @@ public sealed class McpWindow : Window
     internal Task SendAsync()
     {
         if (_ready is not { } ready) return Task.CompletedTask;
-        _ready = null;
+        _ready = null; Shown.Text = "";            // what was shown is being sent; after a failure, a new look is needed
         return Attempt("Sending…", async ct =>
         {
             var result = await ClientFor(ready.Server).CallToolAsync(ready.Tool, ready.Args, ct);
             Answer.Text = result.Text; CopyButton.IsEnabled = result.Text.Length > 0;
             Status.Text = (result.ToolError ? McpRules.SaidToolFailed : McpRules.SaidAnswered) + " " + McpRules.SaidNotKept;
-            Shown.Text = "";
         });
     }
 }

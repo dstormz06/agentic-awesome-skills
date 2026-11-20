@@ -80,15 +80,22 @@ public static class ApiTarget
     public static (KeyValuePair<string, string>? Header, string? Problem) Authorization(string? header, string? scheme, string? token)
     {
         string name = (header ?? "").Trim(), prefix = (scheme ?? "").Trim();
-        if (string.IsNullOrEmpty(token) || name.Length == 0) return (null, null);
+        if (name.Length == 0) return (null, null);
         if (!System.Text.RegularExpressions.Regex.IsMatch(name, @"^[!#$%&'*+.^_`|~0-9A-Za-z-]{1,64}$"))
             return (null, "The token header name is not valid: letters, digits and - only, for example Authorization. Nothing was sent.");
+        // round 40 re-check: a header the app or the connection sets itself would be replaced by the token (Host, Content-Length…)
+        if (Reserved.Contains(name) || name.StartsWith("Content-", StringComparison.OrdinalIgnoreCase) || name.StartsWith("Proxy-", StringComparison.OrdinalIgnoreCase))
+            return (null, $"{name} is a header this app sets itself; please use another name for the token, for example Authorization. Nothing was sent.");
         if (!prefix.All(c => c is >= '!' and <= '~'))
             return (null, "The text before the token is not valid: one word, for example Bearer, with no space or line break. Nothing was sent.");
+        if (string.IsNullOrEmpty(token)) return (null, null);
         if (!token.All(c => c is >= '!' and <= '~'))
             return (null, "The token in that environment variable has a character that cannot be sent in a header (a line break, a space, or a letter outside ASCII), so it was not sent.");
         return (new(name, prefix.Length > 0 ? $"{prefix} {token}" : token), null);
     }
+
+    private static readonly HashSet<string> Reserved = new(StringComparer.OrdinalIgnoreCase)
+        { "Host", "Connection", "Keep-Alive", "Transfer-Encoding", "TE", "Trailer", "Upgrade", "Accept", "Expect", "Cookie", "Mcp-Session-Id", "MCP-Protocol-Version" };
 
     /// <summary>No variable named: no token and no problem.</summary>
     public static (string? Token, string? Problem) Token(string? secretEnvVar, Func<string, string?> env)
@@ -120,6 +127,8 @@ public static class CustomApiConfig
             return new(false, null, "The reply path is not valid. Please use names and [numbers], for example choices[0].message.content");
         var (token, tokenProblem) = ApiTarget.Token(s.SecretEnvVar, env);
         if (tokenProblem is not null) return new(false, null, tokenProblem);
+        // round 40 re-check: Test says what the send would refuse, not "configured"
+        if (ApiTarget.Authorization(s.AuthHeader, s.AuthScheme, token).Problem is { } headerProblem) return new(false, null, headerProblem);
         return new(true, new ElsaSettings(endpoint, token, string.IsNullOrWhiteSpace(s.Model) ? null : s.Model.Trim(), null),
             $"{s.Name} configured · {uri.Host}");
     }

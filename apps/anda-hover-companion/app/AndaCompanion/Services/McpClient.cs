@@ -162,7 +162,8 @@ public sealed class McpClient : IDisposable
         string? version = Str(result["protocolVersion"]);
         if (version is null || !McpRules.Versions.Contains(version))
             throw new McpException($"The server speaks MCP version {McpRules.OneLine(version ?? "(none)", 20)}, which this app does not; nothing more was sent.");
-        await PostAsync("notifications/initialized", null, null, version, ct);
+        try { await PostAsync("notifications/initialized", null, null, version, ct); }
+        catch (Exception ex) when (ex is not SessionGoneException) { await EndAsync(); throw; }      // the session the server opened is ended, not left behind
         _version = version;
     }
 
@@ -195,9 +196,10 @@ public sealed class McpClient : IDisposable
             var answer = events ? await FromEventsAsync(body, id.Value, ct) : AnswerTo(McpJson.Parse(await ReadAllAsync(body, ct)), id.Value);
             if (answer["error"] is JsonObject error)
             {
-                string said = McpRules.OneLine(Str(error["message"]) ?? "no reason given", 300);
-                if (token is not null) said = said.Replace(token, "[token]", StringComparison.Ordinal);       // a server that repeats the token does not get it shown
-                throw new McpException($"The server could not do this: {said}");
+                // a server that repeats the token does not get it shown: replaced before the message is cut, so no part of it is left (round 40 re-check)
+                string raw = Str(error["message"]) ?? "no reason given";
+                if (token is not null) raw = raw.Replace(token, "[token]", StringComparison.Ordinal);
+                throw new McpException($"The server could not do this: {McpRules.OneLine(raw, 300)}");
             }
             return answer["result"] as JsonObject;
         }
