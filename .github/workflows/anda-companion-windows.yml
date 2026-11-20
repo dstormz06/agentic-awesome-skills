@@ -64,6 +64,13 @@ jobs:
           --logger "trx;LogFileName=test-results.trx"
           --results-directory "$env:RUNNER_TEMP/test-results"
 
+      - name: Start a harmless stand-in MCP program for real (path check, SHA-256, no token passed on, job object)
+        # AndaCompanion.McpStub answers with fictional words and reaches nothing; it is built with the tests and never packaged
+        run: >
+          dotnet test app/AndaCompanion.Tests -c Release --no-build -nologo
+          --filter "FullyQualifiedName~Round41ProgramTests"
+          --logger "console;verbosity=normal"
+
       - name: Test the Edge extension's rules against the app's own output (no browser needed)
         run: node --test extension/tests/unit/parity.test.mjs extension/tests/unit/safety.test.mjs extension/tests/unit/manifest.test.mjs extension/tests/unit/service.test.mjs extension/tests/unit/time.test.mjs extension/tests/unit/round33.test.mjs extension/tests/unit/round34.test.mjs
 

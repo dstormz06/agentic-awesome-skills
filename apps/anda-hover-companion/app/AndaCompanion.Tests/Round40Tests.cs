@@ -307,6 +307,7 @@ public class Round40Tests : IClassFixture<HeadlessFixture>
     {
         using var handler = McpClient.DefaultHandler();
         Assert.False(handler.AllowAutoRedirect);                                                   // a token is never carried to another address
+        Assert.True(handler.CheckCertificateRevocationList);                                       // a revoked certificate is refused (round 41, CA5399)
         Assert.Contains("DefaultHandler()", Round37Tests.Code(Folder("app", "AndaCompanion", "Services", "McpHttp.cs")).Split('\n').Single(l => l.Contains("_http = handler is null")));
     }
 

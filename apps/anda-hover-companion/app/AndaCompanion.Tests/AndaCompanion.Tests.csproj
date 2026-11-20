@@ -12,5 +12,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
     <PackageReference Include="Avalonia.Headless" Version="11.3.18" />
     <ProjectReference Include="../AndaCompanion/AndaCompanion.csproj" />
+    <!-- built first, not referenced: the Windows-only tests start its .exe as a real program on this PC -->
+    <ProjectReference Include="../AndaCompanion.McpStub/AndaCompanion.McpStub.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
 </Project>

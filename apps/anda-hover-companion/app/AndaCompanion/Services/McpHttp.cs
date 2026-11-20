@@ -17,7 +17,11 @@ internal sealed class McpHttp : IMcpTransport
     private readonly HttpClient _http;
     private string? _session, _token;
 
-    internal static HttpClientHandler DefaultHandler() => new() { AllowAutoRedirect = false };
+    /// <summary>
+    /// No redirect followed, and the server's certificate checked against its issuer's revocation list (the security build's rule CA5399,
+    /// round 41): a revoked certificate is refused. Where that list cannot be reached, the server is said to be not reachable.
+    /// </summary>
+    internal static HttpClientHandler DefaultHandler() => new() { AllowAutoRedirect = false, CheckCertificateRevocationList = true };
 
     public McpHttp(McpServerSettings server, Func<string, string?> env, HttpMessageHandler? handler)
     {
