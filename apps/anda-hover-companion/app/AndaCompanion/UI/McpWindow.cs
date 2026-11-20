@@ -30,7 +30,7 @@ public sealed class McpWindow : Window
     internal TextBlock Shown { get; } = new() { TextWrapping = TextWrapping.Wrap, FontSize = 12 };
     internal TextBlock Status { get; } = new() { TextWrapping = TextWrapping.Wrap, FontSize = 12 };
     internal TextBox Answer { get; } = new() { IsReadOnly = true, AcceptsReturn = true, TextWrapping = TextWrapping.Wrap, MinHeight = 90, FontSize = 12 };
-    public Func<string, Task>? WriteClipboard { get; set; }
+    public Func<string, Task<bool>>? WriteClipboard { get; set; }
 
     private readonly IReadOnlyList<McpServerSettings> _servers;
     private readonly Func<McpServerSettings, McpClient> _newClient;
@@ -62,17 +62,8 @@ public sealed class McpWindow : Window
         ListButton.Click += async (_, _) => await ListAsync();
         PreviewButton.Click += (_, _) => Preview();
         SendButton.Click += async (_, _) => await SendAsync();
-        CopyButton.Click += async (_, _) =>
-        {
-            try
-            {
-                if (WriteClipboard is not null) await WriteClipboard(Answer.Text ?? "");
-                else if (Clipboard is { } clipboard) await clipboard.SetTextAsync(Answer.Text ?? "");
-                else throw new InvalidOperationException("no clipboard");
-                Status.Text = "Copied.";
-            }
-            catch (Exception) { Status.Text = "Windows did not allow copying just now. Please select the answer and copy it."; }
-        };
+        CopyButton.Click += async (_, _) => Status.Text = await Copying.TextAsync(this, Answer.Text ?? "", WriteClipboard)
+            ? "Copied." : "Windows did not allow copying just now. Please select the answer and copy it.";
         var close = new Button { Content = "Done" };
         close.Click += (_, _) => Close();
         KeyDown += (_, e) => { if (e.Key == Key.Escape) Close(); };

@@ -96,12 +96,7 @@ public partial class CardWindow : Window
     public void ApplySpacing(double spacing) =>
         DisplayScale.Space(new Control[] { HeaderBand, ClockPanel, AttentionBox, WatchGrid, LatestGrid, AheadGrid, RefGrid, BriefPanel, ChipsWrap }, spacing, _spacingWas);
 
-    private async Task<bool> PutOnClipboard(string text)
-    {
-        if (CopyText is not null) return await CopyText(text);
-        try { if (Clipboard is null) return false; await Clipboard.SetTextAsync(text); return true; }
-        catch (Exception) { return false; }
-    }
+    private Task<bool> PutOnClipboard(string text) => Copying.TextAsync(this, text, CopyText);
 
     private void SayDetails(string text) { DetailsMsg.Text = text; DetailsMsg.IsVisible = text.Length > 0; }
 

@@ -777,4 +777,28 @@ public class Round40Tests : IClassFixture<HeadlessFixture>
         string ask = Round37Tests.Code(Folder("app", "AndaCompanion", "App.Ask.cs"));
         Assert.Contains("UseWithMcp = McpServersOn().Count > 0 ? OpenMcp : null,", ask);
     }
+
+    [Fact]
+    public async Task Copy_the_answer_says_whether_it_got_there()
+    {
+        var said = await _fx.Session.Dispatch(async () =>
+        {
+            var w = new McpWindow(new[] { Server() }, null, s => new McpClient(s, _ => null, new FakeServer(Good)));
+            try
+            {
+                w.Show(); Settle(); w.Answer.Text = "Fictional answer"; var copied = new List<string>(); var r = new List<string>();
+                foreach (var writer in new Func<string, Task<bool>>[] { t => { copied.Add(t); return Task.FromResult(true); }, _ => Task.FromResult(false), _ => throw new InvalidOperationException("locked") })
+                {
+                    w.WriteClipboard = writer; w.CopyButton.IsEnabled = true;
+                    w.CopyButton.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
+                    for (int i = 0; i < 20 && (w.Status.Text ?? "") is not ("Copied." or "Windows did not allow copying just now. Please select the answer and copy it."); i++) { await Task.Delay(5); Settle(); }
+                    r.Add(w.Status.Text ?? ""); w.Status.Text = "";
+                }
+                return (r, copied);
+            }
+            finally { w.Close(); Settle(); }
+        }, CancellationToken.None);
+        Assert.Equal(new[] { "Copied.", "Windows did not allow copying just now. Please select the answer and copy it.", "Windows did not allow copying just now. Please select the answer and copy it." }, said.r);
+        Assert.Equal(new[] { "Fictional answer" }, said.copied);
+    }
 }

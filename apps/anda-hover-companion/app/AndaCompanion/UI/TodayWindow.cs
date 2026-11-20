@@ -219,9 +219,7 @@ public sealed class TodayWindow : Window
         string id = look.Record.Number, line = v.Status;
         CopyButton.Click += async (_, _) =>
         {
-            bool ok;
-            try { if (_hooks.CopyText is not null) ok = await _hooks.CopyText(line); else if (Clipboard is null) ok = false; else { await Clipboard.SetTextAsync(line); ok = true; } }
-            catch (Exception) { ok = false; }
+            bool ok = await Copying.TextAsync(this, line, _hooks.CopyText);
             status.Text = ok ? "Copied: the status line." : "Windows did not allow copying, so here is the status line: " + line; status.IsVisible = true;
         };
         OpenButton.Click += (_, _) => _hooks.OpenCard(id);
