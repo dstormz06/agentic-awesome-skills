@@ -1781,7 +1781,7 @@ Chosen by the builder when the owner wrote "You decide": the two items not built
 | 7 | (Theoretical) an applicant name holding U+0001 could mix two applicants in the index | A sister must also have the same applicant, checked again | Read |
 | 8 | (Note) to-do titles show in Today with no switch of their own | Left as is: on screen only, nothing kept; listed as a question to the owner | — |
 
-COUNTS38_PLACEHOLDER
+**Every suite was run twice on the final code of round 38** (with the fixes of both reviews), one run after the other, the app rebuilt from nothing before each; a container restart stopped the first attempt part way, and both runs were made again from the start. Results, identical in both runs: C# **1,313 passed, 15 skipped, 0 failed**; the Debug build succeeded; simulation **50 of 50 suites, 2,180 checks, 0 failed**; extension unit tests **70 of 70** (also under TZ=UTC); extension browser tests **69, 61 and 16 checks, all passing**; all twelve answer files give **0 mismatches** and no page error; `npm run validate` and `npm run security:docs` pass. The Windows workflow could still not be started from this session; nothing of rounds 35 to 38 has run on Windows.
 
 ## Still open
 
