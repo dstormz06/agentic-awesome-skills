@@ -18,7 +18,7 @@ namespace AndaCompanion.UI;
 /// <param name="CopyText">Puts text on the clipboard and says whether it got there.</param>
 public sealed record TodayHooks(Func<IReadOnlyList<Today.Look>> All, Func<string, Today.Look?> Find, Func<IReadOnlyList<string>> Pins, Func<IReadOnlyList<string>> Recents,
     Action<string> OpenCard, Func<string, Task<bool>>? CopyText = null, Action? ShowAll = null,
-    Func<(LastLook.Look? Kept, LastLook.Look Now, string? Note)>? Looks = null, Action? KeepLook = null, Func<NextWeek.Result?>? Week = null);
+    Func<(LastLook.Look? Kept, LastLook.Look Now, string? Note, bool Keep)>? Looks = null, Action<LastLook.Look>? KeepLook = null, Func<NextWeek.Result?>? Week = null);
 
 /// <summary>
 /// Today (round 33): a small two-pane window. Left: what needs a look, the ANDAs kept in my list, recents. Right: the selected one, with
@@ -57,9 +57,9 @@ public sealed class TodayWindow : Window
         {
             _looked = true; _lookNote = looks.Note;
             _since = looks.Kept is null ? null : LastLook.Since(looks.Kept, looks.Now, id => hooks.Find(id)?.Record.Attention?.Text);
+            // what is kept is the look that was shown, so that a change that comes in while Today is open is listed the next time, not lost
+            if (looks.Keep) Closed += (_, _) => hooks.KeepLook?.Invoke(looks.Now);
         }
-        _week = hooks.Week?.Invoke();
-        Closed += (_, _) => hooks.KeepLook?.Invoke();
         Title = "ANDA Companion (Notula) — Today"; Width = 640; Height = 430; MinWidth = 520; MinHeight = 320; CanResize = true;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         Background = Res("C.Bg");
@@ -102,8 +102,12 @@ public sealed class TodayWindow : Window
 
     private List<TodayGroup> Groups() => Today.Groups(_hooks.Pins(), _hooks.Recents(), _all, _hooks.Find);
 
+    /// <summary>A click on the tray icon while Today is open: next week is asked again, and the list is painted again only if it changed.</summary>
+    public void RefreshWeek() { if (_hooks.Week?.Invoke()?.Title != _week?.Title) Paint(); }
+
     private void Paint()
     {
+        _week = _hooks.Week?.Invoke();            // asked again each time, so that a Today left open into Monday does not keep last week's
         string? typed = AndaValidator.Extract(Search.Text);
         if (typed is not null && _hooks.Find(typed) is not null) _selected = typed;
         _list.Children.Clear();
@@ -117,7 +121,7 @@ public sealed class TodayWindow : Window
         if (_looked)
         {
             _list.Children.Add(Head("SINCE YOU LAST LOOKED"));
-            _list.Children.Add(Note(_since is null ? LastLook.SaidFirst : _lookNote ?? ""));
+            _list.Children.Add(Note(_lookNote ?? (_since is null ? LastLook.SaidFirst : LastLook.SaidUndated)));
             if (_since is { } since)
             {
                 if (since.Rows.Count == 0) _list.Children.Add(Note(LastLook.SaidNone));

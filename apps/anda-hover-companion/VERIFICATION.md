@@ -1660,6 +1660,76 @@ The owner's choices of Nov 20, from the suggestions written after round 33 (A1, 
 
 CI: **no Windows run has started for this round's commits either.** The last Windows run is still run 44, on the round 24 code, from Nov 12. The owner can start the workflow from the repository's Actions tab.
 
+## Round 35: a tray menu of seven choices and one type scale; a separate adversarial review; tested twice
+
+The owner's choice of Nov 20 (suggestions A3 and A4 written after round 33). **The tray menu** has seven choices and Exit in both programs (Lookup, Today, Review a draft, Ask, More, Settings, Help; Lists with all tools on), built in the app from one list held to `mockup/round35-golden.json`. **The Windows app's text** uses six named sizes (`Theming/TypeScale.cs`).
+
+**Found while building, before the review:** the version was pinned in the answer files and in several tests, so each new round broke them (now each round's answers hold only its own changes, and the newest version is checked once, through round 29's); four older simulation suites clicked items that are now inside a group.
+
+**A separate reviewer**, which had not built the round, read the change, ran the suites and probes in copies, and broke a copy on purpose; it changed nothing in the repository. Its findings and what was done:
+
+| # | The reviewer's finding | Fix | Held by |
+|---|---|---|---|
+| 1 | The countdown caption on the default card was cut off in every state once it grew to 11 | The box is 120 wide (was 96); a word that still does not fit goes to a second line | New window test, every distance and both card sizes; the fault put back: caught |
+| 2 | "Only six sizes" was not true when the app ran: the theme gives controls and plain text 14, which a reading of the source cannot see | `ControlContentThemeFontSize` is Body (13) in `App.axaml` | New window test that reads the size of every piece of text in the card in all eight looks and in eight other windows; a stray 14 put back: caught |
+| 3 | The app's built menu (which items the focused edition hides, which window each opens) was not tested | The menu is built by `TrayMenu.Build`, which a test builds for real in both editions and compares with the shared answers; a second test checks the action of each of the 23 choices | Both; a choice wired to the wrong window and a choice left visible: each caught |
+| 4 | My actions moved from always shown to all tools only, without a word | Written in what changed, the app README and DESIGN | Shared answers (what changed) |
+| 5 | Quick replies and My usage from the tray opened a new copy each time, and a change to the replies did not reach an open card or Settings | One window each; a change runs the same refresh as from Settings | Source check (the tray needs the whole app) |
+| 6 | Simulation: with Appearance or Auto-hide open, a checked item was a menu item with `aria-checked` (an accessibility rule) | Radios (`menuitemradio`); the scan now runs with those groups open | Simulation M7c; the fault put back: caught |
+| 7 | Simulation keyboard: no Right or Left arrow, the glyph read aloud, Escape left the keyboard on a hidden button | Right opens and goes in, Left closes and goes back (an open group inside More closes alone), the glyph is hidden from screen readers, Escape returns to the tray icon | Simulation M7a, M7b, M7d, M7e; the Escape fault put back: caught |
+| 8 | The demo guide, start-here text, DESIGN, a Settings hint and two comments still described the old menu | All updated | Simulation C12 (the hint) |
+| 9 | No simulation suite tied the version to the answers the app is held to | t43 compares it with round 29's answers | Simulation G3 |
+| 10 | A size chosen by a test that gave the same value on both sides; a test that made a hidden icon visible by script before clicking it | Removed; the test now opens the overflow and clicks the icon there | Simulation M11 |
+
+## Round 36: since you last looked, and next week; a separate adversarial review; tested twice
+
+The owner's choice of Nov 20 (suggestions C2 and C4). **Today begins with what has moved** since the look kept when it was last closed, and **from Thursday noon to Sunday it shows next week**, with its federal holidays. Rules in `Services/LastLook.cs` and the simulation, held to `mockup/round36-golden.json` (now eight pairs of looks, twelve days of the demo data and three weeks with records made for them).
+
+**Found while building, before the review:** two colors in the new rows did not meet 4.5:1 (the notes, and a faded row for an ANDA no longer in the data); four checks of the new suite changed the data while Today was open; the version test failed until round 36 was in the app's change list.
+
+**A separate reviewer** (as above) reported:
+
+| # | The reviewer's finding | Fix | Held by |
+|---|---|---|---|
+| 1 | **High.** A failed read of the person's sheet replaced the kept look with an empty or sample look: every real ANDA listed as gone, then as new, and the moves in between lost (app) | A look holds whose data it is of; data that cannot be read, or holds no ANDA, is neither compared nor kept, and says so; a look of other data is not compared | Unit and window tests; each rule put back: caught |
+| 2 | Changes that came in while Today was open were taken into the kept look unseen; next week stayed on last week's dates past midnight | What is kept is the look that was shown (with the time Today closed), in both programs; next week is asked again at each paint and when the tray icon is clicked | Window test; simulation S8a, S8b; the fault put back: caught in both |
+| 3 | Today crashed every time on a kept file with a date that does not exist | A date that cannot be read counts as none, in both programs | Shared answers (new case) and a unit test; the fault put back: caught |
+| 4 | The kept file was not in SECURITY; a passing lock set it aside; Reset did not clear it | SECURITY describes it; a locked file is left alone and read next time; Reset all settings deletes it | Unit test for the lock; the fault put back: caught |
+| 5 | Today read every record up to four times when it opened | Once | Source check |
+| 6 | Tests passed with the round's own fixes undone: the row pressed was the first copy anyway; next week never had two ANDAs on one day, a record without a forecast, or an observed holiday | The row pressed is now the second copy; three weeks with records made for them, among them Independence Day 2026 and New Year's Day 2028, each observed on a Friday | Window test and simulation S5; each fault put back: caught |
+| 7 | "A new item that needs you" cannot come from a person's sheet (no item column) | Said in what changed and in DESIGN | Shared answers (what changed) |
+| 8 | "1 more changes"; the cap of forty could cut an ANDA's changes part-way; a gray-green dot on a row no longer in the data; an empty note when the kept time could not be read | All fixed in both programs | Shared answers, unit tests, simulation S8d, S8e |
+| 9 | (Suspected) the look may not be kept when Windows logs off | Safe: the changes show again next time | Not tested (needs Windows) |
+
+**The faults put back on purpose**, in copies, after the fixes: for round 35, five in the app (no theme size, the narrow box, a choice wired to the wrong window, a choice never hidden, a stray 14) and two in the simulation; for round 36, nine in the app (unreadable data compared, the source not checked, unreadable dates trusted, the cap cutting an ANDA, a lock set aside, a fresh look kept, focus on the first copy, next week's order, a hidden forecast listed) and two in the simulation. Each was caught by at least one test.
+
+**A static security pass by the builder** (reading only; nothing was scanned or probed), with the Security Engineer and Secure App Builder skill sets as checklists: nothing new is sent; no new host, permission, hook, capture or clipboard use; one new stored file (`last-look.json`: ANDA numbers, two dates each, a fingerprint, a time and a source), written only when Today closes on readable data, set aside only when it cannot be parsed, cleared by Reset; text from the kept file is never shown as markup (the simulation sets text; the app's text blocks do not read markup).
+
+COUNTS_PLACEHOLDER
+
+### Defects caught in rounds 35 and 36
+
+| # | Finding | Found by | Disposition |
+|---|---|---|---|
+| R375 | The version was pinned in answer files and tests, so each round broke them | The builder, at round 35 | Fixed: each round's answers hold its own changes |
+| R376 | Four older simulation suites clicked tray items now inside a group | Those suites | Fixed: they open the group first |
+| R377 | Two colors in Today's new rows below 4.5:1 | The round 36 suite's scan | Fixed |
+| R378 | Four checks of the round 36 suite changed the data while Today was open | The builder | Fixed: close, change, open |
+| R379 | The countdown caption cut off on the default card | The round 35 reviewer | Fixed, with a test |
+| R380 | The theme's own size 14 outside the type scale | The round 35 reviewer | Fixed, with a test of the windows as shown |
+| R381 | The app's built tray menu untested | The round 35 reviewer | Fixed: built and tested for real |
+| R382 | My actions moved to all tools only without a word | The round 35 reviewer | Written down |
+| R383 | Quick replies and My usage from the tray: many copies, no refresh | The round 35 reviewer | Fixed |
+| R384 | Simulation menu: radio roles, Right/Left keys, glyph read aloud, Escape | The round 35 reviewer | Fixed, with tests |
+| R385 | Old menu still described in five places | The round 35 reviewer | Fixed |
+| R386 | A failed read replaced the kept look (app) | The round 36 reviewer | Fixed, with tests |
+| R387 | Changes during an open Today lost; next week frozen | The round 36 reviewer | Fixed in both programs |
+| R388 | Today crashed on an unreadable date in the kept file | The round 36 reviewer | Fixed in both programs |
+| R389 | Kept file undocumented, set aside on a lock, not cleared by Reset | The round 36 reviewer | Fixed |
+| R390 | Records read four times when Today opens | The round 36 reviewer | Fixed (once) |
+| R391 | Tests passed with the round's fixes undone | The round 36 reviewer | Fixed: stronger tests and shared answers |
+| R392 | "1 more changes", cap cut part-way, a colored dot, an empty note | The round 36 reviewer | Fixed |
+
 ## Still open
 
 GDUFA III tier table (needs the commitment-letter text and the dual-source rule); a real-keyboard check of rebound shortcuts on

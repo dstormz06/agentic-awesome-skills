@@ -131,7 +131,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   ok(/Demo: ANDA at risk/.test(basicMenu) && /Demo: ANDA on track/.test(basicMenu), 'C16 the demo menu items name the ANDA state');
   await p.evaluate(() => { showApp('settings'); document.querySelectorAll('#settings details.sec').forEach(d => { d.open = true; }); }); await settle(p, 100);
   ok(!/My to-do list: Ctrl\+Alt\+L/.test(await txt(p, '#keyStatus')), 'D9 and Settings does not list it either in basic mode');
-  ok(/Off shows the three main tools/.test(await p.evaluate(() => document.body.innerText)), 'C12 the basic-mode hint describes what is really shown');
+  ok(/Off shows the main tools: look up an ANDA, Today, review a draft and ask about a selection\. Compare, Quick replies and the other extras stay under More/.test(await p.evaluate(() => document.body.innerText)), 'C12 the basic-mode hint describes what is really shown');
   ok(/Neither changes other programs/.test(await p.evaluate(() => document.body.innerText)), 'D23 the spacing hint says what spacing applies to');
   await p.evaluate(() => { state.keys.look = 'Ctrl+Alt+K'; paintKeys(); });
   eq(await txt(p, '#lookupHead'), 'LOOKUP · CTRL+ALT+K', 'D10 the Lookup header follows a rebound shortcut');

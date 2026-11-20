@@ -82,7 +82,7 @@ public class Round35Tests
     public void The_app_builds_its_menu_from_the_layout_and_has_an_action_for_every_choice()
     {
         string app = File.ReadAllText(Folder("app", "AndaCompanion", "App.axaml.cs"));
-        Assert.Contains("foreach (var entry in TrayMenu.Layout(allTools: true))", app);
+        Assert.Contains("TrayMenu.Build(Make,", app);
         foreach (var entry in TrayMenu.Layout(allTools: true))
             foreach (var label in entry.Items is { } items ? items : new[] { entry.Label })
                 Assert.Contains($"\"{label}\" =>", app);

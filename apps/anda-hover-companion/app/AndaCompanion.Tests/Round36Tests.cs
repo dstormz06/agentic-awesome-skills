@@ -55,7 +55,76 @@ public class Round36Tests
             Assert.Equal(want.GetProperty("more").GetInt32(), more);
             n++;
         }
-        Assert.Equal(6, n);
+        Assert.Equal(8, n);
+    }
+
+    [Fact]
+    public void Next_week_with_records_made_for_it_is_the_simulations()
+    {
+        var template = new MockAndaRepository().Find("216482")!; var cal = new BusinessCalendar();
+        static DateOnly? D(JsonElement e) => e.ValueKind == JsonValueKind.Null ? null : DateOnly.Parse(e.GetString()!, System.Globalization.CultureInfo.InvariantCulture);
+        var records = G("made").GetProperty("records").EnumerateObject().Select(p => template with
+        {
+            Number = p.Name, GoalDateValue = D(p.Value.GetProperty("goal")), ForecastDateValue = D(p.Value.GetProperty("forecast")),
+            ForecastDate = D(p.Value.GetProperty("forecast")) is null ? Models.AndaRecord.Unknown : "set",
+        }).Reverse().ToList();                                                                        // the order given must not matter
+        int n = 0;
+        foreach (var w in G("made").GetProperty("weeks").EnumerateArray())
+        {
+            var got = NextWeek.Of(DateOnly.Parse(w.GetProperty("today").GetString()!, System.Globalization.CultureInfo.InvariantCulture), w.GetProperty("hour").GetInt32(), records, cal);
+            var want = w.GetProperty("result"); string why = w.GetProperty("why").GetString()!;
+            if (want.ValueKind == JsonValueKind.Null) { Assert.True(got is null, why); n++; continue; }
+            Assert.Equal(want.GetProperty("title").GetString(), got!.Title);
+            Assert.Equal(want.GetProperty("rows").EnumerateArray().Select(r => r.GetProperty("id").GetString() + " " + r.GetProperty("text").GetString()).ToList(), got.Rows.Select(r => r.Id + " " + r.Text).ToList());
+            Assert.Equal(want.GetProperty("holidays").EnumerateArray().Select(x => x.GetString()).ToList(), got.Holidays.ToList<string?>());
+            n++;
+        }
+        Assert.Equal(3, n);
+        // the app's own guard: a record whose forecast is shown as unknown is never listed by a forecast date it may still carry
+        var odd = template with { Number = "320009", GoalDateValue = null, ForecastDate = Models.AndaRecord.Unknown, ForecastDateValue = new DateOnly(2026, 7, 1) };
+        Assert.Equal(NextWeek.SaidEmpty, NextWeek.Of(new DateOnly(2026, 6, 26), 9, new[] { odd }, cal)!.Empty);
+    }
+
+    [Fact]
+    public void Data_that_cannot_be_read_is_neither_compared_nor_kept_and_other_data_is_not_compared()
+    {
+        var repo = new MockAndaRepository(); var recs = repo.Numbers.Select(x => repo.Find(x)!).ToList();
+        var kept = LastLook.Of(recs, new DateTime(2026, 7, 15, 21, 5, 0, DateTimeKind.Utc), "file:0badf00d");
+        var now = LastLook.Of(recs, new DateTime(2026, 7, 16, 14, 42, 0, DateTimeKind.Utc), "file:0badf00d");
+        Assert.Equal((kept, (string?)null, true), LastLook.Decide(kept, now, readable: true));
+        Assert.Equal((null, LastLook.SaidUnreadable, false), LastLook.Decide(kept, now, readable: false));
+        Assert.Equal((null, LastLook.SaidUnreadable, false), LastLook.Decide(kept, LastLook.Of(Array.Empty<Models.AndaRecord>(), DateTime.UtcNow, "file:0badf00d"), readable: true));   // no ANDA in it
+        Assert.Equal((null, LastLook.SaidOtherData, true), LastLook.Decide(kept, now with { Source = "demo" }, readable: true));
+        Assert.Equal((null, (string?)null, true), LastLook.Decide(null, now, readable: true));
+        Assert.Equal("1 more change; the card of each ANDA shows its own.", LastLook.SaidMore(1));
+        Assert.Equal("2 more changes; the card of each ANDA shows its own.", LastLook.SaidMore(2));
+        // the source is kept in the file, and an older file without one reads as other data
+        string path = Path.Combine(Temp.NewDir(), "last-look.json");
+        LastLook.Save(path, now); Assert.Equal("file:0badf00d", LastLook.Load(path)!.Source);
+        Assert.Equal(LastLook.SaidOtherData, LastLook.Decide(now with { Source = null }, now, true).Note);
+    }
+
+    [Fact]
+    public void A_kept_file_with_dates_that_cannot_be_read_does_not_stop_Today()
+    {
+        string path = Path.Combine(Temp.NewDir(), "last-look.json");
+        File.WriteAllText(path, "{\"at\":\"not a time\",\"items\":{\"300001\":{\"goal\":\"x\",\"forecast\":\"2027-02-30\",\"item\":null}}}");
+        var kept = LastLook.Load(path)!;
+        var now = new LastLook.Look("2026-07-16T14:42:00.000Z", new Dictionary<string, LastLook.Item> { ["300001"] = new("2027-02-01", "2027-02-10", null) });
+        var (rows, _) = LastLook.Since(kept, now, _ => null);
+        Assert.Equal(new[] { "Goal date set: Mon Feb 1.", "Forecast set: Wed Feb 10." }, rows.Select(r => r.Text));
+    }
+
+    [Fact]
+    public void A_kept_file_locked_for_a_moment_is_not_set_aside()
+    {
+        string dir = Temp.NewDir(), path = Path.Combine(dir, "last-look.json");
+        File.WriteAllText(path, "{\"at\":\"2026-07-16T14:42:00.000Z\",\"items\":{}}");
+        using (new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+            Assert.Null(LastLook.Load(path));
+        Assert.True(File.Exists(path));                                                               // still there, read next time
+        Assert.Empty(Directory.GetFiles(dir, "*unreadable*"));
+        Assert.NotNull(LastLook.Load(path));
     }
 
     [Fact]

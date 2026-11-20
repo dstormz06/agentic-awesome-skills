@@ -2,6 +2,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="AndaCompanion.App"
              RequestedThemeVariant="Light">
+  <Application.Resources>
+    <!-- Round 35: the Fluent theme's own size for controls and plain text (14) is not on the type scale; Body (13) is. -->
+    <x:Double x:Key="ControlContentThemeFontSize">13</x:Double>
+  </Application.Resources>
   <Application.Styles>
     <FluentTheme/>
 

@@ -127,7 +127,7 @@ public class Round24Tests : IClassFixture<HeadlessFixture>
         Assert.Contains("DAYS TO GOAL", r.texts);
         Assert.Contains(r.texts, t => t.StartsWith("days later than the goal"));           // the answer is still the first thing said
         Assert.Contains("Goal Sat Oct 3 (a weekend day); forecast Sat Oct 17 (a weekend day); 14 days apart.", r.texts);
-        Assert.Equal(96, r.width);
+        Assert.Equal(120, r.width);                                                         // round 35: 96 was too narrow for the Caption size
         Assert.True(r.inside && r.ribbon && r.ribbonBelow);
         Assert.Equal(0, r.fill);                                                            // 79 days: quiet, no fill
         Assert.False(r.gauge);                                                              // the dial belongs to W

@@ -52,7 +52,7 @@ MAKE IT YOURS (tray icon, then Settings)
     Ask or on a shortcut you choose. Anything that goes to an AI or an agent shows you the exact text first.
   - (all tools) My agents: Alert Hub, Patent Analysis and Triaging Agent are listed but switched off, because
     their addresses are not known here. Your IT team supplies them. Your own agents work the same way.
-  - (all tools) ANDA to-do list: the tray icon's "ANDA to-do list..." shows your items and what your data says
+  - (all tools) ANDA to-do list: the tray menu's Lists, "ANDA to-do list...", shows your items and what your data says
     needs a look. It updates itself only while it is open.
   - (all tools) My to-do list: a separate list for your daily workload (ANDA related or not). Select rough notes anywhere and
     press Ctrl+Alt+Shift+L (or choose another shortcut here): they become suggested items that you can
@@ -61,7 +61,7 @@ MAKE IT YOURS (tray icon, then Settings)
     "Connected" only after a request has really succeeded.
   - Outlook (optional, off by default): read-only mail about the open ANDA.
   - Back up, restore or reset your settings.
-  - Tray icon, then Prompt library: add your own lens.
+  - Right-click the tray icon, More, then Prompt library (all tools): add your own lens.
 
 THE NEWER DESIGN
   This build has the Loupe icon, eight looks, and a default card (X) that leads with one answer,

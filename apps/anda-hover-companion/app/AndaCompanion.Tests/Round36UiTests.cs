@@ -35,25 +35,31 @@ public class Round36UiTests : IClassFixture<HeadlessFixture>
             items["216482"] = items["216482"] with { Forecast = "2026-10-10", Print = null };           // a week earlier, and no item yet
             items["209998"] = new LastLook.Item("2026-09-01", "2026-09-01", null);                       // since gone
             var kept = new LastLook.Look("2026-07-15T21:05:00.000Z", items);
-            int keptTimes = 0;
+            int keptTimes = 0; LastLook.Look? keptLook = null;
             var week = new NextWeek.Result("NEXT WEEK · MON NOV 23 TO FRI NOV 27", Array.Empty<NextWeek.Row>(), new[] { "Thu Nov 26: Thanksgiving Day (federal holiday)" }, NextWeek.SaidEmpty);
             var w = new TodayWindow(new TodayHooks(() => all, Find, () => Array.Empty<string>(), () => Array.Empty<string>(), _ => { },
-                Looks: () => (kept, now, "Compared with what this PC kept when you last closed Today: Jul 15, 2026, 5:05 PM EDT."), KeepLook: () => keptTimes++, Week: () => week));
-            var first = new TodayWindow(new TodayHooks(() => all, Find, () => Array.Empty<string>(), () => Array.Empty<string>(), _ => { }, Looks: () => (null, now, null)));
+                Looks: () => (kept, now, "Compared with what this PC kept when you last closed Today: Jul 15, 2026, 5:05 PM EDT.", true), KeepLook: l => { keptTimes++; keptLook = l; }, Week: () => week));
+            var first = new TodayWindow(new TodayHooks(() => all, Find, () => Array.Empty<string>(), () => Array.Empty<string>(), _ => { }, Looks: () => (null, now, null, true)));
+            // the person's sheet could not be read: nothing compared, and the look kept last time is not written over
+            int unreadKept = 0;
+            var unread = new TodayWindow(new TodayHooks(() => all, Find, () => Array.Empty<string>(), () => Array.Empty<string>(), _ => { },
+                Looks: () => { var (c, n, k) = LastLook.Decide(kept, now, readable: false); return (c, now, n, k); }, KeepLook: _ => unreadKept++));
             var off = new TodayWindow(new TodayHooks(() => all, Find, () => Array.Empty<string>(), () => Array.Empty<string>(), _ => { }));
             try
             {
-                w.Show(); first.Show(); off.Show(); Settle();
+                w.Show(); first.Show(); off.Show(); unread.Show(); Settle();
+                var unreadTexts = Texts(unread.List); unread.Close(); Settle();
                 var texts = Texts(w.List);
                 var gone = w.List.Children.OfType<StackPanel>().Select(p => AutomationProperties.GetName(p)).Where(n => !string.IsNullOrEmpty(n)).ToList();
                 var rowNames = w.List.Children.OfType<Button>().Select(b => AutomationProperties.GetName(b)).ToList();
                 // pressing the row in "since" keeps the keyboard on that row, not on the same ANDA further down
-                var since216 = w.List.Children.OfType<Button>().First(b => (string?)b.Tag == "216482");
-                since216.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); Settle();
+                // the same ANDA is in "since" and again under NEEDS A LOOK: pressing the second keeps the keyboard there, not on the first
+                var both = w.List.Children.OfType<Button>().Where(b => (string?)b.Tag == "216482").ToList();
+                both[^1].RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); Settle();
                 var focused = TopLevel.GetTopLevel(w)!.FocusManager!.GetFocusedElement() as Button;
-                int idxFocused = w.List.Children.IndexOf(focused!), idxFirst = w.List.Children.IndexOf(w.List.Children.OfType<Button>().First(b => (string?)b.Tag == "216482"));
+                int idxFocused = w.List.Children.IndexOf(focused!), idxFirst = w.List.Children.IndexOf(w.List.Children.OfType<Button>().Where(b => (string?)b.Tag == "216482").Last()), copies = both.Count;
                 w.Close(); Settle();
-                return (texts, gone, rowNames, idxFocused, idxFirst, keptTimes, firstTexts: Texts(first.List), offTexts: Texts(off.List));
+                return (texts, gone, rowNames, idxFocused, idxFirst, copies, keptTimes, keptSame: ReferenceEquals(keptLook, now), firstTexts: Texts(first.List), offTexts: Texts(off.List), unreadTexts, unreadKept);
             }
             finally { first.Close(); off.Close(); Settle(); }
         }, CancellationToken.None);
@@ -65,8 +71,12 @@ public class Round36UiTests : IClassFixture<HeadlessFixture>
         Assert.Contains("Thu Nov 26: Thanksgiving Day (federal holiday)", r.texts);
         Assert.Contains(NextWeek.SaidEmpty, r.texts);
         Assert.Contains(r.rowNames, n => n!.StartsWith("ANDA 216482, urgent. Forecast moved"));
-        Assert.Equal(r.idxFirst, r.idxFocused);                                               // the keyboard stays on the row pressed
-        Assert.Equal(1, r.keptTimes);                                                          // the look is kept when Today closes
+        Assert.True(r.copies >= 2, "216482 should be listed in two groups");
+        Assert.Equal(r.idxFirst, r.idxFocused);                                               // the keyboard stays on the row pressed, in its own group
+        Assert.Equal(1, r.keptTimes);                                                          // the look is kept when Today closes ...
+        Assert.True(r.keptSame);                                                               // ... and it is the look that was shown, not a fresh one
+        Assert.Contains(LastLook.SaidUnreadable, r.unreadTexts);
+        Assert.Equal(0, r.unreadKept);
         Assert.Equal("SINCE YOU LAST LOOKED", r.firstTexts[0]); Assert.Contains(LastLook.SaidFirst, r.firstTexts);
         Assert.DoesNotContain("SINCE YOU LAST LOOKED", r.offTexts);                            // without the hooks, Today is as it was
     }
@@ -77,9 +87,11 @@ public class Round36UiTests : IClassFixture<HeadlessFixture>
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         while (dir is not null && dir.Name != "anda-hover-companion") dir = dir.Parent;
         string more = File.ReadAllText(Path.Combine(dir!.FullName, "app", "AndaCompanion", "App.Round33.cs"));
-        Assert.Contains("var kept = LastLook.Load(AppPaths.LastLookFile);", more);
-        Assert.Contains("KeepLook: () => LastLook.Save(AppPaths.LastLookFile, LookNow()),", more);
-        Assert.Contains("var wall = Clock.Wall(Clock.UtcNow()); return NextWeek.Of(DateOnly.FromDateTime(wall), wall.Hour, Records(), _calendar);", more);
+        Assert.Contains("LastLook.Decide(LastLook.Load(AppPaths.LastLookFile), now, DataReadable());", more);
+        Assert.Contains("KeepLook: look => LastLook.Save(AppPaths.LastLookFile, look with { At = LastLook.Stamp(Clock.UtcNow()) }),", more);
+        Assert.Contains("var wall = Clock.Wall(Clock.UtcNow()); return NextWeek.Of(DateOnly.FromDateTime(wall), wall.Hour, records, _calendar);", more);
+        Assert.Contains("private bool DataReadable() => _portfolio is null || _portfolio.Status.Ok;", more);
+        Assert.Contains("var records = Records().ToList();", more);                         // read once when Today opens
         Assert.EndsWith("last-look.json", AppPaths.LastLookFile);
     }
 }

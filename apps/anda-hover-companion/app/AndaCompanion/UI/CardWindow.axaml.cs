@@ -625,9 +625,11 @@ public partial class CardWindow : Window
                 {
                     // X: the answer on the left; on the right the days to the goal date. Its ink, fill and edge follow the distance (see GoalCountdown).
                     _heroCountFigure = new TextBlock { FontSize = 20, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center };
-                    _heroCountCaption = new TextBlock { FontSize = 11, FontWeight = FontWeight.ExtraBold, LetterSpacing = 0.45, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center, Margin = new Thickness(0, 2, 0, 0) };
+                    // Round 35 (review): the caption grew to the scale's Caption size (11), so the box is 120 wide, not 96; a word that still does not fit
+                    // (another font) goes to a second line instead of being cut off.
+                    _heroCountCaption = new TextBlock { FontSize = 11, FontWeight = FontWeight.ExtraBold, LetterSpacing = 0.3, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center, TextAlignment = TextAlignment.Center, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 2, 0, 0) };
                     var stack = new StackPanel(); stack.Children.Add(_heroCountFigure); stack.Children.Add(_heroCountCaption);
-                    _heroCount = new Border { Name = "HeroCount", Width = 96, CornerRadius = new CornerRadius(12), BorderThickness = new Thickness(1.5), Padding = new Thickness(4, 7, 4, 7), Margin = new Thickness(14, 0, 0, 0), VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center, Child = stack };
+                    _heroCount = new Border { Name = "HeroCount", Width = 120, CornerRadius = new CornerRadius(12), BorderThickness = new Thickness(1.5), Padding = new Thickness(4, 7, 4, 7), Margin = new Thickness(14, 0, 0, 0), VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center, Child = stack };
                     var answer = new StackPanel(); answer.Children.Add(line); answer.Children.Add(_heroSub);
                     var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto") };
                     Grid.SetColumn(_heroCount, 1);
@@ -837,7 +839,6 @@ public partial class CardWindow : Window
                     _heroCount.Background = fill is null ? Brushes.Transparent : new SolidColorBrush(Color.Parse(fill));
                     _heroCount.BorderBrush = new SolidColorBrush(Color.Parse(edge));
                     _heroCountFigure.Text = GoalCountdown.Figure(days);
-                    _heroCountFigure.FontSize = days == 0 ? 20 : 20;
                     _heroCountFigure.FontWeight = heavy ? FontWeight.ExtraBold : FontWeight.SemiBold;
                     _heroCountFigure.Foreground = inkBrush;
                     _heroCountCaption.Text = GoalCountdown.Caption(days);

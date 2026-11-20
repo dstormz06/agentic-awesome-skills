@@ -95,8 +95,8 @@ memo and a demo guide (`../demo/DEMO.md`). Extract, double-click `AndaCompanion.
   read, an AI connection that was never tested, an agent or action that is not ready), what a new user needs first (shortcuts, portfolio) and up to two sections
   opened three or more times; each open section says why. *Suggested view*, *Expand all* and *Collapse all* are always there. Only a count per section is kept (`settings.json`; no text), can be forgotten, and stops when the
   arranging is switched off. `Services/SettingsAdvisor.cs`, `UI/SettingsWindow.Adaptive.cs`.
-- **My actions** — your own prompt, AI request, agent request or to-do item, started by a keyboard shortcut you choose (or from the tray menu's
-  *My actions*). Four kinds: *Add to my to-do list*; *Fill my prompt and show it* (no AI is called; copy the text); *Ask my AI* (shows exactly what
+- **My actions** — your own prompt, AI request, agent request or to-do item, started by a keyboard shortcut you choose (or, with all tools on, from the tray menu's
+  *More*, *My actions*, since round 35). Four kinds: *Add to my to-do list*; *Fill my prompt and show it* (no AI is called; copy the text); *Ask my AI* (shows exactly what
   would be sent and sends only after you press Send, unless you turn that off for that one action); *Run one of my agents*. Placeholders such as
   `{number}`, `{drug}`, `{goal}`, `{forecast}` are filled from the card, and `{selection}` is the text you selected, sent to an AI or agent only
   fenced as data. Up to eight; three starters, none with a shortcut. A press with nothing useful selected asks for an ANDA number instead of doing

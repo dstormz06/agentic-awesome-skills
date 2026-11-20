@@ -1,3 +1,5 @@
+using Avalonia.Controls;
+
 namespace AndaCompanion.Services;
 
 /// <summary>
@@ -24,5 +26,32 @@ public static class TrayMenu
         top.Add(new("Help", new[] { "Help: first steps…", "About and what changed…" }));
         top.Add(new("Exit"));
         return top;
+    }
+
+    /// <summary>
+    /// Builds the menu with all tools, in the layout's order. <paramref name="make"/> gives the item for a choice (and its action);
+    /// <paramref name="fullOnly"/> marks an item the focused edition hides (what Layout(false) leaves out); <paramref name="line"/> is the
+    /// disabled hotkey line, placed with a separator before Exit. Kept apart from the app so a test can build it and read what is shown.
+    /// </summary>
+    public static NativeMenu Build(Func<string, NativeMenuItem> make, Action<NativeMenuItem> fullOnly, NativeMenuItem line)
+    {
+        var focused = Layout(allTools: false);
+        bool InFocused(string label, string? group) => group is null ? focused.Any(e => e.Label == label)
+            : focused.FirstOrDefault(e => e.Label == group)?.Items?.Contains(label) == true;
+        var menu = new NativeMenu();
+        foreach (var entry in Layout(allTools: true))
+        {
+            if (entry.Label == "Exit") { menu.Add(new NativeMenuItemSeparator()); menu.Add(line); }
+            NativeMenuItem top;
+            if (entry.Items is { } items)
+            {
+                top = new NativeMenuItem(entry.Label) { Menu = new NativeMenu() };
+                foreach (var label in items) { var child = make(label); if (!InFocused(label, entry.Label)) fullOnly(child); top.Menu.Add(child); }
+            }
+            else top = make(entry.Label);
+            if (!InFocused(entry.Label, null)) fullOnly(top);
+            menu.Add(top);
+        }
+        return menu;
     }
 }

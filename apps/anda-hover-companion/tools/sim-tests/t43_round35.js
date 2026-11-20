@@ -51,6 +51,19 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   for (let i = 0; i < 9; i++) { seen.push(await p.evaluate(() => document.activeElement.querySelector('span').textContent)); await p.keyboard.press('ArrowDown'); }
   eq(seen.slice(0, 8), want('focused'), 'M6 the arrow keys go through the seven choices and Exit, never into a closed group');
   eq(await axe(p, '#menu'), [], 'M7 accessibility scan of the menu');
+  // added after the review: Right opens a group and goes in, Left closes it and goes back, the glyph is not read, Escape returns to the icon
+  await more.focus(); await p.keyboard.press('ArrowRight'); await settle(p);
+  eq([await more.getAttribute('aria-expanded'), await p.evaluate(() => document.activeElement.querySelector('span').textContent), await more.getAttribute('aria-haspopup'), await p.evaluate(() => document.querySelector('#menu > button[data-group="More"] .k').getAttribute('aria-hidden'))],
+    ['true', moreItems[0], 'true', 'true'], 'M7a Right arrow opens More and goes to its first choice; the arrow glyph is hidden from screen readers');
+  await p.keyboard.press('ArrowLeft'); await settle(p);
+  eq([await more.getAttribute('aria-expanded'), await p.evaluate(() => document.activeElement.dataset.group)], ['false', 'More'], 'M7b Left arrow closes More and goes back to its name');
+  await more.click(); await p.locator('#menu button[data-group="Appearance"]').click(); await p.locator('#menu button[data-group="Auto-hide"]').click(); await settle(p);
+  eq([await p.$$eval('#menu [aria-checked]', n => [...new Set(n.map(x => x.getAttribute('role')))]), await axe(p, '#menu')], [['menuitemradio'], []], 'M7c with More, Appearance and Auto-hide open, the checked choices are radios and the scan finds nothing');
+  await p.locator('#menu button[data-group="Appearance"]').focus(); await p.keyboard.press('ArrowLeft'); await settle(p);
+  eq([await p.locator('#menu button[data-group="Appearance"]').getAttribute('aria-expanded'), await more.getAttribute('aria-expanded')], ['false', 'true'], 'M7d Left arrow on an open group inside More closes that group, not More');
+  await p.keyboard.press('Escape'); await settle(p);
+  eq([await shown(p, '#menu'), await p.evaluate(() => document.activeElement.id)], [false, 'appIcon'], 'M7e Escape closes the menu and the keyboard goes back to the tray icon');
+  await p.click('#appIcon', { button: 'right' }); await settle(p);
   // a choice in a group does what it says
   await more.click(); await p.click('#menu >> text=Connections and event log…'); await settle(p, 250);
   ok(await shown(p, '#conn') && !(await shown(p, '#menu')), 'M8 a choice inside More opens its window and closes the menu');
@@ -64,9 +77,14 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   await p.keyboard.press('Escape');
   // the icon in the overflow does what the pinned one does
   await p.evaluate(() => { APP_WINS.forEach(closeApp); }); await p.click('#chev'); await settle(p);
-  if (await shown(p, '#flyIcon')) { await p.click('#flyIcon'); await settle(p, 250); ok(await shown(p, '#today'), 'M11 the icon in the overflow opens Today too'); }
-  else { await p.evaluate(() => { document.getElementById('flyIcon').hidden = false; document.getElementById('flyIcon').click(); }); await settle(p, 250); ok(await shown(p, '#today'), 'M11 the icon in the overflow opens Today too'); }
   await p.close();
+  // the icon not pinned: it is in the overflow, and a click on it there opens Today (no script makes it visible)
+  { const ctx = await b.newContext({ viewport: { width: 1366, height: 768 }, timezoneId: 'America/New_York', reducedMotion: 'reduce' });
+    p = await ctx.newPage(); p.on('pageerror', e => errs.push(e.message)); await p.goto(SIM); await p.waitForTimeout(300);
+    await p.click('#chev'); await settle(p);
+    const there = await shown(p, '#flyIcon');
+    if (there) { await p.click('#flyIcon'); await settle(p, 250); }
+    ok(there && await shown(p, '#today'), 'M11 the icon in the overflow opens Today too'); await p.close(); }
 
   // ---- L. with all tools on ----
   p = await fresh({ width: 1366, height: 768 }, '#all');
@@ -89,6 +107,8 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   p = await fresh();
   ok(await p.evaluate(() => GUIDE_STEPS.some(s => JSON.stringify(s).includes('Right-click it for the menu: Lookup, Today, Review a draft, Ask, Settings, Help, and More for the rest'))), 'G1 First steps names the menu as it now is');
   eq(await p.evaluate(() => CHANGES.find(c => c.round === 35).items), GOLD.changes.items, 'G2 what changed in round 35 is listed');
+  const v29 = JSON.parse(fs.readFileSync(path.join(SIMROOT, 'mockup', 'round29-golden.json'), 'utf8')).version;
+  eq(await p.evaluate(() => APP_VERSION), v29, 'G3 the version is the one in round 29\'s shared answers, which the Windows app is held to');
   await p.close();
 
   eq(errs, [], 'F1 no error in any page');

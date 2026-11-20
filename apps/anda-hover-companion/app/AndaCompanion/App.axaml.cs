@@ -403,13 +403,8 @@ public partial class App : Application
 
     private TrayIcon BuildTrayIcon(IClassicDesktopStyleApplicationLifetime desktop)
     {
-        var menu = new NativeMenu();
-
-        // Round 35: the menu is built from TrayMenu.Layout, in the simulation's order: seven choices (Lookup, Today, Review a draft, Ask,
+        // Round 35: the menu is built by TrayMenu.Build, in the simulation's order: seven choices (Lookup, Today, Review a draft, Ask,
         // More, Settings, Help) and Exit; Lists with all tools on. What only "Show all tools" shows is what the focused layout leaves out.
-        var focused = TrayMenu.Layout(allTools: false);
-        bool InFocused(string label, string? group) => group is null ? focused.Any(e => e.Label == label)
-            : focused.FirstOrDefault(e => e.Label == group)?.Items?.Contains(label) == true;
         NativeMenuItem Item(string label, Action open) { var i = new NativeMenuItem(label); i.Click += (_, _) => open(); return i; }
         NativeMenuItem Make(string label) => label switch
         {
@@ -420,10 +415,10 @@ public partial class App : Application
             "ANDA to-do list…" => Item(label, OpenTodoWindow),
             "My to-do list…" => _myTodoItem = Item(MyTodoMenuLabel(), OpenMyTodoWindow),
             "Notes to my to-do list…" => Item(label, () => OpenNotes("")),
-            "My usage…" => Item(label, () => new UsageWindow(UsageLog.FilePath, UsageLog.Enabled).Show()),
+            "My usage…" => Item(label, OpenUsage),
             "Compare two files…" => Item(label, OpenCompare),
             "Hand-off page…" => Item(label, () => OpenHandoff(null)),
-            "Quick replies…" => Item(label, () => new QuickRepliesWindow(_replies, () => { }).Show()),
+            "Quick replies…" => Item(label, OpenQuickReplies),
             "Prompt library…" => Item(label, () => new PromptLibraryWindow(_prompts, _settings, ApplySettings).Show()),
             "My actions" => _actionsMenu = new NativeMenuItem("My actions") { Menu = new NativeMenu() },
             // Round 19: the looks are offered in both editions (the owner asked for them back).
@@ -441,20 +436,8 @@ public partial class App : Application
             "Exit" => Item(label, () => desktop.Shutdown()),
             _ => throw new InvalidOperationException("The tray menu has no action for " + label),
         };
-        foreach (var entry in TrayMenu.Layout(allTools: true))
-        {
-            if (entry.Label == "Exit") { menu.Add(new NativeMenuItemSeparator()); menu.Add(_hotkeyLine = new NativeMenuItem(HotkeyStatusLine()) { IsEnabled = false }); }
-            NativeMenuItem top;
-            if (entry.Items is { } items)
-            {
-                top = new NativeMenuItem(entry.Label) { Menu = new NativeMenu() };
-                foreach (var label in items) { var child = Make(label); top.Menu.Add(InFocused(label, entry.Label) ? child : Full(child)); }
-            }
-            else top = Make(entry.Label);
-            menu.Add(InFocused(entry.Label, null) ? top : Full(top));
-        }
+        var menu = TrayMenu.Build(Make, item => Full(item), _hotkeyLine = new NativeMenuItem(HotkeyStatusLine()) { IsEnabled = false });
         RebuildActionsMenu();
-        _trayMenu = menu;
 
         var tray = new TrayIcon
         {
@@ -469,11 +452,27 @@ public partial class App : Application
     }
 
     private readonly List<NativeMenuItem> _fullOnly = new();
-    private NativeMenu? _trayMenu;
-    /// <summary>The tray menu as built, for a test to read (round 35).</summary>
-    internal NativeMenu? TrayMenuForTest => _trayMenu;
 
-    /// <summary>Marks a tray item as one that only "Show all tools" shows. The focused menu is Lookup, Review a draft, Ask, Today (with the watch list), Appearance and Settings.</summary>
+    // Round 35 (review): from the tray, Quick replies and My usage open once, like Settings, and a change to the replies reaches an open
+    // card and an open Settings window as it does when they are managed from Settings.
+    private QuickRepliesWindow? _repliesWindow;
+    private UsageWindow? _usageWindow;
+    private void OpenQuickReplies()
+    {
+        if (_repliesWindow is not null) { _repliesWindow.Activate(); return; }
+        _repliesWindow = new QuickRepliesWindow(_replies, () => { _settingsWindow?.RefreshReplies(); ApplySettings(); });
+        _repliesWindow.Closed += (_, _) => _repliesWindow = null;
+        _repliesWindow.Show();
+    }
+    private void OpenUsage()
+    {
+        if (_usageWindow is not null) { _usageWindow.Activate(); return; }
+        _usageWindow = new UsageWindow(UsageLog.FilePath, UsageLog.Enabled);
+        _usageWindow.Closed += (_, _) => _usageWindow = null;
+        _usageWindow.Show();
+    }
+
+    /// <summary>Marks a tray item as one that only "Show all tools" shows: what TrayMenu.Layout(allTools: false) leaves out.</summary>
     private T Full<T>(T item) where T : NativeMenuItem { _fullOnly.Add(item); return item; }
 
     private void ShowToolsInTray() { foreach (var item in _fullOnly) item.IsVisible = _settings.ShowAllTools; }

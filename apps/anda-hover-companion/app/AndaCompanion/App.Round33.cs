@@ -49,13 +49,18 @@ public partial class App
     }
 
     private IEnumerable<AndaRecord> Records() => _repository.Numbers.Select(n => _repository.Find(n)).Where(r => r is not null).Select(r => r!);
-    private LastLook.Look LookNow() => LastLook.Of(Records(), Clock.UtcNow());
+    /// <summary>Whose data a look is of: the sample records, or the sheet at its path (as a fingerprint). Round 36 review.</summary>
+    private string LookSource() => ReferenceEquals(_repository.Current, _demo) ? "demo" : "file:" + LastLook.Fingerprint((_settings.PortfolioPath ?? "").ToUpperInvariant());
+    /// <summary>False while the person's sheet cannot be read (the sample records stand in for it): nothing is then compared or kept.</summary>
+    private bool DataReadable() => _portfolio is null || _portfolio.Status.Ok;
 
     private void OpenToday()
     {
-        if (_todayWindow is not null) { _todayWindow.Activate(); return; }
+        if (_todayWindow is not null) { _todayWindow.RefreshWeek(); _todayWindow.Activate(); return; }
+        // the records are read once when Today opens, for its groups, what moved and next week (round 36 review: it was read up to four times)
+        var records = Records().ToList();
         _todayWindow = new TodayWindow(new TodayHooks(
-            All: () => _repository.Numbers.Select(n => _repository.Find(n)).Where(r => r is not null).Select(r => LookAt(r!)).ToList(),
+            All: () => records.Select(LookAt).ToList(),
             Find: id => _repository.Find(id) is { } r ? LookAt(r) : null,
             Pins: () => _settings.Pins, Recents: () => _settings.RememberRecents ? _settings.Recents : new List<string>(),
             OpenCard: id =>
@@ -67,12 +72,14 @@ public partial class App
             // round 36: what moved since the look kept when Today was last closed, kept again when it closes; and next week, from Thursday noon
             Looks: () =>
             {
-                var kept = LastLook.Load(AppPaths.LastLookFile);
-                return (kept, LookNow(), kept is not null && DateTime.TryParse(kept.At, null, System.Globalization.DateTimeStyles.AdjustToUniversal, out var at)
-                    ? LastLook.SaidNote(Clock.Ms(DateTime.SpecifyKind(at, DateTimeKind.Utc)), Clock.Zone) : null);
+                var now = LastLook.Of(records, Clock.UtcNow(), LookSource());
+                var (compare, note, keep) = LastLook.Decide(LastLook.Load(AppPaths.LastLookFile), now, DataReadable());
+                if (note is null && compare is not null && DateTime.TryParse(compare.At, null, System.Globalization.DateTimeStyles.AdjustToUniversal, out var at))
+                    note = LastLook.SaidNote(Clock.Ms(DateTime.SpecifyKind(at, DateTimeKind.Utc)), Clock.Zone);
+                return (compare, now, note, keep);
             },
-            KeepLook: () => LastLook.Save(AppPaths.LastLookFile, LookNow()),
-            Week: () => { var wall = Clock.Wall(Clock.UtcNow()); return NextWeek.Of(DateOnly.FromDateTime(wall), wall.Hour, Records(), _calendar); }));
+            KeepLook: look => LastLook.Save(AppPaths.LastLookFile, look with { At = LastLook.Stamp(Clock.UtcNow()) }),   // what was shown, kept at the time Today closed
+            Week: () => { var wall = Clock.Wall(Clock.UtcNow()); return NextWeek.Of(DateOnly.FromDateTime(wall), wall.Hour, records, _calendar); }));
         _todayWindow.Closed += (_, _) => _todayWindow = null;
         _todayWindow.Show();
         RefreshTrayState();

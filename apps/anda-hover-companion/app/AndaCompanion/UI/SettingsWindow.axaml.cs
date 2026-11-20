@@ -30,6 +30,8 @@ public partial class SettingsWindow : Window
 
     private readonly SettingsHooks? _hooks;
     private readonly QuickReplyService _replies;
+    /// <summary>Shows how many quick replies there are; also called when they are changed from the tray (round 35).</summary>
+    public void RefreshReplies() => RepliesSummary.Text = _replies.Replies.Count == 1 ? "1 quick reply" : $"{_replies.Replies.Count} quick replies";
 
     public SettingsWindow(Settings settings, PromptLibraryService prompts, Action onChanged, SettingsHooks? hooks = null, QuickReplyService? replies = null)
     {
@@ -299,9 +301,8 @@ public partial class SettingsWindow : Window
             if (_loading || SignOffBox.Text == _settings.SignOff) return;
             _settings.SignOff = (SignOffBox.Text ?? "").Trim(); Apply();
         };
-        void PaintReplies() => RepliesSummary.Text = _replies.Replies.Count == 1 ? "1 quick reply" : $"{_replies.Replies.Count} quick replies";
-        PaintReplies();
-        RepliesManage.Click += (_, _) => new QuickRepliesWindow(_replies, () => { PaintReplies(); _onChanged(); }).Show(this);
+        RefreshReplies();
+        RepliesManage.Click += (_, _) => new QuickRepliesWindow(_replies, () => { RefreshReplies(); _onChanged(); }).Show(this);
 
         // ---- the Claude model name: change it here, no rebuild ----
         ClaudeModelBox.Text = _settings.ClaudeModel;
@@ -351,11 +352,12 @@ public partial class SettingsWindow : Window
             if (!armed)
             {
                 armed = true; SettingsReset.Content = "Click again to reset";
-                BackupStatus.Text = "This puts every setting, lens and quick reply back to the starting values. File locations are kept.";
+                BackupStatus.Text = "This puts every setting, lens and quick reply back to the starting values, and clears the look Today keeps. File locations are kept.";
                 Avalonia.Threading.DispatcherTimer.RunOnce(() => { armed = false; SettingsReset.Content = "Reset all settings…"; }, TimeSpan.FromSeconds(6));
                 return;
             }
             SettingsBackup.Reset(_settings, _prompts, _replies);
+            try { File.Delete(AppPaths.LastLookFile); } catch (IOException) { } catch (UnauthorizedAccessException) { }   // round 36: Today's kept look starts again too
             Apply();
             RebuildActions(); RebuildAgents();
             BackupStatus.Text = "Everything is back to the starting values. Please open Settings again.";

@@ -1629,7 +1629,7 @@ PS C:\work&gt; </div>
     <hr class="hair">
     <div class="lbl">WHICH TOOLS ARE SHOWN</div>
     <label class="opt"><input type="checkbox" id="allTools"> Show all tools (the two to-do lists, agents and dates)</label>
-    <p class="hint">Off shows the three main tools: look up an ANDA, review a draft and ask about a selection. A few small extras, such as the Watch list and Quick replies, stay in the tray menu, and the looks are always under Look and feel. Turning this on loses nothing and changes no data.</p>
+    <p class="hint">Off shows the main tools: look up an ANDA, Today, review a draft and ask about a selection. Compare, Quick replies and the other extras stay under More in the tray menu, and the looks are always under Look and feel. Turning this on loses nothing and changes no data.</p>
     <hr class="hair">
     <div class="lbl">THIS WINDOW · ARRANGES ITSELF</div>
     <label class="opt"><input type="checkbox" id="adaptCheck" checked> Open the sections that need a look or that I use most, and collapse the rest</label>
@@ -5300,9 +5300,12 @@ const LOOK_MAX = 40;
 function changesSince(before, now, itemText){
   if(!before || !before.items || !now || !now.items) return { rows:[], more:0 };
   const ids = [...new Set([...Object.keys(before.items), ...Object.keys(now.items)])].filter(six).sort(), rows = [];
+  /* a date that cannot be read (a kept file edited by hand, say) counts as none, never as a date it might mean */
+  const okIso = s => typeof s === "string" && dayOfIso(s) !== null && isoDay(dayOfIso(s)) === s ? s : null;
+  const clean = x => x && typeof x === "object" ? { goal:okIso(x.goal), forecast:okIso(x.forecast), item:typeof x.item === "string" ? x.item : null } : null;
   const days = (a, b) => Math.round((dayOfIso(b) - dayOfIso(a)) / DAY);
   for(const id of ids){
-    const b = before.items[id], n = now.items[id];
+    const b = clean(before.items[id]), n = clean(now.items[id]);
     if(!b){ rows.push({ id, kind:"added", text:"New in your data." }); continue; }
     if(!n){ rows.push({ id, kind:"gone", text:"No longer in your data." }); continue; }
     if(b.goal !== n.goal) rows.push({ id, kind:"goal", text:b.goal && n.goal ? `Goal date moved from ${shortDate(dayOfIso(b.goal))} to ${shortDate(dayOfIso(n.goal))}.` : n.goal ? `Goal date set: ${shortDate(dayOfIso(n.goal))}.` : "Goal date removed." });
@@ -5312,7 +5315,10 @@ function changesSince(before, now, itemText){
     }
     if(b.item !== n.item) rows.push({ id, kind:"item", text:n.item ? `New item needs you: ${itemText(id) || "see the card"}.` : "The item that needed you is no longer in your data." });
   }
-  return { rows:rows.slice(0, LOOK_MAX), more:Math.max(0, rows.length - LOOK_MAX) };
+  /* at most LOOK_MAX changes, but an ANDA's changes are never cut part-way: the last one shown is shown whole */
+  let cut = Math.min(rows.length, LOOK_MAX);
+  while(cut > 0 && cut < rows.length && rows[cut].id === rows[cut - 1].id) cut++;
+  return { rows:rows.slice(0, cut), more:rows.length - cut };
 }
 /* Next week, from Thursday noon to Sunday: the goal and forecast dates that fall from Monday to Friday of the coming week, by date, and the
    federal holidays in it. hour is the hour of the day in the person's time zone. */
@@ -5329,7 +5335,8 @@ function nextWeek(todayT, hour, data){
   return { title:`NEXT WEEK · ${shortDate(mon)} TO ${shortDate(fri)}`.toUpperCase(), rows:rows.map(({ id, text }) => ({ id, text })), holidays, empty:rows.length ? null : "Nothing of yours falls due next week." };
 }
 const LOOK_SAID = { first:"From now on, what moves in your data between two looks is listed here.", none:"Nothing has moved since you last looked.",
-  note:(atMs, zone) => `Compared with what this PC kept when you last closed Today: ${timeLabel(atMs, zone)}.` };
+  note:(atMs, zone) => `Compared with what this PC kept when you last closed Today: ${timeLabel(atMs, zone)}.`,
+  undated:"Compared with what this PC kept when you last closed Today.", more:n => `${n} more change${n === 1 ? "" : "s"}; the card of each ANDA shows its own.` };
 /* The demo starts with a fictional earlier look, so the group can be seen: the forecast of 216482 a week earlier, and one ANDA since gone. */
 function sampleLastLook(){
   const look = lookNow(DATA, Date.UTC(2026, 6, 15, 21, 5)); look.sample = true;
@@ -5339,7 +5346,9 @@ function sampleLastLook(){
 }
 /* undefined: the demo's sample look; null: nothing kept yet (a first start); otherwise the look kept when Today was last closed */
 function lastLookKept(){ return state.lastLook === undefined ? sampleLastLook() : state.lastLook; }
-function keepLook(){ state.lastLook = lookNow(DATA, nowMs()); }
+/* What is kept is the look that Today last showed, so that a change that came in while it was open is listed the next time, not lost;
+   its time is when Today was closed, as the note says. */
+function keepLook(){ state.lastLook = state.shownLook ? { ...state.shownLook, at:new Date(nowMs()).toISOString() } : lookNow(DATA, nowMs()); state.shownLook = null; }
 function todayMain(id){
   const d = DATA[id], n = Math.abs(d.delta), fl = watchFlags(id);
   return { meta:`ANDA ${id} · ${d.drug}`, tone:d.delta > 0 ? "late" : "good", figure:d.delta === 0 ? "On" : String(n),
@@ -5358,7 +5367,7 @@ function paintToday(){
   let any = false;
   /* one row: an ANDA in the data can be pressed; one no longer in it is shown as text. grp keeps the keyboard on the row pressed. */
   const row = (grp, id, line) => {
-    if(!DATA[id]){ list.append(h("div", { class:"td-it td-gone", "data-id":id }, h("i", { class:"td-dot g", "aria-hidden":"true" }), h("span", {}, h("b", { text:id }), h("small", { text:line })))); return; }
+    if(!DATA[id]){ list.append(h("div", { class:"td-it td-gone", "data-id":id }, h("i", { class:"td-dot", "aria-hidden":"true" }), h("span", {}, h("b", { text:id }), h("small", { text:line })))); return; }
     const b = h("button", { type:"button", class:"td-it", "aria-current":String(id === tdSel), "data-id":id, "data-grp":grp }, h("i", { class:"td-dot " + tdSev(id), "aria-hidden":"true" }), h("span", {}, h("b", {}, id + " ", h("em", { class:"td-tag", text:TODAY_MARK[tdSev(id)] })), h("small", { text:line })));
     b.addEventListener("click", () => {
       tdSel = id; paintToday();
@@ -5369,12 +5378,12 @@ function paintToday(){
   /* the sentences of one ANDA together, in the order the rule gives them */
   const byId = rows => { const m = new Map(); rows.forEach(r => m.set(r.id, (m.has(r.id) ? m.get(r.id) + " " : "") + r.text)); return [...m]; };
   /* Round 36: what moved since the last look, first */
-  const kept = lastLookKept(), since = kept ? changesSince(kept, lookNow(DATA, nowMs()), id => DATA[id] && DATA[id].attn) : null;
+  const kept = lastLookKept(), shown = state.shownLook = lookNow(DATA, nowMs()), since = kept ? changesSince(kept, shown, id => DATA[id] && DATA[id].attn) : null;
   list.append(h("div", { class:"td-grp", text:"SINCE YOU LAST LOOKED" }));
-  list.append(h("div", { class:"td-note", text:!kept ? LOOK_SAID.first : LOOK_SAID.note(Date.parse(kept.at), toolTz()) + (kept.sample ? " (A fictional earlier look, for the demo.)" : "") }));
+  list.append(h("div", { class:"td-note", text:!kept ? LOOK_SAID.first : (isNaN(Date.parse(kept.at)) ? LOOK_SAID.undated : LOOK_SAID.note(Date.parse(kept.at), toolTz())) + (kept.sample ? " (A fictional earlier look, for the demo.)" : "") }));
   if(kept && !since.rows.length) list.append(h("div", { class:"td-note", text:LOOK_SAID.none }));
   if(since) byId(since.rows).forEach(([id, line]) => row("since", id, line));
-  if(since && since.more) list.append(h("div", { class:"td-note", text:`${since.more} more changes; the card of each ANDA shows its own.` }));
+  if(since && since.more) list.append(h("div", { class:"td-note", text:LOOK_SAID.more(since.more) }));
   /* Round 36: from Thursday noon, next week */
   const wc = zoneClock(nowMs(), toolTz()), week = nextWeek(state.pretend ? demoToday() : ymd(wc.year, wc.month, wc.day), wc.hour, DATA);   /* the page's own clock, in the person's zone */
   if(week){
@@ -5784,6 +5793,20 @@ const menuOpen = () => menu.style.display === "block";
 function closeMenus(){ menu.style.display = "none"; flyout.style.display = "none"; $("replyMenu").style.display = "none"; $("chev").setAttribute("aria-expanded", "false"); }
 function hotkeyLine(){ const t = state.taken, k = state.keys; return `Hotkeys: ${k.peek} ${t.peek ? "✗ in use" : "✓"}   ${k.look} ${t.look ? "✗ in use" : "✓"}   ${k.draft} ${t.draft ? "✗ in use" : "✓"}` + (k.ask ? `   ${k.ask} ${t.ask ? "✗ in use" : "✓"}` : "") + (k.list && state.allTools ? `   ${k.list} ${t.list ? "✗ in use" : "✓"}` : ""); }
 menu.addEventListener("keydown", e => {   /* arrow keys move through the tray menu, as in Windows */
+  if(e.key === "Escape"){ e.preventDefault(); e.stopPropagation(); closeMenus(); $("appIcon").focus(); return; }   /* back to the icon, never to a hidden button */
+  const at = document.activeElement, inBox = at && at.closest && at.closest("#menu .sub");
+  if(e.key === "ArrowRight" && at && at.dataset && at.dataset.group){
+    e.preventDefault(); e.stopPropagation();
+    if(at.getAttribute("aria-expanded") !== "true") at.click();
+    const first = $(at.getAttribute("aria-controls")).querySelector("button:not(:disabled)"); if(first) first.focus();
+    return;
+  }
+  if(e.key === "ArrowLeft" && (inBox || (at && at.dataset && at.dataset.group && at.getAttribute("aria-expanded") === "true"))){
+    e.preventDefault(); e.stopPropagation();
+    const g = at.dataset && at.dataset.group && at.getAttribute("aria-expanded") === "true" ? at : menu.querySelector(`[aria-controls="${inBox.id}"]`);
+    if(g.getAttribute("aria-expanded") === "true") g.click();
+    g.focus(); return;
+  }
   if(!["ArrowDown", "ArrowUp", "Home", "End"].includes(e.key)) return;
   const items = [...menu.querySelectorAll("button:not(:disabled)")].filter(b => b.offsetParent !== null);
   if(!items.length) return;
@@ -5801,16 +5824,19 @@ function openMenu(){
     const lab = document.createElement("span"); lab.textContent = label; b.append(lab);
     if(key){ const k = document.createElement("span"); k.className = "k"; k.textContent = key; b.append(k); }
     if(o.disabled) b.disabled = true;
-    if(o.checked !== undefined) b.setAttribute("aria-checked", o.checked);
+    if(o.checked !== undefined){ b.setAttribute("role", "menuitemradio"); b.setAttribute("aria-checked", o.checked); }   /* one of a set: a radio, as in Windows */
     b.addEventListener("click", () => { if(fn) fn(); if(!o.keep) closeMenus(); });
     return b;
   };
   /* Round 35: seven choices, the daily ones first (Lookup, Today, Review, Ask), then More, Settings and Help; Lists with all tools.
-     A group opens in place, under its name, and says whether it is open. The same order as the Windows app (TrayMenu.Order). */
+     A group opens in place, under its name, and says whether it is open. The same order as the Windows app (TrayMenu.Layout).
+     Right arrow opens a group and goes into it; Left arrow closes it and goes back to its name (the menu's keydown, below). */
   const group = (label, children) => {
-    const g = item(label, "▸", null, { keep:true }), box = document.createElement("div");
-    box.className = "sub"; box.hidden = true; box.append(...children); g.setAttribute("aria-expanded", "false"); g.dataset.group = label;
-    g.addEventListener("click", () => { box.hidden = !box.hidden; g.setAttribute("aria-expanded", String(!box.hidden)); });
+    const g = item(label, "▸", null, { keep:true }), box = document.createElement("div"), arrow = g.querySelector(".k");
+    box.className = "sub"; box.hidden = true; box.append(...children); box.id = "menuGrp" + label.replace(/\W/g, ""); box.setAttribute("role", "group"); box.setAttribute("aria-label", label);
+    arrow.setAttribute("aria-hidden", "true");                     /* the name read is the group's, not the glyph's */
+    g.setAttribute("aria-expanded", "false"); g.setAttribute("aria-haspopup", "true"); g.setAttribute("aria-controls", box.id); g.dataset.group = label;
+    g.addEventListener("click", () => { box.hidden = !box.hidden; g.setAttribute("aria-expanded", String(!box.hidden)); arrow.textContent = box.hidden ? "▸" : "▾"; });
     return [g, box];
   };
   const ap = group("Appearance", LOOKS.map(([id, name]) => item(name, "", () => { applyLook(id); const r = document.querySelector(`input[name=look][value=${id}]`); if(r) r.checked = true; }, { checked:state.look === id })));
@@ -6162,8 +6188,8 @@ function guideOpensAtStart(seen){ return seen !== true; }
 
 const APP_VERSION = "Prototype, round 36";
 const CHANGES = [
-  { round:36, items:["Today begins with what has moved since you last looked: forecasts and goal dates that changed, ANDAs added or gone, and a new item that needs you. This PC keeps only each ANDA's two dates and a fingerprint of its open item, from when you last closed Today.", "From Thursday noon to Sunday, Today also shows next week: the goal and forecast dates that fall in it, and the federal holidays."] },
-  { round:35, items:["The tray menu is shorter: Lookup, Today, Review a draft, Ask, More, Settings and Help. With all tools on, Lists holds the two to-do lists, the notes and your usage. More holds the rest; Help holds first steps and what changed.", "Text in the Windows app uses one scale of six sizes, so pages read calmer and larger text grows them together."] },
+  { round:36, items:["Today begins with what has moved since you last looked: forecasts and goal dates that changed, ANDAs added or gone, and a new item that needs you (items come from the sample records; a sheet has no item column yet). This PC keeps only each ANDA's two dates and a fingerprint of its open item, from when you last closed Today.", "From Thursday noon to Sunday, Today also shows next week: the goal and forecast dates that fall in it, and the federal holidays."] },
+  { round:35, items:["The tray menu is shorter: Lookup, Today, Review a draft, Ask, More, Settings and Help. With all tools on, Lists holds the two to-do lists, the notes and your usage. More holds the rest (with all tools on, also the prompt library and My actions); Help holds first steps and what changed.", "Text in the Windows app uses one scale of six sizes, so pages read calmer and larger text grows them together."] },
   { round:34, items:["Your own shortcut now opens the card directly. If you prefer the small invite first, choose Whisper in Settings, How it starts. A middle-click still shows the invite first.", "The card shows the answer first: what needs you, the goal and the forecast, and the first thing worth a look. The calendar, Latest, Ahead, the reference dates and the brief are one press away, under More or E.", "A click on the tray icon opens Today, which now also holds what the Watch list showed."] },
   { round:33, items:["The Windows app now has what the simulation has shown since rounds 18 and 19: details from your own sheet on an expanded card, each with Copy; larger text and compact spacing; recent ANDAs and a short list you keep; One Bar; and Today.", "In Today, what needs a look is listed with the most pressing first.", "The Edge extension says where a card's data is from, as of when in your time zone and how long ago, marks it STALE after the days you choose, and has first steps of its own."] },
   { round:32, items:["A guide of five short steps opens once, at the first start. You can leave it at any step and open it again from the tray menu: Help: first steps.", "The Drugs@FDA reference file says when it was saved and how long ago, and is marked STALE after a number of days of its own."] },

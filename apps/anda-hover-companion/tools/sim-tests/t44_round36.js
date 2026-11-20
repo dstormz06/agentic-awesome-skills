@@ -41,14 +41,25 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   eq(await p.evaluate(() => { const g = document.querySelector('#tdList .td-gone'); return g ? [g.tagName, g.textContent] : null; }), ['DIV', '209998No longer in your data.'], 'S3 an ANDA no longer in the data is listed as text, not a button');
   ok(t.indexOf('NEEDS A LOOK') > t.indexOf('SINCE YOU LAST LOOKED'), 'S4 the groups of round 33 follow');
   // the keyboard stays on the row pressed, in its own group
-  await p.click('#tdList .td-it[data-grp="since"][data-id="216482"]'); await settle();
-  eq(await p.evaluate(() => [document.activeElement.dataset.grp, document.activeElement.dataset.id]), ['since', '216482'], 'S5 pressing a row keeps the keyboard on that row');
+  // 216482 is under SINCE and again under NEEDS A LOOK: pressing the second keeps the keyboard there, not on the first
+  await p.click('#tdList .td-it[data-grp="NEEDS A LOOK"][data-id="216482"]'); await settle();
+  eq(await p.evaluate(() => [document.activeElement.dataset.grp, document.activeElement.dataset.id]), ['NEEDS A LOOK', '216482'], 'S5 pressing a row keeps the keyboard on that row, in its own group');
   eq(await axe('#today'), [], 'S6 accessibility scan of Today with the new groups');
   // closing keeps the look; nothing has moved since
   await p.evaluate(() => { window.__now = Date.UTC(2026, 6, 16, 15, 0); });
   await reopen(); t = await listText();
   eq([t[1], t[2]], ['Compared with what this PC kept when you last closed Today: Jul 16, 2026, 11:00 AM EDT.', 'Nothing has moved since you last looked.'], 'S7 closing Today keeps the look; the next time nothing has moved');
   ok(await p.evaluate(() => { const k = JSON.stringify(state.lastLook); return !k.includes('IR response') && !k.includes('Metformin') && /"item":"[0-9a-f]{8}"/.test(k); }), 'S8 the look kept holds two dates and a fingerprint, never the item\'s words or anything else of the record');
+  // a change that comes in while Today is open is listed the next time, not taken into the look kept
+  await p.evaluate(() => { DATA['214990'].fcD = [2026, 8, 20]; closeApp('today'); DATA['214990'].fcD = [2026, 8, 6]; openToday(); }); await settle(); t = await listText();
+  eq(t[2], 'Nothing has moved since you last looked.', 'S8a what is kept is the look Today showed');
+  await p.evaluate(() => { DATA['214990'].fcD = [2026, 8, 13]; closeApp('today'); openToday(); }); await settle(); t = await listText();
+  ok(t.includes('Forecast moved from Thu Aug 6 to Thu Aug 13 (7 days later).'), 'S8b a change made while Today was open shows the next time it opens');
+  await p.evaluate(() => { closeApp('today'); DATA['214990'].fcD = [2026, 8, 6]; openToday(); closeApp('today'); }); await settle();
+  // the dot of a row no longer in the data has no color
+  eq(await p.evaluate(() => { state.lastLook = undefined; openToday(); const d = document.querySelector('#tdList .td-gone .td-dot'); return d.className; }), 'td-dot', 'S8d the row of an ANDA no longer in the data has no colored mark');
+  eq(await p.evaluate(() => [LOOK_SAID.more(1), LOOK_SAID.more(2)]), ['1 more change; the card of each ANDA shows its own.', '2 more changes; the card of each ANDA shows its own.'], 'S8e "1 more change", not "1 more changes"');
+  await p.evaluate(() => { window.__now = Date.UTC(2026, 6, 16, 15, 0); closeApp('today'); }); await settle();
   // a change in the data shows the next time
   await p.evaluate(() => { closeApp('today'); DATA['214990'].fcD = [2026, 8, 13]; openToday(); }); await settle(); t = await listText();   // the data changes while Today is closed
   ok(t.includes('Forecast moved from Thu Aug 6 to Thu Aug 13 (7 days later).'), 'S9 a forecast that moved since is listed the next time');
