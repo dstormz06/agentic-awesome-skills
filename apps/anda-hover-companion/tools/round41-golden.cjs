@@ -33,7 +33,7 @@ const OUT = DIR + 'round41-golden.json';
       ['C:\\Tools\\mcp.bat', sha], ['C:\\Tools\\run.ps1', sha], ['\\\\server\\share\\mcp.exe', sha], ['mcp.exe', sha], ['D:\\a\\b\\MCP.EXE', sha], ['C:\\Tools\\mcp.exe', sha.slice(1)],
       ['C:\\Tools\\mc|p.exe', sha], ['C:\\Tools\\mcp.exe', 'g'.repeat(64)],
       // round 41 review: an alternate stream, "." and "..", folders ending in a dot or a space, an empty folder, a forward slash
-      ['C:\\Tools\\notes.txt:mcp.exe', sha], ['C:\\Tools\\..\\Windows\\mcp.exe', sha], ['C:\\.\\Tools\\mcp.exe', sha], ['C:\\Tools.\\mcp.exe', sha],
+      ['C:\\Tools\\notes.txt:mcp.exe', sha], ['C:\\Tools:stream\\mcp.exe', sha], ['C:\\Tools\\..\\Windows\\mcp.exe', sha], ['C:\\.\\Tools\\mcp.exe', sha], ['C:\\Tools.\\mcp.exe', sha],
       ['C:\\Tools \\mcp.exe', sha], ['C:\\\\Tools\\mcp.exe', sha], ['C:/Tools/mcp.exe', sha], ['C:\\Tools\\v1.2\\mcp.exe', sha], ['C:\\mcp.exe', sha]]
       .map(([program, s]) => ({ program, sha: s, problem: mcpProgramProblem(program, s), name: mcpProgramName(program), path: mcpProgramPath(program) }));
     const input = [

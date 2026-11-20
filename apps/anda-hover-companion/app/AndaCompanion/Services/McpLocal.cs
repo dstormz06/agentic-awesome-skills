@@ -48,13 +48,15 @@ internal sealed record McpLocal(Func<string, Stream> Open, Func<ProcessStartInfo
 
     /// <summary>
     /// True when Windows' own path for the open file is the path typed (letters in any case): a local drive, no link, no network share.
+    /// A network path comes back as \\?\UNC\server\share\…, which never equals a typed path (that starts with a drive letter), so the one
+    /// comparison refuses it too.
     /// </summary>
     internal static bool SameFile(string typed, string? final)
     {
         if (final is null) return false;
         const string Long = @"\\?\";
         string f = final.StartsWith(Long, StringComparison.Ordinal) ? final[Long.Length..] : final;
-        return !f.StartsWith(@"UNC\", StringComparison.OrdinalIgnoreCase) && string.Equals(f, typed, StringComparison.OrdinalIgnoreCase);
+        return string.Equals(f, typed, StringComparison.OrdinalIgnoreCase);
     }
 
     private sealed class RealProcess : IMcpProcess
