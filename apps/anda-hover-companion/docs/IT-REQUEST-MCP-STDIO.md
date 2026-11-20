@@ -23,14 +23,15 @@ We ask whether the app may start **one specific, reviewed server program**, name
 
 | Control | What the app does |
 |---|---|
-| Which program | Only the program named in Settings: the full path of an .exe on a drive of this PC (no network share, no script such as .bat, .cmd or .ps1), with the SHA-256 IT gives. The file's SHA-256 is checked before every start, and the file is held open (no writing, no deleting) from that check until the program has started; a different file is refused |
+| Which program | Only the program named in Settings: the full path of an .exe on a drive of this PC (no network share, no script such as .bat, .cmd or .ps1), with the SHA-256 IT gives. Once the file is open, Windows' own path for it must be the path typed, so a network drive, a link or a short name is refused. The file's SHA-256 is checked before every start, and the file is held open (no writing, no deleting) from that check until the program has started; a different file is refused |
 | How it starts | Directly, never through a shell (no cmd.exe, no PowerShell), with no window; the arguments are the ones typed in Settings, as IT names them |
-| When | Only when the person presses Test, or List tools, and then presses again after a sentence that names the program; never at start-up, never by itself |
-| How long | Its input is closed when MCP tools is closed or the test ends; after two seconds it is stopped, with anything it started |
+| When | Only when the person presses Test, or List tools, and then presses again after a sentence that names the program (an edit in between asks again); never at start-up, never by itself, and never again by itself after it stopped |
+| How long | Its input is closed when MCP tools is closed, the test ends or the app ends; after two seconds it is stopped, with anything it started. If the app itself crashes, the program is not stopped |
 | What it receives | The tool's name and the arguments the person was shown first, as for an https server |
-| What it can reach | Whatever the program itself does, with the person's rights. The app passes it no token, but it inherits the person's environment variables, as any program they start does |
+| What it can reach | Whatever the program itself does, with the person's rights. The app passes it no token and starts it without the variables that hold the app's tokens; other environment variables are passed on, as to any program the person starts |
+| What the check covers | The SHA-256 covers the .exe file only, not files it loads (DLLs, scripts, settings). Please name a program in a folder only administrators can change, such as C:\Program Files |
 | What is kept | Counts only in the app's event log ("MCP program started", "MCP program stopped", characters sent); never the arguments or answers. A restored backup brings the program back switched off |
-| Limits | Each answer read up to 1 MB; 30 seconds for a whole operation; a program that breaks off or floods is stopped |
+| Limits | Each answer read up to 1 MB; 30 seconds for a whole operation; a program that breaks off, floods or runs out of time is stopped |
 
 ## What we need from IT
 

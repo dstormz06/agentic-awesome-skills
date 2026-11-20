@@ -98,7 +98,7 @@ public partial class SettingsWindow
     /// <summary>Test: a server's list of tools. A program first says what it starts, and starts on the second press for the same program.</summary>
     internal async Task TestMcpAsync(McpServerSettings s, Button test, TextBlock status, Func<McpServerSettings, McpClient>? client = null)
     {
-        if (McpRules.Problem(s) is { } problem && s.IsProgram) { McpConfirm.Clear(); status.Text = problem; return; }
+        if (s.IsProgram && McpRules.Problem(s) is { } problem) { McpConfirm.Clear(); status.Text = problem; return; }
         if (s.IsProgram && !McpConfirm.Confirm(s)) { status.Text = McpRules.SaidStartsProgram(McpRules.ProgramName(s.Program)); return; }
         test.IsEnabled = false; status.Text = "Asking the server for its tools…";
         using var c = client?.Invoke(s) ?? new McpClient(s, McpRules.WithheldVariables(_settings));

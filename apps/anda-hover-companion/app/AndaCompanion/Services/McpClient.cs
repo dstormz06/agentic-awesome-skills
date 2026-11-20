@@ -12,6 +12,10 @@ internal interface IMcpTransport : IDisposable
     bool Alive { get; }
     /// <summary>Sends a message; for a request (an id), returns the answer to it. An "initialize" starts a new session.</summary>
     Task<JsonObject?> ExchangeAsync(JsonObject message, int? id, string? version, CancellationToken ct);
+    /// <summary>True when nothing can be sent until the person confirms a start (a program on this PC that is not running); never for https.</summary>
+    bool NeedsStart { get; }
+    /// <summary>The person confirmed the start: the next exchange may start the program, once. Nothing for https.</summary>
+    void Permit();
     /// <summary>A server's words with the token taken out, if the server repeated it (https; a program is given no token).</summary>
     string Redact(string text);
     Task EndAsync();
@@ -56,10 +60,10 @@ public sealed class McpClient : IDisposable
     /// Round 41: a program on this PC that is not running. It starts only after <see cref="PermitStart"/>, which the windows call on the
     /// person's second press (<see cref="McpStartConfirm"/>); until then a request is refused before anything is started or sent.
     /// </summary>
-    public bool NeedsStart => _transport is McpProgram { Alive: false };
+    public bool NeedsStart => _transport.NeedsStart;
 
     /// <summary>The person confirmed the start: the next request may start the program, once.</summary>
-    public void PermitStart() { if (_transport is McpProgram p) p.Permit(); }
+    public void PermitStart() => _transport.Permit();
 
     public async Task<IReadOnlyList<McpTool>> ListToolsAsync(CancellationToken ct)
     {
@@ -70,8 +74,14 @@ public sealed class McpClient : IDisposable
 
     public async Task<McpCallResult> CallToolAsync(string tool, JsonObject args, CancellationToken ct)
     {
-        EventLog.Record("sent", $"MCP request, {EventLog.Count(McpRules.Characters(args))} characters");
-        var result = await RunAsync(t => RequestAsync("tools/call", new JsonObject { ["name"] = tool, ["arguments"] = args.DeepClone() }, t), ct);
+        var result = await RunAsync(async t =>
+        {
+            // round 41 review: logged once the session is up, so a request refused before anything could go (a program not running,
+            // an address that cannot be used) is not logged as sent
+            await EnsureSessionAsync(t);
+            EventLog.Record("sent", $"MCP request, {EventLog.Count(McpRules.Characters(args))} characters");
+            return await RequestAsync("tools/call", new JsonObject { ["name"] = tool, ["arguments"] = args.DeepClone() }, t);
+        }, ct);
         var parts = new List<string>();
         foreach (var c in (result["content"] as JsonArray ?? new JsonArray()).OfType<JsonObject>())
             parts.Add(Str(c["type"]) switch

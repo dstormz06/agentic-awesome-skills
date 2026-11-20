@@ -28,6 +28,8 @@ internal sealed class McpHttp : IMcpTransport
 
     public string Unreachable => $"The server at {ApiTarget.Host(_server.Endpoint)} could not be reached, or stopped answering.";
     public bool Alive => true;
+    public bool NeedsStart => false;
+    public void Permit() { }
     public string Redact(string text) => _token is { Length: > 0 } t ? text.Replace(t, "[token]", StringComparison.Ordinal) : text;
 
     public async Task<JsonObject?> ExchangeAsync(JsonObject message, int? id, string? version, CancellationToken ct)

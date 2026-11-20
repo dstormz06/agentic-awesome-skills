@@ -420,6 +420,25 @@ public class Round41Tests : IClassFixture<HeadlessFixture>
     }
 
     [Fact]
+    public async Task A_request_refused_before_anything_could_go_is_not_logged_as_sent()
+    {
+        // round 41 re-review: the log said "MCP request, N characters" for a Send refused because the program was not running
+        string path = Path.Combine(Temp.NewDir(), "events.csv");
+        try
+        {
+            EventLog.Configure(path);
+            using (var c = new McpClient(Program(), null, local: new Starter().Local))
+                Assert.Equal(McpRules.SaidNotStarted("mcp-server.exe"), (await Assert.ThrowsAsync<McpException>(() => c.CallToolAsync("x", new JsonObject { ["q"] = "Fictional" }, CancellationToken.None))).Message);
+            using (var c = new McpClient(new McpServerSettings { Name = "x", Endpoint = "http://mcp.example.test/mcp" }, _ => null))
+                await Assert.ThrowsAsync<McpException>(() => c.CallToolAsync("x", new JsonObject(), CancellationToken.None));
+            var (entries, _, _) = EventLog.Read();
+            Assert.DoesNotContain(entries, e => e.Detail.StartsWith("MCP request,", StringComparison.Ordinal));
+            Assert.Equal(2, entries.Count(e => e.Detail == "MCP request: no answer"));
+        }
+        finally { EventLog.Configure(null); }
+    }
+
+    [Fact]
     public void One_confirm_counts_only_for_the_same_program_SHA_and_arguments()
     {
         var confirm = new McpStartConfirm(); var a = Program(); var b = Program(null, "--x");
@@ -489,11 +508,11 @@ public class Round41Tests : IClassFixture<HeadlessFixture>
     public void Windows_own_path_for_the_file_must_be_the_path_typed()
     {
         const string typed = @"C:\Program Files\Fictional\mcp-server.exe";
-        Assert.True(McpProgram.SameFile(typed, @"\\?\C:\Program Files\Fictional\mcp-server.exe"));
-        Assert.True(McpProgram.SameFile(typed, @"\\?\c:\PROGRAM FILES\Fictional\MCP-SERVER.EXE"));      // letters in any case
-        Assert.False(McpProgram.SameFile(typed, @"\\?\UNC\fictional-server\share\mcp-server.exe"));    // a network drive
-        Assert.False(McpProgram.SameFile(typed, @"\\?\D:\Elsewhere\mcp-server.exe"));                 // through a link or a substituted drive
-        Assert.False(McpProgram.SameFile(typed, null));                                                   // Windows could not say
+        Assert.True(McpLocal.SameFile(typed, @"\\?\C:\Program Files\Fictional\mcp-server.exe"));
+        Assert.True(McpLocal.SameFile(typed, @"\\?\c:\PROGRAM FILES\Fictional\MCP-SERVER.EXE"));      // letters in any case
+        Assert.False(McpLocal.SameFile(typed, @"\\?\UNC\fictional-server\share\mcp-server.exe"));    // a network drive
+        Assert.False(McpLocal.SameFile(typed, @"\\?\D:\Elsewhere\mcp-server.exe"));                 // through a link or a substituted drive
+        Assert.False(McpLocal.SameFile(typed, null));                                                   // Windows could not say
     }
 
     [Fact]
