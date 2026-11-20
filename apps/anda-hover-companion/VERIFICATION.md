@@ -1740,7 +1740,7 @@ The owner's choice of Nov 20, after the review of round 36: a switch in Settings
 
 **Tests:** app `Round37Tests` (5: the words, the default and an older settings file, a backup, removing the file, the switch in Settings, the wiring); simulation `t45_round37.js` (14 checks, among them an accessibility scan of Settings and a backup round trip). The fault put back on purpose (a look kept while the switch is off) was caught. The app's wiring is checked by reading its source, as the tray needs the whole app.
 
-COUNTS37_PLACEHOLDER
+**Every suite was run twice on the final code of round 37**, one run after the other, the app rebuilt from nothing before each. Results, identical in both runs: C# **1,305 passed, 15 skipped, 0 failed**; the Debug build succeeded; simulation **49 of 49 suites, 2,163 checks, 0 failed**; extension unit tests **70 of 70** (also under TZ=UTC); extension browser tests **69, 61 and 16 checks, all passing**; all eleven answer files give **0 mismatches** and no page error; `npm run validate` and `npm run security:docs` pass. The Windows workflow could still not be started from this session (403); nothing of rounds 35 to 37 has run on Windows.
 
 ## Still open
 
