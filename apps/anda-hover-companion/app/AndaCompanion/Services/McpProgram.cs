@@ -138,7 +138,6 @@ internal sealed class McpProgram(McpServerSettings server, McpLocal local, IRead
 
     public void Dispose() => Stop();
 
-
     /// <summary>One line at a time from the program, each read only up to <see cref="McpRules.MaxResponseBytes"/>, so a line with no end cannot fill the memory.</summary>
     private sealed class LineReader(Stream input)
     {
