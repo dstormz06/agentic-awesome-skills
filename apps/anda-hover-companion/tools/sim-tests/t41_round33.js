@@ -63,7 +63,8 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   await p.evaluate(() => { APP_WINS.forEach(closeApp); state.pins = ['214990']; state.recents = ['216482', '214990']; tdSel = null; openToday(); }); await settle(300);
   const groups = await p.evaluate(() => todayGroups(state.pins, state.recents));
   eq(groups[0].rows.map(r => [r.id, r.mark]), [['216482', 'r'], ['214990', 'w']], 'D1 what needs a look is listed with the most pressing first: the urgent ANDA before the one that is only worth a look');
-  eq(await p.evaluate(() => [...document.querySelectorAll('#tdList .td-grp, #tdList .td-it')].map(x => x.classList.contains('td-grp') ? x.textContent : x.querySelector('b').textContent + ' ' + x.querySelector('small').textContent)),
+  // round 36's two groups come first and are checked in t44; here only the three groups of round 33
+  eq(await p.evaluate(() => [...document.querySelectorAll('#tdList .td-grp, #tdList .td-it')].filter(x => !(x.dataset.grp === 'since' || x.dataset.grp === 'week' || x.classList.contains('td-gone') || x.textContent === 'SINCE YOU LAST LOOKED' || x.textContent.startsWith('NEXT WEEK'))).map(x => x.classList.contains('td-grp') ? x.textContent : x.querySelector('b').textContent + ' ' + x.querySelector('small').textContent)),
     groups.flatMap(g => g.ids.length ? [g.title, ...g.rows.map(r => r.id + ' ' + ({ r: 'urgent', w: 'worth a look', g: 'on track' })[r.mark] + ' ' + r.line)] : []), 'D2 the window lists the rule\'s three groups and rows');
   eq(await p.evaluate(() => tdSel), '216482', 'D3 the most pressing ANDA is the one shown on the right when the window opens');
   const main = await p.evaluate(() => todayMain('216482'));

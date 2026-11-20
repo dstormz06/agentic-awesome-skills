@@ -34,5 +34,6 @@ public static class AppPaths
     public static string TodoFile => Path.Combine(Root, "todo.json");
     public static string MyTodoFile => Path.Combine(Root, "mytodo.json");
     public static string QuickNotesFile => Path.Combine(Root, "quick-notes.json");
+    public static string LastLookFile => Path.Combine(Root, "last-look.json");      // round 36: Today's "Since you last looked": two dates and a fingerprint per ANDA
     public static string ReferenceDownloadFile => Path.Combine(Root, "drugsfda-downloaded.zip");
 }

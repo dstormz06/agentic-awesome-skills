@@ -48,6 +48,9 @@ public partial class App
         DisplayScale.Apply(card, DisplayScale.Current);      // before it is shown, so that it is placed at the size it will have
     }
 
+    private IEnumerable<AndaRecord> Records() => _repository.Numbers.Select(n => _repository.Find(n)).Where(r => r is not null).Select(r => r!);
+    private LastLook.Look LookNow() => LastLook.Of(Records(), Clock.UtcNow());
+
     private void OpenToday()
     {
         if (_todayWindow is not null) { _todayWindow.Activate(); return; }
@@ -60,7 +63,16 @@ public partial class App
                 if (_repository.Find(id) is not { } r) return;
                 var cursor = TextCaptureService.GetCursorPosition();
                 OpenCard(r, new PixelPoint(cursor.X, cursor.Y), mini: false);
-            }, ShowAll: OpenWatchList));                          // round 34: the watch list has no tray item; it opens from Today
+            }, ShowAll: OpenWatchList,                            // round 34: the watch list has no tray item; it opens from Today
+            // round 36: what moved since the look kept when Today was last closed, kept again when it closes; and next week, from Thursday noon
+            Looks: () =>
+            {
+                var kept = LastLook.Load(AppPaths.LastLookFile);
+                return (kept, LookNow(), kept is not null && DateTime.TryParse(kept.At, null, System.Globalization.DateTimeStyles.AdjustToUniversal, out var at)
+                    ? LastLook.SaidNote(Clock.Ms(DateTime.SpecifyKind(at, DateTimeKind.Utc)), Clock.Zone) : null);
+            },
+            KeepLook: () => LastLook.Save(AppPaths.LastLookFile, LookNow()),
+            Week: () => { var wall = Clock.Wall(Clock.UtcNow()); return NextWeek.Of(DateOnly.FromDateTime(wall), wall.Hour, Records(), _calendar); }));
         _todayWindow.Closed += (_, _) => _todayWindow = null;
         _todayWindow.Show();
         RefreshTrayState();

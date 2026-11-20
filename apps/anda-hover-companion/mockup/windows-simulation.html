@@ -1049,6 +1049,8 @@ details.sec>summary h3.grp{padding:0;margin:0}
 .td-main .attn{margin:0}
 .td-main .acts{display:flex;gap:8px;flex-wrap:wrap}
 .td-empty{color:var(--c-ink3);padding:20px 4px}
+.td-note{color:var(--c-ink2);font-size:calc(11.5px*var(--ts));padding:0 8px 4px;line-height:1.35}
+.td-gone{cursor:default}
 @media (max-width:640px){.td-grid{grid-template-columns:1fr}#today{width:auto}}
 
 /* ===================== round 20: the desktop looks like Windows 11 =====================
@@ -5282,6 +5284,62 @@ function todayGroups(pins, recents){
   return [{ title:"NEEDS A LOOK", ids:needLookIds() }, { title:"KEPT IN MY LIST", ids:pins.filter(x => DATA[x]) }, { title:"RECENT", ids:recents.filter(x => DATA[x] && !pins.includes(x)) }]
     .map(g => ({ title:g.title, ids:g.ids, rows:g.ids.map(id => ({ id, mark:tdSev(id), line:tdLine(id) })) }));
 }
+/* ---------------- Round 36: "Since you last looked" and "Next week", in Today ----------------
+   What this PC keeps of a look: for each ANDA its goal date, its forecast date and a short fingerprint of its open item (never the item's
+   words), with the time it was kept. It is kept when Today is closed, read when Today opens, and sent nowhere. The Windows app keeps the
+   same in last-look.json beside its settings. The rules below are pure, and mockup/round36-golden.json holds the app to their answers. */
+const isoDay = t => t === null ? null : new Date(t).toISOString().slice(0, 10);
+const dayOfIso = s => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ""); return m ? ymd(+m[1], +m[2], +m[3]) : null; };
+/* FNV-1a over the UTF-16 code units, as eight hex digits: the same in C#. It tells that an item changed without keeping what it says. */
+function fingerprint(text){ let h = 0x811c9dc5; for(let i = 0; i < text.length; i++){ h ^= text.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16).padStart(8, "0"); }
+function lookOf(d){ return { goal:d.goalD ? isoDay(ymd(...d.goalD)) : null, forecast:d.fcD ? isoDay(ymd(...d.fcD)) : null, item:d.attn ? fingerprint(d.attn) : null }; }
+function lookNow(data, atMs){ const items = {}; Object.keys(data).sort().forEach(id => { items[id] = lookOf(data[id]); }); return { at:new Date(atMs).toISOString(), items }; }
+const LOOK_MAX = 40;
+/* What moved between two looks, ANDA by ANDA in number order: added or gone, the goal date, the forecast, the open item. itemText gives an
+   open item's words for the sentence, from the data on screen now. */
+function changesSince(before, now, itemText){
+  if(!before || !before.items || !now || !now.items) return { rows:[], more:0 };
+  const ids = [...new Set([...Object.keys(before.items), ...Object.keys(now.items)])].filter(six).sort(), rows = [];
+  const days = (a, b) => Math.round((dayOfIso(b) - dayOfIso(a)) / DAY);
+  for(const id of ids){
+    const b = before.items[id], n = now.items[id];
+    if(!b){ rows.push({ id, kind:"added", text:"New in your data." }); continue; }
+    if(!n){ rows.push({ id, kind:"gone", text:"No longer in your data." }); continue; }
+    if(b.goal !== n.goal) rows.push({ id, kind:"goal", text:b.goal && n.goal ? `Goal date moved from ${shortDate(dayOfIso(b.goal))} to ${shortDate(dayOfIso(n.goal))}.` : n.goal ? `Goal date set: ${shortDate(dayOfIso(n.goal))}.` : "Goal date removed." });
+    if(b.forecast !== n.forecast){
+      const k = b.forecast && n.forecast ? days(b.forecast, n.forecast) : 0;
+      rows.push({ id, kind:"forecast", text:b.forecast && n.forecast ? `Forecast moved from ${shortDate(dayOfIso(b.forecast))} to ${shortDate(dayOfIso(n.forecast))} (${Math.abs(k)} day${Math.abs(k) === 1 ? "" : "s"} ${k > 0 ? "later" : "earlier"}).` : n.forecast ? `Forecast set: ${shortDate(dayOfIso(n.forecast))}.` : "Forecast removed." });
+    }
+    if(b.item !== n.item) rows.push({ id, kind:"item", text:n.item ? `New item needs you: ${itemText(id) || "see the card"}.` : "The item that needed you is no longer in your data." });
+  }
+  return { rows:rows.slice(0, LOOK_MAX), more:Math.max(0, rows.length - LOOK_MAX) };
+}
+/* Next week, from Thursday noon to Sunday: the goal and forecast dates that fall from Monday to Friday of the coming week, by date, and the
+   federal holidays in it. hour is the hour of the day in the person's time zone. */
+function nextWeek(todayT, hour, data){
+  const dow = dowOf(todayT);
+  if(!(dow === 5 || dow === 6 || dow === 0 || (dow === 4 && hour >= 12))) return null;
+  const mon = todayT + ((8 - dow) % 7 || 7) * DAY, fri = mon + 4 * DAY, rows = [], holidays = [];
+  for(let t = mon; t <= fri; t += DAY){ const hol = holidayOn(t); if(hol) holidays.push(`${shortDate(t)}: ${hol.name} (federal holiday)`); }
+  Object.keys(data).sort().forEach(id => {
+    const d = data[id];
+    [["Goal date", d.goalD], ["Forecast", d.fcD]].forEach(([what, parts]) => { if(!parts) return; const t = ymd(...parts); if(t >= mon && t <= fri) rows.push({ id, t, text:`${what} ${shortDate(t)}` }); });
+  });
+  rows.sort((a, b) => a.t - b.t || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  return { title:`NEXT WEEK · ${shortDate(mon)} TO ${shortDate(fri)}`.toUpperCase(), rows:rows.map(({ id, text }) => ({ id, text })), holidays, empty:rows.length ? null : "Nothing of yours falls due next week." };
+}
+const LOOK_SAID = { first:"From now on, what moves in your data between two looks is listed here.", none:"Nothing has moved since you last looked.",
+  note:(atMs, zone) => `Compared with what this PC kept when you last closed Today: ${timeLabel(atMs, zone)}.` };
+/* The demo starts with a fictional earlier look, so the group can be seen: the forecast of 216482 a week earlier, and one ANDA since gone. */
+function sampleLastLook(){
+  const look = lookNow(DATA, Date.UTC(2026, 6, 15, 21, 5)); look.sample = true;
+  look.items["216482"] = { ...look.items["216482"], forecast:"2026-10-10", item:null };
+  look.items["209998"] = { goal:"2026-09-01", forecast:"2026-09-01", item:null };
+  return look;
+}
+/* undefined: the demo's sample look; null: nothing kept yet (a first start); otherwise the look kept when Today was last closed */
+function lastLookKept(){ return state.lastLook === undefined ? sampleLastLook() : state.lastLook; }
+function keepLook(){ state.lastLook = lookNow(DATA, nowMs()); }
 function todayMain(id){
   const d = DATA[id], n = Math.abs(d.delta), fl = watchFlags(id);
   return { meta:`ANDA ${id} · ${d.drug}`, tone:d.delta > 0 ? "late" : "good", figure:d.delta === 0 ? "On" : String(n),
@@ -5289,7 +5347,7 @@ function todayMain(id){
     dates:`Goal ${d.goal} · Forecast ${d.fc} · ${d.fconf}`, attn:d.attn || null, watch:fl.length ? "Watch: " + fl[0].text : null, status:statusLine(id) };
 }
 function openToday(){
-  closeMenus(); showApp("today"); $("today").style.zIndex = "52";
+  closeMenus(); showApp("today"); $("today").style.zIndex = "52"; $("today").dataset.wasOpen = "1";
   tdSel = tdSel && DATA[tdSel] ? tdSel : (needLookIds()[0] || Object.keys(DATA)[0] || null);
   $("tdSearch").value = ""; paintToday(); refreshTrayState();
   setTimeout(() => $("tdSearch").focus(), 30);
@@ -5297,18 +5355,37 @@ function openToday(){
 function paintToday(){
   const list = $("tdList"); list.replaceChildren();
   const typed = extractNumber($("tdSearch").value.trim()); if(typed && DATA[typed]) tdSel = typed;
-  const groups = todayGroups(state.pins, state.recentsOn ? state.recents : []).map(g => [g.title, g.ids]);
   let any = false;
-  groups.forEach(([title, ids]) => {
-    if(!ids.length) return; any = true; list.append(h("div", { class:"td-grp", text:title }));
-    ids.forEach(id => {
-      const b = h("button", { type:"button", class:"td-it", "aria-current":String(id === tdSel), "data-id":id }, h("i", { class:"td-dot " + tdSev(id), "aria-hidden":"true" }), h("span", {}, h("b", {}, id + " ", h("em", { class:"td-tag", text:TODAY_MARK[tdSev(id)] })), h("small", { text:tdLine(id) })));
-      b.addEventListener("click", () => {
-        tdSel = id; paintToday();
-        const again = list.querySelector(`.td-it[data-id="${id}"][aria-current="true"]`) || list.querySelector(`.td-it[data-id="${id}"]`); if(again) again.focus();
-        $("tdSay").textContent = todayShown(id);
-      }); list.append(b);
-    });
+  /* one row: an ANDA in the data can be pressed; one no longer in it is shown as text. grp keeps the keyboard on the row pressed. */
+  const row = (grp, id, line) => {
+    if(!DATA[id]){ list.append(h("div", { class:"td-it td-gone", "data-id":id }, h("i", { class:"td-dot g", "aria-hidden":"true" }), h("span", {}, h("b", { text:id }), h("small", { text:line })))); return; }
+    const b = h("button", { type:"button", class:"td-it", "aria-current":String(id === tdSel), "data-id":id, "data-grp":grp }, h("i", { class:"td-dot " + tdSev(id), "aria-hidden":"true" }), h("span", {}, h("b", {}, id + " ", h("em", { class:"td-tag", text:TODAY_MARK[tdSev(id)] })), h("small", { text:line })));
+    b.addEventListener("click", () => {
+      tdSel = id; paintToday();
+      const again = list.querySelector(`.td-it[data-grp="${grp}"][data-id="${id}"]`) || list.querySelector(`.td-it[data-id="${id}"]`); if(again) again.focus();
+      $("tdSay").textContent = todayShown(id);
+    }); list.append(b);
+  };
+  /* the sentences of one ANDA together, in the order the rule gives them */
+  const byId = rows => { const m = new Map(); rows.forEach(r => m.set(r.id, (m.has(r.id) ? m.get(r.id) + " " : "") + r.text)); return [...m]; };
+  /* Round 36: what moved since the last look, first */
+  const kept = lastLookKept(), since = kept ? changesSince(kept, lookNow(DATA, nowMs()), id => DATA[id] && DATA[id].attn) : null;
+  list.append(h("div", { class:"td-grp", text:"SINCE YOU LAST LOOKED" }));
+  list.append(h("div", { class:"td-note", text:!kept ? LOOK_SAID.first : LOOK_SAID.note(Date.parse(kept.at), toolTz()) + (kept.sample ? " (A fictional earlier look, for the demo.)" : "") }));
+  if(kept && !since.rows.length) list.append(h("div", { class:"td-note", text:LOOK_SAID.none }));
+  if(since) byId(since.rows).forEach(([id, line]) => row("since", id, line));
+  if(since && since.more) list.append(h("div", { class:"td-note", text:`${since.more} more changes; the card of each ANDA shows its own.` }));
+  /* Round 36: from Thursday noon, next week */
+  const wc = zoneClock(nowMs(), toolTz()), week = nextWeek(state.pretend ? demoToday() : ymd(wc.year, wc.month, wc.day), wc.hour, DATA);   /* the page's own clock, in the person's zone */
+  if(week){
+    list.append(h("div", { class:"td-grp", text:week.title }));
+    week.holidays.forEach(t => list.append(h("div", { class:"td-note", text:t })));
+    if(week.empty) list.append(h("div", { class:"td-note", text:week.empty }));
+    byId(week.rows).forEach(([id, line]) => row("week", id, line));
+  }
+  todayGroups(state.pins, state.recentsOn ? state.recents : []).forEach(g => {
+    if(!g.ids.length) return; any = true; list.append(h("div", { class:"td-grp", text:g.title }));
+    g.rows.forEach(r => row(g.title, r.id, r.line));
   });
   if(!any) list.append(h("div", { class:"td-empty", text:TODAY_SAID.nothing }));
   $("tdAll").hidden = !needLookIds().length;   // round 34: the watch list has no tray item; it opens from here
@@ -5605,6 +5682,7 @@ function closeApp(id){
   w.style.display = "none"; if(card.style.display !== "block") scrim.style.display = "none";
   /* The keyboard goes back to where it was, when that is still on the screen: never to the page body. */
   if(held && back && back.isConnected && back.getClientRects().length){ try{ back.focus({ preventScroll:true }); }catch(e){} }
+  if(id === "today" && w.dataset.wasOpen === "1"){ keepLook(); w.dataset.wasOpen = ""; }   /* round 36: the look is kept when Today closes */
   if(id === "first") fsAfterClose();              /* however the guide was closed (its buttons, Esc), the keyboard is not left on nothing */
   if(id === "cmp") weekDelDisarm();               /* a question that was asked does not wait behind a closed window */
   if(id === "bak") bakPending = null;
@@ -6082,8 +6160,9 @@ const GUIDE_SAID = {
 /* The guide opens by itself once, at the first start, and never again by itself. "seen" is what the PC remembers; anything but true means it has not been shown. */
 function guideOpensAtStart(seen){ return seen !== true; }
 
-const APP_VERSION = "Prototype, round 35";
+const APP_VERSION = "Prototype, round 36";
 const CHANGES = [
+  { round:36, items:["Today begins with what has moved since you last looked: forecasts and goal dates that changed, ANDAs added or gone, and a new item that needs you. This PC keeps only each ANDA's two dates and a fingerprint of its open item, from when you last closed Today.", "From Thursday noon to Sunday, Today also shows next week: the goal and forecast dates that fall in it, and the federal holidays."] },
   { round:35, items:["The tray menu is shorter: Lookup, Today, Review a draft, Ask, More, Settings and Help. With all tools on, Lists holds the two to-do lists, the notes and your usage. More holds the rest; Help holds first steps and what changed.", "Text in the Windows app uses one scale of six sizes, so pages read calmer and larger text grows them together."] },
   { round:34, items:["Your own shortcut now opens the card directly. If you prefer the small invite first, choose Whisper in Settings, How it starts. A middle-click still shows the invite first.", "The card shows the answer first: what needs you, the goal and the forecast, and the first thing worth a look. The calendar, Latest, Ahead, the reference dates and the brief are one press away, under More or E.", "A click on the tray icon opens Today, which now also holds what the Watch list showed."] },
   { round:33, items:["The Windows app now has what the simulation has shown since rounds 18 and 19: details from your own sheet on an expanded card, each with Copy; larger text and compact spacing; recent ANDAs and a short list you keep; One Bar; and Today.", "In Today, what needs a look is listed with the most pressing first.", "The Edge extension says where a card's data is from, as of when in your time zone and how long ago, marks it STALE after the days you choose, and has first steps of its own."] },
