@@ -9,6 +9,8 @@ using Xunit;
 namespace AndaCompanion.Tests;
 
 /// <summary>What each kind of custom action does, tested without a window: what is sent, when, and what is never sent.</summary>
+// It runs an agent, which writes to the app's one event log: it must not run beside a test that reads that log.
+[Collection("Global state")]
 public class ActionRunnerTests
 {
     private static readonly DateOnly Today = new(2026, 11, 2);        // a Monday

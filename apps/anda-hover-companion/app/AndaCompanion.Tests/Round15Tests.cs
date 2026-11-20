@@ -9,6 +9,8 @@ using Xunit;
 namespace AndaCompanion.Tests;
 
 /// <summary>Round 15: the 30–100% transparency range, custom actions, the live to-do list, and the agent connector. All of it is offline-testable.</summary>
+// Some of these tests point the app's one event log at a file of their own; they must not run beside other tests that write to it.
+[Collection("Global state")]
 public class Round15Tests
 {
     private static readonly DateOnly Today = new(2026, 11, 2);

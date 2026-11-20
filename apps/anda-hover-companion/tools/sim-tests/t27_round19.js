@@ -73,7 +73,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   eq(await txt(p, '#x-details-n'), '· 7 of 9 in your sheet', 'C7 the heading counts what the sheet has');
   await p.click('#x-details [data-copy=agentEmail]'); await settle(p, 200);
   eq(await clip(p), 'us.agent@northgate-agents.example', 'C8 Copy puts exactly that value on the clipboard');
-  eq(await txt(p, '#x-details-status'), 'Copied: us agent email.', 'C9 and says what was copied');
+  eq(await txt(p, '#x-details-status'), 'Copied: US agent email.', 'C9 and says what was copied (round 33: a name keeps its capitals)');
   await p.click('#x-details-all'); await settle(p, 200);
   const all = await clip(p);
   ok(all.startsWith('ANDA 216482\nApplicant: Meridian Pharmaceuticals, Inc. (fictional) (Meridian)\n') && all.includes('\nUS agent email: us.agent@northgate-agents.example') && !all.includes('not in your sheet') && all.split('\n').length === 8, 'C10 Copy all gives one labeled line per field the sheet has, and skips the missing ones');

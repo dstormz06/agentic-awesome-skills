@@ -240,7 +240,7 @@ const contrast = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - 
   ok(await vis(p, '#today'), 'H3 Today opens');
   const grp = await p.$$eval('#tdList .td-grp', n => n.map(x => x.textContent));
   ok(grp[0] === 'NEEDS A LOOK', 'H4 the first group is what needs a look');
-  const first = await p.$eval('#tdList .td-it[aria-current=true] b', e => e.textContent);
+  const first = await p.$eval('#tdList .td-it[aria-current=true]', e => e.dataset.id);      // round 33: the row also shows its mark as a word
   ok(['214990', '216482'].includes(first), 'H6 one ANDA is selected and shown on the right');
   await p.fill('#tdSearch', '216482'); await settle(p, 80);
   ok((await txt(p, '#tdMain .meta')).startsWith('ANDA 216482'), 'H7 typing a number selects it');
@@ -271,14 +271,17 @@ const contrast = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - 
     const json = backupText(), parsed = JSON.parse(json);
     state.ts = 'standard'; state.density = 'comfortable'; state.lookupStyle = 'box'; state.recentsOn = true; state.pins = [];
     const r = importBackup(json)[0];
-    const out = { r, ts: state.ts, density: state.density, style: state.lookupStyle, on: state.recentsOn, pins: state.pins, recentsKept: state.recents, hasRecents: 'recents' in parsed.settings, keys: Object.keys(parsed.settings).filter(k => ['textSize', 'density', 'lookupStyle', 'rememberRecents', 'pins'].includes(k)) };
+    const recentsAfterOff = state.recents.slice(), onAfterRestore = state.recentsOn;
+    state.recentsOn = true; state.recents = ['214990']; const onJson = JSON.parse(json); onJson.settings.rememberRecents = true; importBackup(JSON.stringify(onJson)); const recentsAfterOn = state.recents.slice();
+    const out = { r, ts: state.ts, density: state.density, style: state.lookupStyle, on: onAfterRestore, pins: state.pins, recentsKept: recentsAfterOn, recentsAfterOff, hasRecents: 'recents' in parsed.settings, keys: Object.keys(parsed.settings).filter(k => ['textSize', 'density', 'lookupStyle', 'rememberRecents', 'pins'].includes(k)) };
     const bad = JSON.parse(json); bad.settings.textSize = 'huge'; bad.settings.density = 'tight'; bad.settings.lookupStyle = '<img src=x onerror=window.__pwn=1>'; bad.settings.pins = ['<img src=x onerror=window.__pwn=1>', '12345', '1234567', '216482', '216482', 7, null, '100001', '100002', '100003', '100004', '100005'];
     importBackup(JSON.stringify(bad)); out.badTs = state.ts; out.badDensity = state.density; out.badStyle = state.lookupStyle; out.badPins = state.pins; out.pwn = window.__pwn || 0;
     applySettings({}); out.empty = [state.ts, state.density, state.lookupStyle, state.recentsOn, state.pins];
     return out;
   });
   ok(rt.r && rt.ts === 'large' && rt.density === 'compact' && rt.style === 'bar' && rt.on === false && JSON.stringify(rt.pins) === '["216482"]', 'J1 text size, spacing, lookup style, the recents switch and kept ANDAs travel in a backup');
-  ok(!rt.hasRecents && JSON.stringify(rt.recentsKept) === '["214990"]', 'J2 the recents themselves are not in a backup, and a restore leaves this PC\'s own');
+  ok(!rt.hasRecents && JSON.stringify(rt.recentsKept) === '["214990"]', 'J2 the recents themselves are not in a backup, and a restore with remembering on leaves this PC\'s own');
+  ok(JSON.stringify(rt.recentsAfterOff) === '[]', 'J2b a restore that switches remembering off forgets them, as the Settings hint says (round 33)');
   eq([rt.badTs, rt.badDensity, rt.badStyle], ['standard', 'comfortable', 'box'], 'J3 odd values in a hand-edited backup become the defaults');
   eq(rt.badPins, ['216482', '100001', '100002', '100003', '100004'], 'J4 only six-digit numbers are kept, once each, at most five');
   eq(rt.pwn, 0, 'J5 markup in a backup is never run');

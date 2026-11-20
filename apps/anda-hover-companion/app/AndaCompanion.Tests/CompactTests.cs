@@ -215,19 +215,21 @@ public class CompactRenderTests : IClassFixture<HeadlessFixture>
         var (idleGone, pinnedKept) = await _fx.Session.Dispatch(async () =>
         {
             ThemeManager.Apply(AppearanceId.K);
-            var idle = new CardWindow(new OfflineBriefService(), Repo.Find) { CloseWhenDeactivated = false, AutoHideSeconds = 0.3 };
+            // 1.5 s, not less: the very first cards of a run can take longer than a short limit to be drawn, and the pinned one must be
+            // pinned before its limit can pass (round 33: with 0.3 s it hid before the key that pins it arrived, in runs just after a rebuild).
+            var idle = new CardWindow(new OfflineBriefService(), Repo.Find) { CloseWhenDeactivated = false, AutoHideSeconds = 1.5 };
             idle.Show(Repo.Find("216482")!, new PixelPoint(40, 40), false);
-            var pinned = new CardWindow(new OfflineBriefService(), Repo.Find) { CloseWhenDeactivated = false, AutoHideSeconds = 0.3 };
+            var pinned = new CardWindow(new OfflineBriefService(), Repo.Find) { CloseWhenDeactivated = false, AutoHideSeconds = 1.5 };
             pinned.Show(Repo.Find("216482")!, new PixelPoint(40, 40), false);
             pinned.KeyPress(Key.Space, RawInputModifiers.None, PhysicalKey.Space, " ");        // pin
-            for (int i = 0; i < 40 && idle.IsVisible; i++) { await Task.Delay(100); Dispatcher.UIThread.RunJobs(); }
+            for (int i = 0; i < 80 && idle.IsVisible; i++) { await Task.Delay(100); Dispatcher.UIThread.RunJobs(); }
             bool a = !idle.IsVisible, b = pinned.IsVisible;
             if (pinned.IsVisible) pinned.Close();
             if (idle.IsVisible) idle.Close();
             return (a, b);
         }, CancellationToken.None);
-        Assert.True(idleGone);
-        Assert.True(pinnedKept);
+        Assert.True(idleGone, "the idle card was still open after 8 s with a 1.5 s limit");
+        Assert.True(pinnedKept, "the pinned card was closed by the timer");
     }
 
     // ---------- structural signatures of the new full looks ----------
