@@ -1705,7 +1705,9 @@ The owner's choice of Nov 20 (suggestions C2 and C4). **Today begins with what h
 
 **A static security pass by the builder** (reading only; nothing was scanned or probed), with the Security Engineer and Secure App Builder skill sets as checklists: nothing new is sent; no new host, permission, hook, capture or clipboard use; one new stored file (`last-look.json`: ANDA numbers, two dates each, a fingerprint, a time and a source), written only when Today closes on readable data, set aside only when it cannot be parsed, cleared by Reset; text from the kept file is never shown as markup (the simulation sets text; the app's text blocks do not read markup).
 
-COUNTS_PLACEHOLDER
+**Every suite was run twice on the final code**, one run after the other; the app was rebuilt from nothing before each. Results, identical in both runs: C# **1,300 passed, 15 skipped, 0 failed** (the 15 are the picture tests, which run only when asked for); the Debug build succeeded; simulation **48 of 48 suites, 2,149 checks, 0 failed**; extension unit tests **70 of 70** (also under TZ=UTC); extension browser tests **69, 61 and 16 checks, all passing**; all ten answer files give **0 mismatches** and no page error; `npm run validate` and `npm run security:docs` pass.
+
+**Not proven by these rounds**, and what to do about each: nothing ran on Windows (no Windows build since Nov 12; this session may not start the workflow, so the owner starts it from the Actions tab). So the six sizes in Segoe UI, whether the countdown caption fits on one line in that font (it goes to a second line rather than being cut), Narrator in the grouped tray menu (the app's native menu, not the simulation's), the kept look at a Windows log-off, and Today's speed with a large sheet are untested there.
 
 ### Defects caught in rounds 35 and 36
 
