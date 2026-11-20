@@ -1802,7 +1802,7 @@ The owner's choice after round 38 (the to-do titles in Today had no switch of th
 | 7 | The switch sat under "TODAY · SINCE YOU LAST LOOKED" | The section is "TODAY" in both programs | Simulation R2 |
 | 8 | The hint said the lists are read when Today opens (they are read each time next week is shown); a stray comment | Wording and comment corrected | Shared answers |
 
-COUNTS39_PLACEHOLDER
+**Every suite was run twice on the final code of round 39** (with the review's fixes), one run after the other, the app rebuilt from nothing before each. Results, identical in both runs: C# **1,317 passed, 15 skipped, 0 failed**; the Debug build succeeded; simulation **51 of 51 suites, 2,193 checks, 0 failed**; extension unit tests **70 of 70** (also under TZ=UTC); extension browser tests **69, 61 and 16 checks, all passing**; all thirteen answer files give **0 mismatches** and no page error; `npm run validate` and `npm run security:docs` pass. Nothing of rounds 35 to 39 has run on Windows.
 
 ## Still open
 
