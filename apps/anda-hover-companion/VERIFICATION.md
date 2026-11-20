@@ -1841,6 +1841,35 @@ The owner asked that the tool connect to AI APIs and to MCP servers. AI APIs wer
 
 **Every suite was run twice on the final code of round 40**, one run after the other, the app rebuilt from nothing before each. Results, identical in both runs: C# **1,360 passed, 15 skipped, 0 failed**; the Debug build succeeded; simulation **52 of 52 suites, 2,220 checks, 0 failed**; extension unit tests **70 of 70** (also under TZ=UTC); extension browser tests **69, 61 and 16 checks, all passing**; all fourteen answer files give **0 mismatches** and no page error; `npm run validate` and `npm run security:docs` pass. One earlier full run of the simulation (before the last fixes) failed one check of `t30_round21.js` (S2: a typed note lost its first letter after a reload); the suite passed every run since, alone and in full, and the cause was not found. Nothing of rounds 35 to 40 has run on Windows.
 
+## Round 41: Elsa and programs on this PC from Settings, no source edits; two reviews until both found nothing
+
+The owner asked that what still needed a source edit become settings. Elsa's request body, reply path and token header are typed in Settings, AI and connections, Elsa; an MCP server can be a program on this PC (stdio), named only by the full path of an .exe and the SHA-256 IT gives, with its arguments. With nothing typed, nothing changes: Elsa stays offline and no program can be started. Rules and words are held to `mockup/round41-golden.json` (12 Elsa settings, 12 token headers, 22 program paths, 6 servers kept).
+
+**Tests:** app `Round41Tests` (19 test methods): the shared answers; Elsa built and sent as typed, and never Ready with values that could not be used; a stand-in program in memory over pipes, checked, held, started without a shell, spoken to one line at a time; a different file never started; flooding, silence and a program that will not end; a program that broke off or ran out of time is stopped and not restarted by one press or by Send; a 400 KB request while the program writes 2 MB does not block; the token variables withheld; every program stopped at the app's end; Windows' own path compared with the typed path; the two presses in the window and in Settings, an edit between them asking again; a refused request not logged as sent. Simulation `t49_round41.js` (23 checks, with accessibility scans of Settings and MCP tools and a check that the page asks no server for anything).
+
+**A separate adversarial reviewer** read 33e2904f and confirmed 5 defects and 6 plausible ones; **the second model (Sonnet), on the code quality checklist,** asked for 8 changes. All were made in 850c5651:
+
+| # | Finding | Fix |
+|---|---|---|
+| 1 | After a break-off one press, or Send, started the program again | A one-shot permit, given only after a confirmed second press |
+| 2 | Settings' second press counted after an edit; its test read the source | One confirm (`McpStartConfirm`) keyed by program, SHA-256 and arguments; a behavior test |
+| 3 | A timeout left the program running | Stopped |
+| 4, 9 | ":" streams, "..", trailing dots, mapped drives, links | A stricter pattern, and Windows' own path for the open file must equal the typed path |
+| 5 | Elsa counted as Ready with values that could not be used | Never; Settings says why |
+| 6, 7 | Pipe reads not cancellable; a large write could block both sides | A pump reads the output all the time; writes heed the time limit |
+| 8 | Programs left running at the app's end | Stopped when the app ends (not after a crash: no job object, noted) |
+| 10 | The hash covers the .exe only | Said in the hint, SECURITY and the IT request |
+| 11 | The program inherited the app's token variables | Those are withheld |
+| Q1–Q8 | Two-press logic twice; three enablement rules; two shape checks; an optional mapping; Forget; seams public; one file for both transports | One of each; the mapping required; Forget removed; seams internal; McpHttp.cs, McpProgram.cs, McpLocal.cs |
+
+Re-reviews found four more small items (a refused Send logged as sent; a type test in the client; two shutdown hooks; the exit stop described as gentle in two documents), all fixed. **Last word of both reviewers: no findings** (the adversarial reviewer at e4120ea3, the second model at 66d0e2dc; both read the code and ran nothing).
+
+**Faults put back on purpose, 25 of 25 caught** by the app's tests (two survived the first run and were closed: a colon in a folder had no shared case, now added; a network-path clause in `SameFile` was dead code, now removed, since a network path never equals a typed one): no hash check; the file let go before start; a shell; arguments as one string; no permit needed; the permit kept; a timeout or a break-off keeping the program; tokens passed on; no line cap; no stop at the end; StopAll doing nothing; network paths accepted; the path compared by case; dots or colons in folders; a server on with an address that cannot be used; the confirm ignoring arguments or reusable; one press in the window or Settings; logged before the session; Elsa Ready with a problem; Elsa's header unchecked; the reply path unchecked.
+
+**Every suite was run twice on the final code**, one run after the other, the app rebuilt from nothing before each. Results, identical in both runs: C# **1,379 passed, 15 skipped, 0 failed**; the Debug build succeeded; simulation **53 of 53 suites, 2,242 checks, 0 failed**; extension unit tests **70 of 70** (also under TZ=UTC); extension browser tests **69, 61 and 16 checks, all passing**; all fifteen answer files give **0 mismatches** and no page error; `npm run validate` and `npm run security:docs` pass.
+
+**Not tested:** a real program on Windows (no program has been started; the stand-ins run in memory); the Windows final-path check itself (it cannot run here, only its comparison rule); a real Elsa call; a run of rounds 35 to 41 on Windows.
+
 ## Still open
 
 GDUFA III tier table (needs the commitment-letter text and the dual-source rule); a real-keyboard check of rebound shortcuts on
