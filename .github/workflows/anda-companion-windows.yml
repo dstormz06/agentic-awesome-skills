@@ -71,6 +71,8 @@ jobs:
           dotnet test app/AndaCompanion.Tests -c Release --no-build -nologo
           --filter "FullyQualifiedName~Round41ProgramTests"
           --logger "console;verbosity=normal"
+          --logger "trx;LogFileName=program-tests.trx"
+          --results-directory "$env:RUNNER_TEMP/test-results"
 
       - name: Test the Edge extension's rules against the app's own output (no browser needed)
         run: node --test extension/tests/unit/parity.test.mjs extension/tests/unit/safety.test.mjs extension/tests/unit/manifest.test.mjs extension/tests/unit/service.test.mjs extension/tests/unit/time.test.mjs extension/tests/unit/round33.test.mjs extension/tests/unit/round34.test.mjs
