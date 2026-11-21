@@ -48,8 +48,72 @@ public class Round42LogicTests
         var tomorrow = Notices.Pending(s, items, "2026-11-21");
         Assert.Equal(new[] { data.Key }, tomorrow.Select(i => i.Key));
         Assert.Equal(0, s.Shown);                                                            // a new day counts again
-        // after 60 days, what was shown is forgotten (the same fact can be told again)
+        // after 60 days, what was shown is forgotten (the same fact can be told again); on the 60th day it is still kept
+        var day60 = new NoticeState { Day = "2026-11-20", Seen = new(s.Seen) };
+        Assert.Equal(1, Notices.Pending(day60, items, "2027-01-19").Count);
         Assert.Equal(3, Notices.Pending(s, items, "2027-01-20").Count);
+    }
+
+    [Fact]
+    public void Notices_hold_the_rule_not_the_persons_words_and_a_line_given_twice_is_one_notice()
+    {
+        var todo = new TimelineAlert("100006|todo-overdue|0000abcd|2026-11-19", "100006", "todo-overdue", "now", "bad", "2026-11-19", "To-do item overdue since Thu Nov 19: Fictional private words");
+        var attention = new TimelineAlert("100001|attention|0000abcd", "100001", "attention", "now", "warn", null, "Needs action: Fictional private words");
+        var items = Notices.FromAlerts(new[] { todo, attention });
+        Assert.Equal(new[] { "ANDA 100006: To-do item overdue since Thu Nov 19.", "ANDA 100001: Your sheet marks an item that needs action (see the card)." }, items.Select(i => i.Text));
+        Assert.DoesNotContain("private", Timeline.Summary(new[] { todo, attention }, "2026-11-20", _ => null));      // nor in the summary for a team lead
+        var news = new NewsItem("n|2026-11-19|0000abcd", "2026-11-19", "Fictional line.");
+        Assert.Single(Notices.Pending(new NoticeState(), Notices.FromNews(new[] { news, news }), "2026-11-20"));
+        // the memory is full: the oldest shown is let go, and what is shown now is kept as shown
+        var full = new NoticeState { Day = "2026-11-20" };
+        for (int i = 0; i < Notices.MaxKept; i++) full.Seen[$"k{i:D5}"] = i == 7 ? "2026-11-01" : "2026-11-19";
+        var pending = new List<NoticeItem>(items);
+        var shown = Notices.Take(full, pending, 3, "2026-11-20")!;
+        Assert.Equal("2026-11-20", full.Seen[shown.Key]); Assert.False(full.Seen.ContainsKey("k00007")); Assert.Equal(Notices.MaxKept, full.Seen.Count);
+        Assert.Null(Notices.FromText(null, Path.Combine(Temp.NewDir(), "notices.json")));       // a file that cannot be read just now is not written over
+    }
+
+    [Fact]
+    public void The_checks_run_only_on_the_persons_own_readable_data_and_a_look_only_for_the_same_data()
+    {
+        var repo = new AndaCompanion.Data.MockAndaRepository();
+        var records = repo.Numbers.Select(n => repo.Find(n)!).ToList();
+        string dir = Temp.NewDir(), status = Path.Combine(dir, "status-seen.json");
+        var none = Array.Empty<TimelineTodo>();
+        Assert.Null(App.InputFor(false, records, "file:0000abcd", status, null, none, new TimelineSettings()));
+        Assert.False(File.Exists(status));                                                   // an unreadable sheet leaves the kept days alone
+        var look = LastLook.Of(records, new DateTime(2026, 7, 15, 12, 0, 0, DateTimeKind.Utc), "demo");
+        var mine = App.InputFor(true, records, "file:0000abcd", status, look, none, new TimelineSettings())!;
+        Assert.Null(mine.Look);                                                              // the demo's look is not this sheet's
+        Assert.Equal(records.Count, StatusSeen.Load(status, "file:0000abcd").Items!.Count);
+        Assert.NotNull(App.InputFor(true, records, "demo", status, look, none, new TimelineSettings())!.Look);
+        Assert.Null(StatusSeen.Load(status, "file:0000abcd").Items);                         // the other data's days are not mixed in
+    }
+
+    [Fact]
+    public void A_placeholder_date_far_ahead_is_quick_and_said_with_its_year()
+    {
+        var recs = Enumerable.Range(0, 200).Select(i => new TimelineRecord((200000 + i).ToString(), null, i % 2 == 0 ? "9999-12-31" : "2026-12-16", i % 2 == 0 ? null : "9999-12-31")).ToList();
+        var todos = new[] { new TimelineTodo("t", "200000", "Fictional", "9999-12-31", false) };
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        var alerts = Timeline.Alerts(new TimelineInput("2026-11-20", recs, null, todos, new Dictionary<string, string>(), new TimelineSettings()), new BusinessCalendar());
+        Assert.True(watch.Elapsed < TimeSpan.FromSeconds(2), watch.Elapsed.ToString());
+        Assert.Contains(alerts, a => a.Text == "The forecast (Fri Dec 31, 9999) is more than a year after the goal date (Wed Dec 16, 2026).");
+        var (cal, _) = Timeline.Calendar(recs.Take(3), "2026-11-20");
+        Assert.All(cal.Split("\r\n"), l => Assert.True(System.Text.Encoding.UTF8.GetByteCount(l) <= 75, l));      // folded (RFC 5545)
+    }
+
+    [Fact]
+    public void A_window_filling_the_screen_holds_the_notices()
+    {
+        try
+        {
+            Presenting.StateForTests = () => true; Assert.True(Presenting.Now());             // a window fills the screen
+            Presenting.StateForTests = () => false; Assert.False(Presenting.Now());
+            Presenting.StateForTests = () => null; Assert.False(Presenting.Now());            // not known (not Windows)
+            Presenting.StateForTests = null; if (!OperatingSystem.IsWindows()) Assert.False(Presenting.Now());
+        }
+        finally { Presenting.StateForTests = null; }
     }
 
     [Fact]
@@ -57,12 +121,12 @@ public class Round42LogicTests
     {
         string dir = Temp.NewDir(), path = Path.Combine(dir, "notices.json");
         File.WriteAllText(path, "{ not json");
-        var s = Notices.Load(path);
+        var s = Notices.Load(path)!;
         Assert.Equal(0, s.Shown); Assert.Empty(s.Seen);
         Assert.False(File.Exists(path));                                                     // set aside, not read again
         s.Day = "2026-11-20"; s.Shown = 2; s.Seen["d|100001|goal-passed|2026-11-20"] = "2026-11-20";
         Assert.True(Notices.Save(path, s));
-        var back = Notices.Load(path);
+        var back = Notices.Load(path)!;
         Assert.Equal(2, back.Shown); Assert.Equal("2026-11-20", back.Seen["d|100001|goal-passed|2026-11-20"]);
         Assert.DoesNotContain("Fictional", File.ReadAllText(path));                          // keys and days only, never a sentence
     }
@@ -80,11 +144,12 @@ public class Round42LogicTests
         var future = StatusSeen.Update(new Dictionary<string, StatusSeen.Seen> { ["100001"] = new(first["100001"].Fp, "2027-01-01") }, new[] { ("100001", (string?)"Fictional status A") }, "2026-11-20");
         Assert.Equal("2026-11-20", future["100001"].Since);                                  // a day in the future is not believed
         string path = Path.Combine(Temp.NewDir(), "status-seen.json");
-        Assert.True(StatusSeen.Save(path, later));
+        Assert.True(StatusSeen.Save(path, later, "file:0000abcd"));
         Assert.DoesNotContain("Fictional", File.ReadAllText(path));                          // never the status's words
-        Assert.Equal(later["100002"], StatusSeen.Load(path)!["100002"]);
+        Assert.Equal(later["100002"], StatusSeen.Load(path, "file:0000abcd").Items!["100002"]);
+        Assert.Equal((null, true), (StatusSeen.Load(path, "demo").Items, StatusSeen.Load(path, "demo").CanWrite));      // kept for other data: starts again
         File.WriteAllText(path, "[1,2");
-        Assert.Null(StatusSeen.Load(path)); Assert.False(File.Exists(path));
+        Assert.Null(StatusSeen.Load(path, "file:0000abcd").Items); Assert.False(File.Exists(path));
     }
 
     /// <summary>A small Word document made here: the parts Word needs to call it a document, and the given body.</summary>
@@ -113,6 +178,14 @@ public class Round42LogicTests
         Assert.Equal(new[] { "2026-11-19 Fictional meeting moved to Room 1.", "", "inner box", "Nov 18, 2026: outer line" }, paragraphs);
         var news = DivisionNews.Parse(paragraphs!, "2026-11-20");
         Assert.Equal(new[] { "Fictional meeting moved to Room 1.", "outer line" }, news.Select(n => n.Text));
+        // a text box as Word writes it, once for new readers and once for old ones (mc:Fallback): read once
+        const string mc = "xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\"";
+        var box = Docx($"<w:p><w:r><mc:AlternateContent {mc}><mc:Choice Requires=\"wps\"><w:txbxContent><w:p><w:r><w:t>2026-11-19: Fictional box</w:t></w:r></w:p></w:txbxContent></mc:Choice>" +
+            "<mc:Fallback><w:pict><w:txbxContent><w:p><w:r><w:t>2026-11-19: Fictional box</w:t></w:r></w:p></w:txbxContent></w:pict></mc:Fallback></mc:AlternateContent></w:r></w:p>");
+        Assert.Equal(new[] { "2026-11-19: Fictional box", "" }, DivisionNews.ReadDocx(box).Paragraphs);
+        // a long document, the newest line at its end: read
+        var longDoc = Docx(string.Concat(Enumerable.Repeat("<w:p/>", 9000)) + "<w:p><w:r><w:t>2026-11-20: Fictional newest</w:t></w:r></w:p>");
+        Assert.Equal("Fictional newest", DivisionNews.Parse(DivisionNews.ReadDocx(longDoc).Paragraphs!, "2026-11-20").Single().Text);
     }
 
     [Fact]
@@ -124,6 +197,11 @@ public class Round42LogicTests
         Assert.NotNull(DivisionNews.ReadDocx(notZip).Problem);
         Assert.Equal("The news document must be a Word document (.docx).", DivisionNews.ReadDocx(Path.Combine(Temp.NewDir(), "news.doc")).Problem);
         Assert.Equal("Please choose the division's news document first.", DivisionNews.ReadDocx("").Problem);
+        // only a file on this PC: not a network share (Windows would sign in to it), not a web address, not too long to be kept
+        Assert.Equal(DivisionNews.SaidNotLocal, DivisionNews.ReadDocx(@"\\fictional-server\share\news.docx").Problem);
+        Assert.Equal(DivisionNews.SaidNotLocal, DivisionNews.ReadDocx("https://fictional.example/news.docx").Problem);
+        Assert.NotNull(DivisionNews.PathProblem(@"C:\" + new string('a', 500) + ".docx"));
+        Assert.Null(DivisionNews.PathProblem(@"C:\Users\Fictional\OneDrive\news.docx"));
         Assert.NotNull(DivisionNews.ReadDocx(Path.Combine(Temp.NewDir(), "missing.docx")).Problem);
         string noBody = Path.Combine(Temp.NewDir(), "empty.docx");
         using (ZipFile.Open(noBody, ZipArchiveMode.Create)) { }
@@ -209,9 +287,13 @@ public class Round42UiTests : IClassFixture<HeadlessFixture>
             var w = new NewsWindow(new NewsHooks(() => alerts, () => news, id => opened.Add(id), () => "2026-11-20", n => records.FirstOrDefault(x => x.Number == n)?.Drug, () => records,
                 t => { copied = t; return Task.FromResult(true); }, t => { saved = t; return Task.FromResult(saveAnswer); }));
             var off = new NewsWindow(new NewsHooks(() => Array.Empty<TimelineAlert>(), () => (null, DivisionNews.SaidOff), _ => { }, () => "2026-11-20", _ => null, () => records));
+            string? unreadCopied = null;
+            var unread = new NewsWindow(new NewsHooks(() => null, () => (null, DivisionNews.SaidOff), _ => { }, () => "2026-11-20", _ => null, () => records, t => { unreadCopied = t; return Task.FromResult(true); }));
             try
             {
-                w.Show(); off.Show(); Settle();
+                w.Show(); off.Show(); unread.Show(); Settle();
+                await unread.CopySummaryAsync();
+                var unreadSaid = (now: Texts(unread.NowList), say: unread.Say.Text, copied: unreadCopied);
                 var now = Texts(w.NowList); var later = Texts(w.LaterList); var newsTexts = Texts(w.NewsList); string note = w.NewsNote.Text ?? "";
                 var offNow = Texts(off.NowList); var offLater = Texts(off.LaterList); string offNote = off.NewsNote.Text ?? ""; int offNews = off.NewsList.Children.Count;
                 var row = w.NowList.Children.OfType<Button>().Single(); Click(row); Settle();
@@ -220,9 +302,9 @@ public class Round42UiTests : IClassFixture<HeadlessFixture>
                 await w.SaveCalendarAsync(); string saySave = w.Say.Text ?? "";
                 saveAnswer = null; w.Say.Text = "kept"; await w.SaveCalendarAsync(); string sayCancel = w.Say.Text ?? "";
                 saveAnswer = false; await w.SaveCalendarAsync(); string sayFail = w.Say.Text ?? "";
-                return (now, later, newsTexts, note, offNow, offLater, offNote, offNews, opened, laterIsText, copied, sayCopy, saved, saySave, sayCancel, sayFail);
+                return (now, later, newsTexts, note, offNow, offLater, offNote, offNews, opened, laterIsText, copied, sayCopy, saved, saySave, sayCancel, sayFail, unreadSaid);
             }
-            finally { w.Close(); off.Close(); Settle(); }
+            finally { w.Close(); off.Close(); unread.Close(); Settle(); }
         }, CancellationToken.None);
         Assert.Single(r.now); Assert.Contains("100001", r.now[0]);
         Assert.Single(r.later); Assert.Contains("40 days old", r.later[0]);                  // the alert only for information is not listed
@@ -238,6 +320,8 @@ public class Round42UiTests : IClassFixture<HeadlessFixture>
         Assert.Equal(NewsWindow.SaidSaved(1), r.saySave);                                   // only the goal date in the next 180 days
         Assert.Equal("kept", r.sayCancel);                                                 // cancelled: nothing said
         Assert.Equal(NewsWindow.SaidNotSaved, r.sayFail);
+        Assert.Equal(new[] { Timeline.SaidUnreadable }, r.unreadSaid.now);                    // an unreadable sheet: said, and no summary of the demo
+        Assert.Equal(Timeline.SaidUnreadable, r.unreadSaid.say); Assert.Null(r.unreadSaid.copied);
     }
 
     [Fact]
@@ -251,15 +335,20 @@ public class Round42UiTests : IClassFixture<HeadlessFixture>
             var all = repo.Numbers.Select(n => Find(n)!).ToList();
             var alerts = new List<TimelineAlert> { Alert("216482", "goal-passed", "now", "urgent", "First reason."), Alert("216482", "thin-margin", "later", "soon", "Second reason."), Alert("216482", "psg", "later", "info", "Info only.") };
             for (int i = 0; i < 9; i++) alerts.Add(Alert((300000 + i).ToString(), "goal-close", "now", "soon", $"Reason {i}."));
-            var w = new TodayWindow(new TodayHooks(() => all, Find, () => Array.Empty<string>(), () => Array.Empty<string>(), _ => { }, Alerts: () => alerts));
+            int asked = 0;
+            var w = new TodayWindow(new TodayHooks(() => all, Find, () => Array.Empty<string>(), () => Array.Empty<string>(), _ => { }, Alerts: () => { asked++; return alerts; }));
+            var unread = new TodayWindow(new TodayHooks(() => all, Find, () => Array.Empty<string>(), () => Array.Empty<string>(), _ => { }, Alerts: () => null));
             var none = new TodayWindow(new TodayHooks(() => all, Find, () => Array.Empty<string>(), () => Array.Empty<string>(), _ => { }, Alerts: () => new[] { Alert("216482", "psg", "later", "info", "Info only.") }));
             var off = new TodayWindow(new TodayHooks(() => all, Find, () => Array.Empty<string>(), () => Array.Empty<string>(), _ => { }));
             try
             {
-                w.Show(); none.Show(); off.Show(); Settle();
-                return (texts: Texts(w.List), noneTexts: Texts(none.List), offTexts: Texts(off.List));
+                w.Show(); none.Show(); off.Show(); unread.Show(); Settle();
+                var texts = Texts(w.List);
+                Click(w.List.Children.OfType<Button>().First()); Click(w.List.Children.OfType<Button>().Last()); Settle();   // two row clicks repaint
+                int askedAfterClicks = asked; w.Refresh(); Settle();
+                return (texts, noneTexts: Texts(none.List), offTexts: Texts(off.List), unreadTexts: Texts(unread.List), askedAfterClicks, askedAfterRefresh: asked);
             }
-            finally { w.Close(); none.Close(); off.Close(); Settle(); }
+            finally { w.Close(); none.Close(); off.Close(); unread.Close(); Settle(); }
         }, CancellationToken.None);
         Assert.Equal(Timeline.TodayTitle, r.texts[0]);
         Assert.Contains(r.texts, t => t.Contains("First reason. (+1 more)"));             // the first reason, and how many more (info is not counted)
@@ -268,6 +357,9 @@ public class Round42UiTests : IClassFixture<HeadlessFixture>
         Assert.Contains(Timeline.TodayMore(2), r.texts);                                  // ... and how many more are in News and alerts
         Assert.Equal(Timeline.TodayTitle, r.noneTexts[0]); Assert.Contains(Timeline.TodayNone, r.noneTexts);
         Assert.DoesNotContain(Timeline.TodayTitle, r.offTexts);
+        Assert.Equal(new[] { Timeline.TodayTitle, Timeline.SaidUnreadable }, r.unreadTexts.Take(2));   // the sheet could not be read: said, nothing from the demo
+        Assert.Equal(1, r.askedAfterClicks);                                               // read once when Today opens, not at each paint
+        Assert.Equal(2, r.askedAfterRefresh);                                              // and again when a setting changes
     }
 
     [Fact]
@@ -293,6 +385,9 @@ public class Round42UiTests : IClassFixture<HeadlessFixture>
                 w.PickNewsDocument = () => Task.FromResult<string?>(@"C:\Users\Fictional\notes.txt");
                 Click(w.FindControl<Button>("NewsPick")!); await Task.Delay(1); Settle();
                 string wrongType = status.Text ?? ""; string pathAfterWrong = s.NewsDocument;
+                w.PickNewsDocument = () => Task.FromResult<string?>(@"\\fictional-server\share\news.docx");
+                Click(w.FindControl<Button>("NewsPick")!); await Task.Delay(1); Settle();
+                string network = status.Text ?? ""; string pathAfterNetwork = s.NewsDocument;
                 w.PickNewsDocument = () => Task.FromResult<string?>(@"C:\Users\Fictional\OneDrive\news.docx");
                 Click(w.FindControl<Button>("NewsPick")!); await Task.Delay(1); Settle();
                 string chosen = status.Text ?? ""; string path = s.NewsDocument;
@@ -306,12 +401,13 @@ public class Round42UiTests : IClassFixture<HeadlessFixture>
                 // a Settings without the app behind it (radio groups are shared until a window shows, so this one is made only now)
                 bare = new SettingsWindow(new Settings(), new PromptLibraryService(Path.Combine(Temp.NewDir(), "p.json")), () => { }); bare.Show(); Settle();
                 var bareNow = bare.FindControl<Button>("WatchNow")!; Click(bareNow); Settle();
-                return (startCaps, refused, newsOn, wrongType, pathAfterWrong, chosen, path, divisionNews, watchBack, perDay, goalClose, checks, opens, clearedNews, clearedPath,
+                return (network, pathAfterNetwork, startCaps, refused, newsOn, wrongType, pathAfterWrong, chosen, path, divisionNews, watchBack, perDay, goalClose, checks, opens, clearedNews, clearedPath,
                     combos: combos.Count, comboNames: combos.Select(c => AutomationProperties.GetName(c)).ToList(), bareSaid: bare.FindControl<TextBlock>("WatchStatus")!.Text, bareOpen: bare.FindControl<Button>("NewsOpen")!.IsEnabled,
                     hint: w.FindControl<TextBlock>("WatchHint")!.Text, tlHint: w.FindControl<TextBlock>("TimelineHint")!.Text);
             }
             finally { w.Close(); bare?.Close(); Settle(); }
         }, CancellationToken.None);
+        Assert.Equal(DivisionNews.SaidNotLocal, r.network); Assert.Equal("", r.pathAfterNetwork);
         Assert.Equal(new[] { false, true, false }, r.startCaps);                            // three a day unless the person chooses
         Assert.Equal("Please choose the division's news document first.", r.refused); Assert.False(r.newsOn);
         Assert.Equal("The news document must be a Word document (.docx).", r.wrongType); Assert.Equal("", r.pathAfterWrong);

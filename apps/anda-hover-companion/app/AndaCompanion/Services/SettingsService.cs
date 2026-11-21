@@ -391,7 +391,7 @@ public static class SettingsService
         loaded.Timeline = TimelineSettings.Normalize(loaded.Timeline);
         if (!Notices.Caps.Contains(loaded.NoticesPerDay)) loaded.NoticesPerDay = Notices.DefaultCap;
         loaded.NewsDocument = (loaded.NewsDocument ?? "").Trim();
-        if (loaded.NewsDocument.Length > 500 || (loaded.NewsDocument.Length > 0 && !loaded.NewsDocument.EndsWith(".docx", StringComparison.OrdinalIgnoreCase))) loaded.NewsDocument = "";
+        if (loaded.NewsDocument.Length > 0 && (!loaded.NewsDocument.EndsWith(".docx", StringComparison.OrdinalIgnoreCase) || DivisionNews.PathProblem(loaded.NewsDocument) is not null)) loaded.NewsDocument = "";
         loaded.DivisionNews = loaded.DivisionNews && loaded.NewsDocument.Length > 0;
         loaded.AndaPageUrl = (loaded.AndaPageUrl ?? "").Trim(); if (loaded.AndaPageUrl.Length > AndaPage.MaxLength) loaded.AndaPageUrl = loaded.AndaPageUrl[..AndaPage.MaxLength];
         if (!Settings.HolidayLeadChoices.Contains(loaded.HolidayLeadDays)) loaded.HolidayLeadDays = 3;

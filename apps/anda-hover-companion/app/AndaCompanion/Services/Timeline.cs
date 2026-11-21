@@ -92,7 +92,12 @@ public static class Timeline
     public static string TodayMore(int n) => $"{n} more ANDA{(n == 1 ? "" : "s")} in News and alerts.";
     public static string SaidCopied(int now, int later) => $"Copied the summary: {now} immediate, {later} longer term. Please read it before you send it.";
     public static string SaidCalendar(int n) => $"{n} goal date{(n == 1 ? "" : "s")} in the next 180 days. In the Windows app, Save writes this as a calendar file (.ics) where you choose, and Outlook can open it; it holds each ANDA number and its goal date, nothing else. This page cannot save files, so the text is below.";
-    public const string Hint = "The timeline checks run on this PC over your own sheet and to-do list, by fixed rules, with no AI. They say what the data shows and never decide. They appear in Today and in News and alerts, and near the clock when the notices are on.";
+    public const string Hint = "The timeline checks run on this PC over your own sheet and to-do list, by fixed rules, with no AI. They say what the data shows and never decide. They appear in Today and in News and alerts, and near the clock when the notices are on. The check for an unchanged status counts from the day this tool first sees each status, so it says nothing in its first weeks.";
+    /// <summary>Round 42 review: the person's sheet could not be read, so the checks did not run (they never run on the demo records in its place).</summary>
+    public const string SaidUnreadable = "Your data could not be read just now, so the timeline checks did not run, and nothing is shown from the demo records in its place.";
+    public static string SaidFar(string f, string g) => $"The forecast ({f}) is more than a year after the goal date ({g}).";
+    /// <summary>Round 42 review: business days are counted only within a year; a date further off (a 9999 placeholder) would take millions of steps.</summary>
+    public const int FarDays = 366;
 
     /// <summary>A date written YYYY-MM-DD that exists, or null (2026-02-30 is refused).</summary>
     public static DateOnly? Iso(string? s) =>
@@ -117,7 +122,9 @@ public static class Timeline
         void Add(string? number, string code, string sev, DateOnly? date, string text) =>
             outList.Add(new($"{number ?? "-"}|{code}|{(date is { } d ? Iso(d) : "-")}", number, code, Horizon(code), sev, date is { } x ? Iso(x) : null, text));
 
-        var records = input.Records.Where(r => r is not null && IsNumber(r.Number)).ToList();
+        // one row per ANDA: the first, when the sheet holds a number twice (round 42 review)
+        var once = new HashSet<string>(StringComparer.Ordinal);
+        var records = input.Records.Where(r => r is not null && IsNumber(r.Number) && once.Add(r.Number)).ToList();
         foreach (var r in records)
         {
             DateOnly? goal = Iso(r.Goal), fc = Iso(r.Forecast);
@@ -128,7 +135,7 @@ public static class Timeline
                 if (days < 0) Add(r.Number, "goal-passed", "bad", g, $"The goal date ({S(g)}) passed {Plural(-days, "day")} ago.");
                 else
                 {
-                    int n = BizUntil(cal, today, g);
+                    int n = days > FarDays ? int.MaxValue : BizUntil(cal, today, g);
                     if (days == 0) { close = true; Add(r.Number, "goal-close", "warn", g, $"The goal date is today ({S(g)})."); }
                     else if (n <= set.GoalClose) { close = true; Add(r.Number, "goal-close", "warn", g, $"The goal date ({S(g)}) is in {Plural(n, "business day")}."); }
                     if (fc is null && days <= set.NoForecast)
@@ -136,13 +143,13 @@ public static class Timeline
                             : $"There is no forecast date, and the goal date ({S(g)}) is in {Plural(days, "day")}.");
                     if (fc is { } f && f > g)
                     {
-                        int late = BizUntil(cal, g, f);
-                        Add(r.Number, "forecast-after-goal", "bad", f, late == 0 ? $"The forecast ({S(f)}) is after the goal date ({S(g)}), with no business day between them."
+                        int late = f.DayNumber - g.DayNumber > FarDays ? -1 : BizUntil(cal, g, f);
+                        Add(r.Number, "forecast-after-goal", "bad", f, late < 0 ? SaidFar($"{S(f)}, {f.Year.ToString(Inv)}", $"{S(g)}, {g.Year.ToString(Inv)}") : late == 0 ? $"The forecast ({S(f)}) is after the goal date ({S(g)}), with no business day between them."
                             : $"The forecast ({S(f)}) is {Plural(late, "business day")} after the goal date ({S(g)}).");
                     }
                     if (fc is { } f2 && f2 <= g && !close)
                     {
-                        int m = BizUntil(cal, f2, g);
+                        int m = g.DayNumber - f2.DayNumber > FarDays ? int.MaxValue : BizUntil(cal, f2, g);
                         if (m <= set.ThinMargin)
                             Add(r.Number, "thin-margin", "warn", g, m == 0 ? $"The forecast is the goal date itself ({S(g)}), with no margin."
                                 : $"The forecast ({S(f2)}) is only {Plural(m, "business day")} before the goal date ({S(g)}).");
@@ -169,10 +176,10 @@ public static class Timeline
             string? number = IsNumber(t.Number) ? t.Number : null;
             string title = Cut(WithoutFormat(t.Title ?? ""), 80);
             void K(string code, string sev, string text) =>
-                outList.Add(new($"{number ?? "-"}|{code}|{Hash((t.Id ?? "") + "|" + title)}|{Iso(due)}", number, code, "now", sev, Iso(due), text));
+                outList.Add(new($"{number ?? "-"}|{code}|{Hash(string.IsNullOrEmpty(t.Id) ? title : t.Id)}|{Iso(due)}", number, code, "now", sev, Iso(due), text));   // the id's fingerprint, never the title
             if (due < today) K("todo-overdue", "bad", $"To-do item overdue since {S(due)}: {title}");
             else if (due == today) K("todo-soon", "warn", $"To-do item due today: {title}");
-            else if (BizUntil(cal, today, due) <= set.TodoSoon) K("todo-soon", "warn", $"To-do item due {S(due)}: {title}");
+            else if (due.DayNumber - today.DayNumber <= FarDays && BizUntil(cal, today, due) <= set.TodoSoon) K("todo-soon", "warn", $"To-do item due {S(due)}: {title}");
         }
         // a crunch week: goal dates from today to the horizon, grouped by the Monday of their week
         var weeks = new SortedDictionary<DateOnly, List<string>>();
@@ -185,8 +192,8 @@ public static class Timeline
         }
         foreach (var (monday, nums) in weeks)
         {
-            if (nums.Count < set.CrunchCount) continue;
             var list = nums.Distinct(StringComparer.Ordinal).OrderBy(x => x, StringComparer.Ordinal).ToList();
+            if (list.Count < set.CrunchCount) continue;
             outList.Add(new($"-|crunch-week|{Iso(monday)}|{list.Count}", null, "crunch-week", "later", "warn", Iso(monday),
                 $"Week of {S(monday)}: {list.Count} goal dates (ANDA {string.Join(", ", list)})."));
         }
@@ -232,11 +239,18 @@ public static class Timeline
     /// <summary>The line an alert is shown with: its ANDA first, when it has one.</summary>
     public static string Line(TimelineAlert a) => a.Number is { } n ? $"ANDA {n}: {a.Text}" : a.Text;
 
+    /// <summary>
+    /// Round 42 review: what leaves the person's own windows (a notice near the clock, the summary for a team lead) holds the rule and the
+    /// date, never the person's own words: not a to-do item's title, not the sheet's "needs action" text. The simulation's tlBrief.
+    /// </summary>
+    public static string Brief(TimelineAlert a) => a.Code == "attention" ? "Your sheet marks an item that needs action (see the card)."
+        : a.Code.StartsWith("todo-", StringComparison.Ordinal) && a.Text.IndexOf(": ", StringComparison.Ordinal) is int i and >= 0 ? a.Text[..i] + "." : a.Text;
+
     /// <summary>A summary to copy for a team lead: plain text, by the same rules; drug names from the person's own sheet.</summary>
     public static string Summary(IReadOnlyList<TimelineAlert> alerts, string today, Func<string, string?>? drugOf)
     {
         var t = Iso(today) ?? throw new ArgumentException("today must be YYYY-MM-DD", nameof(today));
-        string Item(TimelineAlert a) => "- " + (a.Number is { } n ? $"ANDA {n}{(drugOf?.Invoke(n) is { Length: > 0 } d ? $" ({Cut(d, 60)})" : "")}: {a.Text}" : a.Text);
+        string Item(TimelineAlert a) => "- " + (a.Number is { } n ? $"ANDA {n}{(drugOf?.Invoke(n) is { Length: > 0 } d ? $" ({Cut(d, 60)})" : "")}: {Brief(a)}" : Brief(a));
         var now = alerts.Where(a => a.Horizon == "now").ToList(); var later = alerts.Where(a => a.Horizon == "later").ToList();
         var parts = new List<string> { $"ANDA timeline summary as of {S(t)}, {t.Year.ToString(Inv)}, from my portfolio sheet, checked by fixed rules (no AI).", "" };
         if (alerts.Count == 0) parts.Add("No ANDA in my portfolio sheet meets a timeline rule today.");
@@ -252,16 +266,27 @@ public static class Timeline
     {
         var t = Iso(today) ?? throw new ArgumentException("today must be YYYY-MM-DD", nameof(today));
         static string C(DateOnly d) => d.ToString("yyyyMMdd", Inv);
-        var events = records.Where(r => IsNumber(r.Number)).Select(r => (N: r.Number, G: Iso(r.Goal)))
+        var once = new HashSet<string>(StringComparer.Ordinal);
+        var events = records.Where(r => IsNumber(r.Number) && once.Add(r.Number)).Select(r => (N: r.Number, G: Iso(r.Goal)))
             .Where(e => e.G is { } g && g >= t && g <= t.AddDays(CalendarDays)).Select(e => (e.N, G: e.G!.Value))
             .OrderBy(e => e.G).ThenBy(e => e.N, StringComparer.Ordinal).ToList();
+        // round 42 review: one event per ANDA (its UID does not hold the date), with a sequence that grows each day, so that a newer file replaces
+        // an older one when the goal date moves; lines longer than 75 octets are folded (RFC 5545), as the simulation folds them
+        int seq = t.DayNumber - new DateOnly(2026, 1, 1).DayNumber;
+        static string Fold(string l)
+        {
+            var parts = new List<string>(); string rest = l;
+            while (Encoding.UTF8.GetByteCount(rest) > 75) { int n = 75 - (parts.Count > 0 ? 1 : 0); parts.Add(rest[..n]); rest = rest[n..]; }
+            parts.Add(rest);
+            return string.Join("\r\n ", parts);
+        }
         var lines = new List<string> { "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//ANDA Companion (Notula)//Goal dates//EN", "CALSCALE:GREGORIAN" };
         foreach (var e in events)
-            lines.AddRange(new[] { "BEGIN:VEVENT", $"UID:anda-{e.N}-goal-{C(e.G)}@anda-companion.invalid", $"DTSTAMP:{C(t)}T000000Z", $"DTSTART;VALUE=DATE:{C(e.G)}",
+            lines.AddRange(new[] { "BEGIN:VEVENT", $"UID:anda-{e.N}-goal@anda-companion.invalid", $"SEQUENCE:{seq}", $"DTSTAMP:{C(t)}T000000Z", $"DTSTART;VALUE=DATE:{C(e.G)}",
                 $"DTEND;VALUE=DATE:{C(e.G.AddDays(1))}", $"SUMMARY:Goal date: ANDA {e.N}", "DESCRIPTION:From ANDA Companion (Notula)\\, read from my portfolio sheet. Please check the record before acting.",
                 "TRANSP:TRANSPARENT", "END:VEVENT" });
         lines.Add("END:VCALENDAR");
-        return (string.Join("\r\n", lines) + "\r\n", events.Count);
+        return (string.Join("\r\n", lines.Select(Fold)) + "\r\n", events.Count);
     }
 
     // ---------- text, exactly as the simulation's ----------

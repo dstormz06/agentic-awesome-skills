@@ -18,8 +18,17 @@ public sealed record NewsItem(string Key, string Date, string Text);
 public static class DivisionNews
 {
     public const long MaxFileBytes = 10 * 1024 * 1024, MaxXmlChars = 20_000_000;
-    public const int MaxParagraphs = 2000;
-    private const string W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+    public const int MaxParagraphs = 200_000;      // round 42 review: the whole document is read (news is often added at the end); this only bounds memory
+    private const string W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main", Mc = "http://schemas.openxmlformats.org/markup-compatibility/2006";
+    private const int OnlineOnly = 0x400000;       // FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS: OneDrive has the file online only
+    public const string SaidOnlineOnly = "The news document is kept online only, so it was not opened (that would download it). In OneDrive, choose \"Always keep on this device\" for it.";
+    public const string SaidNotLocal = "The news document must be a file on this PC (the copy OneDrive syncs), not a network path or a web address.";
+    public const int MaxPathLength = 500;
+
+    /// <summary>Round 42 review: a path the app will read: on this PC, not a network share (Windows would sign in to it) nor a web address, at most 500 characters.</summary>
+    public static string? PathProblem(string path) =>
+        path.Length > MaxPathLength ? "The path of the news document is longer than 500 characters. Please move the document to a shorter path."
+        : path.StartsWith(@"\\", StringComparison.Ordinal) || path.StartsWith("//", StringComparison.Ordinal) || path.Contains("://", StringComparison.Ordinal) ? SaidNotLocal : null;
     private static readonly string[] Months = { "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec" };
     private static readonly string Sp = Timeline.JsSpace;
     private static readonly Regex Dated = new(
@@ -36,7 +45,8 @@ public static class DivisionNews
     {
         var t = Timeline.Iso(today) ?? throw new ArgumentException("today must be YYYY-MM-DD", nameof(today));
         var list = new List<(DateOnly D, NewsItem Item)>();
-        foreach (var p in paragraphs.Take(MaxParagraphs))
+        var keys = new HashSet<string>(StringComparer.Ordinal);      // a line given twice is kept once (round 42 review)
+        foreach (var p in paragraphs)
         {
             string s = Timeline.WithoutFormat(p ?? "");
             var m = Dated.Match(s);
@@ -49,7 +59,9 @@ public static class DivisionNews
             var date = new DateOnly(y, mo, d);
             string text = Timeline.Cut(s[m.Length..], Timeline.NewsMax);
             if (text.Length == 0 || date > t || t.DayNumber - date.DayNumber > Timeline.NewsDays) continue;
-            list.Add((date, new NewsItem($"n|{Timeline.Iso(date)}|{Timeline.Hash(text)}", Timeline.Iso(date), text)));
+            string key = $"n|{Timeline.Iso(date)}|{Timeline.Hash(text)}";
+            if (!keys.Add(key)) continue;
+            list.Add((date, new NewsItem(key, Timeline.Iso(date), text)));
         }
         return list.OrderByDescending(x => x.D).ThenBy(x => x.Item.Key, StringComparer.Ordinal).Select(x => x.Item).ToList();
     }
@@ -64,8 +76,11 @@ public static class DivisionNews
     {
         if (string.IsNullOrWhiteSpace(path)) return (null, "Please choose the division's news document first.");
         if (!path.EndsWith(".docx", StringComparison.OrdinalIgnoreCase)) return (null, "The news document must be a Word document (.docx).");
+        if (PathProblem(path) is { } bad) return (null, bad);
         try
         {
+            // round 42 review: a copy OneDrive keeps online only would be downloaded on opening, on the app's own thread; it is left alone
+            if (File.Exists(path) && ((int)File.GetAttributes(path) & (OnlineOnly | (int)FileAttributes.Offline)) != 0) return (null, SaidOnlineOnly);
             using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
             if (fs.Length > MaxFileBytes) return (null, "The news document is larger than 10 MB, which is more than this tool will read.");
             using var zip = new ZipArchive(fs, ZipArchiveMode.Read);
@@ -80,8 +95,10 @@ public static class DivisionNews
             // is its own line, and the outer one goes on after it.
             var paragraphs = new List<string>(); var open = new Stack<StringBuilder>();
             xml.Read();
-            while (!xml.EOF && paragraphs.Count < MaxParagraphs * 4)
+            while (!xml.EOF && paragraphs.Count < MaxParagraphs)
             {
+                // Word writes a text box twice, the second time for older readers (mc:Fallback): read once (round 42 review)
+                if (xml.NodeType == XmlNodeType.Element && xml.NamespaceURI == Mc && xml.LocalName == "Fallback") { xml.Skip(); continue; }
                 if (xml.NamespaceURI == W && xml.NodeType == XmlNodeType.Element)
                 {
                     if (xml.LocalName == "p") { if (xml.IsEmptyElement) paragraphs.Add(""); else open.Push(new StringBuilder()); }

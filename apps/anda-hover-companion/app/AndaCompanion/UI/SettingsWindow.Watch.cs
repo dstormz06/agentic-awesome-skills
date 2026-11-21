@@ -30,6 +30,7 @@ public partial class SettingsWindow
             string? path = PickNewsDocument is { } pick ? await pick() : await PickDocx();
             if (path is null) return;
             if (!path.EndsWith(".docx", StringComparison.OrdinalIgnoreCase)) { WatchStatus.Text = "The news document must be a Word document (.docx)."; return; }
+            if (DivisionNews.PathProblem(path) is { } bad) { WatchStatus.Text = bad; return; }      // a network path, or longer than is kept (round 42 review)
             _settings.NewsDocument = path; NewsPathBox.Text = path; Apply();
             WatchStatus.Text = "Document chosen. Tick the box above to show its news.";
         };

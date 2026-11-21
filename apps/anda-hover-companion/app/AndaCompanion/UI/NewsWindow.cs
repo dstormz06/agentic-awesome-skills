@@ -10,7 +10,7 @@ using AndaCompanion.Services;
 namespace AndaCompanion.UI;
 
 /// <summary>What News and alerts needs from the app: the alerts, the news (null when off, with its sentence), and what its buttons do.</summary>
-public sealed record NewsHooks(Func<IReadOnlyList<TimelineAlert>> Alerts, Func<(IReadOnlyList<NewsItem>? Items, string Note)> News, Action<string> OpenCard,
+public sealed record NewsHooks(Func<IReadOnlyList<TimelineAlert>?> Alerts, Func<(IReadOnlyList<NewsItem>? Items, string Note)> News, Action<string> OpenCard,
     Func<string> Today, Func<string, string?> DrugOf, Func<IReadOnlyList<TimelineRecord>> Records,
     Func<string, Task<bool>>? WriteClipboard = null, Func<string, Task<bool?>>? SaveCalendar = null);
 
@@ -30,6 +30,7 @@ public sealed class NewsWindow : Window
     internal TextBlock Say { get; } = new() { TextWrapping = TextWrapping.Wrap, FontSize = 12 };
     private readonly NewsHooks _hooks;
     private IReadOnlyList<TimelineAlert> _alerts = Array.Empty<TimelineAlert>();
+    private bool _unreadable;
 
     public const string SaidNowNone = "Nothing immediate in your data by these rules.", SaidLaterNone = "Nothing longer term in your data by these rules.";
     public const string Footer = "Division news is the text of one Word document your division keeps in SharePoint, read from the copy synced to this PC. The rest follows fixed rules over your own data, with the limits you chose in Settings, How it starts. Nothing here is sent anywhere, and silence does not mean all is well.";
@@ -65,7 +66,8 @@ public sealed class NewsWindow : Window
     public void Paint()
     {
         IBrush Res(string key) => (IBrush)Application.Current!.Resources[key]!;
-        _alerts = _hooks.Alerts().Where(a => a.Sev != "info").ToList();
+        var all = _hooks.Alerts(); _unreadable = all is null;          // the sheet could not be read: nothing from the demo in its place
+        _alerts = (all ?? Array.Empty<TimelineAlert>()).Where(a => a.Sev != "info").ToList();
         Control Row(TimelineAlert a)
         {
             var text = new TextBlock { Text = Timeline.Line(a), TextWrapping = TextWrapping.Wrap, FontSize = 12, Foreground = Res("C.Ink") };
@@ -80,7 +82,7 @@ public sealed class NewsWindow : Window
         {
             list.Children.Clear();
             var rows = _alerts.Where(a => a.Horizon == horizon).ToList();
-            if (rows.Count == 0) list.Children.Add(Note(none));
+            if (rows.Count == 0) list.Children.Add(Note(_unreadable ? Timeline.SaidUnreadable : none));
             foreach (var a in rows) list.Children.Add(Row(a));
         }
         var (items, note) = _hooks.News();
@@ -95,6 +97,7 @@ public sealed class NewsWindow : Window
 
     internal async Task CopySummaryAsync()
     {
+        if (_unreadable) { Say.Text = Timeline.SaidUnreadable; return; }
         string text = Timeline.Summary(_alerts, _hooks.Today(), _hooks.DrugOf);
         int now = _alerts.Count(a => a.Horizon == "now"), later = _alerts.Count - now;
         Say.Text = await Copying.TextAsync(this, text, _hooks.WriteClipboard) ? Timeline.SaidCopied(now, later) : SaidCopyFailed;
@@ -102,6 +105,7 @@ public sealed class NewsWindow : Window
 
     internal async Task SaveCalendarAsync()
     {
+        if (_unreadable) { Say.Text = Timeline.SaidUnreadable; return; }
         var (text, count) = Timeline.Calendar(_hooks.Records(), _hooks.Today());
         bool? saved = _hooks.SaveCalendar is { } save ? await save(text) : await SaveWithPickerAsync(text);
         if (saved is null) return;                       // the person cancelled: nothing to say
@@ -119,6 +123,7 @@ public sealed class NewsWindow : Window
         try
         {
             await using var stream = await file.OpenWriteAsync();
+            if (stream.CanSeek) stream.SetLength(0);          // an older, longer file in its place is not left with its tail (round 42 review)
             await using var writer = new StreamWriter(stream, new System.Text.UTF8Encoding(false));
             await writer.WriteAsync(text);
             return true;

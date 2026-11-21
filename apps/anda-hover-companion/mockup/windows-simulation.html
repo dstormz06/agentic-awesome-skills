@@ -1489,7 +1489,7 @@ PS C:\work&gt; </div>
     <div id="tlLimits" style="display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center"></div>
     <p class="hint" id="tlHint"></p>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><button class="pill quiet" id="watchNow" type="button">Check now</button><button class="pill quiet" id="hubOpen" type="button">News and alerts…</button><span class="hint" id="watchStatus" role="status" style="margin:0"></span></div>
-    <p class="hint">Both are off until you switch them on. <b>Notices, reminders and the tray dot appear only while the app is running:</b> when it is closed nothing runs and nothing is shown. A notice is one short line near the clock. It never takes the keyboard, hides by itself, and shows the ANDA number and a short reason, never your notes. The Windows app would check when it starts, when your portfolio file changes and once each morning; this page checks when you switch a box on, when the demo date changes and when you press Check now. Division news is plain text from one Word document: anyone who can edit that document can put a line on your screen, so each line is cut to 240 characters and counts toward the daily limit. A notice fires only on what the data shows; silence does not mean all is well.</p>
+    <p class="hint">Both are off until you switch them on. <b>Notices, reminders and the tray dot appear only while the app is running:</b> when it is closed nothing runs and nothing is shown. A notice is one short line near the clock. It never takes the keyboard, hides by itself, and shows the ANDA number, the rule and its date, never your own words (not your notes, a to-do item's title or the sheet's "needs action" text). The Windows app would check when it starts, when your portfolio file changes and once each morning; this page checks when you switch a box on, when the demo date changes and when you press Check now. Division news is plain text from one Word document: anyone who can edit that document can put a line on your screen, so each line is cut to 240 characters and counts toward the daily limit. A notice fires only on what the data shows; silence does not mean all is well.</p>
     <hr class="hair">
     <div class="lbl">OTHER WAYS TO START IT</div>
     <label class="opt"><input type="checkbox" id="setMiddle"> Middle-click (wheel button) on selected text starts Select &amp; Peek</label>
@@ -2821,7 +2821,7 @@ function allAlerts(){
   return tlSort(timelineAlerts(tlInputNow()).concat(extra));
 }
 function watchItems(){   /* round 42: the timeline alerts and the card's facts, most urgent first */
-  return allAlerts().filter(a => a.sev !== "info").map(a => ({ key:"d|" + a.key, kind:"data", number:a.number, horizon:a.horizon, text:cut(tlLine(a), 160) }));
+  return allAlerts().filter(a => a.sev !== "info").map(a => ({ key:"d|" + a.key, kind:"data", number:a.number, horizon:a.horizon, text:cut(tlLine({ ...a, text:tlBrief(a) }), 160), full:tlLine(a) }));
 }
 function watchCheck(){
   const st = $("watchStatus");
@@ -2888,7 +2888,7 @@ function paintHub(){
     if(!list.length){ const e = document.createElement("div"); e.className = "hrow"; e.textContent = none; box.append(e); }
     list.forEach(i => {
       const b = document.createElement(i.number ? "button" : "div"); if(i.number) b.type = "button"; b.className = "hrow";
-      const t = document.createElement("span"); t.className = "t"; t.textContent = i.text; b.append(t);
+      const t = document.createElement("span"); t.className = "t"; t.textContent = i.full || i.text; b.append(t);
       if(state.wSnoozed.has(i.key)){ const z = document.createElement("span"); z.className = "d"; z.textContent = "back tomorrow"; b.append(z); }
       if(i.number) b.addEventListener("click", () => { if(DATA[i.number]) openCard(i.number, { anchor:{ x:Math.max(12, innerWidth - 420), y:80 } }); });
       box.append(b);
@@ -7096,7 +7096,10 @@ const TL_SAID = {
   copied:(now, later) => `Copied the summary: ${now} immediate, ${later} longer term. Please read it before you send it.`,
   copyFailed:"Copying was not allowed just now, so the summary is below to select and copy.",
   calendar:n => `${n} goal date${n === 1 ? "" : "s"} in the next 180 days. In the Windows app, Save writes this as a calendar file (.ics) where you choose, and Outlook can open it; it holds each ANDA number and its goal date, nothing else. This page cannot save files, so the text is below.`,
-  hint:"The timeline checks run on this PC over your own sheet and to-do list, by fixed rules, with no AI. They say what the data shows and never decide. They appear in Today and in News and alerts, and near the clock when the notices are on." };
+  hint:"The timeline checks run on this PC over your own sheet and to-do list, by fixed rules, with no AI. They say what the data shows and never decide. They appear in Today and in News and alerts, and near the clock when the notices are on. The check for an unchanged status counts from the day this tool first sees each status, so it says nothing in its first weeks.",
+  far:(f, g) => `The forecast (${f}) is more than a year after the goal date (${g}).` };
+/* round 42 review: business days are counted only within a year; a date further off (a 9999 placeholder) would take millions of steps */
+const TL_FAR_DAYS = 366;
 /* each setting kept only when it is one of its choices, as the app's TimelineSettings.Normalize */
 const tlNormalize = s => Object.fromEntries(Object.keys(TL_DEFAULTS).map(k => [k, s && TL_CHOICES[k].includes(s[k]) ? s[k] : TL_DEFAULTS[k]]));
 /* business days after a, up to and including b (0 when b is a, or when none lies between and b is closed) */
@@ -7110,7 +7113,8 @@ const TL_NOW = new Set(["goal-passed", "goal-close", "forecast-after-goal", "no-
 function timelineAlerts(input){
   const set = tlNormalize(input.settings), today = tlIso(input.today), out = [], S = shortDate;
   const add = (number, code, sev, date, text) => out.push({ key:`${number || "-"}|${code}|${date == null ? "-" : isoDate(date)}`, number:number || null, code, horizon:TL_NOW.has(code) ? "now" : "later", sev, date:date == null ? null : isoDate(date), text });
-  const records = (input.records || []).filter(r => r && /^\d{6}$/.test(String(r.number || "")));
+  /* one row per ANDA: the first, when the sheet holds a number twice (round 42 review) */
+  const seenNum = new Set(), records = (input.records || []).filter(r => r && /^\d{6}$/.test(String(r.number || "")) && !seenNum.has(String(r.number)) && seenNum.add(String(r.number)));
   for(const r of records){
     const goal = tlIso(r.goal), fc = tlIso(r.forecast), was = input.look && input.look[r.number];
     let close = false;
@@ -7118,18 +7122,18 @@ function timelineAlerts(input){
       const days = Math.round((goal - today) / DAY);
       if(days < 0) add(r.number, "goal-passed", "bad", goal, `The goal date (${S(goal)}) passed ${tlPlural(-days, "day")} ago.`);
       else {
-        const n = bizUntil(today, goal);
+        const n = days > TL_FAR_DAYS ? Infinity : bizUntil(today, goal);
         if(days === 0){ close = true; add(r.number, "goal-close", "warn", goal, `The goal date is today (${S(goal)}).`); }
         else if(n <= set.goalClose){ close = true; add(r.number, "goal-close", "warn", goal, `The goal date (${S(goal)}) is in ${tlPlural(n, "business day")}.`); }
         if(fc == null && days <= set.noForecast) add(r.number, "no-forecast", "warn", goal, days === 0 ? `There is no forecast date, and the goal date is today (${S(goal)}).`
           : `There is no forecast date, and the goal date (${S(goal)}) is in ${tlPlural(days, "day")}.`);
         if(fc != null && fc > goal){
-          const late = bizUntil(goal, fc);
-          add(r.number, "forecast-after-goal", "bad", fc, late === 0 ? `The forecast (${S(fc)}) is after the goal date (${S(goal)}), with no business day between them.`
+          const late = (fc - goal) / DAY > TL_FAR_DAYS ? -1 : bizUntil(goal, fc);
+          add(r.number, "forecast-after-goal", "bad", fc, late < 0 ? TL_SAID.far(`${S(fc)}, ${new Date(fc).getUTCFullYear()}`, `${S(goal)}, ${new Date(goal).getUTCFullYear()}`) : late === 0 ? `The forecast (${S(fc)}) is after the goal date (${S(goal)}), with no business day between them.`
             : `The forecast (${S(fc)}) is ${tlPlural(late, "business day")} after the goal date (${S(goal)}).`);
         }
         if(fc != null && fc <= goal && !close){
-          const m = bizUntil(fc, goal);
+          const m = (goal - fc) / DAY > TL_FAR_DAYS ? Infinity : bizUntil(fc, goal);
           if(m <= set.thinMargin) add(r.number, "thin-margin", "warn", goal, m === 0 ? `The forecast is the goal date itself (${S(goal)}), with no margin.`
             : `The forecast (${S(fc)}) is only ${tlPlural(m, "business day")} before the goal date (${S(goal)}).`);
         }
@@ -7149,10 +7153,11 @@ function timelineAlerts(input){
   for(const t of input.todos || []){
     const due = tlIso(t && t.due); if(!t || t.done || due == null) continue;
     const number = /^\d{6}$/.test(String(t.number || "")) ? String(t.number) : null, title = cut(String(t.title || "").replace(FENCE_HIDDEN, ""), 80);
-    const k = (code, sev, text) => out.push({ key:`${number || "-"}|${code}|${stableHash(String(t.id || "") + "|" + title)}|${isoDate(due)}`, number, code, horizon:"now", sev, date:isoDate(due), text });
+    /* the key holds a fingerprint of the item's id (its title only when it has none), never the title itself (round 42 review) */
+    const k = (code, sev, text) => out.push({ key:`${number || "-"}|${code}|${stableHash(String(t.id || title))}|${isoDate(due)}`, number, code, horizon:"now", sev, date:isoDate(due), text });
     if(due < today) k("todo-overdue", "bad", `To-do item overdue since ${S(due)}: ${title}`);
     else if(due === today) k("todo-soon", "warn", `To-do item due today: ${title}`);
-    else if(bizUntil(today, due) <= set.todoSoon) k("todo-soon", "warn", `To-do item due ${S(due)}: ${title}`);
+    else if((due - today) / DAY <= TL_FAR_DAYS && bizUntil(today, due) <= set.todoSoon) k("todo-soon", "warn", `To-do item due ${S(due)}: ${title}`);
   }
   /* a crunch week: goal dates from today to the horizon, grouped by the Monday of their week */
   const weeks = new Map();
@@ -7162,8 +7167,8 @@ function timelineAlerts(input){
     if(!weeks.has(monday)) weeks.set(monday, []); weeks.get(monday).push(r.number);
   }
   [...weeks].sort((a, b) => a[0] - b[0]).forEach(([monday, nums]) => {
-    if(nums.length < set.crunchCount) return;
-    const list = [...new Set(nums)].sort();
+    const list = [...new Set(nums)].sort(ordCmp);
+    if(list.length < set.crunchCount) return;
     out.push({ key:`-|crunch-week|${isoDate(monday)}|${list.length}`, number:null, code:"crunch-week", horizon:"later", sev:"warn", date:isoDate(monday),
       text:`Week of ${S(monday)}: ${list.length} goal dates (ANDA ${list.join(", ")}).` });
   });
@@ -7179,10 +7184,14 @@ function tlSort(list){
 }
 /* the line an alert is shown with: its ANDA first, when it has one */
 const tlLine = a => a.number ? `ANDA ${a.number}: ${a.text}` : a.text;
+/* round 42 review: what leaves the person's own windows (a notice near the clock, the summary for a team lead) holds the rule and the date,
+   never the person's own words: not a to-do item's title, not the sheet's "needs action" text */
+const tlBrief = a => a.code === "attention" ? "Your sheet marks an item that needs action (see the card)."
+  : /^todo-/.test(a.code) ? a.text.slice(0, a.text.indexOf(": ")) + "." : a.text;
 /* a summary to copy for a team lead: plain text, by the same rules; drug names from the person's own sheet */
 function tlSummary(alerts, todayIso, drugOf){
   const t = tlIso(todayIso), when = `${shortDate(t)}, ${new Date(t).getUTCFullYear()}`;
-  const line = a => "- " + (a.number ? `ANDA ${a.number}${drugOf && drugOf(a.number) ? ` (${cut(drugOf(a.number), 60)})` : ""}: ${a.text}` : a.text);
+  const line = a => "- " + (a.number ? `ANDA ${a.number}${drugOf && drugOf(a.number) ? ` (${cut(drugOf(a.number), 60)})` : ""}: ${tlBrief(a)}` : tlBrief(a));
   const now = alerts.filter(a => a.horizon === "now"), later = alerts.filter(a => a.horizon === "later");
   const parts = [`ANDA timeline summary as of ${when}, from my portfolio sheet, checked by fixed rules (no AI).`, ""];
   if(!alerts.length) parts.push("No ANDA in my portfolio sheet meets a timeline rule today.");
@@ -7196,27 +7205,32 @@ function tlSummary(alerts, todayIso, drugOf){
 const TL_CAL_DAYS = 180;
 function tlCalendar(records, todayIso){
   const t = tlIso(todayIso), c = d => isoDate(d).replace(/-/g, "");
-  const events = (records || []).map(r => ({ n:String(r.number || ""), g:tlIso(r.goal) })).filter(e => /^\d{6}$/.test(e.n) && e.g != null && e.g >= t && e.g <= t + TL_CAL_DAYS * DAY)
+  const once = new Set(), events = (records || []).map(r => ({ n:String(r.number || ""), g:tlIso(r.goal) })).filter(e => /^\d{6}$/.test(e.n) && !once.has(e.n) && once.add(e.n) && e.g != null && e.g >= t && e.g <= t + TL_CAL_DAYS * DAY)
     .sort((a, b) => a.g - b.g || ordCmp(a.n, b.n));
+  /* round 42 review: one event per ANDA (its UID does not hold the date), with a sequence that grows each day, so that a newer file replaces an
+     older one when the goal date moves; lines longer than 75 octets are folded (RFC 5545) */
+  const seq = Math.round((t - ymd(2026, 1, 1)) / DAY), fold = l => { const out = []; let rest = l; while(new TextEncoder().encode(rest).length > 75){ let n = 75 - (out.length ? 1 : 0); out.push(rest.slice(0, n)); rest = rest.slice(n); } out.push(rest); return out.join("\r\n "); };
   const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//ANDA Companion (Notula)//Goal dates//EN", "CALSCALE:GREGORIAN"];
-  events.forEach(e => lines.push("BEGIN:VEVENT", `UID:anda-${e.n}-goal-${c(e.g)}@anda-companion.invalid`, `DTSTAMP:${c(t)}T000000Z`, `DTSTART;VALUE=DATE:${c(e.g)}`,
+  events.forEach(e => lines.push("BEGIN:VEVENT", `UID:anda-${e.n}-goal@anda-companion.invalid`, `SEQUENCE:${seq}`, `DTSTAMP:${c(t)}T000000Z`, `DTSTART;VALUE=DATE:${c(e.g)}`,
     `DTEND;VALUE=DATE:${c(e.g + DAY)}`, `SUMMARY:Goal date: ANDA ${e.n}`, "DESCRIPTION:From ANDA Companion (Notula)\\, read from my portfolio sheet. Please check the record before acting.",
     "TRANSP:TRANSPARENT", "END:VEVENT"));
   lines.push("END:VCALENDAR");
-  return { text:lines.join("\r\n") + "\r\n", count:events.length };
+  return { text:lines.map(fold).join("\r\n") + "\r\n", count:events.length };
 }
 /* division news: the paragraphs of one Word document, each starting with its date (2026-11-20, 11/20/2026 or Nov 20, 2026) */
 const NEWS_MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
 const NEWS_DATE = /^\s*(?:(\d{4})-(\d{2})-(\d{2})|(\d{1,2})\/(\d{1,2})\/(\d{4})|(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|Sept?(?:ember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s+(\d{1,2}),?\s+(\d{4}))(?![\d\/-])\s*[:–—-]?\s*/i;
 function newsFrom(paragraphs, todayIso, days = NEWS_DAYS, max = NEWS_MAX){
   const today = tlIso(todayIso), out = [];
-  for(const p of (paragraphs || []).slice(0, 2000)){
+  const keys = new Set();      /* round 42 review: the whole document is read (news is often added at the end), and a line given twice is kept once */
+  for(const p of (paragraphs || [])){
     const s = String(p == null ? "" : p).replace(FENCE_HIDDEN, ""), m = NEWS_DATE.exec(s); if(!m) continue;
     const [y, mo, d] = m[1] ? [+m[1], +m[2], +m[3]] : m[6] ? [+m[6], +m[4], +m[5]] : [+m[9], NEWS_MONTHS.indexOf(m[7].slice(0, 3).toLowerCase()) + 1, +m[8]];
     const t = ymd(y, mo, d), back = new Date(t);
     if(back.getUTCFullYear() !== y || back.getUTCMonth() !== mo - 1 || back.getUTCDate() !== d) continue;      /* a date that does not exist */
     const text = cut(s.slice(m[0].length), max); if(!text || t > today || today - t > days * DAY) continue;
-    out.push({ key:"n|" + isoDate(t) + "|" + stableHash(text), kind:"news", t, date:isoDate(t), text });
+    const key = "n|" + isoDate(t) + "|" + stableHash(text); if(keys.has(key)) continue; keys.add(key);
+    out.push({ key, kind:"news", t, date:isoDate(t), text });
   }
   return out.sort((a, b) => b.t - a.t || ordCmp(a.key, b.key));
 }

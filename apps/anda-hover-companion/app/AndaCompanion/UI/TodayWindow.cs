@@ -19,7 +19,7 @@ namespace AndaCompanion.UI;
 public sealed record TodayHooks(Func<IReadOnlyList<Today.Look>> All, Func<string, Today.Look?> Find, Func<IReadOnlyList<string>> Pins, Func<IReadOnlyList<string>> Recents,
     Action<string> OpenCard, Func<string, Task<bool>>? CopyText = null, Action? ShowAll = null,
     Func<LastLook.View?>? Looks = null, Action<LastLook.Look>? KeepLook = null, Func<NextWeek.Result?>? Week = null,
-    Func<IReadOnlyList<TimelineAlert>>? Alerts = null);
+    Func<IReadOnlyList<TimelineAlert>?>? Alerts = null);
 
 /// <summary>
 /// Today (round 33): a small two-pane window. Left: what needs a look, the ANDAs kept in my list, recents. Right: the selected one, with
@@ -105,8 +105,13 @@ public sealed class TodayWindow : Window
 
     private List<TodayGroup> Groups() => Today.Groups(_hooks.Pins(), _hooks.Recents(), _all, _hooks.Find);
 
+    // round 42 review: the alerts are read when Today opens and when a setting changes, not at each paint (a row click repaints)
+    private IReadOnlyList<TimelineAlert>? _alerts;
+    private bool _alertsAsked;
+
     private void ReadLooks()
     {
+        _alerts = _hooks.Alerts?.Invoke(); _alertsAsked = _hooks.Alerts is not null;
         if (_hooks.Looks?.Invoke() is not { } looks) { _look = null; return; }      // round 37: switched off, no group and nothing kept
         var since = looks.Kept is null ? ((List<LastLook.Change>, int)?)null : LastLook.Since(looks.Kept, looks.Now, id => _hooks.Find(id)?.Record.Attention?.Text);
         _look = new LookShown(looks.Note ?? (since is null ? LastLook.SaidFirst : LastLook.SaidUndated), since, looks.Keep ? looks.Now : null);
@@ -128,7 +133,9 @@ public sealed class TodayWindow : Window
         static IEnumerable<(string Id, string Line, string? Mark)> ById(IEnumerable<(string Id, string Text)> rows) =>
             rows.GroupBy(r => r.Id).Select(g => (g.Key, string.Join(" ", g.Select(r => r.Text)), (string?)null));
         // Round 42: what needs a look, most urgent first, by the timeline checks: the first reason of each ANDA, and how many more
-        if (_hooks.Alerts?.Invoke() is { } alerts)
+        if (_alertsAsked && _alerts is null)
+            Section("urgent", Timeline.TodayTitle, new[] { Timeline.SaidUnreadable }, Array.Empty<(string, string, string?)>(), Array.Empty<string>());
+        else if (_alerts is { } alerts)
         {
             var firsts = alerts.Where(a => a.Number is not null && a.Sev != "info").GroupBy(a => a.Number!).Select(g => (Id: g.Key, Line: g.First().Text + (g.Count() > 1 ? $" (+{g.Count() - 1} more)" : ""))).ToList();
             Section("urgent", Timeline.TodayTitle, firsts.Count == 0 ? new[] { Timeline.TodayNone } : Array.Empty<string>(),

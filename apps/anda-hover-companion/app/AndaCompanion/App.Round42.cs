@@ -14,7 +14,9 @@ public partial class App
     private NewsWindow? _newsWindow;
     private List<NoticeItem> _noticeQueue = new();
     private FileSystemWatcher? _sheetWatcher;
-    private DispatcherTimer? _sheetSettle, _morningTimer;
+    private DispatcherTimer? _sheetSettle, _clockTimer, _holdTimer;
+    private string? _armedFor, _morningDone;
+    private (string Path, DateTime Written, long Length, IReadOnlyList<string>? Paragraphs, string? Problem)? _newsRead;
 
     /// <summary>The day the checks reckon from: today, or for the fictional demo records the day their data was taken (they are frozen there).</summary>
     private static string TimelineToday(IReadOnlyList<AndaRecord> records) =>
@@ -24,46 +26,75 @@ public partial class App
         r.GoalDateValue is { } g ? Timeline.Iso(g) : null, r.HasForecast && r.ForecastDateValue is { } f ? Timeline.Iso(f) : null, r.Latest);
 
     /// <summary>
-    /// The alerts now, most urgent first: the timeline checks over the records, the ANDA to-do list, the look kept when Today last closed (if
-    /// that switch is on) and when each status was first seen; and the card's own facts that are not about the timeline.
+    /// The alerts now, most urgent first, or null when the person's sheet cannot be read: then the app shows the demo records in its place, and
+    /// the checks must not run on those (round 42 review). The timeline checks over the records, the ANDA to-do list, the look kept when Today
+    /// last closed (if that switch is on, and only for the same data), when each status was first seen; and the card's own facts.
     /// </summary>
-    internal IReadOnlyList<TimelineAlert> CurrentAlerts()
+    internal IReadOnlyList<TimelineAlert>? CurrentAlerts()
     {
         List<AndaRecord> records;
-        try { records = Records().ToList(); } catch (Exception) { return Array.Empty<TimelineAlert>(); }      // an unreadable sheet never takes the app down
-        string today = TimelineToday(records);
-        var kept = StatusSeen.Load(AppPaths.StatusSeenFile);
-        var seen = StatusSeen.Update(kept, records.Select(r => (r.Number, (string?)r.Latest)), today);
-        if (kept is null || kept.Count != seen.Count || seen.Any(kv => !kept.TryGetValue(kv.Key, out var k) || k != kv.Value)) StatusSeen.Save(AppPaths.StatusSeenFile, seen);
-        var look = _settings.SinceLastLook ? LastLook.Load(AppPaths.LastLookFile) : null;
-        var input = new TimelineInput(today, records.Select(ForTimeline).ToList(),
-            look?.Items.ToDictionary(kv => kv.Key, kv => (kv.Value.Goal, kv.Value.Forecast)),
-            _todo.Items.Select(t => new TimelineTodo(t.Id, t.Number, t.Title, t.Due, t.Done)).ToList(), StatusSeen.Since(seen), _settings.Timeline);
+        try { records = Records().ToList(); } catch (Exception) { return null; }      // an unreadable sheet never takes the app down
+        if (InputFor(DataReadable(), records, LookSource(), AppPaths.StatusSeenFile, _settings.SinceLastLook ? LastLook.Load(AppPaths.LastLookFile) : null,
+                _todo.Items.Select(t => new TimelineTodo(t.Id, t.Number, t.Title, t.Due, t.Done)), _settings.Timeline) is not { } input) return null;
         var ctx = CardCtx();
         var alerts = Timeline.Alerts(input, _calendar).ToList();
         foreach (var r in records) alerts.AddRange(Timeline.FromCard(r, WatchRules.Evaluate(r, ctx.Today, _calendar, ctx.Watch)));
         return Timeline.Sort(alerts);
     }
 
-    /// <summary>The division news, or null when it is off, with the sentence News and alerts shows above it.</summary>
+    /// <summary>
+    /// What the checks read, or null when the data is not the person's own readable sheet (then nothing is checked and status-seen.json is left
+    /// alone). Updates when each status was first seen, for this data only, and not when the file is locked; uses the kept look only when it
+    /// was kept for the same data (round 42 review).
+    /// </summary>
+    internal static TimelineInput? InputFor(bool readable, IReadOnlyList<AndaRecord> records, string source, string statusPath, LastLook.Look? look,
+        IEnumerable<TimelineTodo> todos, TimelineSettings settings)
+    {
+        if (!readable) return null;
+        string today = TimelineToday(records);
+        var (kept, canWrite) = StatusSeen.Load(statusPath, source);
+        var seen = StatusSeen.Update(kept, records.Select(r => (r.Number, (string?)r.Latest)), today);
+        bool changed = kept is null || kept.Count != seen.Count || seen.Any(kv => !kept.TryGetValue(kv.Key, out var k) || k != kv.Value);
+        if (changed && canWrite) StatusSeen.Save(statusPath, seen, source);
+        if (look is not null && look.Source != source) look = null;          // a look kept for other data says nothing about this one
+        return new TimelineInput(today, records.Select(ForTimeline).ToList(),
+            look?.Items.ToDictionary(kv => kv.Key, kv => (kv.Value.Goal, kv.Value.Forecast)), todos.ToList(), StatusSeen.Since(seen), settings);
+    }
+
+    /// <summary>The goal dates for the calendar file: none when the sheet cannot be read (never the demo's in its place).</summary>
+    private IReadOnlyList<TimelineRecord> CalendarRecords() => DataReadable() ? Records().Select(ForTimeline).ToList() : Array.Empty<TimelineRecord>();
+
+    /// <summary>
+    /// The division news, or null when it is off, with the sentence News and alerts shows above it. The document is read again only when
+    /// its time or size changed (round 42 review: it was read at every paint).
+    /// </summary>
     private (IReadOnlyList<NewsItem>? Items, string Note) CurrentNews()
     {
         if (!_settings.DivisionNews || _settings.NewsDocument.Length == 0) return (null, DivisionNews.SaidOff);
-        var (paragraphs, problem) = DivisionNews.ReadDocx(_settings.NewsDocument);
-        return paragraphs is null ? (Array.Empty<NewsItem>(), problem!) : (DivisionNews.Parse(paragraphs, Timeline.Iso(Today())), DivisionNews.SaidFrom(Path.GetFileName(_settings.NewsDocument)));
+        string path = _settings.NewsDocument;
+        DateTime written = DateTime.MinValue; long length = -1;
+        try { var info = new FileInfo(path); if (info.Exists) { written = info.LastWriteTimeUtc; length = info.Length; } }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException) { }
+        if (_newsRead is not { } r || r.Path != path || r.Written != written || r.Length != length || r.Paragraphs is null)
+        {
+            var (paragraphs, problem) = DivisionNews.ReadDocx(path);
+            _newsRead = r = (path, written, length, paragraphs, problem);
+        }
+        return r.Paragraphs is null ? (Array.Empty<NewsItem>(), r.Problem!) : (DivisionNews.Parse(r.Paragraphs, Timeline.Iso(Today())), DivisionNews.SaidFrom(Path.GetFileName(path)));
     }
+
+    private bool NewsOn => _settings.DivisionNews && _settings.NewsDocument.Length > 0;
 
     /// <summary>Looks for what to tell the person, and shows the next notice if today's limit allows. Returns the sentence for Settings.</summary>
     internal string CheckNotices()
     {
         if (SelfTestRun is not null) return Notices.SaidNotRunning;
-        bool news = _settings.DivisionNews && _settings.NewsDocument.Length > 0;
-        if (!_settings.WatchBack && !news) { _noticeQueue.Clear(); return Notices.SaidOff; }
+        if (!_settings.WatchBack && !NewsOn) { DropNotices(); return Notices.SaidOff; }
         var items = new List<NoticeItem>();
-        if (news && CurrentNews().Items is { } n) items.AddRange(Notices.FromNews(n));
-        if (_settings.WatchBack) items.AddRange(Notices.FromAlerts(CurrentAlerts()));
+        if (NewsOn && CurrentNews().Items is { } n) items.AddRange(Notices.FromNews(n));
+        if (_settings.WatchBack && CurrentAlerts() is { } alerts) items.AddRange(Notices.FromAlerts(alerts));
         string today = Timeline.Iso(Today());
-        var state = Notices.Load(AppPaths.NoticesFile);
+        if (Notices.Load(AppPaths.NoticesFile) is not { } state) return Notices.SaidBusy;      // locked just now: not written over, tried at the next check
         _noticeQueue = Notices.Pending(state, items, today);
         Notices.Save(AppPaths.NoticesFile, state);
         int pending = _noticeQueue.Count;
@@ -72,18 +103,33 @@ public partial class App
         return said;
     }
 
-    /// <summary>The next notice, if none is showing and today's limit allows; the sentence when the limit is reached.</summary>
+    /// <summary>The switches are off: what waits is dropped, and a notice showing of a kind now off is closed (round 42 review).</summary>
+    private void DropNotices()
+    {
+        _noticeQueue.RemoveAll(i => i.Kind == "news" ? !NewsOn : !_settings.WatchBack);
+        if (_noticeWindow is { } w && (w.Item.Kind == "news" ? !NewsOn : !_settings.WatchBack)) w.Close();
+    }
+
+    /// <summary>The next notice, if none is showing, the switch for its kind is on, the screen is not presenting, and today's limit allows.</summary>
     private string? ShowNextNotice()
     {
+        DropNotices();
         if (_noticeWindow is not null || _noticeQueue.Count == 0) return null;
+        if (Presenting.Now())
+        {
+            // a presentation, a full-screen program or Focus assist: the notice waits (it would show ANDA numbers on a shared screen)
+            _holdTimer ??= new DispatcherTimer { Interval = TimeSpan.FromMinutes(5) };
+            _holdTimer.Tick -= OnHoldEnded; _holdTimer.Tick += OnHoldEnded; _holdTimer.Start();
+            return Notices.SaidHeld;
+        }
         string today = Timeline.Iso(Today());
-        var state = Notices.Load(AppPaths.NoticesFile);
+        if (Notices.Load(AppPaths.NoticesFile) is not { } state) return Notices.SaidBusy;
         var next = Notices.Take(state, _noticeQueue, _settings.NoticesPerDay, today);
         Notices.Save(AppPaths.NoticesFile, state);
         if (next is null) return Notices.SaidCap(_settings.NoticesPerDay, _noticeQueue.Count);
         var win = new NoticeWindow(next, OpenFromNotice, item =>
         {
-            var s = Notices.Load(AppPaths.NoticesFile); Notices.Snooze(s, item.Key, Timeline.Iso(Today())); Notices.Save(AppPaths.NoticesFile, s);
+            if (Notices.Load(AppPaths.NoticesFile) is { } s) { Notices.Snooze(s, item.Key, Timeline.Iso(Today())); Notices.Save(AppPaths.NoticesFile, s); }
         });
         win.Closed += (_, _) =>
         {
@@ -94,6 +140,8 @@ public partial class App
         win.Show();
         return "";
     }
+
+    private void OnHoldEnded(object? sender, EventArgs e) { _holdTimer?.Stop(); ShowNextNotice(); }
 
     private void OpenFromNotice(NoticeItem item)
     {
@@ -116,7 +164,7 @@ public partial class App
             },
             Today: () => TimelineToday(Records().ToList()),
             DrugOf: n => _repository.Find(n)?.Drug,
-            Records: () => Records().Select(ForTimeline).ToList()));
+            Records: CalendarRecords));
         win.Closed += (_, _) => { if (ReferenceEquals(_newsWindow, win)) _newsWindow = null; };
         _newsWindow = win;
         win.Show();
@@ -124,13 +172,18 @@ public partial class App
 
     /// <summary>
     /// When the checks run by themselves: soon after start, when the portfolio file is saved (a watch on that one file, settled for three
-    /// seconds), and each morning at 8. Only while the app runs, and only when the notices are on; Settings' Check now runs them at once.
+    /// seconds), and each morning from 8 (a look at the wall clock every five minutes, so a change of daylight time or a PC asleep at 8 does
+    /// not move it). Only while the app runs, and only when a switch is on. Built again only when the file or the switches change.
     /// </summary>
     private void ArmNotices()
     {
+        bool on = SelfTestRun is null && (_settings.WatchBack || NewsOn);
+        string armFor = on ? (_settings.PortfolioPath ?? "") + "|" + _settings.WatchBack + "|" + NewsOn : "off";
+        if (armFor == _armedFor) return;
+        _armedFor = armFor;
         _sheetWatcher?.Dispose(); _sheetWatcher = null;
-        _morningTimer?.Stop(); _morningTimer = null;
-        if (SelfTestRun is not null || (!_settings.WatchBack && !(_settings.DivisionNews && _settings.NewsDocument.Length > 0))) return;
+        _clockTimer?.Stop(); _clockTimer = null;
+        if (!on) { DropNotices(); return; }
         _sheetSettle ??= new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
         _sheetSettle.Tick -= OnSheetSettled; _sheetSettle.Tick += OnSheetSettled;
         string path = _settings.PortfolioPath ?? "";
@@ -138,19 +191,25 @@ public partial class App
         {
             try
             {
-                _sheetWatcher = new FileSystemWatcher(dir, Path.GetFileName(path)) { NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size };
-                FileSystemEventHandler changed = (_, _) => Dispatcher.UIThread.Post(() => { _sheetSettle!.Stop(); _sheetSettle.Start(); });
-                _sheetWatcher.Changed += changed; _sheetWatcher.Created += changed;
-                _sheetWatcher.Renamed += (_, _) => Dispatcher.UIThread.Post(() => { _sheetSettle!.Stop(); _sheetSettle.Start(); });
-                _sheetWatcher.EnableRaisingEvents = true;
+                var watcher = new FileSystemWatcher(dir, Path.GetFileName(path)) { NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size };
+                void Settle() => Dispatcher.UIThread.Post(() => { _sheetSettle!.Stop(); _sheetSettle.Start(); });
+                watcher.Changed += (_, _) => Settle(); watcher.Created += (_, _) => Settle(); watcher.Renamed += (_, _) => Settle();
+                // too many changes at once, or the folder went away: watch again from scratch, and check once (round 42 review)
+                watcher.Error += (_, _) => Dispatcher.UIThread.Post(() => { if (ReferenceEquals(_sheetWatcher, watcher)) { _armedFor = null; ArmNotices(); Settle(); } });
+                watcher.EnableRaisingEvents = true;
+                _sheetWatcher = watcher;
             }
             catch (Exception ex) when (ex is IOException or ArgumentException or UnauthorizedAccessException or PlatformNotSupportedException) { _sheetWatcher = null; }
         }
-        var now = DateTime.Now; var at = now.Date.AddHours(8);
-        if (at <= now) at = at.AddDays(1);
-        _morningTimer = new DispatcherTimer { Interval = at - now };
-        _morningTimer.Tick += (_, _) => { _morningTimer!.Stop(); RefreshTrayState(); CheckNotices(); ArmNotices(); };
-        _morningTimer.Start();
+        _morningDone ??= DateTime.Now.Hour >= 8 ? DateTime.Now.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture) : null;   // the start already checks
+        _clockTimer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(5) };
+        _clockTimer.Tick += (_, _) =>
+        {
+            var now = DateTime.Now; string day = now.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+            if (now.Hour < 8 || _morningDone == day) return;
+            _morningDone = day; RefreshTrayState(); CheckNotices();
+        };
+        _clockTimer.Start();
     }
 
     private void OnSheetSettled(object? sender, EventArgs e) { _sheetSettle?.Stop(); RefreshTrayState(); CheckNotices(); }

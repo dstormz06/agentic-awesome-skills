@@ -24,6 +24,12 @@ const OUT = DIR + 'round42-golden.json';
       { number: '100010', drug: 'Fictional spray J', goal: '2026-12-08', forecast: null },
       { number: '100011', drug: 'Fictional drops K', goal: '2026-02-30', forecast: '2026-13-01' },
       { number: '12345', drug: 'Not an ANDA number', goal: '2026-11-19', forecast: null },
+      // round 42 review: exactly at the limit of a close goal date (10 business days, Thanksgiving skipped), with a thin margin that is not said
+      { number: '100012', drug: 'Fictional tablets L', goal: '2026-12-07', forecast: '2026-12-04' },
+      { number: '100003', drug: 'A second row for the same number', goal: '2026-12-03', forecast: null },
+      { number: '100013', drug: 'Fictional tablets M', goal: '9999-12-31', forecast: null },
+      { number: '100014', drug: 'Fictional tablets N', goal: '2026-12-16', forecast: '9999-12-31' },
+      { number: '100015', drug: 'Fictional tablets O', goal: '2028-06-01', forecast: '2026-12-01' },
     ];
     const look = { '100003': { goal: '2026-12-09', forecast: '2026-12-11' }, '100004': { goal: '2027-01-15', forecast: '2027-01-05' }, '100006': { goal: '2027-01-10', forecast: '2026-12-01' } };
     const statusSince = { '100006': '2026-10-01', '100007': '2026-11-01', '100010': '2026-10-21', '100008': 'not a date' };
@@ -35,6 +41,8 @@ const OUT = DIR + 'round42-golden.json';
       { id: 't5', number: '100002', title: 'Not due for a while', due: '2026-11-30', done: false },
       { id: 't6', number: 'abc', title: 'Call​ back about the   facility', due: '2026-11-20', done: false },
       { id: 't7', number: '100003', title: 'x'.repeat(120), due: '2026-11-23', done: false },
+      { id: 't8', number: '100012', title: 'A far placeholder date', due: '9999-12-31', done: false },
+      { id: null, number: '100013', title: 'An item with no id', due: '2026-11-23', done: false },
     ];
     const sets = [
       { name: 'the usual limits', settings: {} },
@@ -54,12 +62,15 @@ const OUT = DIR + 'round42-golden.json';
     const paragraphs = ['2026-11-20: The huddle moves to 2:00 PM.', '11/18/2026 – Status updates are due Friday.', 'Nov 10, 2026: Within the fourteen days.',
       'November 5, 2026 The labeling template was updated.', '2026-11-21: Not yet.', '2026-02-30: Not a date.', 'No date here.', 'Sep. 19, 2026: Too old.',
       '2026-11-19:', '2026-11-19: ' + 'y'.repeat(300), '2026-11-1912: Not a date either.', 'Dec 1, 2025: Last year.', '2026-11-17 Hidden​character removed.',
-      '11/17/2026: A short line.', '   2026-11-16: Leading spaces.', 'sept 12, 2026: lower case, too old.', 'NOV 9, 2026 upper case month', '2026-11-15 — an em dash.', '1/2/2026: old'];
+      '11/17/2026: A short line.', '   2026-11-16: Leading spaces.', 'sept 12, 2026: lower case, too old.', 'NOV 9, 2026 upper case month', '2026-11-15 — an em dash.', '1/2/2026: old',
+      '2026-11-20: The huddle moves to 2:00 PM.', ...Array(2100).fill(''), '2026-11-19: The newest line, after a long document.'];
     const news = newsFrom(paragraphs, today);
+    const attention = { key: '100001|attention|x', number: '100001', code: 'attention', horizon: 'now', sev: 'warn', date: null, text: 'Needs action: Fictional words from the sheet' };
+    const briefs = cases[0].alerts.concat([attention]).map(a => [a.code, tlBrief(a)]);
     return {
       about: 'Shared cases for round 42, written by the browser simulation. The Windows app must give the same answers.',
       today, defaults: TL_DEFAULTS, choices: TL_CHOICES, labels: TL_LABELS, normalized: sets.map(s => tlNormalize(s.settings)),
-      cases, summary, summaryNone, summaryLaterOnly, calendar, paragraphs, news,
+      cases, summary, summaryNone, summaryLaterOnly, calendar, paragraphs, news, briefs,
       said: { todayTitle: TL_SAID.todayTitle, todayNone: TL_SAID.todayNone, todayMore: TL_SAID.todayMore(3), copied: TL_SAID.copied(2, 1), calendar: TL_SAID.calendar(4), hint: TL_SAID.hint },
       changes: CHANGES.find(c => c.round === 42), version: APP_VERSION,
     };

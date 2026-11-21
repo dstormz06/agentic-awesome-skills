@@ -59,7 +59,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   await p.evaluate(() => openHub()); await settle();
   const hub = await p.evaluate(() => { const w = watchItems(); return {
     now: [...document.querySelectorAll('#hubData .hrow')].map(r => r.textContent), later: [...document.querySelectorAll('#hubLater .hrow')].map(r => r.textContent),
-    wantNow: w.filter(i => i.horizon !== 'later').map(i => i.text), wantLater: w.filter(i => i.horizon === 'later').map(i => i.text),
+    wantNow: w.filter(i => i.horizon !== 'later').map(i => i.full), wantLater: w.filter(i => i.horizon === 'later').map(i => i.full),
     buttons: [...document.querySelectorAll('#hubData .hrow, #hubLater .hrow')].map(r => r.tagName === 'BUTTON') }; });
   ok(hub.now.length > 0 && JSON.stringify(hub.now) === JSON.stringify(hub.wantNow), `H1 immediate alerts are listed, in order (${hub.now.length})`);
   ok(hub.later.length > 0 && JSON.stringify(hub.later) === JSON.stringify(hub.wantLater), `H2 longer-term alerts are listed apart (${hub.later.length})`);

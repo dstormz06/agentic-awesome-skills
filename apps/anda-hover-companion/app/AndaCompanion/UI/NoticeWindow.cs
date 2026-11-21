@@ -59,7 +59,10 @@ public sealed class NoticeWindow : Window
     {
         if (Screens.Primary is not { } screen) return;
         var area = screen.WorkingArea; double scale = screen.Scaling;
-        int w = (int)Math.Ceiling(Bounds.Width * scale), h = (int)Math.Ceiling(Bounds.Height * scale), margin = (int)(12 * scale);
+        // its own measured size, not Bounds, which may still be empty when it opens (round 42 review)
+        Measure(new Size(Width, double.PositiveInfinity));
+        var size = DesiredSize.Height > 0 ? DesiredSize : Bounds.Size;
+        int w = (int)Math.Ceiling(Width * scale), h = (int)Math.Ceiling(size.Height * scale), margin = (int)(12 * scale);
         Position = new PixelPoint(Math.Max(area.X, area.Right - w - margin), Math.Max(area.Y, area.Bottom - h - margin));
     }
 }
