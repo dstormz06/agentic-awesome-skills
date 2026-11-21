@@ -137,14 +137,23 @@ public sealed class TodayWindow : Window
         // the sentences of one ANDA together, in the order the rule gives them
         static IEnumerable<(string Id, string Line, string? Mark)> ById(IEnumerable<(string Id, string Text)> rows) =>
             rows.GroupBy(r => r.Id).Select(g => (g.Key, string.Join(" ", g.Select(r => r.Text)), (string?)null));
-        // Round 42: what needs a look, most urgent first, by the timeline checks: the first reason of each ANDA, and how many more
+        // Round 42: what needs a look, most urgent first, by the timeline checks: the first reason of each ANDA, and how many more. The owner's
+        // choice: one group, so the round 34 "needs a look" ANDAs that no timeline check names follow in it, and that group is not shown apart
+        var all = Groups();
+        bool merged = false, mergedRows = false;
         if (_alertsAsked && _alerts is null)
             Section("urgent", Timeline.TodayTitle, new[] { Timeline.SaidUnreadable }, Array.Empty<(string, string, string?)>(), Array.Empty<string>());
         else if (_alerts is { } alerts)
         {
             var firsts = alerts.Where(a => a.Number is not null && a.Sev != "info").GroupBy(a => a.Number!).Select(g => (Id: g.Key, Line: g.First().Text + (g.Count() > 1 ? $" (+{g.Count() - 1} more)" : ""))).ToList();
-            Section("urgent", Timeline.TodayTitle, firsts.Count == 0 ? new[] { Timeline.TodayNone } : Array.Empty<string>(),
-                firsts.Take(Timeline.TodayMax).Select(f => (f.Id, f.Line, (string?)null)), firsts.Count > Timeline.TodayMax ? new[] { Timeline.TodayMore(firsts.Count - Timeline.TodayMax) } : Array.Empty<string>());
+            var named = firsts.Select(f => f.Id).ToHashSet(StringComparer.Ordinal);
+            var also = all[0].Rows.Where(r => !named.Contains(r.Id)).ToList();
+            var after = new List<string>();
+            if (firsts.Count > Timeline.TodayMax) after.Add(Timeline.TodayMore(firsts.Count - Timeline.TodayMax));
+            if (all[0].More > 0) after.Add(Today.More(all[0].More));
+            Section("urgent", Timeline.TodayTitle, firsts.Count == 0 && also.Count == 0 ? new[] { Timeline.TodayNone } : Array.Empty<string>(),
+                firsts.Take(Timeline.TodayMax).Select(f => (f.Id, f.Line, (string?)null)).Concat(also.Select(r => (r.Id, r.Line, (string?)r.Mark))), after);
+            merged = true; mergedRows = firsts.Count > 0 || also.Count > 0;
         }
         // Round 36: what moved since the last look comes first; then next week, from Thursday noon; then the groups
         if (_look is { } look)
@@ -153,11 +162,11 @@ public sealed class TodayWindow : Window
         if (_week is { } week)
             Section("week", week.Title, week.Holidays.Concat(week.Empty is { } empty ? new[] { empty } : Array.Empty<string>()), ById(week.Rows.Select(r => (r.Id, r.Text))),
                 (week.Tasks ?? Array.Empty<NextWeek.TaskRow>()).Select(t => t.Text).Concat(week.TasksMore > 0 ? new[] { NextWeek.SaidTasksMore(week.TasksMore) } : Array.Empty<string>()));   // round 38: to-do items, as text
-        var groups = Groups().Where(g => g.Rows.Count > 0).ToList();
+        var groups = all.Skip(merged ? 1 : 0).Where(g => g.Rows.Count > 0).ToList();
         foreach (var g in groups)
             Section(g.Title, g.Title, Array.Empty<string>(), g.Rows.Select(r => (r.Id, r.Line, (string?)r.Mark)), g.More > 0 ? new[] { Today.More(g.More) } : Array.Empty<string>());
-        ShowAllButton.IsVisible = _hooks.ShowAll is not null && Groups()[0].Ids.Count > 0;
-        if (groups.Count == 0) _list.Children.Add(new TextBlock { Text = Today.SaidNothing, FontSize = 12, Foreground = Res("C.Ink3"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(2, 8, 0, 0) });
+        ShowAllButton.IsVisible = _hooks.ShowAll is not null && all[0].Ids.Count > 0;
+        if (groups.Count == 0 && !mergedRows) _list.Children.Add(new TextBlock { Text = Today.SaidNothing, FontSize = 12, Foreground = Res("C.Ink3"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(2, 8, 0, 0) });
         PaintMain();
     }
 

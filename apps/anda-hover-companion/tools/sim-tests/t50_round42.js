@@ -51,7 +51,12 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   const today = await p.evaluate(() => ({ first: document.querySelector('#tdList > *').textContent, rows: [...document.querySelectorAll('#tdList .td-it[data-grp="urgent"]')].map(r => r.dataset.id),
     want: [...new Set(allAlerts().filter(a => a.number && a.sev !== 'info').map(a => a.number))].slice(0, TL_TODAY_MAX) }));
   eq(today.first, GOLD.said.todayTitle, 'T1 Today opens with what needs a look, most urgent first');
-  ok(today.rows.length > 0 && JSON.stringify(today.rows) === JSON.stringify(today.want), `T2 one row per ANDA, in the order of the checks, at most ${8} (${today.rows.join(', ')})`);
+  ok(today.rows.length > 0 && JSON.stringify(today.rows.slice(0, today.want.length)) === JSON.stringify(today.want), `T2 one row per ANDA, in the order of the checks, at most ${8} (${today.rows.join(', ')})`);
+  // the owner's choice: one group; the ANDAs round 34's rule marks, that no timeline check names, follow in it
+  eq(await p.evaluate(() => [[...document.querySelectorAll('#tdList .td-grp')].some(g => g.textContent === 'NEEDS A LOOK'),
+    needLookIds().every(id => document.querySelector(`#tdList .td-it[data-grp="urgent"][data-id="${id}"]`))]), [false, true], 'T2b one group for what needs a look: no second group, and every ANDA the older rule marks is in it');
+  eq(await p.evaluate(() => { const keep = allAlerts; allAlerts = () => []; openToday(); const r = [...document.querySelectorAll('#tdList .td-it[data-grp="urgent"]')].map(x => x.dataset.id);
+    allAlerts = keep; openToday(); return [r, todayGroups(state.pins, state.recents)[0].ids]; }).then(([a, b]) => a.join() === b.join() && a.length > 0), true, 'T2c with no timeline alert, the older rule\'s ANDAs still show, in its order');
   eq(await axe('#today'), [], 'T3 accessibility scan of Today');
   await p.evaluate(() => closeApp('today')); await settle();
 

@@ -372,22 +372,34 @@ public class Round42UiTests : IClassFixture<HeadlessFixture>
             var unread = new TodayWindow(new TodayHooks(() => all, Find, () => Array.Empty<string>(), () => Array.Empty<string>(), _ => { }, Alerts: () => null));
             var none = new TodayWindow(new TodayHooks(() => all, Find, () => Array.Empty<string>(), () => Array.Empty<string>(), _ => { }, Alerts: () => new[] { Alert("216482", "psg", "later", "info", "Info only.") }));
             var off = new TodayWindow(new TodayHooks(() => all, Find, () => Array.Empty<string>(), () => Array.Empty<string>(), _ => { }));
+            // no ANDA needs a look by either rule: the sentence that nothing meets a check
+            var calm = all.Where(x => !Today.NeedsLook(x)).ToList();
+            var empty = new TodayWindow(new TodayHooks(() => calm, Find, () => Array.Empty<string>(), () => Array.Empty<string>(), _ => { }, Alerts: () => Array.Empty<TimelineAlert>()));
+            var needIds = Today.Groups(Array.Empty<string>(), Array.Empty<string>(), all, Find)[0].Ids;
             try
             {
-                w.Show(); none.Show(); off.Show(); unread.Show(); Settle();
+                w.Show(); none.Show(); off.Show(); unread.Show(); empty.Show(); Settle();
                 var texts = Texts(w.List);
                 Click(w.List.Children.OfType<Button>().First()); Click(w.List.Children.OfType<Button>().Last()); Settle();   // two row clicks repaint
                 int askedAfterClicks = asked; w.Refresh(); Settle();
-                return (texts, noneTexts: Texts(none.List), offTexts: Texts(off.List), unreadTexts: Texts(unread.List), askedAfterClicks, askedAfterRefresh: asked);
+                var noneRows = none.List.Children.OfType<Button>().Select(b => (b.Tag as TodayWindow.RowKey)!).ToList();
+                return (texts, noneTexts: Texts(none.List), offTexts: Texts(off.List), unreadTexts: Texts(unread.List), askedAfterClicks, askedAfterRefresh: asked,
+                    emptyTexts: Texts(empty.List), noneRows, needIds);
             }
-            finally { w.Close(); none.Close(); off.Close(); unread.Close(); Settle(); }
+            finally { w.Close(); none.Close(); off.Close(); unread.Close(); empty.Close(); Settle(); }
         }, CancellationToken.None);
         Assert.Equal(Timeline.TodayTitle, r.texts[0]);
         Assert.Contains(r.texts, t => t.Contains("First reason. (+1 more)"));             // the first reason, and how many more (info is not counted)
         Assert.DoesNotContain(r.texts, t => t.Contains("Second reason."));
         Assert.DoesNotContain(r.texts, t => t.Contains("Reason 7."));                     // at most eight ANDAs ...
         Assert.Contains(Timeline.TodayMore(2), r.texts);                                  // ... and how many more are in News and alerts
-        Assert.Equal(Timeline.TodayTitle, r.noneTexts[0]); Assert.Contains(Timeline.TodayNone, r.noneTexts);
+        // the owner's choice: one group. The round 34 "needs a look" ANDAs no timeline check names follow in it, and that group is not shown apart
+        Assert.DoesNotContain("NEEDS A LOOK", r.texts); Assert.DoesNotContain("NEEDS A LOOK", r.noneTexts); Assert.Contains("NEEDS A LOOK", r.offTexts);
+        Assert.Equal(Timeline.TodayTitle, r.noneTexts[0]);
+        Assert.True(r.needIds.Count > 0);
+        Assert.Equal(r.needIds, r.noneRows.Where(k => k.Section == "urgent").Select(k => k.Id));
+        Assert.DoesNotContain(Timeline.TodayNone, r.noneTexts);
+        Assert.Equal(new[] { Timeline.TodayTitle, Timeline.TodayNone }, r.emptyTexts.Take(2));
         Assert.DoesNotContain(Timeline.TodayTitle, r.offTexts);
         Assert.Equal(new[] { Timeline.TodayTitle, Timeline.SaidUnreadable }, r.unreadTexts.Take(2));   // the sheet could not be read: said, nothing from the demo
         Assert.Equal(1, r.askedAfterClicks);                                               // read once when Today opens, not at each paint

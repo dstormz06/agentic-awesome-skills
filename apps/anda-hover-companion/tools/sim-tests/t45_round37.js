@@ -47,7 +47,8 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   await p.evaluate(() => { closeApp('settings'); closeApp('today'); }); await settle();
   eq(await p.evaluate(() => state.lastLook), null, 'O5 closing Today keeps nothing while it is off');
   await p.evaluate(() => openToday()); await settle();
-  ok(!(await listText()).includes('SINCE YOU LAST LOOKED') && (await listText()).includes('NEEDS A LOOK'), 'O6 Today opened again has no such group; the rest is as it was');
+  ok(!(await listText()).includes('SINCE YOU LAST LOOKED') && await p.evaluate(() => document.querySelector('#tdList .td-grp').textContent === TL_SAID.todayTitle && !!document.querySelector('#tdList .td-it[data-grp="urgent"]')),
+    'O6 Today opened again has no such group; the rest is as it was');
   await p.evaluate(() => closeApp('today'));
 
   // ---- B. a backup ----

@@ -45,11 +45,13 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   eq([t[0], t[1].startsWith('Compared with what this PC kept when you last closed Today: Jul 15, 2026, 5:05 PM EDT.'), t[1].endsWith('(A fictional earlier look, for the demo.)')], ['SINCE YOU LAST LOOKED', true, true], 'S1 Today begins with what moved, says against when, and says the demo\'s earlier look is fictional');
   ok(t.includes('Forecast moved from Sat Oct 10 to Sat Oct 17 (7 days later). New item needs you: IR response due in 5 days — Biopharmaceutics.'), 'S2 an ANDA\'s changes are one row: the forecast that moved and the new item');
   eq(await p.evaluate(() => { const g = document.querySelector('#tdList .td-gone'); return g ? [g.tagName, g.textContent] : null; }), ['DIV', '209998No longer in your data.'], 'S3 an ANDA no longer in the data is listed as text, not a button');
-  ok(t.indexOf('NEEDS A LOOK') > t.indexOf('SINCE YOU LAST LOOKED'), 'S4 the groups of round 33 follow');
+  // round 42, the owner's choice: round 33's "needs a look" ANDAs are in the first group (most urgent first), which is not shown apart
+  ok(await p.evaluate(() => ![...document.querySelectorAll('#tdList .td-grp')].some(g => g.textContent === 'NEEDS A LOOK') && needLookIds().length > 0
+    && needLookIds().every(id => document.querySelector(`#tdList .td-it[data-grp="urgent"][data-id="${id}"]`))), 'S4 the ANDAs that need a look by round 33\'s rule are in the first group');
   // the keyboard stays on the row pressed, in its own group
-  // 216482 is under SINCE and again under NEEDS A LOOK: pressing the second keeps the keyboard there, not on the first
-  await p.click('#tdList .td-it[data-grp="NEEDS A LOOK"][data-id="216482"]'); await settle();
-  eq(await p.evaluate(() => [document.activeElement.dataset.grp, document.activeElement.dataset.id]), ['NEEDS A LOOK', '216482'], 'S5 pressing a row keeps the keyboard on that row, in its own group');
+  // 216482 is under SINCE and again in the first group (round 42): pressing the row under SINCE keeps the keyboard there, not on the first
+  await p.click('#tdList .td-it[data-grp="since"][data-id="216482"]'); await settle();
+  eq(await p.evaluate(() => [document.activeElement.dataset.grp, document.activeElement.dataset.id]), ['since', '216482'], 'S5 pressing a row keeps the keyboard on that row, in its own group');
   eq(await axe('#today'), [], 'S6 accessibility scan of Today with the new groups');
   // closing keeps the look; nothing has moved since
   await p.evaluate(() => { window.__now = Date.UTC(2026, 6, 16, 15, 0); });

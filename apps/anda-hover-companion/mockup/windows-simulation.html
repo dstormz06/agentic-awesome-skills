@@ -5506,13 +5506,18 @@ function paintToday(){
   };
   /* the sentences of one ANDA together, in the order the rule gives them */
   const byId = rows => { const m = new Map(); rows.forEach(r => m.set(r.id, (m.has(r.id) ? m.get(r.id) + " " : "") + r.text)); return [...m]; };
-  /* Round 42: what needs a look, most urgent first, by the timeline checks: the first reason of each ANDA, and how many more */
+  /* Round 42: what needs a look, most urgent first, by the timeline checks: the first reason of each ANDA, and how many more. The owner's
+     choice: one group, so the round 34 "needs a look" ANDAs that no timeline check names follow in it, and that group is not shown apart */
+  const groups = todayGroups(state.pins, state.recentsOn ? state.recents : []);
   { const firsts = new Map();
     allAlerts().filter(a => a.number && a.sev !== "info").forEach(a => { if(!firsts.has(a.number)) firsts.set(a.number, { a, more:0 }); else firsts.get(a.number).more++; });
     list.append(h("div", { class:"td-grp", text:TL_SAID.todayTitle }));
-    if(!firsts.size) list.append(h("div", { class:"td-note", text:TL_SAID.todayNone }));
+    const also = groups[0].rows.filter(r => !firsts.has(r.id));
+    if(!firsts.size && !also.length) list.append(h("div", { class:"td-note", text:TL_SAID.todayNone }));
     [...firsts].slice(0, TL_TODAY_MAX).forEach(([id, f]) => row("urgent", id, f.a.text + (f.more ? " " + watchMoreText(f.more) : "")));
-    if(firsts.size > TL_TODAY_MAX) list.append(h("div", { class:"td-note", text:TL_SAID.todayMore(firsts.size - TL_TODAY_MAX) })); }
+    if(firsts.size > TL_TODAY_MAX) list.append(h("div", { class:"td-note", text:TL_SAID.todayMore(firsts.size - TL_TODAY_MAX) }));
+    also.forEach(r => row("urgent", r.id, r.line));
+    if(firsts.size || also.length) any = true; }
   /* Round 36: what moved since the last look, first; round 37: only while the person has it on */
   if(state.lastLookOn){
   const kept = lastLookKept(), shown = state.shownLook = lookNow(DATA, nowMs()), since = kept ? changesSince(kept, shown, id => DATA[id] && DATA[id].attn) : null;
@@ -5532,7 +5537,7 @@ function paintToday(){
     week.tasks.forEach(k => list.append(h("div", { class:"td-note td-task", text:k.text })));      /* round 38: to-do items due next week, as text */
     if(week.tasksMore) list.append(h("div", { class:"td-note", text:weekTasksMore(week.tasksMore) }));
   }
-  todayGroups(state.pins, state.recentsOn ? state.recents : []).forEach(g => {
+  groups.slice(1).forEach(g => {
     if(!g.ids.length) return; any = true; list.append(h("div", { class:"td-grp", text:g.title }));
     g.rows.forEach(r => row(g.title, r.id, r.line));
   });
@@ -6334,7 +6339,7 @@ function guideOpensAtStart(seen){ return seen !== true; }
 
 const APP_VERSION = "Prototype, round 42";
 const CHANGES = [
-  { round:42, items:["Timeline checks watch your goal dates by fixed rules, with no AI: immediate (a goal date passed or close, a forecast after the goal, no forecast, a to-do item due, a goal date moved earlier) and longer term (a forecast that slipped, a thin margin, a crunch week, a status unchanged for a month). Each limit is in Settings, How it starts.", "Today lists what needs a look first, most urgent first. News and alerts shows the immediate and the longer term apart, copies a summary for a team lead, and gives the goal dates as a calendar file.", "The Windows app now shows the short notices near the clock and the division news, off until you switch them on."] },
+  { round:42, items:["Timeline checks watch your goal dates by fixed rules, with no AI: immediate (a goal date passed or close, a forecast after the goal, no forecast, a to-do item due, a goal date moved earlier) and longer term (a forecast that slipped, a thin margin, a crunch week, a status unchanged for a month). Each limit is in Settings, How it starts.", "Today lists what needs a look first, in one group, most urgent first. News and alerts shows the immediate and the longer term apart, copies a summary for a team lead, and gives the goal dates as a calendar file.", "The Windows app now shows the short notices near the clock and the division news, off until you switch them on."] },
   { round:41, items:["Elsa can be filled in from Settings when Elsa's team gives its request body and reply path (Settings, AI and connections, Elsa); left blank, Elsa stays offline. The address and token stay in the environment variables IT sets.", "An MCP server can also be a program on this PC that IT approved: added with “Add a program on this PC”, by its full path and SHA-256, which the app checks before each start. The app asks before it starts the program and stops it when you are done; with nothing entered, no program can be started."] },
   { round:40, items:["MCP servers: connect to tools that answer over https (Settings, AI and connections). Test lists a server's tools; MCP tools in the tray menu's More shows exactly what a call sends before you press Send. Nothing is sent by itself and nothing is kept.", "My API can be filled in for a common kind of service with one press: OpenAI-compatible, Azure OpenAI, or Ollama on this PC."] },
   { round:39, items:["Settings has a second switch beside “Since you last looked”: whether next week in Today also lists your to-do items. Off, it reads neither to-do list for Today and shows no titles."] },
