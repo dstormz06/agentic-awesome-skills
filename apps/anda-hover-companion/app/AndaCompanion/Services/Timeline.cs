@@ -274,7 +274,7 @@ public static class Timeline
         // round 42 review: one event per ANDA (its UID does not hold the date), with a sequence that grows each day, so that a newer file replaces
         // an older one when the goal date moves; lines longer than 75 octets are folded (RFC 5545), as the simulation folds them
         // the sequence and stamp are the time the file is written, so a second file the same day still replaces the first (round 42 re-review)
-        var stamp = stampUtc ?? t.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+        var stamp = (stampUtc ?? t.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)) is var given && given.Kind == DateTimeKind.Utc ? given : given.ToUniversalTime();
         long seq = Math.Max(0, (long)Math.Floor((stamp - new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds));
         static string Fold(string l)
         {
@@ -285,7 +285,7 @@ public static class Timeline
         }
         var lines = new List<string> { "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//ANDA Companion (Notula)//Goal dates//EN", "CALSCALE:GREGORIAN" };
         foreach (var e in events)
-            lines.AddRange(new[] { "BEGIN:VEVENT", $"UID:anda-{e.N}-goal@anda-companion.invalid", $"SEQUENCE:{seq.ToString(Inv)}", $"DTSTAMP:{stamp.ToUniversalTime().ToString("yyyyMMdd'T'HHmmss'Z'", Inv)}", $"DTSTART;VALUE=DATE:{C(e.G)}",
+            lines.AddRange(new[] { "BEGIN:VEVENT", $"UID:anda-{e.N}-goal@anda-companion.invalid", $"SEQUENCE:{seq.ToString(Inv)}", $"DTSTAMP:{stamp.ToString("yyyyMMdd'T'HHmmss'Z'", Inv)}", $"DTSTART;VALUE=DATE:{C(e.G)}",
                 $"DTEND;VALUE=DATE:{C(e.G.AddDays(1))}", $"SUMMARY:Goal date: ANDA {e.N}", "DESCRIPTION:From ANDA Companion (Notula)\\, read from my portfolio sheet. Please check the record before acting.",
                 "TRANSP:TRANSPARENT", "END:VEVENT" });
         lines.Add("END:VCALENDAR");
