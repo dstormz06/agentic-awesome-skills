@@ -17,6 +17,8 @@ namespace AndaCompanion.UI;
 public sealed class NoticeWindow : Window
 {
     internal NoticeItem Item { get; }
+    internal bool Stays { get; }
+    internal bool HidesBySelf => _timer.IsEnabled;
     internal TextBlock KindText { get; } = new() { FontSize = 11, FontWeight = FontWeight.Bold, LetterSpacing = 1.2 };
     internal TextBlock Body { get; } = new() { TextWrapping = TextWrapping.Wrap, FontSize = 13 };
     internal Button OpenButton { get; } = new() { FontSize = 12 };
@@ -24,8 +26,9 @@ public sealed class NoticeWindow : Window
     internal Button CloseButton { get; } = new() { Content = "Close", FontSize = 12 };
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(Notices.ShowSeconds) };
 
-    /// <param name="open">Opens the card (or News and alerts); <paramref name="snooze"/> keeps it for tomorrow; <paramref name="done"/> is told when it hides.</param>
-    public NoticeWindow(NoticeItem item, Action<NoticeItem> open, Action<NoticeItem> snooze)
+    /// <param name="open">Opens the card (or News and alerts); <paramref name="snooze"/> keeps it for tomorrow.</param>
+    /// <param name="stay">Round 42, hardened: the notice stays until it is closed (Settings: Keep each notice until I close it).</param>
+    public NoticeWindow(NoticeItem item, Action<NoticeItem> open, Action<NoticeItem> snooze, bool stay = false)
     {
         Item = item;
         Title = "ANDA Companion (Notula) — notice"; Width = 360; SizeToContent = SizeToContent.Height; CanResize = false;
@@ -41,10 +44,11 @@ public sealed class NoticeWindow : Window
         OpenButton.Click += (_, _) => { Close(); open(item); };
         SnoozeButton.Click += (_, _) => { snooze(item); Close(); };
         CloseButton.Click += (_, _) => Close();
+        Stays = stay;
         _timer.Tick += (_, _) => Close();
         PointerEntered += (_, _) => _timer.Stop();
-        PointerExited += (_, _) => { _timer.Interval = TimeSpan.FromSeconds(4); _timer.Start(); };
-        Opened += (_, _) => { Place(); _timer.Start(); };
+        PointerExited += (_, _) => { if (stay) return; _timer.Interval = TimeSpan.FromSeconds(4); _timer.Start(); };
+        Opened += (_, _) => { Place(); if (!stay) _timer.Start(); };
         Closed += (_, _) => _timer.Stop();
 
         var buttons = new WrapPanel { ItemSpacing = 6, LineSpacing = 4 };

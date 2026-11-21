@@ -16,7 +16,8 @@ public partial class App
     private FileSystemWatcher? _sheetWatcher;
     private DispatcherTimer? _sheetSettle, _clockTimer, _holdTimer;
     private string? _armedFor, _morningDone;
-    private (string Path, DateTime Written, long Length, IReadOnlyList<string>? Paragraphs, string? Problem)? _newsRead;
+    private NewsReader? _newsReader;
+    private string? _noticeNote;       // round 42, hardened: why notices wait, shown at the top of News and alerts
     private (object Read, string Day, IReadOnlyList<NewsItem> Items)? _newsParsed;
 
     /// <summary>The day the checks reckon from: today, or for the fictional demo records the day their data was taken (they are frozen there).</summary>
@@ -56,7 +57,7 @@ public partial class App
         var (kept, canWrite) = StatusSeen.Load(statusPath, source);
         var seen = StatusSeen.Update(kept, records.Select(r => (r.Number, (string?)r.Latest)), today);
         bool changed = kept is null || kept.Count != seen.Count || seen.Any(kv => !kept.TryGetValue(kv.Key, out var k) || k != kv.Value);
-        if (changed && canWrite) StatusSeen.Save(statusPath, seen, source);
+        if (changed && canWrite) StatusSeen.Save(statusPath, seen, source, today);
         if (look is not null && look.Source != source) look = null;          // a look kept for other data says nothing about this one
         return new TimelineInput(today, records.Select(ForTimeline).ToList(),
             look?.Items.ToDictionary(kv => kv.Key, kv => (kv.Value.Goal, kv.Value.Forecast)), todos.ToList(), StatusSeen.Since(seen), settings);
@@ -66,8 +67,8 @@ public partial class App
     private IReadOnlyList<TimelineRecord> CalendarRecords() => DataReadable() ? Records().Select(ForTimeline).ToList() : Array.Empty<TimelineRecord>();
 
     /// <summary>
-    /// The division news, or null when it is off, with the sentence News and alerts shows above it. The document is read again only when
-    /// its time or size changed (round 42 review: it was read at every paint).
+    /// The division news, or null when it is off, with the sentence News and alerts shows above it. The document is read away from the app's
+    /// thread, and again only when its time or size changes (round 42, hardened); while it is read, the last read is shown, or "Reading…".
     /// </summary>
     private (IReadOnlyList<NewsItem>? Items, string Note) CurrentNews()
     {
@@ -76,14 +77,11 @@ public partial class App
         DateTime written = DateTime.MinValue; long length = -1;
         try { var info = new FileInfo(path); if (info.Exists) { written = info.LastWriteTimeUtc; length = info.Length; } }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException) { }
-        if (_newsRead is not { } r || r.Path != path || r.Written != written || r.Length != length || r.Paragraphs is null)
-        {
-            var (paragraphs, problem) = DivisionNews.ReadDocx(path);
-            _newsRead = r = (path, written, length, paragraphs, problem);
-        }
-        if (r.Paragraphs is null) return (Array.Empty<NewsItem>(), r.Problem!);
-        string day = Timeline.Iso(Today());       // parsed again only for a new read or a new day (round 42 re-review)
-        if (_newsParsed is not { } p || !ReferenceEquals(p.Read, r.Paragraphs) || p.Day != day) _newsParsed = p = (r.Paragraphs, day, DivisionNews.Parse(r.Paragraphs, day));
+        _newsReader ??= new NewsReader(DivisionNews.ReadDocx, work => Task.Run(work), work => Dispatcher.UIThread.Post(work));
+        var (paragraphs, problem, reading) = _newsReader.Get(path, written, length, () => { if (NewsOn) CheckNotices(); _newsWindow?.Paint(); });
+        if (paragraphs is null) return (Array.Empty<NewsItem>(), reading && problem is null ? NewsReader.SaidReading : problem!);
+        string day = Timeline.Iso(Today());       // parsed again only for a new read or a new day
+        if (_newsParsed is not { } p || !ReferenceEquals(p.Read, paragraphs) || p.Day != day) _newsParsed = p = (paragraphs, day, DivisionNews.Parse(paragraphs, day));
         return (p.Items, DivisionNews.SaidFrom(Path.GetFileName(path)));
     }
 
@@ -98,7 +96,7 @@ public partial class App
         if (NewsOn && CurrentNews().Items is { } n) items.AddRange(Notices.FromNews(n));
         if (_settings.WatchBack && CurrentAlerts() is { } alerts) items.AddRange(Notices.FromAlerts(alerts));
         string today = Timeline.Iso(Today());
-        if (Notices.Load(AppPaths.NoticesFile) is not { } state) return Notices.SaidBusy;      // locked just now: not written over, tried at the next check
+        if (Notices.Load(AppPaths.NoticesFile) is not { } state) return NoteNotices(Notices.SaidBusy);      // locked just now: not written over, tried at the next check
         _noticeQueue = Notices.Pending(state, items, today);
         Notices.Save(AppPaths.NoticesFile, state);
         int pending = _noticeQueue.Count;
@@ -118,23 +116,25 @@ public partial class App
     private string? ShowNextNotice()
     {
         DropNotices();
+        if (_noticeQueue.Count == 0) NoteNotices(null);
         if (_noticeWindow is not null || _noticeQueue.Count == 0) return null;
         if (Presenting.Now())
         {
             // a presentation, a full-screen program or Focus assist: the notice waits (it would show ANDA numbers on a shared screen)
             _holdTimer ??= new DispatcherTimer { Interval = TimeSpan.FromMinutes(5) };
             _holdTimer.Tick -= OnHoldEnded; _holdTimer.Tick += OnHoldEnded; _holdTimer.Start();
-            return Notices.SaidHeld;
+            return NoteNotices(Notices.SaidHeld);
         }
         string today = Timeline.Iso(Today());
-        if (Notices.Load(AppPaths.NoticesFile) is not { } state) return Notices.SaidBusy;
+        if (Notices.Load(AppPaths.NoticesFile) is not { } state) return NoteNotices(Notices.SaidBusy);
         var next = Notices.Take(state, _noticeQueue, _settings.NoticesPerDay, today);
         Notices.Save(AppPaths.NoticesFile, state);
-        if (next is null) return Notices.SaidCap(_settings.NoticesPerDay, _noticeQueue.Count);
+        if (next is null) return NoteNotices(Notices.SaidCap(_settings.NoticesPerDay, _noticeQueue.Count));
+        NoteNotices(null);
         var win = new NoticeWindow(next, OpenFromNotice, item =>
         {
             if (Notices.Load(AppPaths.NoticesFile) is { } s) { Notices.Snooze(s, item.Key, Timeline.Iso(Today())); Notices.Save(AppPaths.NoticesFile, s); }
-        });
+        }, _settings.NoticesStay);
         win.Closed += (_, _) =>
         {
             if (ReferenceEquals(_noticeWindow, win)) _noticeWindow = null;
@@ -143,6 +143,13 @@ public partial class App
         _noticeWindow = win;
         win.Show();
         return "";
+    }
+
+    /// <summary>Keeps the reason notices wait for News and alerts, and repaints it when the reason changes; returns the sentence.</summary>
+    private string? NoteNotices(string? note)
+    {
+        if (note != _noticeNote) { _noticeNote = note; _newsWindow?.Paint(); }
+        return note;
     }
 
     private void OnHoldEnded(object? sender, EventArgs e) { _holdTimer?.Stop(); ShowNextNotice(); }
@@ -168,7 +175,7 @@ public partial class App
             },
             Today: () => TimelineToday(Records().ToList()),
             DrugOf: n => _repository.Find(n)?.Drug,
-            Records: CalendarRecords));
+            Records: CalendarRecords, NoticeNote: () => _noticeNote));
         win.Closed += (_, _) => { if (ReferenceEquals(_newsWindow, win)) _newsWindow = null; };
         _newsWindow = win;
         win.Show();

@@ -208,6 +208,7 @@
                 <Button Name="NewsClear" Grid.Column="2" Content="Clear"/>
               </Grid>
               <WrapPanel Name="NoticeCapPanel"/>
+              <CheckBox Name="NoticeStayBox" Content="Keep each notice until I close it"/>
               <TextBlock Classes="lbl" Text="TIMELINE CHECKS · THE LIMITS"/>
               <Grid Name="TimelineGrid" ColumnDefinitions="*,Auto" RowSpacing="4" ColumnSpacing="10"/>
               <TextBlock Name="TimelineHint" Classes="hint" TextWrapping="Wrap"/>

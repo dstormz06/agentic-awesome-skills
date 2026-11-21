@@ -42,6 +42,8 @@ public partial class SettingsWindow
             NoticeCapPanel.Children.Add(rb);
         }
         AutomationProperties.SetName(NoticeCapPanel, "Notices a day");
+        NoticeStayBox.IsChecked = _settings.NoticesStay;
+        NoticeStayBox.IsCheckedChanged += (_, _) => { _settings.NoticesStay = NoticeStayBox.IsChecked == true; Apply(); };
         int row = 0;
         foreach (var (key, choices, label) in TimelineSettings.Limits)
         {

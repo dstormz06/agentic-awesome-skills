@@ -156,6 +156,8 @@ public sealed class Settings
     public string NewsDocument { get; set; } = "";
     /// <summary>At most this many notices a day: 1, 3 or 5.</summary>
     public int NoticesPerDay { get; set; } = Notices.DefaultCap;
+    /// <summary>Round 42, hardened: a notice stays until it is closed, instead of hiding after twelve seconds (for anyone who needs more time).</summary>
+    public bool NoticesStay { get; set; }
     /// <summary>Round 42: the limits of the timeline checks.</summary>
     public TimelineSettings Timeline { get; set; } = new();
     /// <summary>The last ANDAs looked up, newest first. Six-digit numbers only; this PC only, never part of a backup.</summary>

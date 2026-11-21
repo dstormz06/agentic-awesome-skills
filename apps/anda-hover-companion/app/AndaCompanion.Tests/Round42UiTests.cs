@@ -87,7 +87,7 @@ public class Round42LogicTests
         Assert.Null(mine.Look);                                                              // the demo's look is not this sheet's
         Assert.Equal(records.Count, StatusSeen.Load(status, "file:0000abcd").Items!.Count);
         Assert.NotNull(App.InputFor(true, records, "demo", status, look, none, new TimelineSettings())!.Look);
-        Assert.Null(StatusSeen.Load(status, "file:0000abcd").Items);                         // the other data's days are not mixed in
+        Assert.Equal(records.Count, StatusSeen.Load(status, "file:0000abcd").Items!.Count);  // round 42, hardened: the sheet's days are kept apart, not lost
     }
 
     [Fact]

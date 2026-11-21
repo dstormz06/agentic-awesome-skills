@@ -12,7 +12,7 @@ namespace AndaCompanion.UI;
 /// <summary>What News and alerts needs from the app: the alerts, the news (null when off, with its sentence), and what its buttons do.</summary>
 public sealed record NewsHooks(Func<IReadOnlyList<TimelineAlert>?> Alerts, Func<(IReadOnlyList<NewsItem>? Items, string Note)> News, Action<string> OpenCard,
     Func<string> Today, Func<string, string?> DrugOf, Func<IReadOnlyList<TimelineRecord>> Records,
-    Func<string, Task<bool>>? WriteClipboard = null, Func<string, Task<bool?>>? SaveCalendar = null);
+    Func<string, Task<bool>>? WriteClipboard = null, Func<string, Task<bool?>>? SaveCalendar = null, Func<string?>? NoticeNote = null);
 
 /// <summary>
 /// Round 42 (round 19 in the simulation): News and alerts. What the timeline checks find, immediate apart from longer term, each row opening
@@ -28,6 +28,8 @@ public sealed class NewsWindow : Window
     internal Button SummaryButton { get; } = new() { Content = "Copy a summary for my team lead" };
     internal Button CalendarButton { get; } = new() { Content = "Save goal dates as a calendar file…" };
     internal TextBlock Say { get; } = new() { TextWrapping = TextWrapping.Wrap, FontSize = 12 };
+    /// <summary>Round 42, hardened: why notices near the clock are waiting (today's limit, a presentation, a file in use), when they are.</summary>
+    internal TextBlock NoticeNote { get; } = new() { TextWrapping = TextWrapping.Wrap, FontSize = 12, IsVisible = false };
     private readonly NewsHooks _hooks;
     private IReadOnlyList<TimelineAlert> _alerts = Array.Empty<TimelineAlert>();
     private bool _unreadable;
@@ -44,7 +46,8 @@ public sealed class NewsWindow : Window
         Title = "ANDA Companion (Notula) — News and alerts"; Width = 560; SizeToContent = SizeToContent.Height; CanResize = false; ShowInTaskbar = false;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         IBrush Res(string key) => (IBrush)Application.Current!.Resources[key]!;
-        Background = Res("C.Bg"); NewsNote.Foreground = Say.Foreground = Res("C.Ink2");
+        Background = Res("C.Bg"); NewsNote.Foreground = Say.Foreground = NoticeNote.Foreground = Res("C.Ink2");
+        AutomationProperties.SetLiveSetting(NoticeNote, AutomationLiveSetting.Polite);
         AutomationProperties.SetLiveSetting(Say, AutomationLiveSetting.Polite);
         TextBlock Label(string t) => new() { Text = t, FontSize = 11, FontWeight = FontWeight.Bold, LetterSpacing = 1.3, Foreground = Res("C.Ink3"), Margin = new Thickness(0, 10, 0, 2) };
         SummaryButton.Click += async (_, _) => await CopySummaryAsync();
@@ -55,7 +58,7 @@ public sealed class NewsWindow : Window
         foreach (var b in new[] { SummaryButton, CalendarButton, done }) buttons.Children.Add(b);
         var body = new StackPanel { Spacing = 2, Margin = new Thickness(20) };
         body.Children.Add(new TextBlock { Text = "News and alerts", FontSize = 15, FontWeight = FontWeight.Bold, Foreground = Res("C.Ink") });
-        foreach (var c in new Control[] { Label("IMMEDIATE · FROM YOUR DATA"), NowList, Label("LONGER TERM · FROM YOUR DATA"), LaterList, Label("DIVISION NEWS"), NewsNote, NewsList, buttons, Say,
+        foreach (var c in new Control[] { NoticeNote, Label("IMMEDIATE · FROM YOUR DATA"), NowList, Label("LONGER TERM · FROM YOUR DATA"), LaterList, Label("DIVISION NEWS"), NewsNote, NewsList, buttons, Say,
                      new TextBlock { Text = Footer, TextWrapping = TextWrapping.Wrap, FontSize = 11, Foreground = Res("C.Ink3"), Margin = new Thickness(0, 8, 0, 0) } })
             body.Children.Add(c);
         Content = new ScrollViewer { Content = body, MaxHeight = 760 };
@@ -67,6 +70,7 @@ public sealed class NewsWindow : Window
     {
         IBrush Res(string key) => (IBrush)Application.Current!.Resources[key]!;
         var all = _hooks.Alerts(); _unreadable = all is null;          // the sheet could not be read: nothing from the demo in its place
+        var waiting = _hooks.NoticeNote?.Invoke(); NoticeNote.Text = waiting ?? ""; NoticeNote.IsVisible = waiting is { Length: > 0 };
         _alerts = (all ?? Array.Empty<TimelineAlert>()).Where(a => a.Sev != "info").ToList();
         Control Row(TimelineAlert a)
         {
@@ -89,7 +93,7 @@ public sealed class NewsWindow : Window
         NewsNote.Text = note; NewsList.Children.Clear();
         if (items is not null)
         {
-            if (items.Count == 0) NewsList.Children.Add(Note(DivisionNews.SaidNone));
+            if (items.Count == 0 && note != NewsReader.SaidReading) NewsList.Children.Add(Note(DivisionNews.SaidNone));     // not while it is still read
             foreach (var n in items)
                 NewsList.Children.Add(new TextBlock { Text = $"{WatchRules.Short(Timeline.Iso(n.Date)!.Value)}  {n.Text}", TextWrapping = TextWrapping.Wrap, FontSize = 12, Foreground = Res("C.Ink"), Margin = new Thickness(6, 2) });
         }

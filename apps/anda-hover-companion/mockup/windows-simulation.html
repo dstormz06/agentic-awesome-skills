@@ -1485,6 +1485,7 @@ PS C:\work&gt; </div>
     <label class="opt"><input type="checkbox" id="setNews"> Show division news from the shared news document</label>
     <div class="frow"><input type="text" id="newsFile" readonly placeholder="The division's news document (.docx) in a synced SharePoint folder" aria-label="Division news document"><button class="pill quiet" id="newsPick" type="button">Choose…</button><button class="pill quiet" id="newsClear" type="button">Clear</button></div>
     <div class="wrap" role="radiogroup" aria-label="Notices a day"><label class="opt"><input type="radio" name="wcap" value="1"> At most 1 a day</label><label class="opt"><input type="radio" name="wcap" value="3" checked> At most 3 a day</label><label class="opt"><input type="radio" name="wcap" value="5"> At most 5 a day</label></div>
+    <label class="opt"><input type="checkbox" id="setWatchStay"> Keep each notice until I close it</label>
     <div class="lbl" style="margin-top:8px">TIMELINE CHECKS · THE LIMITS</div>
     <div id="tlLimits" style="display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center"></div>
     <p class="hint" id="tlHint"></p>
@@ -1941,6 +1942,7 @@ PS C:\work&gt; </div>
   <!-- ===== News and alerts: division news from one shared Word document, and what the person's own data says needs a look ===== -->
   <div class="app-win" id="hub" role="dialog" aria-label="News and alerts">
     <div class="hdr"><h2>News and alerts</h2><button class="pill" id="hubClose" type="button">Close</button></div>
+    <p class="hint" id="hubNoticeNote" role="status" hidden style="margin:0 0 6px"></p>
     <div class="lbl" id="hubNowLbl">NEEDS YOU TODAY · WHY THE TRAY ICON SHOWS ITS DOT</div>
     <div id="hubNow"></div>
     <div class="lbl">DIVISION NEWS</div>
@@ -2707,7 +2709,7 @@ const state = { tz:"", staleDays:7, refStaleDays:45, oldRef:false, oldData:false
   replies:null,
   density:"comfortable", ts:"standard", lookupStyle:"box", recentsOn:true, recents:[], pins:[], lastLookOn:true, weekTodosOn:true,
   cardFields:["applicant", "established", "project", "agentCo", "agentEmail", "applicantEmail", "myNotes", "doc356h", "doc32p1"],
-  watchOn:false, newsOn:false, newsFile:"", watchCap:3, trayRecount:"daily", wDay:null, wCount:0, wSeen:new Set(), wSnoozed:new Set(), hubSeen:new Set(),
+  watchOn:false, newsOn:false, newsFile:"", watchCap:3, watchStay:false, noticeNote:null, trayRecount:"daily", wDay:null, wCount:0, wSeen:new Set(), wSnoozed:new Set(), hubSeen:new Set(),
   /* round 42: the timeline checks' limits (TL_DEFAULTS), and when each ANDA's status was first seen as it is now (kept on this PC, never sent) */
   tl:{ goalClose:10, noForecast:30, thinMargin:5, crunchCount:3, crunchHorizon:90, statusDays:30, todoSoon:2 }, statusSeen:null };
 const steps = {};
@@ -2838,7 +2840,8 @@ function watchCheck(){
 function showNextWhisper(){
   const box = $("whisper"); if(box.style.display === "block" || !wQueue.length) return;
   if(state.wCount >= state.watchCap){
-    $("watchStatus").textContent = `Today's limit of ${state.watchCap} ${state.watchCap === 1 ? "notice" : "notices"} is reached. ${wQueue.length} more ${wQueue.length === 1 ? "is" : "are"} in News and alerts.`;
+    $("watchStatus").textContent = state.noticeNote = `Today's limit of ${state.watchCap} ${state.watchCap === 1 ? "notice" : "notices"} is reached. ${wQueue.length} more ${wQueue.length === 1 ? "is" : "are"} in News and alerts.`;
+    if(isOpen("hub")) paintHub();
     return;
   }
   const i = wQueue.shift(); wCurrent = i; state.wSeen.add(i.key); state.wCount++;
@@ -2848,14 +2851,15 @@ function showNextWhisper(){
   $("whOpen").textContent = i.kind === "news" || !i.number ? "Open News and alerts" : "Open the card";
   $("whSnooze").hidden = i.kind === "news";
   box.style.display = "block";
-  clearTimeout(wTimer); wTimer = setTimeout(() => hideWhisper(true), WHISPER_MS);
+  state.noticeNote = null;
+  clearTimeout(wTimer); if(!state.watchStay) wTimer = setTimeout(() => hideWhisper(true), WHISPER_MS);     /* round 42, hardened: or it stays until closed */
 }
 function hideWhisper(next){
   $("whisper").style.display = "none"; wCurrent = null; clearTimeout(wTimer);
   if(next) setTimeout(showNextWhisper, 500);
 }
 $("whisper").addEventListener("pointerenter", () => clearTimeout(wTimer));
-$("whisper").addEventListener("pointerleave", () => { if(wCurrent){ clearTimeout(wTimer); wTimer = setTimeout(() => hideWhisper(true), 4000); } });
+$("whisper").addEventListener("pointerleave", () => { if(wCurrent && !state.watchStay){ clearTimeout(wTimer); wTimer = setTimeout(() => hideWhisper(true), 4000); } });
 $("whClose").addEventListener("click", () => hideWhisper(true));
 $("whSnooze").addEventListener("click", () => { if(wCurrent){ state.wSnoozed.add(wCurrent.key); state.wSeen.delete(wCurrent.key); } hideWhisper(true); });
 $("whOpen").addEventListener("click", () => {
@@ -2864,6 +2868,7 @@ $("whOpen").addEventListener("click", () => {
 });
 function openHub(){ closeMenus(); showApp("hub"); $("hub").style.zIndex = "52"; paintHub(); }
 function paintHub(){
+  { const n = $("hubNoticeNote"), waiting = state.noticeNote && wQueue.length ? state.noticeNote : ""; n.textContent = waiting; n.hidden = !waiting; }     /* round 42, hardened: why notices wait */
   const news = $("hubNews"), data = $("hubData"), now = $("hubNow"); news.replaceChildren(); data.replaceChildren(); now.replaceChildren();
   { const reasons = alertReasons();
     if(!reasons.length) now.append(h("div", { class:"hrow", text:"Nothing needs you today, so the tray icon shows no dot. The dot is for an item due today or overdue, a goal date that is today or has passed, an ANDA your sheet marks as an immediate risk, a safety issue or a customer service issue, and a message marked urgent that has had no reply for two days (only while Outlook is connected)." }));
@@ -2919,6 +2924,7 @@ $("setNews").addEventListener("change", e => setNewsOn(e.target.checked));
 $("newsPick").addEventListener("click", () => { state.newsFile = "Division-News.docx (simulated; a synced SharePoint folder)"; $("newsFile").value = state.newsFile; $("watchStatus").textContent = "Document chosen. Tick the box above to show its news."; });
 $("newsClear").addEventListener("click", () => { state.newsFile = ""; $("newsFile").value = ""; setNewsOn(false); });
 document.querySelectorAll("input[name=wcap]").forEach(r => r.addEventListener("change", () => { if(r.checked){ state.watchCap = +r.value; showNextWhisper(); } }));
+$("setWatchStay").addEventListener("change", e => { state.watchStay = e.target.checked; });
 document.querySelectorAll("input[name=trec]").forEach(r => r.addEventListener("change", () => { if(r.checked){ state.trayRecount = r.value; refreshTrayState(); } }));     /* saving a setting is a use: it counts */
 $("newsPush").addEventListener("click", () => {
   const t = new Date(demoToday());
@@ -2941,6 +2947,7 @@ function syncRound19(){
   paintTlLimits();
   $("setWatch").checked = state.watchOn; $("setNews").checked = state.newsOn; $("newsFile").value = state.newsFile;
   document.querySelectorAll("input[name=wcap]").forEach(r => { r.checked = +r.value === state.watchCap; });
+  $("setWatchStay").checked = state.watchStay;
   document.querySelectorAll("input[name=trec]").forEach(r => { r.checked = r.value === state.trayRecount; });
   document.querySelectorAll("#setFields input").forEach(c => { c.checked = state.cardFields.includes(c.dataset.field); });
 }
@@ -6342,7 +6349,7 @@ function guideOpensAtStart(seen){ return seen !== true; }
 
 const APP_VERSION = "Prototype, round 42";
 const CHANGES = [
-  { round:42, items:["Timeline checks watch your goal dates by fixed rules, with no AI: immediate (a goal date passed or close, a forecast after the goal, no forecast, a to-do item due, a goal date moved earlier) and longer term (a forecast that slipped, a thin margin, a crunch week, a status unchanged for a month). Each limit is in Settings, How it starts.", "Today lists what needs a look first, in one group, most urgent first. News and alerts shows the immediate and the longer term apart, copies a summary for a team lead, and gives the goal dates as a calendar file.", "The Windows app now shows the short notices near the clock and the division news, off until you switch them on."] },
+  { round:42, items:["Timeline checks watch your goal dates by fixed rules, with no AI: immediate (a goal date passed or close, a forecast after the goal, no forecast, a to-do item due, a goal date moved earlier) and longer term (a forecast that slipped, a thin margin, a crunch week, a status unchanged for a month). Each limit is in Settings, How it starts.", "Today lists what needs a look first, in one group, most urgent first. News and alerts shows the immediate and the longer term apart, says why notices are waiting, copies a summary for a team lead, and gives the goal dates as a calendar file.", "The Windows app now shows the short notices near the clock and the division news, off until you switch them on."] },
   { round:41, items:["Elsa can be filled in from Settings when Elsa's team gives its request body and reply path (Settings, AI and connections, Elsa); left blank, Elsa stays offline. The address and token stay in the environment variables IT sets.", "An MCP server can also be a program on this PC that IT approved: added with “Add a program on this PC”, by its full path and SHA-256, which the app checks before each start. The app asks before it starts the program and stops it when you are done; with nothing entered, no program can be started."] },
   { round:40, items:["MCP servers: connect to tools that answer over https (Settings, AI and connections). Test lists a server's tools; MCP tools in the tray menu's More shows exactly what a call sends before you press Send. Nothing is sent by itself and nothing is kept.", "My API can be filled in for a common kind of service with one press: OpenAI-compatible, Azure OpenAI, or Ollama on this PC."] },
   { round:39, items:["Settings has a second switch beside “Since you last looked”: whether next week in Today also lists your to-do items. Off, it reads neither to-do list for Today and shows no titles."] },
@@ -8518,7 +8525,7 @@ function snapSettings(){
     actions:JSON.parse(JSON.stringify(s.actions)), agents:JSON.parse(JSON.stringify(s.agents)), todoShowFromData:s.todoAuto, todoRefreshSeconds:s.todoRefresh,
     myTodoMode:s.clMode, adaptive:s.adaptive, allTools:s.allTools,
     textSize:s.ts, density:s.density, lookupStyle:s.lookupStyle, rememberRecents:s.recentsOn, sinceLastLook:s.lastLookOn, weekTodos:s.weekTodosOn, mcpServers:JSON.parse(JSON.stringify(s.mcp)), pins:[...s.pins],
-    cardFields:[...s.cardFields], watchBack:s.watchOn, divisionNews:s.newsOn, noticesPerDay:s.watchCap, andaPage:s.andaUrl, trayRecount:s.trayRecount, timeZone:s.tz, staleAfterDays:s.staleDays, refStaleAfterDays:s.refStaleDays };   /* the counts of opened sections belong to this PC: they are not in a backup */
+    cardFields:[...s.cardFields], watchBack:s.watchOn, divisionNews:s.newsOn, noticesPerDay:s.watchCap, noticesStay:s.watchStay, andaPage:s.andaUrl, trayRecount:s.trayRecount, timeZone:s.tz, staleAfterDays:s.staleDays, refStaleAfterDays:s.refStaleDays };   /* the counts of opened sections belong to this PC: they are not in a backup */
 }
 const DEFAULT_SETTINGS = { ...snapSettings(), allTools:false }, DEFAULT_PROMPTS = prompts.map(p => [...p]), DEFAULT_REPLIES = state.replies.map(r => ({ ...r }));
 const oneOf = (v, list, fallback) => list.includes(v) ? v : fallback;
@@ -8550,7 +8557,7 @@ function applySettings(x){
   s.ts = oneOf(x.textSize, ["standard", "large", "xl"], d.textSize); s.density = oneOf(x.density, ["comfortable", "compact"], d.density); s.lookupStyle = oneOf(x.lookupStyle, ["box", "bar"], d.lookupStyle);
   s.andaUrl = typeof x.andaPage === "string" ? x.andaPage.slice(0, 300).trim() : d.andaPage;     /* kept as written: it is checked each time the button is pressed */
   s.cardFields = Array.isArray(x.cardFields) ? DETAIL_FIELDS.map(f => f[0]).filter(k => x.cardFields.includes(k)) : [...d.cardFields];
-  s.watchOn = typeof x.watchBack === "boolean" ? x.watchBack : d.watchBack; s.watchCap = oneOf(x.noticesPerDay, WATCH_CAPS, d.noticesPerDay); s.trayRecount = oneOf(x.trayRecount, ["use", "daily", "hourly"], d.trayRecount);
+  s.watchOn = typeof x.watchBack === "boolean" ? x.watchBack : d.watchBack; s.watchCap = oneOf(x.noticesPerDay, WATCH_CAPS, d.noticesPerDay); s.watchStay = typeof x.noticesStay === "boolean" ? x.noticesStay : false; s.trayRecount = oneOf(x.trayRecount, ["use", "daily", "hourly"], d.trayRecount);
   s.newsOn = x.divisionNews === true && !!s.newsFile;   /* the document's location belongs to this PC and is never in a backup */
   s.recentsOn = typeof x.rememberRecents === "boolean" ? x.rememberRecents : d.rememberRecents; if(!s.recentsOn) s.recents = [];
   /* a backup written before round 37 does not hold the switch: what the person has now stays, as in the app (round 37 review) */

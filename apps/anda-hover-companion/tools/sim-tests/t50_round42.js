@@ -95,6 +95,19 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   await p.evaluate(() => { state.watchOn = false; hideWhisper(false); watchCheck(); }); await settle();
   eq(await p.evaluate(() => document.getElementById('watchStatus').textContent), 'Notices are off.', 'N4 switched off, nothing is shown, and it says so');
 
+  // ---------- round 42, hardened: a notice that stays, and why notices wait ----------
+  await p.evaluate(() => { state.wSeen = new Set(); state.wSnoozed = new Set(); state.wDay = ''; state.watchCap = 1; state.watchStay = true; state.watchOn = true; watchCheck(); }); await settle();
+  await p.waitForTimeout(100);
+  eq(await p.evaluate(() => [document.getElementById('whisper').style.display, wTimer === null || document.getElementById('whisper').style.display === 'block']), ['block', true], 'N5 with Keep each notice on, a notice shows');
+  await p.evaluate(() => { const t0 = Date.now(); window.__stayCheck = () => document.getElementById('whisper').style.display; }); await p.waitForTimeout(13000);
+  eq(await p.evaluate(() => window.__stayCheck()), 'block', 'N6 ... and is still there after twelve seconds, until closed');
+  await p.click('#whClose'); await settle(800);
+  await p.evaluate(() => openHub()); await settle();
+  eq(await p.evaluate(() => [document.getElementById('hubNoticeNote').hidden, document.getElementById('hubNoticeNote').textContent.startsWith("Today's limit of 1 notice is reached.")]), [false, true], 'N7 News and alerts says why notices wait');
+  eq(await p.evaluate(() => { const t = backupText(); state.watchStay = false; importBackup(t); return [JSON.parse(t).settings.noticesStay, state.watchStay]; }), [true, true], 'N8 the choice is in a backup and comes back');
+  eq(await axe('#hub'), [], 'N9 accessibility scan of News and alerts with the note');
+  await p.evaluate(() => { closeApp('hub'); state.watchOn = false; state.watchStay = false; state.noticeNote = null; hideWhisper(false); }); await settle();
+
   // ---------- what changed ----------
   eq(await p.evaluate(() => [CHANGES.find(c => c.round === 42).items, APP_VERSION]), [GOLD.changes.items, GOLD.version], 'F1 what changed in round 42, and the version');
   eq(requests, [], 'F2 the page asked no server for anything');

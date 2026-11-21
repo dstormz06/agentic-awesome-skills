@@ -5,7 +5,7 @@ namespace AndaCompanion.Services;
 
 /// <summary>
 /// Round 42: when each ANDA's status was first seen as it is now, for the check "status unchanged". Kept on this PC in status-seen.json:
-/// for each ANDA its number, an eight-digit fingerprint of its status (never the status's words) and that day, with which data it was (the sheet's fingerprint or the demo). Never sent, not in a backup;
+/// for each ANDA its number, an eight-digit fingerprint of its status (never the status's words) and that day, with which data it was (the sheet's fingerprint or the demo); up to five sources (round 42, hardened). Never sent, not in a backup;
 /// an ANDA that leaves the sheet is forgotten. A file that cannot be read is set aside, and the days start again from today.
 /// </summary>
 public static class StatusSeen
@@ -30,11 +30,17 @@ public static class StatusSeen
 
     public static IReadOnlyDictionary<string, string> Since(IReadOnlyDictionary<string, Seen> seen) => seen.ToDictionary(kv => kv.Key, kv => kv.Value.Since, StringComparer.Ordinal);
 
-    private sealed record Kept([property: JsonPropertyName("source")] string? Source, [property: JsonPropertyName("items")] Dictionary<string, Seen>? Items);
+    /// <summary>Round 42, hardened: the days kept for each data source (up to five sheets or the demo), each with the day it was last used.</summary>
+    private sealed record Kept([property: JsonPropertyName("sources")] Dictionary<string, Slot>? Sources);
+    private sealed record Slot([property: JsonPropertyName("used")] string? Used, [property: JsonPropertyName("items")] Dictionary<string, Seen>? Items);
+    /// <summary>The file of round 42, one source only: still read.</summary>
+    private sealed record KeptOne([property: JsonPropertyName("source")] string? Source, [property: JsonPropertyName("items")] Dictionary<string, Seen>? Items);
+    public const int MaxSources = 5;
 
     /// <summary>
-    /// What was kept for this data (round 42 review: the source is the sheet's fingerprint, or "demo", as for the last look; another sheet
-    /// starts again). CanWrite is false when the file is there but cannot be read just now (locked), so that it is not written over.
+    /// What was kept for this data (the source is the sheet's fingerprint, or "demo", as for the last look). Switching to another sheet and
+    /// back keeps each sheet's days (round 42, hardened). CanWrite is false when the file is there but cannot be read just now (locked), so that it is
+    /// not written over.
     /// </summary>
     public static (Dictionary<string, Seen>? Items, bool CanWrite) Load(string path, string source)
     {
@@ -46,15 +52,41 @@ public static class StatusSeen
     internal static (Dictionary<string, Seen>? Items, bool CanWrite) FromText(string? text, string path, string source)
     {
         if (text is null) return (null, false);
+        var all = AllFrom(text, path);
+        return (all.TryGetValue(source, out var slot) ? Clean(slot.Items) : null, true);
+    }
+
+    private static Dictionary<string, Seen>? Clean(Dictionary<string, Seen>? d) =>
+        d?.Where(kv => kv.Value is { Fp: not null, Since: not null }).ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.Ordinal);
+
+    /// <summary>Every source kept; a file that cannot be understood is set aside and nothing is kept.</summary>
+    private static Dictionary<string, Slot> AllFrom(string text, string path)
+    {
         try
         {
-            if (JsonSerializer.Deserialize<Kept>(text) is { Items: { } d } k)
-                return (k.Source == source ? d.Where(kv => kv.Value is { Fp: not null, Since: not null }).ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.Ordinal) : null, true);
+            using var doc = JsonDocument.Parse(text);
+            if (doc.RootElement.ValueKind == JsonValueKind.Object && doc.RootElement.TryGetProperty("sources", out _))
+                return new(JsonSerializer.Deserialize<Kept>(text)?.Sources ?? new(), StringComparer.Ordinal);
+            if (JsonSerializer.Deserialize<KeptOne>(text) is { Source: { } src, Items: { } items }) return new(StringComparer.Ordinal) { [src] = new Slot(null, items) };
         }
         catch (JsonException) { }
         SafeFile.SetAside(path);
-        return (null, true);
+        return new(StringComparer.Ordinal);
     }
 
-    public static bool Save(string path, IReadOnlyDictionary<string, Seen> seen, string source) => SafeFile.Write(path, JsonSerializer.Serialize(new Kept(source, new(seen, StringComparer.Ordinal)), Options));
+    /// <summary>Keeps this source's days with the others; the five used most lately are kept, the rest let go.</summary>
+    public static bool Save(string path, IReadOnlyDictionary<string, Seen> seen, string source, string? today = null)
+    {
+        var all = new Dictionary<string, Slot>(StringComparer.Ordinal);
+        if (File.Exists(path))
+        {
+            var (text, _) = SafeFile.Read(path);
+            if (text is null) return false;                         // locked just now: not written over
+            all = AllFrom(text, path);
+        }
+        all[source] = new Slot(today ?? DateTime.UtcNow.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture), new(seen, StringComparer.Ordinal));
+        var keep = all.OrderByDescending(kv => kv.Key == source).ThenByDescending(kv => kv.Value.Used ?? "", StringComparer.Ordinal).ThenBy(kv => kv.Key, StringComparer.Ordinal)
+            .Take(MaxSources).ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.Ordinal);
+        return SafeFile.Write(path, JsonSerializer.Serialize(new Kept(keep), Options));
+    }
 }
