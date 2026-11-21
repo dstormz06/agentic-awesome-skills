@@ -108,10 +108,11 @@ public sealed class TodayWindow : Window
     // round 42 review: the alerts are read when Today opens and when a setting changes, not at each paint (a row click repaints)
     private IReadOnlyList<TimelineAlert>? _alerts;
     private bool _alertsAsked;
+    private DateTime _alertsDay;
 
     private void ReadLooks()
     {
-        _alerts = _hooks.Alerts?.Invoke(); _alertsAsked = _hooks.Alerts is not null;
+        _alerts = _hooks.Alerts?.Invoke(); _alertsAsked = _hooks.Alerts is not null; _alertsDay = DateTime.Now.Date;
         if (_hooks.Looks?.Invoke() is not { } looks) { _look = null; return; }      // round 37: switched off, no group and nothing kept
         var since = looks.Kept is null ? ((List<LastLook.Change>, int)?)null : LastLook.Since(looks.Kept, looks.Now, id => _hooks.Find(id)?.Record.Attention?.Text);
         _look = new LookShown(looks.Note ?? (since is null ? LastLook.SaidFirst : LastLook.SaidUndated), since, looks.Keep ? looks.Now : null);
@@ -121,7 +122,11 @@ public sealed class TodayWindow : Window
     public void Refresh() { ReadLooks(); Paint(); }
 
     /// <summary>A click on the tray icon while Today is open: next week is asked again, and the list is painted again only if it changed.</summary>
-    public void RefreshWeek() { if (_hooks.Week?.Invoke()?.Title != _week?.Title) Paint(); }
+    public void RefreshWeek()
+    {
+        if (_alertsAsked && DateTime.Now.Date != _alertsDay) { ReadLooks(); Paint(); return; }      // left open past midnight: today's alerts (round 42 re-review)
+        if (_hooks.Week?.Invoke()?.Title != _week?.Title) Paint();
+    }
 
     private void Paint()
     {

@@ -71,7 +71,7 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   ok(sum.say === sum.copied || (sum.say === sum.failed && sum.text === sum.want), `H4 the summary is copied, or shown to copy by hand when the browser refuses (${sum.say})`);
   ok(sum.want.split('\n').every(l => !/Fictional notes|note:/i.test(l)), 'H5 the summary holds numbers, dates and reasons, never the notes');
   await p.click('#hubCal'); await settle();
-  const cal = await p.evaluate(() => { const r = Object.keys(DATA).map(id => ({ number: id, goal: isoDate(ymd(...DATA[id].goalD)) })), c = tlCalendar(r, isoDate(demoToday()));
+  const cal = await p.evaluate(() => { const r = Object.keys(DATA).map(id => ({ number: id, goal: isoDate(ymd(...DATA[id].goalD)) })), c = tlCalendar(r, isoDate(demoToday()), nowMs());
     return { text: document.getElementById('hubCalText').value, say: document.getElementById('hubSay').textContent, want: c.text, said: TL_SAID.calendar(c.count) }; });
   eq([cal.text, cal.say], [cal.want.replace(/\r\n/g, '\n'), cal.said], 'H6 the goal dates as calendar text, with what it holds (a text box shows CRLF as LF; the saved file keeps CRLF)');
   ok(cal.text.startsWith('BEGIN:VCALENDAR') && cal.text.trim().endsWith('END:VCALENDAR'), 'H7 the calendar text is a whole calendar file');

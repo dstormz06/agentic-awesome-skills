@@ -262,7 +262,8 @@ public static class Timeline
     }
 
     /// <summary>The goal dates as a calendar file (iCalendar): one all-day event each, the ANDA number only, from today to 180 days ahead.</summary>
-    public static (string Text, int Count) Calendar(IEnumerable<TimelineRecord> records, string today)
+    /// <param name="stampUtc">When the file is written (its SEQUENCE and DTSTAMP); today at midnight UTC when not given.</param>
+    public static (string Text, int Count) Calendar(IEnumerable<TimelineRecord> records, string today, DateTime? stampUtc = null)
     {
         var t = Iso(today) ?? throw new ArgumentException("today must be YYYY-MM-DD", nameof(today));
         static string C(DateOnly d) => d.ToString("yyyyMMdd", Inv);
@@ -272,17 +273,19 @@ public static class Timeline
             .OrderBy(e => e.G).ThenBy(e => e.N, StringComparer.Ordinal).ToList();
         // round 42 review: one event per ANDA (its UID does not hold the date), with a sequence that grows each day, so that a newer file replaces
         // an older one when the goal date moves; lines longer than 75 octets are folded (RFC 5545), as the simulation folds them
-        int seq = t.DayNumber - new DateOnly(2026, 1, 1).DayNumber;
+        // the sequence and stamp are the time the file is written, so a second file the same day still replaces the first (round 42 re-review)
+        var stamp = stampUtc ?? t.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+        long seq = Math.Max(0, (long)Math.Floor((stamp - new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds));
         static string Fold(string l)
         {
             var parts = new List<string>(); string rest = l;
-            while (Encoding.UTF8.GetByteCount(rest) > 75) { int n = 75 - (parts.Count > 0 ? 1 : 0); parts.Add(rest[..n]); rest = rest[n..]; }
+            while (Encoding.UTF8.GetByteCount(rest) > 75 - (parts.Count > 0 ? 1 : 0)) { int n = 75 - (parts.Count > 0 ? 1 : 0); parts.Add(rest[..n]); rest = rest[n..]; }   // a continuation also carries its space
             parts.Add(rest);
             return string.Join("\r\n ", parts);
         }
         var lines = new List<string> { "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//ANDA Companion (Notula)//Goal dates//EN", "CALSCALE:GREGORIAN" };
         foreach (var e in events)
-            lines.AddRange(new[] { "BEGIN:VEVENT", $"UID:anda-{e.N}-goal@anda-companion.invalid", $"SEQUENCE:{seq}", $"DTSTAMP:{C(t)}T000000Z", $"DTSTART;VALUE=DATE:{C(e.G)}",
+            lines.AddRange(new[] { "BEGIN:VEVENT", $"UID:anda-{e.N}-goal@anda-companion.invalid", $"SEQUENCE:{seq.ToString(Inv)}", $"DTSTAMP:{stamp.ToUniversalTime().ToString("yyyyMMdd'T'HHmmss'Z'", Inv)}", $"DTSTART;VALUE=DATE:{C(e.G)}",
                 $"DTEND;VALUE=DATE:{C(e.G.AddDays(1))}", $"SUMMARY:Goal date: ANDA {e.N}", "DESCRIPTION:From ANDA Companion (Notula)\\, read from my portfolio sheet. Please check the record before acting.",
                 "TRANSP:TRANSPARENT", "END:VEVENT" });
         lines.Add("END:VCALENDAR");

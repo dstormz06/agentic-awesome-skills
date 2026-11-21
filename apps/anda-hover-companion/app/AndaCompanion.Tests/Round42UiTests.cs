@@ -104,6 +104,34 @@ public class Round42LogicTests
     }
 
     [Fact]
+    public void The_morning_check_is_once_a_day_from_eight_by_the_wall_clock()
+    {
+        Assert.Null(App.MorningDue(new DateTime(2026, 11, 20, 7, 59, 0), null));
+        Assert.Equal("2026-11-20", App.MorningDue(new DateTime(2026, 11, 20, 8, 0, 0), null));
+        Assert.Null(App.MorningDue(new DateTime(2026, 11, 20, 15, 0, 0), "2026-11-20"));          // once a day
+        Assert.Equal("2026-11-21", App.MorningDue(new DateTime(2026, 11, 21, 10, 30, 0), "2026-11-20"));   // a PC asleep at 8 checks when it wakes
+    }
+
+    [Fact]
+    public void A_mapped_network_drive_is_not_a_file_on_this_PC_and_a_second_calendar_the_same_day_is_newer()
+    {
+        try
+        {
+            DivisionNews.NetworkDriveForTests = p => p.StartsWith("Z:", StringComparison.OrdinalIgnoreCase);
+            Assert.Equal(DivisionNews.SaidNotLocal, DivisionNews.PathProblem(@"Z:\News\fictional.docx"));
+            Assert.Null(DivisionNews.PathProblem(@"C:\Users\Fictional\OneDrive\news.docx"));
+        }
+        finally { DivisionNews.NetworkDriveForTests = null; }
+        var recs = new[] { new TimelineRecord("100001", null, "2026-12-01", null) };
+        string Line(string text, string key) => text.Split("\r\n").Single(l => l.StartsWith(key));
+        var (morning, _) = Timeline.Calendar(recs, "2026-11-20", new DateTime(2026, 11, 20, 13, 0, 0, DateTimeKind.Utc));
+        var (afternoon, _) = Timeline.Calendar(recs, "2026-11-20", new DateTime(2026, 11, 20, 19, 30, 5, DateTimeKind.Utc));
+        Assert.True(long.Parse(Line(afternoon, "SEQUENCE:")[9..]) > long.Parse(Line(morning, "SEQUENCE:")[9..]));
+        Assert.Equal("DTSTAMP:20261120T193005Z", Line(afternoon, "DTSTAMP:"));
+        Assert.Equal("SEQUENCE:0", Line(Timeline.Calendar(new[] { new TimelineRecord("100001", null, "2025-12-01", null) }, "2025-11-20").Text, "SEQUENCE:"));   // never negative
+    }
+
+    [Fact]
     public void A_window_filling_the_screen_holds_the_notices()
     {
         try

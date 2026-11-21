@@ -20,7 +20,7 @@ public static class DivisionNews
     public const long MaxFileBytes = 10 * 1024 * 1024, MaxXmlChars = 20_000_000;
     public const int MaxParagraphs = 200_000;      // round 42 review: the whole document is read (news is often added at the end); this only bounds memory
     private const string W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main", Mc = "http://schemas.openxmlformats.org/markup-compatibility/2006";
-    private const int OnlineOnly = 0x400000;       // FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS: OneDrive has the file online only
+    private const int OnlineOnly = 0x400000 | 0x40000;       // FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS and _ON_OPEN: OneDrive has the file online only
     public const string SaidOnlineOnly = "The news document is kept online only, so it was not opened (that would download it). In OneDrive, choose \"Always keep on this device\" for it.";
     public const string SaidNotLocal = "The news document must be a file on this PC (the copy OneDrive syncs), not a network path or a web address.";
     public const int MaxPathLength = 500;
@@ -28,7 +28,17 @@ public static class DivisionNews
     /// <summary>Round 42 review: a path the app will read: on this PC, not a network share (Windows would sign in to it) nor a web address, at most 500 characters.</summary>
     public static string? PathProblem(string path) =>
         path.Length > MaxPathLength ? "The path of the news document is longer than 500 characters. Please move the document to a shorter path."
-        : path.StartsWith(@"\\", StringComparison.Ordinal) || path.StartsWith("//", StringComparison.Ordinal) || path.Contains("://", StringComparison.Ordinal) ? SaidNotLocal : null;
+        : path.StartsWith(@"\\", StringComparison.Ordinal) || path.StartsWith("//", StringComparison.Ordinal) || path.Contains("://", StringComparison.Ordinal) || OnNetworkDrive(path) ? SaidNotLocal : null;
+
+    /// <summary>A drive letter mapped to a network share (round 42 re-review): Windows would reach and sign in to that server on each read.</summary>
+    internal static Func<string, bool>? NetworkDriveForTests;
+    private static bool OnNetworkDrive(string path)
+    {
+        if (NetworkDriveForTests is { } f) return f(path);
+        if (!OperatingSystem.IsWindows() || path.Length < 3 || path[1] != ':') return false;
+        try { return new DriveInfo(path[..3]).DriveType == DriveType.Network; }
+        catch (Exception ex) when (ex is ArgumentException or IOException or UnauthorizedAccessException) { return false; }
+    }
     private static readonly string[] Months = { "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec" };
     private static readonly string Sp = Timeline.JsSpace;
     private static readonly Regex Dated = new(

@@ -2903,7 +2903,7 @@ $("hubSummary").addEventListener("click", () => {
     () => { $("hubSay").textContent = TL_SAID.copyFailed; $("hubCalText").hidden = false; $("hubCalText").value = text; });
 });
 $("hubCal").addEventListener("click", () => {
-  const records = Object.keys(DATA).map(id => ({ number:id, goal:isoDate(ymd(...DATA[id].goalD)) })), cal = tlCalendar(records, isoDate(demoToday()));
+  const records = Object.keys(DATA).map(id => ({ number:id, goal:isoDate(ymd(...DATA[id].goalD)) })), cal = tlCalendar(records, isoDate(demoToday()), nowMs());
   $("hubCalText").hidden = false; $("hubCalText").value = cal.text; $("hubSay").textContent = TL_SAID.calendar(cal.count);
 });
 $("hubClose").addEventListener("click", () => closeApp("hub"));
@@ -7203,15 +7203,17 @@ function tlSummary(alerts, todayIso, drugOf){
 }
 /* the goal dates as a calendar file (iCalendar): one all-day event each, the ANDA number only, from today to 180 days ahead */
 const TL_CAL_DAYS = 180;
-function tlCalendar(records, todayIso){
-  const t = tlIso(todayIso), c = d => isoDate(d).replace(/-/g, "");
+function tlCalendar(records, todayIso, stampMs){
+  const t = tlIso(todayIso), c = d => isoDate(d).replace(/-/g, ""), stamp = stampMs == null ? t : stampMs;
   const once = new Set(), events = (records || []).map(r => ({ n:String(r.number || ""), g:tlIso(r.goal) })).filter(e => /^\d{6}$/.test(e.n) && !once.has(e.n) && once.add(e.n) && e.g != null && e.g >= t && e.g <= t + TL_CAL_DAYS * DAY)
     .sort((a, b) => a.g - b.g || ordCmp(a.n, b.n));
   /* round 42 review: one event per ANDA (its UID does not hold the date), with a sequence that grows each day, so that a newer file replaces an
      older one when the goal date moves; lines longer than 75 octets are folded (RFC 5545) */
-  const seq = Math.round((t - ymd(2026, 1, 1)) / DAY), fold = l => { const out = []; let rest = l; while(new TextEncoder().encode(rest).length > 75){ let n = 75 - (out.length ? 1 : 0); out.push(rest.slice(0, n)); rest = rest.slice(n); } out.push(rest); return out.join("\r\n "); };
+  /* the sequence and stamp are the time the file is written, so a second file the same day still replaces the first (round 42 re-review) */
+  const seq = Math.max(0, Math.floor((stamp - ymd(2026, 1, 1)) / 1000)), dtstamp = new Date(stamp).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  const fold = l => { const out = []; let rest = l; while(new TextEncoder().encode(rest).length > 75 - (out.length ? 1 : 0)){ const n = 75 - (out.length ? 1 : 0); out.push(rest.slice(0, n)); rest = rest.slice(n); } out.push(rest); return out.join("\r\n "); };
   const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//ANDA Companion (Notula)//Goal dates//EN", "CALSCALE:GREGORIAN"];
-  events.forEach(e => lines.push("BEGIN:VEVENT", `UID:anda-${e.n}-goal@anda-companion.invalid`, `SEQUENCE:${seq}`, `DTSTAMP:${c(t)}T000000Z`, `DTSTART;VALUE=DATE:${c(e.g)}`,
+  events.forEach(e => lines.push("BEGIN:VEVENT", `UID:anda-${e.n}-goal@anda-companion.invalid`, `SEQUENCE:${seq}`, `DTSTAMP:${dtstamp}`, `DTSTART;VALUE=DATE:${c(e.g)}`,
     `DTEND;VALUE=DATE:${c(e.g + DAY)}`, `SUMMARY:Goal date: ANDA ${e.n}`, "DESCRIPTION:From ANDA Companion (Notula)\\, read from my portfolio sheet. Please check the record before acting.",
     "TRANSP:TRANSPARENT", "END:VEVENT"));
   lines.push("END:VCALENDAR");

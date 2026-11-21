@@ -17,6 +17,7 @@ public partial class App
     private DispatcherTimer? _sheetSettle, _clockTimer, _holdTimer;
     private string? _armedFor, _morningDone;
     private (string Path, DateTime Written, long Length, IReadOnlyList<string>? Paragraphs, string? Problem)? _newsRead;
+    private (object Read, string Day, IReadOnlyList<NewsItem> Items)? _newsParsed;
 
     /// <summary>The day the checks reckon from: today, or for the fictional demo records the day their data was taken (they are frozen there).</summary>
     private static string TimelineToday(IReadOnlyList<AndaRecord> records) =>
@@ -80,7 +81,10 @@ public partial class App
             var (paragraphs, problem) = DivisionNews.ReadDocx(path);
             _newsRead = r = (path, written, length, paragraphs, problem);
         }
-        return r.Paragraphs is null ? (Array.Empty<NewsItem>(), r.Problem!) : (DivisionNews.Parse(r.Paragraphs, Timeline.Iso(Today())), DivisionNews.SaidFrom(Path.GetFileName(path)));
+        if (r.Paragraphs is null) return (Array.Empty<NewsItem>(), r.Problem!);
+        string day = Timeline.Iso(Today());       // parsed again only for a new read or a new day (round 42 re-review)
+        if (_newsParsed is not { } p || !ReferenceEquals(p.Read, r.Paragraphs) || p.Day != day) _newsParsed = p = (r.Paragraphs, day, DivisionNews.Parse(r.Paragraphs, day));
+        return (p.Items, DivisionNews.SaidFrom(Path.GetFileName(path)));
     }
 
     private bool NewsOn => _settings.DivisionNews && _settings.NewsDocument.Length > 0;
@@ -205,11 +209,17 @@ public partial class App
         _clockTimer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(5) };
         _clockTimer.Tick += (_, _) =>
         {
-            var now = DateTime.Now; string day = now.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
-            if (now.Hour < 8 || _morningDone == day) return;
+            if (MorningDue(DateTime.Now, _morningDone) is not { } day) return;
             _morningDone = day; RefreshTrayState(); CheckNotices();
         };
         _clockTimer.Start();
+    }
+
+    /// <summary>The day to check now, at or after 8 in the morning once a day, or null (round 42: a look at the wall clock, not a fixed wait).</summary>
+    internal static string? MorningDue(DateTime now, string? done)
+    {
+        string day = now.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+        return now.Hour < 8 || done == day ? null : day;
     }
 
     private void OnSheetSettled(object? sender, EventArgs e) { _sheetSettle?.Stop(); RefreshTrayState(); CheckNotices(); }

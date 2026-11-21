@@ -106,7 +106,7 @@ public sealed class NewsWindow : Window
     internal async Task SaveCalendarAsync()
     {
         if (_unreadable) { Say.Text = Timeline.SaidUnreadable; return; }
-        var (text, count) = Timeline.Calendar(_hooks.Records(), _hooks.Today());
+        var (text, count) = Timeline.Calendar(_hooks.Records(), _hooks.Today(), Clock.UtcNow());
         bool? saved = _hooks.SaveCalendar is { } save ? await save(text) : await SaveWithPickerAsync(text);
         if (saved is null) return;                       // the person cancelled: nothing to say
         Say.Text = saved == true ? SaidSaved(count) : SaidNotSaved;

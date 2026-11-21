@@ -18,6 +18,7 @@ public static class Presenting
     [StructLayout(LayoutKind.Sequential)] private struct MonitorInfo { public int Size; public Rect Monitor, Work; public uint Flags; }
 
     [DllImport("user32.dll")] private static extern IntPtr GetForegroundWindow();
+    [DllImport("user32.dll")] private static extern bool IsZoomed(IntPtr hwnd);
     [DllImport("user32.dll")] private static extern bool GetWindowRect(IntPtr hwnd, out Rect rect);
     [DllImport("user32.dll")] private static extern IntPtr MonitorFromWindow(IntPtr hwnd, uint flags);
     [DllImport("user32.dll")] private static extern bool GetMonitorInfoW(IntPtr monitor, ref MonitorInfo info);
@@ -29,7 +30,8 @@ public static class Presenting
         try
         {
             IntPtr hwnd = GetForegroundWindow();
-            if (hwnd == IntPtr.Zero || !GetWindowRect(hwnd, out var r)) return false;
+            // a maximized window is ordinary work, even where it reaches the screen's edges (an auto-hidden taskbar; round 42 re-review)
+            if (hwnd == IntPtr.Zero || IsZoomed(hwnd) || !GetWindowRect(hwnd, out var r)) return false;
             var name = new StringBuilder(64); GetClassNameW(hwnd, name, name.Capacity);
             if (name.ToString() is "Progman" or "WorkerW" or "Shell_TrayWnd") return false;       // the desktop and the taskbar
             var info = new MonitorInfo { Size = Marshal.SizeOf<MonitorInfo>() };
