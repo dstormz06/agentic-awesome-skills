@@ -40,6 +40,11 @@ public static class StatusSeen
     {
         if (!File.Exists(path)) return (null, true);
         var (text, _) = SafeFile.Read(path);
+        return FromText(text, path, source);
+    }
+
+    internal static (Dictionary<string, Seen>? Items, bool CanWrite) FromText(string? text, string path, string source)
+    {
         if (text is null) return (null, false);
         try
         {

@@ -178,6 +178,7 @@ public class Round42LogicTests
         Assert.Equal((null, true), (StatusSeen.Load(path, "demo").Items, StatusSeen.Load(path, "demo").CanWrite));      // kept for other data: starts again
         File.WriteAllText(path, "[1,2");
         Assert.Null(StatusSeen.Load(path, "file:0000abcd").Items); Assert.False(File.Exists(path));
+        Assert.Equal((null, false), StatusSeen.FromText(null, path, "file:0000abcd"));      // there but not readable just now: not written over
     }
 
     /// <summary>A small Word document made here: the parts Word needs to call it a document, and the given body.</summary>
@@ -254,6 +255,9 @@ public class Round42LogicTests
         Assert.Equal(Notices.DefaultCap, read.NoticesPerDay);
         Assert.Equal("", read.NewsDocument); Assert.False(read.DivisionNews);
         Assert.Equal(10, read.Timeline.Get("goalClose"));
+        File.WriteAllText(path, "{\"DivisionNews\":true,\"NewsDocument\":\"\\\\\\\\fictional-server\\\\share\\\\news.docx\"}");
+        var network = SettingsService.Load(path);
+        Assert.Equal("", network.NewsDocument); Assert.False(network.DivisionNews);          // a network path saved earlier is not kept
     }
 }
 
