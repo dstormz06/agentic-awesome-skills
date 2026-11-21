@@ -17,6 +17,7 @@ public partial class App
     private DispatcherTimer? _sheetSettle, _clockTimer, _holdTimer;
     private string? _armedFor, _morningDone;
     private NewsReader? _newsReader;
+    private bool _newsReading, _checkAfterRead;
     private string? _noticeNote;       // round 42, hardened: why notices wait, shown at the top of News and alerts
     private (object Read, string Day, IReadOnlyList<NewsItem> Items)? _newsParsed;
 
@@ -78,11 +79,18 @@ public partial class App
         try { var info = new FileInfo(path); if (info.Exists) { written = info.LastWriteTimeUtc; length = info.Length; } }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException) { }
         _newsReader ??= new NewsReader(DivisionNews.ReadDocx, work => Task.Run(work), work => Dispatcher.UIThread.Post(work));
-        var (paragraphs, problem, reading) = _newsReader.Get(path, written, length, () => { if (NewsOn) CheckNotices(); _newsWindow?.Paint(); });
-        if (paragraphs is null) return (Array.Empty<NewsItem>(), reading && problem is null ? NewsReader.SaidReading : problem!);
+        // when a read ends, News and alerts is painted again; the notices are checked again only when a check was waiting for this read, and
+        // only when it worked, so opening News and alerts never brings up a notice by itself, and a failure never starts a loop (review)
+        var (paragraphs, problem, reading) = _newsReader.Get(path, written, length, ok =>
+        {
+            _newsWindow?.Paint();
+            if (ok && _checkAfterRead) { _checkAfterRead = false; if (NewsOn) CheckNotices(); }
+        });
+        _newsReading = reading;
+        if (paragraphs is null) return (Array.Empty<NewsItem>(), problem ?? NewsReader.SaidReading);
         string day = Timeline.Iso(Today());       // parsed again only for a new read or a new day
         if (_newsParsed is not { } p || !ReferenceEquals(p.Read, paragraphs) || p.Day != day) _newsParsed = p = (paragraphs, day, DivisionNews.Parse(paragraphs, day));
-        return (p.Items, DivisionNews.SaidFrom(Path.GetFileName(path)));
+        return (p.Items, problem is null ? DivisionNews.SaidFrom(Path.GetFileName(path)) : problem + " " + DivisionNews.SaidEarlier);
     }
 
     private bool NewsOn => _settings.DivisionNews && _settings.NewsDocument.Length > 0;
@@ -91,9 +99,9 @@ public partial class App
     internal string CheckNotices()
     {
         if (SelfTestRun is not null) return Notices.SaidNotRunning;
-        if (!_settings.WatchBack && !NewsOn) { DropNotices(); return Notices.SaidOff; }
+        if (!_settings.WatchBack && !NewsOn) { DropNotices(); NoteNotices(null); return Notices.SaidOff; }
         var items = new List<NoticeItem>();
-        if (NewsOn && CurrentNews().Items is { } n) items.AddRange(Notices.FromNews(n));
+        if (NewsOn && CurrentNews().Items is { } n) { items.AddRange(Notices.FromNews(n)); _checkAfterRead |= _newsReading; }     // still being read: checked again when it is
         if (_settings.WatchBack && CurrentAlerts() is { } alerts) items.AddRange(Notices.FromAlerts(alerts));
         string today = Timeline.Iso(Today());
         if (Notices.Load(AppPaths.NoticesFile) is not { } state) return NoteNotices(Notices.SaidBusy);      // locked just now: not written over, tried at the next check
@@ -109,6 +117,7 @@ public partial class App
     private void DropNotices()
     {
         _noticeQueue.RemoveAll(i => i.Kind == "news" ? !NewsOn : !_settings.WatchBack);
+        if (_noticeQueue.Count == 0) NoteNotices(null);         // nothing waits: nothing is said to wait (review)
         if (_noticeWindow is { } w && (w.Item.Kind == "news" ? !NewsOn : !_settings.WatchBack)) w.Close();
     }
 

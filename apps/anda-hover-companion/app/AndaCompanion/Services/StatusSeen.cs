@@ -66,7 +66,8 @@ public static class StatusSeen
         {
             using var doc = JsonDocument.Parse(text);
             if (doc.RootElement.ValueKind == JsonValueKind.Object && doc.RootElement.TryGetProperty("sources", out _))
-                return new(JsonSerializer.Deserialize<Kept>(text)?.Sources ?? new(), StringComparer.Ordinal);
+                return (JsonSerializer.Deserialize<Kept>(text)?.Sources ?? new()).Where(kv => kv.Value is not null)       // a null entry is dropped, never read (review)
+                    .ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.Ordinal);
             if (JsonSerializer.Deserialize<KeptOne>(text) is { Source: { } src, Items: { } items }) return new(StringComparer.Ordinal) { [src] = new Slot(null, items) };
         }
         catch (JsonException) { }

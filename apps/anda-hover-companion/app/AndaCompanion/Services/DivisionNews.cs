@@ -48,6 +48,7 @@ public static class DivisionNews
 
     public const string SaidOff = "Division news is off. Switch it on, and choose the document, in Settings, How it starts.";
     public static string SaidFrom(string file) => $"From {file}. Lines from the last {Timeline.NewsDays} days, newest first.";
+    public const string SaidEarlier = "The lines below are from when it was last read.";
     public static string SaidNone => $"No lines in the last {Timeline.NewsDays} days.";
 
     /// <summary>The dated lines of the last 14 days, newest first.</summary>
