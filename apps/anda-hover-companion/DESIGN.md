@@ -570,7 +570,7 @@ one labeled line per field. The rules:
 
 - One short notice near the clock, bottom right, above the taskbar. It never takes the keyboard and hides by itself after 12 seconds (it waits while the pointer is on it).
 - It says the ANDA number and a short reason from the data, by the card's own rules, most urgent first. **It never shows the person's notes**, so nothing private appears in a meeting.
-- **At most 1, 3 or 5 a day** (3 to start). *Open the card*, *Snooze for today* or *Dismiss*. When the limit is reached, Settings says how many more are waiting in *News and alerts*.
+- **At most 1, 3 or 5 a day** (3 to start). *Open the card*, *Remind me tomorrow* (back the next day) or *Close*. When the limit is reached, Settings says how many more are waiting in *News and alerts*.
 - The app would check when it starts, when the portfolio file changes and once each morning. There is no network use. The simulation checks when a box is ticked, when the demo
   date changes and on *Check now*, and says so.
 - **Silence does not mean all is well.** A notice fires only on what the data shows, and the screen says that.

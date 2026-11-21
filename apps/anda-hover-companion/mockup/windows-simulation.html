@@ -1995,7 +1995,7 @@ PS C:\work&gt; </div>
 
 <div id="compact" role="button" tabindex="-1" aria-label="ANDA compact status. Click to open the full card."></div>
 <div id="scrim"></div>
-<div id="whisper" role="region" aria-label="Notice near the clock"><div class="wk"><i></i><span id="whKind"></span></div><div class="wt" id="whText" role="status"></div><div class="wa"><button class="pri" id="whOpen" type="button">Open</button><button id="whSnooze" type="button">Snooze for today</button><button id="whClose" type="button">Dismiss</button></div></div>
+<div id="whisper" role="region" aria-label="Notice near the clock"><div class="wk"><i></i><span id="whKind"></span></div><div class="wt" id="whText" role="status"></div><div class="wa"><button class="pri" id="whOpen" type="button">Open</button><button id="whSnooze" type="button">Remind me tomorrow</button><button id="whClose" type="button">Close</button></div></div>
 <div id="chipSay" role="status" aria-live="polite" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap"></div>
 <button id="chip" type="button"><span class="dot" id="chipDot"></span><span id="chipTxt"></span><span class="go" id="chipGo">Peek&nbsp;›</span></button>
 
@@ -2889,7 +2889,7 @@ function paintHub(){
     list.forEach(i => {
       const b = document.createElement(i.number ? "button" : "div"); if(i.number) b.type = "button"; b.className = "hrow";
       const t = document.createElement("span"); t.className = "t"; t.textContent = i.text; b.append(t);
-      if(state.wSnoozed.has(i.key)){ const z = document.createElement("span"); z.className = "d"; z.textContent = "snoozed today"; b.append(z); }
+      if(state.wSnoozed.has(i.key)){ const z = document.createElement("span"); z.className = "d"; z.textContent = "back tomorrow"; b.append(z); }
       if(i.number) b.addEventListener("click", () => { if(DATA[i.number]) openCard(i.number, { anchor:{ x:Math.max(12, innerWidth - 420), y:80 } }); });
       box.append(b);
     });

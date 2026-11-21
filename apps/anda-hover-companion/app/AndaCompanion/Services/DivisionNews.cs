@@ -75,17 +75,21 @@ public static class DivisionNews
             var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null, MaxCharactersInDocument = MaxXmlChars };
             using var stream = entry.Open();
             using var xml = XmlReader.Create(stream, settings);
-            var paragraphs = new List<string>(); StringBuilder? p = null;
-            while (xml.Read() && paragraphs.Count < MaxParagraphs * 4)
+            // One step at a time: ReadElementContentAsString already moves past the text, so the loop does not read again after it (round 42
+            // review: a tab or a second piece of text right after a piece of text was being skipped). A paragraph inside another (a text box)
+            // is its own line, and the outer one goes on after it.
+            var paragraphs = new List<string>(); var open = new Stack<StringBuilder>();
+            xml.Read();
+            while (!xml.EOF && paragraphs.Count < MaxParagraphs * 4)
             {
-                if (xml.NamespaceURI != W) continue;
-                if (xml.NodeType == XmlNodeType.Element)
+                if (xml.NamespaceURI == W && xml.NodeType == XmlNodeType.Element)
                 {
-                    if (xml.LocalName == "p") { if (xml.IsEmptyElement) paragraphs.Add(""); else p = new StringBuilder(); }
-                    else if (p is not null && xml.LocalName == "t" && !xml.IsEmptyElement) p.Append(xml.ReadElementContentAsString());
-                    else if (p is not null && xml.LocalName is "tab" or "br" or "cr") p.Append(' ');
+                    if (xml.LocalName == "p") { if (xml.IsEmptyElement) paragraphs.Add(""); else open.Push(new StringBuilder()); }
+                    else if (open.Count > 0 && xml.LocalName == "t" && !xml.IsEmptyElement) { open.Peek().Append(xml.ReadElementContentAsString()); continue; }
+                    else if (open.Count > 0 && xml.LocalName is "tab" or "br" or "cr") open.Peek().Append(' ');
                 }
-                else if (xml.NodeType == XmlNodeType.EndElement && xml.LocalName == "p" && p is not null) { paragraphs.Add(p.ToString()); p = null; }
+                else if (xml.NamespaceURI == W && xml.NodeType == XmlNodeType.EndElement && xml.LocalName == "p" && open.Count > 0) paragraphs.Add(open.Pop().ToString());
+                xml.Read();
             }
             return (paragraphs, null);
         }

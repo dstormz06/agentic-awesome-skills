@@ -240,7 +240,7 @@ const contrast = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - 
   await today.click(); await settle(p, 150);
   ok(await vis(p, '#today'), 'H3 Today opens');
   const grp = await p.$$eval('#tdList .td-grp', n => n.map(x => x.textContent));
-  ok(grp[0] === 'SINCE YOU LAST LOOKED' && grp.filter(g => g !== 'SINCE YOU LAST LOOKED' && !g.startsWith('NEXT WEEK'))[0] === 'NEEDS A LOOK', 'H4 after what moved (round 36), the first group is what needs a look');
+  ok(grp[0] === 'NEEDS A LOOK · MOST URGENT FIRST' && grp[1] === 'SINCE YOU LAST LOOKED' && grp.filter(g => !g.startsWith('NEEDS A LOOK ·') && g !== 'SINCE YOU LAST LOOKED' && !g.startsWith('NEXT WEEK'))[0] === 'NEEDS A LOOK', 'H4 after the most urgent (round 42) and what moved (round 36), the first group is what needs a look');
   const first = await p.$eval('#tdList .td-it[aria-current=true]', e => e.dataset.id);      // round 33: the row also shows its mark as a word
   ok(['214990', '216482'].includes(first), 'H6 one ANDA is selected and shown on the right');
   await p.fill('#tdSearch', '216482'); await settle(p, 80);

@@ -19,7 +19,13 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   p.on('console', m => { if (m.type() === 'error') errs.push(m.type() + ': ' + m.text()); });
   await p.goto(SIM); await p.waitForTimeout(300);
   const settle = (ms = 200) => p.waitForTimeout(ms);
-  const listText = () => p.evaluate(() => document.getElementById('tdList').innerText.split('\n').map(s => s.trim()).filter(Boolean));
+  // round 42's group (most urgent first) now opens Today and is checked in t50; here Today is read from the group after it
+  const listText = () => p.evaluate(() => { const out = []; let skip = false;
+    for (const el of document.getElementById('tdList').children) {
+      if (el.classList.contains('td-grp')) skip = el.textContent === TL_SAID.todayTitle;
+      if (!skip) out.push(...el.innerText.split('\n').map(s => s.trim()).filter(Boolean));
+    }
+    return out; });
   const reopen = async () => { await p.evaluate(() => { closeApp('today'); openToday(); }); await settle(); };
   const axe = async sel => {
     if (!AXE_FILE) return ['axe-core not found: set AXE_PATH'];

@@ -109,7 +109,9 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
   ok(!(await vis(p, '#whisper')) && (await txt(p, '#watchStatus')) === 'Notices are off.', 'D3 Check now says they are off and shows nothing');
   await p.check('#setWatch'); await settle(p, 300);
   ok(await vis(p, '#whisper'), 'D4 switching watch-back on shows the first notice');
-  eq([await txt(p, '#whKind'), await txt(p, '#whText')], ['FROM YOUR DATA', 'ANDA 216482: at risk. Forecast is 14 days after the goal'], 'D5 it is the most urgent item: the number and a short reason');
+  // round 42: the notices from the data follow the timeline checks, most urgent first, and say whether they are immediate or longer term
+  eq([await txt(p, '#whKind'), await txt(p, '#whText')], ['FROM YOUR DATA · IMMEDIATE', await p.evaluate(() => watchItems()[0].text)], 'D5 it is the most urgent item: the number and a short reason');
+  ok((await txt(p, '#whText')).startsWith('ANDA 216482: '), 'D5b the notice starts with its ANDA number');
   ok(await p.evaluate(() => document.activeElement.id === 'setWatch' && !document.getElementById('whisper').contains(document.activeElement)), 'D6 the notice does not take the keyboard');
   ok(!/dissolution|Ask for/.test(await txt(p, '#whisper')), 'D7 and never shows the person\'s notes');
   const box = await p.evaluate(() => { const r = document.getElementById('whisper').getBoundingClientRect(); return { right: innerWidth - r.right, bottom: innerHeight - r.bottom, top: r.top }; });
@@ -254,11 +256,12 @@ const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}${JSON.
     openCard('216482', { anchor: { x: 520, y: 60 }, forceFull: true }); toggleExpand();
     openHub();
     return { len: w.textContent.length, kids: w.children.length, imgs: document.querySelectorAll('#whisper img, #hub img, #x-details img, #whisper script, #hub script, #x-details script').length, pwn: window.__pwn || 0,
-      first: w.textContent.slice(0, 20), detail: document.querySelector('#x-details .drow .v').textContent };
+      first: w.textContent.slice(0, 20), hubRaw: [...document.querySelectorAll('#hubNews .t')].some(t => t.textContent.startsWith('<img src=x')), detail: document.querySelector('#x-details .drow .v').textContent };
   });
   await settle(p, 400);
   eq([atk.len <= 240, atk.kids, atk.imgs, await p.evaluate(() => window.__pwn || 0)], [true, 0, 0, 0], 'H1 markup in the news document or the sheet is shown as text, never run, and a news line is cut to 240 characters');
-  ok(atk.first.startsWith('<img src=x'), 'H2 the reader sees the raw text');
+  // round 42: lines of the same day are in a fixed order (as in the app), so the hostile line need not be the first notice; it is looked for in News and alerts
+  ok(atk.hubRaw, 'H2 the reader sees the raw text');
   ok(atk.detail.startsWith('=HYPERLINK('), 'H3 a formula in a cell is shown as text');
   await p.evaluate(() => { document.querySelector('#x-details [data-copy=applicant]').click(); }); await settle(p, 200);
   eq(await clip(p), '=HYPERLINK("http://evil.example","x") (Meridian)', 'H4 and is copied as that same text');
