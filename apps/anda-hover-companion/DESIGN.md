@@ -566,7 +566,7 @@ one labeled line per field. The rules:
 - **Text is text.** A formula or markup in a cell is shown and copied as written, never run.
 - When a connection to the agency's own data (through Elsa) exists, the same slots can be filled from it. That connection is not built: its fields are not known here.
 
-**Watch-back (simulation; not yet in the app).** The first thing in this product that speaks without being asked, so it is **off until switched on**.
+**Watch-back (simulation; in the Windows app from round 42, §11z).** The first thing in this product that speaks without being asked, so it is **off until switched on**.
 
 - One short notice near the clock, bottom right, above the taskbar. It never takes the keyboard and hides by itself after 12 seconds (it waits while the pointer is on it).
 - It says the ANDA number and a short reason from the data, by the card's own rules, most urgent first. **It never shows the person's notes**, so nothing private appears in a meeting.
@@ -575,7 +575,7 @@ one labeled line per field. The rules:
   date changes and on *Check now*, and says so.
 - **Silence does not mean all is well.** A notice fires only on what the data shows, and the screen says that.
 
-**Division news, the status hub (simulation; not yet in the app).** The division keeps one Word document in SharePoint; a line added there appears as a notice on every RPM's
+**Division news, the status hub (simulation; in the Windows app from round 42, §11z).** The division keeps one Word document in SharePoint; a line added there appears as a notice on every RPM's
 screen and in *News and alerts* (tray menu).
 
 - **How it is read:** from the copy of the document that OneDrive syncs to the PC, as a local file. That needs no new network address and no sign-in by the app. Reading
@@ -1381,6 +1381,29 @@ Asked by the owner after round 40: anything that will be known later should be a
 **Programs on this PC (stdio MCP).** *Add a program on this PC (with IT's approval)* adds a row with the program's full path (an .exe on a drive of this PC; no network share, no script, no alternate stream, no "." or ".." folder; Windows' own path for the open file must be the path typed), its SHA-256 as IT gives it, and its arguments, one per line. It can be switched on only when both are well formed. The app (`McpProgram`): checks the file's SHA-256 before every start, holding the file open (others may only read it) from the check until the program has started; starts it directly, without a shell or a window, with the arguments as typed and without the variables that hold this app's tokens (`McpRules.WithheldVariables`); speaks MCP as one JSON line each way, its output read all the time by a pump that keeps only answers (the newest eight), each read only up to 1 MB, so a program writing while the app writes cannot block either; and ends it by closing its input, then, after two seconds, stopping it and anything it started. A program that breaks off, floods or runs out of time is stopped and is not used again until a new confirmed press; Send never starts one. It starts only on a **second press** of Test or List tools, after a sentence that names it (`McpStartConfirm`, keyed by the program, its SHA-256 and arguments, so an edit in between asks again); the windows then give the client a one-shot permit. Every program still running is stopped when the app ends, and each is held in a Windows job object set to stop it when the app's handle closes, so a crash leaves none behind (`McpJob`; best effort, since the program joins just after it starts). A harmless stand-in, `AndaCompanion.McpStub` (fictional words, no network, never packaged), is started for real by `Round41ProgramTests`: here through the real process code, and on Windows through the full path check, SHA-256 and job object. The Connections window shows it as "this PC: name.exe"; the event log keeps "MCP program started" and "MCP program stopped". A restored backup brings it back switched off. The MCP client's protocol is now shared by two transports, `McpHttp` (round 40) and `McpProgram`. In the simulation nothing is started: the second press says what the app would do.
 
 With nothing entered in either place, nothing changes from round 40: Elsa is offline and no program can be started. Rules and words are the simulation's (`mockup/round41-golden.json`).
+
+## 11z. Round 42: the timeline watched for the person, the notices and division news in the app
+
+Asked by the owner: threats to the timeline, immediate and long term, especially goal dates, told without AI. Twelve fixed checks run on this PC over the person's own sheet, to-do list, the look kept when Today last closed, and the day each status was first seen (`Services/Timeline.cs`, the simulation's `timelineAlerts`, held to `mockup/round42-golden.json`). They say what the data shows and never decide.
+
+| Check | Horizon | Rule (limits are choices in Settings, How it starts) |
+|---|---|---|
+| Goal date passed | immediate | the goal date is before today |
+| Goal date close | immediate | today, or within 10 business days (5, 10, 15) |
+| Forecast after the goal date | immediate | counted in business days |
+| No forecast | immediate | no forecast and the goal date within 30 days (14, 30, 60) |
+| To-do due or overdue | immediate | an open item due within 2 business days (1, 2, 5) or past due |
+| Goal date moved earlier | immediate | since the last look (needs "Since you last looked") |
+| A date on a weekend or holiday; a mark in the sheet; an open item | immediate | the card's own facts, listed beside the checks |
+| Forecast slipped | longer term | later than at the last look |
+| Thin margin | longer term | forecast at most 5 business days before the goal (3, 5, 10), when the goal is not already close |
+| Crunch week | longer term | 3 or more goal dates (2 to 5) in one week, within 90 days (30, 60, 90) |
+| Status unchanged | longer term | the same status for 30 days or more (14, 30, 60); only a fingerprint of it is kept |
+| Old data; PSG | longer term | the card's own rules |
+
+Order: immediate first, then the most serious, the soonest date, the number. **Today** opens with *NEEDS A LOOK · MOST URGENT FIRST*: one line per ANDA (its first reason and how many more), at most eight. **News and alerts** lists immediate and longer term apart; *Copy a summary for my team lead* puts plain text on the clipboard (numbers, drug names from the sheet, dates and reasons; never notes); *Save goal dates as a calendar file…* writes an .ics where the person chooses, with all-day events for each goal date in the next 180 days (ANDA number and date only).
+
+**Notices** (`Notices.cs`, `NoticeWindow.cs`) and **division news** (`DivisionNews.cs`) are the round 19 rules above, now in the app. The app checks soon after it starts, when the portfolio file is saved (a watch on that one file, settled for three seconds) and each morning at 8, only while it runs and only when a switch is on. `notices.json` keeps keys and days (never text); what was shown is forgotten after 60 days. The news document is read as a local file, read-only, with DTD processing prohibited, at most 10 MB, 2,000 paragraphs; each dated paragraph of the last 14 days is a line of at most 240 characters. The document's path stays on this PC (not in a backup).
 
 ## 12. Engagement roadmap — seven features that make it the daily habit
 
