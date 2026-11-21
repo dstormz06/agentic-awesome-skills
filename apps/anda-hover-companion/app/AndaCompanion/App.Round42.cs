@@ -18,6 +18,7 @@ public partial class App
     private string? _armedFor, _morningDone;
     private NewsReader? _newsReader;
     private bool _newsReading, _checkAfterRead;
+    private (string Path, DateTime Written, long Length)? _retryFor;
     private string? _noticeNote;       // round 42, hardened: why notices wait, shown at the top of News and alerts
     private (object Read, string Day, IReadOnlyList<NewsItem> Items)? _newsParsed;
 
@@ -81,6 +82,7 @@ public partial class App
         _newsReader ??= new NewsReader(DivisionNews.ReadDocx, work => Task.Run(work), work => Dispatcher.UIThread.Post(work));
         // when a read ends, News and alerts is painted again; the notices are checked again only when a check was waiting for this read, and
         // only when it worked, so opening News and alerts never brings up a notice by itself, and a failure never starts a loop (review)
+        var stamp = (path, written, length);
         var (paragraphs, problem, reading) = _newsReader.Get(path, written, length, ok =>
         {
             _newsWindow?.Paint();
@@ -88,8 +90,10 @@ public partial class App
             _checkAfterRead = false;
             // the read a check was waiting for: checked now if it worked; if not, checked once more after the reader's minute, so the day's
             // news is not lost to a passing lock, and no later paint is left to bring up a notice (review)
-            if (ok) { if (NewsOn) CheckNotices(); }
-            else DispatcherTimer.RunOnce(() => { if (NewsOn) CheckNotices(); }, NewsReader.RetryAfter + TimeSpan.FromSeconds(2));
+            // once per copy that fails: a file that keeps failing is tried again at the usual times (start, the sheet saved, the morning,
+            // Settings), not every minute (review)
+            if (ok) { _retryFor = null; if (NewsOn) CheckNotices(); }
+            else if (_retryFor != stamp) { _retryFor = stamp; DispatcherTimer.RunOnce(() => { if (NewsOn) CheckNotices(); }, NewsReader.RetryAfter + TimeSpan.FromSeconds(2)); }
         });
         _newsReading = reading;
         if (paragraphs is null) return (null, problem ?? NewsReader.SaidReading);      // nothing read: only the sentence, never "no lines" (review)
