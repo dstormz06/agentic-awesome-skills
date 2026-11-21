@@ -1872,6 +1872,38 @@ Re-reviews found four more small items (a refused Send logged as sent; a type te
 
 **Not tested:** a real program on Windows (the stand-in has run only here, through the real process code, not through the Windows path check or the job); the Windows final-path check, the link refusal and the job object (they run only in the Windows workflow, which the owner will run); the revocation check behind the agency's proxy; a real Elsa call; a run of rounds 35 to 41 on Windows.
 
+## Round 42: the timeline watched for the person, notices near the clock and division news; two reviews until both found nothing
+
+The owner asked for threats to the timeline, immediate and long term, especially goal dates, without AI. Built in the simulation first and held to `mockup/round42-golden.json` (6 sets, 138 alerts, the summary, the calendar, 2,121 news paragraphs): twelve checks, Today most urgent first, News and alerts with a summary for a team lead and an .ics of goal dates, notices near the clock (off until switched on, 1, 3 or 5 a day, Remind me tomorrow) and division news from one Word document. Then the Windows app, answer for answer.
+
+**Found while writing tests:** the Word reader skipped the node after each piece of text (a tab or a second run's text was lost); the simulation's notice buttons said "Snooze for today" and "Dismiss" where the app says "Remind me tomorrow" and "Close"; the app's hint left out that anyone who can edit the news document can put a line on the screen. All fixed.
+
+**A separate adversarial reviewer and a second model** read the round. Their findings, all fixed in dce8a16d, c7da6d94 and 2857efd4:
+
+| Finding | Fix |
+|---|---|
+| With the sheet unreadable the checks ran on the demo records, overwrote status-seen.json, and could notify or save an .ics of fictional ANDAs | Nothing runs; Today and News and alerts say so; the summary and calendar refuse |
+| A look or status days kept for other data were used | Both keyed by data source |
+| Alerts recomputed with file reads at every paint; the Word document read at every paint | Read when Today opens or a setting changes; the document read again only when it changes, parsed again only on a new day |
+| Notices and the summary showed to-do titles and the sheet's needs-action text | The rule and date only; Today and News and alerts keep the full text |
+| A 9999 placeholder date took millions of steps | Business days counted only within a year; a far forecast said with its year |
+| News past the 2,000th paragraph dropped; text boxes read twice; a line pasted twice shown twice | The whole document; mc:Fallback skipped; one of each |
+| Duplicate rows inflated a crunch week | One row per ANDA; distinct numbers counted |
+| Network paths, mapped network drives, web addresses and online-only OneDrive copies opened | Refused |
+| Notices kept coming after switching off; over a full-screen presentation | Dropped and closed; held while a window without a title bar fills its screen (user32 only) |
+| The 8:00 check drifted with daylight time and sleep | A wall-clock look every five minutes |
+| A locked notices or status file was written over; a full memory repeated notices | Not written; the oldest let go |
+| .ics: lines not folded, a UID that held the date, two saves the same day alike, a longer file left with its tail | Folded, one UID per ANDA, SEQUENCE and DTSTAMP at writing, truncated |
+| Today left open past midnight kept yesterday's alerts | Read again on the next tray click |
+
+Kept on purpose: a fact that still holds after 60 days is told again; eight-digit fingerprints in keys (documented); one status file per data source. **Last word: the adversarial reviewer NO FINDINGS (c7da6d94); the second model nothing above minor, its minor points taken in 2857efd4.**
+
+**Faults put back on purpose: 56 of 56 caught** by the app's tests, after two survivors (a locked status file written over; a network path kept from saved settings) were closed with new tests.
+
+**Every suite was run twice on the final code (58800290)**, the app rebuilt from nothing before each. Results, identical in both runs: C# **1,402 passed, 18 skipped (Windows only), 0 failed**; the Debug build succeeded; simulation **54 of 54 suites, 2,273 checks, 0 failed**; extension unit **70 of 70** (and 70 of 70 in UTC); extension browser **69, 61 and 16, all pass**; **16 goldens, 0 mismatches, no page errors**; `npm run validate` and `npm run security:docs` exit 0.
+
+**Not tested:** anything on Windows (the Windows workflow could not be started from this session: GitHub refused, 403; last run Nov 12): the notice window's placement and focus, the full-screen check, the file watcher, OneDrive's online-only flags, mapped drives, the .ics in Outlook; a real synced Word document; a real sheet; an RPM. The limits are guesses until an RPM tries them.
+
 ## Still open
 
 GDUFA III tier table (needs the commitment-letter text and the dual-source rule); a real-keyboard check of rebound shortcuts on
