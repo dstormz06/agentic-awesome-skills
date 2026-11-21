@@ -27,7 +27,7 @@ public static class SettingsBackup
     private static readonly JsonSerializerOptions Json = new() { WriteIndented = true };
 
     /// <summary>Settings that are tied to one PC and so are not part of a backup.</summary>
-    private static readonly string[] ThisPcOnly = { nameof(Settings.PortfolioPath), nameof(Settings.KeepWeeklySheetCopy), nameof(Settings.PortfolioColumns), nameof(Settings.NotesFolder), nameof(Settings.ReferenceDataPath), nameof(Settings.FirstRunDone), nameof(Settings.SectionUse),
+    private static readonly string[] ThisPcOnly = { nameof(Settings.PortfolioPath), nameof(Settings.NewsDocument), nameof(Settings.KeepWeeklySheetCopy), nameof(Settings.PortfolioColumns), nameof(Settings.NotesFolder), nameof(Settings.ReferenceDataPath), nameof(Settings.FirstRunDone), nameof(Settings.SectionUse),
         // How many copies of the lists are kept, and after how many days a finished item is archived, belong to this PC like the lists themselves:
         // a backup from elsewhere, or a reset, must not lower the number and so remove copies that nobody asked to remove.
         nameof(Settings.BackupCopies), nameof(Settings.ArchiveAfterDays),

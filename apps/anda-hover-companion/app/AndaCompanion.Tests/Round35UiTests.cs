@@ -36,7 +36,7 @@ public class Round35UiTests : IClassFixture<HeadlessFixture>
     }
     private static readonly Lazy<JsonElement> Gold = new(() => JsonDocument.Parse(File.ReadAllText(Folder("mockup", "round35-golden.json"))).RootElement.Clone());
     private static List<string> FromGolden(string edition) => Gold.Value.GetProperty(edition).EnumerateArray().Select(e => e.ValueKind == JsonValueKind.String ? e.GetString()!
-        : e.GetProperty("label").GetString() + " [" + string.Join(" | ", e.GetProperty("items").EnumerateArray().Select(x => x.GetString()).Where(x => x != TrayMenu.NotInApp)) + "]").ToList();
+        : e.GetProperty("label").GetString() + " [" + string.Join(" | ", e.GetProperty("items").EnumerateArray().Select(x => x.GetString())) + "]").ToList();
 
     // ---------- the tray menu, built ----------
 
@@ -70,7 +70,7 @@ public class Round35UiTests : IClassFixture<HeadlessFixture>
         {
             ["Lookup ANDA…"] = "OpenLookup", ["Today…"] = "OpenToday", ["Review a draft…"] = "OpenDraft(", ["Ask about a selection…"] = "OpenAsk(",
             ["ANDA to-do list…"] = "OpenTodoWindow", ["My to-do list…"] = "OpenMyTodoWindow", ["Notes to my to-do list…"] = "OpenNotes(", ["My usage…"] = "OpenUsage",
-            ["Compare two files…"] = "OpenCompare", ["Hand-off page…"] = "OpenHandoff(", ["Quick replies…"] = "OpenQuickReplies", ["Prompt library…"] = "new PromptLibraryWindow(", ["MCP tools…"] = "OpenMcp",
+            ["Compare two files…"] = "OpenCompare", ["Hand-off page…"] = "OpenHandoff(", ["News and alerts…"] = "OpenNews", ["Quick replies…"] = "OpenQuickReplies", ["Prompt library…"] = "new PromptLibraryWindow(", ["MCP tools…"] = "OpenMcp",
             ["My actions"] = "_actionsMenu =", ["Appearance"] = "BuildRadioSubmenu(\"Appearance\"", ["Auto-hide"] = "BuildRadioSubmenu(\"Auto-hide\"",
             ["Connections and event log…"] = "OpenConnections", ["Backups and archive…"] = "OpenBackups", ["Demo: ANDA at risk"] = "DemoCard(\"216482\")",
             ["Demo: ANDA on track"] = "DemoCard(\"214990\")", ["Settings…"] = "OpenSettings", ["Help: first steps…"] = "OpenFirstSteps(", ["About and what changed…"] = "OpenAbout",

@@ -197,6 +197,30 @@
 
             <Border Classes="hair"/>
 
+            <!-- round 42 (round 19 in the simulation): short notices near the clock, division news, and the limits of the timeline checks -->
+            <StackPanel Spacing="6">
+              <TextBlock Classes="lbl" Text="WATCH MY BACK · SHORT NOTICES NEAR THE CLOCK"/>
+              <CheckBox Name="WatchBackBox" Content="Tell me when something in my data needs a look"/>
+              <CheckBox Name="NewsBox" Content="Show division news from the shared news document"/>
+              <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6">
+                <TextBox Name="NewsPathBox" IsReadOnly="True" Watermark="The division's news document (.docx) in a synced SharePoint folder"/>
+                <Button Name="NewsPick" Grid.Column="1" Content="Choose…"/>
+                <Button Name="NewsClear" Grid.Column="2" Content="Clear"/>
+              </Grid>
+              <WrapPanel Name="NoticeCapPanel"/>
+              <TextBlock Classes="lbl" Text="TIMELINE CHECKS · THE LIMITS"/>
+              <Grid Name="TimelineGrid" ColumnDefinitions="*,Auto" RowSpacing="4" ColumnSpacing="10"/>
+              <TextBlock Name="TimelineHint" Classes="hint" TextWrapping="Wrap"/>
+              <WrapPanel ItemSpacing="8" LineSpacing="6">
+                <Button Name="WatchNow" Content="Check now"/>
+                <Button Name="NewsOpen" Content="News and alerts…"/>
+              </WrapPanel>
+              <TextBlock Name="WatchStatus" Classes="hint" TextWrapping="Wrap"/>
+              <TextBlock Name="WatchHint" Classes="hint" TextWrapping="Wrap"/>
+            </StackPanel>
+
+            <Border Classes="hair"/>
+
             <StackPanel Spacing="6">
               <TextBlock Classes="lbl" Text="URGENT ANDAs"/>
               <CheckBox Name="EscalateCheck">

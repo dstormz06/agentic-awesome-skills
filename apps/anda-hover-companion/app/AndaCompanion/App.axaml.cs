@@ -104,7 +104,10 @@ public partial class App : Application
             // A tray failure must be reported, not fatal: the hotkeys still work without it.
             try { _tray = BuildTrayIcon(desktop); RefreshTrayState(); ArmTrayRecount(); }
             catch (Exception ex) { _trayError = ex.Message; }
-            desktop.Exit += (_, _) => { McpProgram.StopAll(); _hotkeys.Dispose(); _mouse?.Dispose(); _outlook?.Dispose(); _tray?.Dispose(); };
+            // round 42: the notices, when on, look for what to say soon after start, then when the sheet is saved and each morning
+            ArmNotices();
+            if (SelfTestRun is null) DispatcherTimer.RunOnce(() => CheckNotices(), TimeSpan.FromSeconds(8));
+            desktop.Exit += (_, _) => { McpProgram.StopAll(); _sheetWatcher?.Dispose(); _hotkeys.Dispose(); _mouse?.Dispose(); _outlook?.Dispose(); _tray?.Dispose(); };
             ConnectionStatus.Changed += () => Dispatcher.UIThread.Post(UpdateTrayTip);
             UpdateTrayTip();
             ApplyMouseTrigger();
@@ -397,7 +400,7 @@ public partial class App : Application
             new SettingsHooks(() => HotkeyService.Report(_hotkeys?.Status ?? Array.Empty<HotkeyStatus>()), () => _portfolio, () => _drugs?.LoadedMessage(ReferenceResolver.TimeFor(_settings)) ?? _drugsMessage, MouseStatusLine, Outlook,
                 OpenTodo: OpenTodoWindow, RunAction: RunActionFromMenu, AgentProblem: _agents.SetupProblem, ClearFinished: () => _todo.ClearCompleted(),
                 OpenMyTodo: OpenMyTodoWindow, OpenNotes: () => OpenNotes(""), ClearMyTodoFinished: () => _myTodo.ClearFinished(), Hotkeys: () => _hotkeys?.Status ?? Array.Empty<HotkeyStatus>(),
-                ForgetLastLook: () => LastLook.Forget(AppPaths.LastLookFile)), _replies);
+                ForgetLastLook: () => LastLook.Forget(AppPaths.LastLookFile), CheckNotices: CheckNotices, OpenNews: OpenNews), _replies);
         _settingsWindow.Closed += (_, _) => _settingsWindow = null;
         _settingsWindow.Show();
     }
@@ -421,6 +424,7 @@ public partial class App : Application
             "My usage…" => Item(label, OpenUsage),
             "Compare two files…" => Item(label, OpenCompare),
             "Hand-off page…" => Item(label, () => OpenHandoff(null)),
+            "News and alerts…" => Item(label, OpenNews),
             "Quick replies…" => Item(label, OpenQuickReplies),
             "Prompt library…" => Item(label, () => new PromptLibraryWindow(_prompts, _settings, ApplySettings).Show()),
             "MCP tools…" => Item(label, () => OpenMcp(null)),
@@ -556,6 +560,7 @@ public partial class App : Application
         DisplayScale.Set(Display.TextScale(_settings.TextSize)); _card?.ApplySpacing(Display.Spacing(_settings.Density));      // open windows follow the new text size and spacing at once
         UsageLog.Configure(_settings.UsageLog && SelfTestRun is null);
         LastLook.ForgetIfOff(_settings, AppPaths.LastLookFile);      // round 37: off removes what was kept (from Settings or a restored backup)
+        ArmNotices();                                                  // round 42: the notices' watch and morning check follow the switches
         _todayWindow?.Refresh();      // rounds 37 and 39: an open Today follows its two switches at once
         _hotkeys?.Reconfigure(HotkeyBindings());
         RefreshTrayLabels();

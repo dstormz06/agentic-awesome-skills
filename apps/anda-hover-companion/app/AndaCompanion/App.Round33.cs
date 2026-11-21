@@ -75,6 +75,7 @@ public partial class App
                 ? LastLook.ViewOf(LastLook.Load(AppPaths.LastLookFile), LastLook.Of(records, Clock.UtcNow(), LookSource()), DataReadable(), Clock.Zone)
                 : null,
             KeepLook: look => LastLook.KeepIfOn(_settings, AppPaths.LastLookFile, look, Clock.UtcNow()),   // what was shown, kept when Today closed; not if switched off meanwhile
+            Alerts: CurrentAlerts,                                // round 42: what needs a look, most urgent first
             Week: () => { var wall = Clock.Wall(Clock.UtcNow()); return NextWeek.Of(DateOnly.FromDateTime(wall), wall.Hour, records, _calendar, NextWeek.TasksIfOn(_settings, () => _todo.Items, () => _myTodo.Items), todosOff: !_settings.WeekTodos); }));
         _todayWindow.Closed += (_, _) => _todayWindow = null;
         _todayWindow.Show();

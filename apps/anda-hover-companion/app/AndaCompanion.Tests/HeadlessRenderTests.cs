@@ -163,8 +163,8 @@ public class HeadlessRenderTests : IClassFixture<HeadlessFixture>
         // eight offered appearances + three choices for the tray count + four auto-hide choices + three consent models + three "late" choices + four holiday-lead choices
         // + four connection choices + five tones + four middle-click keys + two Outlook clouds + three Outlook message counts + five to-do refresh choices + two to-do list modes. (The four API-timeout choices sit inside the collapsed
         // "My API" expander, whose content is not part of the visual tree until it is opened.)
-        // Round 33 adds three text sizes, two spacings and two styles of the lookup window.
-        Assert.Equal(8 + 3 + 4 + 3 + 3 + 4 + 4 + 5 + 4 + 2 + 3 + 5 + 2 + 3 + 2 + 2, names.radios);
+        // Round 33 adds three text sizes, two spacings and two styles of the lookup window; round 42 three choices of notices a day.
+        Assert.Equal(8 + 3 + 4 + 3 + 3 + 4 + 4 + 5 + 4 + 2 + 3 + 5 + 2 + 3 + 2 + 2 + 3, names.radios);
     }
 
     [Fact]

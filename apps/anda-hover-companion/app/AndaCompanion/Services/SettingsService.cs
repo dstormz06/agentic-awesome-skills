@@ -148,6 +148,16 @@ public sealed class Settings
     public bool SinceLastLook { get; set; } = true;
     /// <summary>Round 39: whether next week in Today also lists the to-do items. Off: neither list is read for Today.</summary>
     public bool WeekTodos { get; set; } = true;
+    /// <summary>Round 42 (round 19 in the simulation): short notices near the clock about what the data shows. Off until the person switches it on.</summary>
+    public bool WatchBack { get; set; }
+    /// <summary>Round 42: division news from one Word document, as notices and in News and alerts. Off until switched on with a document chosen.</summary>
+    public bool DivisionNews { get; set; }
+    /// <summary>The division's news document (.docx), a local file, usually in a folder OneDrive syncs. Belongs to this PC: never in a backup.</summary>
+    public string NewsDocument { get; set; } = "";
+    /// <summary>At most this many notices a day: 1, 3 or 5.</summary>
+    public int NoticesPerDay { get; set; } = Notices.DefaultCap;
+    /// <summary>Round 42: the limits of the timeline checks.</summary>
+    public TimelineSettings Timeline { get; set; } = new();
     /// <summary>The last ANDAs looked up, newest first. Six-digit numbers only; this PC only, never part of a backup.</summary>
     public List<string> Recents { get; set; } = new();
     /// <summary>The ANDAs kept with "Keep in my list" on a card, five at most. Saved in a backup.</summary>
@@ -377,6 +387,12 @@ public static class SettingsService
         loaded.AutoHideSeconds = UI.AutoHidePolicy.Normalize(loaded.AutoHideSeconds);
         loaded.UrgentLateDays = UrgencyPolicy.Normalize(loaded.UrgentLateDays);
         loaded.TrayRecount = Services.TrayRecount.Normalize(loaded.TrayRecount);
+        // round 42: the limits each one of its choices; a news document only as a .docx path, and news on only with one chosen
+        loaded.Timeline = TimelineSettings.Normalize(loaded.Timeline);
+        if (!Notices.Caps.Contains(loaded.NoticesPerDay)) loaded.NoticesPerDay = Notices.DefaultCap;
+        loaded.NewsDocument = (loaded.NewsDocument ?? "").Trim();
+        if (loaded.NewsDocument.Length > 500 || (loaded.NewsDocument.Length > 0 && !loaded.NewsDocument.EndsWith(".docx", StringComparison.OrdinalIgnoreCase))) loaded.NewsDocument = "";
+        loaded.DivisionNews = loaded.DivisionNews && loaded.NewsDocument.Length > 0;
         loaded.AndaPageUrl = (loaded.AndaPageUrl ?? "").Trim(); if (loaded.AndaPageUrl.Length > AndaPage.MaxLength) loaded.AndaPageUrl = loaded.AndaPageUrl[..AndaPage.MaxLength];
         if (!Settings.HolidayLeadChoices.Contains(loaded.HolidayLeadDays)) loaded.HolidayLeadDays = 3;
         if (!Backups.KeepChoices.Contains(loaded.BackupCopies)) loaded.BackupCopies = Backups.KeepDefault;

@@ -18,7 +18,8 @@ namespace AndaCompanion.UI;
 /// <param name="CopyText">Puts text on the clipboard and says whether it got there.</param>
 public sealed record TodayHooks(Func<IReadOnlyList<Today.Look>> All, Func<string, Today.Look?> Find, Func<IReadOnlyList<string>> Pins, Func<IReadOnlyList<string>> Recents,
     Action<string> OpenCard, Func<string, Task<bool>>? CopyText = null, Action? ShowAll = null,
-    Func<LastLook.View?>? Looks = null, Action<LastLook.Look>? KeepLook = null, Func<NextWeek.Result?>? Week = null);
+    Func<LastLook.View?>? Looks = null, Action<LastLook.Look>? KeepLook = null, Func<NextWeek.Result?>? Week = null,
+    Func<IReadOnlyList<TimelineAlert>>? Alerts = null);
 
 /// <summary>
 /// Today (round 33): a small two-pane window. Left: what needs a look, the ANDAs kept in my list, recents. Right: the selected one, with
@@ -126,6 +127,13 @@ public sealed class TodayWindow : Window
         // the sentences of one ANDA together, in the order the rule gives them
         static IEnumerable<(string Id, string Line, string? Mark)> ById(IEnumerable<(string Id, string Text)> rows) =>
             rows.GroupBy(r => r.Id).Select(g => (g.Key, string.Join(" ", g.Select(r => r.Text)), (string?)null));
+        // Round 42: what needs a look, most urgent first, by the timeline checks: the first reason of each ANDA, and how many more
+        if (_hooks.Alerts?.Invoke() is { } alerts)
+        {
+            var firsts = alerts.Where(a => a.Number is not null && a.Sev != "info").GroupBy(a => a.Number!).Select(g => (Id: g.Key, Line: g.First().Text + (g.Count() > 1 ? $" (+{g.Count() - 1} more)" : ""))).ToList();
+            Section("urgent", Timeline.TodayTitle, firsts.Count == 0 ? new[] { Timeline.TodayNone } : Array.Empty<string>(),
+                firsts.Take(Timeline.TodayMax).Select(f => (f.Id, f.Line, (string?)null)), firsts.Count > Timeline.TodayMax ? new[] { Timeline.TodayMore(firsts.Count - Timeline.TodayMax) } : Array.Empty<string>());
+        }
         // Round 36: what moved since the last look comes first; then next week, from Thursday noon; then the groups
         if (_look is { } look)
             Section("since", "SINCE YOU LAST LOOKED", new[] { look.Note }.Concat(look.Since is { Rows.Count: 0 } ? new[] { LastLook.SaidNone } : Array.Empty<string>()),

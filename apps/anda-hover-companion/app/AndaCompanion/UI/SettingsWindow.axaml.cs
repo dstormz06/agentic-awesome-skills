@@ -12,7 +12,7 @@ public sealed record SettingsHooks(Func<string> HotkeyStatus, Func<PortfolioRepo
     Func<string?>? MouseStatus = null, OutlookService? Outlook = null,
     Action? OpenTodo = null, Action<CustomAction>? RunAction = null, Func<AgentSettings, string?>? AgentProblem = null, Func<int>? ClearFinished = null,
     Action? OpenMyTodo = null, Action? OpenNotes = null, Func<int>? ClearMyTodoFinished = null, Func<IReadOnlyList<HotkeyStatus>>? Hotkeys = null,
-    Func<bool>? ForgetLastLook = null);
+    Func<bool>? ForgetLastLook = null, Func<string>? CheckNotices = null, Action? OpenNews = null);
 
 public partial class SettingsWindow : Window
 {
@@ -64,6 +64,7 @@ public partial class SettingsWindow : Window
         BuildRound33();
         BuildMcp();
         BuildElsa();
+        BuildWatch();
         foreach (int seconds in AutoHidePolicy.Choices)
         {
             var rb = new RadioButton

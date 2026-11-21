@@ -1485,6 +1485,9 @@ PS C:\work&gt; </div>
     <label class="opt"><input type="checkbox" id="setNews"> Show division news from the shared news document</label>
     <div class="frow"><input type="text" id="newsFile" readonly placeholder="The division's news document (.docx) in a synced SharePoint folder" aria-label="Division news document"><button class="pill quiet" id="newsPick" type="button">Choose…</button><button class="pill quiet" id="newsClear" type="button">Clear</button></div>
     <div class="wrap" role="radiogroup" aria-label="Notices a day"><label class="opt"><input type="radio" name="wcap" value="1"> At most 1 a day</label><label class="opt"><input type="radio" name="wcap" value="3" checked> At most 3 a day</label><label class="opt"><input type="radio" name="wcap" value="5"> At most 5 a day</label></div>
+    <div class="lbl" style="margin-top:8px">TIMELINE CHECKS · THE LIMITS</div>
+    <div id="tlLimits" style="display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center"></div>
+    <p class="hint" id="tlHint"></p>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><button class="pill quiet" id="watchNow" type="button">Check now</button><button class="pill quiet" id="hubOpen" type="button">News and alerts…</button><span class="hint" id="watchStatus" role="status" style="margin:0"></span></div>
     <p class="hint">Both are off until you switch them on. <b>Notices, reminders and the tray dot appear only while the app is running:</b> when it is closed nothing runs and nothing is shown. A notice is one short line near the clock. It never takes the keyboard, hides by itself, and shows the ANDA number and a short reason, never your notes. The Windows app would check when it starts, when your portfolio file changes and once each morning; this page checks when you switch a box on, when the demo date changes and when you press Check now. Division news is plain text from one Word document: anyone who can edit that document can put a line on your screen, so each line is cut to 240 characters and counts toward the daily limit. A notice fires only on what the data shows; silence does not mean all is well.</p>
     <hr class="hair">
@@ -1943,9 +1946,14 @@ PS C:\work&gt; </div>
     <div class="lbl">DIVISION NEWS</div>
     <p class="hint" id="hubNewsNote" style="margin:0 0 4px"></p>
     <div id="hubNews"></div>
-    <div class="lbl">FROM YOUR DATA</div>
+    <div class="lbl">IMMEDIATE · FROM YOUR DATA</div>
     <div id="hubData"></div>
-    <p class="hint">Division news is the text of one Word document your division keeps in SharePoint, read from the copy synced to this PC. The rest follows the same rules as the card and the watch list. Nothing here is sent anywhere, and silence does not mean all is well.</p>
+    <div class="lbl">LONGER TERM · FROM YOUR DATA</div>
+    <div id="hubLater"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="pill quiet" id="hubSummary" type="button">Copy a summary for my team lead</button><button class="pill quiet" id="hubCal" type="button">Goal dates as a calendar file…</button></div>
+    <p class="hint" id="hubSay" role="status" style="margin:6px 0 0"></p>
+    <textarea id="hubCalText" readonly rows="6" hidden aria-label="The calendar file's text" style="width:100%;font:12px/1.4 Consolas,monospace;margin-top:6px"></textarea>
+    <p class="hint">Division news is the text of one Word document your division keeps in SharePoint, read from the copy synced to this PC. The rest follows fixed rules over your own data, with the limits you chose in Settings, How it starts. Nothing here is sent anywhere, and silence does not mean all is well.</p>
   </div>
 
   <!-- ===== watch list and page scan ===== -->
@@ -2699,7 +2707,9 @@ const state = { tz:"", staleDays:7, refStaleDays:45, oldRef:false, oldData:false
   replies:null,
   density:"comfortable", ts:"standard", lookupStyle:"box", recentsOn:true, recents:[], pins:[], lastLookOn:true, weekTodosOn:true,
   cardFields:["applicant", "established", "project", "agentCo", "agentEmail", "applicantEmail", "myNotes", "doc356h", "doc32p1"],
-  watchOn:false, newsOn:false, newsFile:"", watchCap:3, trayRecount:"daily", wDay:null, wCount:0, wSeen:new Set(), wSnoozed:new Set(), hubSeen:new Set() };
+  watchOn:false, newsOn:false, newsFile:"", watchCap:3, trayRecount:"daily", wDay:null, wCount:0, wSeen:new Set(), wSnoozed:new Set(), hubSeen:new Set(),
+  /* round 42: the timeline checks' limits (TL_DEFAULTS), and when each ANDA's status was first seen as it is now (kept on this PC, never sent) */
+  tl:{ goalClose:10, noForecast:30, thinMargin:5, crunchCount:3, crunchHorizon:90, statusDays:30, todoSoon:2 }, statusSeen:null };
 const steps = {};
 const APP_WINS = ["mcpw", "lookup", "plib", "settings", "draft", "wlist", "replies", "actwin", "todo", "mytodo", "notes", "ask", "today", "hub", "cmp", "usage", "handoff", "conn", "about", "bak", "first"];
 
@@ -2782,14 +2792,36 @@ if(SHIFT_DAYS) NEWS_DOC.forEach(n => { n.date = shiftYMD(n.date); });
 const NEWS_SAMPLES = ["Building access is limited to the north entrance until 3:00 PM.", "The labeling template was updated this morning. Please use the new version for letters that go out this week.", "Reminder: timesheets are due by noon tomorrow."];
 let wQueue = [], wCurrent = null, wTimer = null, newsPushed = 0;
 const cut = (t, n) => { t = String(t).replace(/\s+/g, " ").trim(); return t.length > n ? t.slice(0, n - 1).trimEnd() + "…" : t; };
-function newsItems(){
-  const today = demoToday();
-  return NEWS_DOC.map(n => ({ t:ymd(...n.date), text:cut(n.text, NEWS_MAX) })).filter(n => n.t <= today && today - n.t <= NEWS_DAYS * DAY).sort((a, b) => b.t - a.t)
-    .map(n => ({ key:"n|" + isoDate(n.t) + "|" + stableHash(n.text), kind:"news", t:n.t, text:n.text }));
+/* round 42: the document is read as paragraphs, each starting with its date, by the rule the Windows app uses (newsFrom) */
+const newsParagraphs = () => NEWS_DOC.map(n => `${isoDate(ymd(...n.date))}: ${n.text}`);
+function newsItems(){ return newsFrom(newsParagraphs(), isoDate(demoToday())); }
+/* round 42: the timeline checks over this page's data, its to-do list and the look kept when Today last closed */
+function tlInputNow(){
+  const today = isoDate(demoToday());
+  const records = Object.keys(DATA).map(id => ({ number:id, drug:DATA[id].drug, goal:isoDate(ymd(...DATA[id].goalD)), forecast:DATA[id].fcD ? isoDate(ymd(...DATA[id].fcD)) : null, status:String(DATA[id].latest || "") }));
+  if(!state.statusSeen){      /* the demo starts with one status first seen 41 days ago, so the rule can be seen; the app keeps the real day it first saw each */
+    state.statusSeen = {}; const old = DATA["214990"];
+    if(old) state.statusSeen["214990"] = { fp:stableHash(String(old.latest || "")), since:isoDate(demoToday() - 41 * DAY), sample:true };
+  }
+  records.forEach(r => { const fp = stableHash(r.status), k = state.statusSeen[r.number]; if(!k || k.fp !== fp) state.statusSeen[r.number] = { fp, since:today }; });
+  const kept = state.lastLookOn ? lastLookKept() : null;
+  return { today, records, look:kept ? kept.items : null, todos:todoStore.items, settings:state.tl,
+    statusSince:Object.fromEntries(Object.entries(state.statusSeen).map(([n, v]) => [n, v.since])) };
 }
-function watchItems(){   /* the rules of the card, the watch list and the to-do list: nothing new is decided here */
-  return Object.keys(DATA).flatMap(autoRowsFor).filter(r => r.sev !== "info").sort((a, b) => a.priority - b.priority || (a.number < b.number ? -1 : 1))
-    .map(r => ({ key:"d|" + r.key, kind:"data", number:r.number, text:cut(r.title, 140) }));
+/* the timeline alerts, with the card's own facts that are not about the timeline itself: a mark in the sheet, a date on a closed day,
+   old data, and the record's open item (TimelineAlerts.WithCard in the app) */
+const TL_FROM_CARD = ["sheet-flag", "goal-date-calendar", "forecast-date-calendar", "stale-data"];
+function allAlerts(){
+  const extra = [];
+  Object.keys(DATA).forEach(id => {
+    watchFlags(id).filter(f => TL_FROM_CARD.includes(f.code) && f.sev !== "info")
+      .forEach(f => extra.push({ key:`${id}|${f.code}|-`, number:id, code:f.code, horizon:TL_NOW.has(f.code) ? "now" : "later", sev:f.sev, date:null, text:f.text }));
+    if(DATA[id].attn) extra.push({ key:`${id}|attention|${stableHash(DATA[id].attn)}`, number:id, code:"attention", horizon:"now", sev:"warn", date:null, text:`Needs action: ${DATA[id].attn}` });
+  });
+  return tlSort(timelineAlerts(tlInputNow()).concat(extra));
+}
+function watchItems(){   /* round 42: the timeline alerts and the card's facts, most urgent first */
+  return allAlerts().filter(a => a.sev !== "info").map(a => ({ key:"d|" + a.key, kind:"data", number:a.number, horizon:a.horizon, text:cut(tlLine(a), 160) }));
 }
 function watchCheck(){
   const st = $("watchStatus");
@@ -2811,9 +2843,9 @@ function showNextWhisper(){
   }
   const i = wQueue.shift(); wCurrent = i; state.wSeen.add(i.key); state.wCount++;
   box.classList.toggle("news", i.kind === "news");
-  $("whKind").textContent = i.kind === "news" ? "DIVISION NEWS" : "FROM YOUR DATA";
+  $("whKind").textContent = i.kind === "news" ? "DIVISION NEWS" : i.horizon === "later" ? "FROM YOUR DATA · LONGER TERM" : "FROM YOUR DATA · IMMEDIATE";
   $("whText").textContent = i.text;
-  $("whOpen").textContent = i.kind === "news" ? "Open News and alerts" : "Open the card";
+  $("whOpen").textContent = i.kind === "news" || !i.number ? "Open News and alerts" : "Open the card";
   $("whSnooze").hidden = i.kind === "news";
   box.style.display = "block";
   clearTimeout(wTimer); wTimer = setTimeout(() => hideWhisper(true), WHISPER_MS);
@@ -2828,7 +2860,7 @@ $("whClose").addEventListener("click", () => hideWhisper(true));
 $("whSnooze").addEventListener("click", () => { if(wCurrent){ state.wSnoozed.add(wCurrent.key); state.wSeen.delete(wCurrent.key); } hideWhisper(true); });
 $("whOpen").addEventListener("click", () => {
   const i = wCurrent; hideWhisper(false); if(!i) return;
-  if(i.kind === "news") openHub(); else if(DATA[i.number]) openCard(i.number, { anchor:{ x:Math.max(12, innerWidth - 420), y:80 }, mini:state.mode === "peek" });
+  if(i.kind === "news" || !i.number) openHub(); else if(DATA[i.number]) openCard(i.number, { anchor:{ x:Math.max(12, innerWidth - 420), y:80 }, mini:state.mode === "peek" });
 });
 function openHub(){ closeMenus(); showApp("hub"); $("hub").style.zIndex = "52"; paintHub(); }
 function paintHub(){
@@ -2851,16 +2883,29 @@ function paintHub(){
       news.append(row);
     });
   }
-  const rows = watchItems();
-  if(!rows.length){ const e = document.createElement("div"); e.className = "hrow"; e.textContent = "Nothing in your data needs a look by these rules."; data.append(e); }
-  rows.forEach(i => {
-    const b = document.createElement("button"); b.type = "button"; b.className = "hrow";
-    const t = document.createElement("span"); t.className = "t"; t.textContent = i.text; b.append(t);
-    if(state.wSnoozed.has(i.key)){ const z = document.createElement("span"); z.className = "d"; z.textContent = "snoozed today"; b.append(z); }
-    b.addEventListener("click", () => { if(DATA[i.number]) openCard(i.number, { anchor:{ x:Math.max(12, innerWidth - 420), y:80 } }); });
-    data.append(b);
+  const rows = watchItems(), later = $("hubLater"); later.replaceChildren();
+  [[data, rows.filter(i => i.horizon !== "later"), "Nothing immediate in your data by these rules."], [later, rows.filter(i => i.horizon === "later"), "Nothing longer term in your data by these rules."]].forEach(([box, list, none]) => {
+    if(!list.length){ const e = document.createElement("div"); e.className = "hrow"; e.textContent = none; box.append(e); }
+    list.forEach(i => {
+      const b = document.createElement(i.number ? "button" : "div"); if(i.number) b.type = "button"; b.className = "hrow";
+      const t = document.createElement("span"); t.className = "t"; t.textContent = i.text; b.append(t);
+      if(state.wSnoozed.has(i.key)){ const z = document.createElement("span"); z.className = "d"; z.textContent = "snoozed today"; b.append(z); }
+      if(i.number) b.addEventListener("click", () => { if(DATA[i.number]) openCard(i.number, { anchor:{ x:Math.max(12, innerWidth - 420), y:80 } }); });
+      box.append(b);
+    });
   });
 }
+/* round 42: a summary to copy for a team lead, and the goal dates as a calendar file, both by the same rules and from the person's own data */
+$("hubSummary").addEventListener("click", () => {
+  const list = allAlerts().filter(a => a.sev !== "info"), text = tlSummary(list, isoDate(demoToday()), n => DATA[n] && DATA[n].drug);
+  const now = list.filter(a => a.horizon === "now").length, later = list.length - now;
+  writeClipboard(text).then(() => { $("hubSay").textContent = TL_SAID.copied(now, later); },
+    () => { $("hubSay").textContent = TL_SAID.copyFailed; $("hubCalText").hidden = false; $("hubCalText").value = text; });
+});
+$("hubCal").addEventListener("click", () => {
+  const records = Object.keys(DATA).map(id => ({ number:id, goal:isoDate(ymd(...DATA[id].goalD)) })), cal = tlCalendar(records, isoDate(demoToday()));
+  $("hubCalText").hidden = false; $("hubCalText").value = cal.text; $("hubSay").textContent = TL_SAID.calendar(cal.count);
+});
 $("hubClose").addEventListener("click", () => closeApp("hub"));
 $("hubOpen").addEventListener("click", () => openHub());
 $("watchNow").addEventListener("click", () => watchCheck());
@@ -2881,7 +2926,19 @@ $("newsPush").addEventListener("click", () => {
   if(state.newsOn && state.newsFile){ watchCheck(); if(isOpen("hub")) paintHub(); }
   else showNotice("A line was added to the division news document. Division news is off, so nothing is shown. Switch it on in Settings, How it starts.", { x:innerWidth - 360, y:innerHeight - 150 });
 });
+/* round 42: the timeline checks' limits, each one of its choices */
+function paintTlLimits(){
+  const box = $("tlLimits"); box.replaceChildren(); $("tlHint").textContent = TL_SAID.hint;
+  Object.keys(TL_DEFAULTS).forEach(k => {
+    const sel = h("select", { id:"tl_" + k, "aria-label":TL_LABELS[k] });
+    TL_CHOICES[k].forEach(v => sel.append(h("option", { value:String(v), text:String(v) })));
+    sel.value = String(state.tl[k]);
+    sel.addEventListener("change", () => { state.tl = tlNormalize({ ...state.tl, [k]:+sel.value }); if(isOpen("today")) paintToday(); if(isOpen("hub")) paintHub(); if(state.watchOn) watchCheck(); });
+    box.append(h("label", { for:"tl_" + k, text:TL_LABELS[k] }), sel);
+  });
+}
 function syncRound19(){
+  paintTlLimits();
   $("setWatch").checked = state.watchOn; $("setNews").checked = state.newsOn; $("newsFile").value = state.newsFile;
   document.querySelectorAll("input[name=wcap]").forEach(r => { r.checked = +r.value === state.watchCap; });
   document.querySelectorAll("input[name=trec]").forEach(r => { r.checked = r.value === state.trayRecount; });
@@ -5449,6 +5506,13 @@ function paintToday(){
   };
   /* the sentences of one ANDA together, in the order the rule gives them */
   const byId = rows => { const m = new Map(); rows.forEach(r => m.set(r.id, (m.has(r.id) ? m.get(r.id) + " " : "") + r.text)); return [...m]; };
+  /* Round 42: what needs a look, most urgent first, by the timeline checks: the first reason of each ANDA, and how many more */
+  { const firsts = new Map();
+    allAlerts().filter(a => a.number && a.sev !== "info").forEach(a => { if(!firsts.has(a.number)) firsts.set(a.number, { a, more:0 }); else firsts.get(a.number).more++; });
+    list.append(h("div", { class:"td-grp", text:TL_SAID.todayTitle }));
+    if(!firsts.size) list.append(h("div", { class:"td-note", text:TL_SAID.todayNone }));
+    [...firsts].slice(0, TL_TODAY_MAX).forEach(([id, f]) => row("urgent", id, f.a.text + (f.more ? " " + watchMoreText(f.more) : "")));
+    if(firsts.size > TL_TODAY_MAX) list.append(h("div", { class:"td-note", text:TL_SAID.todayMore(firsts.size - TL_TODAY_MAX) })); }
   /* Round 36: what moved since the last look, first; round 37: only while the person has it on */
   if(state.lastLookOn){
   const kept = lastLookKept(), shown = state.shownLook = lookNow(DATA, nowMs()), since = kept ? changesSince(kept, shown, id => DATA[id] && DATA[id].attn) : null;
@@ -6268,8 +6332,9 @@ const GUIDE_SAID = {
 /* The guide opens by itself once, at the first start, and never again by itself. "seen" is what the PC remembers; anything but true means it has not been shown. */
 function guideOpensAtStart(seen){ return seen !== true; }
 
-const APP_VERSION = "Prototype, round 41";
+const APP_VERSION = "Prototype, round 42";
 const CHANGES = [
+  { round:42, items:["Timeline checks watch your goal dates by fixed rules, with no AI: immediate (a goal date passed or close, a forecast after the goal, no forecast, a to-do item due, a goal date moved earlier) and longer term (a forecast that slipped, a thin margin, a crunch week, a status unchanged for a month). Each limit is in Settings, How it starts.", "Today lists what needs a look first, most urgent first. News and alerts shows the immediate and the longer term apart, copies a summary for a team lead, and gives the goal dates as a calendar file.", "The Windows app now shows the short notices near the clock and the division news, off until you switch them on."] },
   { round:41, items:["Elsa can be filled in from Settings when Elsa's team gives its request body and reply path (Settings, AI and connections, Elsa); left blank, Elsa stays offline. The address and token stay in the environment variables IT sets.", "An MCP server can also be a program on this PC that IT approved: added with “Add a program on this PC”, by its full path and SHA-256, which the app checks before each start. The app asks before it starts the program and stops it when you are done; with nothing entered, no program can be started."] },
   { round:40, items:["MCP servers: connect to tools that answer over https (Settings, AI and connections). Test lists a server's tools; MCP tools in the tray menu's More shows exactly what a call sends before you press Send. Nothing is sent by itself and nothing is kept.", "My API can be filled in for a common kind of service with one press: OpenAI-compatible, Azure OpenAI, or Ollama on this PC."] },
   { round:39, items:["Settings has a second switch beside “Since you last looked”: whether next week in Today also lists your to-do items. Off, it reads neither to-do list for Today and shows no titles."] },
@@ -7016,6 +7081,144 @@ function autoRowsFor(id){
   });
   if(d.attn) rows.push(make(`${id}|attention|${stableHash(d.attn)}`, `ANDA ${id}: ${d.attn}`, "From the record: the item that needs action.", null, "warn", "The record"));
   return rows;
+}
+/* ---- round 42: timeline alerts (Services/Timeline.cs). Fixed rules over the person's own data: immediate (now) and longer term (later).
+   The rules say what the data shows; they never decide. Every limit is a setting. The Windows app gives the same answers (mockup/round42-golden.json). ---- */
+const TL_DEFAULTS = { goalClose:10, noForecast:30, thinMargin:5, crunchCount:3, crunchHorizon:90, statusDays:30, todoSoon:2 };
+const TL_CHOICES = { goalClose:[5, 10, 15], noForecast:[14, 30, 60], thinMargin:[3, 5, 10], crunchCount:[2, 3, 4, 5], crunchHorizon:[30, 60, 90], statusDays:[14, 30, 60], todoSoon:[1, 2, 5] };
+const TL_LABELS = { goalClose:"Goal date is close: within this many business days", noForecast:"No forecast: when the goal date is within this many days",
+  thinMargin:"Thin margin: forecast within this many business days of the goal", crunchCount:"Crunch week: this many goal dates in one week",
+  crunchHorizon:"Crunch weeks: look this many days ahead", statusDays:"Status unchanged: after this many days", todoSoon:"To-do item due: within this many business days" };
+const TL_TODAY_MAX = 8;
+const TL_SAID = {
+  todayTitle:"NEEDS A LOOK · MOST URGENT FIRST", todayNone:"Nothing in your data meets a timeline check today. Silence does not mean all is well.",
+  todayMore:n => `${n} more ANDA${n === 1 ? "" : "s"} in News and alerts.`,
+  copied:(now, later) => `Copied the summary: ${now} immediate, ${later} longer term. Please read it before you send it.`,
+  copyFailed:"Copying was not allowed just now, so the summary is below to select and copy.",
+  calendar:n => `${n} goal date${n === 1 ? "" : "s"} in the next 180 days. In the Windows app, Save writes this as a calendar file (.ics) where you choose, and Outlook can open it; it holds each ANDA number and its goal date, nothing else. This page cannot save files, so the text is below.`,
+  hint:"The timeline checks run on this PC over your own sheet and to-do list, by fixed rules, with no AI. They say what the data shows and never decide. They appear in Today and in News and alerts, and near the clock when the notices are on." };
+/* each setting kept only when it is one of its choices, as the app's TimelineSettings.Normalize */
+const tlNormalize = s => Object.fromEntries(Object.keys(TL_DEFAULTS).map(k => [k, s && TL_CHOICES[k].includes(s[k]) ? s[k] : TL_DEFAULTS[k]]));
+/* business days after a, up to and including b (0 when b is a, or when none lies between and b is closed) */
+/* a date written YYYY-MM-DD that exists, or null (2026-02-30 is not read as March 2), as the app's DateOnly.TryParseExact */
+const tlIso = s => { const t = parseIso(s); return t != null && isoDate(t) === s ? t : null; };
+const bizUntil = (a, b) => b <= a ? 0 : bizBetween(a, b) + (isBiz(b) ? 1 : 0);
+const tlPlural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+const TL_NOW = new Set(["goal-passed", "goal-close", "forecast-after-goal", "no-forecast", "todo-overdue", "todo-soon", "goal-earlier", "sheet-flag", "goal-date-calendar", "forecast-date-calendar", "attention"]);
+/* input: { today, records:[{number, goal, forecast, status}], look:{number:{goal, forecast}} | null, todos:[{id, number, title, due, done}],
+   statusSince:{number: "YYYY-MM-DD"}, settings } with dates as YYYY-MM-DD. Output: alerts, most urgent first. */
+function timelineAlerts(input){
+  const set = tlNormalize(input.settings), today = tlIso(input.today), out = [], S = shortDate;
+  const add = (number, code, sev, date, text) => out.push({ key:`${number || "-"}|${code}|${date == null ? "-" : isoDate(date)}`, number:number || null, code, horizon:TL_NOW.has(code) ? "now" : "later", sev, date:date == null ? null : isoDate(date), text });
+  const records = (input.records || []).filter(r => r && /^\d{6}$/.test(String(r.number || "")));
+  for(const r of records){
+    const goal = tlIso(r.goal), fc = tlIso(r.forecast), was = input.look && input.look[r.number];
+    let close = false;
+    if(goal != null){
+      const days = Math.round((goal - today) / DAY);
+      if(days < 0) add(r.number, "goal-passed", "bad", goal, `The goal date (${S(goal)}) passed ${tlPlural(-days, "day")} ago.`);
+      else {
+        const n = bizUntil(today, goal);
+        if(days === 0){ close = true; add(r.number, "goal-close", "warn", goal, `The goal date is today (${S(goal)}).`); }
+        else if(n <= set.goalClose){ close = true; add(r.number, "goal-close", "warn", goal, `The goal date (${S(goal)}) is in ${tlPlural(n, "business day")}.`); }
+        if(fc == null && days <= set.noForecast) add(r.number, "no-forecast", "warn", goal, days === 0 ? `There is no forecast date, and the goal date is today (${S(goal)}).`
+          : `There is no forecast date, and the goal date (${S(goal)}) is in ${tlPlural(days, "day")}.`);
+        if(fc != null && fc > goal){
+          const late = bizUntil(goal, fc);
+          add(r.number, "forecast-after-goal", "bad", fc, late === 0 ? `The forecast (${S(fc)}) is after the goal date (${S(goal)}), with no business day between them.`
+            : `The forecast (${S(fc)}) is ${tlPlural(late, "business day")} after the goal date (${S(goal)}).`);
+        }
+        if(fc != null && fc <= goal && !close){
+          const m = bizUntil(fc, goal);
+          if(m <= set.thinMargin) add(r.number, "thin-margin", "warn", goal, m === 0 ? `The forecast is the goal date itself (${S(goal)}), with no margin.`
+            : `The forecast (${S(fc)}) is only ${tlPlural(m, "business day")} before the goal date (${S(goal)}).`);
+        }
+      }
+    }
+    if(was){
+      const g0 = tlIso(was.goal), f0 = tlIso(was.forecast);
+      if(g0 != null && goal != null && goal < g0) add(r.number, "goal-earlier", "bad", goal, `The goal date moved ${tlPlural(Math.round((g0 - goal) / DAY), "day")} earlier since you last looked: ${S(g0)} to ${S(goal)}.`);
+      if(f0 != null && fc != null && fc > f0) add(r.number, "forecast-slipped", "warn", fc, `The forecast slipped ${tlPlural(Math.round((fc - f0) / DAY), "day")} since you last looked: ${S(f0)} to ${S(fc)}.`);
+    }
+    const since = tlIso(input.statusSince && input.statusSince[r.number]);
+    if(since != null && since <= today){
+      const d = Math.round((today - since) / DAY);
+      if(d >= set.statusDays) add(r.number, "status-unchanged", "warn", since, `The status has not changed in ${d} days (since ${S(since)}).`);
+    }
+  }
+  for(const t of input.todos || []){
+    const due = tlIso(t && t.due); if(!t || t.done || due == null) continue;
+    const number = /^\d{6}$/.test(String(t.number || "")) ? String(t.number) : null, title = cut(String(t.title || "").replace(FENCE_HIDDEN, ""), 80);
+    const k = (code, sev, text) => out.push({ key:`${number || "-"}|${code}|${stableHash(String(t.id || "") + "|" + title)}|${isoDate(due)}`, number, code, horizon:"now", sev, date:isoDate(due), text });
+    if(due < today) k("todo-overdue", "bad", `To-do item overdue since ${S(due)}: ${title}`);
+    else if(due === today) k("todo-soon", "warn", `To-do item due today: ${title}`);
+    else if(bizUntil(today, due) <= set.todoSoon) k("todo-soon", "warn", `To-do item due ${S(due)}: ${title}`);
+  }
+  /* a crunch week: goal dates from today to the horizon, grouped by the Monday of their week */
+  const weeks = new Map();
+  for(const r of records){
+    const goal = tlIso(r.goal); if(goal == null || goal < today || goal > today + set.crunchHorizon * DAY) continue;
+    const monday = goal - ((dowOf(goal) + 6) % 7) * DAY;
+    if(!weeks.has(monday)) weeks.set(monday, []); weeks.get(monday).push(r.number);
+  }
+  [...weeks].sort((a, b) => a[0] - b[0]).forEach(([monday, nums]) => {
+    if(nums.length < set.crunchCount) return;
+    const list = [...new Set(nums)].sort();
+    out.push({ key:`-|crunch-week|${isoDate(monday)}|${list.length}`, number:null, code:"crunch-week", horizon:"later", sev:"warn", date:isoDate(monday),
+      text:`Week of ${S(monday)}: ${list.length} goal dates (ANDA ${list.join(", ")}).` });
+  });
+  return tlSort(out);
+}
+const TL_SEV = { bad:2, warn:1, info:0 };
+/* plain character order, as the app's string.CompareOrdinal (never the browser's language order) */
+const ordCmp = (a, b) => a < b ? -1 : a > b ? 1 : 0;
+function tlSort(list){
+  return list.sort((a, b) => (a.horizon === b.horizon ? 0 : a.horizon === "now" ? -1 : 1) || TL_SEV[b.sev] - TL_SEV[a.sev]
+    || (a.date == null ? 1 : 0) - (b.date == null ? 1 : 0) || ordCmp(a.date || "", b.date || "")
+    || (a.number == null ? 1 : 0) - (b.number == null ? 1 : 0) || ordCmp(a.number || "", b.number || "") || ordCmp(a.code, b.code) || ordCmp(a.key, b.key));
+}
+/* the line an alert is shown with: its ANDA first, when it has one */
+const tlLine = a => a.number ? `ANDA ${a.number}: ${a.text}` : a.text;
+/* a summary to copy for a team lead: plain text, by the same rules; drug names from the person's own sheet */
+function tlSummary(alerts, todayIso, drugOf){
+  const t = tlIso(todayIso), when = `${shortDate(t)}, ${new Date(t).getUTCFullYear()}`;
+  const line = a => "- " + (a.number ? `ANDA ${a.number}${drugOf && drugOf(a.number) ? ` (${cut(drugOf(a.number), 60)})` : ""}: ${a.text}` : a.text);
+  const now = alerts.filter(a => a.horizon === "now"), later = alerts.filter(a => a.horizon === "later");
+  const parts = [`ANDA timeline summary as of ${when}, from my portfolio sheet, checked by fixed rules (no AI).`, ""];
+  if(!alerts.length) parts.push("No ANDA in my portfolio sheet meets a timeline rule today.");
+  if(now.length) parts.push("Immediate", ...now.map(line));
+  if(now.length && later.length) parts.push("");
+  if(later.length) parts.push("Longer term", ...later.map(line));
+  parts.push("", "Please check each record before acting on this summary.");
+  return parts.join("\n");
+}
+/* the goal dates as a calendar file (iCalendar): one all-day event each, the ANDA number only, from today to 180 days ahead */
+const TL_CAL_DAYS = 180;
+function tlCalendar(records, todayIso){
+  const t = tlIso(todayIso), c = d => isoDate(d).replace(/-/g, "");
+  const events = (records || []).map(r => ({ n:String(r.number || ""), g:tlIso(r.goal) })).filter(e => /^\d{6}$/.test(e.n) && e.g != null && e.g >= t && e.g <= t + TL_CAL_DAYS * DAY)
+    .sort((a, b) => a.g - b.g || ordCmp(a.n, b.n));
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//ANDA Companion (Notula)//Goal dates//EN", "CALSCALE:GREGORIAN"];
+  events.forEach(e => lines.push("BEGIN:VEVENT", `UID:anda-${e.n}-goal-${c(e.g)}@anda-companion.invalid`, `DTSTAMP:${c(t)}T000000Z`, `DTSTART;VALUE=DATE:${c(e.g)}`,
+    `DTEND;VALUE=DATE:${c(e.g + DAY)}`, `SUMMARY:Goal date: ANDA ${e.n}`, "DESCRIPTION:From ANDA Companion (Notula)\\, read from my portfolio sheet. Please check the record before acting.",
+    "TRANSP:TRANSPARENT", "END:VEVENT"));
+  lines.push("END:VCALENDAR");
+  return { text:lines.join("\r\n") + "\r\n", count:events.length };
+}
+/* division news: the paragraphs of one Word document, each starting with its date (2026-11-20, 11/20/2026 or Nov 20, 2026) */
+const NEWS_MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+const NEWS_DATE = /^\s*(?:(\d{4})-(\d{2})-(\d{2})|(\d{1,2})\/(\d{1,2})\/(\d{4})|(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|Sept?(?:ember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s+(\d{1,2}),?\s+(\d{4}))(?![\d\/-])\s*[:–—-]?\s*/i;
+function newsFrom(paragraphs, todayIso, days = NEWS_DAYS, max = NEWS_MAX){
+  const today = tlIso(todayIso), out = [];
+  for(const p of (paragraphs || []).slice(0, 2000)){
+    const s = String(p == null ? "" : p).replace(FENCE_HIDDEN, ""), m = NEWS_DATE.exec(s); if(!m) continue;
+    const [y, mo, d] = m[1] ? [+m[1], +m[2], +m[3]] : m[6] ? [+m[6], +m[4], +m[5]] : [+m[9], NEWS_MONTHS.indexOf(m[7].slice(0, 3).toLowerCase()) + 1, +m[8]];
+    const t = ymd(y, mo, d), back = new Date(t);
+    if(back.getUTCFullYear() !== y || back.getUTCMonth() !== mo - 1 || back.getUTCDate() !== d) continue;      /* a date that does not exist */
+    const text = cut(s.slice(m[0].length), max); if(!text || t > today || today - t > days * DAY) continue;
+    out.push({ key:"n|" + isoDate(t) + "|" + stableHash(text), kind:"news", t, date:isoDate(t), text });
+  }
+  return out.sort((a, b) => b.t - a.t || ordCmp(a.key, b.key));
 }
 function todoView(){
   const today = demoToday(), rows = [], live = new Set();
@@ -8286,7 +8489,7 @@ function snapSettings(){
     keys:{ ...s.keys }, middleClick:s.middle, middleModifier:s.middleMod, tone:s.tone, style:s.style, signOff:s.signoff,
     provider:s.provider, claudeModel:s.claudeModel,
     myApi:{ name:m.name, endpoint:m.endpoint, header:m.header, scheme:m.scheme, env:m.env, model:m.model, template:m.template, path:m.path },
-    elsa:{ header:s.elsa.header, scheme:s.elsa.scheme, template:s.elsa.template, path:s.elsa.path },
+    elsa:{ header:s.elsa.header, scheme:s.elsa.scheme, template:s.elsa.template, path:s.elsa.path }, timeline:{ ...s.tl },
     outlook:{ enabled:o.on, cloud:o.cloud, clientId:o.client, tenant:o.tenant, maxItems:o.max }, lens:s.lens,
     actions:JSON.parse(JSON.stringify(s.actions)), agents:JSON.parse(JSON.stringify(s.agents)), todoShowFromData:s.todoAuto, todoRefreshSeconds:s.todoRefresh,
     myTodoMode:s.clMode, adaptive:s.adaptive, allTools:s.allTools,
@@ -8330,6 +8533,7 @@ function applySettings(x){
   if(typeof x.sinceLastLook === "boolean") s.lastLookOn = x.sinceLastLook;
   if(typeof x.weekTodos === "boolean") s.weekTodosOn = x.weekTodos;        /* round 39: an older backup keeps the choice the person has now */
   if(Array.isArray(x.mcpServers)) s.mcp = mcpNormalize(x.mcpServers);
+  if(x.timeline && typeof x.timeline === "object") s.tl = tlNormalize(x.timeline);      /* round 42: an older backup keeps the limits the person has now */
   if(x.elsa && typeof x.elsa === "object"){ const e = x.elsa, t = v => typeof v === "string" ? v : "";      /* round 41: an older backup keeps what the person has now */
     s.elsa = { header:t(e.header).trim(), scheme:t(e.scheme).trim(), template:t(e.template).length > 20000 ? "" : t(e.template), path:t(e.path).trim() }; }        /* round 40: an older backup keeps the servers the person has now */
   if(!s.lastLookOn){ s.lastLook = null; s.shownLook = null; }

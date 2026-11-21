@@ -67,7 +67,7 @@ public class Round35Tests
 
     private static List<string> Flat(IEnumerable<object> entries) => entries.Select(e => e is TrayMenu.Entry t ? t.Label + (t.Items is null ? "" : " [" + string.Join(" | ", t.Items) + "]") : (string)e).ToList();
     private static List<string> FromGolden(string edition) => Doc.Value.GetProperty(edition).EnumerateArray().Select(e => e.ValueKind == JsonValueKind.String ? e.GetString()!
-        : e.GetProperty("label").GetString() + " [" + string.Join(" | ", e.GetProperty("items").EnumerateArray().Select(x => x.GetString()).Where(x => x != TrayMenu.NotInApp)) + "]").ToList();
+        : e.GetProperty("label").GetString() + " [" + string.Join(" | ", e.GetProperty("items").EnumerateArray().Select(x => x.GetString())) + "]").ToList();
 
     [Fact]
     public void The_tray_menu_has_the_simulations_choices_in_its_order_in_both_editions()

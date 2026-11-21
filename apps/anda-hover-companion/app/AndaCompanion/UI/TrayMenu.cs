@@ -11,8 +11,6 @@ public static class TrayMenu
 {
     public sealed record Entry(string Label, IReadOnlyList<string>? Items = null);
 
-    /// <summary>What the simulation offers that the Windows app does not have yet: division news (round 19), still owed to the app.</summary>
-    public const string NotInApp = "News and alerts…";
 
     /// <summary>One choice of the menu, and whether the focused edition shows it (round 40 review: no longer worked out from labels).</summary>
     private sealed record Choice(string Label, bool Focused = true, IReadOnlyList<Choice>? Items = null);
@@ -23,7 +21,7 @@ public static class TrayMenu
         new("Lists", Focused: false, Items: new Choice[] { new("ANDA to-do list…"), new("My to-do list…"), new("Notes to my to-do list…"), new("My usage…") }),
         new("More", Items: new Choice[]
         {
-            new("Compare two files…"), new("Hand-off page…"), new("Quick replies…"),
+            new("Compare two files…"), new("Hand-off page…"), new("News and alerts…"), new("Quick replies…"),
             new("Prompt library…", Focused: false), new("MCP tools…", Focused: false), new("My actions", Focused: false),
             new("Appearance"), new("Auto-hide"), new("Connections and event log…"), new("Backups and archive…"), new("Demo: ANDA at risk"), new("Demo: ANDA on track"),
         }),
