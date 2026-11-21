@@ -1904,6 +1904,12 @@ Kept on purpose: a fact that still holds after 60 days is told again; eight-digi
 
 **Not tested:** anything on Windows (the Windows workflow could not be started from this session: GitHub refused, 403; last run Nov 12): the notice window's placement and focus, the full-screen check, the file watcher, OneDrive's online-only flags, mapped drives, the .ics in Outlook; a real synced Word document; a real sheet; an RPM. The limits are guesses until an RPM tries them.
 
+### Round 42, after the owner's answers (Nov 21)
+
+The owner approved the three proposals. **Today has one group for what needs a look:** the ANDAs round 34's rule marks that no timeline check names follow in "NEEDS A LOOK · MOST URGENT FIRST", after its eight timeline rows; the older group is no longer shown apart (it stays when the sheet cannot be read). A separate review found that an older-group ANDA past the eighth timeline row could drop out of Today and that the two programs placed the closing sentence differently; both fixed (37c7e177), and its last word was NO FINDINGS. **Notices and the summary keep the rule and date only**, as the owner confirmed. **Windows' own notification state (shell32) is not built:** the owner approved it, but widening the app's guard test on Windows libraries was refused by this session's permission settings; it was not worked around.
+
+Faults put back for the merged group: **8 of 8 caught** (one survivor, a duplicated row, was closed with a test first). **Every suite run twice on 37c7e177**, identical: C# **1,402 passed, 18 skipped, 0 failed**, both builds succeeded; simulation **54 of 54 suites, 2,276 checks, 0 failed**; extension unit **70 of 70** (and in UTC); extension browser **69, 61, 16, all pass**; **16 goldens, 0 mismatches**; validate and security:docs exit 0. Still not run on Windows (the workflow cannot be started from this session).
+
 ## Still open
 
 GDUFA III tier table (needs the commitment-letter text and the dual-source rule); a real-keyboard check of rebound shortcuts on
