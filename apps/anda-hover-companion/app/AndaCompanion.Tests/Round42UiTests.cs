@@ -376,17 +376,23 @@ public class Round42UiTests : IClassFixture<HeadlessFixture>
             var calm = all.Where(x => !Today.NeedsLook(x)).ToList();
             var empty = new TodayWindow(new TodayHooks(() => calm, Find, () => Array.Empty<string>(), () => Array.Empty<string>(), _ => { }, Alerts: () => Array.Empty<TimelineAlert>()));
             var needIds = Today.Groups(Array.Empty<string>(), Array.Empty<string>(), all, Find)[0].Ids;
+            // an ANDA of the older group that is the tenth with a timeline alert: past the eight shown, yet it must not drop out of Today
+            var late = Enumerable.Range(0, 9).Select(i => Alert((310000 + i).ToString(), "goal-close", "now", "soon", $"Late {i}.")).Append(Alert(needIds[0], "goal-close", "now", "soon", "Tenth.")).ToList();
+            var tenth = new TodayWindow(new TodayHooks(() => all, Find, () => Array.Empty<string>(), () => Array.Empty<string>(), _ => { }, Alerts: () => late));
             try
             {
-                w.Show(); none.Show(); off.Show(); unread.Show(); empty.Show(); Settle();
+                w.Show(); none.Show(); off.Show(); unread.Show(); empty.Show(); tenth.Show(); Settle();
+                var tenthIds = tenth.List.Children.OfType<Button>().Select(b => (b.Tag as TodayWindow.RowKey)!).Where(k => k.Section == "urgent").Select(k => k.Id).ToList();
+                var tenthTexts = Texts(tenth.List);
+                var wIds = w.List.Children.OfType<Button>().Select(b => (b.Tag as TodayWindow.RowKey)!).Where(k => k.Section == "urgent").Select(k => k.Id).ToList();
                 var texts = Texts(w.List);
                 Click(w.List.Children.OfType<Button>().First()); Click(w.List.Children.OfType<Button>().Last()); Settle();   // two row clicks repaint
                 int askedAfterClicks = asked; w.Refresh(); Settle();
                 var noneRows = none.List.Children.OfType<Button>().Select(b => (b.Tag as TodayWindow.RowKey)!).ToList();
                 return (texts, noneTexts: Texts(none.List), offTexts: Texts(off.List), unreadTexts: Texts(unread.List), askedAfterClicks, askedAfterRefresh: asked,
-                    emptyTexts: Texts(empty.List), noneRows, needIds);
+                    emptyTexts: Texts(empty.List), noneRows, needIds, tenthIds, tenthTexts, wIds);
             }
-            finally { w.Close(); none.Close(); off.Close(); unread.Close(); empty.Close(); Settle(); }
+            finally { w.Close(); none.Close(); off.Close(); unread.Close(); empty.Close(); tenth.Close(); Settle(); }
         }, CancellationToken.None);
         Assert.Equal(Timeline.TodayTitle, r.texts[0]);
         Assert.Contains(r.texts, t => t.Contains("First reason. (+1 more)"));             // the first reason, and how many more (info is not counted)
@@ -400,6 +406,11 @@ public class Round42UiTests : IClassFixture<HeadlessFixture>
         Assert.Equal(r.needIds, r.noneRows.Where(k => k.Section == "urgent").Select(k => k.Id));
         Assert.DoesNotContain(Timeline.TodayNone, r.noneTexts);
         Assert.Equal(new[] { Timeline.TodayTitle, Timeline.TodayNone }, r.emptyTexts.Take(2));
+        Assert.Equal(r.wIds.Distinct().Count(), r.wIds.Count);                               // no ANDA twice in the one group
+        Assert.Contains(r.needIds[0], r.tenthIds);                                          // past the eight timeline rows, still shown (as the older rule's row)
+        Assert.Equal(r.tenthIds.Distinct().Count(), r.tenthIds.Count);
+        Assert.Contains(Timeline.TodayMore(1), r.tenthTexts);                               // the ninth only is shown nowhere
+        Assert.True(r.tenthTexts.IndexOf(Timeline.TodayMore(1)) > r.tenthTexts.FindLastIndex(t => t.StartsWith("Late") || t.Contains(" d ")), "the sentence closes the group");
         Assert.DoesNotContain(Timeline.TodayTitle, r.offTexts);
         Assert.Equal(new[] { Timeline.TodayTitle, Timeline.SaidUnreadable }, r.unreadTexts.Take(2));   // the sheet could not be read: said, nothing from the demo
         Assert.Equal(1, r.askedAfterClicks);                                               // read once when Today opens, not at each paint

@@ -5512,11 +5512,14 @@ function paintToday(){
   { const firsts = new Map();
     allAlerts().filter(a => a.number && a.sev !== "info").forEach(a => { if(!firsts.has(a.number)) firsts.set(a.number, { a, more:0 }); else firsts.get(a.number).more++; });
     list.append(h("div", { class:"td-grp", text:TL_SAID.todayTitle }));
-    const also = groups[0].rows.filter(r => !firsts.has(r.id));
+    /* the older group's ANDAs not among the timeline rows shown follow, so none drops out of Today (round 42 review); the timeline's "more"
+       counts only those shown nowhere, and it closes the group, as in the app */
+    const top = [...firsts].slice(0, TL_TODAY_MAX), named = new Set(top.map(([id]) => id)), also = groups[0].rows.filter(r => !named.has(r.id));
+    const shown = new Set([...named, ...also.map(r => r.id)]), hidden = [...firsts.keys()].filter(id => !shown.has(id)).length;
     if(!firsts.size && !also.length) list.append(h("div", { class:"td-note", text:TL_SAID.todayNone }));
-    [...firsts].slice(0, TL_TODAY_MAX).forEach(([id, f]) => row("urgent", id, f.a.text + (f.more ? " " + watchMoreText(f.more) : "")));
-    if(firsts.size > TL_TODAY_MAX) list.append(h("div", { class:"td-note", text:TL_SAID.todayMore(firsts.size - TL_TODAY_MAX) }));
+    top.forEach(([id, f]) => row("urgent", id, f.a.text + (f.more ? " " + watchMoreText(f.more) : "")));
     also.forEach(r => row("urgent", r.id, r.line));
+    if(hidden) list.append(h("div", { class:"td-note", text:TL_SAID.todayMore(hidden) }));
     if(firsts.size || also.length) any = true; }
   /* Round 36: what moved since the last look, first; round 37: only while the person has it on */
   if(state.lastLookOn){

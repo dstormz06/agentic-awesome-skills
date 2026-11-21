@@ -146,10 +146,14 @@ public sealed class TodayWindow : Window
         else if (_alerts is { } alerts)
         {
             var firsts = alerts.Where(a => a.Number is not null && a.Sev != "info").GroupBy(a => a.Number!).Select(g => (Id: g.Key, Line: g.First().Text + (g.Count() > 1 ? $" (+{g.Count() - 1} more)" : ""))).ToList();
-            var named = firsts.Select(f => f.Id).ToHashSet(StringComparer.Ordinal);
+            // the older group's ANDAs not among the timeline rows shown follow, so none drops out of Today (round 42 review); the timeline's
+            // "more" counts only those shown nowhere, and the sentences close the group, as in the simulation
+            var named = firsts.Take(Timeline.TodayMax).Select(f => f.Id).ToHashSet(StringComparer.Ordinal);
             var also = all[0].Rows.Where(r => !named.Contains(r.Id)).ToList();
+            var shown = named.Concat(also.Select(r => r.Id)).ToHashSet(StringComparer.Ordinal);
+            int hidden = firsts.Count(f => !shown.Contains(f.Id));
             var after = new List<string>();
-            if (firsts.Count > Timeline.TodayMax) after.Add(Timeline.TodayMore(firsts.Count - Timeline.TodayMax));
+            if (hidden > 0) after.Add(Timeline.TodayMore(hidden));
             if (all[0].More > 0) after.Add(Today.More(all[0].More));
             Section("urgent", Timeline.TodayTitle, firsts.Count == 0 && also.Count == 0 ? new[] { Timeline.TodayNone } : Array.Empty<string>(),
                 firsts.Take(Timeline.TodayMax).Select(f => (f.Id, f.Line, (string?)null)).Concat(also.Select(r => (r.Id, r.Line, (string?)r.Mark))), after);
