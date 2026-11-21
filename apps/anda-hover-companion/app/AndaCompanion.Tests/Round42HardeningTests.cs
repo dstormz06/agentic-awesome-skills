@@ -107,7 +107,7 @@ public class Round42HardeningUiTests : IClassFixture<HeadlessFixture>
             var hides = new NoticeWindow(item, _ => { }, _ => { });
             string? waiting = Notices.SaidCap(3, 2);
             var records = Array.Empty<TimelineRecord>();
-            var news = new NewsWindow(new NewsHooks(() => Array.Empty<TimelineAlert>(), () => (Array.Empty<NewsItem>(), NewsReader.SaidReading), _ => { }, () => "2026-11-20", _ => null, () => records, NoticeNote: () => waiting));
+            var news = new NewsWindow(new NewsHooks(() => Array.Empty<TimelineAlert>(), () => (null, NewsReader.SaidReading), _ => { }, () => "2026-11-20", _ => null, () => records, NoticeNote: () => waiting));
             try
             {
                 stays.Show(); hides.Show(); news.Show(); Settle();

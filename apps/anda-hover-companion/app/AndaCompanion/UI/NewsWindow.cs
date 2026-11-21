@@ -93,7 +93,7 @@ public sealed class NewsWindow : Window
         NewsNote.Text = note; NewsList.Children.Clear();
         if (items is not null)
         {
-            if (items.Count == 0 && note != NewsReader.SaidReading) NewsList.Children.Add(Note(DivisionNews.SaidNone));     // not while it is still read
+            if (items.Count == 0) NewsList.Children.Add(Note(DivisionNews.SaidNone));        // read, and no line in the last 14 days
             foreach (var n in items)
                 NewsList.Children.Add(new TextBlock { Text = $"{WatchRules.Short(Timeline.Iso(n.Date)!.Value)}  {n.Text}", TextWrapping = TextWrapping.Wrap, FontSize = 12, Foreground = Res("C.Ink"), Margin = new Thickness(6, 2) });
         }

@@ -84,10 +84,15 @@ public partial class App
         var (paragraphs, problem, reading) = _newsReader.Get(path, written, length, ok =>
         {
             _newsWindow?.Paint();
-            if (ok && _checkAfterRead) { _checkAfterRead = false; if (NewsOn) CheckNotices(); }
+            if (!_checkAfterRead) return;
+            _checkAfterRead = false;
+            // the read a check was waiting for: checked now if it worked; if not, checked once more after the reader's minute, so the day's
+            // news is not lost to a passing lock, and no later paint is left to bring up a notice (review)
+            if (ok) { if (NewsOn) CheckNotices(); }
+            else DispatcherTimer.RunOnce(() => { if (NewsOn) CheckNotices(); }, NewsReader.RetryAfter + TimeSpan.FromSeconds(2));
         });
         _newsReading = reading;
-        if (paragraphs is null) return (Array.Empty<NewsItem>(), problem ?? NewsReader.SaidReading);
+        if (paragraphs is null) return (null, problem ?? NewsReader.SaidReading);      // nothing read: only the sentence, never "no lines" (review)
         string day = Timeline.Iso(Today());       // parsed again only for a new read or a new day
         if (_newsParsed is not { } p || !ReferenceEquals(p.Read, paragraphs) || p.Day != day) _newsParsed = p = (paragraphs, day, DivisionNews.Parse(paragraphs, day));
         return (p.Items, problem is null ? DivisionNews.SaidFrom(Path.GetFileName(path)) : problem + " " + DivisionNews.SaidEarlier);
@@ -101,7 +106,11 @@ public partial class App
         if (SelfTestRun is not null) return Notices.SaidNotRunning;
         if (!_settings.WatchBack && !NewsOn) { DropNotices(); NoteNotices(null); return Notices.SaidOff; }
         var items = new List<NoticeItem>();
-        if (NewsOn && CurrentNews().Items is { } n) { items.AddRange(Notices.FromNews(n)); _checkAfterRead |= _newsReading; }     // still being read: checked again when it is
+        if (NewsOn)
+        {
+            if (CurrentNews().Items is { } n) items.AddRange(Notices.FromNews(n));
+            _checkAfterRead |= _newsReading;       // still being read (nothing read yet, or a newer copy): checked again when it is
+        }
         if (_settings.WatchBack && CurrentAlerts() is { } alerts) items.AddRange(Notices.FromAlerts(alerts));
         string today = Timeline.Iso(Today());
         if (Notices.Load(AppPaths.NoticesFile) is not { } state) return NoteNotices(Notices.SaidBusy);      // locked just now: not written over, tried at the next check
